@@ -30,7 +30,7 @@ Each page can define `actions` before capture. Supported types are `click`, `fil
     "id": "onboarding", "path": "app/",
     "sections": [{
       "id": "first-run", "selector": "#root",
-      "reference": "screens/M33 · Owner — Getting started (onboarding on a phone).png"
+      "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
     }]
   }]
 }
