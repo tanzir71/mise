@@ -4,13 +4,18 @@ File: https://www.figma.com/design/FVXWo2wVq4nPS3kdsR4TUv/Tools
 
 Link pattern: `https://www.figma.com/design/FVXWo2wVq4nPS3kdsR4TUv/Tools?node-id=<id with - instead of :>`
 
-If the agent has the Figma MCP server, use `get_design_context` / `get_screenshot` on these node IDs. Otherwise ask the owner to export PNGs into `handover/shots/`.
+Every frame below has export settings in Figma. The PNGs live in `handover/exports/` (`screens/mobile`, `screens/desktop`, `screens/corner-shop`, `screens/online-shop`, `screens/operator`, `landing`). `handover/exports/INDEX.md` maps file names to node IDs. If the agent has the Figma MCP server, also use `get_design_context` / `get_screenshot` on these node IDs.
+
+On 15 Nov 2026 a few frame names lost `:` `?` `/` so they work as file names (e.g. "Desktop 09 · Mise — Orders · live queue"). Node IDs did not change.
 
 ## Landing (page "08 · Landing pages")
 | Frame | Node |
 |---|---|
 | Landing · Bangladesh | `113:3` |
 | Landing · International | `120:2353` |
+| Nav / Hero · Bangladesh (calm hero, 15 Nov 2026) | `113:4` / `116:927` |
+| Nav / Hero · International | `120:2354` / `120:2371` |
+| Landing images to embed (`lp-*`) | see `handover/exports/landing-assets.json` (node IDs included) |
 | Setup · Download and install (desktop), incl. "Run your own copy on Vercel" | `124:4616` |
 | Setup · On the shop phone | `124:4868` |
 

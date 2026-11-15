@@ -17,7 +17,8 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "screenshots": "node scripts/capture.mjs",
-    "quality:lighthouse": "node scripts/lighthouse.mjs"
+    "quality:lighthouse": "node scripts/lighthouse.mjs",
+    "check:exports": "node handover/scripts/export-figma.mjs --check --only=landing"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

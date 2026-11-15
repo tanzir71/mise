@@ -9,10 +9,11 @@ Mise is an operations co-pilot for small businesses that sell through chats, del
 1. Create an empty GitHub repo (suggested name: `mise`).
 2. Copy this whole folder into the repo as `/handover`.
 3. Copy `handover/AGENTS.md` to the repo root (Codex reads `AGENTS.md` automatically).
-4. Copy `handover/templates/.github` to the repo root as `.github`, and `handover/templates/vercel.json` to the root. Copy `handover/templates/CHANGELOG.md` to the root, and `handover/downloads-template/` to `/downloads`.
+4. Copy `handover/templates/github` to the repo root and rename it to `.github`, and `handover/templates/vercel.json` to the root. Copy `handover/templates/CHANGELOG.md` to the root, and `handover/downloads-template/` to `/downloads`.
 5. In the repo settings, set **Pages → Source: GitHub Actions**.
 6. Start Codex with the prompt in `prompts/01-kickoff.md`.
 7. After each milestone, continue with `prompts/02-next-milestone.md`.
+8. **Refinement (added 15 Nov 2026):** export the Figma pages into `handover/exports/` (steps in `exports/README.md`), commit, then give Codex `prompts/05-refinement.md`. It does Phase R before M10.
 
 ## What's inside
 
@@ -28,15 +29,16 @@ Mise is an operations co-pilot for small businesses that sell through chats, del
 | `docs/06-release-process.md` | Branches, PRs, versions, feature flags, deploys |
 | `docs/07-figma-map.md` | Links to every Figma frame by feature |
 | `docs/08-distribution.md` | Unsigned device builds in the repo, `downloads/` manifest, setup page |
+| `docs/09-refinement-appendix.md` | **Phase R**: what's wrong on the live site, the new calm hero, image-first rules, work items R0–R7, visual QA |
 | `docs/packs.json` | Business and market packs (seed data) |
 | `docs/phases/*.md` | Detailed milestone specs with acceptance criteria, phase by phase |
 | `tokens/tokens.json`, `tokens/tokens.css` | Design tokens exported from Figma |
-| `exports/` | Logo, favicon, PWA/extension/Android icons (included); every screen, landing section, board and icon from Figma (`exports/manifest.json`, fetched by `scripts/export-figma.mjs`) |
-| `scripts/export-figma.mjs` | One-command Figma exporter (Node 18+, needs `FIGMA_TOKEN`) |
+| `exports/` | Logo and app icons (included). Every screen, landing image, landing section, board and icon from Figma, exported by the owner or by `scripts/export-figma.mjs`. See `exports/README.md`, `INDEX.md` and `landing-assets.json` |
+| `scripts/export-figma.mjs` | Figma exporter (Node 18+, needs `FIGMA_TOKEN`); `--check` lists missing exports without a token |
 | `copy/landing.bd.json`, `copy/landing.intl.json` | Final landing copy for both regions |
-| `templates/.github/` | Pages deploy workflow, device-artifacts workflow, PR template, issue template |
+| `templates/github/` | Pages deploy workflow, device-artifacts workflow, Figma export workflow, PR template, issue template |
 | `downloads-template/` | Starter `downloads/` folder (manifest + README) for unsigned device builds |
-| `prompts/` | Copy-paste prompts to drive Codex, plus `04-deploy-own-vercel.md` for shop owners' agents |
+| `prompts/` | Copy-paste prompts to drive Codex (`05-refinement.md` = Phase R), plus `04-deploy-own-vercel.md` for shop owners' agents |
 
 ## The rollout rule (short version)
 

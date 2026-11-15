@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-11-15 (refinement): the owner supplied all 270 indexed Figma exports, including the 76 landing assets/references. The old HTML/CSS marketing-preview exception is superseded by Phase R. Product imagery must come from the supplied PNGs through one alias and image pipeline.
+- 2026-11-15 (refinement): preserve the configured export scale when retrying individual Figma renders; never silently downgrade 2× assets to 1×.
+
 - 2026-11-15: Use the restaurant workspace as the repository root, with the supplied package copied to `handover/`. Exclude the duplicate `Claude outputs/` source from Git.
 - 2026-11-15: Begin with the kickoff scope, M00–M05, before adding local app or backend features. Keep the app placeholder honest about availability.
 - 2026-11-15: Figma MCP returned `Unknown tool` for design context. No screen exports or FIGMA_TOKEN are available. Use the HTML/CSS previews explicitly permitted by M02, label them as product previews, and retain a visual-fidelity follow-up.

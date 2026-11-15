@@ -1,535 +1,403 @@
 {
  "fileKey": "FVXWo2wVq4nPS3kdsR4TUv",
  "figmaUrl": "https://www.figma.com/design/FVXWo2wVq4nPS3kdsR4TUv/Tools",
- "note": "Run scripts/export-figma.mjs to download every file listed here into handover/exports/. Brand icons are already rendered in exports/brand/.",
+ "note": "Generated from the export settings in Figma (15 Nov 2026). File names match what Figma writes when the owner exports each page with Export (Ctrl/Cmd+Shift+E), so either route produces the same files. Brand icons are pre-rendered in exports/brand/.",
  "jobs": [
   {
    "format": "png",
-   "scale": 2,
-   "items": [
-    {
-     "id": "102:82",
-     "out": "phone/M12-today.png"
-    },
-    {
-     "id": "102:288",
-     "out": "phone/M13-orders-queue.png"
-    },
-    {
-     "id": "102:448",
-     "out": "phone/M14-order-detail.png"
-    },
-    {
-     "id": "102:593",
-     "out": "phone/M15-new-order.png"
-    },
-    {
-     "id": "103:213",
-     "out": "phone/M16-stock.png"
-    },
-    {
-     "id": "103:400",
-     "out": "phone/M17-plan.png"
-    },
-    {
-     "id": "103:644",
-     "out": "phone/M18-team.png"
-    },
-    {
-     "id": "103:793",
-     "out": "phone/M19-member-edit.png"
-    },
-    {
-     "id": "103:900",
-     "out": "phone/M20-inbox.png"
-    },
-    {
-     "id": "104:358",
-     "out": "phone/M21-guests.png"
-    },
-    {
-     "id": "104:507",
-     "out": "phone/M22-winback-send.png"
-    },
-    {
-     "id": "104:601",
-     "out": "phone/M23-staff-group.png"
-    },
-    {
-     "id": "104:773",
-     "out": "phone/M24-capture.png"
-    },
-    {
-     "id": "104:950",
-     "out": "phone/M25-share-to-mise.png"
-    },
-    {
-     "id": "106:484",
-     "out": "phone/M26-snap-invoice.png"
-    },
-    {
-     "id": "106:564",
-     "out": "phone/M27-more.png"
-    },
-    {
-     "id": "106:787",
-     "out": "phone/M28-business-data.png"
-    },
-    {
-     "id": "106:921",
-     "out": "phone/M29-exports.png"
-    },
-    {
-     "id": "106:1011",
-     "out": "phone/M30-start-service.png"
-    },
-    {
-     "id": "106:1153",
-     "out": "phone/M31-operator.png"
-    },
-    {
-     "id": "107:650",
-     "out": "phone/M32-connect-agent.png"
-    },
-    {
-     "id": "107:794",
-     "out": "phone/M33-getting-started.png"
-    },
-    {
-     "id": "107:942",
-     "out": "phone/M34-performance.png"
-    },
-    {
-     "id": "107:1073",
-     "out": "phone/M35-storefront-qr.png"
-    },
-    {
-     "id": "107:1222",
-     "out": "phone/M36-kitchen-phone.png"
-    },
-    {
-     "id": "107:1280",
-     "out": "phone/M37-live-store.png"
-    },
-    {
-     "id": "107:1508",
-     "out": "phone/M38-all-outlets.png"
-    },
-    {
-     "id": "56:1496",
-     "out": "phone/M01-guest-qr-tracker.png"
-    },
-    {
-     "id": "56:1601",
-     "out": "phone/M02-guest-tracking-link.png"
-    },
-    {
-     "id": "56:1704",
-     "out": "phone/M03-guest-delivered.png"
-    },
-    {
-     "id": "58:34",
-     "out": "phone/M04-qr-menu.png"
-    },
-    {
-     "id": "58:118",
-     "out": "phone/M05-shift-board.png"
-    },
-    {
-     "id": "58:201",
-     "out": "phone/M06-questions.png"
-    },
-    {
-     "id": "59:59",
-     "out": "phone/M07-staff-my-shift.png"
-    },
-    {
-     "id": "59:134",
-     "out": "phone/M08-stall-today.png"
-    },
-    {
-     "id": "77:3291",
-     "out": "phone/M10-night-count.png"
-    },
-    {
-     "id": "78:3328",
-     "out": "phone/M11-order-phone-start.png"
-    },
-    {
-     "id": "110:5",
-     "out": "phone/C00-corner-today.png"
-    },
-    {
-     "id": "110:162",
-     "out": "phone/C01-counter-calculator.png"
-    },
-    {
-     "id": "110:301",
-     "out": "phone/C02-put-on-khata.png"
-    },
-    {
-     "id": "110:384",
-     "out": "phone/C03-receipt-qr.png"
-    },
-    {
-     "id": "111:101",
-     "out": "phone/C04-khata-list.png"
-    },
-    {
-     "id": "111:238",
-     "out": "phone/C05-customer-profile.png"
-    },
-    {
-     "id": "111:366",
-     "out": "phone/C06-orders-inbox.png"
-    },
-    {
-     "id": "111:519",
-     "out": "phone/C07-price-order.png"
-    },
-    {
-     "id": "112:196",
-     "out": "phone/C08-customer-shop-link.png"
-    },
-    {
-     "id": "112:284",
-     "out": "phone/C09-customer-priced.png"
-    },
-    {
-     "id": "112:375",
-     "out": "phone/C10-customer-khata.png"
-    },
-    {
-     "id": "108:1068",
-     "out": "phone/SM01-shop-confirm-cod.png"
-    },
-    {
-     "id": "108:1193",
-     "out": "phone/SM02-shop-book-couriers.png"
-    },
-    {
-     "id": "108:1315",
-     "out": "phone/SM03-shop-money.png"
-    },
-    {
-     "id": "108:1453",
-     "out": "phone/SM04-shop-products.png"
-    },
-    {
-     "id": "124:4868",
-     "out": "phone/setup-order-phone.png"
-    }
-   ]
-  },
-  {
-   "format": "png",
-   "scale": 2,
-   "items": [
-    {
-     "id": "38:474",
-     "out": "desktop/today.png"
-    },
-    {
-     "id": "39:476",
-     "out": "desktop/stock.png"
-    },
-    {
-     "id": "39:949",
-     "out": "desktop/plan.png"
-    },
-    {
-     "id": "48:834",
-     "out": "desktop/invoice-capture.png"
-    },
-    {
-     "id": "49:940",
-     "out": "desktop/teach-website.png"
-    },
-    {
-     "id": "51:1042",
-     "out": "desktop/capture.png"
-    },
-    {
-     "id": "53:1251",
-     "out": "desktop/orders-queue.png"
-    },
-    {
-     "id": "65:1843",
-     "out": "desktop/kitchen-pwa.png"
-    },
-    {
-     "id": "66:1846",
-     "out": "desktop/kitchen-setup.png"
-    },
-    {
-     "id": "60:1558",
-     "out": "desktop/team.png"
-    },
-    {
-     "id": "64:1671",
-     "out": "desktop/guests.png"
-    },
-    {
-     "id": "70:1918",
-     "out": "desktop/staff-group-chat.png"
-    },
-    {
-     "id": "72:2105",
-     "out": "desktop/members.png"
-    },
-    {
-     "id": "74:2354",
-     "out": "desktop/business-data.png"
-    },
-    {
-     "id": "75:2534",
-     "out": "desktop/performance.png"
-    },
-    {
-     "id": "78:2928",
-     "out": "desktop/start-service.png"
-    },
-    {
-     "id": "81:3054",
-     "out": "desktop/onboarding.png"
-    },
-    {
-     "id": "82:3097",
-     "out": "desktop/exports.png"
-    },
-    {
-     "id": "77:2732",
-     "out": "desktop/stock-count-mode.png"
-    },
-    {
-     "id": "88:3319",
-     "out": "desktop/storefront.png"
-    },
-    {
-     "id": "89:3340",
-     "out": "desktop/pos-manual-entry.png"
-    },
-    {
-     "id": "90:3511",
-     "out": "desktop/storefront-settings.png"
-    },
-    {
-     "id": "109:3694",
-     "out": "desktop/live-store.png"
-    },
-    {
-     "id": "109:4289",
-     "out": "desktop/all-outlets.png"
-    },
-    {
-     "id": "93:2",
-     "out": "desktop/operator-mode.png"
-    },
-    {
-     "id": "98:262",
-     "out": "desktop/connect-ai-operator.png"
-    },
-    {
-     "id": "99:577",
-     "out": "desktop/agent-console.png"
-    },
-    {
-     "id": "84:5",
-     "out": "desktop/shop-today.png"
-    },
-    {
-     "id": "85:270",
-     "out": "desktop/shop-orders-confirm.png"
-    },
-    {
-     "id": "86:455",
-     "out": "desktop/shop-courier-booking.png"
-    },
-    {
-     "id": "124:4616",
-     "out": "desktop/setup-downloads.png"
-    }
-   ]
-  },
-  {
-   "format": "png",
    "scale": 1,
    "items": [
     {
-     "id": "99:446",
-     "out": "boards/agent-integration.png"
+     "id": "29:3",
+     "out": "system/Mise components.png"
     },
     {
-     "id": "112:447",
-     "out": "boards/corner-shop-how-it-works.png"
+     "id": "30:486",
+     "out": "system/Brand.png"
     },
     {
-     "id": "108:2374",
-     "out": "boards/parity-matrix.png"
+     "id": "63:100",
+     "out": "system/Market packs.png"
     },
     {
      "id": "31:2",
-     "out": "boards/import-system.png"
+     "out": "flows/Import system.png"
     },
     {
      "id": "43:42",
-     "out": "boards/data-capture-map.png"
+     "out": "flows/Data capture map.png"
     },
     {
      "id": "45:127",
-     "out": "boards/capture-playbooks.png"
+     "out": "flows/Capture playbooks.png"
     },
     {
      "id": "47:185",
-     "out": "boards/understanding-captures.png"
+     "out": "flows/Understanding anything you send.png"
     },
     {
      "id": "57:273",
-     "out": "boards/no-order-left-behind.png"
+     "out": "flows/No order left behind.png"
     },
     {
      "id": "69:267",
-     "out": "boards/opening-other-apps.png"
-    }
-   ]
-  },
-  {
-   "format": "png",
-   "scale": 2,
-   "items": [
+     "out": "flows/Opening other apps without dead ends.png"
+    },
+    {
+     "id": "32:2",
+     "out": "screens/desktop/Desktop 01 · Capture — chat (Messenger tab).png"
+    },
+    {
+     "id": "34:149",
+     "out": "screens/desktop/Desktop 02 · Capture — partner portal + region capture.png"
+    },
+    {
+     "id": "38:474",
+     "out": "screens/desktop/Desktop 03 · Mise — Today.png"
+    },
+    {
+     "id": "39:476",
+     "out": "screens/desktop/Desktop 04 · Mise — Stock & purchasing.png"
+    },
+    {
+     "id": "39:949",
+     "out": "screens/desktop/Desktop 05 · Mise — Plan.png"
+    },
+    {
+     "id": "48:834",
+     "out": "screens/desktop/Desktop 06 · Capture — not an order (supplier invoice in a chat).png"
+    },
+    {
+     "id": "49:940",
+     "out": "screens/desktop/Desktop 07 · Capture — teach a new website.png"
+    },
+    {
+     "id": "51:1042",
+     "out": "screens/desktop/Desktop 08 · Mise — Capture · sources, rules & health.png"
+    },
+    {
+     "id": "53:1251",
+     "out": "screens/desktop/Desktop 09 · Mise — Orders · live queue.png"
+    },
+    {
+     "id": "60:1558",
+     "out": "screens/desktop/Desktop 10 · Mise — Team.png"
+    },
+    {
+     "id": "64:1671",
+     "out": "screens/desktop/Desktop 11 · Mise — Guests & loyalty.png"
+    },
+    {
+     "id": "65:1843",
+     "out": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+    },
+    {
+     "id": "66:1846",
+     "out": "screens/desktop/Kitchen PWA · set up a screen (pairing).png"
+    },
+    {
+     "id": "70:1918",
+     "out": "screens/desktop/Desktop 12 · Mise — Team › Staff group chat (in & out).png"
+    },
+    {
+     "id": "72:2105",
+     "out": "screens/desktop/Desktop 13 · Mise — Team › Members (add & edit).png"
+    },
+    {
+     "id": "74:2354",
+     "out": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+    },
+    {
+     "id": "75:2534",
+     "out": "screens/desktop/Desktop 15 · Mise — Team › Performance (minimal).png"
+    },
+    {
+     "id": "77:2732",
+     "out": "screens/desktop/Desktop 04b · Mise — Stock · count & quick updates.png"
+    },
+    {
+     "id": "78:2928",
+     "out": "screens/desktop/Desktop 16 · Start service — one click opens everything Mise listens to.png"
+    },
+    {
+     "id": "81:3054",
+     "out": "screens/desktop/Desktop 17 · Onboarding › Connect your channels (browser setup).png"
+    },
+    {
+     "id": "82:3097",
+     "out": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png"
+    },
+    {
+     "id": "88:3319",
+     "out": "screens/desktop/Storefront · Restaurant (desktop) — order from a link.png"
+    },
+    {
+     "id": "89:3340",
+     "out": "screens/desktop/Manual order entry · Restaurant (phone & walk-in).png"
+    },
+    {
+     "id": "90:3511",
+     "out": "screens/desktop/Settings › Storefront (link, look, zones, payments).png"
+    },
+    {
+     "id": "109:3694",
+     "out": "screens/desktop/D · Live store (owner and manager view).png"
+    },
+    {
+     "id": "109:4289",
+     "out": "screens/desktop/D · All outlets (owner view).png"
+    },
+    {
+     "id": "108:2374",
+     "out": "screens/mobile/Desktop ↔ phone parity.png"
+    },
+    {
+     "id": "84:5",
+     "out": "screens/online-shop/S01 · Shop — Today.png"
+    },
+    {
+     "id": "85:270",
+     "out": "screens/online-shop/S02 · Shop — Orders · confirm before dispatch.png"
+    },
+    {
+     "id": "86:455",
+     "out": "screens/online-shop/S03 · Shop — Book courier without an API (extension fills the merchant panel).png"
+    },
+    {
+     "id": "87:556",
+     "out": "screens/online-shop/S04 · Shop — Money · courier cash and returns.png"
+    },
+    {
+     "id": "87:907",
+     "out": "screens/online-shop/S05 · Shop — Products & variants.png"
+    },
+    {
+     "id": "92:4509",
+     "out": "screens/online-shop/Storefront · Shop (desktop) — product page and bag.png"
+    },
+    {
+     "id": "92:4654",
+     "out": "screens/online-shop/Manual order entry · Shop (phone, chat or walk-in).png"
+    },
+    {
+     "id": "93:2",
+     "out": "screens/operator/Operator mode · AI agent runs service, people work alongside.png"
+    },
+    {
+     "id": "96:263",
+     "out": "screens/operator/Template · Today — Restaurant × Bangladesh.png"
+    },
+    {
+     "id": "96:352",
+     "out": "screens/operator/Template · Today — Online shop × Kenya.png"
+    },
+    {
+     "id": "96:441",
+     "out": "screens/operator/Template · Today — Food stall × Indonesia.png"
+    },
+    {
+     "id": "96:530",
+     "out": "screens/operator/Generalised core — any business, any market.png"
+    },
+    {
+     "id": "98:262",
+     "out": "screens/operator/Settings › Connect an AI operator (Claude, Codex, other).png"
+    },
+    {
+     "id": "99:446",
+     "out": "screens/operator/How Claude and Codex plug in.png"
+    },
+    {
+     "id": "99:577",
+     "out": "screens/operator/Agent console · mise.app∕agent (browser path).png"
+    },
+    {
+     "id": "112:447",
+     "out": "screens/corner-shop/Corner shop — how it works, for any counter business.png"
+    },
     {
      "id": "113:4",
-     "out": "landing/bd/01-nav.png"
+     "out": "landing/Nav · BD.png"
     },
     {
      "id": "116:927",
-     "out": "landing/bd/02-hero.png"
+     "out": "landing/Hero · BD.png"
     },
     {
      "id": "116:1499",
-     "out": "landing/bd/03-feature-index.png"
+     "out": "landing/Feature index · BD.png"
     },
     {
      "id": "113:618",
-     "out": "landing/bd/04-agent-controls.png"
+     "out": "landing/Agent controls · BD.png"
     },
     {
      "id": "113:797",
-     "out": "landing/bd/05-reads-anything.png"
+     "out": "landing/Reads anything · BD.png"
     },
     {
      "id": "119:2289",
-     "out": "landing/bd/06-data-capture.png"
+     "out": "landing/Data capture · BD.png"
     },
     {
      "id": "119:2505",
-     "out": "landing/bd/07-checks-built-in.png"
+     "out": "landing/Checks built in · BD.png"
     },
     {
      "id": "117:691",
-     "out": "landing/bd/08-operations-in-detail.png"
+     "out": "landing/Operations in detail · BD.png"
     },
     {
      "id": "115:413",
-     "out": "landing/bd/09-a-day-with-mise.png"
+     "out": "landing/A day with Mise · BD.png"
     },
     {
      "id": "115:1332",
-     "out": "landing/bd/10-businesses.png"
+     "out": "landing/Businesses · BD.png"
     },
     {
      "id": "115:1817",
-     "out": "landing/bd/11-the-basics.png"
+     "out": "landing/The basics · BD.png"
     },
     {
      "id": "115:1902",
-     "out": "landing/bd/12-comparison.png"
+     "out": "landing/Comparison · BD.png"
     },
     {
      "id": "115:1993",
-     "out": "landing/bd/13-cta.png"
+     "out": "landing/CTA · BD.png"
     },
     {
      "id": "115:2003",
-     "out": "landing/bd/14-footer.png"
+     "out": "landing/Footer · BD.png"
     },
     {
      "id": "120:2354",
-     "out": "landing/intl/01-nav.png"
+     "out": "landing/Nav · Intl.png"
     },
     {
      "id": "120:2371",
-     "out": "landing/intl/02-hero.png"
+     "out": "landing/Hero · Intl.png"
     },
     {
      "id": "120:2933",
-     "out": "landing/intl/03-feature-index.png"
+     "out": "landing/Feature index · Intl.png"
     },
     {
      "id": "120:2978",
-     "out": "landing/intl/04-agent-controls.png"
+     "out": "landing/Agent controls · Intl.png"
     },
     {
      "id": "120:3148",
-     "out": "landing/intl/05-reads-anything.png"
+     "out": "landing/Reads anything · Intl.png"
     },
     {
      "id": "120:3249",
-     "out": "landing/intl/06-data-capture.png"
+     "out": "landing/Data capture · Intl.png"
     },
     {
      "id": "120:3424",
-     "out": "landing/intl/07-checks-built-in.png"
+     "out": "landing/Checks built in · Intl.png"
     },
     {
      "id": "120:3577",
-     "out": "landing/intl/08-operations-in-detail.png"
+     "out": "landing/Operations in detail · Intl.png"
     },
     {
      "id": "120:7169",
-     "out": "landing/intl/09-a-day-with-mise.png"
+     "out": "landing/A day with Mise · Intl.png"
     },
     {
      "id": "120:8088",
-     "out": "landing/intl/10-businesses.png"
+     "out": "landing/Businesses · Intl.png"
     },
     {
      "id": "120:8561",
-     "out": "landing/intl/11-the-basics.png"
+     "out": "landing/The basics · Intl.png"
     },
     {
      "id": "120:8626",
-     "out": "landing/intl/12-comparison.png"
+     "out": "landing/Comparison · Intl.png"
     },
     {
      "id": "120:8698",
-     "out": "landing/intl/13-cta.png"
+     "out": "landing/CTA · Intl.png"
     },
     {
      "id": "120:8707",
-     "out": "landing/intl/14-footer.png"
+     "out": "landing/Footer · Intl.png"
     },
     {
-     "id": "116:947",
-     "out": "landing/bd/hero-visual.png"
+     "id": "124:4616",
+     "out": "landing/Setup · Download and install (desktop).png"
     },
     {
-     "id": "120:2388",
-     "out": "landing/intl/hero-visual.png"
-    }
-   ]
-  },
-  {
-   "format": "png",
-   "scale": 1,
-   "items": [
-    {
-     "id": "113:3",
-     "out": "landing/full-page-bd.png"
+     "id": "136:3773",
+     "out": "portfolio/Behance · 01 Hero.png"
     },
     {
-     "id": "120:2353",
-     "out": "landing/full-page-intl.png"
+     "id": "136:4256",
+     "out": "portfolio/Behance · 02 Intro.png"
+    },
+    {
+     "id": "136:4294",
+     "out": "portfolio/Behance · 03 Brand.png"
+    },
+    {
+     "id": "136:4326",
+     "out": "portfolio/Behance · 04 Process.png"
+    },
+    {
+     "id": "136:4354",
+     "out": "portfolio/Behance · 05 Problem and solution.png"
+    },
+    {
+     "id": "136:4386",
+     "out": "portfolio/Behance · 06 Information architecture.png"
+    },
+    {
+     "id": "136:4503",
+     "out": "portfolio/Behance · 07 Live store laptop.png"
+    },
+    {
+     "id": "136:4910",
+     "out": "portfolio/Behance · 08 Screens.png"
+    },
+    {
+     "id": "137:1060",
+     "out": "portfolio/Behance · 09 Corner shop.png"
+    },
+    {
+     "id": "137:1592",
+     "out": "portfolio/Behance · 10 AI operator.png"
+    },
+    {
+     "id": "137:1921",
+     "out": "portfolio/Behance · 11 Data capture.png"
+    },
+    {
+     "id": "137:2096",
+     "out": "portfolio/Behance · 12 Parity wall.png"
+    },
+    {
+     "id": "137:3865",
+     "out": "portfolio/Behance · 13 Type and colour.png"
+    },
+    {
+     "id": "137:3917",
+     "out": "portfolio/Behance · 14 Icons and rules.png"
+    },
+    {
+     "id": "137:4091",
+     "out": "portfolio/Behance · 15 Markets.png"
+    },
+    {
+     "id": "137:4115",
+     "out": "portfolio/Behance · 16 Landing and setup.png"
+    },
+    {
+     "id": "137:5639",
+     "out": "portfolio/Behance · 17 Thank you.png"
     }
    ]
   },
@@ -539,251 +407,697 @@
    "items": [
     {
      "id": "29:11",
-     "out": "icons/home.svg"
+     "out": "system/Mise icon/home.svg"
     },
     {
      "id": "29:18",
-     "out": "icons/receipt.svg"
+     "out": "system/Mise icon/receipt.svg"
     },
     {
      "id": "29:25",
-     "out": "icons/package.svg"
+     "out": "system/Mise icon/package.svg"
     },
     {
      "id": "29:32",
-     "out": "icons/calendar.svg"
+     "out": "system/Mise icon/calendar.svg"
     },
     {
      "id": "29:40",
-     "out": "icons/users.svg"
+     "out": "system/Mise icon/users.svg"
     },
     {
      "id": "29:46",
-     "out": "icons/heart.svg"
+     "out": "system/Mise icon/heart.svg"
     },
     {
      "id": "29:53",
-     "out": "icons/wallet.svg"
+     "out": "system/Mise icon/wallet.svg"
     },
     {
      "id": "29:59",
-     "out": "icons/activity.svg"
+     "out": "system/Mise icon/activity.svg"
     },
     {
      "id": "72:2582",
-     "out": "icons/capture.svg"
+     "out": "system/Mise icon/capture.svg"
     },
     {
      "id": "29:66",
-     "out": "icons/chart.svg"
+     "out": "system/Mise icon/chart.svg"
     },
     {
      "id": "29:75",
-     "out": "icons/qr.svg"
+     "out": "system/Mise icon/qr.svg"
     },
     {
      "id": "29:81",
-     "out": "icons/store.svg"
+     "out": "system/Mise icon/store.svg"
     },
     {
      "id": "29:88",
-     "out": "icons/camera.svg"
+     "out": "system/Mise icon/camera.svg"
     },
     {
      "id": "29:94",
-     "out": "icons/share.svg"
+     "out": "system/Mise icon/share.svg"
     },
     {
      "id": "29:101",
-     "out": "icons/clipboard.svg"
+     "out": "system/Mise icon/clipboard.svg"
     },
     {
      "id": "29:107",
-     "out": "icons/message.svg"
+     "out": "system/Mise icon/message.svg"
     },
     {
      "id": "29:113",
-     "out": "icons/bell.svg"
+     "out": "system/Mise icon/bell.svg"
     },
     {
      "id": "29:120",
-     "out": "icons/globe.svg"
+     "out": "system/Mise icon/globe.svg"
     },
     {
      "id": "29:126",
-     "out": "icons/check.svg"
+     "out": "system/Mise icon/check.svg"
     },
     {
      "id": "29:132",
-     "out": "icons/x.svg"
+     "out": "system/Mise icon/x.svg"
     },
     {
      "id": "29:138",
-     "out": "icons/minus.svg"
+     "out": "system/Mise icon/minus.svg"
     },
     {
      "id": "29:144",
-     "out": "icons/square.svg"
+     "out": "system/Mise icon/square.svg"
     },
     {
      "id": "29:150",
-     "out": "icons/sparkles.svg"
+     "out": "system/Mise icon/sparkles.svg"
     },
     {
      "id": "29:157",
-     "out": "icons/search.svg"
+     "out": "system/Mise icon/search.svg"
     },
     {
      "id": "29:163",
-     "out": "icons/plus.svg"
+     "out": "system/Mise icon/plus.svg"
     },
     {
      "id": "29:169",
-     "out": "icons/arrowRight.svg"
+     "out": "system/Mise icon/arrowRight.svg"
     },
     {
      "id": "29:175",
-     "out": "icons/arrowLeft.svg"
+     "out": "system/Mise icon/arrowLeft.svg"
     },
     {
      "id": "29:181",
-     "out": "icons/chevronDown.svg"
+     "out": "system/Mise icon/chevronDown.svg"
     },
     {
      "id": "29:187",
-     "out": "icons/chevronRight.svg"
+     "out": "system/Mise icon/chevronRight.svg"
     },
     {
      "id": "29:193",
-     "out": "icons/chevronLeft.svg"
+     "out": "system/Mise icon/chevronLeft.svg"
     },
     {
      "id": "29:199",
-     "out": "icons/phone.svg"
+     "out": "system/Mise icon/phone.svg"
     },
     {
      "id": "29:206",
-     "out": "icons/pin.svg"
+     "out": "system/Mise icon/pin.svg"
     },
     {
      "id": "29:213",
-     "out": "icons/clock.svg"
+     "out": "system/Mise icon/clock.svg"
     },
     {
      "id": "29:219",
-     "out": "icons/shield.svg"
+     "out": "system/Mise icon/shield.svg"
     },
     {
      "id": "29:225",
-     "out": "icons/refresh.svg"
+     "out": "system/Mise icon/refresh.svg"
     },
     {
      "id": "29:231",
-     "out": "icons/link.svg"
+     "out": "system/Mise icon/link.svg"
     },
     {
      "id": "29:238",
-     "out": "icons/mic.svg"
+     "out": "system/Mise icon/mic.svg"
     },
     {
      "id": "29:244",
-     "out": "icons/zap.svg"
+     "out": "system/Mise icon/zap.svg"
     },
     {
      "id": "29:250",
-     "out": "icons/trendUp.svg"
+     "out": "system/Mise icon/trendUp.svg"
     },
     {
      "id": "29:256",
-     "out": "icons/trendDown.svg"
+     "out": "system/Mise icon/trendDown.svg"
     },
     {
      "id": "29:263",
-     "out": "icons/copy.svg"
+     "out": "system/Mise icon/copy.svg"
     },
     {
      "id": "29:270",
-     "out": "icons/send.svg"
+     "out": "system/Mise icon/send.svg"
     },
     {
      "id": "29:276",
-     "out": "icons/external.svg"
+     "out": "system/Mise icon/external.svg"
     },
     {
      "id": "29:283",
-     "out": "icons/lock.svg"
+     "out": "system/Mise icon/lock.svg"
     },
     {
      "id": "29:289",
-     "out": "icons/filter.svg"
+     "out": "system/Mise icon/filter.svg"
     },
     {
      "id": "29:295",
-     "out": "icons/download.svg"
+     "out": "system/Mise icon/download.svg"
     },
     {
      "id": "29:303",
-     "out": "icons/more.svg"
+     "out": "system/Mise icon/more.svg"
     },
     {
      "id": "29:309",
-     "out": "icons/alert.svg"
+     "out": "system/Mise icon/alert.svg"
     },
     {
      "id": "29:316",
-     "out": "icons/checkCircle.svg"
+     "out": "system/Mise icon/checkCircle.svg"
     },
     {
      "id": "29:322",
-     "out": "icons/wifiOff.svg"
+     "out": "system/Mise icon/wifiOff.svg"
     },
     {
      "id": "29:329",
-     "out": "icons/eye.svg"
+     "out": "system/Mise icon/eye.svg"
     },
     {
      "id": "29:335",
-     "out": "icons/pause.svg"
+     "out": "system/Mise icon/pause.svg"
     },
     {
      "id": "29:342",
-     "out": "icons/gift.svg"
+     "out": "system/Mise icon/gift.svg"
     },
     {
      "id": "29:348",
-     "out": "icons/star.svg"
+     "out": "system/Mise icon/star.svg"
     },
     {
      "id": "29:355",
-     "out": "icons/layers.svg"
+     "out": "system/Mise icon/layers.svg"
     },
     {
      "id": "29:361",
-     "out": "icons/scan.svg"
+     "out": "system/Mise icon/scan.svg"
     },
     {
      "id": "29:367",
-     "out": "icons/crop.svg"
+     "out": "system/Mise icon/crop.svg"
     },
     {
      "id": "29:373",
-     "out": "icons/puzzle.svg"
+     "out": "system/Mise icon/puzzle.svg"
     },
     {
      "id": "29:380",
-     "out": "icons/sidebar.svg"
+     "out": "system/Mise icon/sidebar.svg"
     },
     {
      "id": "29:386",
-     "out": "icons/utensils.svg"
+     "out": "system/Mise icon/utensils.svg"
     },
     {
      "id": "29:392",
-     "out": "icons/history.svg"
+     "out": "system/Mise icon/history.svg"
     },
     {
      "id": "29:399",
-     "out": "icons/database.svg"
+     "out": "system/Mise icon/database.svg"
+    }
+   ]
+  },
+  {
+   "format": "png",
+   "scale": 2,
+   "items": [
+    {
+     "id": "66:1964",
+     "out": "screens/desktop/PWA status · offline variant.png"
+    },
+    {
+     "id": "56:1496",
+     "out": "screens/mobile/M01 · Guest — QR order becomes the tracker (dine-in).png"
+    },
+    {
+     "id": "56:1601",
+     "out": "screens/mobile/M02 · Guest — tracking link from chat (honest delay notice) · full page.png"
+    },
+    {
+     "id": "56:1704",
+     "out": "screens/mobile/M03 · Guest — delivered · feedback and stamp.png"
+    },
+    {
+     "id": "58:34",
+     "out": "screens/mobile/M04 · Guest — QR menu & cart (stall or table).png"
+    },
+    {
+     "id": "58:118",
+     "out": "screens/mobile/M05 · Shop order phone — Who’s here (shift board).png"
+    },
+    {
+     "id": "58:201",
+     "out": "screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"
+    },
+    {
+     "id": "59:59",
+     "out": "screens/mobile/M07 · Staff — My shift (link, Bangla mode).png"
+    },
+    {
+     "id": "59:134",
+     "out": "screens/mobile/M08 · Street vendor — Today (stall mode).png"
+    },
+    {
+     "id": "59:191",
+     "out": "screens/mobile/M09 · Printable QR poster (A5, bilingual).png"
+    },
+    {
+     "id": "77:3291",
+     "out": "screens/mobile/M10 · Kitchen lead phone — Night count (one item at a time).png"
+    },
+    {
+     "id": "78:3328",
+     "out": "screens/mobile/M11 · Order phone — Start service check.png"
+    },
+    {
+     "id": "102:82",
+     "out": "screens/mobile/M12 · Manager — Today.png"
+    },
+    {
+     "id": "102:288",
+     "out": "screens/mobile/M13 · Manager — Orders queue.png"
+    },
+    {
+     "id": "102:448",
+     "out": "screens/mobile/M14 · Manager — Order detail, tracking link, handled by.png"
+    },
+    {
+     "id": "102:593",
+     "out": "screens/mobile/M15 · Manager — New order (phone, walk-in, verbal).png"
+    },
+    {
+     "id": "103:213",
+     "out": "screens/mobile/M16 · Manager — Stock (quick update, on hand, target, to order).png"
+    },
+    {
+     "id": "103:400",
+     "out": "screens/mobile/M17 · Manager — Plan (people and prep).png"
+    },
+    {
+     "id": "103:644",
+     "out": "screens/mobile/M18 · Manager — Team (on duty, performance, members, group).png"
+    },
+    {
+     "id": "103:793",
+     "out": "screens/mobile/M19 · Manager — Edit team member (sheet).png"
+    },
+    {
+     "id": "103:900",
+     "out": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+    },
+    {
+     "id": "104:358",
+     "out": "screens/mobile/M21 · Manager — Guests (groups, win-back, knowing who’s who).png"
+    },
+    {
+     "id": "104:507",
+     "out": "screens/mobile/M22 · Manager — Send win-back (one tap each, copy if an app won’t open).png"
+    },
+    {
+     "id": "104:601",
+     "out": "screens/mobile/M23 · Manager — Staff group (what comes in, what goes out, what failed).png"
+    },
+    {
+     "id": "104:773",
+     "out": "screens/mobile/M24 · Manager — Capture (sources, rules, teach a website).png"
+    },
+    {
+     "id": "104:950",
+     "out": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png"
+    },
+    {
+     "id": "106:484",
+     "out": "screens/mobile/M26 · Manager — Snap a supplier invoice.png"
+    },
+    {
+     "id": "106:564",
+     "out": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+    },
+    {
+     "id": "106:787",
+     "out": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+    },
+    {
+     "id": "106:921",
+     "out": "screens/mobile/M29 · Manager — Export (sheet).png"
+    },
+    {
+     "id": "106:1011",
+     "out": "screens/mobile/M30 · Manager — Start service from the phone.png"
+    },
+    {
+     "id": "106:1153",
+     "out": "screens/mobile/M31 · Manager — Operator mode (Claude or Codex).png"
+    },
+    {
+     "id": "107:650",
+     "out": "screens/mobile/M32 · Manager — Connect an agent (Claude or Codex).png"
+    },
+    {
+     "id": "107:794",
+     "out": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+    },
+    {
+     "id": "107:942",
+     "out": "screens/mobile/M34 · Manager — Performance (from what Mise already sees).png"
+    },
+    {
+     "id": "107:1073",
+     "out": "screens/mobile/M35 · Manager — Storefront and QR.png"
+    },
+    {
+     "id": "107:1222",
+     "out": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+    },
+    {
+     "id": "107:1280",
+     "out": "screens/mobile/M37 · Owner ∕ manager — Live store (everything happening now).png"
+    },
+    {
+     "id": "107:1508",
+     "out": "screens/mobile/M38 · Owner — All outlets (every place you own).png"
+    },
+    {
+     "id": "108:1068",
+     "out": "screens/online-shop/SM01 · Shop phone — Orders · confirm cash on delivery.png"
+    },
+    {
+     "id": "108:1193",
+     "out": "screens/online-shop/SM02 · Shop phone — Book couriers for 6 parcels.png"
+    },
+    {
+     "id": "108:1315",
+     "out": "screens/online-shop/SM03 · Shop phone — Money · courier cash, payouts, returns.png"
+    },
+    {
+     "id": "108:1453",
+     "out": "screens/online-shop/SM04 · Shop phone — Products and variants.png"
+    },
+    {
+     "id": "110:5",
+     "out": "screens/corner-shop/C00 · Owner — Today at the corner shop.png"
+    },
+    {
+     "id": "110:162",
+     "out": "screens/corner-shop/C01 · Owner — Counter · tap the amount, cash is one tap (with change).png"
+    },
+    {
+     "id": "110:301",
+     "out": "screens/corner-shop/C02 · Owner — Put ৳245 on whose khata (credit, with limits).png"
+    },
+    {
+     "id": "110:384",
+     "out": "screens/corner-shop/C03 · Owner turns phone to customer — scan for receipt, save the shop.png"
+    },
+    {
+     "id": "111:101",
+     "out": "screens/corner-shop/C04 · Owner — Khata · who owes what, and who to remind.png"
+    },
+    {
+     "id": "111:238",
+     "out": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+    },
+    {
+     "id": "111:366",
+     "out": "screens/corner-shop/C06 · Owner — Orders from the link, WhatsApp, calls and photos.png"
+    },
+    {
+     "id": "111:519",
+     "out": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png"
+    },
+    {
+     "id": "112:196",
+     "out": "screens/corner-shop/C08 · Customer — Scan the counter QR or open the link · just say what you need.png"
+    },
+    {
+     "id": "112:284",
+     "out": "screens/corner-shop/C09 · Customer — The shop priced it · agree, swap, pay (cash, bKash or khata).png"
+    },
+    {
+     "id": "112:375",
+     "out": "screens/corner-shop/C10 · Customer — My khata at this shop (pay, ask for time, check every entry).png"
+    },
+    {
+     "id": "152:4653",
+     "out": "landing/lp-bd-hero-phone.png"
+    },
+    {
+     "id": "117:697",
+     "out": "landing/lp-bd-detail-01-every-channel-one-queue.png"
+    },
+    {
+     "id": "117:1023",
+     "out": "landing/lp-bd-detail-02-a-kitchen-screen-nobody.png"
+    },
+    {
+     "id": "117:1251",
+     "out": "landing/lp-bd-detail-03-customers-track-their-own.png"
+    },
+    {
+     "id": "117:1465",
+     "out": "landing/lp-bd-detail-04-stock-in-seconds-not.png"
+    },
+    {
+     "id": "117:1839",
+     "out": "landing/lp-bd-detail-05-plan-people-and-prep.png"
+    },
+    {
+     "id": "117:2081",
+     "out": "landing/lp-bd-detail-06-your-team-without-new.png"
+    },
+    {
+     "id": "117:2535",
+     "out": "landing/lp-bd-detail-07-know-your-regulars-win.png"
+    },
+    {
+     "id": "117:3017",
+     "out": "landing/lp-bd-detail-08-credit-without-awkward-conversations.png"
+    },
+    {
+     "id": "117:3275",
+     "out": "landing/lp-bd-detail-09-the-whole-store-live.png"
+    },
+    {
+     "id": "117:3702",
+     "out": "landing/lp-bd-detail-10-your-storefront-pos-and.png"
+    },
+    {
+     "id": "117:3902",
+     "out": "landing/lp-bd-detail-11-online-shop-confirm-ship.png"
+    },
+    {
+     "id": "117:4088",
+     "out": "landing/lp-bd-detail-12-open-in-one-tap.png"
+    },
+    {
+     "id": "115:576",
+     "out": "landing/lp-bd-day-01-m12.png"
+    },
+    {
+     "id": "115:706",
+     "out": "landing/lp-bd-day-02-m13.png"
+    },
+    {
+     "id": "115:825",
+     "out": "landing/lp-bd-day-03-m14.png"
+    },
+    {
+     "id": "115:984",
+     "out": "landing/lp-bd-day-04-m16.png"
+    },
+    {
+     "id": "115:1118",
+     "out": "landing/lp-bd-day-05-m23.png"
+    },
+    {
+     "id": "115:1329",
+     "out": "landing/lp-bd-day-06-m37.png"
+    },
+    {
+     "id": "115:1338",
+     "out": "landing/lp-bd-biz-01-restaurant.png"
+    },
+    {
+     "id": "115:1510",
+     "out": "landing/lp-bd-biz-02-online-shop.png"
+    },
+    {
+     "id": "115:1613",
+     "out": "landing/lp-bd-biz-03-food-stall.png"
+    },
+    {
+     "id": "115:1683",
+     "out": "landing/lp-bd-biz-04-corner-shop.png"
+    },
+    {
+     "id": "153:4599",
+     "out": "landing/lp-intl-hero-phone.png"
+    },
+    {
+     "id": "120:3583",
+     "out": "landing/lp-intl-detail-01-every-channel-one-queue.png"
+    },
+    {
+     "id": "120:3926",
+     "out": "landing/lp-intl-detail-02-a-kitchen-screen-nobody.png"
+    },
+    {
+     "id": "120:4132",
+     "out": "landing/lp-intl-detail-03-customers-track-their-own.png"
+    },
+    {
+     "id": "120:4365",
+     "out": "landing/lp-intl-detail-04-stock-in-seconds-not.png"
+    },
+    {
+     "id": "120:4716",
+     "out": "landing/lp-intl-detail-05-plan-people-and-prep.png"
+    },
+    {
+     "id": "120:4975",
+     "out": "landing/lp-intl-detail-06-your-team-without-new.png"
+    },
+    {
+     "id": "120:5405",
+     "out": "landing/lp-intl-detail-07-know-your-regulars-win.png"
+    },
+    {
+     "id": "120:5905",
+     "out": "landing/lp-intl-detail-08-credit-without-awkward-conversations.png"
+    },
+    {
+     "id": "120:6142",
+     "out": "landing/lp-intl-detail-09-the-whole-store-live.png"
+    },
+    {
+     "id": "120:6586",
+     "out": "landing/lp-intl-detail-10-your-storefront-pos-and.png"
+    },
+    {
+     "id": "120:6764",
+     "out": "landing/lp-intl-detail-11-online-shop-confirm-ship.png"
+    },
+    {
+     "id": "120:6967",
+     "out": "landing/lp-intl-detail-12-open-in-one-tap.png"
+    },
+    {
+     "id": "120:7176",
+     "out": "landing/lp-intl-day-01-m12.png"
+    },
+    {
+     "id": "120:7336",
+     "out": "landing/lp-intl-day-02-m13.png"
+    },
+    {
+     "id": "120:7466",
+     "out": "landing/lp-intl-day-03-m14.png"
+    },
+    {
+     "id": "120:7585",
+     "out": "landing/lp-intl-day-04-m16.png"
+    },
+    {
+     "id": "120:7744",
+     "out": "landing/lp-intl-day-05-m23.png"
+    },
+    {
+     "id": "120:7878",
+     "out": "landing/lp-intl-day-06-m37.png"
+    },
+    {
+     "id": "120:8094",
+     "out": "landing/lp-intl-biz-01-restaurant.png"
+    },
+    {
+     "id": "120:8263",
+     "out": "landing/lp-intl-biz-02-online-shop.png"
+    },
+    {
+     "id": "120:8363",
+     "out": "landing/lp-intl-biz-03-food-stall.png"
+    },
+    {
+     "id": "120:8430",
+     "out": "landing/lp-intl-biz-04-corner-shop.png"
+    },
+    {
+     "id": "124:4868",
+     "out": "landing/Setup · On the shop phone (mobile web).png"
+    },
+    {
+     "id": "140:3149",
+     "out": "portfolio/Dribbble · 01 Type hero.png"
+    },
+    {
+     "id": "140:3292",
+     "out": "portfolio/Dribbble · 02 Three phones.png"
+    },
+    {
+     "id": "140:3777",
+     "out": "portfolio/Dribbble · 03 Live store.png"
+    },
+    {
+     "id": "140:4187",
+     "out": "portfolio/Dribbble · 04 Corner shop.png"
+    },
+    {
+     "id": "140:4660",
+     "out": "portfolio/Dribbble · 05 AI operator.png"
+    },
+    {
+     "id": "140:6277",
+     "out": "portfolio/Dribbble · 07 Brand.png"
+    },
+    {
+     "id": "140:6302",
+     "out": "portfolio/Dribbble · 08 Type and colour.png"
+    },
+    {
+     "id": "140:6321",
+     "out": "portfolio/Dribbble · 09 Online shop.png"
+    },
+    {
+     "id": "141:3197",
+     "out": "portfolio/Dribbble · 06 Phone parity.png"
     }
    ]
   }
