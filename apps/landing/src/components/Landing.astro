@@ -10,6 +10,7 @@ import Section from '@mise/ui/Section.astro';
 import Chip from '@mise/ui/Chip.astro';
 import '../styles/landing.css';
 import '../styles/hero.css';
+import '../styles/product-sections.css';
 interface Props { copy: typeof bdCopy }
 const { copy: c } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -49,16 +50,16 @@ const numberedSlot = (group: string, index: number) => `${group}.${String(index 
       <div class="checks-grid">{c.checks.items.map(item=><article class="check-card"><div class="check-card-top"><span>{item.tag}</span><Icon name={item.icon} size={20} /></div><div class="when"><span>WHEN</span><h3>{item.when}</h3></div><div class="then"><Icon name="cornerDownRight" size={18} /><div><span>MISE</span><p>{item.then}</p></div></div></article>)}</div>
     </Section>
     <Section id="detail" class="detail-section">
-      <Heading eyebrow={c.detail.eyebrow} headline={c.detail.headline} lead={c.detail.lead} center />
+      <Heading eyebrow={c.detail.eyebrow} headline={c.detail.headline} lead={c.detail.lead} />
       <div class="detail-blocks">{c.detail.blocks.map((block,i)=><article id={block.id} class:list={['detail-block', { reverse:i%2===1 }]}><div class="detail-visual"><Shot region={region} imageSlot={numberedSlot('detail', i)} /></div><div class="detail-copy"><p class="eyebrow"><span>{block.n}</span> / {block.cat}</p><h3>{block.title}</h3><p class="lead">{block.lead}</p><ol>{block.steps.map((step,index)=><li><span>{String(index+1).padStart(2,'0')}</span><p>{step}</p></li>)}</ol><div class="fallback-box"><Icon name="shield" size={16} /><p><strong>{c.detail.failLabel}</strong> {block.fail}</p></div></div></article>)}</div>
     </Section>
     <Section id="day" dark>
       <Heading eyebrow={c.day.eyebrow} headline={c.day.headline} lead={c.day.lead} />
-      <div class="day-shots" tabindex="0" role="region" aria-label="A day with Mise product images">{c.day.items.map((item,i)=><figure><Shot region={region} imageSlot={numberedSlot('day', i)} /><figcaption><span>{item.time}</span><p>{item.text}</p></figcaption></figure>)}</div>
+      <div class="day-shots" tabindex="0" role="region" aria-label="A day with Mise product images">{c.day.items.map((item,i)=><figure><div class="day-visual"><Shot region={region} imageSlot={numberedSlot('day', i)} sizes="(max-width: 767px) 200px, 235.5px" /></div><figcaption><span>{item.time}</span><p>{item.text}</p></figcaption></figure>)}</div>
     </Section>
     <Section id="businesses">
       <Heading eyebrow={c.businesses.eyebrow} headline={c.businesses.headline} />
-      <div class="business-grid">{c.businesses.items.map((item,i)=><article id={`business-${item.title.toLowerCase().replaceAll(' ','-')}`} class="business-card"><div class="business-shot"><Shot region={region} imageSlot={numberedSlot('businesses', i)} /></div><div class="business-copy"><span class="business-number">0{i+1} /</span><h3>{item.title}</h3><ul>{item.points.map(point=><li><Icon name="check" size={15} /><span>{point}</span></li>)}</ul></div></article>)}</div>
+      <div class="business-grid">{c.businesses.items.map((item,i)=><article id={`business-${item.title.toLowerCase().replaceAll(' ','-')}`} class="business-card"><div class="business-shot"><Shot region={region} imageSlot={numberedSlot('businesses', i)} sizes="251px" /></div><div class="business-copy"><h3>{item.title}</h3><ul>{item.points.map(point=><li><Icon name="check" size={16} /><span>{point}</span></li>)}</ul></div></article>)}</div>
     </Section>
     <Section id="basics" muted>
       <Heading eyebrow={c.basics.eyebrow} headline={c.basics.headline} />
