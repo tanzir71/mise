@@ -126,7 +126,7 @@
       {"type": "wait", "selector": ".welcome-panel", "state": "visible"},
       {"type": "click", "selector": ".app-sidebar a[href$=\"/stock\"]:visible,.app-bottom-nav a[href$=\"/stock\"]:visible"},
       {"type": "wait", "selector": ".stock-page[aria-busy=\"false\"]", "state": "visible"},
-      {"type": "click", "selector": "main a[href$=\"/stock/drafts\"]"},
+      {"type": "click", "selector": "main a[href$=\"/stock/drafts\"]:visible"},
       {"type": "click", "selector": "main a[href$=\"/stock/suppliers\"]"},
       {"type": "click", "selector": "button:text-is(\"Add supplier\")"},
       {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Rahim Traders"},
