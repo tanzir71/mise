@@ -2,7 +2,7 @@ import { chromium } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
 const stage = process.argv[2];
-if (!/^r[0-2]$/.test(stage || '')) throw new Error('Choose a refinement checkpoint: r0, r1 or r2.');
+if (!/^r[0-3]$/.test(stage || '')) throw new Error('Choose a refinement checkpoint: r0, r1, r2 or r3.');
 const origin = process.env.PREVIEW_URL || 'http://127.0.0.1:4321/';
 mkdirSync('docs/screenshots', { recursive: true });
 const browser = await chromium.launch();
@@ -12,8 +12,14 @@ try {
     await page.goto(`${origin}${region}/`);
     await page.evaluate(() => document.fonts.ready);
     await page.locator('.hero img').evaluate(image => image.decode());
-    for (const [name, selector] of [['nav', '.site-header'], ['hero', '.hero']]) {
-      await page.locator(selector).screenshot({ path: `docs/screenshots/${stage}-${region}-${name}-${width}.png` });
+    const sections = stage === 'r3' ? [['operations', '#f-orders'], ['day', '#day'], ['businesses', '#businesses']] : [['nav', '.site-header'], ['hero', '.hero']];
+    for (const [name, selector] of sections) {
+      const section = page.locator(selector);
+      for (const image of await section.locator('img').all()) {
+        await image.scrollIntoViewIfNeeded();
+        await image.evaluate(image => image.decode());
+      }
+      await section.screenshot({ path: `docs/screenshots/${stage}-${region}-${name}-${width}.png`, style: stage === 'r3' ? '.site-header { visibility: hidden; }' : '' });
     }
     await page.close();
   }

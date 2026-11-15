@@ -6,6 +6,7 @@
 - 2026-11-15 (R1): use the supplied Figma SVG icons as CSS masks with currentColor where available; Lucide remains the fallback for unmapped names. This removes hundreds of repeated inline paths without changing icon slots or adding client JavaScript.
 - 2026-11-15 (R2): use #6A6A67 for small secondary text on the #EDEDEC hero/navigation background so it meets WCAG AA. This deliberately darkens the reference's #6F6F6C links/lead and #8A8A87 trust line while preserving their type and layout.
 - 2026-11-15 (R2): preserve the complete hero PNG at its intrinsic display size, including shadows. Offset it 10px down on desktop to align the visible phone with the section reference; its shadow bounds are asymmetric. Compact navigation between 1024 and 1199px keeps all controls available without overflow.
+- 2026-11-15 (R3): the owner approved the deployed R2 hero and instructed continuation. Product-section images keep the complete intrinsic PNG bounds. Day and business layout slots align the visible screen with its section reference while allowing transparent shadow bounds to extend; no image is cropped or framed. At intermediate widths, day screens use two rows of three and business cards use two columns.
 
 - 2026-11-15: Use the restaurant workspace as the repository root, with the supplied package copied to `handover/`. Exclude the duplicate `Claude outputs/` source from Git.
 - 2026-11-15: Begin with the kickoff scope, M00–M05, before adding local app or backend features. Keep the app placeholder honest about availability.
