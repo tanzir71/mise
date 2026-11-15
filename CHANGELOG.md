@@ -10,6 +10,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
+- M13 follow-up: count a customer once in the reminder heading when several currency accounts are due; keep each account's message and balance separate.
 - M13: enabled customer editing, dated opening balances, khata lists/profiles, credit limits and explicit over-limit approval, counter credit sales, payments and audited reversals. Added sequential reminder/receipt/call handoffs with copy fallbacks, editable bilingual wording, archive/restore and separate currency accounts.
 - M13 foundations: customer and credit-account commands, exact entry-derived balances, limit confirmations, atomic credit sales/payments/reversals, FIFO debt ageing, monthly reminder filters, bilingual/custom wording and an additive database upgrade. Khata UI remains behind a flag until its delivery checks pass.
 - M12: enabled the cash-first counter, 4×5 keypad, round/manual given amounts, exact change, optional names/items, confirmed wallet/card recording, real receipt QR and copy fallback, sales log with ten-minute undo, and recorded sales on Today. Optional browser speech previews a calculation; the keypad stays available offline.

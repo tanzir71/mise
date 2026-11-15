@@ -4,6 +4,8 @@ Customers, credit limits, payments and reviewed reminders now work on one device
 
 Customer details include a nickname, optional normalized phone, address, tags and notes. A paid-up profile can be archived and restored with its history. Opening balances are dated, new credit defaults off, and accounts retain their original currency when shop settings change. The list reports separate currency totals, unpaid debt age and monthly reminders. A customer profile shows the balance, limit, settings and actor/time history with ten-minute financial reversals.
 
+The reminder heading counts each person once across currencies. Each due currency account still receives its own preview, preserving the recorded denomination; an extended browser check covers one customer with two due accounts.
+
 WhatsApp receipts and reminders are previewed before opening another app. Copy and a selectable-text fallback remain available; only I sent it records completion. Calls similarly provide Copy number and I called. Start reminders presents one due account at a time, with Skip leaving it due. Wording and explicit payment instructions are editable. BD defaults to Bangla plus English; other markets default to English.
 
 ## Reference review

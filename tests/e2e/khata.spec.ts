@@ -114,6 +114,10 @@ test('wording changes persist and current-currency accounts keep old debt separa
   await page.getByRole('combobox',{name:'Khata currency',exact:true}).selectOption({label:'BDT'}); await page.reload(); await expect(page.locator('.credit-balance>strong')).toHaveText('৳100');
   await page.getByRole('combobox',{name:'Khata currency',exact:true}).selectOption({label:'USD'}); await expect(page.locator('.credit-balance>strong')).toHaveText('$0');
   await go(page,'khata'); await expect(page.getByLabel('Khata totals BDT',{exact:true})).toContainText('৳100'); await expect(page.getByLabel('Khata totals USD',{exact:true})).toContainText('$0');
+  await page.locator('.khata-list a').filter({hasText:'$0'}).click(); await page.getByRole('button',{name:'Change limit or reminder',exact:true}).click(); const terms=page.getByRole('dialog',{name:'Credit settings',exact:true});
+  await terms.getByRole('switch',{name:'Allow credit',exact:true}).click(); await terms.getByLabel('Credit limit (USD)',{exact:true}).fill('1000'); await terms.getByRole('switch',{name:'Monthly reminder',exact:true}).click(); await terms.getByLabel('Day of month',{exact:true}).fill('1'); await terms.getByRole('button',{name:'Save credit settings',exact:true}).click();
+  const sale=await credit(page,'50'); await sale.getByRole('switch',{name:'Send the receipt on WhatsApp',exact:true}).click(); await sale.getByRole('button',{name:'Add to Karim bhai’s khata',exact:true}).click();
+  await page.clock.setFixedTime(new Date(Date.now()+40*86400000)); await go(page,'khata'); await expect(page.getByRole('button',{name:'Due this week 2',exact:true})).toBeVisible(); await expect(page.getByRole('heading',{name:'Remind 1 person due this week',exact:true})).toBeVisible();
 });
 
 for (const width of [360,390,768,1024,1440]) test(`khata list, profile and credit sheet fit and meet axe at ${width}px`,async ({page}) => {
