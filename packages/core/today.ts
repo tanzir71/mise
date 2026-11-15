@@ -38,7 +38,7 @@ export function todayOverview(context:TodayContext, at = Date.now()) {
   const dayEntries = entries.filter(onDay), activeSaleIds = new Set(sales.filter(sale => sale.voidedAt === undefined).map(sale => sale.id));
   const payments = dayEntries.filter(entry => entry.type === 'payment'), refunds = scoped(context.refunds).filter(onDay).filter(refund => refund.voidedAt === undefined);
   const orders = context.orders.filter(order => order.outletId === outletId && order.createdAt <= at);
-  const waiting = orders.filter(order => !isOrderFinished(order)).sort((a,b) => a.createdAt-b.createdAt || a.id.localeCompare(b.id));
+  const waiting = orders.filter(order => !isOrderFinished(order) && (!order.scheduledFor || order.scheduledFor <= at)).sort((a,b) => a.createdAt-b.createdAt || a.id.localeCompare(b.id));
   const completed = orders.filter(order => ['delivered','collected','done'].includes(order.status) && order.statusChangedAt <= at && order.statusChangedAt >= order.createdAt && dayKey(order.statusChangedAt,timezone) === day);
   const lowStock = context.stock.filter(item => item.outletId === outletId && item.archivedAt === undefined && stockIsLow(item));
   const activeCustomers = new Set(context.customers.filter(customer => customer.businessId === setup.business.id && customer.archivedAt === undefined).map(customer => customer.id));
@@ -56,7 +56,9 @@ export function todayOverview(context:TodayContext, at = Date.now()) {
     waitingOrders:waiting.length,lowStock:lowStock.length,dueReminders:new Set(dueReminders.map(row => row.account.customerId)).size,
   };
   const closing = context.closings.find(record => record.outletId === outletId && record.currency === currency && record.day === day && record.voidedAt === undefined) || null;
-  return {summary,waiting,lowStock,dueReminders,closing};
+  const givenPeople = new Set(dayEntries.filter(entry => entry.type === 'charge' && (!entry.saleId || activeSaleIds.has(entry.saleId))).map(entry => entry.customerId)).size;
+  const collectedPeople = new Set(payments.map(entry => entry.customerId)).size;
+  return {summary,waiting,lowStock,dueReminders,closing,givenPeople,collectedPeople};
 }
 export function closingPreview(context:TodayContext, at = Date.now()) {
   const {summary} = todayOverview(context,at);

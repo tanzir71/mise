@@ -11,6 +11,7 @@ async function start(page: Page, width: number) {
   await page.getByLabel('Shop name', { exact: true }).fill('Catalogue test');
   await page.getByLabel('Phone number', { exact: true }).fill('01712345482');
   await page.getByRole('button', { name: 'Open Mise', exact: true }).click();
+  await page.locator('.app-sidebar a[href$="/more"]:visible,.app-bottom-nav a[href$="/more"]:visible').click();
   await page.locator('.app-main a[href$="/catalogue"]').click();
   await expect(page.locator('.catalogue-page')).toHaveAttribute('aria-busy', 'false');
 }

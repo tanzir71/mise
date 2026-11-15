@@ -31,7 +31,7 @@
     {
       "id": "m10-today",
       "path": "app/",
-      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields. The current Today shell includes recorded local counter totals added in M12.",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields. The current Today screen includes M16 totals and queues derived from local sales, orders, credit and stock.",
       "actions": [
         {
           "type": "click",
@@ -185,7 +185,7 @@
         },
         {
           "type": "click",
-          "selector": ".welcome-panel a"
+          "selector": ".app-sidebar .sidebar-bottom a[href$=\"/settings/business\"]:visible,.phone-app-header a[href$=\"/settings/business\"]:visible"
         }
       ],
       "sections": [

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Button, Card, StatusWord } from '@mise/ui/primitives.tsx';
 import { MiseIcon } from '@mise/ui/MiseIcon.tsx';
 import { Modal } from '@mise/ui/Modal.tsx';
@@ -21,7 +21,9 @@ import './stock.css';
 
 export function Stock({setup,online}: {setup:SetupSnapshot;online:boolean}) {
   const {'*':path = ''} = useParams(), navigate = useNavigate(), data = useStock(setup);
-  const [query,setQuery] = useState(''), [filter,setFilter] = useState('all'), [category,setCategory] = useState(''), [archived,setArchived] = useState(false);
+  const [params,setParams] = useSearchParams(), filter = ['low','order'].includes(params.get('filter') || '') ? params.get('filter')! : 'all';
+  const setFilter = (value:string) => {const next = new URLSearchParams(params);if (value === 'all') next.delete('filter');else next.set('filter',value);setParams(next,{replace:true});};
+  const [query,setQuery] = useState(''), [category,setCategory] = useState(''), [archived,setArchived] = useState(false);
   const [editor,setEditor] = useState<StockItem|'new'|null>(null), [supplier,setSupplier] = useState<Supplier|'new'|null>(null), [adjust,setAdjust] = useState<{item:StockItem;reason?:'count'|'received'|'waste'}|null>(null), [contact,setContact] = useState<SupplierDraft|null>(null);
   const [error,setError] = useState(''), [message,setMessage] = useState(''), [saving,setSaving] = useState(false), busy = useRef(false);
   if (!data) return <div className="stock-page" aria-busy="true"><p>Loading stock…</p></div>;

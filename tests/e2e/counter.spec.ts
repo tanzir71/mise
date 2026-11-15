@@ -26,7 +26,7 @@ test('ten cash sales take under sixty seconds with only the keypad, including of
   await page.reload(); await expect(page.locator('.counter-log>summary')).toHaveText('Sales log · 10 sales');
   await expect(page.locator('.counter-heading')).toContainText('৳750');
   await page.locator('.app-bottom-nav').getByRole('link',{name:'Today',exact:true}).click();
-  await expect(page.locator('.app-metrics').first()).toContainText('৳750');
+  await expect(page.locator('[data-metric=sales]')).toContainText('৳750');
 });
 for (const width of [390,1440]) test(`cash change, genuine receipt QR and audited undo at ${width}px`, async ({page}) => {
   await start(page,width); await page.getByLabel('Calculation',{exact:true}).fill('75+150+20');

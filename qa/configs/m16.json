@@ -1,0 +1,193 @@
+{
+  "title": "M16 Today and closing",
+  "pages": [
+    {
+      "id": "m16-corner-today",
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "note": "The complete C00, M12 and desktop Today Figma contexts define the compact metrics, neutral payment split, grouped rows, shared cards and 360px desktop side column. Screens are populated through actual onboarding, cash sales, manual orders and physical stock counts. Values and counts follow these records. Native browser/phone chrome, agents, connected-channel health, forecasts, food cost, target comparisons, courier distances and ETAs belong to later milestones. Phone controls are 44px; desktop cards in each row have equal heights and pinned footers. Due reminders use recorded accounts, never demonstration messages.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C00 · Owner — Today at the corner shop.png"
+        }
+      ],
+      "actionSets": [
+        "cornerBase",
+        "cash",
+        "cornerOrders",
+        "lowStock",
+        "today"
+      ]
+    },
+    {
+      "id": "m16-manager-today",
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "note": "The complete C00, M12 and desktop Today Figma contexts define the compact metrics, neutral payment split, grouped rows, shared cards and 360px desktop side column. Screens are populated through actual onboarding, cash sales, manual orders and physical stock counts. Values and counts follow these records. Native browser/phone chrome, agents, connected-channel health, forecasts, food cost, target comparisons, courier distances and ETAs belong to later milestones. Phone controls are 44px; desktop cards in each row have equal heights and pinned footers. Due reminders use recorded accounts, never demonstration messages.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M12 · Manager — Today.png"
+        }
+      ],
+      "actionSets": [
+        "restaurantBase",
+        "cash",
+        "restaurantOrders",
+        "lowStock",
+        "today"
+      ]
+    },
+    {
+      "id": "m16-today-desktop",
+      "path": "app/",
+      "widths": [
+        1440
+      ],
+      "heights": {
+        "1440": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "note": "The complete C00, M12 and desktop Today Figma contexts define the compact metrics, neutral payment split, grouped rows, shared cards and 360px desktop side column. Screens are populated through actual onboarding, cash sales, manual orders and physical stock counts. Values and counts follow these records. Native browser/phone chrome, agents, connected-channel health, forecasts, food cost, target comparisons, courier distances and ETAs belong to later milestones. Phone controls are 44px; desktop cards in each row have equal heights and pinned footers. Due reminders use recorded accounts, never demonstration messages.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 03 · Mise — Today.png"
+        }
+      ],
+      "actionSets": [
+        "restaurantBase",
+        "cash",
+        "restaurantOrders",
+        "lowStock",
+        "today"
+      ]
+    }
+  ],
+  "actionSets": {
+    "cornerBase": [
+      {"type":"click","selector":"input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"click","selector":"input[name=\"market\"][value=\"BD\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"fill","selector":"input[name=\"shopName\"]","value":"Rahman Store"},
+      {"type":"fill","selector":"input[name=\"phone\"]","value":"01712345482"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"wait","selector":".today-page[aria-busy=\"false\"]","state":"visible"}
+    ],
+    "cash": [
+      {"type":"click","selector":".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type":"click","selector":"main a[href$=\"/counter\"]"},
+      {"type":"fill","selector":"#counter-expression","value":"100"},
+      {"type":"click","selector":".counter-cash"},
+      {"type":"wait","selector":".counter-success","state":"visible"}
+    ],
+    "cornerOrders": [
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type":"click","selector":".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type":"wait","selector":".order-form[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".order-form input[value=\"pickup\"]"},
+      {"type":"click","selector":"button[aria-label=\"Add Rice\"]"},
+      {"type":"click","selector":"button:text-is(\"Create order\")"},
+      {"type":"wait","selector":".order-detail-heading","state":"visible"},
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type":"click","selector":".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type":"wait","selector":".order-form[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".order-form input[value=\"pickup\"]"},
+      {"type":"click","selector":"button[aria-label=\"Add Rice\"]"},
+      {"type":"click","selector":"button:text-is(\"Create order\")"},
+      {"type":"wait","selector":".order-detail-heading","state":"visible"},
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type":"click","selector":".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type":"wait","selector":".order-form[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".order-form input[value=\"pickup\"]"},
+      {"type":"click","selector":"button[aria-label=\"Add Rice\"]"},
+      {"type":"click","selector":"button:text-is(\"Create order\")"},
+      {"type":"wait","selector":".order-detail-heading","state":"visible"},
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"}
+    ],
+    "lowStock": [
+      {"type":"click","selector":".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type":"click","selector":"main a[href$=\"/stock\"]"},
+      {"type":"wait","selector":".stock-page[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".stock-heading button[aria-label=\"Add stock item\"]"},
+      {"type":"fill","selector":"dialog[open] input[name=\"name\"]","value":"Eggs"},
+      {"type":"fill","selector":"dialog[open] input[name=\"unit\"]","value":"pcs"},
+      {"type":"fill","selector":"dialog[open] input[name=\"onHand\"]","value":"2"},
+      {"type":"fill","selector":"dialog[open] input[name=\"target\"]","value":"20"},
+      {"type":"fill","selector":"dialog[open] input[name=\"packSize\"]","value":"1"},
+      {"type":"click","selector":"dialog[open] button:text-is(\"Save stock item\")"},
+      {"type":"wait","selector":"dialog[open]","state":"hidden"},
+      {"type":"click","selector":".stock-heading button[aria-label=\"Add stock item\"]"},
+      {"type":"fill","selector":"dialog[open] input[name=\"name\"]","value":"Napa Extra"},
+      {"type":"fill","selector":"dialog[open] input[name=\"unit\"]","value":"strip"},
+      {"type":"fill","selector":"dialog[open] input[name=\"onHand\"]","value":"3"},
+      {"type":"fill","selector":"dialog[open] input[name=\"target\"]","value":"20"},
+      {"type":"fill","selector":"dialog[open] input[name=\"packSize\"]","value":"1"},
+      {"type":"click","selector":"dialog[open] button:text-is(\"Save stock item\")"},
+      {"type":"wait","selector":"dialog[open]","state":"hidden"},
+      {"type":"click","selector":".stock-heading button[aria-label=\"Add stock item\"]"},
+      {"type":"fill","selector":"dialog[open] input[name=\"name\"]","value":"Fresh milk"},
+      {"type":"fill","selector":"dialog[open] input[name=\"unit\"]","value":"L"},
+      {"type":"fill","selector":"dialog[open] input[name=\"onHand\"]","value":"4"},
+      {"type":"fill","selector":"dialog[open] input[name=\"target\"]","value":"20"},
+      {"type":"fill","selector":"dialog[open] input[name=\"packSize\"]","value":"1"},
+      {"type":"click","selector":"dialog[open] button:text-is(\"Save stock item\")"},
+      {"type":"wait","selector":"dialog[open]","state":"hidden"}
+    ],
+    "today": [
+      {"type":"click","selector":".app-sidebar nav a[href$=\"/app/\"]:visible,.app-bottom-nav a[href$=\"/app/\"]:visible"},
+      {"type":"wait","selector":".today-page[aria-busy=\"false\"]","state":"visible"}
+    ],
+    "restaurantBase": [
+      {"type":"click","selector":"input[name=\"business\"][value=\"restaurant\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"click","selector":"input[name=\"market\"][value=\"BD\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"fill","selector":"input[name=\"shopName\"]","value":"Shorshe Kitchen"},
+      {"type":"fill","selector":"input[name=\"phone\"]","value":"01712345482"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"wait","selector":".today-page[aria-busy=\"false\"]","state":"visible"}
+    ],
+    "restaurantOrders": [
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type":"click","selector":".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type":"wait","selector":".order-form[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".order-form input[value=\"pickup\"]"},
+      {"type":"click","selector":"button[aria-label=\"Add Tea\"]"},
+      {"type":"click","selector":"button:text-is(\"Create order\")"},
+      {"type":"wait","selector":".order-detail-heading","state":"visible"},
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type":"click","selector":".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type":"wait","selector":".order-form[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".order-form input[value=\"pickup\"]"},
+      {"type":"click","selector":"button[aria-label=\"Add Tea\"]"},
+      {"type":"click","selector":"button:text-is(\"Create order\")"},
+      {"type":"wait","selector":".order-detail-heading","state":"visible"},
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type":"click","selector":".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type":"wait","selector":".order-form[aria-busy=\"false\"]","state":"visible"},
+      {"type":"click","selector":".order-form input[value=\"pickup\"]"},
+      {"type":"click","selector":"button[aria-label=\"Add Tea\"]"},
+      {"type":"click","selector":"button:text-is(\"Create order\")"},
+      {"type":"wait","selector":".order-detail-heading","state":"visible"},
+      {"type":"click","selector":".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible,.phone-app-header a[href$=\"/orders\"]:visible"}
+    ]
+  }
+}

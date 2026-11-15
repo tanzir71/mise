@@ -79,7 +79,7 @@ test('onboarding and profile forms meet automated AA checks', async ({ page }) =
   let result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   expect(result.violations).toEqual([]);
   await onboard(page);
-  await page.locator('.welcome-panel a').click();
+  await page.locator('.app-sidebar .sidebar-bottom a[href$="/settings/business"]:visible,.phone-app-header a[href$="/settings/business"]:visible').click();
   await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
   result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   expect(result.violations).toEqual([]);

@@ -60,7 +60,7 @@ export function undoClosingCommand(before:DayClosing, setup:SetupSnapshot, sale:
 export function daySummaryText(record:DayClosing):string {
   const summary = record.summary, money = (amount:number) => formatMoney(amount,record.currency);
   return [summary.shopName,summary.outletName !== summary.shopName ? summary.outletName : '',`Day summary · ${record.day} · ${record.timezone}`,record.voidedAt === undefined ? 'Closed' : 'Closing undone',
-    `Sales: ${money(summary.sales)} · ${summary.saleCount} sales`, `Orders: ${summary.orderCount}`,
+    `Sales: ${money(summary.sales)} · ${summary.saleCount} ${summary.saleCount === 1 ? 'sale' : 'sales'}`, `Orders: ${summary.orderCount}`,
     ...summary.split.map(row => `${row.method === 'wallet' ? 'Wallets' : row.method[0].toUpperCase()+row.method.slice(1)}: ${money(row.amount)}`),
     `Credit given: ${money(summary.creditGiven)}`,`Credit collected, net of khata refunds: ${money(summary.creditCollected)}`,
     `Cash receipts: ${money(summary.cashSales)}`,`Cash khata collections: ${money(summary.cashCollections)}`,`Cash refunds: ${money(summary.cashRefunds)}`,

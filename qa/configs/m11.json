@@ -48,6 +48,10 @@
         },
         {
           "type": "click",
+          "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
+        },
+        {
+          "type": "click",
           "selector": ".app-main a[href$=\"/catalogue\"]"
         },
         {
@@ -113,6 +117,10 @@
         {
           "type": "wait",
           "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
         },
         {
           "type": "click",
@@ -189,6 +197,10 @@
         {
           "type": "wait",
           "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
         },
         {
           "type": "click",

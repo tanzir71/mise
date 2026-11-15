@@ -59,6 +59,7 @@ jobs:
             qa/screens/
             qa/references/
             qa/diffs/
+            qa/pdfs/
           retention-days: 14
       - name: Link visual QA report
         if: always() && steps.visual-qa.outputs.artifact-url != ''

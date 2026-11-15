@@ -123,7 +123,7 @@
       {"type": "fill", "selector": "input[name=\"shopName\"]", "value": "Shorshe Kitchen"},
       {"type": "fill", "selector": "input[name=\"phone\"]", "value": "01712345482"},
       {"type": "click", "selector": "button[type=\"submit\"]"},
-      {"type": "wait", "selector": ".welcome-panel", "state": "visible"},
+      {"type": "wait", "selector": ".today-page[aria-busy=\"false\"]", "state": "visible"},
       {"type": "click", "selector": ".app-sidebar a[href$=\"/stock\"]:visible,.app-bottom-nav a[href$=\"/stock\"]:visible"},
       {"type": "wait", "selector": ".stock-page[aria-busy=\"false\"]", "state": "visible"},
       {"type": "click", "selector": "main a[href$=\"/stock/drafts\"]:visible"},

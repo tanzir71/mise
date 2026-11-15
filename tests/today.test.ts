@@ -47,6 +47,12 @@ test('local midnight and both occurrences of a DST hour use the outlet civil day
   expect(dayKey(Date.parse('2026-11-01T05:30:00Z'),'America/New_York')).toBe('2026-11-01');expect(dayKey(Date.parse('2026-11-01T06:30:00Z'),'America/New_York')).toBe('2026-11-01');
   expect(() => dayKey(NaN,'UTC')).toThrow();
 });
+test('future scheduled orders join Today waiting only when their recorded due time arrives',() => {
+  const {context} = fixture(), order = saveOrderCommand(orderFixture().input,{setup:context.setup,items:[],sequence:1},null,0,at).order;
+  context.orders = [order,{...order,id:'scheduled',scheduledFor:at+3600000}];
+  expect(todayOverview(context,at+1000).summary).toMatchObject({orderCount:2,waitingOrders:1});
+  expect(todayOverview(context,at+3600000).summary.waitingOrders).toBe(2);
+});
 test('cash totals match the retained receipt sum for arbitrary mixtures and corrections',() => {
   fc.assert(fc.property(fc.array(fc.record({amount:fc.integer({min:1,max:1000000}),state:fc.constantFrom('active','cancelled','undone')}),{maxLength:80}),records => {
     const {context,sale} = fixture(), template = sale('1');
