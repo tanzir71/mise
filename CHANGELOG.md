@@ -4,6 +4,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
+### Landing
+
+- Added the owner's tanziro.com credit to the shared regional footer.
+
 ### App foundations
 
 - M10 foundations: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events.

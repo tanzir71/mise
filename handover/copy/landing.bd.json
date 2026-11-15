@@ -1047,6 +1047,7 @@
     "regionTitle": "Region",
     "region": "Bangladesh · English",
     "regionNote": "We chose this page from your location. Prices in ৳, with bKash, Nagad, Foodpanda and Pathao. You can switch any time.",
-    "copyright": "© 2026 Mise"
+    "copyright": "© 2026 Mise",
+    "credit": { "label": "Made by tanziro.com", "href": "https://tanziro.com/" }
   }
 }
