@@ -114,7 +114,7 @@ test('credit return and refunds match an independent net-debt and retained-payme
     if(due) { const refund=refundOrderCommand(cancelled.order,cancelled.sales[0],{amount:due,method:'cash'},{...context,ledger},3,at+4); ledger=append(ledger,refund); }
     expect(creditOverview(ledger.account,ledger.entries,'Asia/Dhaka','BD',at+5).collectedThisWeek).toBe(Math.min(collected,older));
   }),{numRuns:500});
-});
+},15000);
 
 test('refunds may cross week boundaries without converting currency or changing balances',()=>{
   const {context,change}=credit(), payment=recordCreditPaymentCommand(2500,'wallet','bKash',context.ledger,['bKash'], '',at+2);

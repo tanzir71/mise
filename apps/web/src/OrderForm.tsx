@@ -1,0 +1,108 @@
+import { useRef, useState, type FormEvent } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Button, Card } from '@mise/ui/primitives.tsx';
+import { MiseIcon } from '@mise/ui/MiseIcon.tsx';
+import { Modal } from '@mise/ui/Modal.tsx';
+import { Toggle } from '@mise/ui/Toggle.tsx';
+import { businessPacks, marketPacks } from '@mise/core/packs';
+import { orderableItems, searchItems } from '@mise/core/catalogue';
+import { formatMoney, moneyInputValue, parseMoney } from '@mise/core/money';
+import { CreditLimitError, type OverLimitConfirmation } from '@mise/core/khata';
+import { editableOrderPrices, orderSourceLabels, type OrderInput } from '@mise/core/orders';
+import { orderLineTotal, orderPricing, type OrderLineInput } from '@mise/core/order-lines';
+import { findOrderCustomer, usualOrderLines } from '@mise/core/order-views';
+import type { Customer, Item, Order, OrderSource, SetupSnapshot } from '@mise/core/models';
+import type { OrderSettlementInput } from '@mise/core/order-payments';
+import { db } from './data/db';
+import { displayName, errorText, useKhata } from './khata-data';
+import { CreditTermsForm, CustomerForm } from './KhataForms';
+import { OrderLineForm } from './OrderLineForm';
+import './orders.css';
+
+type DraftLine = {key:string;value:OrderLineInput};
+type PaymentChoice = 'cash'|'paid'|'card'|'credit'|`wallet:${string}`;
+type Editor = {type:'line';key?:string}|{type:'customer'}|{type:'terms'};
+const draftLine = (value:OrderLineInput):DraftLine => ({key:value.id || crypto.randomUUID(),value});
+function localTime(at?:number) { return at === undefined ? '' : new Date(at-new Date(at).getTimezoneOffset()*60000).toISOString().slice(0,16); }
+
+export function OrderForm({setup,order:liveOrder,onSaved,onCancel}: {setup:SetupSnapshot;order?:Order;onSaved:(order:Order) => void;onCancel:() => void}) {
+  const [order] = useState(liveOrder);
+  const currency = order?.currency || setup.outlet.currency, locked = Boolean(order && !editableOrderPrices(order));
+  const [draft,setDraft] = useState(() => ({source:order?.source || 'phone' as OrderSource,sourceText:order?.sourceText || '',customerId:order?.customer.id,name:order?.customer.name || '',phone:order?.customer.phone || '',type:order?.type || 'delivery' as OrderInput['type'],address:order?.address || '',table:order?.table || ''}));
+  const [lines,setLines] = useState<DraftLine[]>(() => (order?.lines || []).map(draftLine)), [query,setQuery] = useState(''), [when,setWhen] = useState(() => localTime(order?.scheduledFor));
+  const [fee,setFee] = useState(() => moneyInputValue(order?.deliveryFee || 0,currency)), [discount,setDiscount] = useState(() => moneyInputValue(order?.discount || 0,currency));
+  const [choice,setChoice] = useState<PaymentChoice>(() => order?.payment.method === 'wallet' ? `wallet:${order.payment.wallet}` : order?.payment.method === 'credit' ? 'credit' : order?.payment.method === 'card' ? 'card' : order?.payment.status === 'paid' ? 'paid' : 'cash');
+  const [customerExpanded,setCustomerExpanded] = useState(false);
+  const [received,setReceived] = useState(false), [given,setGiven] = useState(''), [editor,setEditor] = useState<Editor|null>(null), [error,setError] = useState(''), [saving,setSaving] = useState(false);
+  const [confirmation,setConfirmation] = useState<OverLimitConfirmation|null>(null), busy = useRef(false);
+  const {data:khata,rows} = useKhata(setup);
+  const data = useLiveQuery(async () => {
+    const [items,orders] = await Promise.all([db.items.where('outletId').equals(setup.outlet.id).toArray(),db.orders.where('outletId').equals(setup.outlet.id).toArray()]);return {items,orders};
+  },[setup.outlet.id]);
+  const customers = khata?.customers || [], person = draft.customerId ? customers.find(person => person.id === draft.customerId) : findOrderCustomer(customers,draft.phone,setup);
+  const account = rows.find(row => row.account.customerId === person?.id && row.account.currency === currency);
+  const wallets = [...new Set([...marketPacks[setup.business.marketCode]['pay/wallets'].filter(wallet => wallet !== 'Cash'),...(order?.payment.wallet ? [order.payment.wallet] : [])])];
+  const available = searchItems(orderableItems(data?.items || []),query), usual = person ? usualOrderLines(person.id,data?.orders || [],data?.items || [],setup.outlet.id,currency) : [];
+  const editing = editor?.type === 'line' ? lines.find(line => line.key === editor.key) : undefined;
+  let pricing:ReturnType<typeof orderPricing>|undefined, pricingError = '';
+  try {
+    const deliveryFee = draft.type === 'delivery' ? parseMoney(fee,currency) : 0, reduction = parseMoney(discount,currency);
+    if (deliveryFee === null || reduction === null) throw new Error('Enter a valid delivery fee and discount.');
+    pricing = orderPricing(lines.map(({key,value}) => ({...value,id:key,note:value.note || '',unavailable:Boolean(value.unavailable),lineTotal:value.unitPrice === null ? null : orderLineTotal(value.unitPrice,value.qty)})),deliveryFee,reduction);
+  } catch (error) { pricingError = errorText(error); }
+  function patch(value:Partial<typeof draft>) { setDraft(before => ({...before,...value}));setConfirmation(null); }
+  function chooseCustomer(person:Customer|undefined) { setCustomerExpanded(false);patch({customerId:person?.id,name:person ? displayName(person) : '',phone:person?.phone || '',address:person?.address || draft.address}); }
+  function changePhone(phone:string) {
+    const next = findOrderCustomer(customers,phone,setup);if (next) setCustomerExpanded(false);
+    patch({phone,customerId:next?.id,name:next ? displayName(next) : person ? '' : draft.name,address:!draft.address || draft.address === person?.address ? next?.address || '' : draft.address});
+  }
+  function add(item:Item) {
+    setLines(before => { const found = before.find(line => line.value.itemId === item.id && !line.value.substitution && !line.value.unavailable);return found ? before.map(line => line.key === found.key ? {...line,value:{...line.value,qty:Math.round((line.value.qty+1)*1000)/1000}} : line) : [...before,draftLine({itemId:item.id,name:item.name,unit:item.unit,qty:1,unitPrice:item.price})]; });setConfirmation(null);
+  }
+  function quantity(key:string,amount:number) { setLines(before => amount <= 0 ? before.filter(line => line.key !== key) : before.map(line => line.key === key ? {...line,value:{...line.value,qty:amount}} : line));setConfirmation(null); }
+  async function save(event:FormEvent) {
+    event.preventDefault();if (busy.current) return;busy.current = true;setSaving(true);setError('');
+    try {
+      if (!data || !khata) throw new Error('Wait for this device’s records to load.');
+      if (pricingError) throw new Error(pricingError);
+      const method = choice.startsWith('wallet:') ? 'wallet' : choice === 'credit' ? 'credit' : choice === 'card' ? 'card' : 'cash', wallet = method === 'wallet' ? choice.slice(7) : undefined;
+      const input:OrderInput = {...draft,customerId:locked ? order?.customer.id : person?.id,name:draft.name || (person ? displayName(person) : ''),phone:draft.phone,lines:lines.map(line => line.value),scheduledFor:when ? new Date(when).getTime() : undefined,deliveryFee:draft.type === 'delivery' ? parseMoney(fee,currency)! : 0,discount:parseMoney(discount,currency)!,payment:locked ? order!.payment : {method,wallet}};
+      const recordNow = !order && (choice === 'paid' || choice === 'credit' || ((method === 'wallet' || method === 'card') && received));
+      let settlement:OrderSettlementInput|undefined;
+      if (recordNow) {
+        if (pricing?.total == null) throw new Error('Finish pricing before recording payment or adding this order to khata.');
+        const amountGiven = given.trim() ? parseMoney(given,currency) : undefined;
+        if (amountGiven === null) throw new Error('Enter a valid cash amount given.');
+        settlement = {method,wallet,accountId:account?.account.id,confirmation:confirmation || undefined,...(choice === 'paid' && amountGiven !== undefined ? {given:amountGiven} : {})};
+      }
+      onSaved(await db.saveOrder(input,{id:order?.id,revision:order?.revision,settlement}));
+    } catch (error) {
+      if (error instanceof CreditLimitError) { setConfirmation({balance:error.balance,limit:error.limit});setError(`New balance ${formatMoney(error.proposed,currency)} exceeds the limit ${formatMoney(error.limit,currency)}. Confirm Give anyway only if you agree.`); }
+      else {setError(errorText(error));setConfirmation(null);}
+    } finally {busy.current = false;setSaving(false);}
+  }
+  const createLabel = order ? 'Save changes' : confirmation ? 'Give anyway · create order' : 'Create order';
+  return <><form className="order-form" onSubmit={event => void save(event)} aria-busy={!data || !khata}><header className="app-page-heading"><h1>{order ? `Change ${order.number}` : 'New order'}</h1><p>Record a call, walk-in or request on this device.</p></header>
+    <fieldset className="order-form-fields" disabled={saving}><legend className="sr-only">Order details</legend><div className="order-form-main">
+      <div className="order-field"><span>Where is it from?</span><div className="order-chips" role="group" aria-label="Order source">{Object.entries(orderSourceLabels).map(([source,label]) => <button type="button" className={`chip${draft.source === source ? ' selected' : ''}`} aria-pressed={draft.source === source} key={source} onClick={() => patch({source:source as OrderSource,...(source === 'table' ? {type:'dine_in'} : {})})}>{label}</button>)}</div></div>
+      {['paste','other'].includes(draft.source) ? <label className="order-field">{draft.source === 'paste' ? 'Original chat (optional)' : 'Source details (optional)'}<textarea rows={3} maxLength={4000} value={draft.sourceText} onChange={event => patch({sourceText:event.target.value})} /><small>Keep the request here and enter its items below.</small></label> : null}
+      <Card className="order-form-card"><label className="order-field">Customer phone<span className="order-input-icon"><MiseIcon name="phone" size={16} /><input type="tel" autoFocus={!order} autoComplete="tel" value={draft.phone} disabled={locked} onChange={event => changePhone(event.target.value)} />{person && !locked ? <button type="button" className="order-choose-customer" onClick={() => setCustomerExpanded(value => !value)}>Choose</button> : null}</span></label>
+        {!person || customerExpanded ? <div className="order-form-pair"><label className="order-field">Customer name<input value={draft.name} maxLength={80} onChange={event => patch({name:event.target.value})} /></label><label className="order-field">Saved customer<select aria-label="Saved customer" value={person?.id || ''} disabled={locked} onChange={event => chooseCustomer(customers.find(person => person.id === event.target.value))}><option value="">Enter manually</option>{customers.filter(person => person.archivedAt === undefined || person.id === order?.customer.id).map(person => <option key={person.id} value={person.id}>{displayName(person)}{person.archivedAt !== undefined ? ' · Archived' : ''}</option>)}</select></label></div> : null}
+        {person ? <div className="order-usual"><MiseIcon name="heart" size={16} /><span>{displayName(person)} · {(data?.orders || []).filter(order => order.customer.id === person.id).length} orders{usual.length ? ` · usual: ${usual.map(line => `${line.qty}× ${line.name}`).join(', ')}` : ''}</span>{usual.length && !locked ? <Button type="button" kind="ghost" onClick={() => {setLines(usual.map(draftLine));setConfirmation(null);}}>Use usual</Button> : null}</div> : <Button type="button" kind="ghost" disabled={locked} onClick={() => setEditor({type:'customer'})}>New customer</Button>}
+      </Card>
+      <label className="order-field">Items<span className="order-input-icon"><MiseIcon name="search" size={16} /><input type="search" placeholder={`Search ${businessPacks[setup.business.businessType]['noun/catalogue'].toLowerCase()}`} value={query} disabled={locked || currency !== setup.outlet.currency} onChange={event => setQuery(event.target.value)} /></span></label>
+      {!locked && currency === setup.outlet.currency ? <div className="order-item-tiles">{available.slice(0,query ? 40 : 8).map(item => {const chosen = lines.find(line => line.value.itemId === item.id && !line.value.substitution && !line.value.unavailable);return <article key={item.id} className={chosen ? 'selected' : ''}><h2>{item.name}</h2><small>{formatMoney(item.price,currency)} / {item.unit}</small>{chosen ? <div className="order-stepper"><button type="button" aria-label={`Remove one ${item.name}`} onClick={() => quantity(chosen.key,Math.round((chosen.value.qty-1)*1000)/1000)}><MiseIcon name="minus" size={14} /></button><button type="button" aria-label={`Edit quantity ${item.name}`} onClick={() => setEditor({type:'line',key:chosen.key})}>{chosen.value.qty}</button><button type="button" aria-label={`Add one ${item.name}`} onClick={() => add(item)}><MiseIcon name="plus" size={14} /></button></div> : <Button type="button" kind="secondary" aria-label={`Add ${item.name}`} onClick={() => add(item)}><MiseIcon name="plus" size={14} />Add</Button>}</article>;})}{data && !available.length ? <p>No available items match. Add a typed item below.</p> : null}</div> : currency !== setup.outlet.currency ? <small>New catalogue prices use {setup.outlet.currency}. This order retains {currency}.</small> : null}
+      {lines.some(line => locked || currency !== setup.outlet.currency || !line.value.itemId || line.value.unavailable || !available.slice(0,query ? 40 : 8).some(item => item.id === line.value.itemId)) ? <Card className="order-form-card order-draft-lines">{lines.filter(line => locked || currency !== setup.outlet.currency || !line.value.itemId || line.value.unavailable || !available.slice(0,query ? 40 : 8).some(item => item.id === line.value.itemId)).map(({key,value}) => <article key={key}><div><strong>{value.qty} × {value.name}</strong><small>{value.unavailable ? 'Out of stock' : value.unitPrice === null ? 'Price pending' : `${formatMoney(value.unitPrice,currency)} / ${value.unit}`}{value.substitution ? ` · ${value.substitution.accepted ? 'Swap accepted' : 'Swap awaiting agreement'}` : ''}{value.note ? ` · ${value.note}` : ''}</small></div><Button type="button" kind="ghost" aria-label={`Edit ${value.name}`} onClick={() => setEditor({type:'line',key})}>{locked ? 'Note' : 'Edit'}</Button>{!locked ? <Button type="button" kind="ghost" aria-label={`Remove ${value.name}`} onClick={() => quantity(key,0)}><MiseIcon name="x" size={16} /></Button> : null}</article>)}</Card> : null}
+      {!locked ? <Button type="button" kind="secondary" className="order-add-line" onClick={() => setEditor({type:'line'})}><MiseIcon name="plus" size={16} />Type an item</Button> : <small>Item prices, customer and payment are locked at this stage. Fulfilment details and notes can still change.</small>}
+    </div><div className="order-form-side"><Card className="order-form-card"><fieldset className="order-fulfilment" disabled={saving}><legend className="sr-only">Fulfilment</legend>{(['delivery','pickup','dine_in'] as const).map(type => <label key={type}><input type="radio" name="fulfilment" value={type} checked={draft.type === type} onChange={() => patch({type})} /><span>{type === 'dine_in' ? 'Dine-in' : type === 'pickup' ? 'Pickup' : 'Delivery'}</span></label>)}</fieldset>
+      {draft.type === 'delivery' ? <label className="order-field">Address<span className="order-input-icon"><MiseIcon name="pin" size={16} /><input required maxLength={250} value={draft.address} onChange={event => patch({address:event.target.value})} /></span></label> : draft.type === 'dine_in' ? <label className="order-field">Table<input maxLength={40} value={draft.table} onChange={event => patch({table:event.target.value})} /></label> : null}
+      <label className="order-field">When<span className="order-input-icon"><MiseIcon name="clock" size={16} /><input type="datetime-local" aria-label="When" value={when} onChange={event => {setWhen(event.target.value);setConfirmation(null);}} /></span><small>Leave blank for as soon as possible. Times follow this device.</small></label></Card>
+      <Card className="order-form-card"><div className="order-form-pair">{draft.type === 'delivery' ? <label className="order-field">Delivery fee ({currency})<input inputMode="decimal" value={fee} disabled={locked} onChange={event => {setFee(event.target.value);setConfirmation(null);}} /></label> : null}<label className="order-field">Discount ({currency})<input inputMode="decimal" value={discount} disabled={locked} onChange={event => {setDiscount(event.target.value);setConfirmation(null);}} /></label></div></Card>
+      <div className="order-field"><span>Payment</span><div className="order-chips" role="group" aria-label="Order payment">{([{id:'cash',label:draft.type === 'delivery' ? 'Cash on delivery' : 'Cash on collection'},...wallets.map(wallet => ({id:`wallet:${wallet}`,label:wallet})),{id:'paid',label:'Paid at counter'},{id:'card',label:'Card'},{id:'credit',label:setup.business.marketCode === 'BD' ? 'Khata / Baki' : 'Khata / Credit'}] as {id:PaymentChoice;label:string}[]).map(value => <button type="button" key={value.id} className={`chip${choice === value.id ? ' selected' : ''}`} disabled={locked} aria-pressed={choice === value.id} onClick={() => {setChoice(value.id);setConfirmation(null);setReceived(false);}}>{value.label}</button>)}</div></div>
+      {!order && (choice.startsWith('wallet:') || choice === 'card') ? <div className="khata-toggle-row"><span>Payment received<small>Confirm only after checking the payment yourself.</small></span><Toggle checked={received} label="Payment received" onChange={setReceived} /></div> : null}
+      {!order && choice === 'paid' ? <label className="order-field">Cash given (optional)<input inputMode="decimal" aria-label="Cash given (optional)" value={given} onChange={event => setGiven(event.target.value)} /><small>Recording confirms you received this cash.</small></label> : null}
+      {choice === 'credit' ? <Card className="order-form-card"><p>{account ? `${formatMoney(account.balance,currency)} due · limit ${formatMoney(account.account.limit,currency)}` : 'Choose a saved customer and set their credit limit.'}</p>{person && !locked ? <Button type="button" kind="secondary" onClick={() => setEditor({type:'terms'})}>{account?.account.allowed ? 'Change credit settings' : 'Set credit limit'}</Button> : null}<small>{order ? 'A pending order is added to khata when you record its payment.' : 'Creating this order adds its priced total to khata. Credit must be allowed.'}</small></Card> : null}
+    </div></fieldset>
+    {liveOrder && order && liveOrder.revision !== order.revision ? <p className="order-warning">This order changed. Reopen it before saving this draft.</p> : null}{pricingError ? <p className="form-error" role="alert">{pricingError}</p> : null}{error ? <p className="form-error" role="alert">{error}</p> : null}<footer className="order-action-bar"><div><strong>{pricing?.total == null ? 'Price pending' : formatMoney(pricing.total,currency)} · {lines.length} {lines.length === 1 ? 'line' : 'lines'}</strong><small>Saved on this device. Share after reviewing.</small></div><Button type="button" kind="ghost" disabled={saving} onClick={onCancel}>Cancel</Button><Button type="submit" disabled={saving || !data || !khata || !lines.length || Boolean(pricingError)}>{saving ? 'Saving…' : createLabel}</Button></footer>
+    </form><Modal open={Boolean(editor)} variant="sheet" title={editor?.type === 'customer' ? 'New customer' : editor?.type === 'terms' ? 'Credit settings' : editing ? 'Edit order item' : 'Type an item'} closeLabel="Close" onClose={() => setEditor(null)}>{editor?.type === 'customer' ? <CustomerForm setup={setup} onSaved={person => {chooseCustomer(person);setEditor(null);}} /> : editor?.type === 'terms' && person ? <CreditTermsForm setup={setup} customer={person} account={account?.account} onSaved={() => {setConfirmation(null);setEditor(null);}} /> : editor?.type === 'line' ? <OrderLineForm key={editor.key || 'new'} value={editing?.value} currency={currency} notesOnly={locked} onSaved={value => {if (locked && editing) value = {...editing.value,note:value.note};setLines(before => editing ? before.map(line => line.key === editing.key ? {...line,value} : line) : [...before,draftLine(value)]);setConfirmation(null);setEditor(null);}} /> : null}</Modal></>;
+}

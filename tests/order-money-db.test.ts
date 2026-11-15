@@ -37,10 +37,11 @@ test('create-and-pay is atomic and failed credit consent does not consume an ord
 });
 
 test('active paid orders accept fulfilment changes while protecting receipt amounts and payment links',async()=>{
-  const {db,input}=await boot(),paid=await db.saveOrder({...input,type:'delivery',address:'Old road',deliveryFee:100},{settlement:{method:'cash'}});
+  const {db,input,customer}=await boot(),paid=await db.saveOrder({...input,type:'delivery',address:'Old road',deliveryFee:100},{settlement:{method:'cash'}});
   const sale=await db.sales.get(paid.payment.saleId!);
+  await db.saveCustomer({...customer,phone:'01711222483'},{id:customer.id});
   const edited=await db.saveOrder({...input,type:'delivery',address:'New road',deliveryFee:100,lines:paid.lines},{id:paid.id,revision:paid.revision});
-  expect(edited).toMatchObject({address:'New road',total:2600,payment:{status:'paid',saleId:sale!.id}});expect(await db.sales.get(sale!.id)).toEqual(sale);
+  expect(edited).toMatchObject({address:'New road',total:2600,customer:{phone:paid.customer.phone},payment:{status:'paid',saleId:sale!.id}});expect(await db.sales.get(sale!.id)).toEqual(sale);
   await expect(db.saveOrder({...input,type:'delivery',address:'New road',deliveryFee:100,lines:paid.lines.map(line=>({...line,unitPrice:1500}))},{id:paid.id,revision:edited.revision})).rejects.toThrow(/cannot be edited/);
   expect((await db.orders.get(paid.id))?.revision).toBe(edited.revision);expect(await db.sales.count()).toBe(1);
 });

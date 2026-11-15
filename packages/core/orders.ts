@@ -44,7 +44,8 @@ export function saveOrderCommand(input: OrderInput, context: OrderContext, befor
   if (name.length > 80 || /[\r\n]/.test(name) || address.length > 250 || table.length > 40 || sourceText.length > 4000) throw new Error('Keep the name, address, table and source note within their field limits.');
   const phone = input.phone.trim() ? normalisePhone(input.phone,setup.business.marketCode) : input.customerId ? customer?.phone : undefined;
   if (input.phone.trim() && !phone) throw new Error('Enter a complete phone number.');
-  if (input.customerId && customer?.phone && phone !== customer.phone) throw new Error('The phone does not match the selected customer.');
+  const retainedPhone = before?.customer.id === input.customerId && before?.customer.phone === phone;
+  if (input.customerId && customer?.phone && phone !== customer.phone && !retainedPhone) throw new Error('The phone does not match the selected customer.');
   if (input.type === 'delivery' && !address) throw new Error('Enter a delivery address.');
   if (input.type === 'dine_in' && !table) throw new Error('Enter a table or seat.');
   if (input.scheduledFor !== undefined && (!Number.isSafeInteger(input.scheduledFor) || input.scheduledFor < 0)) throw new Error('Choose a valid order time.');

@@ -28,7 +28,6 @@ export function orderQuoteText(order: Order, setup: SetupSnapshot): string {
     return [setup.business.name,`${bn ? 'অর্ডার' : 'Order'} ${order.number} · ${order.customer.name}`, ...lines,order.deliveryFee ? `${bn ? 'ডেলিভারি' : 'Delivery'}: ${formatMoney(order.deliveryFee,order.currency)}` : '',order.discount ? `${bn ? 'ছাড়' : 'Discount'}: ${formatMoney(order.discount,order.currency)}` : '',order.total === null ? bn ? 'মোট দাম এখনও বাকি — দাম ও বদলি পণ্যে সম্মতি জানান।' : 'Total pending — please confirm prices and swaps.' : `${bn ? 'মোট' : 'Total'}: ${formatMoney(order.total,order.currency)}`,bn ? 'দাম ও বদলি পণ্য দেখে সম্মতি জানান।' : 'Please confirm the prices and any swaps.'].filter(Boolean).join('\n');
   };
   const message = [setup.business.languages.includes('bn') && render(true),setup.business.languages.includes('en') && render(false)].filter(Boolean).join('\n\n');
-  if (message.length > 4000) throw new Error('This quote is too long to share. Copy or send a shorter summary.');
   return message;
 }
 export function orderContactLinks(order: Order, text: string): {whatsapp?:string;call?:string} { return order.customer.phone ? {whatsapp:waLink(order.customer.phone,text),call:`tel:${order.customer.phone}`} : {}; }
