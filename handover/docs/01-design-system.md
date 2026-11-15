@@ -11,11 +11,25 @@ Tokens live in `handover/tokens/tokens.json` and `tokens.css`. They were exporte
   - Tinted backgrounds (`*-50`) are allowed only for tiny badges in dense tables.
 - **Equal-height cards** in a row: the tallest card sets the height, the others stretch. Footers and actions are pinned to the bottom.
 - **Spacing:** 8pt grid. Control heights are 36 px (compact) and 44 px (touch). Card radius is 14–16 px on the app, 24 px on the landing page. Pills use 999 px.
-- **Shadows:** `--shadow-raised` for cards when needed, `--shadow-soft` for floating chips and product shots. Avoid the heavier `overlay` shadow on marketing pages.
+- **Shadows:** `--shadow-raised` for cards when needed, `--shadow-soft` for floating elements in the app. Product images on marketing pages already contain their own soft shadow, so add none. Avoid the heavier `overlay` shadow on marketing pages.
 - **Accessibility:**
   - Meet WCAG 2.2 AA contrast, with a visible focus ring (2 px ink + 2 px white offset).
   - Hit targets are at least 44 px on touch.
   - Respect `prefers-reduced-motion`.
+
+## Global visual rules (owner's taste, apply everywhere: app, landing page, marketing, portfolio)
+- **No gradients.** Use solid fills only. The single exception is an *extremely* subtle tonal shift (≤ 3% lightness difference) on a large neutral surface, and even then only if it's clearly needed.
+- **Restrained colour.** Large surfaces are warm neutrals (`--bg`, `--fill`, `--subtle`) or ink. Ember is a small accent only: an eyebrow label, a live dot, the logo bar, one highlighted word. Never use ember as a full section or hero background.
+- **No warm or ember text on dark surfaces.** On ink or dark greys, text is white or a cool neutral grey (`--muted`, `--border-strong`). Ember text only appears on light backgrounds.
+- **One style per text.** Text set together (a line, headline, sentence or label) never mixes sizes or weights, so there is no light/bold emphasis inside a line and no highlighted words in a different colour. For emphasis, use a separate line or element.
+- **Modest type.** Headlines are never oversized:
+  - landing hero ≤ 64 px, section headlines ≤ 40 px
+  - portfolio and marketing modules 30–48 px
+  - editorial headlines use one weight throughout (Geist Regular)
+- **Devices and screens:** show them straight on and evenly spaced. Never lay a phone over a desktop screen. Put each device on its own, or side by side with clear gaps.
+- **Calm hero.** Light `--fill` (#EDEDEC) background, headline + one short lead + two buttons + one quiet trust line on the left, a single device on the right. No eyebrow pills, no floating notification chips, no partner logo strip in bold, no dark hero.
+- **Product screens are pictures of the real design.** On marketing pages (landing, setup, OG images) every app screen, device and product panel is an image exported from Figma (`handover/exports/landing/lp-*.png`). Never redraw a screen, phone or browser in HTML, CSS or inline SVG.
+- **No trademark symbols** (®, ™) next to the logo or name.
 
 ## Type
 | Token | Font | Size / line height | Use |
@@ -30,7 +44,13 @@ Tokens live in `handover/tokens/tokens.json` and `tokens.css`. They were exporte
 | caption | Geist | 11/16 | Helper text |
 | bangla-* | Hind Siliguri | 14/24, 12/20, 20/32 | Bengali text |
 
-Landing page only: hero headline 68–72 px, section headlines 56 px, sub-copy 20/29. All use Geist SemiBold at −2.5% tracking.
+Landing page only (updated 15 Nov 2026, replaces the old 68–72 px / 56 px SemiBold values):
+- hero headline: Geist Regular 56/62, −1% tracking
+- section headlines: Geist Regular 40/46, −1%
+- CTA headline: Geist Regular 48/55, −1%
+- hero lead: Geist Regular 18/28 in `--muted`; section leads 18/28
+- small headings inside sections (e.g. "A shift with an agent"): Geist SemiBold 24/32
+- one weight per text, always (see Global visual rules)
 
 **Bengali:**
 - Set `font-family: Geist, "Hind Siliguri", system-ui, sans-serif;` on all text, so Bengali runs (including ৳) fall back to Hind Siliguri automatically.

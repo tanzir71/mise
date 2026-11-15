@@ -2,6 +2,8 @@
 
 Read this first, every session. Then read `handover/docs/03-roadmap.md` to find the next unchecked milestone. Its spec is in `handover/docs/phases/`.
 
+> **Current priority (15 Nov 2026): Phase R, the refinement pass in `handover/docs/09-refinement-appendix.md`.** Do not start M10 until Phase R is ticked and tagged `v0.1.1`.
+
 ## Mission
 
 Build Mise in small, working increments:
@@ -72,6 +74,9 @@ pnpm lint && pnpm typecheck
 - Meet WCAG 2.2 AA.
 - Use the soft shadow token (`--shadow-soft`) for floating things. Avoid heavy shadows.
 - Match the Figma frame listed in each milestone. Check layouts at 360, 390, 768, 1024 and 1440 px wide.
+- **Image-first on marketing pages:** every app screen, phone, laptop and product panel on the landing and setup pages is a Figma export (`handover/exports/landing/lp-*.png`, mapped in `landing-assets.json`). Never redraw one in HTML/CSS/SVG.
+- **The exports are the visual reference for the app:** `handover/exports/screens/…` (index: `handover/exports/INDEX.md`). Before a UI milestone, run `node handover/scripts/export-figma.mjs --check`. If files are missing, ask the owner; never guess a design.
+- **Calm, modest type:** landing hero 56 px Regular, section headlines 40 px Regular, one weight per line, no gradients, no ®.
 
 ## Working style
 
@@ -93,5 +98,6 @@ pnpm lint && pnpm typecheck
 - [ ] No critical axe violations on changed pages
 - [ ] Works offline where the phase requires it
 - [ ] Responsive at 360–1440 px, and visually matches the Figma frame(s) named in the spec
+- [ ] Visual QA report (`pnpm qa:visual` → `qa/report.html`) attached to the PR, comparing your screens with the exports named in the spec
 - [ ] Deployed to GitHub Pages from `main`, with the live URL in the PR description
 - [ ] CHANGELOG, roadmap checkbox and docs updated

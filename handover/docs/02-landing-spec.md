@@ -36,12 +36,13 @@ Also required:
 ## Sections (in order)
 Section IDs are used for in-page anchors from the feature index.
 
-1. **Nav** (black): logo; links (Product, AI operator, Reads anything, Businesses, Pricing → `#cta` for now); region pill; Sign in (→ `/app/`); "Start free" (→ `/app/`). On phones: hamburger with a full-screen sheet.
-2. **Hero** (`#top`, black):
-   - eyebrow chip "New: let Claude or Codex run a shift →"
-   - headline, lead, two CTAs, trust line with partner names
-   - right side: product composite (desktop Live store screenshot + phone Orders screenshot) with 4 floating chips
-   - on phones: the visual goes below the copy and shows the phone only
+1. **Nav** (light `#EDEDEC`, updated 15 Nov 2026): logo; links (Product, AI operator, Reads anything, Businesses, Pricing → `#cta` for now); region pill; Sign in (→ `/app/`); "Start free" ink pill (→ `/app/`). On phones: logo + Start free + menu button opening a light full-screen sheet. Exact values: `09-refinement-appendix.md` R2. Reference: `exports/landing/Nav · BD.png`.
+2. **Hero** (`#top`, light `#EDEDEC`, updated 15 Nov 2026), calm:
+   - left: headline (56/62 Geist Regular), one lead, two buttons, one quiet trust line
+   - right: one image, `lp-<region>-hero-phone` (the Orders screen in a phone, straight on)
+   - **no** eyebrow chip, floating chips, laptop, partner logo strip or dark background
+   - on phones: the phone goes below the buttons, 240 px wide
+   - reference: `exports/landing/Hero · BD.png` / `Hero · Intl.png`. Exact values: `09-refinement-appendix.md` R2
 3. **Feature index** (`#features`): 14 pills linking to sections 4–7. The first two (AI operator, Reads anything) are filled ink.
 4. **01 · AI operator** (`#ai`):
    - headline + lead
@@ -56,32 +57,38 @@ Section IDs are used for in-page anchors from the feature index.
    - footer note about manual fallbacks
    - on phones each row becomes a stacked card
 7. **04 · Checks built in** (`#checks`): 12 "When → Mise" cards, 3 per row, equal height, each with a category tag and an icon.
-8. **05 · The whole operation, part by part** (`#detail`): 10 alternating feature blocks (07–16). Each block has:
-   - a product screenshot panel (680×500, grey, radius 28) and a floating callout chip
-   - an eyebrow number, a 40 px title, a lead
+8. **05 · The whole operation, part by part** (`#detail`): 12 alternating feature blocks. Each block has:
+   - the image `lp-<region>-detail-NN` (680×500; the grey panel, the screen and the callout chip are all inside the image)
+   - an eyebrow number, a 40 px Regular title, a lead
    - 3 numbered steps
    - an "If something goes wrong" fallback box
-9. **A day with Mise** (`#day`, black): 6 phone screenshots with time + caption. Horizontal scroll on phones.
-10. **Businesses** (`#businesses`): 4 equal-height cards (Restaurants, Online shops, Food stalls, Corner shops), each with a phone shot and 3 ticks.
+9. **A day with Mise** (`#day`, black): 6 images `lp-<region>-day-NN` (179×388) with time + caption in HTML. Horizontal scroll-snap on phones.
+10. **Businesses** (`#businesses`): 4 equal-height cards (Restaurants, Online shops, Food stalls, Corner shops), each with the image `lp-<region>-biz-NN` (234×350) and 3 ticks.
 11. **The basics** (`#basics`, grey): 12 equal-height tiles, 4 per row (2 on tablet, 1 on phone).
 12. **Comparison** (`#compare`): table Mise vs Typical POS vs WhatsApp + notebook, 8 rows. On phones it becomes stacked rows.
 13. **CTA** (`#cta`, black): headline, sub-line, "Start free" + secondary (BD: "Chat with us on WhatsApp" → `wa.me` link from env; Intl: "Book a demo" → link from env).
 14. **Footer** (black): three link columns, region pill + note, ©.
 
 ## Visual assets
-- **Product screenshots:** use the files in `handover/exports/phone/` and `exports/desktop/` (2× PNG). Convert them to WebP at build time, keep a PNG fallback, and place them in `apps/landing/src/assets/shots/`.
-  - Section references for both regions are in `exports/landing/bd/` and `exports/landing/intl/`.
-  - If `exports/phone/` is empty, run `FIGMA_TOKEN=… node handover/scripts/export-figma.mjs` once, or ask the owner to run it. Don't fall back to blurry crops.
-- **Logo and icons:** `exports/brand/` (SVG logo, favicon, PWA and maskable icons) and `exports/icons/*.svg`.
+- **Product images:** `handover/exports/landing/lp-*.png` (2×), mapped to slots in `handover/exports/landing-assets.json`.
+  - Render them with one `<Shot region slot>` component → Astro `<Picture>` (AVIF, WebP, PNG fallback), explicit width/height, lazy below the fold.
+  - **Never redraw a screen, phone, laptop or browser in HTML/CSS/SVG**, and never add CSS frames, chips or shadows around these images.
+  - If any are missing: `node handover/scripts/export-figma.mjs --check --only=landing`, then ask the owner (see `exports/README.md`). Don't fake them.
+- **Section references** (compare, don't embed): `exports/landing/<Section> · BD.png` and `<Section> · Intl.png`.
+- **Logo and icons:** `exports/brand/` (SVG logo, favicon, PWA and maskable icons) and `exports/system/Mise icon/*.svg`.
 - **Images:** lazy-load below the fold. Use `width`/`height` attributes to avoid layout shift.
-- **Shadows:** `--shadow-soft` with a 1 px `--border` outline. Never a heavy drop shadow.
+- **Shadows:** `--shadow-soft` with a 1 px `--border` outline, for HTML cards only. Never a heavy drop shadow.
 - **Arrows:** fixed-size 18 px icons, vertically centred. Never stretched.
+
+## Visual rules
+Follow "Global visual rules" in `01-design-system.md`: no gradients, ember only as a small accent, hero headline 56 px Regular, section headlines 40 px Regular, CTA 48 px Regular, one weight per line, a calm light hero with a single device, product screens as images, no ®.
 
 ## Quality bars
 - Lighthouse on mobile: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95.
 - Total JS on first load ≤ 30 KB gzipped: region router plus nav sheet. Everything else is static HTML/CSS.
-- Fonts self-hosted with `font-display: swap`; preload Geist 400/600 only.
+- Fonts self-hosted with `font-display: swap`; preload Geist 400 only (headlines and body are Regular). Load 500/600 normally.
 - No layout shift from fonts or images (CLS < 0.05).
 - Text never overflows its container at 360 px. Test the longest strings.
 - Cards in the same row are always equal height.
-- Open Graph image per region (1200×630) built from the hero.
+- Open Graph image per region (1200×630) built from the new hero: `#EDEDEC`, headline left, `lp-<region>-hero-phone` right.
+- Page length on a 390 px phone ≤ 20,000 px (see R5 in `09-refinement-appendix.md`).

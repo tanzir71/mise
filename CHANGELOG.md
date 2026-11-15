@@ -2,6 +2,12 @@
 
 All notable changes are documented here. Milestone completion is recorded after verification.
 
+## [Unreleased]
+
+### Refinement pass
+
+- R0: supplied Figma exports and updated design requirements, a single `@figma` asset source, required-export checks in CI, and a manual Figma refresh workflow.
+
 ## [0.1.0] - 2026-11-15
 
 ### Added

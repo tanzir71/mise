@@ -33,12 +33,11 @@
     "cta": "Start free"
   },
   "hero": {
-    "eyebrow": "New: let Claude or Codex run a shift",
     "headline": "Every order, chat\nand payment, in\none calm place.",
-    "lead": "Mise pulls in orders from delivery apps, WhatsApp, Instagram, QR and walk-ins, and keeps the kitchen, stock, staff, credit and cash in step. When you’re busy, an AI operator can take the shift.",
+    "lead": "Mise keeps orders, kitchen, stock, staff, credit and cash in step for shops that run on chats. When you’re busy, an AI operator can take the shift.",
     "ctaPrimary": "Start free",
     "ctaSecondary": "See how it works",
-    "trustLabel": "Works with what you already use · no APIs, no new hardware",
+    "trustLine": "Works with Uber Eats, DoorDash, Deliveroo, Stripe, WhatsApp, Instagram and Shopify. No APIs, no new hardware.",
     "partners": [
       "Uber Eats",
       "DoorDash",
@@ -48,6 +47,9 @@
       "Instagram",
       "Shopify"
     ],
+    "visual": "lp-intl-hero-phone",
+    "eyebrow": "New: let Claude or Codex run a shift",
+    "trustLabel": "Works with what you already use · no APIs, no new hardware",
     "chips": [
       {
         "icon": "bell",
@@ -69,7 +71,13 @@
         "title": "Claude replied to Sadia",
         "meta": "Messenger · 7:42 pm"
       }
-    ]
+    ],
+    "_deprecated": [
+      "eyebrow",
+      "trustLabel",
+      "chips"
+    ],
+    "_changed": "15 Nov 2026: new lead, trustLine and visual. eyebrow, trustLabel and chips are deprecated: kept only so the current build keeps working. R2 stops rendering them and deletes them (and _deprecated) from this file. Partners stay for structured data only; never render them as a logo strip."
   },
   "index": {
     "label": "Everything a shop needs, each part explained below",

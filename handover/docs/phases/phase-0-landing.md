@@ -9,7 +9,7 @@ Goal: a fast, polished, region-aware landing page live on GitHub Pages, plus the
 - pnpm workspaces: `apps/landing`, `apps/web` (placeholder "Coming soon" page at `/app/`), `packages/ui`, `packages/core`.
 - TypeScript strict, ESLint, Prettier, Vitest, Playwright.
 - Root scripts as listed in `AGENTS.md`. `pnpm build` produces `site/` with the landing page at `/` and the app at `/app/`.
-- Copy `handover/templates/.github` to `.github`. Set `BASE_PATH` from the repo name in the workflow.
+- Copy `handover/templates/github` to `.github`. Set `BASE_PATH` from the repo name in the workflow.
 - `CHANGELOG.md`, `handover/DECISIONS.md`, `handover/QUESTIONS.md` (start empty).
 
 **Accept**
@@ -21,7 +21,7 @@ Goal: a fast, polished, region-aware landing page live on GitHub Pages, plus the
 **Build**
 - `packages/ui/tokens.css` (from `handover/tokens/tokens.css`). Tailwind theme mapped to the CSS variables.
 - Self-host fonts: Geist (400/500/600), Geist Mono (400), Hind Siliguri (400/500/600).
-- Primitives: Button, Chip, Card, Section, Eyebrow, StatusWord, Icon (Lucide).
+- Primitives: Button, Chip, Card, Section, Eyebrow, StatusWord, Icon (the Mise set in `handover/exports/system/Mise icon/*.svg`; use Lucide only for an icon the set doesn't have).
 - A component gallery page at `/app/_ui` (behind a flag).
 
 **Accept**
@@ -32,11 +32,12 @@ Goal: a fast, polished, region-aware landing page live on GitHub Pages, plus the
 **Build**
 - All sections in `docs/02-landing-spec.md`, in order, with copy from `copy/landing.bd.json`.
 - Components take copy as props, so M03 needs no new components.
-- Static product visuals: use exported screenshots if available. Otherwise build faithful HTML mocks of:
-  - the hero composite
-  - the 10 feature block panels
+- Product visuals are **Figma exports only** (`handover/exports/landing/lp-*.png`, slots in `exports/landing-assets.json`):
+  - the hero phone
+  - the 12 feature block panels
   - the 6 day-in-the-life phones
-  - the 4 business phones
+  - the 4 business cards
+- If any are missing, run `node handover/scripts/export-figma.mjs --check --only=landing` and ask the owner. **Never build HTML mocks of screens or devices** (corrected 15 Nov 2026; see `09-refinement-appendix.md`).
 - Responsive at 360/390/768/1024/1440. Specific behaviours:
   - the feature index wraps
   - the capture matrix stacks on phones
@@ -44,7 +45,7 @@ Goal: a fast, polished, region-aware landing page live on GitHub Pages, plus the
   - the "day" phones scroll horizontally on phones
 
 **Accept**
-- [ ] Visually matches Figma `113:3` at 1440, within reason.
+- [ ] Visually matches the section references `handover/exports/landing/<Section> · BD.png` at 1440 (see the visual QA harness, R7).
 - [ ] Equal-height cards in every grid (OCR pairs, checks, businesses, basics).
 - [ ] No text overflow at 360 px. Arrows are fixed-size and centred.
 - [ ] All anchors from the feature index scroll to the right section.
@@ -80,7 +81,7 @@ Goal: a fast, polished, region-aware landing page live on GitHub Pages, plus the
 - `downloads/manifest.json` (empty `items` for now) and `downloads/README.md`. The Pages build copies `downloads/` into `site/downloads/`.
 - At runtime the page reads the manifest. Items not yet listed show "Coming in a later version". The web app and kitchen screen cards link to `/app/`.
 - Full instructions for the extension (Developer mode › Load unpacked), the Android APK (**Allow from unknown sources**, with both the Android 8+ per-app "Allow from this source" and the older Settings › Security › Unknown sources; Play Protect note; notification access; battery; pairing), adb, checksums, updates and troubleshooting.
-- Copy `templates/.github/workflows/artifacts.yml` into the repo (it no-ops until `apps/extension` / `apps/order-phone` exist).
+- Copy `templates/github/workflows/artifacts.yml` into the repo (it no-ops until `apps/extension` / `apps/order-phone` exist).
 - **Run your own copy on Vercel** section (`#vercel`): AI-agent steps, a "Copy prompt for your agent" button (from `prompts/04-deploy-own-vercel.md`), a Deploy to Vercel button, and what you get. Copy `templates/vercel.json` to the repo root. See `docs/08-distribution.md` → Self-hosting.
 
 **Accept**

@@ -1,1 +1,1 @@
-{ "extends": "astro/tsconfigs/strict", "compilerOptions": { "strict": true }, "include": [".astro/types.d.ts", "**/*", "../../packages/**/*.ts"], "exclude": ["dist"] }
+{ "extends": "astro/tsconfigs/strict", "compilerOptions": { "strict": true, "baseUrl": ".", "paths": { "@figma/*": ["../../handover/exports/*"] } }, "include": [".astro/types.d.ts", "**/*", "../../packages/**/*.ts"], "exclude": ["dist"] }

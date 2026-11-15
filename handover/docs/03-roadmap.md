@@ -26,6 +26,18 @@ Spec: `phases/phase-0-landing.md`
 - [x] **M04** Landing polish: screenshots, Lighthouse targets, OG images, phone layouts · S · T0
 - [x] **M05** Setup & downloads page (`/setup/`) reading `downloads/manifest.json`; `downloads/` folder + artifacts workflow skeleton · S · T0
 
+## Phase R — Refinement before the app (T0) → tag `v0.1.1`
+**Blocking: do not start M10 until every item is ticked.** Spec: `09-refinement-appendix.md` (added 15 Nov 2026 after the owner's review of the live site).
+
+- [x] **R0** Figma exports in the repo, `pnpm check:exports` in CI, Figma export workflow installed · S · T0
+- [ ] **R1** `<Shot>` image pipeline (AVIF/WebP/PNG); delete every hand-drawn mockup; CI guard · M · T0
+- [ ] **R2** Nav + hero rebuilt to the new calm Figma hero (both regions) · S · T0
+- [ ] **R3** Product images in Operations in detail (12), A day with Mise (6), Businesses (4) · M · T0
+- [ ] **R4** Section-by-section match: 40 px Regular headlines, backgrounds, no gradients · M · T0
+- [ ] **R5** Phone pass: no overflow at 360–414, page ≤ 20,000 px at 390 · M · T0
+- [ ] **R6** Setup page matches Figma; remove ®; new OG images · S · T0
+- [ ] **R7** Visual QA harness (`pnpm qa:visual` → `qa/report.html`), required on every UI PR from now on · S · T0
+
 ## Phase 1 — Useful on one device (T1) → tag `v0.2.0`
 The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-local-app.md`
 

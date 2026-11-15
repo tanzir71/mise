@@ -1,0 +1,46 @@
+# Refreshes handover/exports/ from Figma. Manual run only.
+# Needs the repo secret FIGMA_TOKEN (Figma personal access token, read-only "File content").
+name: Figma export
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Limit to folders (comma list: landing,screens,system,flows,portfolio). Empty = everything."
+        required: false
+        default: ""
+      force:
+        description: "Re-download files that already exist"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Export from Figma
+        env:
+          FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+          ONLY: ${{ inputs.only }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          ARGS=()
+          if [ -n "$ONLY" ]; then ARGS+=("--only=$ONLY"); fi
+          if [ "$FORCE" = "true" ]; then ARGS+=("--force"); fi
+          node handover/scripts/export-figma.mjs "${ARGS[@]}"
+      - name: Check
+        run: node handover/scripts/export-figma.mjs --check
+      - name: Commit
+        run: |
+          git config user.name "figma-export"
+          git config user.email "figma-export@users.noreply.github.com"
+          git add handover/exports
+          git diff --cached --quiet || git commit -m "chore(exports): refresh Figma exports"
+          git push

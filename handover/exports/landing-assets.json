@@ -1,0 +1,469 @@
+{
+ "bd": {
+  "hero": {
+   "slot": "hero.visual",
+   "src": "landing/lp-bd-hero-phone.png",
+   "node": "152:4653",
+   "cssWidth": 310,
+   "cssHeight": 638,
+   "exportScale": 2,
+   "alt": "Mise Orders screen on a phone: every order from chats, delivery apps and walk-ins in one list"
+  },
+  "detail": [
+   {
+    "slot": "detail.01",
+    "src": "landing/lp-bd-detail-01-every-channel-one-queue.png",
+    "node": "117:697",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Every channel, one queue”"
+   },
+   {
+    "slot": "detail.02",
+    "src": "landing/lp-bd-detail-02-a-kitchen-screen-nobody.png",
+    "node": "117:1023",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “A kitchen screen nobody can miss”"
+   },
+   {
+    "slot": "detail.03",
+    "src": "landing/lp-bd-detail-03-customers-track-their-own.png",
+    "node": "117:1251",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Customers track their own order”"
+   },
+   {
+    "slot": "detail.04",
+    "src": "landing/lp-bd-detail-04-stock-in-seconds-not.png",
+    "node": "117:1465",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Stock in seconds, not spreadsheets”"
+   },
+   {
+    "slot": "detail.05",
+    "src": "landing/lp-bd-detail-05-plan-people-and-prep.png",
+    "node": "117:1839",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Plan people and prep”"
+   },
+   {
+    "slot": "detail.06",
+    "src": "landing/lp-bd-detail-06-your-team-without-new.png",
+    "node": "117:2081",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Your team, without new apps”"
+   },
+   {
+    "slot": "detail.07",
+    "src": "landing/lp-bd-detail-07-know-your-regulars-win.png",
+    "node": "117:2535",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Know your regulars. Win them back.”"
+   },
+   {
+    "slot": "detail.08",
+    "src": "landing/lp-bd-detail-08-credit-without-awkward-conversations.png",
+    "node": "117:3017",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Credit without awkward conversations”"
+   },
+   {
+    "slot": "detail.09",
+    "src": "landing/lp-bd-detail-09-the-whole-store-live.png",
+    "node": "117:3275",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “The whole store, live, from anywhere”"
+   },
+   {
+    "slot": "detail.10",
+    "src": "landing/lp-bd-detail-10-your-storefront-pos-and.png",
+    "node": "117:3702",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Your storefront, POS and QR menu”"
+   },
+   {
+    "slot": "detail.11",
+    "src": "landing/lp-bd-detail-11-online-shop-confirm-ship.png",
+    "node": "117:3902",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Online shop? Confirm, ship, get paid.”"
+   },
+   {
+    "slot": "detail.12",
+    "src": "landing/lp-bd-detail-12-open-in-one-tap.png",
+    "node": "117:4088",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Open in one tap. Export anything.”"
+   }
+  ],
+  "day": [
+   {
+    "slot": "day.01",
+    "src": "landing/lp-bd-day-01-m12.png",
+    "node": "115:576",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Today"
+   },
+   {
+    "slot": "day.02",
+    "src": "landing/lp-bd-day-02-m13.png",
+    "node": "115:706",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Orders queue"
+   },
+   {
+    "slot": "day.03",
+    "src": "landing/lp-bd-day-03-m14.png",
+    "node": "115:825",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Order detail, tracking link, handled by"
+   },
+   {
+    "slot": "day.04",
+    "src": "landing/lp-bd-day-04-m16.png",
+    "node": "115:984",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Stock (quick update, on hand, target, to order)"
+   },
+   {
+    "slot": "day.05",
+    "src": "landing/lp-bd-day-05-m23.png",
+    "node": "115:1118",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Staff group (what comes in, what goes out, what failed)"
+   },
+   {
+    "slot": "day.06",
+    "src": "landing/lp-bd-day-06-m37.png",
+    "node": "115:1329",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Owner ∕ manager — Live store (everything happening now)"
+   }
+  ],
+  "businesses": [
+   {
+    "slot": "businesses.01",
+    "src": "landing/lp-bd-biz-01-restaurant.png",
+    "node": "115:1338",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise Today screen for a restaurant, on a phone"
+   },
+   {
+    "slot": "businesses.02",
+    "src": "landing/lp-bd-biz-02-online-shop.png",
+    "node": "115:1510",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise order confirmation for an online shop, on a phone"
+   },
+   {
+    "slot": "businesses.03",
+    "src": "landing/lp-bd-biz-03-food-stall.png",
+    "node": "115:1613",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise stall mode for a street food stall, on a phone"
+   },
+   {
+    "slot": "businesses.04",
+    "src": "landing/lp-bd-biz-04-corner-shop.png",
+    "node": "115:1683",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise counter calculator for a corner shop, on a phone"
+   }
+  ],
+  "sectionReferences": {
+   "Nav": "landing/Nav · BD.png",
+   "Hero": "landing/Hero · BD.png",
+   "Feature index": "landing/Feature index · BD.png",
+   "Agent controls": "landing/Agent controls · BD.png",
+   "Reads anything": "landing/Reads anything · BD.png",
+   "Data capture": "landing/Data capture · BD.png",
+   "Checks built in": "landing/Checks built in · BD.png",
+   "Operations in detail": "landing/Operations in detail · BD.png",
+   "A day with Mise": "landing/A day with Mise · BD.png",
+   "Businesses": "landing/Businesses · BD.png",
+   "The basics": "landing/The basics · BD.png",
+   "Comparison": "landing/Comparison · BD.png",
+   "CTA": "landing/CTA · BD.png",
+   "Footer": "landing/Footer · BD.png"
+  }
+ },
+ "intl": {
+  "hero": {
+   "slot": "hero.visual",
+   "src": "landing/lp-intl-hero-phone.png",
+   "node": "153:4599",
+   "cssWidth": 310,
+   "cssHeight": 638,
+   "exportScale": 2,
+   "alt": "Mise Orders screen on a phone: every order from chats, delivery apps and walk-ins in one list"
+  },
+  "detail": [
+   {
+    "slot": "detail.01",
+    "src": "landing/lp-intl-detail-01-every-channel-one-queue.png",
+    "node": "120:3583",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Every channel, one queue”"
+   },
+   {
+    "slot": "detail.02",
+    "src": "landing/lp-intl-detail-02-a-kitchen-screen-nobody.png",
+    "node": "120:3926",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “A kitchen screen nobody can miss”"
+   },
+   {
+    "slot": "detail.03",
+    "src": "landing/lp-intl-detail-03-customers-track-their-own.png",
+    "node": "120:4132",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Customers track their own order”"
+   },
+   {
+    "slot": "detail.04",
+    "src": "landing/lp-intl-detail-04-stock-in-seconds-not.png",
+    "node": "120:4365",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Stock in seconds, not spreadsheets”"
+   },
+   {
+    "slot": "detail.05",
+    "src": "landing/lp-intl-detail-05-plan-people-and-prep.png",
+    "node": "120:4716",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Plan people and prep”"
+   },
+   {
+    "slot": "detail.06",
+    "src": "landing/lp-intl-detail-06-your-team-without-new.png",
+    "node": "120:4975",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Your team, without new apps”"
+   },
+   {
+    "slot": "detail.07",
+    "src": "landing/lp-intl-detail-07-know-your-regulars-win.png",
+    "node": "120:5405",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Know your regulars. Win them back.”"
+   },
+   {
+    "slot": "detail.08",
+    "src": "landing/lp-intl-detail-08-credit-without-awkward-conversations.png",
+    "node": "120:5905",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Credit without awkward conversations”"
+   },
+   {
+    "slot": "detail.09",
+    "src": "landing/lp-intl-detail-09-the-whole-store-live.png",
+    "node": "120:6142",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “The whole store, live, from anywhere”"
+   },
+   {
+    "slot": "detail.10",
+    "src": "landing/lp-intl-detail-10-your-storefront-pos-and.png",
+    "node": "120:6586",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Your storefront, POS and QR menu”"
+   },
+   {
+    "slot": "detail.11",
+    "src": "landing/lp-intl-detail-11-online-shop-confirm-ship.png",
+    "node": "120:6764",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Online shop? Confirm, ship, get paid.”"
+   },
+   {
+    "slot": "detail.12",
+    "src": "landing/lp-intl-detail-12-open-in-one-tap.png",
+    "node": "120:6967",
+    "cssWidth": 680,
+    "cssHeight": 500,
+    "exportScale": 2,
+    "alt": "Mise screen for “Open in one tap. Export anything.”"
+   }
+  ],
+  "day": [
+   {
+    "slot": "day.01",
+    "src": "landing/lp-intl-day-01-m12.png",
+    "node": "120:7176",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Today"
+   },
+   {
+    "slot": "day.02",
+    "src": "landing/lp-intl-day-02-m13.png",
+    "node": "120:7336",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Orders queue"
+   },
+   {
+    "slot": "day.03",
+    "src": "landing/lp-intl-day-03-m14.png",
+    "node": "120:7466",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Order detail, tracking link, handled by"
+   },
+   {
+    "slot": "day.04",
+    "src": "landing/lp-intl-day-04-m16.png",
+    "node": "120:7585",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Stock (quick update, on hand, target, to order)"
+   },
+   {
+    "slot": "day.05",
+    "src": "landing/lp-intl-day-05-m23.png",
+    "node": "120:7744",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Manager — Staff group (what comes in, what goes out, what failed)"
+   },
+   {
+    "slot": "day.06",
+    "src": "landing/lp-intl-day-06-m37.png",
+    "node": "120:7878",
+    "cssWidth": 179,
+    "cssHeight": 388,
+    "exportScale": 2,
+    "alt": "Mise on a phone: Owner ∕ manager — Live store (everything happening now)"
+   }
+  ],
+  "businesses": [
+   {
+    "slot": "businesses.01",
+    "src": "landing/lp-intl-biz-01-restaurant.png",
+    "node": "120:8094",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise Today screen for a restaurant, on a phone"
+   },
+   {
+    "slot": "businesses.02",
+    "src": "landing/lp-intl-biz-02-online-shop.png",
+    "node": "120:8263",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise order confirmation for an online shop, on a phone"
+   },
+   {
+    "slot": "businesses.03",
+    "src": "landing/lp-intl-biz-03-food-stall.png",
+    "node": "120:8363",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise stall mode for a street food stall, on a phone"
+   },
+   {
+    "slot": "businesses.04",
+    "src": "landing/lp-intl-biz-04-corner-shop.png",
+    "node": "120:8430",
+    "cssWidth": 234,
+    "cssHeight": 350,
+    "exportScale": 2,
+    "alt": "Mise counter calculator for a corner shop, on a phone"
+   }
+  ],
+  "sectionReferences": {
+   "Nav": "landing/Nav · Intl.png",
+   "Hero": "landing/Hero · Intl.png",
+   "Feature index": "landing/Feature index · Intl.png",
+   "Agent controls": "landing/Agent controls · Intl.png",
+   "Reads anything": "landing/Reads anything · Intl.png",
+   "Data capture": "landing/Data capture · Intl.png",
+   "Checks built in": "landing/Checks built in · Intl.png",
+   "Operations in detail": "landing/Operations in detail · Intl.png",
+   "A day with Mise": "landing/A day with Mise · Intl.png",
+   "Businesses": "landing/Businesses · Intl.png",
+   "The basics": "landing/The basics · Intl.png",
+   "Comparison": "landing/Comparison · Intl.png",
+   "CTA": "landing/CTA · Intl.png",
+   "Footer": "landing/Footer · Intl.png"
+  }
+ },
+ "setup": {
+  "desktopReference": "landing/Setup · Download and install (desktop).png",
+  "phoneReference": "landing/Setup · On the shop phone (mobile web).png"
+ },
+ "_how": "Embed every entry under hero/detail/day/businesses as an <Image>/<Picture> (AVIF + WebP + PNG fallback) at cssWidth×cssHeight. The PNGs are exported at exportScale (2× = retina). sectionReferences are for visual comparison only; never embed them."
+}
