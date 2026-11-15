@@ -1,7 +1,6 @@
 ---
 import type copy from '../../../../handover/copy/landing.bd.json';
 import RegionPicker from './RegionPicker.astro';
-import Icon from '@mise/ui/Icon.astro';
 interface Props { footer: typeof copy.footer; region: string; contactUrl?: string }
 const { footer, region, contactUrl } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -12,4 +11,4 @@ const targets: Record<string,string> = {
   About:`${base}about/`, Careers:`${base}about/#careers`, 'Contact on WhatsApp':contactUrl || `${base}about/#contact`, Privacy:`${base}privacy/`,
 };
 ---
-<footer class="site-footer dark"><div class="container"><div class="footer-top"><div class="footer-brand"><a href={home} class="wordmark" aria-label="Mise home"><img src={`${base}brand/mise-mark-mono-white.svg`} width="32" height="32" alt="" /><span>mise</span></a><p>A little more order.<br />A little more room to breathe.</p><span class="footer-release">PRODUCT PREVIEW · v0.1</span></div>{footer.columns.map(column=><div class="footer-column"><h3>{column.title}</h3>{column.links.map(label=><a href={targets[label]}>{label}</a>)}</div>)}</div><div class="footer-bottom"><div><p class="eyebrow">{footer.regionTitle}</p><RegionPicker label={footer.region} /><p class="region-note">{footer.regionNote}</p></div><div class="footer-end"><span>{footer.copyright}</span><a href="#top" aria-label="Back to top"><Icon name="arrowUp" size={18} /></a></div></div></div></footer>
+<footer class="site-footer dark"><div class="container"><div class="footer-top">{footer.columns.map(column=><div class="footer-column"><h3>{column.title}</h3>{column.links.filter(label=>label!=='Setup and downloads').map(label=><a href={targets[label]}>{label}</a>)}</div>)}<div class="footer-region"><h3>{footer.regionTitle}</h3><RegionPicker label={footer.region} /><p class="region-note">{footer.regionNote}</p>{footer.columns.flatMap(column=>column.links).filter(label=>label==='Setup and downloads').map(label=><a class="setup-footer-link" href={targets[label]}>{label}</a>)}</div></div><p class="footer-copyright">{footer.copyright}</p></div></footer>
