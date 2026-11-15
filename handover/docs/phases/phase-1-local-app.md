@@ -141,8 +141,8 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
   - produce a day summary (shareable text/PDF)
 
 **Accept**
-- [ ] Numbers on Today equal the sums of the underlying records (tests).
-- [ ] The close-day flow works offline and can be undone the same day.
+- [x] Numbers on Today equal the sums of the underlying records (tests).
+- [x] The close-day flow works offline and can be undone the same day.
 
 ## M17 · Exports and backup · S
 **Figma:** M29 `106:921`, desktop `82:3097`
