@@ -19,6 +19,7 @@
     "screenshots": "node scripts/capture.mjs",
     "screenshots:og": "node scripts/capture-og.mjs",
     "quality:lighthouse": "node scripts/lighthouse.mjs",
+    "qa:visual": "node scripts/qa-visual.mjs",
     "check:exports": "node handover/scripts/export-figma.mjs --check --only=landing",
     "check:marketing": "node scripts/check-marketing.mjs",
     "check:images": "node scripts/check-image-budgets.mjs"
@@ -32,8 +33,11 @@
     "eslint": "^9.39.0",
     "eslint-plugin-astro": "^1.3.1",
     "lighthouse": "^12.8.2",
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0",
     "prettier": "^3.6.0",
     "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.34.5",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.0",
     "vitest": "^3.2.4"

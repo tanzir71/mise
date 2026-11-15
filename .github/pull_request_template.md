@@ -11,6 +11,14 @@ M__ · <title> (see `handover/docs/phases/…`)
 
 Figma frames matched: `node-id …`
 
+Visual QA artifact: <link to this PR's `visual-qa` Actions artifact; open `report.html`>
+
+For changes to `apps/landing` or `apps/web`, run `pnpm qa:visual` and include three key implementation screenshots inline below. List intentional differences from the exports. App milestones add their screen references to a capture config (see `qa/README.md`).
+
+![Key screen 1](...)
+![Key screen 2](...)
+![Key screen 3](...)
+
 ## Flags
 - [ ] No new flags · or: `flagName` (default off), reason:
 
