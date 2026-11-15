@@ -30,7 +30,7 @@ Spec: `phases/phase-0-landing.md`
 **Blocking: do not start M10 until every item is ticked.** Spec: `09-refinement-appendix.md` (added 15 Nov 2026 after the owner's review of the live site).
 
 - [x] **R0** Figma exports in the repo, `pnpm check:exports` in CI, Figma export workflow installed · S · T0
-- [ ] **R1** `<Shot>` image pipeline (AVIF/WebP/PNG); delete every hand-drawn mockup; CI guard · M · T0
+- [x] **R1** `<Shot>` image pipeline (AVIF/WebP/PNG); delete every hand-drawn mockup; CI guard · M · T0
 - [ ] **R2** Nav + hero rebuilt to the new calm Figma hero (both regions) · S · T0
 - [ ] **R3** Product images in Operations in detail (12), A day with Mise (6), Businesses (4) · M · T0
 - [ ] **R4** Section-by-section match: 40 px Regular headlines, backgrounds, no gradients · M · T0

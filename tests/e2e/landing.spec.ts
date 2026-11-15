@@ -11,7 +11,7 @@ test('Bangladesh copy, product sections and feature anchors are complete', async
   await expect(page.locator('.capture-row')).toHaveCount(10);
   await expect(page.locator('.check-card')).toHaveCount(12);
   await expect(page.locator('.detail-block')).toHaveCount(12);
-  await expect(page.locator('.day-phones figure')).toHaveCount(6);
+  await expect(page.locator('.day-shots figure')).toHaveCount(6);
   await expect(page.locator('.business-card')).toHaveCount(4);
   await expect(page.locator('.basic-tile')).toHaveCount(12);
   for (const href of await page.locator('.index-pills a').evaluateAll(links => links.map(link => link.getAttribute('href')!))) {
