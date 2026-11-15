@@ -4,6 +4,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
+### App foundations
+
+- M10, part 1: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events. The local-app flag remains off while onboarding and the shell are implemented.
+
 ### Refinement pass
 
 - R0: supplied Figma exports and updated design requirements, a single `@figma` asset source, required-export checks in CI, and a manual Figma refresh workflow.
