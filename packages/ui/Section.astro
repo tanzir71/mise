@@ -1,0 +1,5 @@
+---
+interface Props { id?: string; dark?: boolean; muted?: boolean; class?: string }
+const { id, dark, muted, class: className } = Astro.props;
+---
+<section id={id} class:list={['section', { dark, 'section-muted': muted }, className]}><div class="container"><slot /></div></section>
