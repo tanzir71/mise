@@ -1,0 +1,62 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Project pages live under /<repo>/. Set to "/" once a custom domain is configured.
+      BASE_PATH: /${{ github.event.repository.name }}/
+      PUBLIC_APP_URL: /${{ github.event.repository.name }}/app/
+      PUBLIC_GEO_URL: ${{ vars.PUBLIC_GEO_URL }}
+      PUBLIC_WHATSAPP_URL: ${{ vars.PUBLIC_WHATSAPP_URL }}
+      PUBLIC_DEMO_URL: ${{ vars.PUBLIC_DEMO_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build            # → ./site (landing at /, app at /app/)
+      - name: Copy downloads into the site
+        run: |
+          if [ -d downloads ]; then mkdir -p site/downloads && cp -R downloads/. site/downloads/; fi
+          touch site/.nojekyll
+          [ -f site/app/index.html ] && cp site/app/index.html site/404.html || true
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

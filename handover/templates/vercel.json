@@ -1,0 +1,24 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "BASE_PATH=/ PUBLIC_APP_URL=/app/ pnpm build && (test -d downloads && mkdir -p site/downloads && cp -R downloads/. site/downloads/ || true)",
+  "outputDirectory": "site",
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "rewrites": [
+    { "source": "/app/:path*", "destination": "/app/index.html" }
+  ],
+  "headers": [
+    { "source": "/app/sw.js", "headers": [
+      { "key": "Cache-Control", "value": "no-cache" },
+      { "key": "Service-Worker-Allowed", "value": "/app/" }
+    ]},
+    { "source": "/downloads/(.*)", "headers": [
+      { "key": "Cache-Control", "value": "public, max-age=300" }
+    ]},
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+    ]}
+  ]
+}

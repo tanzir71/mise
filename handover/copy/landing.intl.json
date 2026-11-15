@@ -1,0 +1,1073 @@
+{
+  "region": "intl",
+  "lang": "en",
+  "meta": {
+    "title": "Mise — every order, chat and payment in one calm place",
+    "description": "Orders from delivery apps, WhatsApp, Instagram, QR and walk-ins in one place. Kitchen, stock, staff, credit and cash in step. Let Claude or Codex run a shift."
+  },
+  "nav": {
+    "links": [
+      {
+        "label": "Product",
+        "href": "#features"
+      },
+      {
+        "label": "AI operator",
+        "href": "#ai"
+      },
+      {
+        "label": "Reads anything",
+        "href": "#ocr"
+      },
+      {
+        "label": "Businesses",
+        "href": "#businesses"
+      },
+      {
+        "label": "Pricing",
+        "href": "#cta"
+      }
+    ],
+    "region": "International · English",
+    "signIn": "Sign in",
+    "cta": "Start free"
+  },
+  "hero": {
+    "eyebrow": "New: let Claude or Codex run a shift",
+    "headline": "Every order, chat\nand payment, in\none calm place.",
+    "lead": "Mise pulls in orders from delivery apps, WhatsApp, Instagram, QR and walk-ins, and keeps the kitchen, stock, staff, credit and cash in step. When you’re busy, an AI operator can take the shift.",
+    "ctaPrimary": "Start free",
+    "ctaSecondary": "See how it works",
+    "trustLabel": "Works with what you already use · no APIs, no new hardware",
+    "partners": [
+      "Uber Eats",
+      "DoorDash",
+      "Deliveroo",
+      "Stripe",
+      "WhatsApp",
+      "Instagram",
+      "Shopify"
+    ],
+    "chips": [
+      {
+        "icon": "bell",
+        "title": "Kitchen hadn’t seen A-2043",
+        "meta": "Order phone rang · 7:44 pm"
+      },
+      {
+        "icon": "users",
+        "title": "Karim checked in",
+        "meta": "said it in the staff group · 10:40"
+      },
+      {
+        "icon": "wallet",
+        "title": "Matched $910 Stripe",
+        "meta": "to A-2041 · 7:31 pm"
+      },
+      {
+        "icon": "sparkles",
+        "title": "Claude replied to Sadia",
+        "meta": "Messenger · 7:42 pm"
+      }
+    ]
+  },
+  "index": {
+    "label": "Everything a shop needs, each part explained below",
+    "items": [
+      {
+        "icon": "sparkles",
+        "label": "AI operator",
+        "href": "#ai",
+        "highlight": true
+      },
+      {
+        "icon": "capture",
+        "label": "Reads anything",
+        "href": "#ocr",
+        "highlight": true
+      },
+      {
+        "icon": "receipt",
+        "label": "Every channel, one queue",
+        "href": "#f-orders"
+      },
+      {
+        "icon": "utensils",
+        "label": "Kitchen screen",
+        "href": "#f-kitchen"
+      },
+      {
+        "icon": "link",
+        "label": "Live order tracking",
+        "href": "#f-tracking"
+      },
+      {
+        "icon": "package",
+        "label": "Stock and suppliers",
+        "href": "#f-stock"
+      },
+      {
+        "icon": "calendar",
+        "label": "People and prep",
+        "href": "#f-plan"
+      },
+      {
+        "icon": "message",
+        "label": "Team and group chat",
+        "href": "#f-team"
+      },
+      {
+        "icon": "heart",
+        "label": "Guests and win-back",
+        "href": "#f-guests"
+      },
+      {
+        "icon": "clipboard",
+        "label": "Credit and tab",
+        "href": "#f-credit"
+      },
+      {
+        "icon": "layers",
+        "label": "Live store, all outlets",
+        "href": "#f-live"
+      },
+      {
+        "icon": "store",
+        "label": "Storefront, POS, QR",
+        "href": "#f-storefront"
+      },
+      {
+        "icon": "send",
+        "label": "Couriers and COD",
+        "href": "#f-couriers"
+      },
+      {
+        "icon": "download",
+        "label": "Start, setup, exports",
+        "href": "#f-start"
+      }
+    ]
+  },
+  "ai": {
+    "eyebrow": "01 · AI OPERATOR · OPTIONAL",
+    "headline": "Hand over the shift.\nTake it back in one tap.",
+    "lead": "Pick what the agent may do alone, what it must ask about, and what it only watches. It works next to your team: type in a chat and it steps back.",
+    "permissions": [
+      {
+        "title": "Reply to customers",
+        "meta": "Messenger, WhatsApp, Instagram",
+        "level": "Alone"
+      },
+      {
+        "title": "Take orders from chats",
+        "meta": "Drafts, confirms, sends to kitchen",
+        "level": "Alone"
+      },
+      {
+        "title": "Book riders and couriers",
+        "meta": "DoorDash, DHL, FedEx",
+        "level": "Ask"
+      },
+      {
+        "title": "Refunds and discounts",
+        "meta": "Up to $500 and 10%",
+        "level": "Ask"
+      },
+      {
+        "title": "Supplier orders",
+        "meta": "Drafts from low stock",
+        "level": "Ask"
+      },
+      {
+        "title": "Message your staff",
+        "meta": "Shift reminders",
+        "level": "Watch"
+      }
+    ],
+    "benefits": [
+      {
+        "icon": "shield",
+        "title": "Limits it can’t cross",
+        "text": "Set money limits, quiet hours and things it must never do, such as cancelling paid orders."
+      },
+      {
+        "icon": "history",
+        "title": "Every action logged, with undo",
+        "text": "See what it did, why, and reverse it. Your staff see the same log."
+      },
+      {
+        "icon": "users",
+        "title": "Works next to people",
+        "text": "A presence pill shows who handles each chat and order. Type in a chat and the agent steps back."
+      },
+      {
+        "icon": "bell",
+        "title": "Never the only safety net",
+        "text": "Kitchen alarms, missed orders and payment gaps still ring phones, even if the agent is offline."
+      }
+    ],
+    "timelineTitle": "A shift with an agent",
+    "timeline": [
+      {
+        "time": "10:55",
+        "title": "Start service",
+        "text": "One tap opens every chat and delivery tab"
+      },
+      {
+        "time": "11:00",
+        "title": "Agent checks in",
+        "text": "Reads the playbook and today’s plan"
+      },
+      {
+        "time": "All day",
+        "title": "Works the queue",
+        "text": "Replies, takes orders, books couriers"
+      },
+      {
+        "time": "Rush",
+        "title": "Asks when unsure",
+        "text": "“Free raita for Sadia? $40”"
+      },
+      {
+        "time": "Any time",
+        "title": "You take over",
+        "text": "Type in a chat and it steps back"
+      },
+      {
+        "time": "23:15",
+        "title": "Closes the day",
+        "text": "Summary to the owner on WhatsApp"
+      }
+    ],
+    "failureTitle": "When something fails, it does what a person would",
+    "failureSteps": [
+      "Try again",
+      "Try another way",
+      "Ask a person",
+      "Park it and remind"
+    ],
+    "failureText": "Courier site changed? It switches to copy-and-paste. WhatsApp closed? It asks the desk. Nothing is dropped silently.",
+    "connectTitle": "Connect Claude or Codex in two minutes",
+    "connectCode": [
+      "Claude  →  Customize › Connectors › Add custom connector",
+      "https://mcp.mise.app/mcp",
+      "Codex   →  codex mcp add mise --url https://mcp.mise.app/mcp"
+    ],
+    "connectText": "Start it once with a copied prompt. Scheduled check-ins or one live session per shift keep it going, and Mise tells you if it stops checking in."
+  },
+  "ocr": {
+    "eyebrow": "02 · READS ANYTHING",
+    "headline": "Snap it, share it, forward it.\nMise understands it.",
+    "lead": "When the agent can read a chat directly, no photo is needed. For everything else, such as screenshots, invoices, prescriptions, payment SMS and handwritten lists, Mise reads it and asks only when it’s unsure.",
+    "cards": [
+      {
+        "title": "Chat screenshots → orders",
+        "input": [
+          "2 biryani, 1 lassi",
+          "Road 12, House 5"
+        ],
+        "output": [
+          [
+            "Order",
+            "2× Biryani, 1× Lassi"
+          ],
+          [
+            "To",
+            "Road 12"
+          ]
+        ],
+        "note": "From Messenger, WhatsApp, Instagram, or any app."
+      },
+      {
+        "title": "Supplier invoices → stock and purchases",
+        "input": [
+          "Chicken 20kg 4800",
+          "Oil 10L ...2350",
+          "Total 7150"
+        ],
+        "output": [
+          [
+            "Stock",
+            "+20 kg, +10 L"
+          ],
+          [
+            "Owed",
+            "$7,150"
+          ]
+        ],
+        "note": "Handwritten or printed. Unclear lines are flagged for you."
+      },
+      {
+        "title": "Prescriptions → priced orders",
+        "input": [
+          "Rx Napa Ext 1+1",
+          "Seclo 20 1x",
+          "Fexo 120"
+        ],
+        "output": [
+          [
+            "Lines",
+            "3 medicines"
+          ],
+          [
+            "Check",
+            "Pharmacist confirms"
+          ]
+        ],
+        "note": "You check every line before anything is sold."
+      },
+      {
+        "title": "Payment SMS → matched payments",
+        "input": [
+          "Stripe: Payment of $910 received from 017•••482"
+        ],
+        "output": [
+          [
+            "Payment",
+            "$910"
+          ],
+          [
+            "Matched",
+            "A-2041"
+          ]
+        ],
+        "note": "Stripe, PayPal and bank alerts on the shop phone."
+      },
+      {
+        "title": "Handwritten lists → orders",
+        "input": [
+          "1kg basmati",
+          "2 Lux soap",
+          "6 eggs"
+        ],
+        "output": [
+          [
+            "Order",
+            "3 items"
+          ],
+          [
+            "For",
+            "Akter apa"
+          ]
+        ],
+        "note": "Customers snap a list from the shop’s link."
+      },
+      {
+        "title": "New website → read forever",
+        "input": [
+          "Order #8812 · Rumana · $3,450"
+        ],
+        "output": [
+          [
+            "Taught",
+            "once, by pointing"
+          ],
+          [
+            "Then",
+            "every order"
+          ]
+        ],
+        "note": "Point at the order number, name and total once."
+      }
+    ]
+  },
+  "capture": {
+    "eyebrow": "03 · EVERY WAY DATA GETS IN",
+    "headline": "Your shop already makes the data.\nMise just catches it.",
+    "lead": "Each source has an automatic way in and a one-tap manual fallback, so nobody has to sit and type.",
+    "columns": [
+      "Where it happens",
+      "How Mise catches it",
+      "What it becomes"
+    ],
+    "rows": [
+      {
+        "icon": "globe",
+        "source": "Delivery apps",
+        "examples": "Uber Eats, DoorDash, Amazon",
+        "method": "Browser extension reads the open tabs on the shop PC",
+        "result": [
+          "Orders",
+          "Status",
+          "Payouts"
+        ]
+      },
+      {
+        "icon": "message",
+        "source": "Customer chats",
+        "examples": "WhatsApp, Messenger, Instagram",
+        "method": "Order phone notifications, or the AI agent reading the chat",
+        "result": [
+          "Orders",
+          "Questions",
+          "Guests"
+        ]
+      },
+      {
+        "icon": "wallet",
+        "source": "Payment alerts",
+        "examples": "Stripe, PayPal, bank SMS",
+        "method": "Order phone reads the alert and matches it",
+        "result": [
+          "Payments",
+          "Matched orders"
+        ]
+      },
+      {
+        "icon": "phone",
+        "source": "Phone calls",
+        "examples": "Orders and missed calls",
+        "method": "Missed-call log, then a one-tap order on the POS",
+        "result": [
+          "Orders",
+          "Call-backs"
+        ]
+      },
+      {
+        "icon": "qr",
+        "source": "QR, storefront, shop link",
+        "examples": "Tables, delivery, pre-orders",
+        "method": "Arrives directly, with the customer’s number",
+        "result": [
+          "Orders",
+          "Customers"
+        ]
+      },
+      {
+        "icon": "receipt",
+        "source": "Walk-ins at the counter",
+        "examples": "Cash, Stripe, credit",
+        "method": "Counter calculator or POS, cash in one tap",
+        "result": [
+          "Sales",
+          "Cash",
+          "Credit"
+        ]
+      },
+      {
+        "icon": "users",
+        "source": "Staff group chat",
+        "examples": "“I’m here”, “chicken almost out”",
+        "method": "Group listener on the order phone",
+        "result": [
+          "Check-ins",
+          "Stock notes",
+          "Late notes"
+        ]
+      },
+      {
+        "icon": "camera",
+        "source": "Photos and screenshots",
+        "examples": "Invoices, prescriptions, lists",
+        "method": "Snap, or share to Mise from any app (OCR)",
+        "result": [
+          "Stock",
+          "Purchases",
+          "Orders"
+        ]
+      },
+      {
+        "icon": "mic",
+        "source": "Said out loud",
+        "examples": "“used 2 kg chicken”",
+        "method": "Quick update bar: type or speak",
+        "result": [
+          "Stock",
+          "Notes"
+        ]
+      },
+      {
+        "icon": "utensils",
+        "source": "Kitchen taps",
+        "examples": "Got it, Ready",
+        "method": "Kitchen screen on any tablet",
+        "result": [
+          "Prep times",
+          "Performance"
+        ]
+      }
+    ],
+    "fallback": "Every row has a manual fallback: one tap on the phone, or tell a manager and they log it. Mise treats it the same."
+  },
+  "checks": {
+    "eyebrow": "04 · CHECKS BUILT IN",
+    "headline": "Mise watches for the problems\nso you don’t have to.",
+    "lead": "These run all day without an agent. When an agent is on, it acts on them; otherwise the right person gets a nudge.",
+    "items": [
+      {
+        "tag": "Orders",
+        "icon": "utensils",
+        "when": "The kitchen hasn’t tapped Got it in 2 minutes",
+        "then": "Rings the order phone and tells the desk"
+      },
+      {
+        "tag": "Orders",
+        "icon": "receipt",
+        "when": "A delivery-app order isn’t in the queue",
+        "then": "Flags it at the 20-minute check and adds it"
+      },
+      {
+        "tag": "Orders",
+        "icon": "pin",
+        "when": "A rider hasn’t picked up after 10 minutes",
+        "then": "Alerts the desk with the rider’s details"
+      },
+      {
+        "tag": "Money",
+        "icon": "wallet",
+        "when": "A payment arrives with no order",
+        "then": "Suggests the likely order to match"
+      },
+      {
+        "tag": "Money",
+        "icon": "clipboard",
+        "when": "The cash count is higher than recorded",
+        "then": "Offers to add the gap as walk-in sales"
+      },
+      {
+        "tag": "Money",
+        "icon": "send",
+        "when": "A COD buyer returned 2 of their last 3",
+        "then": "Asks for an advance before packing"
+      },
+      {
+        "tag": "Stock",
+        "icon": "package",
+        "when": "An item drops below its target",
+        "then": "Drafts the supplier order for you to send"
+      },
+      {
+        "tag": "People",
+        "icon": "calendar",
+        "when": "Tomorrow’s dinner shift is short",
+        "then": "Asks the staff group to cover"
+      },
+      {
+        "tag": "People",
+        "icon": "users",
+        "when": "Someone hasn’t checked in",
+        "then": "Reminds them, then tells the manager"
+      },
+      {
+        "tag": "Guests",
+        "icon": "heart",
+        "when": "A regular hasn’t ordered in 30 days",
+        "then": "Adds them to the win-back list"
+      },
+      {
+        "tag": "Credit",
+        "icon": "clipboard",
+        "when": "A tab is due on the customer’s payday",
+        "then": "Prepares a polite reminder for you to approve"
+      },
+      {
+        "tag": "System",
+        "icon": "lock",
+        "when": "A delivery app signs out, or the agent goes quiet",
+        "then": "Alerts you; the order phone keeps catching orders"
+      }
+    ]
+  },
+  "detail": {
+    "eyebrow": "05 · THE WHOLE OPERATION, PART BY PART",
+    "headline": "Not just the AI.\nEverything that keeps a shop running.",
+    "lead": "Each part works on its own, with or without an agent. Every step has an easy way to record it and a fallback when something breaks.",
+    "failLabel": "If something goes wrong:",
+    "blocks": [
+      {
+        "id": "f-orders",
+        "n": "07",
+        "cat": "ORDERS",
+        "title": "Every channel, one queue",
+        "lead": "Delivery apps, chats, QR, calls and walk-ins land in one list. No APIs, no copying between screens.",
+        "steps": [
+          "The browser extension reads Uber Eats, DoorDash and Messenger tabs on the shop PC",
+          "The order phone reads WhatsApp, Stripe and missed calls",
+          "Anything else: share a screenshot, or add it by hand in seconds"
+        ],
+        "fail": "Every 20 minutes Mise checks each delivery app against the queue and flags anything missing.",
+        "shot": [
+          "53:1251"
+        ],
+        "callout": {
+          "icon": "checkCircle",
+          "title": "Nothing missed",
+          "meta": "checked 7:42 pm"
+        }
+      },
+      {
+        "id": "f-kitchen",
+        "n": "08",
+        "cat": "KITCHEN",
+        "title": "A kitchen screen nobody can miss",
+        "lead": "Runs in a browser on any tablet or phone. No app store, no special hardware.",
+        "steps": [
+          "New orders appear with a sound and a timer",
+          "The cook taps Got it, then Ready",
+          "Not seen in 2 minutes? The order phone rings and the desk is told"
+        ],
+        "fail": "If the internet drops, tickets keep working and sync when it’s back.",
+        "shot": [
+          "65:1843"
+        ],
+        "callout": {
+          "icon": "bell",
+          "title": "A-2043 not seen",
+          "meta": "order phone ringing"
+        }
+      },
+      {
+        "id": "f-tracking",
+        "n": "09",
+        "cat": "TRACKING",
+        "title": "Customers track their own order",
+        "lead": "QR orders turn into a live tracker. Chat and phone orders get a link.",
+        "steps": [
+          "Guests who order by QR see their order move automatically",
+          "Chat orders get a link, sent by Mise or copied by staff",
+          "Running late? An honest delay notice goes out before they ask"
+        ],
+        "fail": "Link not opened? Staff get a nudge to message or call.",
+        "shot": [
+          "56:1496",
+          "56:1601"
+        ]
+      },
+      {
+        "id": "f-stock",
+        "n": "10",
+        "cat": "STOCK",
+        "title": "Stock in seconds, not spreadsheets",
+        "lead": "Type or say what was used, snap the supplier invoice, and count at night one item at a time.",
+        "steps": [
+          "“used 2 kg chicken” updates the right item",
+          "Target (par) minus on hand shows what to order",
+          "Supplier orders are drafted for you to send"
+        ],
+        "fail": "Mise compares counts with sales and flags gaps, such as waste or a missed entry.",
+        "shot": [
+          "39:476"
+        ],
+        "callout": {
+          "icon": "package",
+          "title": "Chicken low",
+          "meta": "order 8 kg"
+        }
+      },
+      {
+        "id": "f-plan",
+        "n": "11",
+        "cat": "PLAN",
+        "title": "Plan people and prep",
+        "lead": "Need versus have, hour by hour, from your past weeks and local events.",
+        "steps": [
+          "See which shifts are short before the rush",
+          "Ask the staff group to cover in one tap",
+          "The prep list reaches the kitchen at 3 pm"
+        ],
+        "fail": "No reply from the group? Mise reminds you to call someone.",
+        "shot": [
+          "39:949"
+        ],
+        "callout": {
+          "icon": "calendar",
+          "title": "Dinner 1 short",
+          "meta": "asked the group"
+        }
+      },
+      {
+        "id": "f-team",
+        "n": "12",
+        "cat": "TEAM",
+        "title": "Your team, without new apps",
+        "lead": "Staff check in by saying it in the group, tapping the order phone, or opening their own link.",
+        "steps": [
+          "The staff group is read for check-ins, stock notes and late messages",
+          "Shift reminders and alerts are posted back",
+          "Fair performance, from taps Mise already records"
+        ],
+        "fail": "Told you in person? Log it in one tap. It counts the same.",
+        "shot": [
+          "70:1918"
+        ],
+        "callout": {
+          "icon": "users",
+          "title": "Karim checked in",
+          "meta": "10:40 · staff group"
+        }
+      },
+      {
+        "id": "f-guests",
+        "n": "13",
+        "cat": "GUESTS",
+        "title": "Know your regulars. Win them back.",
+        "lead": "One profile per guest across QR, chats, calls and delivery apps.",
+        "steps": [
+          "Ask for a phone number on QR orders, with a stamp in return",
+          "See who is drifting away",
+          "Send win-back messages one tap at a time, with copy and paste if an app won’t open"
+        ],
+        "fail": "No way to reach them? Staff are reminded to ask at the next visit.",
+        "shot": [
+          "64:1671"
+        ],
+        "callout": {
+          "icon": "heart",
+          "title": "62 regulars drifting",
+          "meta": "31 via Messenger"
+        }
+      },
+      {
+        "id": "f-credit",
+        "n": "14",
+        "cat": "CREDIT",
+        "title": "Credit without awkward conversations",
+        "lead": "For corner shops and regulars. Cash stays one tap; credit is there when you need it.",
+        "steps": [
+          "Tap amounts like a calculator; cash is the default",
+          "Credit checks the person’s limit and sends a receipt",
+          "Polite monthly reminders; Stripe payments close the entry"
+        ],
+        "fail": "Disagreement? Both sides see the same list, with who wrote each entry.",
+        "shot": [
+          "110:162",
+          "111:101"
+        ]
+      },
+      {
+        "id": "f-live",
+        "n": "15",
+        "cat": "LIVE STORE",
+        "title": "The whole store, live, from anywhere",
+        "lead": "Owners and managers see orders, kitchen, cash, people, stock and channels on one screen, for every outlet.",
+        "steps": [
+          "Stuck and late orders rise to the top",
+          "Money now: drawer, wallets and what delivery apps owe",
+          "Owners switch outlets; managers see their own"
+        ],
+        "fail": "A nightly summary of every outlet arrives on WhatsApp.",
+        "shot": [
+          "109:3694"
+        ],
+        "callout": {
+          "icon": "layers",
+          "title": "3 outlets",
+          "meta": "$112,840 today"
+        }
+      },
+      {
+        "id": "f-storefront",
+        "n": "16",
+        "cat": "STOREFRONT",
+        "title": "Your storefront, POS and QR menu",
+        "lead": "The basics every shop expects, connected to everything above.",
+        "steps": [
+          "Share your order link for delivery, pickup and pre-orders",
+          "Enter phone and walk-in orders on the POS in seconds",
+          "Print table QR codes; guests order and track"
+        ],
+        "fail": "Item sold out? Turn it off once and the QR menu, storefront and delivery apps update.",
+        "shot": [
+          "88:3319"
+        ],
+        "callout": {
+          "icon": "store",
+          "title": "mise.app/saffron",
+          "meta": "open now"
+        }
+      },
+      {
+        "id": "f-couriers",
+        "n": "17",
+        "cat": "COURIERS",
+        "title": "Online shop? Confirm, ship, get paid.",
+        "lead": "Built for cash-on-delivery businesses that ship with UPS, DHL or FedEx.",
+        "steps": [
+          "Confirm COD orders before packing; risky buyers are flagged",
+          "Courier forms are filled on the shop PC for you",
+          "Courier payouts are matched to every parcel"
+        ],
+        "fail": "Courier site changed? Copy-and-paste mode keeps you shipping.",
+        "shot": [
+          "86:455"
+        ],
+        "callout": {
+          "icon": "send",
+          "title": "6 parcels booked",
+          "meta": "$780 fees"
+        }
+      },
+      {
+        "id": "f-start",
+        "n": "18",
+        "cat": "START AND EXPORT",
+        "title": "Open in one tap. Export anything.",
+        "lead": "Start service opens every chat and delivery tab and checks each device. Everything you record can leave with you.",
+        "steps": [
+          "One tap opens and checks every channel",
+          "A setup checklist gets a new shop running in an evening",
+          "Excel, CSV, PDF or Google Sheets, on demand or every night"
+        ],
+        "fail": "Shop PC off? Listen on the order phone until it’s back.",
+        "shot": [
+          "78:2928"
+        ],
+        "callout": {
+          "icon": "zap",
+          "title": "7 of 8 ready",
+          "meta": "DoorDash needs sign-in"
+        }
+      }
+    ]
+  },
+  "day": {
+    "eyebrow": "EVERY WORKFLOW",
+    "headline": "A whole day, on the phone in your pocket.",
+    "lead": "Everything on the computer works on the phone too. Here’s a Saturday at a neighbourhood restaurant.",
+    "items": [
+      {
+        "shot": "102:82",
+        "time": "11:00 · Open",
+        "text": "Every channel listening"
+      },
+      {
+        "shot": "102:288",
+        "time": "13:20 · Rush",
+        "text": "One queue for every app"
+      },
+      {
+        "shot": "102:448",
+        "time": "13:24 · Track",
+        "text": "Link sent, kitchen confirmed"
+      },
+      {
+        "shot": "103:213",
+        "time": "16:00 · Restock",
+        "text": "Say what was used"
+      },
+      {
+        "shot": "104:601",
+        "time": "18:45 · Team",
+        "text": "Short a person? Ask the group"
+      },
+      {
+        "shot": "107:1280",
+        "time": "19:44 · Owner",
+        "text": "Everything live, from anywhere"
+      }
+    ]
+  },
+  "businesses": {
+    "eyebrow": "FOR EVERY KIND OF SHOP",
+    "headline": "Restaurants, online shops,\nstalls and corner shops.",
+    "items": [
+      {
+        "shot": "102:82",
+        "title": "Restaurants",
+        "points": [
+          "Uber Eats, DoorDash, chats and QR tables in one queue",
+          "Kitchen screen on any tablet",
+          "Riders tracked to the door"
+        ]
+      },
+      {
+        "shot": "108:1068",
+        "title": "Online shops",
+        "points": [
+          "Confirm cash-on-delivery orders before packing",
+          "Courier forms filled for you",
+          "Courier cash matched to every parcel"
+        ]
+      },
+      {
+        "shot": "59:134",
+        "title": "Food stalls",
+        "points": [
+          "QR orders with a token number",
+          "Stripe matched automatically",
+          "Close the day in 30 seconds"
+        ]
+      },
+      {
+        "shot": "110:162",
+        "title": "Corner shops",
+        "points": [
+          "Tap amounts like a calculator; cash in one tap",
+          "Neighbours order by link or photo",
+          "Credit with limits and polite reminders"
+        ]
+      }
+    ]
+  },
+  "basics": {
+    "eyebrow": "AND THE BASICS",
+    "headline": "Everything you’d expect, done properly.",
+    "items": [
+      {
+        "icon": "store",
+        "title": "Your own storefront",
+        "text": "Order link for delivery, pickup and pre-orders"
+      },
+      {
+        "icon": "receipt",
+        "title": "POS and manual entry",
+        "text": "Phone calls, walk-ins, anything verbal"
+      },
+      {
+        "icon": "qr",
+        "title": "QR menus and tables",
+        "text": "Guests order and track from the table"
+      },
+      {
+        "icon": "utensils",
+        "title": "Kitchen screen",
+        "text": "Works in a browser on any tablet or phone"
+      },
+      {
+        "icon": "package",
+        "title": "Couriers and riders",
+        "text": "DoorDash, DHL, FedEx or your own"
+      },
+      {
+        "icon": "wallet",
+        "title": "Payments",
+        "text": "Cash, Stripe, PayPal, card, matched automatically"
+      },
+      {
+        "icon": "download",
+        "title": "Exports",
+        "text": "Excel, CSV, PDF or Google Sheets, scheduled"
+      },
+      {
+        "icon": "layers",
+        "title": "Many outlets",
+        "text": "One login, live view of every place"
+      },
+      {
+        "icon": "shield",
+        "title": "Roles and access",
+        "text": "Owner, manager, staff and agent"
+      },
+      {
+        "icon": "globe",
+        "title": "Any language",
+        "text": "Mixed-language messages are understood too"
+      },
+      {
+        "icon": "wifiOff",
+        "title": "Works offline",
+        "text": "Keeps going and syncs when back"
+      },
+      {
+        "icon": "phone",
+        "title": "No new hardware",
+        "text": "The phone and PC you already have"
+      }
+    ]
+  },
+  "compare": {
+    "headline": "Why owners switch",
+    "columns": [
+      "",
+      "Mise",
+      "Typical POS",
+      "WhatsApp and a notebook"
+    ],
+    "rows": [
+      [
+        "Takes orders from chats and delivery apps, no APIs needed",
+        true,
+        "Partly",
+        "By hand"
+      ],
+      [
+        "An AI operator that can run the shift",
+        true,
+        false,
+        false
+      ],
+      [
+        "Reads screenshots, invoices and prescriptions",
+        true,
+        false,
+        false
+      ],
+      [
+        "No order left behind: kitchen and portal checks",
+        true,
+        "Partly",
+        false
+      ],
+      [
+        "Staff check in without installing anything",
+        true,
+        false,
+        false
+      ],
+      [
+        "Credit and tab with polite reminders",
+        true,
+        false,
+        "Notebook"
+      ],
+      [
+        "Storefront, QR menu and POS",
+        true,
+        true,
+        false
+      ],
+      [
+        "Runs on the phone and PC you already have",
+        true,
+        "New hardware",
+        true
+      ]
+    ]
+  },
+  "cta": {
+    "headline": "Run your next shift with Mise.",
+    "lead": "Free to start. Set up in an evening. Your staff learn it in a shift.",
+    "primary": "Start free",
+    "secondary": {
+      "label": "Book a demo",
+      "hrefEnv": "PUBLIC_DEMO_URL"
+    }
+  },
+  "footer": {
+    "columns": [
+      {
+        "title": "Product",
+        "links": [
+          "AI operator",
+          "Reads anything",
+          "Live store",
+          "Storefront and POS",
+          "Setup and downloads"
+        ]
+      },
+      {
+        "title": "Businesses",
+        "links": [
+          "Restaurants",
+          "Online shops",
+          "Food stalls",
+          "Corner shops"
+        ]
+      },
+      {
+        "title": "Company",
+        "links": [
+          "About",
+          "Careers",
+          "Contact on WhatsApp",
+          "Privacy"
+        ]
+      }
+    ],
+    "regionTitle": "Region",
+    "region": "International · English",
+    "regionNote": "We chose this page from your location. Prices in your currency, with your local delivery and payment apps. You can switch any time.",
+    "copyright": "© 2026 Mise"
+  },
+  "_note": "Generated from landing.bd.json with the same substitutions used for the International Figma frame (120:2353). Partner names are examples; swap per country when known."
+}

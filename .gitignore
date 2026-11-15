@@ -1,0 +1,12 @@
+node_modules/
+site/
+dist/
+.astro/
+.env
+.env.*
+!.env.example
+test-results/
+playwright-report/
+.vercel/
+Claude outputs/
+.DS_Store
