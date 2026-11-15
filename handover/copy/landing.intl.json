@@ -468,6 +468,7 @@
     "fallback": "Every row has a manual fallback: one tap on the phone, or tell a manager and they log it. Mise treats it the same."
   },
   "checks": {
+    "moreLabel": "Show all 12",
     "eyebrow": "04 · CHECKS BUILT IN",
     "headline": "Mise watches for the problems\nso you don’t have to.",
     "lead": "These run all day without an agent. When an agent is on, it acts on them; otherwise the right person gets a nudge.",
@@ -547,6 +548,7 @@
     ]
   },
   "detail": {
+    "howLabel": "How it works",
     "eyebrow": "05 · THE WHOLE OPERATION, PART BY PART",
     "headline": "Not just the AI.\nEverything that keeps a shop running.",
     "lead": "Each part works on its own, with or without an agent. Every step has an easy way to record it and a fallback when something breaks.",

@@ -1,0 +1,7 @@
+---
+import type copy from '../../../../handover/copy/landing.bd.json';
+import Icon from '@mise/ui/Icon.astro';
+interface Props { item: typeof copy.checks.items[number] }
+const { item } = Astro.props;
+---
+<article class="check-card"><div class="check-card-top"><span>{item.tag}</span><Icon name={item.icon} size={20} /></div><div class="when"><span>When</span><h3>{item.when}</h3></div><div class="then"><div><span>Mise</span><p>{item.then}</p></div></div></article>
