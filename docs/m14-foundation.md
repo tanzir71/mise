@@ -12,4 +12,10 @@ Notes and completed contact actions have separate tables, with their order revis
 
 The next increment adds audited payment/credit settlement before enabling the UI. A new order currently records a pending payment choice, never an invented receipt or khata charge. The six required Figma frames have been fetched at full fidelity and all 270 exports are present.
 
-Validation: 186 unit tests, including 1,000 independently checked decimal-price cases, all four state machines, unpriced/swap gates, status undo with later notes, scoped contacts, currency retention, concurrent numbering/edits, audit rollback and a version 3 credit-data migration. The existing 100 browser tests and 89 visual comparisons remain part of CI.
+Validation: 186 unit tests, including 1,000 independently checked decimal-price cases, all four state machines, unpriced/swap gates, status undo with later notes, scoped contacts, currency retention, concurrent numbering/edits, audit rollback and a version 3 credit-data migration. The browser suite now has 101 tests, alongside 89 visual comparisons.
+
+The foundation passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43743813776), including the [visual report](https://github.com/tanzir71/mise/actions/runs/43743813776/artifacts/14173229313). Controlled browser QA used the published Pages artifacts from `181f2cc` and `132a0e7`: a returning visitor upgraded from schema 3 to 4 with the same two sale IDs, customer ID, two ledger-entry IDs, seven audit IDs and 175 credit balance. Offline reload retained the balance with no page errors.
+
+A fresh browser on the public Pages deployment also confirmed schema 4 and the new tables, with Orders still staged and no page errors.
+
+That check also exposed a separate first-install-session update bug. The follow-up handles activation only after this tab's explicit Reload action and does not automatically navigate another tab. A new browser test changes the real worker bytes, confirms the requesting tab reloads, preserves another tab's unsaved calculation and retains a recorded sale offline. The order UI remains staged.

@@ -10,6 +10,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
+- Fixed explicit app updates during the first installed session. Reload now waits for the new worker to take control in the requesting tab; activating an update does not automatically navigate another tab away from its draft.
 - M14 foundations: manual-order records, exact fractional-quantity pricing, unpriced/out-of-stock/swap gates, business-specific status transitions and undo, optimistic revisions, notes/contact audit records, warning settings, bilingual quotes and an additive database upgrade. Orders remain staged until settlement and UI delivery pass.
 - M13 follow-up: count a customer once in the reminder heading when several currency accounts are due; keep each account's message and balance separate.
 - M13: enabled customer editing, dated opening balances, khata lists/profiles, credit limits and explicit over-limit approval, counter credit sales, payments and audited reversals. Added sequential reminder/receipt/call handoffs with copy fallbacks, editable bilingual wording, archive/restore and separate currency accounts.
