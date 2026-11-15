@@ -19,7 +19,7 @@ Each milestone is deployed to GitHub Pages when merged, and tagged when a phase 
 ## Phase 0 — Foundation and landing (T0) → tag `v0.1.0`
 Spec: `phases/phase-0-landing.md`
 
-- [ ] **M00** Repo, monorepo, CI, Pages deploy skeleton · S · T0
+- [x] **M00** Repo, monorepo, CI, Pages deploy skeleton · S · T0
 - [ ] **M01** Design tokens + base UI primitives in `packages/ui` · S · T0
 - [ ] **M02** Landing: Bangladesh page, all sections, static · M · T0
 - [ ] **M03** Landing: International page from the same components + region router + hreflang · S · T0
