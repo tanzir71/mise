@@ -39,7 +39,7 @@ test('offline credit sale, bilingual receipt, payment and reversal retain an att
   await context.setOffline(true);
   const dialog = await credit(page);
   await dialog.getByRole('button',{name:'Add to Karim bhai’s khata',exact:true}).evaluate((button:HTMLButtonElement) => { button.click(); button.click(); });
-  const receipt = page.getByRole('dialog',{name:'Share receipt',exact:true}); 
+  const receipt = page.getByRole('dialog',{name:'Share receipt',exact:true});
   await expect(receipt.getByRole('textbox',{name:'Message preview',exact:true})).toHaveValue(/মোট বাকি ৳345/);
   const href = await receipt.getByRole('link',{name:'Open WhatsApp',exact:true}).getAttribute('href'); expect(href).toMatch(/^https:\/\/wa.me\/8801711222482\?text=/); expect(decodeURIComponent(href!)).toContain('Your balance is ৳345');
   await page.evaluate(() => Object.defineProperty(navigator,'clipboard',{value:{writeText:async () => { throw Error('Blocked'); }},configurable:true}));
