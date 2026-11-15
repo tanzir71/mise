@@ -84,9 +84,9 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - **Reminders:** generate bilingual text from a template (`khata.ts`). Open `wa.me` with the text, with Copy and "I sent it" next to it. "Start reminders" steps through each due customer one at a time.
 
 **Accept**
-- [ ] Balances always equal the sum of entries (property-based test).
-- [ ] Reminder text matches the template in BD (Bangla + English) and Intl (English).
-- [ ] Every khata action is recorded in history with the actor and time.
+- [x] Balances always equal the sum of entries (property-based test).
+- [x] Reminder text matches the template in BD (Bangla + English) and Intl (English).
+- [x] Every khata action is recorded in history with the actor and time.
 
 ## M14 · Manual orders and queue · M
 **Figma:** M15 `102:593`, M13 `102:288`, M14 `102:448`, D09 `53:1251`, C06 `111:366`, C07 `111:519`

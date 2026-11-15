@@ -1,0 +1,124 @@
+{
+  "title": "M13 customers and khata",
+  "widths": [
+    390,
+    1440
+  ],
+  "heights": {
+    "390": 900,
+    "1440": 1000
+  },
+  "pages": [
+    {
+      "id": "m13-khata",
+      "path": "app/",
+      "actions": [],
+      "note": "Uses real onboarding, saved customers and dated opening balances. C02/C04/C05 supply app geometry, type, rows and meters. Phone chrome and fabricated reference statistics are omitted; touch targets remain 44px. Customer registration QR belongs to a later phase, so new customers are typed manually. Desktop adapts these phone frames to the existing 240px shell and a 440px drawer. Currency totals remain separate. Dynamic data and the full bilingual message replace example text.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C04 · Owner — Khata · who owes what, and who to remind.png"
+        }
+      ],
+      "actionSets": [
+        "customers"
+      ]
+    },
+    {
+      "id": "m13-customer",
+      "path": "app/",
+      "actions": [
+        {"type": "click", "selector": ".khata-list a:has-text(\"Karim bhai\")"},
+        {"type": "wait", "selector": ".credit-balance"}
+      ],
+      "note": "Uses real onboarding, saved customers and dated opening balances. C02/C04/C05 supply app geometry, type, rows and meters. Phone chrome and fabricated reference statistics are omitted; touch targets remain 44px. Customer registration QR belongs to a later phase, so new customers are typed manually. Desktop adapts these phone frames to the existing 240px shell and a 440px drawer. Currency totals remain separate. Dynamic data and the full bilingual message replace example text.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ],
+      "actionSets": [
+        "customers"
+      ]
+    },
+    {
+      "id": "m13-credit-sheet",
+      "path": "app/",
+      "actions": [
+        {"type": "click", "selector": "a[href$=\"/counter\"]:visible"},
+        {"type": "fill", "selector": "input[name=\"calculation\"]", "value": "245"},
+        {"type": "click", "selector": "button:text-is(\"Baki\")"},
+        {"type": "wait", "selector": "dialog[open]"},
+        {"type": "click", "selector": "dialog[open] input[aria-label=\"Karim bhai\"]"}
+      ],
+      "note": "Uses real onboarding, saved customers and dated opening balances. C02/C04/C05 supply app geometry, type, rows and meters. Phone chrome and fabricated reference statistics are omitted; touch targets remain 44px. Customer registration QR belongs to a later phase, so new customers are typed manually. Desktop adapts these phone frames to the existing 240px shell and a 440px drawer. Currency totals remain separate. Dynamic data and the full bilingual message replace example text.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": "dialog[open]",
+          "reference": "screens/corner-shop/C02 · Owner — Put ৳245 on whose khata (credit, with limits).png"
+        }
+      ],
+      "actionSets": [
+        "customers"
+      ]
+    }
+  ],
+  "actionSets": {
+    "customers": [
+      {"type": "click", "selector": "input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "click", "selector": "input[name=\"market\"][value=\"BD\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "fill", "selector": "input[name=\"shopName\"]", "value": "Rahman Store"},
+      {"type": "fill", "selector": "input[name=\"phone\"]", "value": "01712345482"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "wait", "selector": ".app-shell"},
+      {"type": "click", "selector": "a[href$=\"/counter\"]:visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"},
+      {"type": "wait", "selector": ".khata-page[aria-busy=\"false\"]"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Karim bhai"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": "01711222482"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Allow credit\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Credit limit\") input", "value": "3000"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Monthly reminder\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Day of month\") input", "value": "1"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Opening balance\") input", "value": "1240"},
+      {"type": "fill", "selector": "dialog[open] input[type=\"date\"]", "value": "2026-10-01"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Sumon · tea stall"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": ""},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Allow credit\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Credit limit\") input", "value": "4000"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Monthly reminder\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Day of month\") input", "value": "1"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Opening balance\") input", "value": "4850"},
+      {"type": "fill", "selector": "dialog[open] input[type=\"date\"]", "value": "2026-10-01"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Akter apa"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": ""},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Allow credit\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Credit limit\") input", "value": "2000"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Monthly reminder\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Day of month\") input", "value": "1"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Opening balance\") input", "value": "0"},
+      {"type": "fill", "selector": "dialog[open] input[type=\"date\"]", "value": "2026-10-28"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"}
+    ]
+  }
+}

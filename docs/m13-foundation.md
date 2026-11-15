@@ -1,5 +1,7 @@
 # M13 · Customer and credit data foundation
 
+This records the foundation increment. The subsequent UI delivery is documented in [M13 delivery](m13-delivery.md).
+
 The data foundation adds customers, credit accounts and immutable ledger entries to IndexedDB version 3. Existing profiles, catalogue, cash sales and audit events survive the upgrade. Credit is not enabled in the UI yet; M13 remains unchecked and `khata` defaults off.
 
 All writes use pure commands and atomic Dexie transactions. Credit sales append a sale and charge together, with both audit events. Balances are the exact sum of entries in integer minor units. Over-limit consent is tied to the balance and limit the owner reviewed and is rechecked at commit. Payments cannot exceed the amount due. Reversals retain the originals and are allowed once within ten minutes; a credit sale reversal also reverses its charge.

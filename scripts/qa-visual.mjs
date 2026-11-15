@@ -7,7 +7,13 @@ import { writeVisualReport } from './visual-report.mjs';
 
 const configPaths = process.argv[2] ? [process.argv[2]] : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
-const targets = configs.flatMap(config => config.pages.map(page => ({ ...page, widths: page.widths || config.widths, heights: page.heights || config.heights, sections: page.sections || config.sections })));
+const targets = configs.flatMap(config => config.pages.map(page => {
+  const shared = (page.actionSets || []).flatMap(name => {
+    if (!Array.isArray(config.actionSets?.[name])) throw new Error(`Unknown visual action set: ${name}`);
+    return config.actionSets[name];
+  });
+  return { ...page, actions:[...shared,...(page.actions || [])], widths: page.widths || config.widths, heights: page.heights || config.heights, sections: page.sections || config.sections };
+}));
 const assets = JSON.parse(readFileSync('handover/exports/landing-assets.json', 'utf8'));
 const base = `/${(process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/');
 const origin = process.env.PREVIEW_URL || `http://127.0.0.1:4321${base}`;
