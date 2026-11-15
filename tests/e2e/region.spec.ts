@@ -37,6 +37,18 @@ test('root works without JavaScript', async ({ browser, baseURL }) => {
   await context.close();
 });
 
+test('blocked browser storage does not prevent routing or switching', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ timezoneId: 'Asia/Dhaka' });
+  await context.addInitScript(() => Object.defineProperty(window, 'localStorage', { get: () => { throw new DOMException('Blocked', 'SecurityError'); } }));
+  const page = await context.newPage();
+  await page.goto(baseURL!);
+  await expect(page).toHaveURL(/\/bd\/$/);
+  await page.locator('.site-header .region-picker summary').click();
+  await page.locator('.site-header [data-region="intl"]').click();
+  await expect(page).toHaveURL(/\/intl\/$/);
+  await context.close();
+});
+
 test('international content and SEO use the same complete layout', async ({ page, baseURL }) => {
   await page.goto('intl/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('payment');

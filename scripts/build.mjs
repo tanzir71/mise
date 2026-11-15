@@ -8,6 +8,8 @@ for (const app of ['@mise/landing', '@mise/web']) {
 }
 mkdirSync('site/downloads', { recursive: true });
 if (existsSync('downloads')) cpSync('downloads', 'site/downloads', { recursive: true });
+mkdirSync('site/docs', { recursive: true });
+cpSync('docs/deploy-own-vercel.md', 'site/docs/deploy-own-vercel.md');
 writeFileSync('site/.nojekyll', '');
 cpSync('site/app/index.html', 'site/404.html');
 hardenSite('site');
