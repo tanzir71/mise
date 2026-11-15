@@ -2,22 +2,30 @@
 import type copy from '../../../../handover/copy/landing.bd.json';
 import Icon from '@mise/ui/Icon.astro';
 import RegionPicker from './RegionPicker.astro';
+import '../styles/header.css';
 interface Props { nav: typeof copy.nav; appUrl: string; home?: string }
 const { nav, appUrl, home = '#top' } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
-<header class="site-header dark">
+<span id="top" class="page-top" aria-hidden="true"></span>
+<header class="site-header">
   <div class="container nav-inner">
-    <a class="wordmark" href={home} aria-label="Mise home"><img src={`${base}brand/mise-mark-mono-white.svg`} width="32" height="32" alt="" /><span>mise</span><sup>®</sup></a>
+    <a class="wordmark" href={home} aria-label="Mise home"><img src={`${base}brand/mise-mark.svg`} width="28" height="28" alt="" /><span>mise</span></a>
     <nav class="desktop-nav" aria-label="Main navigation">{nav.links.map(link => <a href={link.href}>{link.label}</a>)}</nav>
-    <div class="nav-actions"><RegionPicker label={nav.region} /><a class="sign-in" href={appUrl}>{nav.signIn}</a><a href={appUrl} class="button button-primary button-small">{nav.cta}<Icon name="arrowUpRight" size={14} /></a></div>
-    <button class="menu-toggle" aria-label="Open navigation" aria-controls="mobile-nav"><Icon name="menu" size={24} /></button>
+    <div class="nav-actions"><RegionPicker label={nav.region} /><a class="sign-in" href={appUrl}>{nav.signIn}</a><a href={appUrl} class="button button-primary">{nav.cta}</a></div>
+    <button class="menu-toggle" aria-label="Open navigation" aria-controls="mobile-nav" aria-expanded="false"><Icon name="menu" size={24} /></button>
   </div>
 </header>
-<dialog id="mobile-nav" class="mobile-nav dark"><div class="mobile-nav-top"><span class="wordmark">mise</span><button class="menu-close" aria-label="Close navigation"><Icon name="x" size={24} /></button></div><nav aria-label="Mobile navigation">{nav.links.map(link => <a href={link.href}>{link.label}<Icon name="arrowUpRight" size={20} /></a>)}</nav><RegionPicker label={nav.region} /><a href={appUrl} class="button button-primary">{nav.cta}<Icon name="arrowRight" size={18} /></a></dialog>
+<dialog id="mobile-nav" class="mobile-nav"><div class="mobile-nav-top"><a class="wordmark" href={home} aria-label="Mise home"><img src={`${base}brand/mise-mark.svg`} width="28" height="28" alt="" /><span>mise</span></a><button class="menu-close" aria-label="Close navigation"><Icon name="x" size={24} /></button></div><nav aria-label="Mobile navigation">{nav.links.map(link => <a href={link.href}>{link.label}<Icon name="arrowRight" size={18} /></a>)}</nav><RegionPicker label={nav.region} /><a href={appUrl} class="button button-primary">{nav.cta}</a></dialog>
 <script>
   const menu = document.querySelector<HTMLDialogElement>('#mobile-nav');
-  document.querySelector('.menu-toggle')?.addEventListener('click', () => menu?.showModal());
+  const trigger = document.querySelector('.menu-toggle');
+  trigger?.addEventListener('click', () => { menu?.showModal(); trigger.setAttribute('aria-expanded', 'true'); });
   document.querySelector('.menu-close')?.addEventListener('click', () => menu?.close());
   menu?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => menu.close()));
+  menu?.addEventListener('close', () => trigger?.setAttribute('aria-expanded', 'false'));
+  const header = document.querySelector('.site-header');
+  const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 0);
+  window.addEventListener('scroll', updateHeader, { passive: true });
+  updateHeader();
 </script>

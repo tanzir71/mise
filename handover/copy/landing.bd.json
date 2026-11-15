@@ -47,37 +47,7 @@
       "Messenger",
       "Daraz"
     ],
-    "visual": "lp-bd-hero-phone",
-    "eyebrow": "New: let Claude or Codex run a shift",
-    "trustLabel": "Works with what you already use · no APIs, no new hardware",
-    "chips": [
-      {
-        "icon": "bell",
-        "title": "Kitchen hadn’t seen A-2043",
-        "meta": "Order phone rang · 7:44 pm"
-      },
-      {
-        "icon": "users",
-        "title": "Karim checked in",
-        "meta": "said it in the staff group · 10:40"
-      },
-      {
-        "icon": "wallet",
-        "title": "Matched ৳910 bKash",
-        "meta": "to A-2041 · 7:31 pm"
-      },
-      {
-        "icon": "sparkles",
-        "title": "Claude replied to Sadia",
-        "meta": "Messenger · 7:42 pm"
-      }
-    ],
-    "_deprecated": [
-      "eyebrow",
-      "trustLabel",
-      "chips"
-    ],
-    "_changed": "15 Nov 2026: new lead, trustLine and visual. eyebrow, trustLabel and chips are deprecated: kept only so the current build keeps working. R2 stops rendering them and deletes them (and _deprecated) from this file. Partners stay for structured data only; never render them as a logo strip."
+    "visual": "lp-bd-hero-phone"
   },
   "index": {
     "label": "Everything a shop needs, each part explained below",

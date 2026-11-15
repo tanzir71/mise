@@ -4,7 +4,6 @@ import '@mise/ui/fonts.css';
 import '@mise/ui/primitives.css';
 import '../styles/global.css';
 import geistRegular from '../../../../packages/ui/node_modules/@fontsource/geist/files/geist-latin-400-normal.woff2?url';
-import geistSemibold from '../../../../packages/ui/node_modules/@fontsource/geist/files/geist-latin-600-normal.woff2?url';
 interface Props { title: string; description: string; lang?: string; region?: 'bd' | 'intl'; noindex?: boolean }
 const { title, description, lang = 'en', region, noindex } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -24,7 +23,6 @@ const analyticsUrl = import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true' && /^ht
     <link rel="icon" href={`${base}brand/icons/favicon.ico`} sizes="any" />
     <link rel="apple-touch-icon" href={`${base}brand/icons/apple-touch-icon-180.png`} />
     <link rel="preload" href={geistRegular} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={geistSemibold} as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={new URL(Astro.url.pathname, origin).href} />
     <link rel="alternate" hreflang="en-BD" href={url('bd/')} />
     <link rel="alternate" hreflang="en" href={url('intl/')} />

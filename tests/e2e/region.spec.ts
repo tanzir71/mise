@@ -52,7 +52,7 @@ test('blocked browser storage does not prevent routing or switching', async ({ b
 test('international content and SEO use the same complete layout', async ({ page, baseURL }) => {
   await page.goto('intl/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('payment');
-  await expect(page.locator('.partners')).toContainText('DoorDash');
+  await expect(page.locator('.hero-trust')).toContainText('DoorDash');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/intl\/$/);
   await expect(page.locator('link[hreflang="en-BD"]')).toHaveAttribute('href', /\/bd\/$/);
   await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', new RegExp(new URL(baseURL!).pathname + '$'));
