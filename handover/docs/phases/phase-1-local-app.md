@@ -106,9 +106,9 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - **Price an order** (corner shop): a free-text order shows lines without prices; tap a line to enter its price on the mini keypad; mark out of stock; offer a swap; then send the price via WhatsApp (deep link + Copy).
 
 **Accept**
-- [ ] An order can be created in ≤ 20 seconds with keyboard only on desktop and tap only on the phone.
-- [ ] Status changes are logged; undo works for the last change.
-- [ ] Orders older than a configurable threshold are highlighted, using a left bar, not a filled background.
+- [x] An order can be created in ≤ 20 seconds with keyboard only on desktop and tap only on the phone.
+- [x] Status changes are logged; undo works for the last change.
+- [x] Orders older than a configurable threshold are highlighted, using a left bar, not a filled background.
 
 ## M15 · Stock · M
 **Figma:** M16 `103:213`, Stock `39:476`, M10 `77:3291`

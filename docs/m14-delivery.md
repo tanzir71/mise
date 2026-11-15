@@ -29,7 +29,11 @@ Phone controls are 44px, and desktop card actions wrap onto clear rows. The desk
 
 The local suite includes desktop keyboard-only and phone touch-only creation under 20 seconds, offline status changes and undo with later notes, the four business flows, exact price/swap handling, manual sharing, payments, cancellation, partial refunds, credit consent, stale edits, refreshed usual orders, duplicate-tap prevention and waiting/search behaviour. Axe and overflow checks cover the form, queue, detail and pricing at 360, 390, 768, 1024 and 1440px.
 
-The production build, lint, type checking and all 210 unit tests pass. All 118 browser tests pass, including the timed entry paths and five-width axe checks. The complete visual report contains 95 comparisons, including all six M14 references. Final CI and public deployment evidence is added after publication; M14 stays unchecked until those delivery checks pass.
+The production build, lint, type checking and all 210 unit tests pass. The first UI release passed all 118 browser tests and [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43756474508). Its [visual report](https://github.com/tanzir71/mise/actions/runs/43756474508/artifacts/14178477566) contains 95 comparisons, including all six M14 references. A focused follow-up verifies scheduled orders stay out of the live queue until due and then receive the configured warning; this brings the browser suite to 119 tests. Orders were also rerun with no feature override, and the desktop creation form was separately inspected at 1440px.
+
+The [live queue](https://tanzir71.github.io/mise/app/orders) and [new order form](https://tanzir71.github.io/mise/app/orders/new) are enabled by default. A returning-browser check updated the published settlement build to the UI release without changing schema 5. It retained two sale IDs, one customer ID, two ledger-entry IDs, all seven existing audit IDs and the 175 credit balance. Offline, it created an order, recorded Priced, added a note, undid the status and reloaded with the note intact. No page errors occurred. Both regional tanziro.com footer credits remained visible.
+
+M14 is complete. M15 Stock is next; the broader handover goal remains active.
 
 ## Key captures
 

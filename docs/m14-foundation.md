@@ -26,7 +26,7 @@ Order payments now create a linked receipt and, for credit, a matching khata cha
 
 Cancellation preserves the receipt and removes the sale from revenue. Cash remains physically held until a refund is recorded. Credit cancellation removes the order's own unpaid lot before other debt, so older unpaid purchases keep their age. It clears at most the current balance; previously collected excess becomes a refund owed rather than a negative customer balance. Partial refunds record the actual return method and reduce that amount owed. Credit refunds reduce net collections without changing the debt balance. A mistaken refund record can be corrected within ten minutes; cancellation undo requires all recorded refunds to be corrected first.
 
-Schema 5 adds `orderRefunds` and order/refund lookup indexes. Existing orders, notes, receipts, customers, ledger entries and events remain intact. Customer archival retains historical collection totals, and an open receipt observes later changes from another tab. M14 remains unchecked and the `orders` flag remains off until UI delivery.
+Schema 5 adds `orderRefunds` and order/refund lookup indexes. Existing orders, notes, receipts, customers, ledger entries and events remain intact. Customer archival retains historical collection totals, and an open receipt observes later changes from another tab. At the settlement stage, M14 remained unchecked and the `orders` flag stayed off pending UI delivery. The completed UI and live checks are now recorded in the delivery notes.
 
 Payment corrections respect the cancellation dependency: undo a later credit cancellation before reversing a payment used in its return/refund calculation. This prevents recreating debt for a cancelled order.
 
