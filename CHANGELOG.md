@@ -8,6 +8,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 - M10 foundations: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events.
 - M10: enabled three-step onboarding, pack-aware phone navigation and 240px desktop sidebar, business/outlet/market settings, removable samples, offline shell caching and an explicit reload control for updates. Future counter/order/stock tools remain staged. Added app reference captures and direct-to-main delivery workflow per owner instruction.
+- M11: catalogue item editing with local names, exact prices, units, categories, availability and often-bought flags; search and reviewed bulk paste, atomic audit events, offline persistence, responsive editors and supplied Figma toggle assets.
 
 ## [0.1.1] - 2026-11-15
 

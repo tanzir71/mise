@@ -1,5 +1,5 @@
 import { Component, useEffect, useState, type ReactNode } from 'react';
-import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Button, Card, StatusWord } from '@mise/ui/primitives.tsx';
 import { MiseIcon } from '@mise/ui/MiseIcon.tsx';
@@ -9,7 +9,7 @@ import c from '../../../handover/copy/app.en.json';
 import { db } from './data/db';
 import { Onboarding } from './Onboarding';
 import { Settings } from './Settings';
-import { SampleCatalogue } from './SampleCatalogue';
+import { Catalogue } from './Catalogue';
 import { useAppUpdate } from './app-update';
 import './app.css';
 
@@ -25,6 +25,8 @@ function ShopWorkspace() {
 }
 export function LocalApp() { return <StorageBoundary><ShopWorkspace /></StorageBoundary>; }
 function Shell({ setup }: { setup: SetupSnapshot }) {
+  const location = useLocation();
+  const inMore = location.pathname.startsWith('/catalogue') || location.pathname.startsWith('/settings');
   const [updateReady, update] = useAppUpdate();
   const pack = businessPacks[setup.business.businessType];
   const bottom = phoneNav(setup.business.businessType);
@@ -38,8 +40,8 @@ function Shell({ setup }: { setup: SetupSnapshot }) {
   }, []);
   return <div className="app-shell"><a className="app-skip" href="#workspace">Skip to content</a>
     <aside className="app-sidebar"><Link to="/" className="app-wordmark"><img src={`${import.meta.env.BASE_URL}mise-mark.svg`} width="24" height="24" alt="" />mise</Link><Link to="/settings/business" className="outlet-switch"><MiseIcon name="store" size={20} /><span><strong>{setup.outlet.name}</strong><small>{pack['biz/type']}</small></span><MiseIcon name="chevronDown" size={16} /></Link><nav aria-label="Main navigation">{desktop.map(item => <NavLink key={item.path} to={item.path} end><MiseIcon name={item.icon} size={18} />{item.label}</NavLink>)}</nav><div className="sidebar-bottom"><StatusWord>{c.thisDevice}</StatusWord><p>{c.localNote}</p><Link to="/settings/business">{c.settings}</Link></div></aside>
-    <div className="app-main">{updateReady ? <div className="app-update" role="status"><span>{c.updateReady}</span><Button kind="secondary" onClick={update}>{c.reload}</Button></div> : null}<div className="phone-app-header"><Link to="/settings/business">{setup.outlet.name}<MiseIcon name="chevronDown" size={14} /></Link><span className="local-pill">{online ? c.online : c.offline}</span></div><main id="workspace" tabIndex={-1}><Routes><Route path="/" element={<Today setup={setup} />} /><Route path="/more" element={<More setup={setup} />} /><Route path="/catalogue" element={<SampleCatalogue setup={setup} />} /><Route path="/settings/*" element={<Settings setup={setup} />} />{['counter', 'orders', 'khata', 'stock', 'inbox'].map(path => <Route key={path} path={`/${path}`} element={<Unavailable title={desktop.find(item => item.path === `/${path}`)?.label || path[0].toUpperCase() + path.slice(1)} />} />)}<Route path="*" element={<Navigate to="/" replace />} /></Routes></main></div>
-    <nav className="app-bottom-nav" aria-label="Phone navigation">{bottom.map(item => <NavLink key={item.path} to={item.path} end><MiseIcon name={item.icon} size={22} /><span>{item.label}</span></NavLink>)}</nav>
+    <div className="app-main">{updateReady ? <div className="app-update" role="status"><span>{c.updateReady}</span><Button kind="secondary" onClick={update}>{c.reload}</Button></div> : null}<div className="phone-app-header">{inMore ? <Link to="/more"><MiseIcon name="chevronLeft" size={18} />{c.more}</Link> : <Link to="/settings/business">{setup.outlet.name}<MiseIcon name="chevronDown" size={14} /></Link>}<span className="local-pill">{online ? c.online : c.offline}</span></div><main id="workspace" tabIndex={-1}><Routes><Route path="/" element={<Today setup={setup} />} /><Route path="/more" element={<More setup={setup} />} /><Route path="/catalogue" element={<Catalogue setup={setup} />} /><Route path="/settings/*" element={<Settings setup={setup} />} />{['counter', 'orders', 'khata', 'stock', 'inbox'].map(path => <Route key={path} path={`/${path}`} element={<Unavailable title={desktop.find(item => item.path === `/${path}`)?.label || path[0].toUpperCase() + path.slice(1)} />} />)}<Route path="*" element={<Navigate to="/" replace />} /></Routes></main></div>
+    <nav className="app-bottom-nav" aria-label="Phone navigation">{bottom.map(item => <NavLink key={item.path} to={item.path} end className={({ isActive }) => isActive || (item.path === "/more" && inMore) ? "active" : ""}><MiseIcon name={item.icon} size={22} /><span>{item.label}</span></NavLink>)}</nav>
   </div>;
 }
 function Today({ setup }: { setup: SetupSnapshot }) {

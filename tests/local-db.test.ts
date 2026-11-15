@@ -44,3 +44,17 @@ test('removing a sample is audited, while real items are protected during setup'
   await expect(db.removeSample(real.id)).rejects.toThrow(/Only sample/);
   expect(await db.items.get(real.id)).toBeDefined();
 });
+test('catalogue writes, availability and deletion are atomic and audited', async () => {
+  const db = open(); await db.saveSetup(input);
+  const itemInput = { name: 'Tea', nameLocal: 'চা', price: 2000, unit: 'pc', category: 'Drinks', available: true, oftenBought: true };
+  const item = await db.saveItem(itemInput);
+  await db.saveItem({ ...itemInput, price: 2500 }, item.id);
+  await db.setItemAvailable(item.id, false);
+  expect(await db.items.get(item.id)).toMatchObject({ price: 2500, available: false });
+  await db.deleteItem(item.id);
+  expect(await db.items.get(item.id)).toBeUndefined();
+  expect(await db.events.where('command').startsWith('catalogue.').count()).toBe(4);
+  const count = await db.items.count(), categories = await db.categories.count();
+  await expect(db.addItems([itemInput, { ...itemInput, name: 'Bad', price: -1 }])).rejects.toThrow(/price/);
+  expect(await db.items.count()).toBe(count); expect(await db.categories.count()).toBe(categories);
+});

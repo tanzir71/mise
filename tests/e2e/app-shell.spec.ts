@@ -19,10 +19,12 @@ test('three-step first run stores a profile and adapts the phone navigation to t
   await expect(page.getByRole('navigation', { name: 'Phone navigation' }).getByRole('link')).toHaveText(['Today', 'Orders', 'Inbox', 'Stock', 'More']);
   await page.getByRole('navigation', { name: 'Phone navigation' }).getByRole('link', { name: 'More', exact: true }).click();
   await page.getByRole('link', { name: /Business data/ }).click();
-  await expect(page.getByRole('heading', { name: 'Menu', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^Remove sample:/ })).toHaveCount(3);
-  await page.getByRole('button', { name: 'Remove sample: Sample dish', exact: true }).click();
-  await expect(page.getByRole('button', { name: /^Remove sample:/ })).toHaveCount(2);
+  await expect(page.getByRole('heading', { name: 'Business data', exact: true })).toBeVisible();
+  await expect(page.getByRole('switch')).toHaveCount(3);
+  await page.getByRole('button', { name: 'Edit item: Sample dish', exact: true }).click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Delete item', exact: true }).click();
+  await expect(page.getByRole('switch')).toHaveCount(2);
 });
 
 test('desktop settings preserve the shop, change pack nouns and retain samples across reload', async ({ page }) => {

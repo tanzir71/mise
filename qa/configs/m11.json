@@ -1,0 +1,247 @@
+{
+  "title": "M11 catalogue",
+  "widths": [
+    390,
+    1440
+  ],
+  "heights": {
+    "390": 844,
+    "1440": 1000
+  },
+  "pages": [
+    {
+      "id": "m11-catalogue",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-main a[href$=\"/catalogue\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".catalogue-page[aria-busy=\"false\"]"
+        }
+      ],
+      "path": "app/",
+      "note": "M11 catalogue CRUD, search and bulk paste use the supplied business-data geometry, rows, type and toggle assets. Future tables, suppliers, devices and integrations from the references are not exposed. The desktop reference's list/editor layout is applied to catalogue items. Editor and paste states extend its existing field/card primitives; no separate reference was supplied. Native phone/browser chrome is omitted. Full-page captures place the fixed phone navigation at the document bottom for readability.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".app-shell",
+          "widths": [
+            390
+          ],
+          "reference": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+        },
+        {
+          "id": "desktop",
+          "selector": ".app-shell",
+          "widths": [
+            1440
+          ],
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    },
+    {
+      "id": "m11-editor",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-main a[href$=\"/catalogue\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".catalogue-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[aria-label=\"Edit item: Sample dish\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".item-editor-form:visible"
+        }
+      ],
+      "path": "app/",
+      "note": "M11 catalogue CRUD, search and bulk paste use the supplied business-data geometry, rows, type and toggle assets. Future tables, suppliers, devices and integrations from the references are not exposed. The desktop reference's list/editor layout is applied to catalogue items. Editor and paste states extend its existing field/card primitives; no separate reference was supplied. Native phone/browser chrome is omitted. Full-page captures place the fixed phone navigation at the document bottom for readability.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".app-shell",
+          "widths": [
+            390
+          ],
+          "reference": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+        },
+        {
+          "id": "desktop",
+          "selector": ".app-shell",
+          "widths": [
+            1440
+          ],
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    },
+    {
+      "id": "m11-paste",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-main a[href$=\"/catalogue\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".catalogue-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "click",
+          "selector": ".paste-card button"
+        },
+        {
+          "type": "fill",
+          "selector": ".app-dialog[open] textarea",
+          "value": "Tea, 20\nRice, 75\nSoap, 45.50"
+        },
+        {
+          "type": "fill",
+          "selector": ".app-dialog[open] .paste-category input",
+          "value": "Everyday"
+        },
+        {
+          "type": "click",
+          "selector": ".app-dialog[open] button:text-is(\"Preview\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".paste-preview"
+        }
+      ],
+      "path": "app/",
+      "note": "M11 catalogue CRUD, search and bulk paste use the supplied business-data geometry, rows, type and toggle assets. Future tables, suppliers, devices and integrations from the references are not exposed. The desktop reference's list/editor layout is applied to catalogue items. Editor and paste states extend its existing field/card primitives; no separate reference was supplied. Native phone/browser chrome is omitted. Full-page captures place the fixed phone navigation at the document bottom for readability.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".app-shell",
+          "widths": [
+            390
+          ],
+          "reference": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+        },
+        {
+          "id": "desktop",
+          "selector": ".app-shell",
+          "widths": [
+            1440
+          ],
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    }
+  ]
+}

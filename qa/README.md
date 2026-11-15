@@ -2,7 +2,7 @@
 
 Run `pnpm build`, then `pnpm qa:visual`. The command starts a production preview if one is not running. Set `BASE_PATH=/mise/` for a Pages build or `PREVIEW_URL` to use an existing preview at its complete base URL. A supplied preview URL must end in `/`.
 
-Open `qa/report.html`. The landing config contains 64 comparisons; M10 adds eight app comparisons. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. CI uploads them as `visual-qa` and links the artifact in the run summary.
+Open `qa/report.html`. The current suite has 77 comparisons: 64 landing/setup, seven M10 shell and six M11 catalogue captures. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. CI uploads them as `visual-qa` and links the artifact in the run summary.
 
 References come from `sectionReferences` in `handover/exports/landing-assets.json`. Desktop setup has one full-frame export, so its individual comparisons use explicitly listed reference regions in `qa/configs/landing.json`. The full frame is included too. Phone landing sections have desktop references; their responsive reflow is intentionally different. The setup phone reference includes browser/OS UI supplied by the real device, not by the webpage.
 
