@@ -6,13 +6,13 @@ export interface Member extends Entity { businessId: string; outletIds: string[]
 export interface Category extends Entity { outletId: string; name: string; sort: number }
 export interface Item extends Entity { outletId: string; name: string; nameLocal: string; categoryId: string; price: number; unit: string; available: boolean; isSample: boolean; oftenBought?: boolean }
 export interface SetupSnapshot { business: Business; outlet: Outlet; owner: Member }
-export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; stockItemId?:string; stockRevision?:number; supplierId?:string; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
+export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; stockItemId?:string; stockRevision?:number; supplierId?:string; closingId?:string; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
 export interface SetupInput { businessType: BusinessType; marketCode: MarketCode; name: string; phone: string; outletName?: string; address?: string; language?: MessageLanguage; timezone?: string; currency?: string }
 export interface SetupCommand { snapshot: SetupSnapshot; items: Item[]; categories: Category[]; event: AuditEvent }
 export type PaymentMethod = 'cash' | 'wallet' | 'card';
 export type SaleMethod = PaymentMethod | 'credit';
 export interface SaleLine { itemId?: string; name: string; unit: string; unitPrice: number; qty: number; lineTotal: number }
-export interface Sale extends Entity { outletId: string; orderId?:string; orderNumber?:string; deliveryFee?:number; discount?:number; expression: string; amount: number; currency: string; method: SaleMethod; methodName: string; given?: number; change?: number; who: string; customerId?: string; creditAccountId?: string; items: SaleLine[]; shopName: string; shopLink?: string; timezone: string; createdBy: string; eventId: string; voidedAt?: number; voidReason?:'undo'|'order-cancel' }
+export interface Sale extends Entity { outletId: string; orderId?:string; orderNumber?:string; closingId?:string; deliveryFee?:number; discount?:number; expression: string; amount: number; currency: string; method: SaleMethod; methodName: string; given?: number; change?: number; who: string; customerId?: string; creditAccountId?: string; items: SaleLine[]; shopName: string; shopLink?: string; timezone: string; createdBy: string; eventId: string; voidedAt?: number; voidReason?:'undo'|'order-cancel' }
 export interface Customer extends Entity { businessId: string; name: string; nickname: string; phone?: string; address: string; notes: string; tags: string[]; consent: { savedAt: number; source: 'manual' }; archivedAt?: number }
 export type ReminderTone = 'gentle' | 'direct';
 export interface CreditReminder { enabled: boolean; dayOfMonth: number; tone: ReminderTone; channel: 'whatsapp' }
@@ -38,3 +38,15 @@ export interface StockItem extends Entity { outletId:string;revision:number;name
 export type StockReason = 'used'|'received'|'count'|'waste'|'undo';
 export interface StockMove extends Entity { outletId:string;stockItemId:string;revision:number;name:string;unit:string;before:number;after:number;delta:number;reason:StockReason;source:'manual'|'quick_update'|'count';note:string;createdBy:string;eventId:string;countBatchId?:string;undoOf?:string }
 export interface SupplierMessage extends Entity { outletId:string;supplierId?:string;supplierName:string;phone?:string;text:string;channel:'whatsapp'|'manual';stockItemIds:string[];part:number;parts:number;createdBy:string;eventId:string;voidedAt?:number }
+export interface DaySummary {
+  day:string;timezone:string;currency:string;shopName:string;outletName:string;
+  sales:number;saleCount:number;orderCount:number;creditGiven:number;creditCollected:number;
+  cashSales:number;cashCollections:number;cashRefunds:number;expectedCash:number;
+  split:{method:SaleMethod;amount:number;count:number}[];completedOrders:number;averageTimeMs:number|null;
+  waitingOrders:number;lowStock:number;dueReminders:number;
+}
+export interface DayClosing extends Entity {
+  outletId:string;activeKey?:string;day:string;timezone:string;currency:string;summary:DaySummary;
+  countedCash:number;expectedCash:number;difference:number;addedWalkIn:number;addedSaleId?:string;note:string;
+  previewFingerprint:string;createdBy:string;createdByName:string;eventId:string;voidedAt?:number;
+}

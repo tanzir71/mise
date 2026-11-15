@@ -48,6 +48,7 @@ The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-loca
 - [x] **M14** Manual orders + queue: new order (source, customer, items, delivery/pickup, payment), statuses, order detail · M · T1
 - [x] **M15** Stock: items, on hand, target (par), to order; quick-update parser ("used 2 kg chicken"); night count mode · M · T1
 - [ ] **M16** Today dashboard (sales split, waiting, low stock, credit given/collected) + closing cash count · S · T1
+  - Data layer in progress: [delivery notes](../../docs/m16-delivery.md). The screen, offline closing flow, PDF and visual checks remain before completion.
 - [ ] **M17** Exports (CSV, XLSX, PDF) + JSON backup/restore · S · T1
 - [ ] **M18** PWA: install, offline, update prompt, storage persistence request · S · T1
 

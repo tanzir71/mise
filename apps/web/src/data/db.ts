@@ -12,6 +12,9 @@ import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOr
 import { saveOrderCommand, changeOrderStatusCommand, undoOrderStatusCommand, addOrderNoteCommand, recordOrderCommunicationCommand, saveOrderWarningCommand, type OrderInput } from '@mise/core/orders';
 import { saveStockItemCommand, adjustStockCommand, stockBatchCommand, undoStockMoveCommand, archiveStockItemCommand, saveSupplierCommand, archiveSupplierCommand, type StockInput, type StockContext, type StockChange, type StockAdjustment, type SupplierInput } from '@mise/core/stock';
 import { recordSupplierMessageCommand, sameSupplierMessage, undoSupplierMessageCommand, type SupplierMessageInput } from '@mise/core/supplier-drafts';
+import { closeDayCommand, sameClosingRequest, undoClosingCommand, type ClosingInput } from '@mise/core/closing';
+import type { DayClosing } from '@mise/core/models';
+import type { TodayContext } from '@mise/core/today';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -32,6 +35,7 @@ export class MiseDatabase extends Dexie {
   stockMoves!: EntityTable<StockMove,'id'>;
   suppliers!: EntityTable<Supplier,'id'>;
   supplierMessages!: EntityTable<SupplierMessage,'id'>;
+  dayClosings!: EntityTable<DayClosing,'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
@@ -40,6 +44,7 @@ export class MiseDatabase extends Dexie {
     this.version(4).stores({orders:'id,outletId,status,customer.id,createdAt,&[outletId+sequence],&[outletId+number]',orderNotes:'id,orderId,outletId,&[orderId+revision]',orderCommunications:'id,orderId,outletId,&[orderId+revision]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision]'});
     this.version(5).stores({orderRefunds:'id,outletId,orderId,saleId,createdAt',sales:'id,outletId,createdAt,orderId',creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,orderId,refundId,&reversalOf,&[accountId+sequence]'});
     this.version(6).stores({stockItems:'id,outletId,supplierId,category,&[outletId+activeKey]',stockMoves:'id,outletId,stockItemId,createdAt,countBatchId,&undoOf,&[stockItemId+revision]',suppliers:'id,outletId',supplierMessages:'id,outletId,supplierId,createdAt',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision]'});
+    this.version(7).stores({dayClosings:'id,outletId,day,&[outletId+activeKey]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId'});
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -368,6 +373,37 @@ export class MiseDatabase extends Dexie {
     await this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(),before = await this.supplierMessages.get(id);if (!setup || !before) throw new Error('Sent record not found.');
       const change = undoSupplierMessageCommand(before,setup);await this.supplierMessages.put(change.message);await this.events.add(change.event);
+    });
+  }
+  private async todayContext():Promise<TodayContext> {
+    const setup = await this.setup();if (!setup) throw new Error('Set up your shop first.');
+    const outletId = setup.outlet.id;
+    const [sales,orders,refunds,accounts,entries,customers,stock,closings] = await Promise.all([
+      this.sales.where('outletId').equals(outletId).toArray(),this.orders.where('outletId').equals(outletId).toArray(),this.orderRefunds.where('outletId').equals(outletId).toArray(),
+      this.creditAccounts.where('outletId').equals(outletId).toArray(),this.creditEntries.where('outletId').equals(outletId).toArray(),this.customers.where('businessId').equals(setup.business.id).toArray(),
+      this.stockItems.where('outletId').equals(outletId).toArray(),this.dayClosings.where('outletId').equals(outletId).toArray(),
+    ]);
+    return {setup,sales,orders,refunds,accounts,entries,customers,stock,closings};
+  }
+  async readToday():Promise<TodayContext> {
+    return this.transaction('r',this.tables,() => this.todayContext());
+  }
+  async closeDay(input:ClosingInput):Promise<DayClosing> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.todayContext(), before = await this.dayClosings.get(input.id);
+      if (before) {
+        if (before.outletId !== context.setup.outlet.id || before.voidedAt !== undefined || !sameClosingRequest(input,before)) throw new Error('This closing request changed. Reopen the review.');
+        return before;
+      }
+      const change = closeDayCommand(input,context);
+      await this.dayClosings.add(change.closing);if (change.sale) await this.sales.add(change.sale);await this.events.bulkAdd(change.events);return change.closing;
+    });
+  }
+  async undoDayClosing(id:string):Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(), before = await this.dayClosings.get(id);if (!setup || !before) throw new Error('Day closing not found.');
+      const sale = before.addedSaleId ? await this.sales.get(before.addedSaleId) : undefined, change = undoClosingCommand(before,setup,sale);
+      await this.dayClosings.put(change.closing);if (change.sale) await this.sales.put(change.sale);await this.events.bulkAdd(change.events);
     });
   }
 }

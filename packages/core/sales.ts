@@ -31,8 +31,9 @@ export function recordSaleCommand(input: SaleInput, context: SaleContext, at = D
   const sale: Sale = { id: ulid(at), outletId: setup.outlet.id, expression: normalizeExpression(input.expression), amount, currency: setup.outlet.currency, method: input.method, methodName: input.method === 'wallet' ? input.wallet! : input.method === 'cash' ? 'Cash' : 'Card', given, change: given === undefined ? undefined : given - amount, who: input.who?.trim() || '', items, shopName: setup.business.name, shopLink, timezone: setup.outlet.timezone, createdBy: setup.owner.id, eventId, createdAt: at, updatedAt: at };
   return { sale, event: { id: eventId, outletId: sale.outletId, actor: { type: 'member', id: setup.owner.id }, command: 'sale.record', before: null, after: sale, at } };
 }
-export const canUndoSale = (sale: Sale, at = Date.now()) => sale.voidedAt === undefined && at >= sale.createdAt && at - sale.createdAt <= 600000;
+export const canUndoSale = (sale: Sale, at = Date.now()) => !sale.closingId && sale.voidedAt === undefined && at >= sale.createdAt && at - sale.createdAt <= 600000;
 export function undoSaleCommand(sale: Sale, actorId: string, at = Date.now()): { sale: Sale; event: AuditEvent } {
+  if (sale.closingId) throw new Error('Undo this receipt through its day closing.');
   if (!canUndoSale(sale, at)) throw new Error('A sale can be undone once, within 10 minutes.');
   const after = { ...sale, voidedAt: at, voidReason: 'undo' as const, updatedAt: at };
   return { sale: after, event: { id: ulid(at), outletId: sale.outletId, actor: { type: 'member', id: actorId }, command: 'sale.undo', before: sale, after, undoOf: sale.eventId, at } };
