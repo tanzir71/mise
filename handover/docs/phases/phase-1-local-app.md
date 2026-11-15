@@ -125,8 +125,8 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - **Draft supplier order:** a grouped list → WhatsApp text per supplier, with Copy and "Sent".
 
 **Accept**
-- [ ] The parser handles ≥ 40 fixture phrases (English, with unit variants: kg, g, L, ml, pcs, hali, dozen, strip).
-- [ ] The count summary shows variances; applying them writes `count` moves.
+- [x] The parser handles ≥ 40 fixture phrases (English, with unit variants: kg, g, L, ml, pcs, hali, dozen, strip).
+- [x] The count summary shows variances; applying them writes `count` moves.
 
 ## M16 · Today and closing · S
 **Figma:** C00 `110:5`, M12 `102:82`
