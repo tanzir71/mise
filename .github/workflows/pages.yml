@@ -45,6 +45,26 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
+      - name: Compare UI with Figma exports
+        run: pnpm qa:visual
+      - name: Upload visual QA report
+        id: visual-qa
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-qa
+          path: |
+            qa/report.html
+            qa/results.json
+            qa/screens/
+            qa/references/
+            qa/diffs/
+          retention-days: 14
+      - name: Link visual QA report
+        if: always() && steps.visual-qa.outputs.artifact-url != ''
+        env:
+          REPORT_URL: ${{ steps.visual-qa.outputs.artifact-url }}
+        run: echo "[Download the visual QA report]($REPORT_URL) — open report.html inside the artifact." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/configure-pages@v5
         if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3

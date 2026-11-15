@@ -1,0 +1,34 @@
+{
+  "title": "Mise landing and setup — Figma comparison",
+  "widths": [1440, 390],
+  "sections": [
+    {"id":"nav","selector":".site-header","referenceKey":"Nav"},
+    {"id":"hero","selector":".hero","referenceKey":"Hero"},
+    {"id":"features","selector":"#features","referenceKey":"Feature index"},
+    {"id":"ai","selector":"#ai","referenceKey":"Agent controls"},
+    {"id":"ocr","selector":"#ocr","referenceKey":"Reads anything"},
+    {"id":"capture","selector":"#capture","referenceKey":"Data capture"},
+    {"id":"checks","selector":"#checks","referenceKey":"Checks built in"},
+    {"id":"detail","selector":"#detail","referenceKey":"Operations in detail"},
+    {"id":"day","selector":"#day","referenceKey":"A day with Mise"},
+    {"id":"businesses","selector":"#businesses","referenceKey":"Businesses"},
+    {"id":"basics","selector":"#basics","referenceKey":"The basics"},
+    {"id":"compare","selector":"#compare","referenceKey":"Comparison"},
+    {"id":"cta","selector":"#cta","referenceKey":"CTA"},
+    {"id":"footer","selector":".site-footer","referenceKey":"Footer"}
+  ],
+  "pages": [
+    {"id":"bd","path":"bd/","referenceGroup":"bd","note":"At 390px the desktop section reference is scaled proportionally for context. Responsive reflow and closed disclosures are expected to differ."},
+    {"id":"intl","path":"intl/","referenceGroup":"intl","note":"At 390px the desktop section reference is scaled proportionally for context. Responsive reflow and closed disclosures are expected to differ."},
+    {"id":"setup","path":"setup/","note":"Actual availability comes from the production manifest. Regular type follows the updated design rules. The phone reference includes native browser/OS chrome, which is not recreated by the webpage.","sections":[
+      {"id":"full","selector":"body","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png"},
+      {"id":"hero","selector":".setup-hero","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png","clip":{"left":120,"top":84,"width":1200,"height":402}},
+      {"id":"downloads","selector":"#downloads","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png","clip":{"left":120,"top":486,"width":1200,"height":342}},
+      {"id":"install","selector":"#install","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png","clip":{"left":120,"top":900,"width":1200,"height":832}},
+      {"id":"helpers","selector":".setup-helpers","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png","clip":{"left":120,"top":1803,"width":1200,"height":241}},
+      {"id":"vercel","selector":"#vercel","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png","clip":{"left":120,"top":2116,"width":1200,"height":671}},
+      {"id":"troubleshooting","selector":".setup-troubleshooting","widths":[1440],"reference":"landing/Setup · Download and install (desktop).png","clip":{"left":120,"top":2787,"width":1200,"height":273}},
+      {"id":"phone","selector":".setup-phone","widths":[390],"reference":"landing/Setup · On the shop phone (mobile web).png"}
+    ]}
+  ]
+}

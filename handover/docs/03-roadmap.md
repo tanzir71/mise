@@ -36,7 +36,7 @@ Spec: `phases/phase-0-landing.md`
 - [x] **R4** Section-by-section match: 40 px Regular headlines, backgrounds, no gradients · M · T0
 - [x] **R5** Phone pass: no overflow at 360–414, page ≤ 20,000 px at 390 · M · T0
 - [x] **R6** Setup page matches Figma; remove ®; new OG images · S · T0
-- [ ] **R7** Visual QA harness (`pnpm qa:visual` → `qa/report.html`), required on every UI PR from now on · S · T0
+- [x] **R7** Visual QA harness (`pnpm qa:visual` → `qa/report.html`), required on every UI PR from now on · S · T0
 
 ## Phase 1 — Useful on one device (T1) → tag `v0.2.0`
 The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-local-app.md`

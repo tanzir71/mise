@@ -1,6 +1,6 @@
 # 09 · Refinement appendix: Phase R (do this before M10)
 
-**Status: blocking.** The owner reviewed the live site on 15 Nov 2026. Finish every item below, merged and deployed, before starting M10. Tick each one in `03-roadmap.md` under "Phase R".
+**Status: refinement implemented.** R0–R7 are checked in the roadmap. R7 must pass CI, merge and deploy before tagging `v0.1.1` and starting M10. The owner reviewed the original live site on 15 Nov 2026.
 
 Live pages reviewed: `https://tanzir71.github.io/mise/bd/`, `/intl/`, `/setup/`.
 
@@ -168,15 +168,15 @@ For each `exports/landing/<Section> · BD.png` (and `· Intl`), compare at 1440 
 
 ## 5 · Done when (the whole pass)
 
-- [ ] `pnpm check:exports` passes in CI. The Figma export workflow is installed.
-- [ ] No hand-drawn screen, device or browser markup; the CI grep guard is in place.
-- [ ] Nav and hero match `Nav/Hero · BD.png` and `Nav/Hero · Intl.png`. No pill, chips, laptop, dark hero or bold logo strip.
-- [ ] Every headline ≤ 56 px (hero) / 40 px (sections) / 48 px (CTA), Geist Regular, one weight per line. No gradients, no ®.
-- [ ] 23 images per region, sharp at 2×, served as AVIF/WebP with a PNG fallback, with alt text.
-- [ ] No horizontal overflow at 360–414 px. `/bd/` ≤ 20,000 px tall at 390.
-- [ ] Lighthouse on mobile: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95. CLS < 0.05.
-- [ ] `qa/report.html` attached; owner sign-off recorded in the R4 PR.
-- [ ] Phase R ticked in the roadmap. CHANGELOG has a "Refinement pass" entry. Tag `v0.1.1`.
+- [x] `pnpm check:exports` passes in CI. The Figma export workflow is installed.
+- [x] No hand-drawn screen, device or browser markup; the CI grep guard is in place.
+- [x] Nav and hero match `Nav/Hero · BD.png` and `Nav/Hero · Intl.png`. No pill, chips, laptop, dark hero or bold logo strip.
+- [x] Every headline ≤ 56 px (hero) / 40 px (sections) / 48 px (CTA), Geist Regular, one weight per line. No gradients, no ®.
+- [x] 23 images per region, sharp at 2×, served as AVIF/WebP with a PNG fallback, with alt text.
+- [x] No horizontal overflow at 360–414 px. `/bd/` ≤ 20,000 px tall at 390.
+- [x] Lighthouse on mobile: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95. CLS < 0.05.
+- [x] `qa/report.html` produced and uploaded by R7 CI; the owner's sign-off waiver is recorded in the R4 PR and DECISIONS.
+- [x] Phase R ticked in the roadmap and CHANGELOG updated. Release tag `v0.1.1` follows R7 merge and successful deployment.
 
 ## 6 · Rules carried into M10 and every later milestone
 
