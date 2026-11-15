@@ -142,6 +142,7 @@ For each `exports/landing/<Section> · BD.png` (and `· Intl`), compare at 1440 
 - **Effects:** remove both CSS gradients. Shadows use `--shadow-soft` only.
 - **Deliverable:** `qa/report.html` (R7) with every section next to its reference.
 - **Owner sign-off:** the owner signs off on the hero and three sections of their choice before R4 merges.
+  - **Owner override, 15 Nov 2026:** the owner instructed “don't ask me for any sign off just continue.” Manual sign-off gates are waived; reference comparison, required checks, ordered merges and deployment still apply. Recorded in `handover/DECISIONS.md` and the R4 PR.
 
 ### R5 · Phone pass · M
 - **At 360, 375, 390 and 414 px:** no horizontal overflow (`scrollWidth === innerWidth`), nothing clipped, tap targets ≥ 44 px.

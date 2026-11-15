@@ -1,6 +1,6 @@
 ## Milestone
 
-R4 · Match each landing section (`handover/docs/09-refinement-appendix.md`). Implementation is ready; the required owner sign-off remains before merge.
+R4 · Match each landing section (`handover/docs/09-refinement-appendix.md`).
 
 ## What shipped
 
@@ -8,9 +8,9 @@ The landing now follows the supplied section references: regular 40px headlines,
 
 Secondary text on grey meets AA. The supplied copy remains the source, including its detail numbering; detail titles follow the updated written Regular rule. The existing Setup and downloads link is kept in the footer's region column. The picture test now reads its DOM attributes in one batch, preserving its assertions while avoiding hundreds of browser round trips.
 
-## Screenshots and owner review
+## Screenshots and visual comparison
 
-The owner approved the hero after R2. These three sections are prepared for the remaining R4 sign-off:
+The owner approved the hero after R2, then explicitly instructed “don't ask me for any sign off just continue.” This supersedes the manual R4 sign-off gate. Operations, A day with Mise and Businesses were compared against their supplied references:
 
 ![Operations](https://raw.githubusercontent.com/tanzir71/mise/codex/r4-section-refinement/docs/screenshots/r4-bd-detail-first-1440.png)
 ![A day with Mise](https://raw.githubusercontent.com/tanzir71/mise/codex/r4-section-refinement/docs/screenshots/r4-bd-day-1440.png)
@@ -40,11 +40,11 @@ References in `handover/exports/landing/`, for both `· BD.png` and `· Intl.png
 ## Docs
 
 - [x] CHANGELOG and DECISIONS updated.
-- [ ] R4 roadmap checkbox stays open until owner sign-off. R5–R7 remain pending.
-- [ ] Owner signs off on Operations in detail, A day with Mise and Businesses before merge, as R4 requires.
+- [x] R4 roadmap checkbox ticked. R5–R7 remain pending.
+- [x] Owner's instruction to continue without manual sign-off recorded in DECISIONS and the appendix.
 
 ## Deployment
 
 [Local Bangladesh preview](http://127.0.0.1:4321/bd/#detail) · [Local International preview](http://127.0.0.1:4321/intl/#detail)
 
-After approval and merge: [Bangladesh](https://tanzir71.github.io/mise/bd/) · [International](https://tanzir71.github.io/mise/intl/). Public Pages currently contains the completed R3 deployment.
+After merge: [Bangladesh](https://tanzir71.github.io/mise/bd/) · [International](https://tanzir71.github.io/mise/intl/).

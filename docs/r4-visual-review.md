@@ -1,10 +1,10 @@
 # R4 visual review
 
-Implementation is ready for the owner sign-off required by refinement appendix R4. The hero was approved after R2. Review Operations in detail, A day with Mise and Businesses before R4 merges.
+The hero was approved after R2. Operations in detail, A day with Mise and Businesses are compared below. The owner subsequently instructed continuing without any manual sign-off gates; this is recorded in DECISIONS and the R4 PR.
 
-Preview: http://127.0.0.1:4321/bd/#detail and http://127.0.0.1:4321/intl/#detail while the local preview server is running. Public Pages currently contains the merged R3 layout; R4 deploys after sign-off and merge.
+Preview: http://127.0.0.1:4321/bd/#detail and http://127.0.0.1:4321/intl/#detail while the local preview server is running. R4 deploys to public Pages after merge.
 
-## Three sections for sign-off
+## Three section comparisons
 
 ### Operations in detail
 
