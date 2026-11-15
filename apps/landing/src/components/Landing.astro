@@ -9,6 +9,7 @@ import Icon from '@mise/ui/Icon.astro';
 import Section from '@mise/ui/Section.astro';
 import Chip from '@mise/ui/Chip.astro';
 import '../styles/landing.css';
+import '../styles/hero.css';
 interface Props { copy: typeof bdCopy }
 const { copy: c } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -19,14 +20,13 @@ const region = c.region as 'bd' | 'intl';
 const numberedSlot = (group: string, index: number) => `${group}.${String(index + 1).padStart(2, '0')}`;
 ---
 <Base title={c.meta.title} description={c.meta.description} lang={c.lang} region={c.region as 'bd' | 'intl'}>
-  <div id="top"><Header nav={c.nav} appUrl={appUrl} /></div>
+  <Header nav={c.nav} appUrl={appUrl} />
   <main id="main">
-    <section class="hero dark">
+    <section class="hero" aria-labelledby="hero-title">
       <div class="container hero-grid">
-        <div class="hero-copy"><a href="#ai" class="new-chip"><span class="ember-dot" />{c.hero.eyebrow}<Icon name="arrowRight" size={14} /></a><h1>{c.hero.headline}</h1><p class="lead">{c.hero.lead}</p><div class="hero-actions"><a class="button button-primary" href={appUrl}>{c.hero.ctaPrimary}<Icon name="arrowUpRight" size={18} /></a><a class="button button-ghost" href="#day"><span class="play-icon"><Icon name="play" size={12} /></span>{c.hero.ctaSecondary}</a></div><span class="preview-label">PRODUCT PREVIEW · ROLLING OUT IN STAGES</span></div>
-        <div class="hero-visual"><Shot region={region} imageSlot="hero.visual" eager /></div>
+        <div class="hero-copy"><h1 id="hero-title">{c.hero.headline}</h1><p class="hero-lead">{c.hero.lead}</p><div class="hero-actions"><a class="button button-primary" href={appUrl}>{c.hero.ctaPrimary}</a><a class="button hero-secondary" href="#day"><Icon name="zap" size={16} />{c.hero.ctaSecondary}</a></div><p class="hero-trust">{c.hero.trustLine}</p></div>
+        <div class="hero-visual"><Shot region={region} imageSlot="hero.visual" eager sizes="(max-width: 767px) 240px, (max-width: 1023px) 260px, 359.5px" /></div>
       </div>
-      <div class="container trust"><p>{c.hero.trustLabel}</p><div class="partners">{c.hero.partners.map(partner=><span>{partner}</span>)}</div></div>
     </section>
     <section id="features" class="feature-index"><div class="container"><p class="eyebrow">{c.index.label}</p><div class="index-pills">{c.index.items.map(item=><Chip href={item.href} selected={item.highlight}><Icon name={item.icon} size={16} />{item.label}</Chip>)}</div></div></section>
     <Section id="ai">

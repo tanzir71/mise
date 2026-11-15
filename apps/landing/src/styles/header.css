@@ -1,0 +1,45 @@
+.page-top { display: block; height: 0; scroll-margin-top: 0; }
+.site-header { position: sticky; top: 0; z-index: 50; background: #ededec; color: #141414; }
+.site-header::after { content: ''; position: absolute; inset: auto 0 0; height: 1px; background: #e2e2df; opacity: 0; pointer-events: none; }
+.site-header.is-scrolled::after { opacity: 1; }
+.nav-inner { display: flex; align-items: center; width: min(1200px, calc(100% - 96px)); height: 89px; margin-inline: auto; }
+.wordmark { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: inherit; font-size: 24px; line-height: 1; font-weight: 600; letter-spacing: -.025em; text-decoration: none; }
+.wordmark img { flex-shrink: 0; }
+.site-header .wordmark { flex-shrink: 0; }
+.desktop-nav { display: flex; align-items: center; gap: 32px; margin-left: 32px; }
+.desktop-nav a, .sign-in { font-size: 15px; line-height: 22px; font-weight: 400; text-decoration: none; white-space: nowrap; }
+.desktop-nav a { color: #6a6a67; }
+.desktop-nav a:hover { color: #141414; }
+.nav-actions { display: flex; align-items: center; gap: 32px; margin-left: auto; }
+.sign-in { color: #141414; }
+.site-header .region-picker summary { height: 38px; min-height: 38px; border: 1px solid #d4d4d2; padding: 8px 12px; border-radius: 999px; font-size: 14px; line-height: 20px; color: #6a6a67; }
+.site-header .region-picker summary > .icon:first-child { width: 14px; height: 14px; }
+.nav-actions > .button { min-height: 50px; padding: 14px 24px; border: 0; font-size: 16px; line-height: 22px; background: #141414; color: white; }
+.menu-toggle, .menu-close { display: none; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 0; padding: 10px; background: transparent; color: #141414; }
+.mobile-nav { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; border: 0; padding: 20px; overflow-y: auto; background: #ededec; color: #141414; }
+.mobile-nav::backdrop { background: #ededec; }
+.mobile-nav-top { display: flex; justify-content: space-between; align-items: center; }
+.mobile-nav .menu-close { display: flex; }
+.mobile-nav nav { display: grid; margin: 40px 0 28px; }
+.mobile-nav nav a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; padding: 12px 0; border-bottom: 1px solid #d4d4d2; color: #141414; font-size: 20px; font-weight: 400; line-height: 28px; text-decoration: none; }
+.mobile-nav > .button { width: 100%; margin-top: 24px; min-height: 50px; background: #141414; color: white; font-size: 16px; }
+.mobile-nav .region-picker { width: fit-content; }
+.mobile-nav .region-picker summary { min-height: 44px; color: #62625f; font-size: 14px; }
+.mobile-nav .region-menu { left: 0; right: auto; }
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .nav-inner { width: calc(100% - 48px); }
+  .desktop-nav { gap: 18px; margin-left: 24px; }
+  .desktop-nav a, .sign-in { font-size: 13px; }
+  .nav-actions { gap: 16px; }
+  .site-header .region-picker summary { font-size: 12px; }
+  .nav-actions > .button { padding-inline: 20px; font-size: 14px; }
+}
+@media (max-width: 1023px) {
+  .nav-inner { width: calc(100% - 64px); height: 80px; gap: 20px; }
+  .desktop-nav, .nav-actions > .region-picker, .nav-actions .sign-in { display: none; }
+  .menu-toggle { display: flex; }
+}
+@media (max-width: 767px) {
+  .nav-inner { width: calc(100% - 40px); height: 72px; gap: 16px; }
+  .nav-actions > .button { min-height: 44px; padding: 11px 18px; font-size: 14px; line-height: 22px; }
+}

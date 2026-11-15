@@ -4,6 +4,8 @@
 - 2026-11-15 (refinement): preserve the configured export scale when retrying individual Figma renders; never silently downgrade 2× assets to 1×.
 - 2026-11-15 (R1): `Shot` uses `imageSlot` as its prop because Astro reserves `slot` for named slots. The values are the unchanged keys in landing-assets.json. Display dimensions come from image metadata divided by exportScale, including the exported shadow bounds.
 - 2026-11-15 (R1): use the supplied Figma SVG icons as CSS masks with currentColor where available; Lucide remains the fallback for unmapped names. This removes hundreds of repeated inline paths without changing icon slots or adding client JavaScript.
+- 2026-11-15 (R2): use #6A6A67 for small secondary text on the #EDEDEC hero/navigation background so it meets WCAG AA. This deliberately darkens the reference's #6F6F6C links/lead and #8A8A87 trust line while preserving their type and layout.
+- 2026-11-15 (R2): preserve the complete hero PNG at its intrinsic display size, including shadows. Offset it 10px down on desktop to align the visible phone with the section reference; its shadow bounds are asymmetric. Compact navigation between 1024 and 1199px keeps all controls available without overflow.
 
 - 2026-11-15: Use the restaurant workspace as the repository root, with the supplied package copied to `handover/`. Exclude the duplicate `Claude outputs/` source from Git.
 - 2026-11-15: Begin with the kickoff scope, M00–M05, before adding local app or backend features. Keep the app placeholder honest about availability.
