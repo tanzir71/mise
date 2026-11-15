@@ -105,6 +105,7 @@ test('the counter can create a customer and invalid limits stay editable', async
 });
 
 test('wording changes persist and current-currency accounts keep old debt separate', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-11-16T06:00:00Z'));
   await start(page,1440); await customer(page,'Karim bhai','1000','100',true);
   await go(page,'khata'); await page.getByRole('button',{name:'Change wording',exact:true}).click(); const wording=page.getByRole('dialog',{name:'Change wording',exact:true});
   await wording.getByRole('textbox',{name:'Gentle · English',exact:true}).fill('Dear {name}, {amount} is due at {shop}. {payment}'); await wording.getByRole('textbox',{name:'Payment instructions (optional)',exact:true}).fill('Pay at the counter.'); await wording.getByRole('button',{name:'Save wording',exact:true}).click();
@@ -117,7 +118,8 @@ test('wording changes persist and current-currency accounts keep old debt separa
   await page.locator('.khata-list a').filter({hasText:'$0'}).click(); await page.getByRole('button',{name:'Change limit or reminder',exact:true}).click(); const terms=page.getByRole('dialog',{name:'Credit settings',exact:true});
   await terms.getByRole('switch',{name:'Allow credit',exact:true}).click(); await terms.getByLabel('Credit limit (USD)',{exact:true}).fill('1000'); await terms.getByRole('switch',{name:'Monthly reminder',exact:true}).click(); await terms.getByLabel('Day of month',{exact:true}).fill('1'); await terms.getByRole('button',{name:'Save credit settings',exact:true}).click();
   const sale=await credit(page,'50'); await sale.getByRole('switch',{name:'Send the receipt on WhatsApp',exact:true}).click(); await sale.getByRole('button',{name:'Add to Karim bhai’s khata',exact:true}).click();
-  await page.clock.setFixedTime(new Date(Date.now()+40*86400000)); await go(page,'khata'); await expect(page.getByRole('button',{name:'Due this week 2',exact:true})).toBeVisible(); await expect(page.getByRole('heading',{name:'Remind 1 person due this week',exact:true})).toBeVisible();
+  await expect(sale).not.toBeVisible(); await expect(page.getByLabel('Calculation',{exact:true})).toHaveValue('');
+  await page.clock.setFixedTime(new Date('2026-12-26T06:00:00Z')); await go(page,'khata'); await expect(page.getByRole('button',{name:'Due this week 2',exact:true})).toBeVisible(); await expect(page.getByRole('heading',{name:'Remind 1 person due this week',exact:true})).toBeVisible();
 });
 
 for (const width of [360,390,768,1024,1440]) test(`khata list, profile and credit sheet fit and meet axe at ${width}px`,async ({page}) => {
