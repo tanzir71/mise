@@ -33,3 +33,14 @@ test('concurrent first-run saves create one shop and one sample catalogue', asyn
   expect(await db.items.count()).toBe(3);
   expect(await db.events.count()).toBe(2);
 });
+test('removing a sample is audited, while real items are protected during setup', async () => {
+  const db = open(); await db.saveSetup(input);
+  const sample = (await db.items.toArray())[0];
+  await db.removeSample(sample.id);
+  expect(await db.items.count()).toBe(2);
+  expect(await db.events.where('command').equals('catalogue.remove-sample').count()).toBe(1);
+  const real = (await db.items.toArray())[0];
+  await db.items.update(real.id, { isSample: false });
+  await expect(db.removeSample(real.id)).rejects.toThrow(/Only sample/);
+  expect(await db.items.get(real.id)).toBeDefined();
+});

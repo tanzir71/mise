@@ -41,7 +41,7 @@ Spec: `phases/phase-0-landing.md`
 ## Phase 1 — Useful on one device (T1) → tag `v0.2.0`
 The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-local-app.md`
 
-- [ ] **M10** App shell: routes, desktop sidebar, phone bottom nav, business + market packs, onboarding (3 questions) · M · T1
+- [x] **M10** App shell: routes, desktop sidebar, phone bottom nav, business + market packs, onboarding (3 questions) · M · T1
 - [ ] **M11** Catalogue / business data CRUD (items, prices, categories, available toggle) · S · T1
 - [ ] **M12** Counter calculator: amount entry, cash in one tap, given/change, optional "who", sales log · S · T1
 - [ ] **M13** Customers + khata (credit): limits, entries, payments, balances, WhatsApp/copy reminder · M · T1

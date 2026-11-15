@@ -1,0 +1,257 @@
+{
+  "title": "M10 local app",
+  "widths": [
+    390,
+    1440
+  ],
+  "heights": {
+    "390": 844,
+    "1440": 1000
+  },
+  "pages": [
+    {
+      "id": "m10-onboarding",
+      "path": "app/",
+      "actions": [
+        {
+          "type": "wait",
+          "selector": ".onboarding form"
+        }
+      ],
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. The written milestone specifies three initial questions; M33 depicts the later getting-started checklist. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "sections": [
+        {
+          "id": "first-run",
+          "selector": ".onboarding",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}"
+    },
+    {
+      "id": "m10-today",
+      "path": "app/",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        }
+      ],
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".app-shell",
+          "widths": [
+            390
+          ],
+          "reference": "screens/mobile/M12 · Manager — Today.png"
+        },
+        {
+          "id": "desktop",
+          "selector": ".app-shell",
+          "widths": [
+            1440
+          ],
+          "reference": "screens/desktop/Desktop 03 · Mise — Today.png"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}"
+    },
+    {
+      "id": "m10-more",
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-bottom-nav a[href$=\"/more\"]"
+        }
+      ],
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}"
+    },
+    {
+      "id": "m10-settings",
+      "path": "app/",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. The local business fields reuse M33's card/type system; fields follow the M10 written spec. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".welcome-panel a"
+        }
+      ],
+      "sections": [
+        {
+          "id": "form",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}"
+    },
+    {
+      "id": "m10-samples",
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Sample-only list for the M10 removable-seed acceptance; full catalogue CRUD is M11. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-main a[href$=\"/catalogue\"]"
+        }
+      ],
+      "sections": [
+        {
+          "id": "list",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}"
+    }
+  ]
+}

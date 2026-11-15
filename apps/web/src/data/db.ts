@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Business, Outlet, Member, Category, Item, AuditEvent, SetupSnapshot, SetupInput } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
+import { removeSampleCommand } from '@mise/core/catalogue';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -29,5 +30,13 @@ export class MiseDatabase extends Dexie {
       return command.snapshot;
     });
   }
+  async removeSample(id: string): Promise<void> {
+    await this.transaction('rw', this.tables, async () => {
+      const [item, setup] = await Promise.all([this.items.get(id), this.setup()]);
+      if (!item || !setup || item.outletId !== setup.outlet.id) throw new Error('Sample item not found.');
+      const event = removeSampleCommand(item, setup.owner.id);
+      await this.items.delete(id); await this.events.add(event);
+    });
+  }
 }
-export const db = new MiseDatabase();
+export const db = new MiseDatabase(`mise-local:${import.meta.env.BASE_URL}`);

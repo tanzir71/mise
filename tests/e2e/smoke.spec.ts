@@ -4,12 +4,12 @@ test('landing and app are available', async ({ page }) => {
   await page.goto('./');
   await expect(page).toHaveTitle(/Mise/);
   await page.goto('app/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Your next shift');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Getting started');
 });
 
 test('UI gallery is opt-in and renders Bengali examples', async ({ page }) => {
   await page.goto('app/_ui');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Your next shift');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Getting started');
   await page.goto('app/_ui?flags=uiGallery');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Mise UI');
   await expect(page.getByText('আপনার দোকান · ৳১,১২,৮৪০')).toBeVisible();

@@ -4,6 +4,7 @@ import '@mise/ui/fonts.css';
 import '@mise/ui/primitives.css';
 import '../styles/global.css';
 import geistRegular from '../../../../packages/ui/node_modules/@fontsource/geist/files/geist-latin-400-normal.woff2?url';
+import appCopy from '../../../../handover/copy/app.en.json';
 interface Props { title: string; description: string; lang?: string; region?: 'bd' | 'intl'; noindex?: boolean }
 const { title, description, lang = 'en', region, noindex } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -42,7 +43,7 @@ const analyticsUrl = import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true' && /^ht
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
-    <dialog id="availability" class="availability"><div><p class="eyebrow">LET’S GET YOU READY</p><h2>We’re getting Mise ready.</h2><p>The working app is coming in the next phase. Explore setup and the rollout plan while we get the counter ready.</p><a class="button button-primary" href={`${base}setup/`}>See setup and downloads <span aria-hidden="true">→</span></a><form method="dialog"><button class="button button-secondary">Close</button></form></div></dialog>
+    <dialog id="availability" class="availability"><div><p class="eyebrow">LET’S GET YOU READY</p><h2>We’re getting Mise ready.</h2><p>{appCopy.availability}</p><a class="button button-primary" href={`${base}setup/`}>See setup and downloads <span aria-hidden="true">→</span></a><form method="dialog"><button class="button button-secondary">Close</button></form></div></dialog>
     <dialog id="copy-fallback" class="availability"><h2>Copy by hand</h2><p>Select the text below and copy it.</p><label class="sr-only" for="copy-text">Text to copy</label><textarea id="copy-text" readonly rows="8"></textarea><form method="dialog"><button class="button button-primary">Done</button></form></dialog>
     <p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
     <script>

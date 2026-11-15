@@ -1,6 +1,6 @@
 # 09 · Refinement appendix: Phase R (do this before M10)
 
-**Status: refinement implemented.** R0–R7 are checked in the roadmap. R7 must pass CI, merge and deploy before tagging `v0.1.1` and starting M10. The owner reviewed the original live site on 15 Nov 2026.
+**Status: complete.** R0–R7 passed CI, deployed and were released as `v0.1.1` on 15 Nov 2026. The owner subsequently requested direct commits to main without PRs; see AGENTS.md and DECISIONS.md for the current delivery workflow.
 
 Live pages reviewed: `https://tanzir71.github.io/mise/bd/`, `/intl/`, `/setup/`.
 

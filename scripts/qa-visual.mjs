@@ -7,7 +7,7 @@ import { writeVisualReport } from './visual-report.mjs';
 
 const configPaths = process.argv[2] ? [process.argv[2]] : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
-const targets = configs.flatMap(config => config.pages.map(page => ({ ...page, widths: page.widths || config.widths, sections: page.sections || config.sections })));
+const targets = configs.flatMap(config => config.pages.map(page => ({ ...page, widths: page.widths || config.widths, heights: page.heights || config.heights, sections: page.sections || config.sections })));
 const assets = JSON.parse(readFileSync('handover/exports/landing-assets.json', 'utf8'));
 const base = `/${(process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/');
 const origin = process.env.PREVIEW_URL || `http://127.0.0.1:4321${base}`;
@@ -33,7 +33,7 @@ try {
   if (!available) throw new Error(`Production preview unavailable at ${origin}. Run pnpm build first.`);
   browser = await chromium.launch();
   for (const target of targets) for (const width of target.widths) {
-    const page = await browser.newPage({ viewport: { width, height: 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+    const page = await browser.newPage({ viewport: { width, height: target.heights?.[width] || 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
     await page.goto(new URL(target.path, origin).href);
     await page.evaluate(() => document.fonts.ready);
     for (const action of target.actions || []) {
@@ -64,13 +64,14 @@ try {
       if (!/^[a-z0-9-]+$/.test(id) || captureIds.has(id)) throw new Error(`Invalid or duplicate capture id: ${id}`);
       captureIds.add(id);
       const screen = `screens/${id}.png`;
-      await element.screenshot({ path: `${output}/${screen}`, animations: 'disabled', style: '.skip-link{visibility:hidden}' + (section.selector !== '.site-header' && section.selector !== 'body' ? '.site-header{visibility:hidden}' : '') });
+      const captureStyle = section.captureStyle || target.captureStyle || '';
+      await element.screenshot({ path: `${output}/${screen}`, animations: 'disabled', style: '.skip-link{visibility:hidden}' + (section.selector !== '.site-header' && section.selector !== 'body' ? '.site-header{visibility:hidden}' : '') + captureStyle });
       const result = await compareImages(`${output}/${screen}`, referencePath, section.clip);
       const reference = `references/${id}.png`;
       const diff = `diffs/${id}.png`;
       writeFileSync(`${output}/${reference}`, result.reference);
       writeFileSync(`${output}/${diff}`, result.diff);
-      rows.push({ id, page: target.id, section: section.id, width, url: new URL(target.path, origin).href, screen, reference, diff, referenceFile, note: section.note || target.note || '', pageMetrics, ...result.metrics });
+      rows.push({ id, page: target.id, section: section.id, width, url: new URL(target.path, origin).href, screen, reference, diff, referenceFile, note: section.note || target.note || '', captureStyle, pageMetrics, ...result.metrics });
       console.log(`${id}: ${result.metrics.percent}% difference (informational)`);
     }
     await page.close();

@@ -13,7 +13,7 @@ test('marketing JS stays small and root routing stays below 2KB', async () => {
   }
 });
 
-test('social images, sitemap and placeholder app handoff work', async ({ page, request, baseURL }) => {
+test('social images, sitemap and app handoff work', async ({ page, request, baseURL }) => {
   await page.goto('intl/');
   const og = await page.locator('meta[property="og:image"]').getAttribute('content');
   const ogPath = new URL(og!).pathname.split('/').pop();
@@ -23,14 +23,14 @@ test('social images, sitemap and placeholder app handoff work', async ({ page, r
   expect((await request.get(`${baseURL}robots.txt`)).ok()).toBeTruthy();
   expect((await request.get(`${baseURL}sitemap.xml`)).ok()).toBeTruthy();
   await page.locator('.hero-actions').getByRole('link', { name: 'Start free' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Your next shift');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Getting started');
 });
 
 test('unconfigured contact CTA gives an honest, dismissible next step', async ({ page }) => {
   await page.goto('bd/#cta');
   await page.getByRole('link', { name: 'Chat with us on WhatsApp', exact: true }).click();
   await expect(page.locator('#availability')).toBeVisible();
-  await expect(page.locator('#availability')).toContainText('The working app is coming');
+  await expect(page.locator('#availability')).toContainText('Shop setup is available now');
   await page.locator('#availability').getByRole('button', { name: 'Close' }).click();
   await expect(page.locator('#availability')).not.toBeVisible();
 });

@@ -80,7 +80,7 @@ pnpm lint && pnpm typecheck
 
 ## Working style
 
-- **One milestone = one branch = one PR**, using the PR template. Small PRs beat big ones. Split a milestone into several PRs if it touches more than ~800 lines.
+- **Owner delivery override (15 Nov 2026): commit and push directly to `main`; do not create PRs or request sign-off.** Keep increments small and run the required checks before each push. Confirm CI and Pages deployment afterward.
 - **Feature flags:** put unfinished user-facing work behind a flag in `packages/core/flags.ts`, default off.
 - **Documentation per milestone:**
   - Update `CHANGELOG.md` (Keep a Changelog style).
@@ -98,6 +98,6 @@ pnpm lint && pnpm typecheck
 - [ ] No critical axe violations on changed pages
 - [ ] Works offline where the phase requires it
 - [ ] Responsive at 360–1440 px, and visually matches the Figma frame(s) named in the spec
-- [ ] Visual QA report (`pnpm qa:visual` → `qa/report.html`) attached to the PR, comparing your screens with the exports named in the spec
-- [ ] Deployed to GitHub Pages from `main`, with the live URL in the PR description
+- [ ] Visual QA report (`pnpm qa:visual` → `qa/report.html`) uploaded as a CI artifact, comparing your screens with the exports named in the spec; link the run and three key screenshots in the milestone notes
+- [ ] Deployed to GitHub Pages from `main`, with the live URL in the milestone notes
 - [ ] CHANGELOG, roadmap checkbox and docs updated

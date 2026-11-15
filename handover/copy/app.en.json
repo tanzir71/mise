@@ -1,0 +1,99 @@
+{
+  "gettingStarted": "Getting started",
+  "step": "Step",
+  "of": "of",
+  "minute": "about a minute",
+  "back": "Back",
+  "next": "Continue",
+  "open": "Open Mise",
+  "saving": "Saving…",
+  "save": "Save changes",
+  "saved": "Changes saved on this device.",
+  "updateReady": "An update is ready. Save your changes before reloading.",
+  "reload": "Reload",
+  "onboarding": [
+    {
+      "title": "What kind of business?",
+      "lead": "Mise uses the words and workflow that fit your shop."
+    },
+    {
+      "title": "Where is your shop?",
+      "lead": "Your market sets the currency, phone format and customer messages."
+    },
+    {
+      "title": "Your business basics",
+      "lead": "No account or verification code. Your shop stays on this device."
+    }
+  ],
+  "shopName": "Shop name",
+  "phone": "Phone number",
+  "outlet": "Outlet name",
+  "address": "Address",
+  "business": "Business type",
+  "market": "Market",
+  "language": "Customer messages",
+  "currency": "Currency",
+  "timezone": "Timezone",
+  "currencyPreview": "Currency preview",
+  "settings": "Settings",
+  "businessSettings": "Business and outlet",
+  "marketSettings": "Market and language",
+  "thisDevice": "On this device",
+  "offline": "Offline · saved on this device",
+  "online": "Local mode",
+  "storageError": "Couldn’t open your shop data.",
+  "storageHelp": "Keep this browser’s data. Try reopening Mise; your shop may still be stored on this device.",
+  "retry": "Try again",
+  "today": "Today",
+  "welcome": "Your shop is ready.",
+  "welcomeLead": "Your business basics and sample items are saved on this device. You can adjust them at any time.",
+  "sales": "Sales",
+  "orders": "Orders",
+  "average": "Average order",
+  "noSales": "No sales recorded",
+  "noOrders": "No orders yet",
+  "needsYou": "Needs you",
+  "allClear": "Nothing needs your attention.",
+  "localLead": "This is your local workspace. Orders, counter sales and stock tools will appear as they become available.",
+  "samples": "sample items",
+  "viewSamples": "View sample items",
+  "sampleLead": "These examples help you get started. Remove any you don’t need; they aren’t sales or stock.",
+  "sample": "Sample",
+  "removeSample": "Remove sample",
+  "removed": "Sample removed.",
+  "noSamples": "No sample items left.",
+  "emptyFeature": "This part of Mise is on its way.",
+  "emptyLead": "Your shop details are ready. You can keep setting up your business while this tool is being prepared.",
+  "backToday": "Back to Today",
+  "more": "More",
+  "businessData": "Business data",
+  "setup": "Setup",
+  "devices": "Devices",
+  "downloads": "Setup and downloads",
+  "whatsNew": "What’s new",
+  "localNote": "Your data lives in this browser. Keep this device and browser’s storage to keep your shop.",
+  "languages": [
+    {
+      "value": "en",
+      "label": "English"
+    },
+    {
+      "value": "bn",
+      "label": "বাংলা"
+    },
+    {
+      "value": "both",
+      "label": "English + বাংলা"
+    }
+  ],
+  "businessHints": {
+    "restaurant": "Orders, kitchen and guests",
+    "online_shop": "Products, packing and couriers",
+    "food_stall": "Fast sales and simple stock",
+    "corner_shop": "Cash, credit and a price list"
+  },
+  "businessGroup": "Business",
+  "currencyNote": "Changing currency does not convert amounts. Review your prices afterward.",
+  "availability": "Shop setup is available now. More tools are rolling out in stages, and contact and demo links are still being configured.",
+  "recentChanges": "Recent changes in Mise. The local app is being built in small, useful increments."
+}

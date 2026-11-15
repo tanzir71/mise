@@ -6,7 +6,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
-- M10, part 1: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events. The local-app flag remains off while onboarding and the shell are implemented.
+- M10 foundations: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events.
+- M10: enabled three-step onboarding, pack-aware phone navigation and 240px desktop sidebar, business/outlet/market settings, removable samples, offline shell caching and an explicit reload control for updates. Future counter/order/stock tools remain staged. Added app reference captures and direct-to-main delivery workflow per owner instruction.
+
+## [0.1.1] - 2026-11-15
 
 ### Refinement pass
 
