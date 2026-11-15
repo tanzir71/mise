@@ -17,7 +17,7 @@ export function setupCommand(input: SetupInput, before: SetupSnapshot | null = n
   const language = input.language || (input.marketCode === 'BD' ? 'both' : 'en');
   const languages: SetupSnapshot['business']['languages'] = language === 'both' ? ['en', 'bn'] : [language];
   const business = { id: before?.business.id || id(), name, businessType: input.businessType, marketCode: input.marketCode, languages, createdAt: before?.business.createdAt ?? at, updatedAt: at } satisfies SetupSnapshot['business'];
-  const outlet = { id: before?.outlet.id || id(), businessId: business.id, name: input.outletName?.trim() || name, address: input.address?.trim() || '', timezone, currency, shopLink: before?.outlet.shopLink, creditMessaging:before?.outlet.creditMessaging, createdAt: before?.outlet.createdAt ?? at, updatedAt: at };
+  const outlet = { id: before?.outlet.id || id(), businessId: business.id, name: input.outletName?.trim() || name, address: input.address?.trim() || '', timezone, currency, shopLink: before?.outlet.shopLink, creditMessaging:before?.outlet.creditMessaging, orderWarningMinutes:before?.outlet.orderWarningMinutes, createdAt: before?.outlet.createdAt ?? at, updatedAt: at };
   const owner = { id: before?.owner.id || id(), businessId: business.id, outletIds: [outlet.id], name: before?.owner.name || 'Owner', phone, role: 'owner', active: true, createdAt: before?.owner.createdAt ?? at, updatedAt: at } satisfies SetupSnapshot['owner'];
   const snapshot = { business, outlet, owner };
   const category = { id: id(), outletId: outlet.id, name: 'Samples', sort: 0, createdAt: at, updatedAt: at };

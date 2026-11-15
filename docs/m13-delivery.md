@@ -25,3 +25,5 @@ CI runs lint, type checking, unit/browser suites, export checks, both portable b
 Live app: [Mise](https://tanzir71.github.io/mise/app/). [CI and Pages passed](https://github.com/tanzir71/mise/actions/runs/43739624690) for `9f67db841bc531c775886556281ac02e980a513f`; download the [89-comparison visual report](https://github.com/tanzir71/mise/actions/runs/43739624690/artifacts/14171846890).
 
 Public verification used an isolated fresh browser with the default feature flags: a 100 opening balance plus 75 credit sale, followed by a 50 payment, retained the correct 125 balance after offline reload. No page errors occurred. Both regional landing footers also retained the owner's tanziro.com credit.
+
+The reminder-count follow-up also passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43740946330), including the [complete visual report](https://github.com/tanzir71/mise/actions/runs/43740946330/artifacts/14171574621).

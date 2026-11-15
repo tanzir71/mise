@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput } from '@mise/core/models';
+import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
@@ -8,6 +8,7 @@ import { saveCustomerCommand, archiveCustomerCommand, type CustomerInput } from 
 import { creditBalance, defaultCreditTerms, saveCreditTermsCommand, openingBalanceCommand, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
 import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } from '@mise/core/credit-sales';
 import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
+import { saveOrderCommand, changeOrderStatusCommand, undoOrderStatusCommand, addOrderNoteCommand, recordOrderCommunicationCommand, saveOrderWarningCommand, type OrderInput } from '@mise/core/orders';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -20,11 +21,15 @@ export class MiseDatabase extends Dexie {
   customers!: EntityTable<Customer, 'id'>;
   creditAccounts!: EntityTable<CreditAccount, 'id'>;
   creditEntries!: EntityTable<CreditEntry, 'id'>;
+  orders!: EntityTable<Order,'id'>;
+  orderNotes!: EntityTable<OrderNote,'id'>;
+  orderCommunications!: EntityTable<OrderCommunication,'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
     this.version(2).stores({ sales: 'id,outletId,createdAt' });
     this.version(3).stores({ customers:'id,businessId,phone,&[businessId+phone]', creditAccounts:'id,outletId,customerId,&[outletId+customerId+currency]', creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,&reversalOf,&[accountId+sequence]', events:'id,outletId,at,command,customerId' });
+    this.version(4).stores({orders:'id,outletId,status,customer.id,createdAt,&[outletId+sequence],&[outletId+number]',orderNotes:'id,orderId,outletId,&[orderId+revision]',orderCommunications:'id,orderId,outletId,&[orderId+revision]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision]'});
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -187,6 +192,54 @@ export class MiseDatabase extends Dexie {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
       const command = saveCreditMessagingCommand(input,setup);
       await this.outlets.put(command.outlet); await this.events.add(command.event);
+    });
+  }
+
+  async saveOrder(input: OrderInput, options: {id?:string;revision?:number} = {}): Promise<Order> {
+    return this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
+      const before = options.id ? await this.orders.get(options.id) : null;
+      if (options.id && !before) throw new Error('Order not found.');
+      const last = before || await this.orders.where('[outletId+sequence]').between([setup.outlet.id,Dexie.minKey],[setup.outlet.id,Dexie.maxKey]).last();
+      const command = saveOrderCommand(input,{setup,items:await this.items.where('outletId').equals(setup.outlet.id).toArray(),customer:input.customerId ? await this.customers.get(input.customerId) : undefined,sequence:before?.sequence || (last?.sequence || 0)+1},before,options.revision);
+      await this.orders.put(command.order); await this.events.add(command.event); return command.order;
+    });
+  }
+  private async orderContext(id: string) {
+    const setup = await this.setup(), order = await this.orders.get(id);
+    if (!setup || !order || order.outletId !== setup.outlet.id) throw new Error('Order not found in this shop.');
+    return {setup,order};
+  }
+  async changeOrderStatus(id: string, status: OrderStatus, revision: number): Promise<Order> {
+    return this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id), command = changeOrderStatusCommand(order,status,setup,revision);
+      await this.orders.put(command.order); await this.events.add(command.event); return command.order;
+    });
+  }
+  async undoOrderStatus(id: string, revision: number): Promise<Order> {
+    return this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id), event = await this.events.get(order.statusEventId);
+      if (!event) throw new Error('Status history not found.');
+      const command = undoOrderStatusCommand(order,event,setup,revision);
+      await this.orders.put(command.order); await this.events.add(command.event); return command.order;
+    });
+  }
+  async addOrderNote(id: string, text: string, revision: number): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id), command = addOrderNoteCommand(order,text,setup,revision);
+      await this.orders.put(command.order); await this.orderNotes.add(command.note); await this.events.add(command.event);
+    });
+  }
+  async recordOrderCommunication(id: string, input: Pick<OrderCommunication,'purpose'|'channel'|'text'>, revision: number): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id), command = recordOrderCommunicationCommand(order,input,setup,revision);
+      await this.orders.put(command.order); await this.orderCommunications.add(command.communication); await this.events.add(command.event);
+    });
+  }
+  async saveOrderWarning(minutes: number): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
+      const command = saveOrderWarningCommand(minutes,setup); await this.outlets.put(command.outlet); await this.events.add(command.event);
     });
   }
 }
