@@ -1,0 +1,32 @@
+{
+  "measuredAt": "2026-11-15T09:39:58.734Z",
+  "profile": "Lighthouse default mobile, cold navigation, local static production build",
+  "reports": [
+    {
+      "region": "bd",
+      "url": "http://127.0.0.1:4321/bd/",
+      "scores": {
+        "performance": 96,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "cls": 0.00102302769791864,
+      "lcp": 2332.551,
+      "fcp": 2107.551
+    },
+    {
+      "region": "intl",
+      "url": "http://127.0.0.1:4321/intl/",
+      "scores": {
+        "performance": 98,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100
+      },
+      "cls": 0.00102302769791864,
+      "lcp": 1956.17055,
+      "fcp": 1806.17055
+    }
+  ]
+}
