@@ -40,15 +40,22 @@ try {
   browser = await chromium.launch();
   for (const target of targets) for (const width of target.widths) {
     const page = await browser.newPage({ viewport: { width, height: target.heights?.[width] || 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+    let clockInstalled = false;
+    if ((target.actions || []).some(action => action.type === 'advance-time')) { await page.clock.install(); clockInstalled = true; }
     await page.goto(new URL(target.path, origin).href);
     await page.evaluate(() => document.fonts.ready);
     for (const action of target.actions || []) {
-      const locator = page.locator(action.selector);
+      const locator = page.locator(action.selector || 'body');
       if (action.type === 'click') await locator.click();
       else if (action.type === 'fill') await locator.fill(action.value);
       else if (action.type === 'select') await locator.selectOption(action.value);
       else if (action.type === 'press') await locator.press(action.value);
       else if (action.type === 'wait') await locator.waitFor({ state: action.state || 'visible' });
+      else if (action.type === 'advance-time') {
+        if (!Number.isSafeInteger(action.milliseconds) || action.milliseconds < 0 || action.milliseconds > 604800000) throw new Error('Visual time advance must be between zero and seven days.');
+        if (!clockInstalled) { await page.clock.install(); clockInstalled = true; }
+        await page.clock.fastForward(action.milliseconds);
+      }
       else throw new Error(`Unknown capture action: ${action.type}`);
     }
     const pageMetrics = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth }));
@@ -66,6 +73,7 @@ try {
         await img.evaluate(image => image.decode());
       }
       for (const strip of await element.locator('.day-shots').all()) await strip.evaluate(row => { row.scrollLeft = 0; });
+      for (const panel of await element.locator('.order-detail-content').all()) await panel.evaluate(panel => { panel.scrollTop = 0; });
       const id = `${target.id}-${section.id}-${width}`;
       if (!/^[a-z0-9-]+$/.test(id) || captureIds.has(id)) throw new Error(`Invalid or duplicate capture id: ${id}`);
       captureIds.add(id);

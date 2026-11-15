@@ -1,0 +1,325 @@
+{
+  "title": "M14 manual orders",
+  "pages": [
+    {
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "id": "m14-new-order",
+      "actions": [
+        {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"},
+        {"type": "click", "selector": ".orders-queue-heading a[href$=\"/orders/new\"]"},
+        {"type": "wait", "selector": ".order-form[aria-busy=\"false\"]", "state": "visible"},
+        {"type": "fill", "selector": ".order-form input[type=\"tel\"]", "value": "01711222482"},
+        {"type": "click", "selector": "button:text-is(\"Use usual\")"},
+        {"type": "fill", "selector": ".order-form label:has-text(\"Delivery fee\") input", "value": "60"},
+        {"type": "click", "selector": "button:text-is(\"bKash\")"}
+      ],
+      "note": "Real onboarding, catalogue and order commands seed each capture. The six full Figma contexts supply geometry and local SVG markers. Native browser/phone chrome and later agents, OCR, remote acknowledgements, courier automation and public tracking are omitted. Touch controls are 44px, local owner/time/payment facts replace example claims, and unsupported customer-link panels use manual sharing. Board age advances 20 minutes only in the visual fixture; no production data is changed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M15 · Manager — New order (phone, walk-in, verbal).png"
+        }
+      ],
+      "actionSets": [
+        "restaurantBase"
+      ]
+    },
+    {
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "id": "m14-restaurant-queue",
+      "actions": [],
+      "note": "Real onboarding, catalogue and order commands seed each capture. The six full Figma contexts supply geometry and local SVG markers. Native browser/phone chrome and later agents, OCR, remote acknowledgements, courier automation and public tracking are omitted. Touch controls are 44px, local owner/time/payment facts replace example claims, and unsupported customer-link panels use manual sharing. Board age advances 20 minutes only in the visual fixture; no production data is changed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M13 · Manager — Orders queue.png"
+        }
+      ],
+      "actionSets": [
+        "restaurantBase",
+        "restaurantBoard"
+      ]
+    },
+    {
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "id": "m14-order-detail",
+      "actions": [],
+      "note": "Real onboarding, catalogue and order commands seed each capture. The six full Figma contexts supply geometry and local SVG markers. Native browser/phone chrome and later agents, OCR, remote acknowledgements, courier automation and public tracking are omitted. Touch controls are 44px, local owner/time/payment facts replace example claims, and unsupported customer-link panels use manual sharing. Board age advances 20 minutes only in the visual fixture; no production data is changed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M14 · Manager — Order detail, tracking link, handled by.png"
+        }
+      ],
+      "actionSets": [
+        "restaurantBase"
+      ]
+    },
+    {
+      "path": "app/",
+      "widths": [
+        1440
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "id": "m14-desktop-queue",
+      "actions": [
+        {"type": "click", "selector": ".order-card[data-status=\"cooking\"] .order-open"}
+      ],
+      "note": "Real onboarding, catalogue and order commands seed each capture. The six full Figma contexts supply geometry and local SVG markers. Native browser/phone chrome and later agents, OCR, remote acknowledgements, courier automation and public tracking are omitted. Touch controls are 44px, local owner/time/payment facts replace example claims, and unsupported customer-link panels use manual sharing. Board age advances 20 minutes only in the visual fixture; no production data is changed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 09 · Mise — Orders · live queue.png"
+        }
+      ],
+      "actionSets": [
+        "restaurantBase",
+        "restaurantBoard"
+      ]
+    },
+    {
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "id": "m14-corner-orders",
+      "actions": [
+        {"type": "click", "selector": "button:text-is(\"Paste chat\")"},
+        {"type": "fill", "selector": ".order-form label:has-text(\"Original chat\") textarea", "value": "১ কেজি চিনিগুড়া চাল, ২টা Lux সাবান, ১ হালি ডিম"},
+        {"type": "click", "selector": "button:text-is(\"Type an item\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Chinigura rice"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Quantity\") input", "value": "1"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit\"):not(:has-text(\"Unit price\")) input", "value": "kg"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+        {"type": "click", "selector": "button:text-is(\"Type an item\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Lux soap"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Quantity\") input", "value": "2"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit\"):not(:has-text(\"Unit price\")) input", "value": "pcs"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+        {"type": "click", "selector": "button:text-is(\"Type an item\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Eggs"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Quantity\") input", "value": "1"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit\"):not(:has-text(\"Unit price\")) input", "value": "hali"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+        {"type": "click", "selector": "button:text-is(\"Create order\")"},
+        {"type": "wait", "selector": ".order-detail-heading", "state": "visible"},
+        {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"}
+      ],
+      "note": "Real onboarding, catalogue and order commands seed each capture. The six full Figma contexts supply geometry and local SVG markers. Native browser/phone chrome and later agents, OCR, remote acknowledgements, courier automation and public tracking are omitted. Touch controls are 44px, local owner/time/payment facts replace example claims, and unsupported customer-link panels use manual sharing. Board age advances 20 minutes only in the visual fixture; no production data is changed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C06 · Owner — Orders from the link, WhatsApp, calls and photos.png"
+        }
+      ],
+      "actionSets": [
+        "cornerBase"
+      ]
+    },
+    {
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "id": "m14-price-order",
+      "actions": [
+        {"type": "click", "selector": "input[name=\"fulfilment\"][value=\"pickup\"]"},
+        {"type": "click", "selector": "button:text-is(\"Type an item\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Chinigura rice"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Quantity\") input", "value": "1"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit\"):not(:has-text(\"Unit price\")) input", "value": "pcs"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit price\") input", "value": "25"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+        {"type": "click", "selector": "button:text-is(\"Type an item\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Soap"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Quantity\") input", "value": "1"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit\"):not(:has-text(\"Unit price\")) input", "value": "pcs"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+        {"type": "click", "selector": "button:text-is(\"Type an item\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Eggs"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Quantity\") input", "value": "1"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit\"):not(:has-text(\"Unit price\")) input", "value": "pcs"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit price\") input", "value": "90"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+        {"type": "click", "selector": "button:text-is(\"Create order\")"},
+        {"type": "wait", "selector": ".order-detail-heading", "state": "visible"},
+        {"type": "click", "selector": ".order-detail-actions a[href$=\"/price\"]"},
+        {"type": "click", "selector": ".order-price-list article:has-text(\"Soap\") button:text-is(\"Edit\")"},
+        {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Out of stock\"]"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save item\")"},
+        {"type": "click", "selector": ".order-price-list article:has-text(\"Soap\") button:text-is(\"Offer swap\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Item name\") input", "value": "Lux soap"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Unit price\") input", "value": "60"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save swap proposal\")"},
+        {"type": "click", "selector": "button[aria-label=\"Price Eggs\"]"}
+      ],
+      "note": "Real onboarding, catalogue and order commands seed each capture. The six full Figma contexts supply geometry and local SVG markers. Native browser/phone chrome and later agents, OCR, remote acknowledgements, courier automation and public tracking are omitted. Touch controls are 44px, local owner/time/payment facts replace example claims, and unsupported customer-link panels use manual sharing. Board age advances 20 minutes only in the visual fixture; no production data is changed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png"
+        }
+      ],
+      "actionSets": [
+        "cornerBase"
+      ]
+    }
+  ],
+  "actionSets": {
+    "restaurantBase": [
+      {"type": "click", "selector": "input[name=\"business\"][value=\"restaurant\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "click", "selector": "input[name=\"market\"][value=\"BD\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "fill", "selector": "input[name=\"shopName\"]", "value": "Shorshe Kitchen"},
+      {"type": "fill", "selector": "input[name=\"phone\"]", "value": "01712345482"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "wait", "selector": ".welcome-panel", "state": "visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type": "click", "selector": "main a[href$=\"/catalogue\"]"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Available: Sample dish\"]"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Available: Tea\"]"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Available: Water\"]"},
+      {"type": "click", "selector": ".paste-card button"},
+      {"type": "fill", "selector": "dialog[open] .paste-input textarea", "value": "Kacchi Biryani, 380\nMorog Polao, 320\nBeef Tehari, 260\nBorhani, 90"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Preview\")"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Add 4 items\")"},
+      {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type": "click", "selector": "main a[href$=\"/khata\"]"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Sadia Islam"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": "01711222482"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"address\"]", "value": "House 5, Road 12, Dhanmondi"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading", "state": "visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type": "click", "selector": ".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type": "wait", "selector": ".order-form[aria-busy=\"false\"]", "state": "visible"},
+      {"type": "fill", "selector": ".order-form input[type=\"tel\"]", "value": "01711222482"},
+      {"type": "click", "selector": ".order-form button[aria-label=\"Add Kacchi Biryani\"]"},
+      {"type": "click", "selector": "button[aria-label=\"Add one Kacchi Biryani\"]"},
+      {"type": "click", "selector": ".order-form button[aria-label=\"Add Borhani\"]"},
+      {"type": "fill", "selector": ".order-form label:has-text(\"Delivery fee\") input", "value": "60"},
+      {"type": "click", "selector": "button:text-is(\"bKash\")"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Payment received\"]"},
+      {"type": "click", "selector": "button:text-is(\"Create order\")"},
+      {"type": "wait", "selector": ".order-detail-heading", "state": "visible"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark confirmed\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark kitchen has it\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark cooking\")"}
+    ],
+    "restaurantBoard": [
+      {"type": "advance-time", "milliseconds": 1200000},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type": "click", "selector": ".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type": "wait", "selector": ".order-form[aria-busy=\"false\"]", "state": "visible"},
+      {"type": "fill", "selector": ".order-form input[type=\"tel\"]", "value": "01711222482"},
+      {"type": "click", "selector": ".order-form button[aria-label=\"Add Beef Tehari\"]"},
+      {"type": "click", "selector": "button:text-is(\"Create order\")"},
+      {"type": "wait", "selector": ".order-detail-heading", "state": "visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type": "click", "selector": ".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type": "wait", "selector": ".order-form[aria-busy=\"false\"]", "state": "visible"},
+      {"type": "click", "selector": "button:text-is(\"Table\")"},
+      {"type": "fill", "selector": ".order-form label:has-text(\"Table\") input", "value": "7"},
+      {"type": "click", "selector": ".order-form button[aria-label=\"Add Morog Polao\"]"},
+      {"type": "click", "selector": ".order-form button[aria-label=\"Add Borhani\"]"},
+      {"type": "click", "selector": "button:text-is(\"Create order\")"},
+      {"type": "wait", "selector": ".order-detail-heading", "state": "visible"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark confirmed\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark kitchen has it\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark cooking\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark ready\")"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type": "click", "selector": ".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type": "wait", "selector": ".order-form[aria-busy=\"false\"]", "state": "visible"},
+      {"type": "fill", "selector": ".order-form input[type=\"tel\"]", "value": "01711222482"},
+      {"type": "click", "selector": ".order-form button[aria-label=\"Add Kacchi Biryani\"]"},
+      {"type": "click", "selector": "button:text-is(\"Create order\")"},
+      {"type": "wait", "selector": ".order-detail-heading", "state": "visible"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark confirmed\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark kitchen has it\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark cooking\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark ready\")"},
+      {"type": "click", "selector": ".order-detail-actions button:text-is(\"Mark out with rider\")"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"}
+    ],
+    "cornerBase": [
+      {"type": "click", "selector": "input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "click", "selector": "input[name=\"market\"][value=\"BD\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "fill", "selector": "input[name=\"shopName\"]", "value": "Rahman Store"},
+      {"type": "fill", "selector": "input[name=\"phone\"]", "value": "01712345482"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "wait", "selector": ".welcome-panel", "state": "visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type": "click", "selector": "main a[href$=\"/catalogue\"]"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Available: Rice\"]"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Available: Soap\"]"},
+      {"type": "click", "selector": "button[role=\"switch\"][aria-label=\"Available: Egg\"]"},
+      {"type": "click", "selector": ".paste-card button"},
+      {"type": "fill", "selector": "dialog[open] .paste-input textarea", "value": "Chinigura rice, 120\nLux soap, 60\nEggs, 12"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Preview\")"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Add 3 items\")"},
+      {"type": "wait", "selector": "dialog[open]", "state": "hidden"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type": "click", "selector": "main a[href$=\"/khata\"]"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Akter apa"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": "01711222482"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"address\"]", "value": "House 5, Road 12, Dhanmondi"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading", "state": "visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible, .phone-app-header a[href$=\"/orders\"]:visible"},
+      {"type": "click", "selector": ".orders-queue-heading a[href$=\"/orders/new\"]"},
+      {"type": "wait", "selector": ".order-form[aria-busy=\"false\"]", "state": "visible"},
+      {"type": "fill", "selector": ".order-form input[type=\"tel\"]", "value": "01711222482"}
+    ]
+  }
+}

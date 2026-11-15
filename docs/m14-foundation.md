@@ -1,6 +1,6 @@
 # M14 · Manual-order data foundation
 
-This increment adds the order commands and IndexedDB version 4. M14 remains unchecked and `orders` defaults off while financial settlement and the reference-based screens are connected. The current landing, counter and khata remain available.
+The order foundation includes commands, settlement and IndexedDB version 5. Its stages were published with Orders off while the reference-based screens were connected. See [M14 delivery](m14-delivery.md) for the UI and its delivery checks.
 
 Orders keep their business flow, currency, timezone, customer contact and item-price snapshots. Sources are manual phone, walk-in, table, pasted text or other; pasted text remains literal data. Each order has a unique outlet number and an optimistic revision. Creation, edits, status changes, cancellation, notes, contact completion and warning settings use pure commands with atomic database writes and actor/time audit events.
 
@@ -31,3 +31,5 @@ Schema 5 adds `orderRefunds` and order/refund lookup indexes. Existing orders, n
 Payment corrections respect the cancellation dependency: undo a later credit cancellation before reversing a payment used in its return/refund calculation. This prevents recreating debt for a cancelled order.
 
 Validation before publication: 210 unit tests pass, including 500 independent credit-return/refund scenarios, atomic rollback, concurrent settlement/refund/correction, payment-correction dependencies, debt ageing, historical currency/wallet retention and a version 4-to-5 migration. The browser suite passes all 101 tests, including the archived-customer collection regression, responsive/axe checks and explicit app updates. The visual report contains 89 comparisons. Final CI and live deployment results are recorded below after they finish.
+
+Settlement commit `cfb155c` passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43751391621), including the [89-comparison visual report](https://github.com/tanzir71/mise/actions/runs/43751391621/artifacts/14176117967). A controlled browser upgraded the published `132a0e7` schema-4 build to the published `cfb155c` schema-5 build using the explicit Reload action. It retained both sale IDs, the customer ID, both ledger-entry IDs, all seven audit IDs and the 175 credit balance, then reloaded offline without page errors. A fresh public browser confirmed schema 5, two new receipts and the same offline balance. Both regional footer credits were visibly verified on the public site.
