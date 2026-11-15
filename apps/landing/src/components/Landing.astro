@@ -12,7 +12,7 @@ import '../styles/landing.css';
 interface Props { copy: typeof bdCopy }
 const { copy: c } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const appUrl = import.meta.env.PUBLIC_APP_URL || `${base}app/`;
+const appUrl = import.meta.env.PUBLIC_APP_URL || (import.meta.env.DEV ? `http://127.0.0.1:5173${base}app/` : `${base}app/`);
 const secondaryUrl = c.region === 'bd' ? import.meta.env.PUBLIC_WHATSAPP_URL : import.meta.env.PUBLIC_DEMO_URL;
 const contactUrl = import.meta.env.PUBLIC_WHATSAPP_URL;
 const modes = ['today','orders','tracking','stock','team','live'];

@@ -2,7 +2,7 @@
 
 All notable changes are documented here. Milestone completion is recorded after verification.
 
-## [Unreleased]
+## [0.1.0] - 2026-11-15
 
 ### Added
 
@@ -12,3 +12,4 @@ All notable changes are documented here. Milestone completion is recorded after 
 - M02: complete Bangladesh product page using the supplied copy, twelve detailed workflows, responsive product previews, accessible mobile navigation, and About / Privacy pages.
 - M03: international page from shared components, remembered region switcher, non-blocking region routing with configurable country lookup, and canonical / hreflang metadata.
 - M04: regional social cards and screenshots, mobile Lighthouse targets, copy fallbacks, optional analytics hook (off), sitemap / robots, and a build-time content security policy.
+- M05: setup and downloads guide, runtime manifest with validated checksums and stable download links, installation instructions, artifact publishing skeleton, and self-hosting guide / agent prompt.

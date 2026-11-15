@@ -17,4 +17,11 @@ try {
     await page.screenshot({ path: `docs/screenshots/${region}-390.png`, fullPage: true });
     await page.close();
   }
+  const setup = await browser.newPage({ viewport: { width: 1440, height: 960 } });
+  await setup.goto(`${origin}setup/`);
+  await setup.locator('#manifest-status').filter({ hasText: 'Device builds are coming' }).waitFor();
+  await setup.screenshot({ path: 'docs/screenshots/setup-1440.png', fullPage: true });
+  await setup.screenshot({ path: 'docs/screenshots/setup-hero.png' });
+  await setup.setViewportSize({ width: 390, height: 844 });
+  await setup.screenshot({ path: 'docs/screenshots/setup-390.png', fullPage: true });
 } finally { await browser.close(); }

@@ -22,7 +22,7 @@ You are deploying the Mise web app (landing page + app) from the owner's GitHub 
    - `PUBLIC_WHATSAPP_URL` (optional, the shop's `wa.me` link) or `PUBLIC_DEMO_URL`
    - `PUBLIC_GEO_URL` (optional country lookup for the landing page)
    - from v0.4 (sync): `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` from the owner's own Supabase project. Help them create it if they ask. Never put a `service_role` key in Vercel public env vars.
-7. **Deploy.** Run `vercel deploy --prod`. Open the URL and check `/`, `/app/` and `/setup/`, then reload `/app/` offline to confirm the PWA caches.
+7. **Deploy.** Run `vercel deploy --prod`. Open the URL and check `/`, `/app/` and `/setup/`. In Phase 0 the app is a coming-soon screen. From Phase 1 (M18), also reload `/app/` offline to confirm the PWA caches.
 8. **Connect Git for automatic updates** (recommended): `vercel git connect`, or in the Vercel dashboard → Project → Git. Every push to the fork's `main` then redeploys.
 9. **Custom domain** (optional): `vercel domains add <domain>`, then show the DNS records the owner must add at their registrar.
 10. **Hand back:**

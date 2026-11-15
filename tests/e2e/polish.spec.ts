@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
+import AxeBuilder from '@axe-core/playwright';
 
 test('marketing JS stays small and root routing stays below 2KB', async () => {
   for (const region of ['', 'bd/', 'intl/']) {
@@ -33,3 +34,12 @@ test('unconfigured contact CTA gives an honest, dismissible next step', async ({
   await page.locator('#availability').getByRole('button', { name: 'Close' }).click();
   await expect(page.locator('#availability')).not.toBeVisible();
 });
+
+for (const route of ['bd/', 'intl/', 'setup/']) {
+  test(`${route} is accessible on phones`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(route);
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(results.violations.map(v => ({ id: v.id, nodes: v.nodes.map(n => ({ target: n.target, reason: n.failureSummary })) }))).toEqual([]);
+  });
+}

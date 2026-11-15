@@ -13,3 +13,5 @@
 
 #copy-text{width:100%;padding:12px;border:1px solid #cfcfcc;border-radius:8px;font:12px/1.7 var(--font-mono);resize:vertical}.changelog{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.8 var(--font-sans);margin:32px 0}
 
+
+.wordmark{min-height:44px}@media(max-width:767px){.nav-actions .button{min-height:44px}.index-pills .chip{min-height:44px}.footer-column a{min-height:44px}}
