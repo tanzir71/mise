@@ -14,7 +14,7 @@ Receipt QR codes contain the actual saved receipt text, including the calculatio
 - 83 visual comparisons: the previous 77 plus counter, receipt and sales log at 390/1440.
 - All 270 supplied exports are present; production source/image guards pass.
 
-The report is uploaded as `visual-qa` by [main CI](https://github.com/tanzir71/mise/actions/workflows/pages.yml?query=branch%3Amain). Run summaries link to the complete artifact.
+The report is uploaded as `visual-qa` by [M12 main CI](https://github.com/tanzir71/mise/actions/runs/43732528642): [download the report](https://github.com/tanzir71/mise/actions/runs/43732528642/artifacts/14168254329) and open `report.html`. The deployed counter was also verified in a fresh browser: cash, first-use QR generation/decoding, undo and reload all worked offline.
 
 ## References and scope
 

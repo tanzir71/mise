@@ -8,7 +8,7 @@ import { orderableItems, searchItems } from '@mise/core/catalogue';
 import { formatMoney, moneyInputValue, parseMoney } from '@mise/core/money';
 import { canUndoSale, dailySales, givenSuggestions, saleTotals, type SaleInput } from '@mise/core/sales';
 import { marketPacks } from '@mise/core/packs';
-import type { Item, Sale, SaleMethod, SetupSnapshot } from '@mise/core/models';
+import type { Item, Sale, PaymentMethod, SetupSnapshot } from '@mise/core/models';
 import copy from '../../../handover/copy/app.en.json';
 import { db } from './data/db';
 import { Receipt } from './Receipt';
@@ -59,7 +59,7 @@ export function Counter({ setup, online }: { setup: SetupSnapshot; online: boole
     else change(expression+operator);
   }
   function attach(item: Item) { setAttached(before => before.some(line => line.itemId === item.id) ? before.filter(line => line.itemId !== item.id) : [...before,{itemId:item.id,unitPrice:item.price,qty:1}]); }
-  async function record(method: SaleMethod, wallet?: string) {
+  async function record(method: PaymentMethod, wallet?: string) {
     if (busy.current || submitted.current === expression || amount === null || amount <= 0) return;
     speech.cancel();
     busy.current = true; submitted.current = expression; setSaving(true); setError('');

@@ -2,9 +2,9 @@ import { ulid } from 'ulid';
 import { calculateAmount, normalizeExpression } from './calc';
 import { currencyDigits, formatMoney } from './money';
 import { orderableItems } from './catalogue';
-import type { AuditEvent, Item, Sale, SaleMethod, SetupSnapshot } from './models';
+import type { AuditEvent, Item, Sale, PaymentMethod, SetupSnapshot } from './models';
 
-export interface SaleInput { expression: string; method: SaleMethod; wallet?: string; given?: number; who?: string; items?: { itemId: string; qty: number; unitPrice: number }[] }
+export interface SaleInput { expression: string; method: PaymentMethod; wallet?: string; given?: number; who?: string; items?: { itemId: string; qty: number; unitPrice: number }[] }
 export interface SaleContext { setup: SetupSnapshot; items: Item[]; wallets: string[] }
 export function recordSaleCommand(input: SaleInput, context: SaleContext, at = Date.now()): { sale: Sale; event: AuditEvent } {
   const { setup } = context, amount = calculateAmount(input.expression, setup.outlet.currency);

@@ -1,9 +1,13 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Business, Outlet, Member, Category, Item, Sale, AuditEvent, SetupSnapshot, SetupInput } from '@mise/core/models';
+import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
 import { marketPacks } from '@mise/core/packs';
+import { saveCustomerCommand, archiveCustomerCommand, type CustomerInput } from '@mise/core/customers';
+import { creditBalance, defaultCreditTerms, saveCreditTermsCommand, openingBalanceCommand, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
+import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } from '@mise/core/credit-sales';
+import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -13,10 +17,14 @@ export class MiseDatabase extends Dexie {
   items!: EntityTable<Item, 'id'>;
   events!: EntityTable<AuditEvent, 'id'>;
   sales!: EntityTable<Sale, 'id'>;
+  customers!: EntityTable<Customer, 'id'>;
+  creditAccounts!: EntityTable<CreditAccount, 'id'>;
+  creditEntries!: EntityTable<CreditEntry, 'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
     this.version(2).stores({ sales: 'id,outletId,createdAt' });
+    this.version(3).stores({ customers:'id,businessId,phone,&[businessId+phone]', creditAccounts:'id,outletId,customerId,&[outletId+customerId+currency]', creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,&reversalOf,&[accountId+sequence]', events:'id,outletId,at,command,customerId' });
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -92,8 +100,93 @@ export class MiseDatabase extends Dexie {
     await this.transaction('rw', this.tables, async () => {
       const [sale, setup] = await Promise.all([this.sales.get(id), this.setup()]);
       if (!sale || !setup || sale.outletId !== setup.outlet.id) throw new Error('Sale not found.');
+      if (sale.method === 'credit') {
+        const context = await this.ledgerContext(sale.creditAccountId || '');
+        const charge = context.entries.find(entry => entry.saleId === sale.id && entry.type === 'charge');
+        if (!charge) throw new Error('Credit charge not found.');
+        const command = undoCreditSaleCommand(sale,charge,context);
+        await this.sales.put(command.sale); await this.events.add(command.event);
+        await this.creditEntries.add(command.entry); await this.events.add(command.creditEvent); return;
+      }
       const command = undoSaleCommand(sale, setup.owner.id);
       await this.sales.put(command.sale); await this.events.add(command.event);
+    });
+  }
+  private async ledgerContext(accountId: string): Promise<LedgerContext> {
+    const [account,setup] = await Promise.all([this.creditAccounts.get(accountId),this.setup()]);
+    const customer = account ? await this.customers.get(account.customerId) : undefined;
+    if (!setup || !account || !customer || customer.businessId !== setup.business.id || account.outletId !== setup.outlet.id) throw new Error('Khata not found in this shop.');
+    return {setup,account,customer,entries:await this.creditEntries.where('accountId').equals(accountId).toArray()};
+  }
+  async readCreditLedger(accountId: string): Promise<LedgerContext> { return this.transaction('r',this.tables,() => this.ledgerContext(accountId)); }
+  async saveCustomer(input: CustomerInput, options: { id?: string; credit?: CreditTermsInput; opening?: {amount:number;occurredAt:number} } = {}): Promise<Customer> {
+    return this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
+      const before = options.id ? await this.customers.get(options.id) : null;
+      if (options.id && !before) throw new Error('Customer not found.');
+      const command = saveCustomerCommand(input,setup,await this.customers.where('businessId').equals(setup.business.id).toArray(),before);
+      const existing = await this.creditAccounts.where('[outletId+customerId+currency]').equals([setup.outlet.id,command.customer.id,setup.outlet.currency]).first();
+      if (options.opening && existing) throw new Error('Opening balances are only available on a new khata.');
+      await this.customers.put(command.customer); await this.events.add(command.event);
+      if (!existing || options.credit) {
+        const terms = saveCreditTermsCommand(options.credit || defaultCreditTerms,command.customer,setup,existing || null);
+        await this.creditAccounts.put(terms.account); await this.events.add(terms.event);
+        if (options.opening) { const opening = openingBalanceCommand(options.opening.amount,options.opening.occurredAt,{setup,customer:command.customer,account:terms.account,entries:[]}); await this.creditEntries.add(opening.entry); await this.events.add(opening.event); }
+      }
+      return command.customer;
+    });
+  }
+  async saveCreditTerms(customerId: string, input: CreditTermsInput, accountId?: string): Promise<CreditAccount> {
+    return this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(), customer = await this.customers.get(customerId);
+      if (!setup || !customer) throw new Error('Customer not found.');
+      const before = accountId ? await this.creditAccounts.get(accountId) : await this.creditAccounts.where('[outletId+customerId+currency]').equals([setup.outlet.id,customerId,setup.outlet.currency]).first();
+      if (accountId && !before) throw new Error('Khata not found.');
+      const command = saveCreditTermsCommand(input,customer,setup,before || null);
+      await this.creditAccounts.put(command.account); await this.events.add(command.event); return command.account;
+    });
+  }
+  async archiveCustomer(id: string, archive = true): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(), customer = await this.customers.get(id);
+      if (!setup || !customer) throw new Error('Customer not found.');
+      const accounts = await this.creditAccounts.where('customerId').equals(id).toArray(), entries = await this.creditEntries.where('customerId').equals(id).toArray();
+      const command = archiveCustomerCommand(customer,setup,accounts.some(account => creditBalance(account,entries) !== 0),archive);
+      await this.customers.put(command.customer); await this.events.add(command.event);
+    });
+  }
+  async recordCreditSale(input: CreditSaleInput): Promise<Sale> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.ledgerContext(input.accountId);
+      const command = recordCreditSaleCommand(input,context,{setup:context.setup,wallets:marketPacks[context.setup.business.marketCode]['pay/wallets'],items:await this.items.where('outletId').equals(context.setup.outlet.id).toArray()});
+      await this.sales.add(command.sale); await this.events.add(command.event);
+      await this.creditEntries.add(command.entry); await this.events.add(command.creditEvent); return command.sale;
+    });
+  }
+  async recordCreditPayment(accountId: string, amount: number, method: PaymentMethod, wallet?: string, note = ''): Promise<CreditEntry> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.ledgerContext(accountId), command = recordCreditPaymentCommand(amount,method,wallet,context,marketPacks[context.setup.business.marketCode]['pay/wallets'],note);
+      await this.creditEntries.add(command.entry); await this.events.add(command.event); return command.entry;
+    });
+  }
+  async undoCreditEntry(id: string): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const entry = await this.creditEntries.get(id); if (!entry) throw new Error('Credit entry not found.');
+      const command = undoCreditEntryCommand(entry,await this.ledgerContext(entry.accountId));
+      await this.creditEntries.add(command.entry); await this.events.add(command.event);
+    });
+  }
+  async recordCommunication(accountId: string, purpose: 'reminder'|'receipt'|'call', text: string, channel: 'whatsapp'|'manual'|'call'): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const command = recordCommunicationCommand(await this.ledgerContext(accountId),purpose,text,channel);
+      await this.creditEntries.add(command.entry); await this.events.add(command.event);
+    });
+  }
+  async saveCreditMessaging(input: CreditMessaging): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
+      const command = saveCreditMessagingCommand(input,setup);
+      await this.outlets.put(command.outlet); await this.events.add(command.event);
     });
   }
 }
