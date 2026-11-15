@@ -39,7 +39,9 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm check:exports
+      - run: pnpm check:marketing
       - run: pnpm build            # → ./site (landing at /, app at /app/)
+      - run: pnpm check:images
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e

@@ -1,0 +1,44 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import assets from '@figma/landing-assets.json';
+
+interface Props {
+  region: 'bd' | 'intl';
+  imageSlot: string;
+  eager?: boolean;
+  sizes?: string;
+}
+const { region, imageSlot, eager = false, sizes } = Astro.props;
+const regionAssets = assets[region];
+const definition = [regionAssets.hero, ...regionAssets.detail, ...regionAssets.day, ...regionAssets.businesses].find(item => item.slot === imageSlot);
+if (!definition) throw new Error(`Unknown Figma image slot: ${region}/${imageSlot}`);
+
+const images = import.meta.glob<ImageMetadata>('@figma/landing/lp-*.png', { eager: true, import: 'default' });
+const source = Object.entries(images).find(([path]) => path.endsWith(`/${definition.src.split('/').pop()}`))?.[1];
+if (!source) throw new Error(`Required Figma image is missing: ${definition.src}`);
+const displayWidth = source.width / definition.exportScale;
+const displayHeight = source.height / definition.exportScale;
+const widths = [Math.ceil(displayWidth), source.width];
+---
+<Picture
+  src={source}
+  formats={['avif', 'webp']}
+  fallbackFormat="png"
+  widths={widths}
+  width={source.width}
+  height={source.height}
+  quality={imageSlot === 'hero.visual' ? 58 : 65}
+  sizes={sizes || `(max-width: ${displayWidth}px) 100vw, ${displayWidth}px`}
+  alt={definition.alt}
+  loading={eager ? 'eager' : 'lazy'}
+  fetchpriority={eager ? 'high' : 'auto'}
+  decoding="async"
+  data-shot={`${region}/${imageSlot}`}
+  data-export-scale={definition.exportScale}
+  pictureAttributes={{ class: 'figma-shot', style: `--shot-width:${displayWidth}px;--shot-height:${displayHeight}px` }}
+/>
+<style>
+  .figma-shot { display: block; width: var(--shot-width); max-width: 100%; flex-shrink: 0; }
+  .figma-shot :global(img) { display: block; width: 100%; height: auto; }
+</style>

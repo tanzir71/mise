@@ -2,6 +2,8 @@
 
 - 2026-11-15 (refinement): the owner supplied all 270 indexed Figma exports, including the 76 landing assets/references. The old HTML/CSS marketing-preview exception is superseded by Phase R. Product imagery must come from the supplied PNGs through one alias and image pipeline.
 - 2026-11-15 (refinement): preserve the configured export scale when retrying individual Figma renders; never silently downgrade 2× assets to 1×.
+- 2026-11-15 (R1): `Shot` uses `imageSlot` as its prop because Astro reserves `slot` for named slots. The values are the unchanged keys in landing-assets.json. Display dimensions come from image metadata divided by exportScale, including the exported shadow bounds.
+- 2026-11-15 (R1): use the supplied Figma SVG icons as CSS masks with currentColor where available; Lucide remains the fallback for unmapped names. This removes hundreds of repeated inline paths without changing icon slots or adding client JavaScript.
 
 - 2026-11-15: Use the restaurant workspace as the repository root, with the supplied package copied to `handover/`. Exclude the duplicate `Claude outputs/` source from Git.
 - 2026-11-15: Begin with the kickoff scope, M00–M05, before adding local app or backend features. Keep the app placeholder honest about availability.

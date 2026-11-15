@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
 import Heading from './SectionHeading.astro';
-import Preview from './Preview.astro';
+import Shot from './Shot.astro';
 import Icon from '@mise/ui/Icon.astro';
 import Section from '@mise/ui/Section.astro';
 import Chip from '@mise/ui/Chip.astro';
@@ -15,8 +15,8 @@ const base = import.meta.env.BASE_URL;
 const appUrl = import.meta.env.PUBLIC_APP_URL || (import.meta.env.DEV ? `http://127.0.0.1:5173${base}app/` : `${base}app/`);
 const secondaryUrl = c.region === 'bd' ? import.meta.env.PUBLIC_WHATSAPP_URL : import.meta.env.PUBLIC_DEMO_URL;
 const contactUrl = import.meta.env.PUBLIC_WHATSAPP_URL;
-const modes = ['today','orders','tracking','stock','team','live'];
-const businessModes = ['today','shop','stall','credit'];
+const region = c.region as 'bd' | 'intl';
+const numberedSlot = (group: string, index: number) => `${group}.${String(index + 1).padStart(2, '0')}`;
 ---
 <Base title={c.meta.title} description={c.meta.description} lang={c.lang} region={c.region as 'bd' | 'intl'}>
   <div id="top"><Header nav={c.nav} appUrl={appUrl} /></div>
@@ -24,7 +24,7 @@ const businessModes = ['today','shop','stall','credit'];
     <section class="hero dark">
       <div class="container hero-grid">
         <div class="hero-copy"><a href="#ai" class="new-chip"><span class="ember-dot" />{c.hero.eyebrow}<Icon name="arrowRight" size={14} /></a><h1>{c.hero.headline}</h1><p class="lead">{c.hero.lead}</p><div class="hero-actions"><a class="button button-primary" href={appUrl}>{c.hero.ctaPrimary}<Icon name="arrowUpRight" size={18} /></a><a class="button button-ghost" href="#day"><span class="play-icon"><Icon name="play" size={12} /></span>{c.hero.ctaSecondary}</a></div><span class="preview-label">PRODUCT PREVIEW · ROLLING OUT IN STAGES</span></div>
-        <div class="hero-visual" role="img" aria-label="Illustrative preview of the Mise live store dashboard and orders on a phone"><div class="hero-desktop"><Preview mode="live" region={c.region} /></div><div class="hero-phone"><Preview mode="orders" phone region={c.region} /></div>{c.hero.chips.map((chip,i)=><div class:list={['floating-chip',`hero-chip-${i}`]}><span class="floating-icon"><Icon name={chip.icon} size={17} /></span><div><strong>{chip.title}</strong><small>{chip.meta}</small></div>{i===2&&<Icon name="check" size={13} />}</div>)}</div>
+        <div class="hero-visual"><Shot region={region} imageSlot="hero.visual" eager /></div>
       </div>
       <div class="container trust"><p>{c.hero.trustLabel}</p><div class="partners">{c.hero.partners.map(partner=><span>{partner}</span>)}</div></div>
     </section>
@@ -50,15 +50,15 @@ const businessModes = ['today','shop','stall','credit'];
     </Section>
     <Section id="detail" class="detail-section">
       <Heading eyebrow={c.detail.eyebrow} headline={c.detail.headline} lead={c.detail.lead} center />
-      <div class="detail-blocks">{c.detail.blocks.map((block,i)=><article id={block.id} class:list={['detail-block', { reverse:i%2===1 }]}><div class="detail-visual"><div class:list={['detail-preview', { 'dual-phones':block.id==='f-tracking'||block.id==='f-credit' }]}>{block.id==='f-tracking'? <><Preview mode="tracking" phone region={c.region} /><Preview mode="orders" phone region={c.region} /></> : block.id==='f-credit'? <><Preview mode="credit" phone region={c.region} /><Preview mode="orders" phone region={c.region} /></> : <Preview mode={block.id.replace('f-','')} region={c.region} />}</div>{block.callout&&<div class="floating-chip detail-callout"><span class="floating-icon"><Icon name={block.callout.icon} size={19} /></span><div><strong>{block.callout.title}</strong><small>{block.callout.meta}</small></div><Icon name="check" size={14} /></div>}<span class="visual-caption">MISE / {block.cat} · PRODUCT PREVIEW</span></div><div class="detail-copy"><p class="eyebrow"><span>{block.n}</span> / {block.cat}</p><h3>{block.title}</h3><p class="lead">{block.lead}</p><ol>{block.steps.map((step,index)=><li><span>{String(index+1).padStart(2,'0')}</span><p>{step}</p></li>)}</ol><div class="fallback-box"><Icon name="shield" size={16} /><p><strong>{c.detail.failLabel}</strong> {block.fail}</p></div></div></article>)}</div>
+      <div class="detail-blocks">{c.detail.blocks.map((block,i)=><article id={block.id} class:list={['detail-block', { reverse:i%2===1 }]}><div class="detail-visual"><Shot region={region} imageSlot={numberedSlot('detail', i)} /></div><div class="detail-copy"><p class="eyebrow"><span>{block.n}</span> / {block.cat}</p><h3>{block.title}</h3><p class="lead">{block.lead}</p><ol>{block.steps.map((step,index)=><li><span>{String(index+1).padStart(2,'0')}</span><p>{step}</p></li>)}</ol><div class="fallback-box"><Icon name="shield" size={16} /><p><strong>{c.detail.failLabel}</strong> {block.fail}</p></div></div></article>)}</div>
     </Section>
     <Section id="day" dark>
       <Heading eyebrow={c.day.eyebrow} headline={c.day.headline} lead={c.day.lead} />
-      <div class="day-phones" tabindex="0" role="region" aria-label="A day with Mise product previews">{c.day.items.map((item,i)=><figure><Preview mode={modes[i]} phone region={c.region} /><figcaption><span>{item.time}</span><p>{item.text}</p></figcaption></figure>)}</div>
+      <div class="day-shots" tabindex="0" role="region" aria-label="A day with Mise product images">{c.day.items.map((item,i)=><figure><Shot region={region} imageSlot={numberedSlot('day', i)} /><figcaption><span>{item.time}</span><p>{item.text}</p></figcaption></figure>)}</div>
     </Section>
     <Section id="businesses">
       <Heading eyebrow={c.businesses.eyebrow} headline={c.businesses.headline} />
-      <div class="business-grid">{c.businesses.items.map((item,i)=><article id={`business-${item.title.toLowerCase().replaceAll(' ','-')}`} class="business-card"><div class="business-phone"><Preview mode={businessModes[i]} phone region={c.region} /></div><div class="business-copy"><span class="business-number">0{i+1} /</span><h3>{item.title}</h3><ul>{item.points.map(point=><li><Icon name="check" size={15} /><span>{point}</span></li>)}</ul></div></article>)}</div>
+      <div class="business-grid">{c.businesses.items.map((item,i)=><article id={`business-${item.title.toLowerCase().replaceAll(' ','-')}`} class="business-card"><div class="business-shot"><Shot region={region} imageSlot={numberedSlot('businesses', i)} /></div><div class="business-copy"><span class="business-number">0{i+1} /</span><h3>{item.title}</h3><ul>{item.points.map(point=><li><Icon name="check" size={15} /><span>{point}</span></li>)}</ul></div></article>)}</div>
     </Section>
     <Section id="basics" muted>
       <Heading eyebrow={c.basics.eyebrow} headline={c.basics.headline} />
