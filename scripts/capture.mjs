@@ -9,7 +9,6 @@ try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
     await page.goto(`${origin}${region}/`);
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `apps/landing/public/og-${region}.png` });
     await page.setViewportSize({ width: 1440, height: 960 });
     await page.screenshot({ path: `docs/screenshots/${region}-1440.png`, fullPage: true });
     await page.screenshot({ path: `docs/screenshots/${region}-hero.png` });

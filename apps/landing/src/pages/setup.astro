@@ -1,69 +1,111 @@
 ---
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import DownloadCard from '../components/DownloadCard.astro';
 import Icon from '@mise/ui/Icon.astro';
-import copy from '../../../../handover/copy/landing.bd.json';
+import landing from '../../../../handover/copy/landing.bd.json';
+import c from '../../../../handover/copy/setup.json';
 import '../styles/landing.css';
 import '../styles/setup.css';
 const base = import.meta.env.BASE_URL;
 const appUrl = import.meta.env.PUBLIC_APP_URL || (import.meta.env.DEV ? `http://127.0.0.1:5173${base}app/` : `${base}app/`);
 const repo = (import.meta.env.PUBLIC_REPO_URL || 'https://github.com/tanzir71/mise').replace(/\/$/, '');
-const nav = { ...copy.nav, links: copy.nav.links.map(link => ({ ...link, href: `${base}bd/${link.href}` })) };
+const nav = { ...landing.nav, cta: c.nav.cta, links: [ { label: c.nav.product, href: `${base}bd/` }, { label: c.nav.setup, href: `${base}setup/` }, { label: c.nav.releases, href: `${repo}/releases` } ] };
 const deploy = `https://vercel.com/new/clone?${new URLSearchParams({ 'repository-url': repo, 'project-name': 'mise', 'repository-name': 'mise' })}`;
-const prompt = `Deploy my own copy of Mise from my GitHub fork to my own Vercel account.\n\nAsk for my fork URL, project name (default mise) and optional domain. Use Node 20.19+ and pnpm 10. Run pnpm install --frozen-lockfile, then build with BASE_PATH=/ and PUBLIC_APP_URL=/app/. Confirm site/index.html, site/app/index.html and site/setup/index.html exist.\n\nUse the included vercel.json. Let me approve Vercel login in my browser, link my project, set only the optional public contact/demo/geo configuration I provide, and deploy with vercel deploy --prod. Verify /, /bd/, /intl/, /app/ and /setup/, including app deep-link reloads.\n\nThis is Phase 0: the app is a coming-soon screen; offline PWA functionality ships in Phase 1. No database or backend is needed now.\n\nAsk before spending money or deleting anything. Never print secrets. Hand back my production URL and update/rollback instructions. Full guide: ${repo}/blob/main/docs/deploy-own-vercel.md`;
+const prompt = c.selfHost.prompt.replace('{repo}', repo);
+const orderPhone = c.devices.find(d => d.id === 'order-phone')!;
 ---
-<Base title="Setup and downloads — Mise" description="Set up Mise on the devices you already have. Web app, kitchen screen, Chrome extension, Android order phone and your own Vercel deployment.">
-  <Header nav={nav} appUrl={appUrl} home={`${base}bd/`} />
-  <main id="main">
-    <section class="setup-hero container"><p class="eyebrow">YOUR DEVICES. ONE CALMER SHIFT.</p><div class="setup-hero-grid"><div><h1>A home for Mise.<br />On every device.</h1><p class="lead">The phone, computer and tablet you already have. Pick what your shop needs, and we’ll walk you through it.</p></div><div class="setup-index"><a href="#downloads"><span>01</span>Pick your devices<Icon name="arrowDown" size={16} /></a><a href="#install"><span>02</span>Install and connect<Icon name="arrowDown" size={16} /></a><a href="#vercel"><span>03</span>Run your own copy<Icon name="arrowDown" size={16} /></a></div></div><p class="setup-preview-note"><Icon name="info" size={16} /><span>Mise is rolling out in stages. The web app is currently a preview; device builds will appear here when they’re ready.</span></p></section>
-    <section id="downloads" class="setup-downloads container" data-base={base} data-repo={repo}>
-      <div class="setup-section-label"><span>01 / THE DEVICES</span><p id="manifest-status" role="status">Checking available downloads…</p><button id="manifest-retry" class="copy-link" hidden>Try again</button></div>
-      <div class="downloads-grid">
-        <article class="download-card"><div class="download-card-top"><span class="device-icon"><Icon name="monitor" size={26} /></span><span class="device-stage">PHASE 1</span></div><h2>Web app</h2><p>Your counter, orders, customers and stock. Start in a browser on your phone or computer.</p><span class="device-availability">App coming soon</span><div class="download-actions"><a href={appUrl} class="button button-primary">Open app preview<Icon name="arrowUpRight" size={16} /></a><a href="#web-install">How to install<Icon name="arrowDown" size={14} /></a></div></article>
-        <article class="download-card"><div class="download-card-top"><span class="device-icon"><Icon name="tablet" size={26} /></span><span class="device-stage">PHASE 3</span></div><h2>Kitchen screen</h2><p>Give the kitchen a clear view of what’s next. Runs on a tablet, phone or spare computer.</p><span class="device-availability">Coming in a later version</span><div class="download-actions"><a href={appUrl} class="button button-secondary">Open app preview<Icon name="arrowUpRight" size={16} /></a><a href="#kitchen-install">View instructions<Icon name="arrowDown" size={14} /></a></div></article>
-        {[{id:'extension',icon:'puzzle',title:'Chrome extension',text:'Catches orders from the open tabs on your shop computer. No marketplace installation.',guide:'#extension-install'}, {id:'order-phone',icon:'smartphone',title:'Android order phone',text:'A dedicated shop phone listens for order and payment notifications, even when the computer is off.',guide:'#android-install'}].map(device=><article class="download-card" data-download={device.id}><div class="download-card-top"><span class="device-icon"><Icon name={device.icon} size={26} /></span><span class="device-stage">PHASE 4</span></div><h2>{device.title}</h2><p>{device.text}</p><span class="device-availability">Coming in a later version</span><div class="download-meta" hidden><p><span data-version></span> · <span data-size></span> · <span data-date></span></p><p data-requirements></p><div class="checksum"><span>SHA-256</span><code data-checksum></code><button class="copy-link" data-copy="">Copy checksum</button></div></div><div class="download-actions"><a class="button button-primary download-link" hidden download>Download<Icon name="download" size={16} /></a><a href={device.guide}>View instructions<Icon name="arrowDown" size={14} /></a><a class="repo-link" hidden>View in repo<Icon name="external" size={12} /></a></div></article>)}
-      </div><p class="manifest-note"><Icon name="fileJson" size={15} /> Download availability comes from the <a href={`${base}downloads/manifest.json`}>published manifest</a>. No app stores. No silent updates.</p><noscript><p>JavaScript is off. View the <a href={`${base}downloads/manifest.json`}>download manifest</a> and <a href={`${repo}/tree/main/downloads`}>downloads in the repository</a> for available builds.</p></noscript>
-    </section>
-    <section id="install" class="install-section section-muted"><div class="container install-grid"><aside class="install-sidebar"><p class="eyebrow">02 / INSTALL AND CONNECT</p><h2>One device<br />at a time.</h2><p>Keep this guide open while you set things up.</p><nav aria-label="Installation instructions"><a href="#web-install">Web app</a><a href="#kitchen-install">Kitchen screen</a><a href="#extension-install">Chrome extension</a><a href="#android-install">Android order phone</a><a href="#checksums">Check a download</a><a href="#updates">Updates and help</a></nav></aside><div class="installation-guides">
-      <article id="web-install" class="install-guide"><div class="guide-title"><Icon name="monitor" size={22} /><h3>Web app</h3><span>PHASE 1</span></div><p>The current app is a coming-soon screen. When the offline app ships, you can install it without an app store.</p><ol><li>Open <a href={appUrl}>Mise on this device</a>.</li><li>On Android or desktop Chrome, use the browser’s <strong>Install app</strong> option. On iPhone, use Safari → Share → <strong>Add to Home Screen</strong>.</li><li>Keep it in a browser if you prefer. The same app works there.</li></ol><div class="guide-note"><Icon name="wifiOff" size={17} /><p>Offline operation, storage and backups arrive with Phase 1. They are not active in this preview.</p></div></article>
-      <article id="kitchen-install" class="install-guide"><div class="guide-title"><Icon name="tablet" size={22} /><h3>Kitchen screen</h3><span>PHASE 3</span></div><ol><li>Open Mise on the kitchen tablet or spare phone.</li><li>When available, choose <strong>Settings → Devices → Kitchen screen</strong> and pair it with your outlet.</li><li>Keep the screen awake, turn the volume up and place a test order. The cook taps <strong>Got it</strong>, then <strong>Ready</strong>.</li></ol><p>A browser is enough. Install the web app to keep the kitchen screen within one tap.</p></article>
-      <article id="extension-install" class="install-guide"><div class="guide-title"><Icon name="puzzle" size={22} /><h3>Chrome extension</h3><span>PHASE 4</span></div><ol><li>Download the extension ZIP from the card above when a build is available. <a href="#checksums">Check its SHA-256</a>.</li><li>Unzip it into a folder you can keep on the shop computer.</li><li>Open <code>chrome://extensions</code> in Chrome.</li><li>Turn on <strong>Developer mode</strong> in the top-right corner.</li><li>Choose <strong>Load unpacked</strong> and select the folder containing <code>manifest.json</code>.</li><li>Pin Mise from Chrome’s extensions menu.</li><li>In Mise → <strong>Settings → Devices</strong>, create a 6-digit pairing code. Enter it in the extension within 10 minutes.</li><li>Open your delivery and chat tabs, sign in normally and check that Mise can see a test order.</li></ol><div class="guide-note"><Icon name="link" size={17} /><p>Running your own copy? When pairing is available, choose <strong>Pair to a self-hosted copy</strong>, enter your base URL, then the pairing code.</p></div></article>
-      <article id="android-install" class="install-guide"><div class="guide-title"><Icon name="smartphone" size={22} /><h3>Android order phone</h3><span>PHASE 4</span></div><ol><li>Download the APK on the shop phone when a build is available. Compare its checksum with the card above.</li><li><strong>Allow from unknown sources.</strong> On Android 8+, if installation is blocked, tap Settings and enable <strong>Allow from this source</strong> for the browser. You can also find it at Settings → Apps → Special app access → Install unknown apps. On Android 7 and older, use Settings → Security → <strong>Unknown sources</strong>. Names vary by brand.</li><li>Go back, open the APK and tap <strong>Install</strong>. Play Protect may show a warning for this developer build. After verifying the file came from this repository, use <strong>More details → Install anyway</strong> if offered.</li><li>Open Mise and grant <strong>notification access</strong> for the apps your shop uses, such as WhatsApp and payment alerts.</li><li>Turn off battery optimisation for the order phone app so Android can keep it listening.</li><li>Pair by scanning the QR in Mise → <strong>Settings → Devices</strong>. Send a test notification and confirm the device is connected.</li></ol><p>These APKs use the same shared debug key so updates can install over previous builds. They are developer builds distributed directly from this repository.</p><details class="guide-details"><summary>Install over a USB cable with adb<Icon name="chevronDown" size={16} /></summary><p>Enable USB debugging on the phone, connect it and approve the computer. Then run:</p><div class="command"><code>adb install -r mise-order-phone.apk</code><button class="copy-link" data-copy="adb install -r mise-order-phone.apk">Copy</button></div></details><div class="guide-note"><Icon name="link" size={17} /><p>For your own deployment, enter its base URL on the pairing screen before scanning the QR. Devices can be revoked from Settings → Devices when that feature ships.</p></div></article>
-      <article id="checksums" class="install-guide"><div class="guide-title"><Icon name="shieldCheck" size={22} /><h3>Check a download</h3></div><p>The SHA-256 printed on a download card identifies that exact file. Compute the checksum, then compare the entire value before installing.</p><h4>Windows</h4><div class="command"><code>certutil -hashfile mise-order-phone.apk SHA256</code><button class="copy-link" data-copy="certutil -hashfile mise-order-phone.apk SHA256">Copy</button></div><h4>macOS / Linux</h4><div class="command"><code>shasum -a 256 mise-order-phone.apk</code><button class="copy-link" data-copy="shasum -a 256 mise-order-phone.apk">Copy</button></div><p>For the extension, replace the filename with <code>mise-extension.zip</code>. If the checksum differs, download the file again from this page.</p></article>
-      <article id="updates" class="install-guide"><div class="guide-title"><Icon name="refreshCw" size={22} /><h3>Updates and troubleshooting</h3></div><details class="guide-details"><summary>How do updates work?<Icon name="chevronDown" size={16} /></summary><p>Devices will check the manifest daily and show a link here when a new version is available. They do not update silently. For the extension, unzip the new version into its existing folder and choose Reload at chrome://extensions. Install the new APK over the existing app to keep its data.</p></details><details class="guide-details"><summary>The extension folder won’t load<Icon name="chevronDown" size={16} /></summary><p>Select the unzipped folder containing manifest.json, not the ZIP or its parent folder. Turn on Developer mode and check the extension’s error message.</p></details><details class="guide-details"><summary>The phone stopped listening<Icon name="chevronDown" size={16} /></summary><p>Check notification access, battery optimisation and internet access. Open the app, confirm its paired outlet, then send a test alert. Until it is connected again, log the order or payment by hand.</p></details><details class="guide-details"><summary>Pairing code expired or the wrong shop is connected<Icon name="chevronDown" size={16} /></summary><p>Create a fresh code in Settings → Devices. Check the base URL if you run your own copy. Revoke an old device before pairing it with another outlet.</p></details></article>
-    </div></div></section>
-    <section id="vercel" class="vercel-section container"><p class="eyebrow">03 / YOUR OWN COPY</p><div class="vercel-grid"><div><h2>Your shop.<br />Your own Mise.</h2><p class="lead">Run the landing page and web app on your own Vercel account. Your agent can do the setup with you.</p><ul class="self-host-benefits"><li><Icon name="check" size={16} />Your own address, with the same Mise experience</li><li><Icon name="check" size={16} />Updates from your GitHub fork</li><li><Icon name="check" size={16} />A portable build with no backend needed in Phase 0</li></ul><a href={deploy} class="button button-primary" target="_blank" rel="noreferrer">Deploy to Vercel<Icon name="arrowUpRight" size={17} /></a><p class="self-host-note">You choose the account and plan. The app is currently a preview; offline features arrive in Phase 1.</p></div><div class="agent-deploy-card"><span class="device-icon"><Icon name="sparkles" size={24} /></span><h3>Let your agent set it up.</h3><ol><li>Fork <a href={repo}>Mise on GitHub</a>.</li><li>Copy the prompt and give it to Claude Code, Codex or your coding agent.</li><li>Approve Vercel login in your own browser.</li><li>Your agent builds, deploys and checks your copy.</li></ol><button class="button button-primary" data-copy-source="#agent-prompt">Copy prompt for your agent<Icon name="copy" size={16} /></button><details class="guide-details"><summary>Read or copy the prompt by hand<Icon name="chevronDown" size={16} /></summary><label class="sr-only" for="agent-prompt">Deployment prompt for your agent</label><textarea id="agent-prompt" readonly rows="12">{prompt}</textarea></details><a href={`${base}docs/deploy-own-vercel.md`} class="full-guide">Read the full deployment guide<Icon name="arrowUpRight" size={14} /></a></div></div></section>
-  </main><Footer footer={copy.footer} region="bd" contactUrl={import.meta.env.PUBLIC_WHATSAPP_URL} />
+<Base title={c.meta.title} description={c.meta.description}>
+  <div class="setup-header"><Header nav={nav} appUrl={appUrl} home={`${base}bd/`} showSignIn={false} /></div>
+  <main id="main" class="setup-page" data-base={base} data-repo={repo} data-download-copy={JSON.stringify(c.availability)}>
+    <div class="setup-phone container">
+      <h1>{c.phone.title}</h1><p class="phone-lead">{c.phone.lead}</p>
+      <DownloadCard device={orderPhone} appUrl={appUrl} compact />
+      <p class="phone-manifest-status" role="status" data-mobile-manifest-status></p><button class="copy-link" data-phone-retry hidden>{c.availability.retry}</button>
+      <ol class="phone-steps">{c.phone.steps.map((step, i) => <li><span class="step-number">{i + 1}</span><div><h2>{step.title}</h2><p>{step.text}</p></div></li>)}</ol>
+      <aside class="phone-self-host"><h2><Icon name="sparkles" size={18} />{c.phone.selfHostTitle}</h2><p>{c.phone.selfHostText} <a href="#vercel">{new URL(`${base}setup/#vercel`, Astro.site).href}</a></p></aside>
+      <p class="phone-help">{c.phone.help}</p>
+    </div>
+    <details class="setup-all-devices container">
+      <summary>{c.common.allDevices}<Icon name="chevronDown" size={18} /></summary>
+      <div class="setup-desktop">
+        <section class="setup-hero"><p class="eyebrow">{c.hero.eyebrow}</p><h1>{c.hero.title}</h1><p class="lead">{c.hero.lead}</p><div class="setup-release"><p id="manifest-status" role="status">{c.availability.checking}</p><button id="manifest-retry" class="copy-link" hidden>{c.availability.retry}</button><a class="button button-secondary" href={`${repo}/releases`}><Icon name="external" size={17} />{c.hero.releases}</a></div></section>
+        <section id="downloads" aria-label={c.common.allDevices}>
+          <div class="downloads-grid">{c.devices.map(device => <DownloadCard device={device} appUrl={appUrl} />)}</div>
+          <p class="setup-preview-note">{c.availability.preview}</p>
+          <noscript><p><a href={`${base}downloads/manifest.json`}>{c.availability.manifest}</a> · <a href={`${repo}/tree/main/downloads`}>{c.availability.repository}</a></p></noscript>
+        </section>
+        <section id="install" class="installation-guides" aria-label={c.common.instructions}>
+          {c.guides.map(guide => <article id={guide.id} class="install-guide"><h2>{guide.title}</h2><p>{guide.lead}</p><ol class="setup-steps">{guide.steps.map((step, i) => <li><span class="step-number">{i + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p>{'code' in step && <pre class="command"><code>{step.code}</code></pre>}{'example' in step && <div class:list={['instruction-example', { 'notification-example': step.example === 'notifications' }]} aria-label={c.examples.label}>
+            {step.example === 'developer' && <><span>{c.examples.extensions}</span><span class="example-setting">{c.examples.developer}<span class="example-toggle" role="img" aria-label={c.examples.on}></span></span></>}
+            {step.example === 'source' && <><span>{c.examples.source}</span><span class="example-toggle" role="img" aria-label={c.examples.on}></span></>}
+            {step.example === 'unpacked' && c.examples.unpacked.map(label => <span class="example-button">{label}</span>)}
+            {step.example === 'notifications' && c.examples.notifications.map((label, index) => <span class="example-setting">{label}<span class:list={['example-toggle', { off: index === 3 }]} role="img" aria-label={index === 3 ? c.examples.off : c.examples.on}></span></span>)}
+          </div>}</div></li>)}</ol></article>)}
+        </section>
+        <section class="setup-helpers" aria-label={c.helpers.updates.title}>
+          {[c.helpers.cable, c.helpers.checksum].map((helper, i) => <article id={i === 0 ? 'cable' : 'checksums'}><h2>{helper.title}</h2><p>{helper.text}</p><div class="command"><code>{helper.command}</code><button class="copy-link" data-copy={helper.command} aria-label={`${c.common.copy} ${helper.title}`}><Icon name="copy" size={16} /></button></div></article>)}
+          <article id="updates"><h2>{c.helpers.updates.title}</h2><p>{c.helpers.updates.text}</p><ul>{c.helpers.updates.items.map(item => <li><Icon name="refreshCw" size={16} /><span>{item}</span></li>)}</ul></article>
+        </section>
+        <div class="browser-guides">{c.browserGuides.map(guide => <details id={guide.id}><summary>{guide.title}<Icon name="chevronDown" size={16} /></summary><p>{guide.text}</p><ol>{guide.steps.map(step => <li>{step}</li>)}</ol><a href={appUrl} class="text-link">{c.nav.cta}<Icon name="external" size={14} /></a></details>)}</div>
+        <section id="vercel" class="vercel-section"><p class="eyebrow">{c.selfHost.eyebrow}</p><h2>{c.selfHost.title}</h2><p class="vercel-lead">{c.selfHost.lead}</p><div class="vercel-grid">
+          <article class="agent-deploy-card"><h3><Icon name="sparkles" size={20} />{c.selfHost.agentTitle}</h3><p>{c.selfHost.agentLead}</p><ol class="setup-steps">{c.selfHost.steps.map((step, i) => <li><span class="step-number">{i + 1}</span><div><h4>{i === 0 ? <a href={`${repo}/fork`}>{step.title}</a> : step.title}</h4><p>{step.text}</p></div></li>)}</ol><div class="agent-prompt"><div><label for="agent-prompt">{c.common.prompt}</label><button class="copy-link" data-copy-source="#agent-prompt" aria-label={c.common.copyPrompt}><Icon name="copy" size={18} /></button></div><textarea id="agent-prompt" readonly rows="10">{prompt}</textarea></div><a href={`${base}docs/deploy-own-vercel.md`} class="text-link">{c.common.fullGuide}<Icon name="arrowUpRight" size={14} /></a></article>
+          <article class="manual-deploy-card"><h3>{c.selfHost.manualTitle}</h3><p>{c.selfHost.manualLead}</p><a href={deploy} class="button button-primary" target="_blank" rel="noreferrer"><Icon name="external" size={17} />{c.selfHost.deploy}</a><ul>{c.selfHost.benefits.map(benefit => <li><Icon name={benefit.icon} size={18} /><div><h4>{benefit.title}</h4><p>{benefit.text}</p></div></li>)}</ul></article>
+        </div></section>
+        <section class="setup-troubleshooting"><h2>{c.troubleshooting.title}</h2><div>{c.troubleshooting.items.map(item => <article><h3><Icon name="triangleAlert" size={16} />{item.title}</h3><p>{item.text}</p></article>)}</div></section>
+        <p class="setup-manifest-link"><a href={`${base}downloads/manifest.json`}>{c.availability.manifest}</a> · <a href={`${repo}/tree/main/downloads`}>{c.availability.repository}</a></p>
+      </div>
+    </details>
+  </main>
 </Base>
 <script>
   import { parseDownloadsManifest, formatBytes } from '@mise/core/downloads';
-  const host = document.querySelector<HTMLElement>('.setup-downloads')!;
+  const host = document.querySelector<HTMLElement>('.setup-page')!;
   const status = document.querySelector<HTMLElement>('#manifest-status')!;
   const retry = document.querySelector<HTMLButtonElement>('#manifest-retry')!;
+  const phoneRetry = document.querySelector<HTMLButtonElement>('[data-phone-retry]')!;
+  const phoneStatus = document.querySelector<HTMLElement>('[data-mobile-manifest-status]')!;
+  const labels = JSON.parse(host.dataset.downloadCopy!) as Record<string, string>;
+  const allDevices = document.querySelector<HTMLDetailsElement>('.setup-all-devices')!;
+  const desktop = window.matchMedia('(min-width: 768px)');
+  const showGuides = () => { allDevices.open = desktop.matches || Boolean(location.hash); allDevices.toggleAttribute('data-desktop-open', desktop.matches); };
+  showGuides(); desktop.addEventListener('change', showGuides);
+  const revealHash = () => {
+    const target = document.getElementById(location.hash.slice(1));
+    if (!target) return;
+    allDevices.open = true;
+    if (target instanceof HTMLDetailsElement) target.open = true;
+    target.scrollIntoView();
+  };
+  window.addEventListener('hashchange', revealHash);
+  if (location.hash) revealHash();
   async function loadManifest() {
-    retry.hidden = true; status.textContent = 'Checking available downloads…';
+    retry.hidden = true; phoneRetry.hidden = true; status.textContent = labels.checking; phoneStatus.textContent = '';
     const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 5000);
     try {
       const response = await fetch(`${host.dataset.base}downloads/manifest.json`, { cache: 'no-store', signal: controller.signal });
       if (!response.ok) throw new Error('Download list unavailable');
       const manifest = parseDownloadsManifest(await response.json());
       for (const item of manifest.items) {
-        const card = document.querySelector<HTMLElement>(`[data-download="${item.id}"]`)!;
-        card.querySelector<HTMLElement>('.device-availability')!.textContent = `Available · v${item.version}`;
-        const text = (selector: string, value: string) => { card.querySelector<HTMLElement>(selector)!.textContent = value; };
-        text('[data-version]', `v${item.version}`); text('[data-size]', formatBytes(item.bytes));
-        text('[data-date]', manifest.updatedAt ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(manifest.updatedAt)) : 'Latest build');
-        text('[data-checksum]', item.sha256); text('[data-requirements]', [item.minAndroid && `Android ${item.minAndroid}+`, item.minApp && `Mise ${item.minApp}+`].filter(Boolean).join(' · '));
-        card.querySelector<HTMLElement>('.download-meta')!.hidden = false;
-        card.querySelector<HTMLButtonElement>('[data-copy]')!.dataset.copy = item.sha256;
-        const download = card.querySelector<HTMLAnchorElement>('.download-link')!; download.href = `${host.dataset.base}downloads/${item.latest}`; download.hidden = false;
-        const source = card.querySelector<HTMLAnchorElement>('.repo-link')!; source.href = `${host.dataset.repo}/blob/main/downloads/${item.file}`; source.hidden = false;
+        for (const card of document.querySelectorAll<HTMLElement>(`[data-download="${item.id}"]`)) {
+          card.querySelector<HTMLElement>('.device-availability')!.hidden = true;
+          const text = (selector: string, value: string) => { card.querySelector<HTMLElement>(selector)!.textContent = value; };
+          text('[data-version]', `v${item.version}`); text('[data-size]', formatBytes(item.bytes));
+          text('[data-date]', manifest.updatedAt ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(manifest.updatedAt)) : labels.latest);
+          text('[data-checksum]', item.sha256); text('[data-requirements]', [item.minAndroid && `Android ${item.minAndroid}+`, item.minApp && `Mise ${item.minApp}+`].filter(Boolean).join(' · '));
+          card.querySelector<HTMLElement>('.download-meta')!.hidden = false;
+          card.querySelector<HTMLElement>('[data-coming]')!.hidden = true;
+          card.querySelector<HTMLElement>('.checksum')!.hidden = false;
+          card.querySelector<HTMLButtonElement>('[data-copy]')!.dataset.copy = item.sha256;
+          const download = card.querySelector<HTMLAnchorElement>('.download-link')!; download.href = `${host.dataset.base}downloads/${item.latest}`; download.hidden = false;
+          const source = card.querySelector<HTMLAnchorElement>('.repo-link')!; source.href = `${host.dataset.repo}/blob/main/downloads/${item.file}`; source.hidden = false;
+        }
       }
-      status.textContent = manifest.items.length ? `${manifest.items.length} device builds available` : 'Device builds are coming in a later version.';
-    } catch { status.textContent = 'Couldn’t check downloads. Try again, or view the manifest below.'; retry.hidden = false; }
+      status.textContent = manifest.items.length ? `${manifest.items.length} ${labels.count}` : labels.empty;
+    } catch { status.textContent = labels.error; phoneStatus.textContent = labels.error; retry.hidden = false; phoneRetry.hidden = false; }
     finally { clearTimeout(timeout); }
   }
   retry.addEventListener('click', () => void loadManifest());
+  phoneRetry.addEventListener('click', () => void loadManifest());
   void loadManifest();
 </script>

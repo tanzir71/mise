@@ -1,0 +1,19 @@
+---
+import Icon from '@mise/ui/Icon.astro';
+import copy from '../../../../handover/copy/setup.json';
+interface Props { device: typeof copy.devices[number]; appUrl: string; compact?: boolean }
+const { device: d, appUrl, compact = false } = Astro.props;
+const native = d.id === 'extension' || d.id === 'order-phone';
+---
+<article class:list={['download-card', { 'phone-download': compact }]} data-download={native ? d.id : undefined}>
+  <span class="device-icon"><Icon name={d.icon} size={22} /></span>
+  <h2>{compact ? copy.phone.app : d.title}</h2>
+  {!compact && <p class="device-description">{d.subtitle}</p>}
+  {!compact && <div class="device-file"><p class:list={{ 'file-path': native }}>{d.description}</p>{d.meta && <p>{d.meta}</p>}</div>}
+  <p class="device-availability">{d.id === 'web' ? copy.availability.app : copy.availability.coming}</p>
+  {native && <>
+    <div class="download-meta" hidden><p><span data-size></span> · <span data-version></span> · {copy.availability.build}</p><p><span data-date></span> · <span data-requirements></span></p></div>
+    <div class="download-actions"><button class="button button-primary" data-coming disabled><Icon name="download" size={17} />{d.action}</button><a class="button button-primary download-link" hidden download><Icon name="download" size={17} />{d.action}</a><div class="download-links"><a class="repo-link" hidden>{copy.common.repo}</a><details class="checksum" hidden><summary>{copy.common.checksum}</summary><code data-checksum></code><button class="copy-link" data-copy="">{copy.common.copyChecksum}</button></details></div></div>
+  </>}
+  {!native && <div class="download-actions"><a href={d.id === 'web' ? appUrl : `#${d.guide}`} class="button button-secondary"><Icon name="external" size={17} />{d.action}</a></div>}
+</article>
