@@ -1,7 +1,9 @@
 import 'fake-indexeddb/auto';
 import { afterEach, expect, test } from 'vitest';
 import { randomUUID } from 'node:crypto';
+import Dexie from 'dexie';
 import { MiseDatabase } from '../apps/web/src/data/db';
+import { setupCommand } from '../packages/core/setup';
 
 const databases: MiseDatabase[] = [];
 const open = () => { const db = new MiseDatabase(`mise-test-${randomUUID()}`); databases.push(db); return db; };
@@ -57,4 +59,34 @@ test('catalogue writes, availability and deletion are atomic and audited', async
   const count = await db.items.count(), categories = await db.categories.count();
   await expect(db.addItems([itemInput, { ...itemInput, name: 'Bad', price: -1 }])).rejects.toThrow(/price/);
   expect(await db.items.count()).toBe(count); expect(await db.categories.count()).toBe(categories);
+});
+test('sales survive reload, audit failure rolls back, and concurrent undo applies once', async () => {
+  const db = open(); await db.saveSetup(input);
+  const sale = await db.recordSale({ expression: '75+150+20', method: 'cash', given: 50000 });
+  db.close(); await db.open();
+  expect(await db.sales.get(sale.id)).toMatchObject({ amount: 24500, change: 25500 });
+  const undo = await Promise.allSettled([db.undoSale(sale.id), db.undoSale(sale.id)]);
+  expect(undo.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+  expect(await db.events.where('command').equals('sale.undo').count()).toBe(1);
+  const before = await db.sales.count();
+  db.events.hook('creating', (_key, event) => { if (event.command === 'sale.record') throw new Error('Audit failed'); });
+  await expect(db.recordSale({ expression: '10', method: 'cash' })).rejects.toThrow('Audit failed');
+  expect(await db.sales.count()).toBe(before);
+});
+test('upgrading the original database preserves the shop, catalogue and audit history', async () => {
+  const name = `mise-upgrade-${randomUUID()}`, legacy = new Dexie(name);
+  legacy.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
+  const setup = setupCommand(input);
+  await legacy.table('businesses').put(setup.snapshot.business);
+  await legacy.table('outlets').put({ ...setup.snapshot.outlet, shopLink: 'https://example.com/shop' });
+  await legacy.table('members').put(setup.snapshot.owner);
+  await legacy.table('categories').bulkPut(setup.categories);
+  await legacy.table('items').bulkPut(setup.items); await legacy.table('events').add(setup.event);
+  legacy.close();
+  const upgraded = new MiseDatabase(name); databases.push(upgraded);
+  expect((await upgraded.setup())?.business.name).toBe('Test shop');
+  expect(await upgraded.items.count()).toBe(3); expect(await upgraded.events.count()).toBe(1);
+  expect(await upgraded.sales.count()).toBe(0);
+  await upgraded.saveSetup({ ...input, name: 'Renamed' });
+  expect((await upgraded.setup())?.outlet.shopLink).toBe('https://example.com/shop');
 });

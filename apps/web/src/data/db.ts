@@ -1,7 +1,9 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Business, Outlet, Member, Category, Item, AuditEvent, SetupSnapshot, SetupInput } from '@mise/core/models';
+import type { Business, Outlet, Member, Category, Item, Sale, AuditEvent, SetupSnapshot, SetupInput } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
+import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
+import { marketPacks } from '@mise/core/packs';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -10,9 +12,11 @@ export class MiseDatabase extends Dexie {
   categories!: EntityTable<Category, 'id'>;
   items!: EntityTable<Item, 'id'>;
   events!: EntityTable<AuditEvent, 'id'>;
+  sales!: EntityTable<Sale, 'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
+    this.version(2).stores({ sales: 'id,outletId,createdAt' });
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -75,6 +79,21 @@ export class MiseDatabase extends Dexie {
         if (command.category) { await this.categories.add(command.category); categories.push(command.category); }
         await this.items.add(command.item); await this.events.add(command.event);
       }
+    });
+  }
+  async recordSale(input: SaleInput): Promise<Sale> {
+    return this.transaction('rw', this.tables, async () => {
+      const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
+      const command = recordSaleCommand(input, { setup, wallets: marketPacks[setup.business.marketCode]['pay/wallets'], items: await this.items.where('outletId').equals(setup.outlet.id).toArray() });
+      await this.sales.add(command.sale); await this.events.add(command.event); return command.sale;
+    });
+  }
+  async undoSale(id: string): Promise<void> {
+    await this.transaction('rw', this.tables, async () => {
+      const [sale, setup] = await Promise.all([this.sales.get(id), this.setup()]);
+      if (!sale || !setup || sale.outletId !== setup.outlet.id) throw new Error('Sale not found.');
+      const command = undoSaleCommand(sale, setup.owner.id);
+      await this.sales.put(command.sale); await this.events.add(command.event);
     });
   }
 }

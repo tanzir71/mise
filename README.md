@@ -2,7 +2,7 @@
 
 Every order, chat and payment, in one calm place.
 
-Implementation follows the milestones in [the handover](handover/README.md). Phase 0 ships the static landing site, regional pages, setup guide and the app's coming-soon screen. Later app features follow the roadmap.
+Implementation follows the milestones in [the handover](handover/README.md). The landing site and refinement pass are live. The local app now includes three-step setup, business settings and catalogue editing/search/bulk paste. Counter, khata, orders and stock follow the roadmap.
 
 ## Development
 
@@ -25,7 +25,7 @@ Use Node 20.19 or newer. Before the first browser test, run `pnpm exec playwrigh
 
 Production: https://tanzir71.github.io/mise/
 
-Regional pages: `/bd/` and `/intl/`. Device setup: `/setup/`. The app at `/app/` is a coming-soon screen in this release. No native device builds, accounts, backend or offline app features ship in Phase 0.
+Regional pages: `/bd/` and `/intl/`. Device setup: `/setup/`. The app at `/app/` works locally after its first load, with data stored on this device. Native builds, accounts and backend sync arrive in later phases. Delivery evidence is in `docs/m10-delivery.md` and `docs/m11-delivery.md`.
 
 `pnpm screenshots` and `pnpm quality:lighthouse` run against a production preview at port 4321. Set `PREVIEW_URL` when previewing a project base such as `http://127.0.0.1:4321/mise/`. Quality evidence lives in `docs/quality/` and `docs/screenshots/`.
 

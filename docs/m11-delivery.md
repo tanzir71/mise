@@ -12,7 +12,7 @@ The catalogue and editor work offline after the first load. Desktop editing stay
 - 77 visual comparisons: 64 landing/setup, seven M10 shell and six M11 catalogue captures.
 - All 270 supplied exports are present; production source/image guards pass.
 
-The full report is uploaded as `visual-qa` by [main CI](https://github.com/tanzir71/mise/actions/workflows/pages.yml?query=branch%3Amain). Each run's summary links to its artifact.
+The full report is uploaded as `visual-qa` by [M11 main CI](https://github.com/tanzir71/mise/actions/runs/43727661275): [download the report](https://github.com/tanzir71/mise/actions/runs/43727661275/artifacts/14166898816) and open `report.html`.
 
 ## References and scope
 
