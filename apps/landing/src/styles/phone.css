@@ -1,0 +1,68 @@
+.responsive-disclosure > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; padding: 12px 16px; border: 1px solid #d4d4d2; border-radius: 12px; color: #141414; font-size: 14px; line-height: 20px; list-style: none; cursor: pointer; }
+.responsive-disclosure > summary::-webkit-details-marker { display: none; }
+.responsive-disclosure[open] > summary .icon { transform: rotate(180deg); }
+.responsive-disclosure[data-desktop-open] > summary { display: none; }
+.detail-how-content { margin-top: 20px; }
+.detail-how[data-desktop-open] > .detail-how-content { margin-top: 0; }
+.more-checks { margin-top: 40px; }
+.more-checks:not([data-desktop-open]) > .checks-grid { margin-top: 20px; }
+@media (max-width: 767px) {
+  .section, #detail, #day, #businesses { padding: 32px 0; }
+  .section-heading, #ai .section-heading, #ocr .section-heading, #detail .section-heading, #day .section-heading, #businesses .section-heading, #basics .section-heading { margin-bottom: 24px; }
+  .section-heading h2, #detail .section-heading h2, #day .section-heading h2, #businesses .section-heading h2 { font-size: 28px; line-height: 34px; }
+  .section-heading .lead, #detail .section-heading .lead, #day .section-heading .lead { margin-top: 16px; font-size: 15px; line-height: 22px; }
+  .ai-grid { gap: 24px; }
+  .permission-row { flex-direction: row; gap: 12px; padding-block: 12px; }
+  .permission-row > div:first-child { min-width: 0; }
+  .segmented { grid-template-columns: repeat(3, 44px); }
+  .benefits { gap: 16px; }
+  .benefit p { font-size: 13px; line-height: 18px; }
+  .benefit { gap: 12px; }
+  .line-icon { width: 40px; height: 40px; }
+  .timeline { margin-top: 32px; padding: 20px; }
+  .timeline h3 { font-size: 20px; line-height: 26px; }
+  .timeline-grid { margin-top: 20px; gap: 24px 16px; }
+  .agent-bottom { margin-top: 32px; gap: 16px; }
+  .agent-bottom > div { padding: 20px; }
+  .agent-bottom h3 { font-size: 20px; line-height: 26px; }
+  .agent-bottom p { font-size: 14px; line-height: 20px; }
+  .connect-panel pre { margin-block: 16px; padding: 12px; font-size: 11px; line-height: 18px; }
+  .ladder-steps { margin: 20px 0 16px; gap: 8px; }
+  .ladder-step { min-height: 64px; }
+  .ocr-grid { gap: 12px; }
+  .ocr-card { padding: 16px; }
+  .ocr-flow { min-height: 84px; margin-bottom: 16px; }
+  .ocr-output { min-height: 84px; gap: 4px; padding: 8px; }
+  .ocr-card h3 { margin-bottom: 12px; font-size: 14px; }
+  .capture-table { gap: 12px; }
+  .capture-row { gap: 12px; padding: 16px; border-radius: 16px; }
+  .capture-fallback { margin-top: 20px; }
+  .check-card { min-height: 0; padding: 16px; }
+  .check-card-top { margin-bottom: 12px; }
+  .when { padding-bottom: 8px; }
+  .when > span, .then > div > span { margin-bottom: 2px; }
+  .then { padding-top: 8px; }
+  .more-checks { margin-top: 24px; }
+  .detail-blocks { gap: 24px; }
+  .detail-block { gap: 16px; }
+  .detail-block .detail-visual .figma-shot { width: 290px; }
+  .detail-copy .eyebrow { margin-bottom: 12px; font-size: 12px; line-height: 18px; }
+  .detail-copy h3 { font-size: 28px; line-height: 34px; }
+  .detail-copy > .lead { margin-block: 16px; font-size: 15px; line-height: 22px; }
+  .business-card { padding: 16px; }
+  .business-shot { height: 209px; margin-bottom: 16px; }
+  .business-card .business-shot .figma-shot { width: 150px; top: -9.56px; }
+  .business-copy h3 { margin-bottom: 12px; font-size: 18px; line-height: 24px; }
+  .business-copy ul { gap: 12px; }
+  .business-copy li { gap: 8px; }
+  .business-copy li .icon { width: 14px; height: 14px; }
+  .business-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .basics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .basic-tile { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+  .compare-table tbody { gap: 12px; }
+  .compare-table tr { padding: 16px; }
+  .compare-table th:first-child { padding-bottom: 12px; }
+  .compare-table td { min-height: 0; padding-block: 4px; line-height: 16px; }
+  .cta-section h2 { font-size: 32px; line-height: 38px; }
+  .footer-top { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 16px; }
+}

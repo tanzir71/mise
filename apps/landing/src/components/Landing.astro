@@ -8,9 +8,11 @@ import Shot from './Shot.astro';
 import Icon from '@mise/ui/Icon.astro';
 import Section from '@mise/ui/Section.astro';
 import Chip from '@mise/ui/Chip.astro';
+import CheckCard from './CheckCard.astro';
 import '../styles/landing.css';
 import '../styles/hero.css';
 import '../styles/product-sections.css';
+import '../styles/phone.css';
 interface Props { copy: typeof bdCopy }
 const { copy: c } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -47,11 +49,12 @@ const numberedSlot = (group: string, index: number) => `${group}.${String(index 
     </Section>
     <Section id="checks">
       <Heading eyebrow={c.checks.eyebrow} headline={c.checks.headline} lead={c.checks.lead} />
-      <div class="checks-grid">{c.checks.items.map(item=><article class="check-card"><div class="check-card-top"><span>{item.tag}</span><Icon name={item.icon} size={20} /></div><div class="when"><span>When</span><h3>{item.when}</h3></div><div class="then"><div><span>Mise</span><p>{item.then}</p></div></div></article>)}</div>
+      <div class="checks-grid">{c.checks.items.slice(0,6).map(item=><CheckCard item={item} />)}</div>
+      <details class="more-checks responsive-disclosure"><summary>{c.checks.moreLabel}<Icon name="chevronDown" size={16} /></summary><div class="checks-grid">{c.checks.items.slice(6).map(item=><CheckCard item={item} />)}</div></details>
     </Section>
     <Section id="detail" class="detail-section">
       <Heading eyebrow={c.detail.eyebrow} headline={c.detail.headline} lead={c.detail.lead} />
-      <div class="detail-blocks">{c.detail.blocks.map((block,i)=><article id={block.id} class:list={['detail-block', { reverse:i%2===1 }]}><div class="detail-visual"><Shot region={region} imageSlot={numberedSlot('detail', i)} /></div><div class="detail-copy"><p class="eyebrow">{block.n} · {block.cat}</p><h3>{block.title}</h3><p class="lead">{block.lead}</p><ol>{block.steps.map((step,index)=><li><span>{index+1}</span><p>{step}</p></li>)}</ol><div class="fallback-box"><Icon name="alert" size={16} /><p>{c.detail.failLabel} {block.fail}</p></div></div></article>)}</div>
+      <div class="detail-blocks">{c.detail.blocks.map((block,i)=><article id={block.id} class:list={['detail-block', { reverse:i%2===1 }]}><div class="detail-visual"><Shot region={region} imageSlot={numberedSlot('detail', i)} /></div><div class="detail-copy"><p class="eyebrow">{block.n} · {block.cat}</p><h3>{block.title}</h3><p class="lead">{block.lead}</p><details class="detail-how responsive-disclosure"><summary>{c.detail.howLabel}<Icon name="chevronDown" size={16} /></summary><div class="detail-how-content"><ol>{block.steps.map((step,index)=><li><span>{index+1}</span><p>{step}</p></li>)}</ol><div class="fallback-box"><Icon name="alert" size={16} /><p>{c.detail.failLabel} {block.fail}</p></div></div></details></div></article>)}</div>
     </Section>
     <Section id="day" dark>
       <Heading eyebrow={c.day.eyebrow} headline={c.day.headline} lead={c.day.lead} />
@@ -73,3 +76,13 @@ const numberedSlot = (group: string, index: number) => `${group}.${String(index 
   </main>
   <Footer footer={c.footer} region={c.region} contactUrl={contactUrl} />
 </Base>
+<script>
+  const disclosures = document.querySelectorAll<HTMLDetailsElement>('.responsive-disclosure');
+  const desktop = window.matchMedia('(min-width: 768px)');
+  const updateDisclosures = () => disclosures.forEach(disclosure => {
+    disclosure.open = desktop.matches;
+    disclosure.toggleAttribute('data-desktop-open', desktop.matches);
+  });
+  updateDisclosures();
+  desktop.addEventListener('change', updateDisclosures);
+</script>
