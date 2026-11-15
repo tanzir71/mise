@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
 import assets from '../../handover/exports/landing-assets.json';
 
+declare global { interface Window { miseCLS: number; } }
+
 for (const region of ['bd', 'intl'] as const) {
   test(`${region} uses the complete Figma picture set with sharp source variants`, async ({ page }) => {
     await page.addInitScript(() => {
-      const state = window as Window & { miseCLS: number };
+      const state = window;
       state.miseCLS = 0;
       new PerformanceObserver(list => { for (const entry of list.getEntries()) { const shift = entry as PerformanceEntry & { hadRecentInput: boolean; value: number }; if (!shift.hadRecentInput) state.miseCLS += shift.value; } }).observe({ type: 'layout-shift', buffered: true });
     });
@@ -32,6 +34,6 @@ for (const region of ['bd', 'intl'] as const) {
     expect(await hero.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await hero.evaluate(image => (image as HTMLImageElement).decode());
     await page.evaluate(() => document.fonts.ready);
-    expect(await page.evaluate(() => (window as Window & { miseCLS: number }).miseCLS)).toBeLessThan(0.05);
+    expect(await page.evaluate(() => window.miseCLS)).toBeLessThan(0.05);
   });
 }
