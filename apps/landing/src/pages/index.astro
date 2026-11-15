@@ -1,6 +1,31 @@
 ---
+import Base from '../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
 ---
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Mise — a calmer shift</title></head>
-<body><main><h1>Mise</h1><p>Every order, chat and payment, in one calm place.</p><a href={`${base}bd/`}>Bangladesh</a> · <a href={`${base}intl/`}>International</a> · <a href={`${base}app/`}>Open app</a></main></body></html>
+<Base title="Mise — every order, chat and payment in one calm place" description="Choose your Mise region: Bangladesh or International. Every order, chat and payment, in one calm place.">
+  <main id="main" class="region-router" data-base={base} data-geo={import.meta.env.PUBLIC_GEO_URL || ''}>
+    <img src={`${base}brand/mise-mark.svg`} width="48" height="48" alt="Mise" />
+    <h1>A little more order.</h1>
+    <p>Choose the Mise page for your shop.</p>
+    <div><a class="button button-primary" href={`${base}bd/`} data-region="bd">Bangladesh · English</a><a class="button button-secondary" href={`${base}intl/`} data-region="intl">International · English</a></div>
+    <noscript><p>JavaScript is off. <a href={`${base}bd/`}>Visit Bangladesh</a> or <a href={`${base}intl/`}>visit International</a>.</p></noscript>
+  </main>
+</Base>
+<script>
+  import { resolveRegion, validRegion } from '@mise/core/region';
+  const host = document.querySelector<HTMLElement>('.region-router')!;
+  const query = new URLSearchParams(location.search).get('region');
+  let saved: string | null = null;
+  try { saved = localStorage.getItem('mise.region'); if (validRegion(query)) localStorage.setItem('mise.region', query!); } catch { /* Region links work with storage disabled. */ }
+  const endpoint = host.dataset.geo;
+  const lookup = endpoint ? async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 800);
+    try { const response = await fetch(endpoint, { signal: controller.signal, credentials: 'omit' }); if (!response.ok) throw new Error('Country lookup unavailable'); return await response.json(); }
+    finally { clearTimeout(timer); }
+  } : undefined;
+  let timezone = '';
+  try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { /* Language remains a fallback. */ }
+  void resolveRegion({ query, saved, timezone, languages: navigator.languages || [navigator.language], lookup }).then(region => location.replace(`${host.dataset.base}${region}/${location.search}${location.hash}`));
+</script>
+<style>.region-router{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;background:#f5f5f4;gap:24px}.region-router h1{font-size:clamp(36px,6vw,56px);line-height:1.1}.region-router>p{color:#6f6f6c}.region-router>div{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.region-router noscript{font-size:13px}</style>
