@@ -1,0 +1,74 @@
+---
+import type bdCopy from '../../../../handover/copy/landing.bd.json';
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import Heading from './SectionHeading.astro';
+import Preview from './Preview.astro';
+import Icon from '@mise/ui/Icon.astro';
+import Section from '@mise/ui/Section.astro';
+import Chip from '@mise/ui/Chip.astro';
+import '../styles/landing.css';
+interface Props { copy: typeof bdCopy }
+const { copy: c } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const appUrl = import.meta.env.PUBLIC_APP_URL || `${base}app/`;
+const secondaryUrl = c.region === 'bd' ? import.meta.env.PUBLIC_WHATSAPP_URL : import.meta.env.PUBLIC_DEMO_URL;
+const contactUrl = import.meta.env.PUBLIC_WHATSAPP_URL;
+const modes = ['today','orders','tracking','stock','team','live'];
+const businessModes = ['today','shop','stall','credit'];
+---
+<Base title={c.meta.title} description={c.meta.description} lang={c.lang} region={c.region as 'bd' | 'intl'}>
+  <div id="top"><Header nav={c.nav} appUrl={appUrl} /></div>
+  <main id="main">
+    <section class="hero dark">
+      <div class="container hero-grid">
+        <div class="hero-copy"><a href="#ai" class="new-chip"><span class="ember-dot" />{c.hero.eyebrow}<Icon name="arrowRight" size={14} /></a><h1>{c.hero.headline}</h1><p class="lead">{c.hero.lead}</p><div class="hero-actions"><a class="button button-primary" href={appUrl}>{c.hero.ctaPrimary}<Icon name="arrowUpRight" size={18} /></a><a class="button button-ghost" href="#day"><span class="play-icon"><Icon name="play" size={12} /></span>{c.hero.ctaSecondary}</a></div><span class="preview-label">PRODUCT PREVIEW · ROLLING OUT IN STAGES</span></div>
+        <div class="hero-visual" role="img" aria-label="Illustrative preview of the Mise live store dashboard and orders on a phone"><div class="hero-desktop"><Preview mode="live" region={c.region} /></div><div class="hero-phone"><Preview mode="orders" phone region={c.region} /></div>{c.hero.chips.map((chip,i)=><div class:list={['floating-chip',`hero-chip-${i}`]}><span class="floating-icon"><Icon name={chip.icon} size={17} /></span><div><strong>{chip.title}</strong><small>{chip.meta}</small></div>{i===2&&<Icon name="check" size={13} />}</div>)}</div>
+      </div>
+      <div class="container trust"><p>{c.hero.trustLabel}</p><div class="partners">{c.hero.partners.map(partner=><span>{partner}</span>)}</div></div>
+    </section>
+    <section id="features" class="feature-index"><div class="container"><p class="eyebrow">{c.index.label}</p><div class="index-pills">{c.index.items.map(item=><Chip href={item.href} selected={item.highlight}><Icon name={item.icon} size={16} />{item.label}</Chip>)}</div></div></section>
+    <Section id="ai">
+      <Heading eyebrow={c.ai.eyebrow} headline={c.ai.headline} lead={c.ai.lead} />
+      <div class="ai-grid"><div class="permissions-card"><div class="permissions-top"><div><Icon name="sparkles" size={20} /><strong>Your operator’s playbook</strong></div><span class="small-label">YOU SET THE RULES</span></div>{c.ai.permissions.map(row=><div class="permission-row"><div><h3>{row.title}</h3><p>{row.meta}</p></div><div class="segmented" aria-label={`${row.title}: ${row.level}`}>{['Watch','Ask','Alone'].map(level=><span class:list={[{ active:level===row.level }]}>{level}</span>)}</div></div>)}<div class="permissions-footer"><Icon name="lock" size={13} /> Your limits. Your business. Always.</div></div><div class="benefits">{c.ai.benefits.map(benefit=><div class="benefit"><span class="line-icon"><Icon name={benefit.icon} size={22} /></span><div><h3>{benefit.title}</h3><p>{benefit.text}</p></div></div>)}</div></div>
+      <div class="timeline dark"><div class="timeline-heading"><Icon name="sparkles" size={22} /><h3>{c.ai.timelineTitle}</h3><span>YOU’RE STILL IN CHARGE</span></div><div class="timeline-grid">{c.ai.timeline.map((step,i)=><div><span class="timeline-time">{step.time}</span><span class="timeline-node">{String(i+1).padStart(2,'0')}</span><h4>{step.title}</h4><p>{step.text}</p></div>)}</div></div>
+      <div class="failure-ladder"><h3>{c.ai.failureTitle}</h3><div class="ladder-steps">{c.ai.failureSteps.map((step,i)=><Fragment><span><b>0{i+1}</b>{step}</span>{i<3&&<Icon name="arrowRight" size={18} />}</Fragment>)}</div><p>{c.ai.failureText}</p></div>
+      <div class="connect-panel"><div><span class="eyebrow">BRING YOUR OWN AGENT</span><h3>{c.ai.connectTitle}</h3><p>{c.ai.connectText}</p><span class="small-label">CONNECTION PREVIEW · COMING IN PHASE 5</span></div><pre><code>{c.ai.connectCode.join('\n\n')}</code></pre></div>
+    </Section>
+    <Section id="ocr" muted>
+      <Heading eyebrow={c.ocr.eyebrow} headline={c.ocr.headline} lead={c.ocr.lead} />
+      <div class="ocr-grid">{c.ocr.cards.map((card,i)=><article class="ocr-card"><div class="ocr-card-title"><span>0{i+1}</span><h3>{card.title}</h3><Icon name={['message','receipt','clipboard','wallet','camera','globe'][i]} size={19} /></div><div class="ocr-flow"><div class:list={['ocr-input',`ocr-input-${i}`]}><span class="sample-label">BEFORE</span><div>{card.input.map(line=><p>{line}</p>)}</div></div><span class="flow-arrow"><Icon name="arrowDown" size={18} /></span><div class="ocr-output"><span class="sample-label">IN MISE</span>{card.output.map(([label,value])=><div><span>{label}</span><strong>{value}</strong></div>)}</div></div><p class="ocr-note">{card.note}</p></article>)}</div>
+    </Section>
+    <Section id="capture" dark>
+      <Heading eyebrow={c.capture.eyebrow} headline={c.capture.headline} lead={c.capture.lead} />
+      <div class="capture-table"><div class="capture-head">{c.capture.columns.map(label=><span>{label}</span>)}</div>{c.capture.rows.map(row=><div class="capture-row"><div class="capture-source"><span class="capture-icon"><Icon name={row.icon} size={20} /></span><div><h3>{row.source}</h3><p>{row.examples}</p></div></div><div class="capture-method"><Icon name="arrowRight" size={18} /><p>{row.method}</p></div><div class="capture-results">{row.result.map(result=><span>{result}</span>)}</div></div>)}</div><p class="capture-fallback"><Icon name="shield" size={18} />{c.capture.fallback}</p>
+    </Section>
+    <Section id="checks">
+      <Heading eyebrow={c.checks.eyebrow} headline={c.checks.headline} lead={c.checks.lead} />
+      <div class="checks-grid">{c.checks.items.map(item=><article class="check-card"><div class="check-card-top"><span>{item.tag}</span><Icon name={item.icon} size={20} /></div><div class="when"><span>WHEN</span><h3>{item.when}</h3></div><div class="then"><Icon name="cornerDownRight" size={18} /><div><span>MISE</span><p>{item.then}</p></div></div></article>)}</div>
+    </Section>
+    <Section id="detail" class="detail-section">
+      <Heading eyebrow={c.detail.eyebrow} headline={c.detail.headline} lead={c.detail.lead} center />
+      <div class="detail-blocks">{c.detail.blocks.map((block,i)=><article id={block.id} class:list={['detail-block', { reverse:i%2===1 }]}><div class="detail-visual"><div class:list={['detail-preview', { 'dual-phones':block.id==='f-tracking'||block.id==='f-credit' }]}>{block.id==='f-tracking'? <><Preview mode="tracking" phone region={c.region} /><Preview mode="orders" phone region={c.region} /></> : block.id==='f-credit'? <><Preview mode="credit" phone region={c.region} /><Preview mode="orders" phone region={c.region} /></> : <Preview mode={block.id.replace('f-','')} region={c.region} />}</div>{block.callout&&<div class="floating-chip detail-callout"><span class="floating-icon"><Icon name={block.callout.icon} size={19} /></span><div><strong>{block.callout.title}</strong><small>{block.callout.meta}</small></div><Icon name="check" size={14} /></div>}<span class="visual-caption">MISE / {block.cat} · PRODUCT PREVIEW</span></div><div class="detail-copy"><p class="eyebrow"><span>{block.n}</span> / {block.cat}</p><h3>{block.title}</h3><p class="lead">{block.lead}</p><ol>{block.steps.map((step,index)=><li><span>{String(index+1).padStart(2,'0')}</span><p>{step}</p></li>)}</ol><div class="fallback-box"><Icon name="shield" size={16} /><p><strong>{c.detail.failLabel}</strong> {block.fail}</p></div></div></article>)}</div>
+    </Section>
+    <Section id="day" dark>
+      <Heading eyebrow={c.day.eyebrow} headline={c.day.headline} lead={c.day.lead} />
+      <div class="day-phones" tabindex="0" role="region" aria-label="A day with Mise product previews">{c.day.items.map((item,i)=><figure><Preview mode={modes[i]} phone region={c.region} /><figcaption><span>{item.time}</span><p>{item.text}</p></figcaption></figure>)}</div>
+    </Section>
+    <Section id="businesses">
+      <Heading eyebrow={c.businesses.eyebrow} headline={c.businesses.headline} />
+      <div class="business-grid">{c.businesses.items.map((item,i)=><article id={`business-${item.title.toLowerCase().replaceAll(' ','-')}`} class="business-card"><div class="business-phone"><Preview mode={businessModes[i]} phone region={c.region} /></div><div class="business-copy"><span class="business-number">0{i+1} /</span><h3>{item.title}</h3><ul>{item.points.map(point=><li><Icon name="check" size={15} /><span>{point}</span></li>)}</ul></div></article>)}</div>
+    </Section>
+    <Section id="basics" muted>
+      <Heading eyebrow={c.basics.eyebrow} headline={c.basics.headline} />
+      <div class="basics-grid">{c.basics.items.map(item=><article class="basic-tile"><Icon name={item.icon} size={24} /><h3>{item.title}</h3><p>{item.text}</p></article>)}</div>
+    </Section>
+    <Section id="compare">
+      <Heading headline={c.compare.headline} />
+      <table class="compare-table"><caption class="sr-only">Compare Mise with a typical POS and WhatsApp with a notebook</caption><thead><tr>{c.compare.columns.map((label,i)=><th scope="col" class:list={[{ 'mise-column':i===1 }]}>{label||'Feature'}{i===1&&<Icon name="sparkles" size={18} />}</th>)}</tr></thead><tbody>{c.compare.rows.map(row=><tr><th scope="row">{row[0]}</th>{row.slice(1).map((value,i)=><td data-label={c.compare.columns[i+1]} class:list={[{ 'mise-column':i===0 }]}>{typeof value==='boolean'?<><Icon name={value?'check':'minus'} size={18} /><span class="sr-only">{value?'Included':'Not included'}</span></>:value}</td>)}</tr>)}</tbody></table>
+    </Section>
+    <Section id="cta" dark class="cta-section"><span class="cta-mark"><Icon name="sparkles" size={30} /></span><Heading headline={c.cta.headline} lead={c.cta.lead} center /><div class="cta-actions"><a href={appUrl} class="button button-primary">{c.cta.primary}<Icon name="arrowUpRight" size={18} /></a><a href={secondaryUrl || '#availability'} data-unconfigured={!secondaryUrl || undefined} class="button button-ghost">{c.cta.secondary.label}<Icon name={c.region==='bd'?'message':'arrowRight'} size={18} /></a>{secondaryUrl&&<button class="copy-link" data-copy={secondaryUrl}>Copy link</button>}</div><p class="cta-availability">The app is coming soon. Explore the product and get ready for launch.</p></Section>
+  </main>
+  <Footer footer={c.footer} region={c.region} contactUrl={contactUrl} />
+</Base>

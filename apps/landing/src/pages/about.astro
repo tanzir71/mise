@@ -1,0 +1,5 @@
+---
+import InfoPage from '../components/InfoPage.astro';
+const contact = import.meta.env.PUBLIC_WHATSAPP_URL;
+---
+<InfoPage title="A calmer way to run a shop." description="Mise brings every order, chat and payment into one calm place. Bangladesh first, built for small businesses everywhere."><h2>Built one useful step at a time</h2><p>We’re starting with the essentials: your counter, customers, orders, stock and cash. The product pages show the full roadmap. The working app, connected devices and optional AI operator arrive in later phases.</p><h2 id="careers">Careers</h2><p>No open roles are listed yet. Any opportunities will be published here.</p><h2 id="contact">Contact</h2>{contact?<p><a href={contact}>Chat with us on WhatsApp</a> · <button class="copy-link" data-copy={contact}>Copy link</button></p>:<p>Contact details will be published here when Mise is ready for new shops. For now, explore the <a href={`${import.meta.env.BASE_URL}setup/`}>setup guide</a> or follow the project on <a href={import.meta.env.PUBLIC_REPO_URL || 'https://github.com/tanzir71/mise'}>GitHub</a>.</p>}</InfoPage>

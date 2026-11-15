@@ -1,0 +1,6 @@
+---
+import Eyebrow from '@mise/ui/Eyebrow.astro';
+interface Props { eyebrow?: string; headline: string; lead?: string; center?: boolean }
+const { eyebrow, headline, lead, center } = Astro.props;
+---
+<div class:list={['section-heading', { 'text-center': center }]}>{eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}<h2>{headline}</h2>{lead && <p class="lead">{lead}</p>}</div>

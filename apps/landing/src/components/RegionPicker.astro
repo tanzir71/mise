@@ -1,0 +1,7 @@
+---
+import Icon from '@mise/ui/Icon.astro';
+interface Props { label: string }
+const { label } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+<details class="region-picker"><summary><Icon name="globe" size={15} /><span>{label}</span><Icon name="chevronDown" size={12} /></summary><div class="region-menu"><a href={`${base}bd/`} data-region="bd">Bangladesh · English</a><a href={`${base}intl/`} data-region="intl">International · English</a></div></details>
