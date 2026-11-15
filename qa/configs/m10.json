@@ -18,7 +18,7 @@
           "selector": ".onboarding form"
         }
       ],
-      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. The written milestone specifies three initial questions; M33 depicts the later getting-started checklist. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. The written milestone specifies three initial questions; M33 depicts the later getting-started checklist. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
       "sections": [
         {
           "id": "first-run",
@@ -31,7 +31,7 @@
     {
       "id": "m10-today",
       "path": "app/",
-      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields. The current Today shell includes recorded local counter totals added in M12.",
       "actions": [
         {
           "type": "click",
@@ -94,7 +94,7 @@
       "widths": [
         390
       ],
-      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
       "actions": [
         {
           "type": "click",
@@ -147,7 +147,7 @@
     {
       "id": "m10-settings",
       "path": "app/",
-      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later sales, channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. The local business fields reuse M33's card/type system; fields follow the M10 written spec. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
+      "note": "M10 implements the shell and local setup only. The reference includes native browser/phone chrome and later channels, staff, devices and AI features; those are intentionally absent. No demonstration counts or connected integrations are claimed. The local business fields reuse M33's card/type system; fields follow the M10 written spec. Full-page captures place the fixed phone navigation at the document bottom so it does not cover form fields.",
       "actions": [
         {
           "type": "click",

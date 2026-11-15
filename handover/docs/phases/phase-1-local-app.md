@@ -57,9 +57,9 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - Sales log with undo (last 10 minutes), and day totals by method.
 
 **Accept**
-- [ ] Ten sales in under 60 seconds with keypad only (Playwright test).
-- [ ] Calculator maths is correct, including operator precedence and `%` (unit tests with ≥ 30 cases).
-- [ ] Cash is always one tap from the total. No modal is required for cash.
+- [x] Ten sales in under 60 seconds with keypad only (Playwright test).
+- [x] Calculator maths is correct, including operator precedence and `%` (unit tests with ≥ 30 cases).
+- [x] Cash is always one tap from the total. No modal is required for cash.
 
 ## M13 · Customers and khata (credit) · M
 **Figma:** C02 `110:301`, C04 `111:101`, C05 `111:238`

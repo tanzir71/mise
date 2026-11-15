@@ -1,0 +1,315 @@
+{
+  "title": "M12 cash counter",
+  "widths": [
+    390,
+    1440
+  ],
+  "heights": {
+    "390": 844,
+    "1440": 1000
+  },
+  "pages": [
+    {
+      "id": "m12-counter",
+      "path": "app/",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/counter\"]:visible"
+        },
+        {
+          "type": "wait",
+          "selector": ".counter-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"calculation\"]",
+          "value": "75+150+20"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-given button:text-is(\"৳500\")"
+        }
+      ],
+      "note": "Real local counter and receipts. Use C01 keypad/type/spacing and C03 receipt geometry; dynamic totals and a genuine text QR replace reference examples. The desktop layout adapts the phone counter with the existing 240px shell and a sales log beside it. C00 supplies the day-total/list card primitives for the log, not its later orders, credit or stock data. Touch targets are at least 44px; future customer registration, khata and online tracking are absent. Capture-only navigation positioning prevents the fixed bar covering long content. Skip links are hidden only for capture, as on the landing report.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C01 · Owner — Counter · tap the amount, cash is one tap (with change).png"
+        }
+      ]
+    },
+    {
+      "id": "m12-receipt",
+      "path": "app/",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/counter\"]:visible"
+        },
+        {
+          "type": "wait",
+          "selector": ".counter-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"calculation\"]",
+          "value": "75+150+20"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-given button:text-is(\"৳500\")"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-cash"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-success button:text-is(\"Show receipt QR\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".receipt-qr"
+        }
+      ],
+      "note": "Real local counter and receipts. Use C01 keypad/type/spacing and C03 receipt geometry; dynamic totals and a genuine text QR replace reference examples. The desktop layout adapts the phone counter with the existing 240px shell and a sales log beside it. C00 supplies the day-total/list card primitives for the log, not its later orders, credit or stock data. Touch targets are at least 44px; future customer registration, khata and online tracking are absent. Capture-only navigation positioning prevents the fixed bar covering long content. Skip links are hidden only for capture, as on the landing report.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C03 · Owner turns phone to customer — scan for receipt, save the shop.png"
+        }
+      ]
+    },
+    {
+      "id": "m12-log-phone",
+      "path": "app/",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/counter\"]:visible"
+        },
+        {
+          "type": "wait",
+          "selector": ".counter-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"calculation\"]",
+          "value": "75+150+20"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-given button:text-is(\"৳500\")"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-cash"
+        },
+        {
+          "type": "wait",
+          "selector": ".counter-log>summary:text-is(\"Sales log · 1 sale\")"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-log>summary"
+        }
+      ],
+      "note": "Real local counter and receipts. Use C01 keypad/type/spacing and C03 receipt geometry; dynamic totals and a genuine text QR replace reference examples. The desktop layout adapts the phone counter with the existing 240px shell and a sales log beside it. C00 supplies the day-total/list card primitives for the log, not its later orders, credit or stock data. Touch targets are at least 44px; future customer registration, khata and online tracking are absent. Capture-only navigation positioning prevents the fixed bar covering long content. Skip links are hidden only for capture, as on the landing report.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C00 · Owner — Today at the corner shop.png"
+        }
+      ],
+      "widths": [
+        390
+      ]
+    },
+    {
+      "id": "m12-log-desktop",
+      "path": "app/",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/counter\"]:visible"
+        },
+        {
+          "type": "wait",
+          "selector": ".counter-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"calculation\"]",
+          "value": "75+150+20"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-given button:text-is(\"৳500\")"
+        },
+        {
+          "type": "click",
+          "selector": ".counter-cash"
+        },
+        {
+          "type": "wait",
+          "selector": ".counter-log>summary:text-is(\"Sales log · 1 sale\")"
+        }
+      ],
+      "note": "Real local counter and receipts. Use C01 keypad/type/spacing and C03 receipt geometry; dynamic totals and a genuine text QR replace reference examples. The desktop layout adapts the phone counter with the existing 240px shell and a sales log beside it. C00 supplies the day-total/list card primitives for the log, not its later orders, credit or stock data. Touch targets are at least 44px; future customer registration, khata and online tracking are absent. Capture-only navigation positioning prevents the fixed bar covering long content. Skip links are hidden only for capture, as on the landing report.",
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C00 · Owner — Today at the corner shop.png"
+        }
+      ],
+      "widths": [
+        1440
+      ]
+    }
+  ]
+}

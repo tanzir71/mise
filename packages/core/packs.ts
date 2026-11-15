@@ -16,8 +16,8 @@ export function defaultMarket(timezone: string): MarketCode {
 }
 export interface AppNavItem { path: string; label: string; icon: string }
 const nav: Record<string, AppNavItem> = {
-  today: { path: '/', label: 'Today', icon: 'home' }, counter: { path: '/counter', label: 'Counter', icon: 'calculator' },
-  orders: { path: '/orders', label: 'Orders', icon: 'receipt' }, khata: { path: '/khata', label: 'Khata', icon: 'wallet' },
+  today: { path: '/', label: 'Today', icon: 'home' }, counter: { path: '/counter', label: 'Counter', icon: 'wallet' },
+  orders: { path: '/orders', label: 'Orders', icon: 'receipt' }, khata: { path: '/khata', label: 'Khata', icon: 'clipboard' },
   inbox: { path: '/inbox', label: 'Inbox', icon: 'message' }, stock: { path: '/stock', label: 'Stock', icon: 'package' },
   more: { path: '/more', label: 'More', icon: 'more' },
 };

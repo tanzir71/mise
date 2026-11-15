@@ -1,4 +1,4 @@
-export const defaultFlags = { uiGallery: false, localApp: true } as const;
+export const defaultFlags = { uiGallery: false, localApp: true, counter: true } as const;
 export type FeatureFlag = keyof typeof defaultFlags;
 
 export function flagEnabled(name: FeatureFlag, query = '', stored = ''): boolean {

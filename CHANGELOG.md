@@ -10,6 +10,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
+- M12: enabled the cash-first counter, 4×5 keypad, round/manual given amounts, exact change, optional names/items, confirmed wallet/card recording, real receipt QR and copy fallback, sales log with ten-minute undo, and recorded sales on Today. Optional browser speech previews a calculation; the keypad stays available offline.
 - M12 foundations: exact calculator arithmetic, audited cash/wallet/card sale commands, ten-minute undo, timezone-aware day totals, receipt text and an additive IndexedDB upgrade. Counter UI remains staged until its checks pass.
 - M10 foundations: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events.
 - M10: enabled three-step onboarding, pack-aware phone navigation and 240px desktop sidebar, business/outlet/market settings, removable samples, offline shell caching and an explicit reload control for updates. Future counter/order/stock tools remain staged. Added app reference captures and direct-to-main delivery workflow per owner instruction.
