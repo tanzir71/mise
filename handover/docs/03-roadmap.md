@@ -23,7 +23,7 @@ Spec: `phases/phase-0-landing.md`
 - [x] **M01** Design tokens + base UI primitives in `packages/ui` · S · T0
 - [x] **M02** Landing: Bangladesh page, all sections, static · M · T0
 - [x] **M03** Landing: International page from the same components + region router + hreflang · S · T0
-- [ ] **M04** Landing polish: screenshots, Lighthouse targets, OG images, phone layouts · S · T0
+- [x] **M04** Landing polish: screenshots, Lighthouse targets, OG images, phone layouts · S · T0
 - [ ] **M05** Setup & downloads page (`/setup/`) reading `downloads/manifest.json`; `downloads/` folder + artifacts workflow skeleton · S · T0
 
 ## Phase 1 — Useful on one device (T1) → tag `v0.2.0`

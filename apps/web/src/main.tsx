@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import '@mise/ui/tokens.css';
@@ -6,7 +6,9 @@ import './style.css';
 import '@mise/ui/fonts.css';
 import '@mise/ui/primitives.css';
 import { flagEnabled } from '@mise/core/flags';
-import { Gallery } from './Gallery';
+import changelog from '../../../CHANGELOG.md?raw';
+
+const Gallery = lazy(() => import('./Gallery').then(module => ({ default: module.Gallery })));
 
 const base = import.meta.env.BASE_URL.replace(/app\/$/, '');
 let storedFlags = '';
@@ -18,7 +20,7 @@ function ComingSoon() {
 }
 
 function WhatsNew() {
-  return <main className="coming-soon"><p className="eyebrow">WHAT’S NEW</p><h1>Mise 0.1</h1><p>The regional product pages and setup guide are here. The working app follows in Phase 1.</p><Link to="/">Back to Mise</Link></main>;
+  return <main className="coming-soon"><p className="eyebrow">WHAT’S NEW</p><h1>Mise 0.1</h1><p>The product pages preview the roadmap. The working app follows in Phase 1.</p><pre className="changelog">{changelog.replace(/^# Changelog\s*/, '')}</pre><Link to="/">Back to Mise</Link></main>;
 }
 
-createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter basename={import.meta.env.BASE_URL}><Routes><Route path="/whats-new" element={<WhatsNew />} />{showGallery && <Route path="/_ui" element={<Gallery />} />}<Route path="*" element={<ComingSoon />} /></Routes></BrowserRouter></React.StrictMode>);
+createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter basename={import.meta.env.BASE_URL}><Routes><Route path="/whats-new" element={<WhatsNew />} />{showGallery && <Route path="/_ui" element={<Suspense fallback={<p>Loading UI gallery…</p>}><Gallery /></Suspense>} />}<Route path="*" element={<ComingSoon />} /></Routes></BrowserRouter></React.StrictMode>);

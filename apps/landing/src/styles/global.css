@@ -10,3 +10,6 @@
 .product-preview{--text-secondary:#6f6f6c;--border:#e3e3e1;--surface:#ffffff}
 .store-banner>small,.store-banner>span{color:#62625f}
 
+
+#copy-text{width:100%;padding:12px;border:1px solid #cfcfcc;border-radius:8px;font:12px/1.7 var(--font-mono);resize:vertical}.changelog{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.8 var(--font-sans);margin:32px 0}
+

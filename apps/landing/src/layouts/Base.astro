@@ -10,6 +10,7 @@ const { title, description, lang = 'en', region, noindex } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const origin = Astro.site || new URL('https://tanzir71.github.io');
 const url = (path: string) => new URL(`${base}${path}`, origin).href;
+const analyticsUrl = import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true' && /^https:\/\//.test(import.meta.env.PUBLIC_ANALYTICS_SCRIPT || '') ? import.meta.env.PUBLIC_ANALYTICS_SCRIPT : '';
 ---
 <!doctype html>
 <html lang={lang}>
@@ -37,15 +38,25 @@ const url = (path: string) => new URL(`${base}${path}`, origin).href;
     <meta property="og:image" content={url(`og-${region || 'intl'}.png`)} />
     <meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    {analyticsUrl && <script is:inline defer src={analyticsUrl}></script>}
     <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
     <dialog id="availability" class="availability"><div><p class="eyebrow">LET’S GET YOU READY</p><h2>We’re getting Mise ready.</h2><p>The working app is coming in the next phase. Explore setup and the rollout plan while we get the counter ready.</p><a class="button button-primary" href={`${base}setup/`}>See setup and downloads <span aria-hidden="true">→</span></a><form method="dialog"><button class="button button-secondary">Close</button></form></div></dialog>
+    <dialog id="copy-fallback" class="availability"><h2>Copy by hand</h2><p>Select the text below and copy it.</p><label class="sr-only" for="copy-text">Text to copy</label><textarea id="copy-text" readonly rows="8"></textarea><form method="dialog"><button class="button button-primary">Done</button></form></dialog>
+    <p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
     <script>
       document.querySelectorAll<HTMLAnchorElement>('[data-unconfigured]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); document.querySelector<HTMLDialogElement>('#availability')?.showModal(); }));
       document.querySelectorAll<HTMLAnchorElement>('[data-region]').forEach(link => link.addEventListener('click', () => { try { localStorage.setItem('mise.region', link.dataset.region || 'intl'); } catch { /* Navigation works without storage. */ } }));
+      document.querySelectorAll<HTMLButtonElement>('[data-copy], [data-copy-source]').forEach(button => button.addEventListener('click', async () => {
+        const source = button.dataset.copySource ? document.querySelector<HTMLTextAreaElement>(button.dataset.copySource)?.value : button.dataset.copy;
+        if (!source) return;
+        try { await navigator.clipboard.writeText(source); const status = document.querySelector('#copy-status'); if (status) status.textContent = 'Copied to clipboard'; const label = button.textContent; button.textContent = 'Copied ✓'; setTimeout(() => { button.textContent = label; }, 2000); }
+        catch { const field = document.querySelector<HTMLTextAreaElement>('#copy-text')!; field.value = source; document.querySelector<HTMLDialogElement>('#copy-fallback')?.showModal(); field.focus(); field.select(); }
+      }));
+      document.querySelectorAll<HTMLButtonElement>('[data-mark-done]').forEach(button => button.addEventListener('click', () => { button.textContent = 'Marked done ✓'; button.disabled = true; }));
     </script>
   </body>
 </html>
