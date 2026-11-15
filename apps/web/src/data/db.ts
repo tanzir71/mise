@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus, OrderRefund } from '@mise/core/models';
+import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus, OrderRefund, StockItem, StockMove, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
@@ -10,6 +10,8 @@ import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } 
 import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
 import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOrderCancellationCommand, refundOrderCommand, undoOrderRefundCommand, type OrderMoneyChange, type OrderMoneyContext, type OrderSettlementInput, type OrderRefundInput } from '@mise/core/order-payments';
 import { saveOrderCommand, changeOrderStatusCommand, undoOrderStatusCommand, addOrderNoteCommand, recordOrderCommunicationCommand, saveOrderWarningCommand, type OrderInput } from '@mise/core/orders';
+import { saveStockItemCommand, adjustStockCommand, stockBatchCommand, undoStockMoveCommand, archiveStockItemCommand, saveSupplierCommand, archiveSupplierCommand, type StockInput, type StockContext, type StockChange, type StockAdjustment, type SupplierInput } from '@mise/core/stock';
+import { recordSupplierMessageCommand, sameSupplierMessage, undoSupplierMessageCommand, type SupplierMessageInput } from '@mise/core/supplier-drafts';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -26,6 +28,10 @@ export class MiseDatabase extends Dexie {
   orderNotes!: EntityTable<OrderNote,'id'>;
   orderCommunications!: EntityTable<OrderCommunication,'id'>;
   orderRefunds!: EntityTable<OrderRefund,'id'>;
+  stockItems!: EntityTable<StockItem,'id'>;
+  stockMoves!: EntityTable<StockMove,'id'>;
+  suppliers!: EntityTable<Supplier,'id'>;
+  supplierMessages!: EntityTable<SupplierMessage,'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
@@ -33,6 +39,7 @@ export class MiseDatabase extends Dexie {
     this.version(3).stores({ customers:'id,businessId,phone,&[businessId+phone]', creditAccounts:'id,outletId,customerId,&[outletId+customerId+currency]', creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,&reversalOf,&[accountId+sequence]', events:'id,outletId,at,command,customerId' });
     this.version(4).stores({orders:'id,outletId,status,customer.id,createdAt,&[outletId+sequence],&[outletId+number]',orderNotes:'id,orderId,outletId,&[orderId+revision]',orderCommunications:'id,orderId,outletId,&[orderId+revision]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision]'});
     this.version(5).stores({orderRefunds:'id,outletId,orderId,saleId,createdAt',sales:'id,outletId,createdAt,orderId',creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,orderId,refundId,&reversalOf,&[accountId+sequence]'});
+    this.version(6).stores({stockItems:'id,outletId,supplierId,category,&[outletId+activeKey]',stockMoves:'id,outletId,stockItemId,createdAt,countBatchId,&undoOf,&[stockItemId+revision]',suppliers:'id,outletId',supplierMessages:'id,outletId,supplierId,createdAt',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision]'});
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -304,6 +311,63 @@ export class MiseDatabase extends Dexie {
       const refund = await this.orderRefunds.get(id); if (!refund) throw new Error('Refund not found.');
       const {setup,order} = await this.orderContext(refund.orderId);
       const change = undoOrderRefundCommand(order,refund,await this.orderMoneyContext(order,setup),revision ?? order.revision); await this.writeOrderMoney(change);
+    });
+  }
+  private async stockContext():Promise<StockContext> {
+    const setup = await this.setup();if (!setup) throw new Error('Set up your shop first.');
+    const [items,suppliers,moves] = await Promise.all([this.stockItems.where('outletId').equals(setup.outlet.id).toArray(),this.suppliers.where('outletId').equals(setup.outlet.id).toArray(),this.stockMoves.where('outletId').equals(setup.outlet.id).toArray()]);return {setup,items,suppliers,moves};
+  }
+  private async writeStock(change:StockChange):Promise<void> {
+    await this.stockItems.bulkPut(change.items);await this.stockMoves.bulkAdd(change.moves);await this.events.bulkAdd(change.events);
+  }
+  async saveStockItem(input:StockInput,options:{id?:string;revision?:number} = {}):Promise<StockItem> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.stockContext(), before = options.id ? context.items.find(item => item.id === options.id) : null;
+      if (options.id && !before) throw new Error('Stock item not found.');
+      const change = saveStockItemCommand(input,context,before,options.revision);await this.writeStock(change);return change.items[0];
+    });
+  }
+  async adjustStock(input:StockAdjustment):Promise<StockItem> {
+    return this.transaction('rw',this.tables,async () => {const change = adjustStockCommand(input,await this.stockContext());await this.writeStock(change);return change.items[0];});
+  }
+  async applyStockBatch(inputs:StockAdjustment[],count = false):Promise<StockItem[]> {
+    return this.transaction('rw',this.tables,async () => {const change = stockBatchCommand(inputs,await this.stockContext(),Date.now(),count);await this.writeStock(change);return change.items;});
+  }
+  async undoStockMove(id:string,revision:number):Promise<StockItem> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.stockContext(),record = context.moves.find(move => move.id === id);if (!record) throw new Error('Stock movement not found.');
+      const change = undoStockMoveCommand(record,revision,context);await this.writeStock(change);return change.items[0];
+    });
+  }
+  async archiveStockItem(id:string,archive:boolean,revision:number):Promise<StockItem> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.stockContext(),before = context.items.find(item => item.id === id);if (!before) throw new Error('Stock item not found.');
+      const change = archiveStockItemCommand(before,archive,revision,context);await this.writeStock(change);return change.items[0];
+    });
+  }
+  async saveSupplier(input:SupplierInput,options:{id?:string;revision?:number} = {}):Promise<Supplier> {
+    return this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup();if (!setup) throw new Error('Set up your shop first.');const before = options.id ? await this.suppliers.get(options.id) : null;if (options.id && !before) throw new Error('Supplier not found.');
+      const change = saveSupplierCommand(input,setup,before,options.revision);await this.suppliers.put(change.supplier);await this.events.add(change.event);return change.supplier;
+    });
+  }
+  async archiveSupplier(id:string,archive:boolean,revision:number):Promise<Supplier> {
+    return this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(),before = await this.suppliers.get(id);if (!setup || !before) throw new Error('Supplier not found.');
+      const change = archiveSupplierCommand(before,archive,revision,setup);await this.suppliers.put(change.supplier);await this.events.add(change.event);return change.supplier;
+    });
+  }
+  async recordSupplierMessage(input:SupplierMessageInput):Promise<SupplierMessage> {
+    return this.transaction('rw',this.tables,async () => {
+      const context = await this.stockContext(),before = await this.supplierMessages.get(input.id);
+      if (before) {if (before.outletId !== context.setup.outlet.id || before.voidedAt !== undefined || !sameSupplierMessage(input,before)) throw new Error('This sent record changed. Reopen the supplier draft.');return before;}
+      const change = recordSupplierMessageCommand(input,context);await this.supplierMessages.add(change.message);await this.events.add(change.event);return change.message;
+    });
+  }
+  async undoSupplierMessage(id:string):Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const setup = await this.setup(),before = await this.supplierMessages.get(id);if (!setup || !before) throw new Error('Sent record not found.');
+      const change = undoSupplierMessageCommand(before,setup);await this.supplierMessages.put(change.message);await this.events.add(change.event);
     });
   }
 }

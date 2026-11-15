@@ -6,7 +6,7 @@ export interface Member extends Entity { businessId: string; outletIds: string[]
 export interface Category extends Entity { outletId: string; name: string; sort: number }
 export interface Item extends Entity { outletId: string; name: string; nameLocal: string; categoryId: string; price: number; unit: string; available: boolean; isSample: boolean; oftenBought?: boolean }
 export interface SetupSnapshot { business: Business; outlet: Outlet; owner: Member }
-export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
+export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; stockItemId?:string; stockRevision?:number; supplierId?:string; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
 export interface SetupInput { businessType: BusinessType; marketCode: MarketCode; name: string; phone: string; outletName?: string; address?: string; language?: MessageLanguage; timezone?: string; currency?: string }
 export interface SetupCommand { snapshot: SetupSnapshot; items: Item[]; categories: Category[]; event: AuditEvent }
 export type PaymentMethod = 'cash' | 'wallet' | 'card';
@@ -33,3 +33,8 @@ export interface Order extends Entity {
 export interface OrderNote extends Entity { orderId:string; outletId:string; revision:number; text:string; createdBy:string; eventId:string }
 export interface OrderCommunication extends Entity { orderId:string; outletId:string; revision:number; purpose:'quote'|'message'|'call'; channel:'whatsapp'|'manual'|'call'; text:string; createdBy:string; eventId:string }
 export interface OrderRefund extends Entity { orderId:string; saleId:string; outletId:string; customerId?:string; accountId?:string; amount:number; currency:string; method:PaymentMethod; methodName:string; note:string; createdBy:string; eventId:string; creditEntryId?:string; voidedAt?:number }
+export interface Supplier extends Entity { outletId:string;revision:number;name:string;phone?:string;note:string;archivedAt?:number;eventId:string }
+export interface StockItem extends Entity { outletId:string;revision:number;name:string;nameLocal:string;activeKey?:string;unit:string;category:string;aliases:string[];onHand:number;target:number;packSize:number;lowAt:number;supplierId?:string;archivedAt?:number;lastCountedAt?:number;eventId:string }
+export type StockReason = 'used'|'received'|'count'|'waste'|'undo';
+export interface StockMove extends Entity { outletId:string;stockItemId:string;revision:number;name:string;unit:string;before:number;after:number;delta:number;reason:StockReason;source:'manual'|'quick_update'|'count';note:string;createdBy:string;eventId:string;countBatchId?:string;undoOf?:string }
+export interface SupplierMessage extends Entity { outletId:string;supplierId?:string;supplierName:string;phone?:string;text:string;channel:'whatsapp'|'manual';stockItemIds:string[];part:number;parts:number;createdBy:string;eventId:string;voidedAt?:number }

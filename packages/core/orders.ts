@@ -2,6 +2,7 @@ import { ulid } from 'ulid';
 import { marketPacks, type BusinessType } from './packs';
 import { normalisePhone } from './phone';
 import { orderPricing, prepareOrderLines, type OrderLineInput } from './order-lines';
+import { validateShop } from './shop-access';
 import type { AuditEvent, Customer, Item, Order, OrderCommunication, OrderNote, OrderPayment, OrderSource, OrderStatus, OrderType, SetupSnapshot } from './models';
 
 export const orderFlows: Record<BusinessType, readonly OrderStatus[]> = {
@@ -20,9 +21,6 @@ export interface OrderInput {
   scheduledFor?:number; lines:OrderLineInput[]; deliveryFee:number; discount:number; payment:{method:OrderPayment['method'];wallet?:string};
 }
 export interface OrderContext { setup:SetupSnapshot; items:Item[]; customer?:Customer; sequence:number }
-function validateShop(setup: SetupSnapshot) {
-  if (setup.outlet.businessId !== setup.business.id || setup.owner.businessId !== setup.business.id || !setup.owner.active || !setup.owner.outletIds.includes(setup.outlet.id)) throw new Error('Choose an active member from this shop.');
-}
 export function validateOrder(order: Order, setup: SetupSnapshot, revision: number) {
   validateShop(setup);
   if (order.outletId !== setup.outlet.id) throw new Error('Choose an order from this shop.');
