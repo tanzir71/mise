@@ -1,0 +1,6 @@
+---
+interface Props { href?: string; kind?: 'primary' | 'secondary' | 'ghost'; small?: boolean; class?: string }
+const { href, kind = 'primary', small = false, class: className = '' } = Astro.props;
+const Tag = href ? 'a' : 'button';
+---
+<Tag href={href} class:list={['button', `button-${kind}`, { 'button-small': small }, className]}><slot /></Tag>

@@ -1,0 +1,6 @@
+---
+interface Props { href?: string; selected?: boolean; class?: string }
+const { href, selected = false, class: className = '' } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+<Tag href={href} class:list={['chip', { selected }, className]}><slot /></Tag>

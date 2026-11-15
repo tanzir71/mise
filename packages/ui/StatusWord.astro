@@ -1,0 +1,5 @@
+---
+interface Props { tone?: 'positive' | 'warning' | 'negative' | 'info' | 'neutral' }
+const { tone = 'neutral' } = Astro.props;
+---
+<span class:list={['status-word', `status-${tone}`]}><span aria-hidden="true">●</span><slot /></span>
