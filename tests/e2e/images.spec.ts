@@ -15,18 +15,21 @@ for (const region of ['bd', 'intl'] as const) {
     const definitions = [expected.hero, ...expected.detail, ...expected.day, ...expected.businesses];
     await expect(page.locator('picture img[data-shot]')).toHaveCount(23);
     expect(await page.locator('svg').count()).toBeLessThanOrEqual(120);
+    const pictures = await page.locator('picture img[data-shot]').evaluateAll(images => images.map(element => {
+      const image = element as HTMLImageElement;
+      return { slot: image.dataset.shot, alt: image.alt, decoding: image.decoding, loading: image.loading,
+        width: Number(image.getAttribute('width')), height: Number(image.getAttribute('height')),
+        sources: Array.from(image.parentElement!.querySelectorAll('source')).map(source => ({ type: source.type, variants: source.srcset.split(',').length })) };
+    }));
     for (const definition of definitions) {
-      const image = page.locator(`img[data-shot="${region}/${definition.slot}"]`);
-      await expect(image).toHaveAttribute('alt', definition.alt);
-      await expect(image).toHaveAttribute('decoding', 'async');
-      await expect(image).toHaveAttribute('loading', definition.slot === 'hero.visual' ? 'eager' : 'lazy');
-      expect(Number(await image.getAttribute('width'))).toBeGreaterThan(0);
-      expect(Number(await image.getAttribute('height'))).toBeGreaterThan(0);
-      const sources = image.locator('..').locator('source');
-      await expect(sources).toHaveCount(2);
-      await expect(sources.nth(0)).toHaveAttribute('type', 'image/avif');
-      await expect(sources.nth(1)).toHaveAttribute('type', 'image/webp');
-      expect((await sources.nth(0).getAttribute('srcset'))?.split(',')).toHaveLength(2);
+      const picture = pictures.find(image => image.slot === `${region}/${definition.slot}`)!;
+      expect(picture).toBeDefined();
+      expect(picture.alt).toBe(definition.alt);
+      expect(picture.decoding).toBe('async');
+      expect(picture.loading).toBe(definition.slot === 'hero.visual' ? 'eager' : 'lazy');
+      expect(picture.width).toBeGreaterThan(0);
+      expect(picture.height).toBeGreaterThan(0);
+      expect(picture.sources).toEqual([{ type: 'image/avif', variants: 2 }, { type: 'image/webp', variants: 2 }]);
     }
     const hero = page.locator(`img[data-shot="${region}/hero.visual"]`);
     await expect(hero).toHaveAttribute('fetchpriority', 'high');
