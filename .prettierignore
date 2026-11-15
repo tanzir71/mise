@@ -1,0 +1,8 @@
+node_modules
+site
+pnpm-lock.yaml
+handover
+Claude outputs
+mise-handover
+test-results
+playwright-report

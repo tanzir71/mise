@@ -1,0 +1,86 @@
+name: Build device artifacts (unsigned extension, debug-signed APK) into downloads/
+
+# Runs on version tags. Builds whatever exists (extension and/or Android app),
+# commits the files to downloads/ on main, and attaches them to the GitHub Release.
+on:
+  push:
+    tags: ['v*', 'ext-v*', 'phone-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Version from tag
+        id: v
+        run: echo "version=${GITHUB_REF_NAME#*v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Chrome extension (unpacked zip)
+        if: hashFiles('apps/extension/package.json') != ''
+        run: |
+          pnpm --filter extension build
+          mkdir -p "downloads/${{ steps.v.outputs.version }}" downloads/latest
+          (cd apps/extension/dist && zip -r "../../../downloads/${{ steps.v.outputs.version }}/mise-extension-${{ steps.v.outputs.version }}.zip" .)
+          cp "downloads/${{ steps.v.outputs.version }}/mise-extension-${{ steps.v.outputs.version }}.zip" downloads/latest/mise-extension.zip
+
+      - name: Set up Java
+        if: hashFiles('apps/order-phone/build.gradle*') != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build Android APK (debug-signed with the shared, committed debug keystore)
+        if: hashFiles('apps/order-phone/build.gradle*') != ''
+        working-directory: apps/order-phone
+        run: |
+          ./gradlew assembleDebug
+          mkdir -p "../../downloads/${{ steps.v.outputs.version }}" ../../downloads/latest
+          cp app/build/outputs/apk/debug/app-debug.apk "../../downloads/${{ steps.v.outputs.version }}/mise-order-phone-${{ steps.v.outputs.version }}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk ../../downloads/latest/mise-order-phone.apk
+
+      - name: Checksums and manifest
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          if [ -d "downloads/$V" ]; then
+            (cd "downloads/$V" && sha256sum * > SHA256SUMS.txt)
+            node scripts/update-downloads-manifest.mjs "$V"   # Codex writes this script in M05
+            # keep only the 5 newest version folders
+            ls -1d downloads/[0-9]* 2>/dev/null | sort -V | head -n -5 | xargs -r rm -rf
+          fi
+
+      - name: Commit to main
+        run: |
+          git config user.name "mise-bot"
+          git config user.email "mise-bot@users.noreply.github.com"
+          git add downloads
+          git diff --cached --quiet || git commit -m "chore(downloads): publish ${{ steps.v.outputs.version }} [skip ci]"
+          git push origin main
+
+      - name: Attach to GitHub Release
+        if: hashFiles('downloads/latest/*') != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            downloads/${{ steps.v.outputs.version }}/*
+
+      - name: Redeploy Pages
+        if: hashFiles('downloads/latest/*') != ''
+        run: gh workflow run pages.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
