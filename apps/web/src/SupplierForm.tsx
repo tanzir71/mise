@@ -1,0 +1,10 @@
+import { useRef, useState } from 'react';
+import { Button } from '@mise/ui/primitives.tsx';
+import type { Supplier } from '@mise/core/models';
+import { db } from './data/db';
+import { errorText } from './khata-data';
+export function SupplierForm({supplier,onDone}: {supplier?:Supplier;onDone:() => void}) {
+  const [draft,setDraft] = useState({name:supplier?.name || '',phone:supplier?.phone || '',note:supplier?.note || ''}), [revision] = useState(supplier?.revision), [error,setError] = useState(''), [saving,setSaving] = useState(false), busy = useRef(false);
+  async function write(archive = false) {if (busy.current) return;busy.current = true;setSaving(true);setError('');try {if (archive && supplier) await db.archiveSupplier(supplier.id,supplier.archivedAt === undefined,revision!);else await db.saveSupplier(draft,{id:supplier?.id,revision});onDone();}catch(error){setError(errorText(error));}finally{busy.current = false;setSaving(false);}}
+  return <form className="stock-form" onSubmit={event => {event.preventDefault();void write();}}><fieldset disabled={saving}><label>Name<input name="name" required autoFocus maxLength={120} value={draft.name} onChange={event => setDraft({...draft,name:event.target.value})} /></label><label>Phone (optional)<input name="phone" type="tel" autoComplete="tel" value={draft.phone} onChange={event => setDraft({...draft,phone:event.target.value})} /></label><label>Note (optional)<textarea name="note" rows={4} maxLength={2000} value={draft.note} onChange={event => setDraft({...draft,note:event.target.value})} /></label><small>A saved number opens the supplier chat. Copy remains available without a number.</small></fieldset>{error ? <p role="alert" className="form-error">{error}</p> : null}<footer className="sheet-actions"><Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save supplier'}</Button></footer>{supplier ? <Button type="button" kind="ghost" disabled={saving} onClick={() => void write(true)}>{supplier.archivedAt === undefined ? 'Archive supplier' : 'Restore supplier'}</Button> : null}</form>;
+}
