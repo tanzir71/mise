@@ -17,6 +17,7 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "screenshots": "node scripts/capture.mjs",
+    "screenshots:og": "node scripts/capture-og.mjs",
     "quality:lighthouse": "node scripts/lighthouse.mjs",
     "check:exports": "node handover/scripts/export-figma.mjs --check --only=landing",
     "check:marketing": "node scripts/check-marketing.mjs",

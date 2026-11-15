@@ -1,0 +1,91 @@
+{
+  "meta": {"title":"Setup and downloads — Mise","description":"Install Mise on your devices. Web app, Chrome extension, Android order phone, kitchen screen and your own Vercel deployment."},
+  "nav": {"product":"Product","setup":"Setup","releases":"Releases on GitHub","cta":"Open the app"},
+  "hero": {
+    "eyebrow":"SETUP · DOWNLOADS",
+    "title":"Install Mise on your devices",
+    "lead":"Everything downloads free from our GitHub repo. The Chrome extension and the Android app are developer builds that aren’t in any store, so you install them in developer mode. About 5 minutes per device.",
+    "releases":"All releases on GitHub"
+  },
+  "availability": {
+    "preview":"Mise is rolling out in stages. The web app is currently a preview; device builds will appear here when they’re ready.",
+    "coming":"Coming in a later version",
+    "app":"App coming soon",
+    "checking":"Checking available downloads…",
+    "empty":"Device builds are coming in a later version.",
+    "error":"Couldn’t check downloads. Try again, or view the manifest below.",
+    "retry":"Try again",
+    "available":"Available",
+    "count":"device builds available",
+    "latest":"Latest build",
+    "build":"debug build",
+    "manifest":"Published manifest",
+    "repository":"Downloads in the repository"
+  },
+  "common": {"copy":"Copy","checksum":"SHA-256","copyChecksum":"Copy checksum","repo":"View in repo","allDevices":"All devices and installation guides","instructions":"Installation instructions","guide":"View instructions","copyPrompt":"Copy prompt for your agent","prompt":"Prompt for your agent","fullGuide":"Read the full deployment guide"},
+  "devices": [
+    {"id":"web","icon":"globe","title":"Web app","subtitle":"Phones, PCs and tablets","description":"Install from the browser","meta":"No download","action":"Open the app","guide":"web-install"},
+    {"id":"extension","icon":"puzzle","title":"Chrome extension","subtitle":"Shop PC · reads delivery-app tabs, fills courier forms","description":"downloads/latest/mise-extension.zip","meta":"","action":"Download .zip","guide":"extension-install"},
+    {"id":"order-phone","icon":"phone","title":"Android order phone","subtitle":"Shop phone · reads WhatsApp, bKash, Nagad, calls","description":"downloads/latest/mise-order-phone.apk","meta":"","action":"Download .apk","guide":"android-install"},
+    {"id":"kitchen","icon":"utensils","title":"Kitchen screen","subtitle":"Any tablet or phone · works offline","description":"Same web app, kitchen mode","meta":"No download","action":"Set up kitchen","guide":"kitchen-install"}
+  ],
+  "guides": [
+    {"id":"extension-install","title":"Chrome extension","lead":"On the shop PC. Use Chrome or Edge.","steps":[
+      {"title":"Download and unzip","text":"Unzip mise-extension.zip into a folder you won’t delete, such as Documents › Mise."},
+      {"title":"Open the extensions page","text":"Type chrome://extensions in the address bar (Edge: edge://extensions).","code":"chrome://extensions"},
+      {"title":"Turn on Developer mode","text":"The switch is at the top right of the page.","example":"developer"},
+      {"title":"Click “Load unpacked” and choose the folder","text":"Pick the folder that contains manifest.json.","example":"unpacked"},
+      {"title":"Pin Mise and pair it","text":"Click the puzzle icon, pin Mise, open it and enter the 6-digit code from Mise › Settings › Devices."},
+      {"title":"If Chrome warns about developer-mode extensions","text":"That’s expected for builds outside the Chrome Web Store. Keep the extension on."}
+    ]},
+    {"id":"android-install","title":"Android order phone","lead":"On the phone that receives WhatsApp, bKash and calls.","steps":[
+      {"title":"Open this page on the phone and tap Download .apk","text":"Or scan the QR in Mise › Settings › Devices."},
+      {"title":"Allow from unknown sources","text":"Android blocks apps from unknown sources by default. When you open the file, tap Settings and turn on “Allow from this source” for Chrome (or Settings › Apps › Special app access › Install unknown apps). Older phones: Settings › Security › Unknown sources. Names vary by brand.","example":"source"},
+      {"title":"Go back, open the file and tap Install","text":"If Play Protect warns, tap More details › Install anyway. It’s a developer build, not a store app."},
+      {"title":"Allow notification access","text":"Choose only WhatsApp, WhatsApp Business, bKash, Nagad and Phone.","example":"notifications"},
+      {"title":"Turn off battery optimisation for Mise","text":"So Android doesn’t stop it during a busy shift."},
+      {"title":"Pair the phone","text":"Scan the pairing QR in Mise › Settings › Devices. The phone appears as “Order phone · online”."}
+    ]}
+  ],
+  "examples": {"label":"Illustration of the setting","extensions":"Extensions","developer":"Developer mode","source":"Allow from this source","unpacked":["Load unpacked","Pack extension","Update"],"notifications":["WhatsApp","bKash","Nagad","Everything else"],"on":"Enabled","off":"Disabled"},
+  "helpers": {
+    "cable":{"title":"Prefer a cable?","text":"Turn on USB debugging in Developer options, connect the phone, then run:","command":"adb install -r mise-order-phone.apk"},
+    "checksum":{"title":"Check the download","text":"Compare the fingerprint with the one listed next to the file in the repo.","command":"shasum -a 256 mise-order-phone.apk\n# Windows: certutil -hashfile mise-order-phone.apk SHA256"},
+    "updates":{"title":"Updates","text":"Mise tells you in the app when a newer build is in the repo.","items":["Extension: replace the folder, then click the reload icon on chrome://extensions","Android: install the new APK over the old one. Your data stays."]}
+  },
+  "browserGuides": [
+    {"id":"web-install","title":"Web app","text":"The current app is a coming-soon screen. When the offline app ships, you can install it without an app store.","steps":["Open Mise on this device.","On Android or desktop Chrome, use the browser’s Install app option. On iPhone, use Safari › Share › Add to Home Screen.","Keep it in a browser if you prefer. The same app works there."]},
+    {"id":"kitchen-install","title":"Kitchen screen","text":"The kitchen screen arrives in Phase 3. A browser is enough; install the web app to keep it within one tap.","steps":["Open Mise on the kitchen tablet or spare phone.","When available, choose Settings › Devices › Kitchen screen and pair it with your outlet.","Keep the screen awake, turn the volume up and place a test order. The cook taps Got it, then Ready."]}
+  ],
+  "selfHost": {
+    "eyebrow":"OPTIONAL · SELF-HOST","title":"Run your own copy on Vercel","lead":"Prefer your own address and your own account? Let your AI agent deploy the web app to Vercel in a few minutes. Your data, your domain, our updates.",
+    "agentTitle":"Let your AI agent do it","agentLead":"Works with Claude Code, Codex or any agent that can run commands on your computer.",
+    "steps":[
+      {"title":"Fork the Mise repo on GitHub","text":"One click: Fork. You now have your own copy to deploy and update."},
+      {"title":"Paste this prompt into your agent","text":"It clones your fork, installs the Vercel CLI and runs the build."},
+      {"title":"Approve the Vercel sign-in","text":"The agent opens a browser window. You sign in; it never sees your password."},
+      {"title":"Get your link","text":"Something like mise-yourshop.vercel.app. Add your own domain in Vercel if you like."}
+    ],
+    "prompt":"Deploy my own copy of Mise (github.com/<you>/mise) to my Vercel account.\nFollow handover/prompts/04-deploy-own-vercel.md exactly: clone, pnpm install, build with BASE_PATH=/, install the Vercel CLI, log in (I will approve in the browser), link a new project, set the env vars it lists, deploy to production, then give me the URL and explain how updates work. Ask before creating anything paid.\n\nThis is Phase 0: the app is currently a preview. No database or backend is needed now. Use the current implementation guide: {repo}/blob/main/docs/deploy-own-vercel.md",
+    "manualTitle":"Or do it by hand","manualLead":"Click the button, sign in to Vercel and GitHub, and accept the defaults.","deploy":"Deploy to Vercel",
+    "benefits":[
+      {"icon":"globe","title":"Your own address","text":"yourshop.vercel.app, or connect your domain in Vercel"},
+      {"icon":"refreshCw","title":"Updates","text":"Sync your fork with ours; Vercel redeploys on every push"},
+      {"icon":"database","title":"When you need sync (v1)","text":"Accounts and multi-device need your own Supabase project. The agent sets the keys in Vercel."},
+      {"icon":"zap","title":"Device apps stay the same","text":"The extension and Android app point at your address after pairing."}
+    ]
+  },
+  "troubleshooting":{"title":"If something doesn’t work","items":[
+    {"title":"“App not installed”","text":"An older copy signed differently is on the phone. Uninstall it, then install again."},
+    {"title":"“Manifest file is missing”","text":"You chose the zip or the wrong folder. Unzip first, then pick the folder with manifest.json."},
+    {"title":"No orders arriving from the phone","text":"Re-allow notification access and turn battery optimisation off. Check Settings › Devices."},
+    {"title":"Extension stopped after a Chrome update","text":"On chrome://extensions, make sure Developer mode is still on, and click reload."}
+  ]},
+  "phone":{"title":"Set up the order phone","lead":"A developer build from our GitHub repo. About 3 minutes.","app":"Mise Order Phone","steps":[
+    {"title":"Allow from unknown sources","text":"When Android blocks the install, tap Settings and turn on “Allow from this source”. Older phones: Settings › Security › Unknown sources."},
+    {"title":"Tap Install","text":"Play Protect may warn: More details › Install anyway."},
+    {"title":"Allow notification access","text":"WhatsApp, bKash, Nagad and Phone only."},
+    {"title":"Turn off battery optimisation","text":"Keeps it running all shift."},
+    {"title":"Scan the pairing QR","text":"From Mise › Settings › Devices on any screen."}
+  ],"selfHostTitle":"Want your own copy of the web app?","selfHostText":"Your AI agent can deploy it to your Vercel account. Do it from a computer:","help":"Not working? Uninstall any older copy and try again, or ask us on WhatsApp."}
+}

@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-11-15 (R6): transcribe the supplied setup frames into `handover/copy/setup.json`. Keep the updated calm Regular type rule; retain actual manifest availability, dates, requirements, checksum copying, Phase 0 notices and the implementation deployment guide instead of advertising the reference's example v0.5.0 binaries. No registered mark remains in application source.
+- 2026-11-15 (R6): the phone setup reference includes browser chrome and a native Android installer. Those are browser/OS context, not page content, so the website renders only the five-step guide and real download controls. The full device guides remain available in a native disclosure, opened by guide anchors. Desktop setting examples are static, labelled instruction primitives, not recreated screens.
+- 2026-11-15 (R6): generate regional OG images through a dedicated 1200×630 browser composition of the supplied complete hero PNG, actual copy and Geist Regular on #EDEDEC. Routine page screenshot captures no longer overwrite the OG composition with a cropped viewport.
 - 2026-11-15 (refinement): the owner supplied all 270 indexed Figma exports, including the 76 landing assets/references. The old HTML/CSS marketing-preview exception is superseded by Phase R. Product imagery must come from the supplied PNGs through one alias and image pipeline.
 - 2026-11-15 (refinement): preserve the configured export scale when retrying individual Figma renders; never silently downgrade 2× assets to 1×.
 - 2026-11-15 (R1): `Shot` uses `imageSlot` as its prop because Astro reserves `slot` for named slots. The values are the unchanged keys in landing-assets.json. Display dimensions come from image metadata divided by exportScale, including the exported shadow bounds.
