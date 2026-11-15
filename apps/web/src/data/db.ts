@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus } from '@mise/core/models';
+import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus, OrderRefund } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
@@ -8,6 +8,7 @@ import { saveCustomerCommand, archiveCustomerCommand, type CustomerInput } from 
 import { creditBalance, defaultCreditTerms, saveCreditTermsCommand, openingBalanceCommand, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
 import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } from '@mise/core/credit-sales';
 import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
+import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOrderCancellationCommand, refundOrderCommand, undoOrderRefundCommand, type OrderMoneyChange, type OrderMoneyContext, type OrderSettlementInput, type OrderRefundInput } from '@mise/core/order-payments';
 import { saveOrderCommand, changeOrderStatusCommand, undoOrderStatusCommand, addOrderNoteCommand, recordOrderCommunicationCommand, saveOrderWarningCommand, type OrderInput } from '@mise/core/orders';
 
 export class MiseDatabase extends Dexie {
@@ -24,12 +25,14 @@ export class MiseDatabase extends Dexie {
   orders!: EntityTable<Order,'id'>;
   orderNotes!: EntityTable<OrderNote,'id'>;
   orderCommunications!: EntityTable<OrderCommunication,'id'>;
+  orderRefunds!: EntityTable<OrderRefund,'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
     this.version(2).stores({ sales: 'id,outletId,createdAt' });
     this.version(3).stores({ customers:'id,businessId,phone,&[businessId+phone]', creditAccounts:'id,outletId,customerId,&[outletId+customerId+currency]', creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,&reversalOf,&[accountId+sequence]', events:'id,outletId,at,command,customerId' });
     this.version(4).stores({orders:'id,outletId,status,customer.id,createdAt,&[outletId+sequence],&[outletId+number]',orderNotes:'id,orderId,outletId,&[orderId+revision]',orderCommunications:'id,orderId,outletId,&[orderId+revision]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision]'});
+    this.version(5).stores({orderRefunds:'id,outletId,orderId,saleId,createdAt',sales:'id,outletId,createdAt,orderId',creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,orderId,refundId,&reversalOf,&[accountId+sequence]'});
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -105,6 +108,15 @@ export class MiseDatabase extends Dexie {
     await this.transaction('rw', this.tables, async () => {
       const [sale, setup] = await Promise.all([this.sales.get(id), this.setup()]);
       if (!sale || !setup || sale.outletId !== setup.outlet.id) throw new Error('Sale not found.');
+      if (sale.orderId) {
+        const {order} = await this.orderContext(sale.orderId), context = await this.orderMoneyContext(order,setup);
+        let change: OrderMoneyChange;
+        if (sale.voidReason === 'order-cancel') {
+          const event = await this.events.get(order.statusEventId); if (!event) throw new Error('Cancellation history not found.');
+          change = undoOrderCancellationCommand(order,event,sale,context,order.revision);
+        } else change = undoOrderPaymentCommand(order,sale,context,order.revision);
+        await this.writeOrderMoney(change); return;
+      }
       if (sale.method === 'credit') {
         const context = await this.ledgerContext(sale.creditAccountId || '');
         const charge = context.entries.find(entry => entry.saleId === sale.id && entry.type === 'charge');
@@ -177,6 +189,7 @@ export class MiseDatabase extends Dexie {
   async undoCreditEntry(id: string): Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const entry = await this.creditEntries.get(id); if (!entry) throw new Error('Credit entry not found.');
+      if (entry.refundId) { await this.undoOrderRefund(entry.refundId); return; }
       const command = undoCreditEntryCommand(entry,await this.ledgerContext(entry.accountId));
       await this.creditEntries.add(command.entry); await this.events.add(command.event);
     });
@@ -195,14 +208,15 @@ export class MiseDatabase extends Dexie {
     });
   }
 
-  async saveOrder(input: OrderInput, options: {id?:string;revision?:number} = {}): Promise<Order> {
+  async saveOrder(input: OrderInput, options: {id?:string;revision?:number;settlement?:OrderSettlementInput} = {}): Promise<Order> {
     return this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
       const before = options.id ? await this.orders.get(options.id) : null;
       if (options.id && !before) throw new Error('Order not found.');
       const last = before || await this.orders.where('[outletId+sequence]').between([setup.outlet.id,Dexie.minKey],[setup.outlet.id,Dexie.maxKey]).last();
       const command = saveOrderCommand(input,{setup,items:await this.items.where('outletId').equals(setup.outlet.id).toArray(),customer:input.customerId ? await this.customers.get(input.customerId) : undefined,sequence:before?.sequence || (last?.sequence || 0)+1},before,options.revision);
-      await this.orders.put(command.order); await this.events.add(command.event); return command.order;
+      await this.orders.put(command.order); await this.events.add(command.event);
+      return options.settlement ? this.settleOrder(command.order.id,options.settlement,command.order.revision) : command.order;
     });
   }
   private async orderContext(id: string) {
@@ -212,7 +226,12 @@ export class MiseDatabase extends Dexie {
   }
   async changeOrderStatus(id: string, status: OrderStatus, revision: number): Promise<Order> {
     return this.transaction('rw',this.tables,async () => {
-      const {setup,order} = await this.orderContext(id), command = changeOrderStatusCommand(order,status,setup,revision);
+      const {setup,order} = await this.orderContext(id);
+      if (status === 'cancelled') {
+        const sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
+        const change = cancelOrderCommand(order,sale,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.order;
+      }
+      const command = changeOrderStatusCommand(order,status,setup,revision);
       await this.orders.put(command.order); await this.events.add(command.event); return command.order;
     });
   }
@@ -220,6 +239,10 @@ export class MiseDatabase extends Dexie {
     return this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id), event = await this.events.get(order.statusEventId);
       if (!event) throw new Error('Status history not found.');
+      if (order.status === 'cancelled') {
+        const sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
+        const change = undoOrderCancellationCommand(order,event,sale,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.order;
+      }
       const command = undoOrderStatusCommand(order,event,setup,revision);
       await this.orders.put(command.order); await this.events.add(command.event); return command.order;
     });
@@ -240,6 +263,47 @@ export class MiseDatabase extends Dexie {
     await this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
       const command = saveOrderWarningCommand(minutes,setup); await this.outlets.put(command.outlet); await this.events.add(command.event);
+    });
+  }
+
+  private async orderMoneyContext(order: Order, setup: SetupSnapshot, accountId?:string): Promise<OrderMoneyContext> {
+    const sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
+    const id = accountId || sale?.creditAccountId;
+    return {setup,ledger:id ? await this.ledgerContext(id) : undefined};
+  }
+  private async writeOrderMoney(change: OrderMoneyChange): Promise<void> {
+    await this.orders.put(change.order);
+    if (change.sales.length) await this.sales.bulkPut(change.sales);
+    if (change.entries.length) await this.creditEntries.bulkAdd(change.entries);
+    if (change.refunds.length) await this.orderRefunds.bulkPut(change.refunds);
+    await this.events.bulkAdd(change.events);
+  }
+  async settleOrder(id: string, input: OrderSettlementInput, revision: number): Promise<Order> {
+    return this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id);
+      const account = input.method === 'credit' && !input.accountId && order.customer.id ? await this.creditAccounts.where('[outletId+customerId+currency]').equals([order.outletId,order.customer.id,order.currency]).first() : undefined;
+      const context = await this.orderMoneyContext(order,setup,input.method === 'credit' ? input.accountId || account?.id : undefined);
+      const change = settleOrderCommand(order,{...input,accountId:input.accountId || account?.id},context,revision); await this.writeOrderMoney(change); return change.order;
+    });
+  }
+  async undoOrderPayment(id: string, revision: number): Promise<Order> {
+    return this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id), sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
+      const change = undoOrderPaymentCommand(order,sale,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.order;
+    });
+  }
+  async refundOrder(id: string, input: OrderRefundInput, revision: number): Promise<OrderRefund> {
+    return this.transaction('rw',this.tables,async () => {
+      const {setup,order} = await this.orderContext(id), sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
+      if (!sale) throw new Error('The original receipt is missing.');
+      const change = refundOrderCommand(order,sale,input,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.refunds[0];
+    });
+  }
+  async undoOrderRefund(id: string, revision?:number): Promise<void> {
+    await this.transaction('rw',this.tables,async () => {
+      const refund = await this.orderRefunds.get(id); if (!refund) throw new Error('Refund not found.');
+      const {setup,order} = await this.orderContext(refund.orderId);
+      const change = undoOrderRefundCommand(order,refund,await this.orderMoneyContext(order,setup),revision ?? order.revision); await this.writeOrderMoney(change);
     });
   }
 }

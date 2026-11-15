@@ -11,19 +11,19 @@ export interface SetupInput { businessType: BusinessType; marketCode: MarketCode
 export interface SetupCommand { snapshot: SetupSnapshot; items: Item[]; categories: Category[]; event: AuditEvent }
 export type PaymentMethod = 'cash' | 'wallet' | 'card';
 export type SaleMethod = PaymentMethod | 'credit';
-export interface SaleLine { itemId: string; name: string; unit: string; unitPrice: number; qty: number; lineTotal: number }
-export interface Sale extends Entity { outletId: string; expression: string; amount: number; currency: string; method: SaleMethod; methodName: string; given?: number; change?: number; who: string; customerId?: string; creditAccountId?: string; items: SaleLine[]; shopName: string; shopLink?: string; timezone: string; createdBy: string; eventId: string; voidedAt?: number }
+export interface SaleLine { itemId?: string; name: string; unit: string; unitPrice: number; qty: number; lineTotal: number }
+export interface Sale extends Entity { outletId: string; orderId?:string; orderNumber?:string; deliveryFee?:number; discount?:number; expression: string; amount: number; currency: string; method: SaleMethod; methodName: string; given?: number; change?: number; who: string; customerId?: string; creditAccountId?: string; items: SaleLine[]; shopName: string; shopLink?: string; timezone: string; createdBy: string; eventId: string; voidedAt?: number; voidReason?:'undo'|'order-cancel' }
 export interface Customer extends Entity { businessId: string; name: string; nickname: string; phone?: string; address: string; notes: string; tags: string[]; consent: { savedAt: number; source: 'manual' }; archivedAt?: number }
 export type ReminderTone = 'gentle' | 'direct';
 export interface CreditReminder { enabled: boolean; dayOfMonth: number; tone: ReminderTone; channel: 'whatsapp' }
 export interface CreditAccount extends Entity { customerId: string; outletId: string; currency: string; allowed: boolean; limit: number; reminder: CreditReminder }
-export interface CreditEntry extends Entity { accountId: string; customerId: string; outletId: string; currency: string; sequence: number; type: 'charge' | 'payment' | 'adjustment' | 'reminder'; amount: number; note: string; createdBy: string; eventId: string; saleId?: string; methodName?: string; occurredAt?: number; reversalOf?: string; purpose?: 'reminder' | 'receipt' | 'call'; overLimit?: { balance: number; limit: number } }
+export interface CreditEntry extends Entity { accountId: string; customerId: string; outletId: string; currency: string; sequence: number; type: 'charge' | 'payment' | 'adjustment' | 'reminder' | 'refund'; amount: number; note: string; createdBy: string; eventId: string; saleId?: string; orderId?:string; refundId?:string; returnsChargeId?:string; methodName?: string; occurredAt?: number; reversalOf?: string; purpose?: 'reminder' | 'receipt' | 'call'; overLimit?: { balance: number; limit: number } }
 export interface CreditMessaging { paymentNote: string; templates: Record<ReminderTone, { en: string; bn: string }> }
 export type OrderSource = 'phone'|'walk_in'|'table'|'paste'|'other';
 export type OrderType = 'delivery'|'pickup'|'dine_in';
 export type OrderStatus = 'new'|'confirmed'|'kitchen_seen'|'cooking'|'ready'|'out'|'delivered'|'to_confirm'|'packed'|'booked'|'with_courier'|'returning'|'returned'|'ordered'|'making'|'ready_called'|'collected'|'requested'|'priced'|'accepted'|'packing'|'delivering'|'done'|'cancelled';
 export interface OrderLine { id:string; itemId?:string; name:string; unit:string; qty:number; unitPrice:number|null; lineTotal:number|null; note:string; unavailable:boolean; substitution?:{from:string;accepted:boolean;acceptedAt?:number} }
-export interface OrderPayment { method:PaymentMethod|'credit'; wallet?:string; status:'pending'|'paid'|'credited'; saleId?:string; at?:number }
+export interface OrderPayment { method:PaymentMethod|'credit'; wallet?:string; status:'pending'|'paid'|'credited'; saleId?:string; at?:number; cancellation?:{creditEntryId?:string;refundTotal:number;refundDue:number} }
 export interface Order extends Entity {
   outletId:string; businessType:BusinessType; sequence:number; number:string; revision:number; source:OrderSource; sourceText:string;
   customer:{id?:string;name:string;phone?:string}; type:OrderType; status:OrderStatus; statusChangedAt:number; statusEventId:string;
@@ -32,3 +32,4 @@ export interface Order extends Entity {
 }
 export interface OrderNote extends Entity { orderId:string; outletId:string; revision:number; text:string; createdBy:string; eventId:string }
 export interface OrderCommunication extends Entity { orderId:string; outletId:string; revision:number; purpose:'quote'|'message'|'call'; channel:'whatsapp'|'manual'|'call'; text:string; createdBy:string; eventId:string }
+export interface OrderRefund extends Entity { orderId:string; saleId:string; outletId:string; customerId?:string; accountId?:string; amount:number; currency:string; method:PaymentMethod; methodName:string; note:string; createdBy:string; eventId:string; creditEntryId?:string; voidedAt?:number }

@@ -34,7 +34,7 @@ export function recordSaleCommand(input: SaleInput, context: SaleContext, at = D
 export const canUndoSale = (sale: Sale, at = Date.now()) => sale.voidedAt === undefined && at >= sale.createdAt && at - sale.createdAt <= 600000;
 export function undoSaleCommand(sale: Sale, actorId: string, at = Date.now()): { sale: Sale; event: AuditEvent } {
   if (!canUndoSale(sale, at)) throw new Error('A sale can be undone once, within 10 minutes.');
-  const after = { ...sale, voidedAt: at, updatedAt: at };
+  const after = { ...sale, voidedAt: at, voidReason: 'undo' as const, updatedAt: at };
   return { sale: after, event: { id: ulid(at), outletId: sale.outletId, actor: { type: 'member', id: actorId }, command: 'sale.undo', before: sale, after, undoOf: sale.eventId, at } };
 }
 export function dailySales(sales: Sale[], timezone: string, at = Date.now()): Sale[] {
@@ -65,5 +65,5 @@ export function givenSuggestions(amount: number, currency: string): number[] {
 }
 export function receiptText(sale: Sale): string {
   const date = new Intl.DateTimeFormat('en-GB', { timeZone: sale.timezone, dateStyle: 'medium', timeStyle: 'short' }).format(sale.createdAt);
-  return [sale.shopName, `Receipt ${sale.id.slice(-6)}`, date, sale.who && `For: ${sale.who}`, sale.items.length && 'Catalogue prices before adjustments:', ...sale.items.map(line => `${line.qty} × ${line.name} · ${formatMoney(line.lineTotal, sale.currency)}`), `Calculation: ${sale.expression}`, `Total: ${formatMoney(sale.amount, sale.currency)} · ${sale.methodName}`, sale.given !== undefined && `Given: ${formatMoney(sale.given, sale.currency)} · Change: ${formatMoney(sale.change || 0, sale.currency)}`, sale.voidedAt !== undefined && 'UNDONE', sale.shopLink, 'Thank you.'].filter(Boolean).join('\n');
+  return [sale.shopName, `Receipt ${sale.id.slice(-6)}`, sale.orderNumber && `Order ${sale.orderNumber}`, date, sale.who && `For: ${sale.who}`, sale.items.length && (sale.orderId ? 'Order items:' : 'Catalogue prices before adjustments:'), ...sale.items.map(line => `${line.qty} × ${line.name} · ${formatMoney(line.lineTotal, sale.currency)}`), sale.deliveryFee && `Delivery: ${formatMoney(sale.deliveryFee,sale.currency)}`, sale.discount && `Discount: −${formatMoney(sale.discount,sale.currency)}`, `Calculation: ${sale.expression}`, `Total: ${formatMoney(sale.amount, sale.currency)} · ${sale.methodName}`, sale.given !== undefined && `Given: ${formatMoney(sale.given, sale.currency)} · Change: ${formatMoney(sale.change || 0, sale.currency)}`, sale.voidedAt !== undefined && (sale.voidReason === 'order-cancel' ? 'ORDER CANCELLED' : 'UNDONE'), sale.shopLink, 'Thank you.'].filter(Boolean).join('\n');
 }

@@ -10,6 +10,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
+- M14 settlement foundations: atomic order payments and khata charges, linked receipts, cancellation with credit returns, partial refunds and audited corrections. Preserve the age of unrelated debt, retain physical cash until an actual refund, and keep collected totals after customer archival. Schema 5 adds refund records; Orders remains staged pending its reference-based UI.
 - Fixed explicit app updates during the first installed session. Reload now waits for the new worker to take control in the requesting tab; activating an update does not automatically navigate another tab away from its draft.
 - M14 foundations: manual-order records, exact fractional-quantity pricing, unpriced/out-of-stock/swap gates, business-specific status transitions and undo, optimistic revisions, notes/contact audit records, warning settings, bilingual quotes and an additive database upgrade. Orders remain staged until settlement and UI delivery pass.
 - M13 follow-up: count a customer once in the reminder heading when several currency accounts are due; keep each account's message and balance separate.

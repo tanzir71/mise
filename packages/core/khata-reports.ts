@@ -12,7 +12,7 @@ export function civilDay(at: number, timezone: string): number { const value = p
 export function marketWeekStart(market: MarketCode): number { const day = marketPacks[market]['week/weekend'].at(-1) || 'Sun'; return (['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(day)+1)%7; }
 function total(values: number[]): number {
   const sum = values.reduce((sum,value) => sum+BigInt(value),0n);
-  if (sum > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('The total exceeds the supported amount.');
+  if (sum > BigInt(Number.MAX_SAFE_INTEGER) || sum < -BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('The total exceeds the supported amount.');
   return Number(sum);
 }
 export interface CreditOverview { account: CreditAccount; balance: number; since: number | null; ageDays: number; over30Amount: number; collectedThisWeek: number; lastPaymentAt: number | null; lastReminderAt: number | null; dueThisWeek: boolean; dueOn: string | null; overLimit: boolean }
@@ -34,7 +34,7 @@ export function creditOverview(account: CreditAccount, entries: CreditEntry[], t
     dueOn = new Date(due*DAY).toISOString().slice(0,10);
     dueThisWeek = !completed && due <= weekStart+6; // Includes missed reminders from earlier this month.
   }
-  return {account,balance,since,ageDays:since === null ? 0 : Math.max(0,day-civilDay(since,timezone)),over30Amount:total(lots.filter(lot => day-civilDay(lot.at,timezone) > 30).map(lot => lot.amount)),collectedThisWeek:total(payments.filter(entry => { const on = civilDay(entry.createdAt,timezone); return on >= weekStart && on <= day && entry.createdAt <= at; }).map(entry => entry.amount)),lastPaymentAt,lastReminderAt,dueThisWeek,dueOn,overLimit:balance > account.limit};
+  return {account,balance,since,ageDays:since === null ? 0 : Math.max(0,day-civilDay(since,timezone)),over30Amount:total(lots.filter(lot => day-civilDay(lot.at,timezone) > 30).map(lot => lot.amount)),collectedThisWeek:total(records.filter(entry => entry.type === 'payment' || entry.type === 'refund').filter(entry => { const on = civilDay(entry.createdAt,timezone); return on >= weekStart && on <= day && entry.createdAt <= at; }).map(entry => entry.type === 'refund' ? -entry.amount : entry.amount)),lastPaymentAt,lastReminderAt,dueThisWeek,dueOn,overLimit:balance > account.limit};
 }
 export type CreditFilter = 'all'|'due-week'|'over-30'|'over-limit'|'paid-up';
 export function filterCreditOverviews(rows: CreditOverview[], filter: CreditFilter): CreditOverview[] {
