@@ -1,6 +1,6 @@
 # M15 · Stock foundation
 
-Stock remains staged, with `stock: false`, until its phone/desktop list, supplier drafts and night-count screens match the supplied references and pass delivery checks. M15 remains unchecked in the roadmap.
+The foundation was published with `stock: false` while the reference-based phone/desktop list, supplier drafts and night-count screens were connected. See [M15 delivery](m15-delivery.md) for the UI and its verification. The roadmap is checked only after the full delivery is verified.
 
 Stock quantities use up to three decimal places in the item's unit. JSON stores readable quantities; calculations use integer thousandths and reject overflow, negative stock and unsupported precision. To order rounds the positive target deficit up to a whole pack. Kilograms/grams, litres/millilitres and pieces/hali/dozen convert exactly; hali means four pieces. A strip's contents are never assumed. Packs use the item's explicitly entered pack size. Changing a stock unit requires a new item so historical movements keep their meaning.
 
@@ -16,4 +16,6 @@ IndexedDB version 6 adds `stockItems`, `stockMoves`, `suppliers` and `supplierMe
 
 Local validation: lint, TypeScript/Astro checks and the portable production build pass; all 279 unit tests and 119 browser tests pass. The visual report completes 95 comparisons of the existing screens. The stock tests include 48 parser fixtures, 500 generated pack-rounding cases, an independent movement model, count/undo dependencies, stale/concurrent writes, audit rollback, repeated Sent taps and a version-5 migration preserving every existing record. The current [phone order form](screenshots/m14-new-order-390.png), [desktop queue](screenshots/m14-queue-1440.png) and [phone pricing](screenshots/m14-price-390.png) remain the latest key app screenshots; this increment introduces no visible Stock screen.
 
-The live app is [Mise on GitHub Pages](https://tanzir71.github.io/mise/app/). CI and a returning-browser version-5-to-6 upgrade are checked after publication. The next increment connects this foundation to Figma M16 `103:213`, desktop Stock `39:476` and M10 Night count `77:3291`.
+Foundation commit `a4f6bcb` passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43760350846), with the [95-comparison visual report](https://github.com/tanzir71/mise/actions/runs/43760350846/artifacts/14179983403). A returning browser on the actual published version-5 build explicitly updated to version 6, preserving every record across the 14 existing tables: shop/catalogue, two sales, customer/account, two ledger entries, ten audit events, an order and its note. Offline reload retained the 175 credit balance and note without page errors. A fresh public browser confirmed all four stock tables and a new cash sale surviving offline reload; both regional tanziro.com footer credits remained visible.
+
+The live app is [Mise on GitHub Pages](https://tanzir71.github.io/mise/app/). The UI increment connects this foundation to Figma M16 `103:213`, desktop Stock `39:476` and M10 Night count `77:3291`.
