@@ -1,0 +1,228 @@
+{
+  "title": "M21 Paste and review an order",
+  "heights": {
+    "390": 1000,
+    "1440": 1100
+  },
+  "actionSets": {
+    "corner": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "restaurant": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"restaurant\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Shorshe Kitchen"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "orders": [
+      {
+        "type": "click",
+        "selector": ".app-sidebar a[href$=\"/orders\"]:visible,.app-bottom-nav a[href$=\"/orders\"]:visible"
+      },
+      {
+        "type": "wait",
+        "selector": ".orders-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "paste": [
+      {
+        "type": "click",
+        "selector": "a[href$=\"/orders/paste\"]"
+      },
+      {
+        "type": "wait",
+        "selector": "textarea[aria-label=\"Order message\"]",
+        "state": "visible"
+      }
+    ],
+    "review": [
+      {
+        "type": "fill",
+        "selector": "textarea[aria-label=\"Order message\"]",
+        "value": "Name: Sadia\nPhone: ০১৭১২৩৪৫৪৮২\nPickup: Tomorrow morning\nPayment: bKash\n2 Rice\n1 Soap\n1 Eggs"
+      },
+      {
+        "type": "click",
+        "selector": "button:text-is(\"Review draft\")"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "m21-orders-desktop",
+      "path": "app/?flags=pasteOrders",
+      "widths": [
+        1440
+      ],
+      "actionSets": [
+        "corner",
+        "orders"
+      ],
+      "actions": [],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "note": "M21 reuses the complete M14/C07 pricing and M15 new-order components, original icons and tokens. Paste entry has no dedicated Figma frame and uses the same fields/cards. Parsed requests remain unsaved; payment/time hints are literal, with manual review before creation. Native phone/browser chrome, OCR, automatic order/payment confirmation and later integrations are absent. Source/content and height differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 09 · Mise — Orders · live queue.png"
+        }
+      ]
+    },
+    {
+      "id": "m21-paste-phone",
+      "path": "app/?flags=pasteOrders",
+      "widths": [
+        390
+      ],
+      "actionSets": [
+        "corner",
+        "orders",
+        "paste"
+      ],
+      "actions": [],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "note": "M21 reuses the complete M14/C07 pricing and M15 new-order components, original icons and tokens. Paste entry has no dedicated Figma frame and uses the same fields/cards. Parsed requests remain unsaved; payment/time hints are literal, with manual review before creation. Native phone/browser chrome, OCR, automatic order/payment confirmation and later integrations are absent. Source/content and height differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M15 · Manager — New order (phone, walk-in, verbal).png"
+        }
+      ]
+    },
+    {
+      "id": "m21-price-phone",
+      "path": "app/?flags=pasteOrders",
+      "widths": [
+        390
+      ],
+      "actionSets": [
+        "corner",
+        "orders",
+        "paste",
+        "review"
+      ],
+      "actions": [
+        {
+          "type": "wait",
+          "selector": ".order-pricing",
+          "state": "visible"
+        },
+        {
+          "type": "fill",
+          "selector": "input[aria-label=\"Selected unit price\"]",
+          "value": "75"
+        },
+        {
+          "type": "click",
+          "selector": "button[aria-label=\"Price Soap\"]"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "note": "M21 reuses the complete M14/C07 pricing and M15 new-order components, original icons and tokens. Paste entry has no dedicated Figma frame and uses the same fields/cards. Parsed requests remain unsaved; payment/time hints are literal, with manual review before creation. Native phone/browser chrome, OCR, automatic order/payment confirmation and later integrations are absent. Source/content and height differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png"
+        }
+      ]
+    },
+    {
+      "id": "m21-review-phone",
+      "path": "app/?flags=pasteOrders",
+      "widths": [
+        390
+      ],
+      "actionSets": [
+        "restaurant",
+        "orders",
+        "paste",
+        "review"
+      ],
+      "actions": [
+        {
+          "type": "wait",
+          "selector": ".order-form[aria-busy=\"false\"]",
+          "state": "visible"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}.order-action-bar,.order-price-keypad,.order-detail-actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;max-height:none!important}.order-fullscreen .order-form,.order-fullscreen .order-pricing,.order-detail{padding-bottom:0!important}",
+      "note": "M21 reuses the complete M14/C07 pricing and M15 new-order components, original icons and tokens. Paste entry has no dedicated Figma frame and uses the same fields/cards. Parsed requests remain unsaved; payment/time hints are literal, with manual review before creation. Native phone/browser chrome, OCR, automatic order/payment confirmation and later integrations are absent. Source/content and height differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M15 · Manager — New order (phone, walk-in, verbal).png"
+        }
+      ]
+    }
+  ]
+}

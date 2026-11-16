@@ -11,12 +11,22 @@ import { newClosingId } from '../packages/core/closing';
 import { newSupplierMessageId } from '../packages/core/supplier-drafts';
 import { orderFixture } from './order-fixture';
 import { stockInput } from './stock-fixture';
+import {orderMessage} from '../packages/core/orderMessage';
+import {publicOrderFixture} from './public-shop-fixture';
 
 const at = Date.UTC(2026,10,16,6), databases:MiseDatabase[] = [];
 const shop = {businessType:'corner_shop',marketCode:'BD',name:'মায়ের দোকান',phone:'01712345482'} as const;
 beforeEach(() => {vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(at);});
 afterEach(async () => {await Promise.all(databases.splice(0).map(db => db.delete()));vi.useRealTimers();});
 async function boot(setup = true) {const db = new MiseDatabase(`mise-backup-${randomUUID()}`);databases.push(db);if (setup) await db.saveSetup(shop);else await db.open();return db;}
+
+test('complete M20 source messages beyond 4,000 characters save and restore without truncation',async()=>{
+  const source=await boot(),sourceText='  \r\n'+orderMessage({...publicOrderFixture(),items:['x'.repeat(3900)]})+'\r\n  ';expect(sourceText.length).toBeGreaterThan(4000);
+  const order=await source.saveOrder({...orderFixture().input,source:'paste',sourceText});expect(order.sourceText).toBe(sourceText);
+  const backup=await source.readBackup(),target=await boot(false);await target.restoreBackup(backup,await target.previewRestore(backup));expect((await target.orders.get(order.id))?.sourceText).toBe(sourceText);
+  const invalid=structuredClone(backup);invalid.tables.orders[0].sourceText='x'.repeat(12001);expect(()=>parseBackup(invalid)).toThrow(/12,000/);
+  const before=await source.events.count();for(const invalid of ['x'.repeat(12001),123 as unknown as string])await expect(source.saveOrder({...orderFixture().input,sourceText:invalid})).rejects.toThrow(/field limits/);expect(await source.events.count()).toBe(before);
+});
 async function fullFixture() {
   const db = await boot();
   const customer = await db.saveCustomer({name:'রিনা',nickname:'Rina',phone:'01712345483',address:'Road 12',notes:'চিনি কম',tags:['regular']},{credit:{...defaultCreditTerms,allowed:true,limit:100000,reminder:{...defaultCreditTerms.reminder,enabled:true,dayOfMonth:31}},opening:{amount:10000,occurredAt:at-86400000}});

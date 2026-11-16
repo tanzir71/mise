@@ -2,6 +2,8 @@ import {normalisePhone} from './phone';
 import {parseOrderMessage} from './parse-order-message';
 import {publicText} from './public-shop';
 import type {MarketCode} from './packs';
+import type {OrderInput} from './orders';
+import {ORDER_SOURCE_MAX_TEXT} from './order-limits';
 
 export interface PastedOrderLine {
   /** Original literal line, including its spacing. Never executable input. */
@@ -56,14 +58,16 @@ export function parsePastedOrderLine(text:string):PastedOrderLine {
 
 /** Produces a proposal only. Caller must review and use the ordinary audited order save. */
 export function parsePastedOrder(sourceText:string,market:MarketCode='BD'):PastedOrderDraft {
-  publicText(sourceText,12000,true,true);
+  if(typeof sourceText!=='string'||!sourceText.trim())throw new Error('Paste the customer’s request to review.');
+  if(sourceText.length>ORDER_SOURCE_MAX_TEXT)throw new Error('Keep a pasted request within 12,000 characters. Split a longer request.');
+  try{publicText(sourceText,ORDER_SOURCE_MAX_TEXT,true,true);}catch{throw new Error('Paste plain text without unsupported control characters.');}
   const rows=sourceText.replace(/\r\n?/g,'\n').split('\n').filter(line=>line.trim());
   if(rows.length>200)throw new Error('Paste at most 200 non-empty lines. Split a longer request.');
-  const request=parseOrderMessage(sourceText,market);
+  const request=parseOrderMessage(sourceText.trim(),market);
   if(request)return {format:'mise-v1',sourceText,name:request.name,phone:request.phone,fulfilment:request.fulfilment,address:request.address,requestedTime:request.when,paymentPreference:request.payment,photoExpected:request.photo,shopCode:request.shopCode,shopName:request.shopName,lines:request.items.filter(line=>line.trim()).map(parsePastedOrderLine),warnings:[]};
   const draft:PastedOrderDraft={format:'free-text',sourceText,name:'',phone:'',fulfilment:null,address:'',requestedTime:'',paymentPreference:'',photoExpected:false,shopCode:'',shopName:'',lines:[],warnings:[]};
   if(rows.some(line=>/^#mise\b/i.test(line.trim()))){
-    draft.warnings.push('The Mise message could not be verified. All lines are kept for manual review.');
+    draft.warnings.push('This Mise message format is not recognised. All lines are kept for manual review.');
     draft.lines=rows.map(parsePastedOrderLine);return draft;
   }
   const used=new Set<string>();
@@ -92,4 +96,9 @@ export function parsePastedOrder(sourceText:string,market:MarketCode='BD'):Paste
     if(!accepted)draft.lines.push(parsePastedOrderLine(text));
   }
   return draft;
+}
+
+/** Unsaved editable input. A payment preference never records a payment. */
+export function pastedOrderInput(draft:PastedOrderDraft):OrderInput {
+  return {source:'paste',sourceText:draft.sourceText,name:draft.name,phone:draft.phone,type:draft.fulfilment||'delivery',address:draft.address,table:'',lines:draft.lines.map(line=>({name:line.name,qty:line.quantity??1,unit:line.unit||'pc',unitPrice:null})),deliveryFee:0,discount:0,payment:{method:'cash'}};
 }

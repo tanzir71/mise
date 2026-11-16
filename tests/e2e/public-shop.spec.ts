@@ -83,5 +83,5 @@ test('the complete public offline resource set stays below 60,000 encoded body b
     const size=await new Promise<number>((resolve,reject)=>{httpGet(new URL(url,'http://127.0.0.1:4321'),{headers:{'Accept-Encoding':'gzip'}},response=>{if(response.statusCode!==200){response.resume();reject(new Error(`${url}: ${response.statusCode}`));return;}let length=0;response.on('data',chunk=>{length+=chunk.length;});response.on('end',()=>resolve(length));response.on('error',reject);}).on('error',reject);});
     parts[url.slice(base.length)]=size;bytes+=size;
   }
-  expect(manifest.resources.filter(url=>url.endsWith('.woff2'))).toHaveLength(3);expect(bytes,JSON.stringify(parts,null,2)).toBeLessThan(60000);
+  expect(manifest.resources.every(url=>url.startsWith(base+'s/')||url===base+'mise-mark.svg')).toBe(true);expect(manifest.resources.filter(url=>url.endsWith('.woff2'))).toHaveLength(3);expect(bytes,JSON.stringify(parts,null,2)).toBeLessThan(60000);
 });

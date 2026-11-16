@@ -7,7 +7,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 ### Added
 
 - M20: bounded public shop links, bilingual structured order messages, audited generation and ten-minute undo; Shop link settings with item selection, preview and copy/share fallbacks. The public customer page supports lists/menu choices, optional voice and photo preview, remembered details/last request, fulfilment/time and WhatsApp/Copy/manual completion, with a separate offline worker and a complete page budget below 60 KB.
-- M21 (in progress): a pure paste-to-order parser with twenty English/Bangla request fixtures, preserved literal source/unknown lines and explicit count/unit suggestions. The reviewed Orders interface is not yet enabled.
+- M21: paste English/Bangla customer requests into editable order drafts, with explicit count/unit suggestions, unsaved counter pricing, clipboard/manual fallbacks and owner-confirmed creation. Complete original requests survive order saves and JSON backup/restore; payment preferences never record money.
 
 ## [0.2.0] - 2026-11-16
 

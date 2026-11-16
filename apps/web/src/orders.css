@@ -18,3 +18,7 @@
 @media(max-width:1023px){.order-view-tabs{flex-wrap:nowrap}.order-view-tabs>.button{min-width:44px;flex:none;margin-left:auto}.order-warning-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}}
 
 .app-shell .order-swap-summary{margin-top:12px;padding:12px;background:var(--subtle);border:0;border-radius:12px;gap:8px}.order-swap-summary small{font-size:11px;line-height:16px;color:var(--text-secondary)}.order-swap-summary p{font-size:12px;line-height:16px;margin-top:4px}
+
+.order-paste{max-width:740px}.order-paste>.card{gap:12px}.order-paste-actions{display:flex;flex-wrap:wrap;gap:8px}.order-source-note p{overflow-wrap:anywhere}
+
+.orders-page.has-paste .app-page-heading{flex-wrap:wrap}.order-heading-actions{display:flex;flex-wrap:wrap;gap:8px;min-width:0}

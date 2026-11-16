@@ -1,4 +1,5 @@
 import { ulid } from 'ulid';
+import { ORDER_SOURCE_MAX_TEXT } from './order-limits';
 import { marketPacks, type BusinessType } from './packs';
 import { normalisePhone } from './phone';
 import { orderPricing, prepareOrderLines, type OrderLineInput } from './order-lines';
@@ -38,8 +39,8 @@ export function saveOrderCommand(input: OrderInput, context: OrderContext, befor
   if (!['phone','walk_in','table','paste','other'].includes(input.source) || !['delivery','pickup','dine_in'].includes(input.type)) throw new Error('Choose a supported order source and fulfilment type.');
   if (!Number.isSafeInteger(context.sequence) || context.sequence < 1) throw new Error('Use a valid order number.');
   if (input.customerId && (!customer || customer.id !== input.customerId || customer.businessId !== setup.business.id || (customer.archivedAt !== undefined && before?.customer.id !== customer.id))) throw new Error('Choose an active customer from this shop.');
-  const name = input.name.trim(), address = input.address.trim(), table = input.table.trim(), sourceText = input.sourceText.trim();
-  if (name.length > 80 || /[\r\n]/.test(name) || address.length > 250 || table.length > 40 || sourceText.length > 4000) throw new Error('Keep the name, address, table and source note within their field limits.');
+  const name = input.name.trim(), address = input.address.trim(), table = input.table.trim(), sourceText = input.sourceText;
+  if (name.length > 80 || /[\r\n]/.test(name) || address.length > 250 || table.length > 40 || typeof sourceText!=='string' || sourceText.length > ORDER_SOURCE_MAX_TEXT) throw new Error('Keep the name, address, table and source note within their field limits.');
   const phone = input.phone.trim() ? normalisePhone(input.phone,setup.business.marketCode) : input.customerId ? customer?.phone : undefined;
   if (input.phone.trim() && !phone) throw new Error('Enter a complete phone number.');
   const retainedPhone = before?.customer.id === input.customerId && before?.customer.phone === phone;

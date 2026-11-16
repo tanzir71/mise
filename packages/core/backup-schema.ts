@@ -1,5 +1,6 @@
 import { businessPacks, marketPacks } from './packs';
 import { stockAtoms } from './stock-quantity';
+import { ORDER_SOURCE_MAX_TEXT } from './order-limits';
 import type { BackupTable } from './backup-tables';
 
 type Check = (value:unknown,path:string) => void;
@@ -10,6 +11,7 @@ export function backupRecord(value:unknown,path:string):Record<string,unknown> {
   return value as Record<string,unknown>;
 }
 const text:Check = (v,p) => {if (typeof v !== 'string' || v.length > 1_000_000) invalid(p,'must be text within 1,000,000 characters');};
+const orderSource:Check=(v,p)=>{if(typeof v!=='string'||v.length>ORDER_SOURCE_MAX_TEXT)invalid(p,'must be a request within 12,000 characters');};
 const id:Check = (v,p) => {if (typeof v !== 'string' || !/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v)) invalid(p,'must be a ULID');};
 const bool:Check = (v,p) => {if (typeof v !== 'boolean') invalid(p,'must be true or false');};
 const integer:Check = (v,p) => {if (typeof v !== 'number' || !Number.isSafeInteger(v)) invalid(p,'must be a safe integer');};
@@ -69,7 +71,7 @@ const shapes:Record<BackupTable,Shape> = {
   customers:{...entity,businessId:id,name:text,nickname:text,phone:optional(phone),address:text,notes:text,tags:array(text),consent:backupObject({savedAt:backupTime,source:oneOf(['manual'])}),archivedAt:optional(backupTime)},
   creditAccounts:{...owned,customerId:id,currency,allowed:bool,limit:money,reminder:backupObject({enabled:bool,dayOfMonth:positive,tone,channel:oneOf(['whatsapp'])})},
   creditEntries:{...owned,...dated,accountId:id,customerId:id,currency,sequence:positive,type:oneOf(['charge','payment','adjustment','reminder','refund']),amount:integer,note:text,saleId:optional(id),orderId:optional(id),refundId:optional(id),returnsChargeId:optional(id),methodName:optional(text),occurredAt:optional(backupTime),reversalOf:optional(id),purpose:optional(oneOf(['reminder','receipt','call'])),overLimit:optional(backupObject({balance:integer,limit:money}))},
-  orders:{...owned,...dated,...revision,businessType:business,sequence:positive,number:text,source:oneOf(['phone','walk_in','table','paste','other']),sourceText:text,customer:backupObject({id:optional(id),name:text,phone:optional(phone)}),type:oneOf(['delivery','pickup','dine_in']),status,statusChangedAt:backupTime,statusEventId:id,
+  orders:{...owned,...dated,...revision,businessType:business,sequence:positive,number:text,source:oneOf(['phone','walk_in','table','paste','other']),sourceText:orderSource,customer:backupObject({id:optional(id),name:text,phone:optional(phone)}),type:oneOf(['delivery','pickup','dine_in']),status,statusChangedAt:backupTime,statusEventId:id,
     lines:array(backupObject({id,itemId:optional(id),name:text,unit:text,qty:number,unitPrice:nullable(money),lineTotal:nullable(money),note:text,unavailable:bool,substitution:optional(backupObject({from:text,accepted:bool,acceptedAt:optional(backupTime)}))})),subtotal:money,deliveryFee:money,discount:money,total:nullable(money),currency,timezone,address:text,table:text,scheduledFor:optional(backupTime),
     payment:backupObject({method:saleMethod,wallet:optional(text),status:oneOf(['pending','paid','credited']),saleId:optional(id),at:optional(backupTime),cancellation:optional(backupObject({creditEntryId:optional(id),refundTotal:money,refundDue:money}))}),handledBy:text},
   orderNotes:{...owned,...dated,...revision,orderId:id,text},

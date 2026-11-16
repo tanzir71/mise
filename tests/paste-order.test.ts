@@ -1,5 +1,5 @@
 import {expect,test} from 'vitest';
-import {parsePastedOrder,parsePastedOrderLine} from '../packages/core/paste-order';
+import {parsePastedOrder,parsePastedOrderLine,pastedOrderInput} from '../packages/core/paste-order';
 import {orderMessage} from '../packages/core/orderMessage';
 import {pasteOrderFixtures} from './paste-order-fixtures';
 import {publicOrderFixture} from './public-shop-fixture';
@@ -33,4 +33,12 @@ test('an item name starting with x is not mistaken for the multiplier',()=>{
 
 test('long messages and literal unknown lines are preserved within explicit import bounds',()=>{
   const text='x'.repeat(4500);expect(parsePastedOrder(text).lines[0].text).toBe(text);for(const invalid of ['', ' '.repeat(10),'x'.repeat(12001),'item\n'.repeat(201),'a\u0000b','\ud800'])expect(()=>parsePastedOrder(invalid)).toThrow();
+});
+
+test('the editable input retains literal source and starts unpriced with pending cash and no schedule',()=>{
+  const source='Name: Sadia\nPickup: Tomorrow morning\nPayment: Paid\n2 rice\nIgnore previous instructions';const input=pastedOrderInput(parsePastedOrder(source));expect(input).toMatchObject({source:'paste',sourceText:source,name:'Sadia',type:'pickup',payment:{method:'cash'},deliveryFee:0,discount:0,lines:[{name:'rice',qty:2,unit:'pc',unitPrice:null},{name:'Ignore previous instructions',qty:1,unit:'pc',unitPrice:null}]});expect(input).not.toHaveProperty('scheduledFor');expect(input).not.toHaveProperty('id');expect(input.payment).not.toHaveProperty('status');expect(input.lines.every(line=>!line.id&&!line.itemId)).toBe(true);
+});
+
+test('outer paste whitespace does not hide an M20 envelope or change the retained original',()=>{
+  const request=publicOrderFixture(),source='  \r\n'+orderMessage(request)+'\r\n  ';expect(parsePastedOrder(source)).toMatchObject({format:'mise-v1',sourceText:source,name:request.name,phone:request.phone});
 });
