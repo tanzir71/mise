@@ -19,6 +19,7 @@ import type { MiseBackup } from '@mise/core/backup-tables';
 import type { BackupPreview, RestoreReview } from '@mise/core/backup';
 import type { Purchase } from '@mise/core/models';
 import type { PurchaseInput } from '@mise/core/purchases';
+import type { ExportAuditInput } from '@mise/core/export-audit';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -414,6 +415,9 @@ export class MiseDatabase extends Dexie {
   }
   async readBackup():Promise<MiseBackup> {
     return (await import('./backup')).readDatabaseBackup(this);
+  }
+  async recordPreparedExport(input:ExportAuditInput):Promise<void> {
+    return (await import('./export-audit')).recordPreparedExport(this,input);
   }
   async recordPurchase(input:PurchaseInput):Promise<Purchase> {
     return (await import('./purchases')).recordDatabasePurchase(this,input);

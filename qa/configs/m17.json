@@ -1,0 +1,163 @@
+{
+  "title": "M17 Exports and complete backup",
+  "actionSets": {
+    "shop": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      },
+      {
+        "type": "click",
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
+      },
+      {
+        "type": "click",
+        "selector": "main a[href$=\"/counter\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "#counter-expression",
+        "value": "100"
+      },
+      {
+        "type": "click",
+        "selector": ".counter-cash"
+      },
+      {
+        "type": "wait",
+        "selector": ".counter-success",
+        "state": "visible"
+      },
+      {
+        "type": "click",
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
+      },
+      {
+        "type": "click",
+        "selector": "main a[href$=\"/settings/exports\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".exports-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "m17-phone-export",
+      "path": "app/",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 844
+      },
+      "actionSets": [
+        "shop"
+      ],
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "The M29 phone and desktop Exports contexts define the shared six-list catalogue, format and period controls, compact labels, native radio assets and 440px desktop sheet. Adapted to the six datasets specified in M17 and records already delivered. Complete JSON backup replaces later scheduled/remote exports; native sharing is offered where supported. English headers and plain spreadsheet numbers preserve Bengali values; PDF uses local Hind Siliguri and market money grouping. Phone controls are 44px. Data and row counts come from actual local onboarding and a recorded cash sale. Browser/device decoration is cropped from the supplied reference; content differences remain visible and informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-dialog:has(.export-form)",
+          "reference": "screens/mobile/M29 · Manager — Export (sheet).png",
+          "clip": {
+            "left": 56,
+            "top": 144,
+            "width": 780,
+            "height": 1576
+          }
+        }
+      ]
+    },
+    {
+      "id": "m17-exports-desktop",
+      "path": "app/",
+      "widths": [
+        1440
+      ],
+      "heights": {
+        "1440": 1200
+      },
+      "actionSets": [
+        "shop"
+      ],
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "The M29 phone and desktop Exports contexts define the shared six-list catalogue, format and period controls, compact labels, native radio assets and 440px desktop sheet. Adapted to the six datasets specified in M17 and records already delivered. Complete JSON backup replaces later scheduled/remote exports; native sharing is offered where supported. English headers and plain spreadsheet numbers preserve Bengali values; PDF uses local Hind Siliguri and market money grouping. Phone controls are 44px. Data and row counts come from actual local onboarding and a recorded cash sale. Browser/device decoration is cropped from the supplied reference; content differences remain visible and informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "clip": {
+            "left": 28,
+            "top": 100,
+            "width": 1440,
+            "height": 1200
+          }
+        }
+      ]
+    },
+    {
+      "id": "m17-export-sheet-desktop",
+      "path": "app/",
+      "widths": [
+        1440
+      ],
+      "heights": {
+        "1440": 1200
+      },
+      "actionSets": [
+        "shop"
+      ],
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "The M29 phone and desktop Exports contexts define the shared six-list catalogue, format and period controls, compact labels, native radio assets and 440px desktop sheet. Adapted to the six datasets specified in M17 and records already delivered. Complete JSON backup replaces later scheduled/remote exports; native sharing is offered where supported. English headers and plain spreadsheet numbers preserve Bengali values; PDF uses local Hind Siliguri and market money grouping. Phone controls are 44px. Data and row counts come from actual local onboarding and a recorded cash sale. Browser/device decoration is cropped from the supplied reference; content differences remain visible and informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".export-sheet",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "clip": {
+            "left": 1004,
+            "top": 198,
+            "width": 440,
+            "height": 728
+          }
+        }
+      ]
+    }
+  ]
+}
