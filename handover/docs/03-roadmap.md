@@ -59,9 +59,10 @@ Spec: `phases/phase-2-links-no-backend.md`
 
 - [x] **M20** Public shop page + order link: menu or "type what you need", photo attach (preview only), pickup/delivery → "Send on WhatsApp" with a structured message · M · T0
   - [Implementation and verification notes](../../docs/m20-delivery.md) (complete).
-- [ ] **M21** Paste-to-order: paste a WhatsApp order message (from M20 or free text) → parsed draft order · S · T1
-  - [Implementation and verification notes](../../docs/m21-delivery.md) (implementation complete; deployment verification pending).
+- [x] **M21** Paste-to-order: paste a WhatsApp order message (from M20 or free text) → parsed draft order · S · T1
+  - [Implementation and verification notes](../../docs/m21-delivery.md) (complete).
 - [ ] **M22** QR posters and counter cards (printable PDF/PNG) for the shop link · S · T0
+  - [Implementation and verification notes](../../docs/m22-delivery.md) (behind `qrPosters`; physical print/scan acceptance pending).
 - [ ] **M23** Hand-off pattern everywhere: deep link + Copy + "I sent it" for reminders, receipts, win-back · S · T1
 - [ ] **M24** Share target (Android PWA): share text/images into Mise → inbox to sort manually · S · T1
 

@@ -1,0 +1,178 @@
+{
+  "title": "M22 QR poster and counter-card printing",
+  "heights": {
+    "390": 1000,
+    "1440": 1100
+  },
+  "actionSets": {
+    "setup": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "more": [
+      {
+        "type": "click",
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
+      }
+    ],
+    "link": [
+      {
+        "type": "click",
+        "selector": "main a[href$=\"/settings/shop-link\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "label:has-text(\"Opening hours\") textarea",
+        "value": "9 am–11 pm"
+      },
+      {
+        "type": "fill",
+        "selector": "label:has-text(\"Delivery note\") textarea",
+        "value": "Call at the gate · গেটে ফোন করুন"
+      },
+      {
+        "type": "click",
+        "selector": ".shop-link-selection fieldset input[type=checkbox] >> nth=0"
+      },
+      {
+        "type": "click",
+        "selector": "button[form=\"shop-link-settings-form\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".shop-link-preview-card h2",
+        "state": "visible"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "m22-poster-phone",
+      "path": "app/?flags=qrPosters",
+      "actionSets": [
+        "setup",
+        "more",
+        "link"
+      ],
+      "actions": [
+        {
+          "type": "click",
+          "selector": ".shop-link-actions button:has-text(\"QR posters\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".shop-poster-preview img"
+        }
+      ],
+      "widths": [
+        390
+      ],
+      "note": "M09 hierarchy and local typefaces with the actual saved customer URL. The illustrative QR is enlarged to preserve whole modules and a four-module white quiet zone. The shop phone replaces the unsupported sample table number; caption describes a WhatsApp request, and later tracking/payment claims are omitted. Authoring controls extend the shared modal/button primitives. Random immutable edition data changes the QR between captures. Differences are informational.",
+      "sections": [
+        {
+          "id": "artwork",
+          "selector": ".shop-poster-preview img",
+          "reference": "screens/mobile/M09 · Printable QR poster (A5, bilingual).png"
+        }
+      ]
+    },
+    {
+      "id": "m22-poster-desktop",
+      "path": "app/?flags=qrPosters",
+      "actionSets": [
+        "setup",
+        "more",
+        "link"
+      ],
+      "actions": [
+        {
+          "type": "click",
+          "selector": ".shop-link-actions button:has-text(\"QR posters\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".shop-poster-preview img"
+        }
+      ],
+      "widths": [
+        1440
+      ],
+      "note": "M09 hierarchy and local typefaces with the actual saved customer URL. The illustrative QR is enlarged to preserve whole modules and a four-module white quiet zone. The shop phone replaces the unsupported sample table number; caption describes a WhatsApp request, and later tracking/payment claims are omitted. Authoring controls extend the shared modal/button primitives. Random immutable edition data changes the QR between captures. Differences are informational.",
+      "sections": [
+        {
+          "id": "artwork",
+          "selector": ".shop-poster-preview img",
+          "reference": "screens/mobile/M09 · Printable QR poster (A5, bilingual).png"
+        }
+      ]
+    },
+    {
+      "id": "m22-card-tools-phone",
+      "path": "app/?flags=qrPosters",
+      "actionSets": [
+        "setup",
+        "more",
+        "link"
+      ],
+      "actions": [
+        {
+          "type": "click",
+          "selector": ".shop-link-actions button:has-text(\"QR posters\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".shop-poster-preview img"
+        },
+        {
+          "type": "select",
+          "selector": ".shop-poster-tools select",
+          "value": "card"
+        }
+      ],
+      "widths": [
+        390
+      ],
+      "note": "M09 hierarchy and local typefaces with the actual saved customer URL. The illustrative QR is enlarged to preserve whole modules and a four-module white quiet zone. The shop phone replaces the unsupported sample table number; caption describes a WhatsApp request, and later tracking/payment claims are omitted. Authoring controls extend the shared modal/button primitives. Random immutable edition data changes the QR between captures. Differences are informational.",
+      "sections": [
+        {
+          "id": "controls",
+          "selector": ".app-dialog",
+          "reference": "screens/mobile/M09 · Printable QR poster (A5, bilingual).png"
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M22 (behind `qrPosters`): saved-link QR posters and counter cards, market scan copy, offline local fonts, PNG download/open and native PDF printing at A5 or counter-card size.
 - M20: bounded public shop links, bilingual structured order messages, audited generation and ten-minute undo; Shop link settings with item selection, preview and copy/share fallbacks. The public customer page supports lists/menu choices, optional voice and photo preview, remembered details/last request, fulfilment/time and WhatsApp/Copy/manual completion, with a separate offline worker and a complete page budget below 60 KB.
 - M21: paste English/Bangla customer requests into editable order drafts, with explicit count/unit suggestions, unsaved counter pricing, clipboard/manual fallbacks and owner-confirmed creation. Complete original requests survive order saves and JSON backup/restore; payment preferences never record money.
 

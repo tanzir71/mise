@@ -111,6 +111,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@fontsource/hind':
+        specifier: 5.3.0
+        version: 5.3.0
       '@mise/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -1153,6 +1156,9 @@ packages:
 
   '@fontsource/hind-siliguri@5.3.0':
     resolution: {integrity: sha512-jTxXVXLTUYpiCqQ8zGzX9gK4pHkJ6nOn05nKqFjPEpqf3VY6gGREKAIvHfHprE/6N4ittSudnHsMPT10QQfgtw==}
+
+  '@fontsource/hind@5.3.0':
+    resolution: {integrity: sha512-tN9N0AurZa2N8JakQw8Eqs5/1Rzpw7J6YA1mYpkkHZ3iTw1JjbSHq6V6hGjhRdZlUMHk1sN+jOhPmuF+RkRKEg==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -6211,6 +6217,8 @@ snapshots:
   '@fontsource/geist@5.3.0': {}
 
   '@fontsource/hind-siliguri@5.3.0': {}
+
+  '@fontsource/hind@5.3.0': {}
 
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:

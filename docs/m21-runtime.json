@@ -1,0 +1,62 @@
+{
+  "commit": "465c1ea076270912fb6fdead5454fd81abb7345a",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43868052205",
+  "entry": "assets/app-DA5-mpUV.js",
+  "defaultPasteEnabled": true,
+  "customerNoOwnerDatabase": true,
+  "bilingualRequest": true,
+  "pricingAndReviewUnsaved": true,
+  "unknownNoteRemovedOnlyByOwner": true,
+  "originalSourcePreserved": true,
+  "totalMinorUnits": 11000,
+  "paymentStatus": "pending",
+  "sales": 0,
+  "creditEntries": 0,
+  "auditedCreates": 1,
+  "ownerOfflineReload": true,
+  "customerOfflineReload": true,
+  "publishedPublicEncodedBodyBytes": 58219,
+  "parts": [
+    {
+      "path": "/mise/app/s/assets/geist-public-DLU4sjwV.woff2",
+      "bytes": 10472,
+      "encoding": "identity"
+    },
+    {
+      "path": "/mise/app/s/assets/hind-public-p_zvPAp4.woff2",
+      "bytes": 26112,
+      "encoding": "identity"
+    },
+    {
+      "path": "/mise/app/s/assets/shop-4L7X5iJB.js",
+      "bytes": 14069,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/s/assets/shop-CSRt5LA-.css",
+      "bytes": 3786,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/s/assets/taka-public-B0YCb3dw.woff2",
+      "bytes": 704,
+      "encoding": "identity"
+    },
+    {
+      "path": "/mise/app/s/index.html",
+      "bytes": 2287,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/mise-mark.svg",
+      "bytes": 180,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/s/sw.js",
+      "bytes": 609,
+      "encoding": "gzip"
+    }
+  ],
+  "errors": []
+}

@@ -48,7 +48,7 @@ Delivery: Flat 2C, House 9 · Now
 - The draft opens in Price an order (M14) for corner shops, or New order for others.
 
 **Accept**
-- [ ] 20 fixtures of real-style messages, including mixed Bangla/English, produce sensible drafts. Unknown lines are kept as free text.
+- [x] 20 fixtures of real-style messages, including mixed Bangla/English, produce sensible drafts. Unknown lines are kept as free text.
 
 ## M22 · QR posters and counter cards · S
 **Figma:** M09 `59:191` (QR poster A5, bilingual)
