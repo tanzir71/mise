@@ -2,7 +2,8 @@ import { expect,test } from 'vitest';
 import fc from 'fast-check';
 import { compressToUint8Array,decompressFromUint8Array } from 'lz-string';
 import { parsePublicShop,PUBLIC_SHOP_MAX_PAYLOAD,PUBLIC_SHOP_MAX_TEXT } from '../packages/core/public-shop';
-import { decodeShopPayload,encodeShopPayload,publicShopUrl } from '../packages/core/public-shop-codec';
+import { encodeShopPayload,publicShopUrl } from '../packages/core/public-shop-codec';
+import { decodeShopPayload } from '../packages/core/public-shop-decode';
 import { decompressLzBounded } from '../packages/core/lz-bounded';
 import { publicShopFixture } from './public-shop-fixture';
 

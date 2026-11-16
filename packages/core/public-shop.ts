@@ -22,7 +22,7 @@ export function publicText(value:unknown,max:number,multiline=false,required=fal
 export function parsePublicShop(value:unknown):PublicShop{
   const row=publicRecord(value,['v','code','edition','publishedAt','name','address','hours','phone','deliveryNote','market','currency','timezone','mode','items']);
   if(row.v!==1||typeof row.code!=='string'||!publicShopCodePattern.test(row.code)||typeof row.edition!=='string'||!/^[0-9A-HJKMNP-TV-Z]{26}$/.test(row.edition))throw new Error('This shop-link version or identifier is unsupported.');
-  if(!Number.isSafeInteger(row.publishedAt)||(row.publishedAt as number)<0||!['BD','IN','ID','KE','OTHER'].includes(row.market as string)||!['list','menu'].includes(row.mode as string))throw new Error('Use supported public shop settings.');
+  if(!Number.isSafeInteger(row.publishedAt)||(row.publishedAt as number)<0||(row.publishedAt as number)>8640000000000000||!['BD','IN','ID','KE','OTHER'].includes(row.market as string)||!['list','menu'].includes(row.mode as string))throw new Error('Use supported public shop settings.');
   if(typeof row.phone!=='string'||!e164Pattern.test(row.phone)||typeof row.currency!=='string'||!/^[A-Z]{3}$/.test(row.currency)||typeof row.timezone!=='string')throw new Error('Use a public E.164 phone, currency and timezone.');
   try{new Intl.DateTimeFormat('en',{timeZone:row.timezone});}catch{throw new Error('Use a valid shop timezone.');}
   if(!Array.isArray(row.items)||row.items.length>PUBLIC_SHOP_MAX_ITEMS)throw new Error(`Choose at most ${PUBLIC_SHOP_MAX_ITEMS} public items.`);

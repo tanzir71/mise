@@ -1,0 +1,48 @@
+{
+  "generator": "scripts/generate-public-fonts.py",
+  "fontTools": "4.63.0",
+  "geometry": "UPM reduction rounds outlines and variable deltas; these are modified fonts, not byte-identical exports.",
+  "geist": {
+    "package": "@fontsource-variable/geist",
+    "version": "5.3.0",
+    "sourceSha256": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1",
+    "characters": 106,
+    "weights": [
+      400,
+      600
+    ],
+    "upm": 128,
+    "baseCoordinateRoundingBoundAt24px": 0.09375,
+    "basePlusVariationRoundingBoundAt24px": 0.1875
+  },
+  "hind": {
+    "package": "@fontsource/hind-siliguri",
+    "version": "5.3.0",
+    "sourceSha256": "7ffe9456e2957755ef86a46375cadf2f83a4dd3caea3959873e5e61ca4466265",
+    "characters": 99,
+    "upm": 64,
+    "baseCoordinateRoundingBoundAt16px": 0.125
+  },
+  "taka": {
+    "sourceSha256": "9be952c7271f7103f1818aa6d6f839a7a7157f8284508079536a98fc2cea7227",
+    "characters": [
+      "U+09F3"
+    ],
+    "weight": 600,
+    "upm": 1000
+  },
+  "outputs": {
+    "geist-public.woff2": {
+      "bytes": 10472,
+      "sha256": "250ba1130c72274eafadcb6360fb99238ae70f5a11d2e01bf4c64c716d131fd5"
+    },
+    "hind-public.woff2": {
+      "bytes": 26112,
+      "sha256": "c110fb634d109bed8ec82a12e5b4c4f9127eeb36a600637d124f76d9a96df2e7"
+    },
+    "taka-public.woff2": {
+      "bytes": 704,
+      "sha256": "218f4dc3f62bbd4aeb306b583fddf4d73f65de90ed971035f409db0b5df69223"
+    }
+  }
+}

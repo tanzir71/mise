@@ -1,0 +1,37 @@
+/* Mise design tokens — exported from Figma (FVXWo2wVq4nPS3kdsR4TUv). Copy to packages/ui/tokens.css */
+:root {
+  /* palette */
+  --neutral-0:#ffffff; --neutral-25:#fafafa; --neutral-50:#f5f5f4; --neutral-100:#ededec; --neutral-200:#e3e3e1;
+  --neutral-300:#cfcfcc; --neutral-400:#a3a3a0; --neutral-500:#6f6f6c; --neutral-700:#3f3f3d; --neutral-900:#141414; --neutral-1000:#000000;
+  --ember-50:#fff1eb; --ember-500:#f2541b; --ember-600:#c2410c;
+  --positive-50:#e8f6f0; --positive-600:#0e8a5f;
+  --warning-50:#fef3e2; --warning-600:#b45309;
+  --negative-50:#fdecea; --negative-600:#d92d20;
+  --info-50:#eaf1fe; --info-600:#2563eb;
+
+  /* aliases */
+  --bg:var(--neutral-50); --surface:var(--neutral-0); --subtle:var(--neutral-25); --fill:var(--neutral-100);
+  --border:var(--neutral-200); --border-strong:var(--neutral-300); --muted:var(--neutral-400);
+  --text-secondary:var(--neutral-500); --text-700:var(--neutral-700); --text:var(--neutral-900); --ink:var(--neutral-900);
+  --accent:var(--ember-500); --accent-strong:var(--ember-600);
+  --positive:var(--positive-600); --warning:var(--warning-600); --negative:var(--negative-600); --info:var(--info-600);
+
+  /* type */
+  --font-sans: "Geist", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-bangla: "Hind Siliguri", "Geist", system-ui, sans-serif;
+
+  /* radius */
+  --r-xs:6px; --r-sm:8px; --r-md:10px; --r-lg:14px; --r-xl:16px; --r-2xl:24px; --r-phone:36px; --r-pill:999px;
+
+  /* shadows */
+  --shadow-raised: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-overlay: 0 2px 6px rgba(0,0,0,.06), 0 12px 32px -4px rgba(0,0,0,.12);
+  --shadow-soft: 0 12px 32px -4px rgba(15,18,23,.06), 0 1px 3px rgba(15,18,23,.04);
+
+  /* controls */
+  --control-compact:36px; --control-touch:44px;
+
+  /* focus */
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink);
+}
