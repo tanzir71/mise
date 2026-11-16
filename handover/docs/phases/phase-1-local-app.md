@@ -154,8 +154,8 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - JSON backup (all tables + schema version) and restore with a preview. Share via the Web Share API where available.
 
 **Accept**
-- [ ] The CSV opens correctly in Excel (UTF-8 BOM) with Bengali text intact.
-- [ ] Restore into a fresh browser reproduces identical totals.
+- [x] The CSV opens correctly in Excel (UTF-8 BOM) with Bengali text intact.
+- [x] Restore into a fresh browser reproduces identical totals.
 
 ## M18 · PWA · S
 **Build**

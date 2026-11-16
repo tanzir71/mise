@@ -49,8 +49,8 @@ The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-loca
 - [x] **M15** Stock: items, on hand, target (par), to order; quick-update parser ("used 2 kg chicken"); night count mode · M · T1
 - [x] **M16** Today dashboard (sales split, waiting, low stock, credit given/collected) + closing cash count · S · T1
   - [Delivery notes and verification](../../docs/m16-delivery.md).
-- [ ] **M17** Exports (CSV, XLSX, PDF) + JSON backup/restore · S · T1
-  - [Implementation and verification notes](../../docs/m17-delivery.md) (in progress).
+- [x] **M17** Exports (CSV, XLSX, PDF) + JSON backup/restore · S · T1
+  - [Implementation and verification notes](../../docs/m17-delivery.md) (complete).
 - [ ] **M18** PWA: install, offline, update prompt, storage persistence request · S · T1
 
 ## Phase 2 — Customer links without a backend (T0/T1) → tag `v0.3.0`

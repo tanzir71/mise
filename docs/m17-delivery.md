@@ -1,6 +1,6 @@
-# M17 delivery in progress
+# M17 · Exports and complete backup
 
-M17 covers Orders, Sales, Credit, Stock moves, Customers and Purchases exports in CSV/XLSX/PDF, date ranges, and full JSON backup/restore. The milestone remains unchecked until its interface, file formats and published end-to-end flows pass delivery.
+Status: complete. M17 exports Orders, Sales, Credit, Stock moves, Customers and Purchases in CSV/XLSX/PDF with date ranges and selected columns, plus complete JSON backup/restore. The interface is enabled and deployed. M18 installation and storage persistence are next.
 
 ## Backup foundation
 
@@ -46,6 +46,12 @@ Complete JSON backup ignores report filters. A fresh browser can restore before 
 
 Focused browser checks pass for offline CSV/Excel, selected fields and custom dates, native sharing cancellation/retry, fresh-browser offline restoration of all twenty tables, stale reviews and backup-before-replacement. Export, restore and print-preview controls pass axe and fit at 360, 390, 768, 1024 and 1440px. A real Bengali A4-landscape PDF is rendered for visual inspection; the final full regression, reference report and deployed verification follow below.
 
-Local interface checks pass: frozen-lockfile install, lint, TypeScript/Astro, production build, all 323 unit tests, all 162 browser tests without retries, and 104 visual comparisons. The final three-page Bengali A4-landscape PDF was rendered and all pages visually checked after widening row labels and preventing split rows. All selected records, multiline Bengali notes and taka values are legible. The main app chunk is 491.86 kB; Excel generation stays in its separate lazy module. The export feature is enabled for delivery; the roadmap checkbox remains open until CI, Pages and the published UI are verified.
+Local interface checks pass: frozen-lockfile install, lint, TypeScript/Astro, production build, all 323 unit tests, all 162 browser tests without retries, and 104 visual comparisons. The final three-page Bengali A4-landscape PDF was rendered and all pages visually checked after widening row labels and preventing split rows. All selected records, multiline Bengali notes and taka values are legible. The main app chunk is 491.86 kB; Excel generation stays in its separate lazy module. The export feature is enabled in the default app.
 
 Key captures: [phone export](screenshots/m17-export-390.png), [desktop exports](screenshots/m17-exports-1440.png), [desktop export controls](screenshots/m17-export-sheet-1440.png). Reference differences are informational and retain unmatched height. The public route is [Settings › Exports](https://tanzir71.github.io/mise/app/settings/exports).
+
+## Published verification
+
+Interface commit `685b1de` passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43814031854), with all 323 unit tests, all 162 browser tests without retries and the [104-comparison visual report](https://github.com/tanzir71/mise/actions/runs/43814031854/artifacts/14202400522). The report artifact includes the Bengali PDF fixture.
+
+On the published site, a fresh desktop browser recorded a 100-unit cash sale, opened the default-enabled export route, waited for the worker to control the page, disabled the network and reloaded. It downloaded a BOM CSV, opened the PDF print preview and downloaded a complete schema-8 JSON backup. A separate fresh phone browser loaded the app shell, went offline, restored that downloaded backup through the actual preview and acknowledgement, and reloaded offline. All twenty source tables and original records were preserved, with one additional restore audit; Today retained the same 100-unit total. Neither browser reported a page error. M17 is complete.
