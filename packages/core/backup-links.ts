@@ -1,5 +1,6 @@
 import { stockAtoms, stockNameKey } from './stock-quantity';
 import { creditBalance, entryDelta } from './khata';
+import { orderLineTotal } from './order-lines';
 import { backupTableNames, type BackupTables, type BackupTable } from './backup-tables';
 
 /** Check live references; historical catalogue snapshots may refer to deleted items. */
@@ -83,6 +84,12 @@ export function validateBackupLinks(t:BackupTables):void {
     if (move.undoOf) {const before = link('stockMoves',move.undoOf);ensure(before.stockItemId === move.stockItemId && move.delta === -before.delta && !before.undoOf,'a stock reversal is inconsistent');}
   }
   for (const message of t.supplierMessages) {if (message.supplierId) link('suppliers',message.supplierId);for (const id of message.stockItemIds) link('stockItems',id);ensure(message.part <= message.parts,'a supplier message has an invalid part number');}
+  for (const purchase of t.purchases) {
+    if (purchase.supplierId) link('suppliers',purchase.supplierId);
+    ensure(purchase.lines.length > 0 && purchase.lines.length <= 200,'a purchase needs priced invoice lines');
+    let total = 0n;for (const line of purchase.lines) {ensure(line.lineTotal === orderLineTotal(line.unitPrice,line.qty),'a purchase line total is inconsistent');total += BigInt(line.lineTotal);if (line.stockItemId) ensure(link('stockItems',line.stockItemId).unit === line.unit,'a purchase line uses a different stock unit');}
+    ensure(total === BigInt(purchase.total),'a purchase total differs from its invoice lines');
+  }
   for (const closing of t.dayClosings) {
     ensure(closing.summary.day === closing.day && closing.summary.currency === closing.currency && closing.summary.timezone === closing.timezone,'a closing snapshot has different day or currency settings');
     ensure(closing.difference === closing.countedCash-closing.expectedCash && (closing.addedWalkIn === 0 || closing.addedWalkIn === closing.difference),'a closing variance is inconsistent');

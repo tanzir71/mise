@@ -68,6 +68,9 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.5)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1)
+      xlsx:
+        specifier: file:vendor/xlsx-0.20.3.tgz
+        version: file:vendor/xlsx-0.20.3.tgz
 
   apps/landing:
     dependencies:
@@ -129,6 +132,9 @@ importers:
       workbox-window:
         specifier: ^7.4.1
         version: 7.4.1
+      xlsx:
+        specifier: file:../../vendor/xlsx-0.20.3.tgz
+        version: file:vendor/xlsx-0.20.3.tgz
     devDependencies:
       '@types/qrcode':
         specifier: 1.5.6
@@ -5068,6 +5074,12 @@ packages:
   xdg-basedir@5.1.0:
     resolution: {integrity: sha512-GCPAHLvrIH13+c0SuacwvRYj2SxJXQ4kaVTT5xgL3kPrz56XxkF21IGhjSE1+W0aw7gpBWRGXLCPnPby6lSpmQ==}
     engines: {node: '>=12'}
+
+  xlsx@file:vendor/xlsx-0.20.3.tgz:
+    resolution: {integrity: sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==, tarball: file:vendor/xlsx-0.20.3.tgz}
+    version: 0.20.3
+    engines: {node: '>=0.8'}
+    hasBin: true
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -10820,6 +10832,8 @@ snapshots:
   ws@8.23.0: {}
 
   xdg-basedir@5.1.0: {}
+
+  xlsx@file:vendor/xlsx-0.20.3.tgz: {}
 
   xtend@4.0.2: {}
 

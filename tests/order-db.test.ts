@@ -71,7 +71,7 @@ test('version 3 credit data upgrades additively to orders without losing its bal
   await legacy.table('businesses').put(setup.business); await legacy.table('outlets').put(setup.outlet); await legacy.table('members').put(setup.owner); await legacy.table('items').bulkPut(seeded.items); await legacy.table('categories').bulkPut(seeded.categories);
   await legacy.table('customers').put(customer.customer); await legacy.table('creditAccounts').put(terms.account); await legacy.table('creditEntries').put(opening.entry); await legacy.table('events').bulkPut([seeded.event,customer.event,terms.event,opening.event]); legacy.close();
   const db=new MiseDatabase(name); databases.push(db); await db.open();
-  expect(db.verno).toBe(7); expect(await db.items.count()).toBe(3); expect(await db.events.count()).toBe(4);
+  expect(db.verno).toBe(8); expect(await db.items.count()).toBe(3); expect(await db.events.count()).toBe(4);
   const ledger=await db.readCreditLedger(terms.account.id); expect(creditBalance(ledger.account,ledger.entries)).toBe(1200); expect(ledger.customer.phone).toBe('+8801712345482');
   expect(await db.orders.count()).toBe(0); const order=await db.saveOrder(orderFixture().input); expect(order.number).toBe('A-0001'); expect(await db.events.where('customerId').equals(customer.customer.id).count()).toBe(3);
 });

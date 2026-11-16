@@ -50,3 +50,8 @@ export interface DayClosing extends Entity {
   countedCash:number;expectedCash:number;difference:number;addedWalkIn:number;addedSaleId?:string;note:string;
   previewFingerprint:string;createdBy:string;createdByName:string;eventId:string;voidedAt?:number;
 }
+export interface PurchaseLine {stockItemId?:string;name:string;unit:string;qty:number;unitPrice:number;lineTotal:number}
+export interface Purchase extends Entity {
+  outletId:string;supplierId?:string;supplierName:string;reference:string;lines:PurchaseLine[];total:number;currency:string;timezone:string;
+  paid:PaymentMethod|'due';methodName:string;note:string;photoRef?:string;createdBy:string;eventId:string;voidedAt?:number;
+}

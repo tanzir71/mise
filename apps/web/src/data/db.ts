@@ -17,6 +17,8 @@ import type { DayClosing } from '@mise/core/models';
 import type { TodayContext } from '@mise/core/today';
 import type { MiseBackup } from '@mise/core/backup-tables';
 import type { BackupPreview, RestoreReview } from '@mise/core/backup';
+import type { Purchase } from '@mise/core/models';
+import type { PurchaseInput } from '@mise/core/purchases';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -38,6 +40,7 @@ export class MiseDatabase extends Dexie {
   suppliers!: EntityTable<Supplier,'id'>;
   supplierMessages!: EntityTable<SupplierMessage,'id'>;
   dayClosings!: EntityTable<DayClosing,'id'>;
+  purchases!: EntityTable<Purchase,'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
@@ -47,6 +50,7 @@ export class MiseDatabase extends Dexie {
     this.version(5).stores({orderRefunds:'id,outletId,orderId,saleId,createdAt',sales:'id,outletId,createdAt,orderId',creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,orderId,refundId,&reversalOf,&[accountId+sequence]'});
     this.version(6).stores({stockItems:'id,outletId,supplierId,category,&[outletId+activeKey]',stockMoves:'id,outletId,stockItemId,createdAt,countBatchId,&undoOf,&[stockItemId+revision]',suppliers:'id,outletId',supplierMessages:'id,outletId,supplierId,createdAt',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision]'});
     this.version(7).stores({dayClosings:'id,outletId,day,&[outletId+activeKey]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId'});
+    this.version(8).stores({purchases:'id,outletId,supplierId,createdAt'});
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
@@ -410,6 +414,12 @@ export class MiseDatabase extends Dexie {
   }
   async readBackup():Promise<MiseBackup> {
     return (await import('./backup')).readDatabaseBackup(this);
+  }
+  async recordPurchase(input:PurchaseInput):Promise<Purchase> {
+    return (await import('./purchases')).recordDatabasePurchase(this,input);
+  }
+  async undoPurchase(id:string):Promise<void> {
+    return (await import('./purchases')).undoDatabasePurchase(this,id);
   }
   async previewRestore(input:unknown):Promise<BackupPreview> {
     return (await import('./backup')).previewDatabaseRestore(this,input);

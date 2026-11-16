@@ -80,6 +80,7 @@ const shapes:Record<BackupTable,Shape> = {
   suppliers:{...owned,...revision,name:text,phone:optional(phone),note:text,archivedAt:optional(backupTime),eventId:id},
   supplierMessages:{...owned,...dated,...voided,supplierId:optional(id),supplierName:text,phone:optional(phone),text,channel:oneOf(['whatsapp','manual']),stockItemIds:array(id),part:positive,parts:positive},
   dayClosings:{...owned,...dated,...voided,activeKey:optional(text),day,timezone,currency,summary,countedCash:money,expectedCash:integer,difference:integer,addedWalkIn:money,addedSaleId:optional(id),note:text,previewFingerprint:text,createdByName:text},
+  purchases:{...owned,...dated,...voided,supplierId:optional(id),supplierName:text,reference:text,lines:array(backupObject({stockItemId:optional(id),name:text,unit:text,qty:number,unitPrice:money,lineTotal:money})),total:money,currency,timezone,paid:oneOf(['cash','wallet','card','due']),methodName:text,note:text,photoRef:optional(text)},
 };
 export function validateBackupRow(table:BackupTable,value:unknown,path:string) {
   backupObject(shapes[table])(value,path);

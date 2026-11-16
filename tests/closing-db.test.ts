@@ -63,10 +63,10 @@ test('schema 6 financial, stock, supplier and audit records survive the additive
   const customer = await source.saveCustomer({name:'Rina',nickname:'',phone:'01712345483',address:'',notes:'',tags:[]},{credit:{...defaultCreditTerms,allowed:true,limit:100000}}), account = (await source.creditAccounts.toArray())[0];
   const order = await source.saveOrder({...orderFixture().input,customerId:customer.id,phone:customer.phone!},{settlement:{method:'credit',accountId:account.id}});await source.addOrderNote(order.id,'Keep the full note',order.revision);await source.recordCreditPayment(account.id,500,'cash');
   const records:Record<string,unknown[]> = {}, stores:Record<string,string> = {};
-  for (const table of source.tables.filter(table => table.name !== 'dayClosings')) {stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.filter(index => index.name !== 'closingId').map(index => index.src)].join(',');records[table.name] = await table.toArray();}
+  for (const table of source.tables.filter(table => table.name !== 'dayClosings' && table.name !== 'purchases')) {stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.filter(index => index.name !== 'closingId').map(index => index.src)].join(',');records[table.name] = await table.toArray();}
   const name = `mise-closing-v6-${randomUUID()}`, legacy = new Dexie(name);legacy.version(6).stores(stores);
   for (const table of Object.keys(stores)) await legacy.table(table).bulkPut(records[table]);legacy.close();
-  const db = new MiseDatabase(name);databases.push(db);await db.open();expect(db.verno).toBe(7);expect(await db.dayClosings.count()).toBe(0);
+  const db = new MiseDatabase(name);databases.push(db);await db.open();expect(db.verno).toBe(8);expect(await db.dayClosings.count()).toBe(0);
   for (const table of Object.keys(stores)) expect(await db.table(table).toArray(),table).toEqual(records[table]);
   expect(todayOverview(await db.readToday()).summary).toMatchObject({sales:7500,creditGiven:2500,creditCollected:500,expectedCash:5500});
   await db.closeDay(await review(db,5500));expect(await db.stockItems.toArray()).toEqual(records.stockItems);expect(await db.creditEntries.toArray()).toEqual(records.creditEntries);expect(await db.orders.toArray()).toEqual(records.orders);
