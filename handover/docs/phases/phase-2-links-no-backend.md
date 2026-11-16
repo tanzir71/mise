@@ -39,8 +39,8 @@ Delivery: Flat 2C, House 9 · Now
 ```
 
 **Accept**
-- [ ] The link works offline once opened. The page weighs < 60 KB.
-- [ ] The generated message parses back into the same draft (round-trip tests).
+- [x] The link works offline once opened. The page weighs < 60 KB.
+- [x] The generated message parses back into the same draft (round-trip tests).
 
 ## M21 · Paste to order · S
 **Build**

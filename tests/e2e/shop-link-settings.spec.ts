@@ -9,7 +9,7 @@ async function start(page:Page,width=390){
   await page.goto('app/');await page.getByRole('radio',{name:/^Corner shop/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.getByRole('radio',{name:/^Bangladesh/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.getByLabel('Shop name',{exact:true}).fill('Rahman Store');await page.getByLabel('Phone number',{exact:true}).fill('01712345482');await page.getByRole('button',{name:'Open Mise',exact:true}).click();
-  await expect(page.locator('.app-main')).toBeVisible();await page.goto('app/more');await page.getByRole('link',{name:/Shop link Public details/}).click();await expect(page.getByRole('heading',{name:'Settings › Shop link'})).toBeVisible();
+  await expect(page.locator('.app-main')).toBeVisible();await page.getByRole('link',{name:'More',exact:true}).click();await page.getByRole('link',{name:/Shop link Public details/}).click();await expect(page.getByRole('heading',{name:'Settings › Shop link'})).toBeVisible();
 }
 async function generate(page:Page){
   await page.getByRole('textbox',{name:'Opening hours',exact:true}).fill('9 am–11 pm');await page.getByRole('textbox',{name:'Delivery note',exact:true}).fill('Call at the gate · গেটে ফোন করুন');

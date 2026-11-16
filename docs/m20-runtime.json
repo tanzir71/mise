@@ -1,0 +1,72 @@
+{
+  "commit": "911392df1999dba489c5fa6c420d682951a0cc2b",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43853355790",
+  "entry": "assets/app-DPPixBgf.js",
+  "publicPath": "/mise/app/s/",
+  "items": 1,
+  "defaultEnabled": true,
+  "freshCustomerNoDatabase": true,
+  "photoMessage": true,
+  "rememberedLastRequest": true,
+  "customerOffline": true,
+  "ownerAndPreviewOffline": true,
+  "publishedEncodedBodyBytes": 59427,
+  "parts": [
+    {
+      "path": "/mise/app/assets/flags-Bv-BYidg.js",
+      "bytes": 250,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/assets/geist-public-DLU4sjwV.woff2",
+      "bytes": 10472,
+      "encoding": "identity"
+    },
+    {
+      "path": "/mise/app/assets/hind-public-p_zvPAp4.woff2",
+      "bytes": 26112,
+      "encoding": "identity"
+    },
+    {
+      "path": "/mise/app/assets/money-Dp4gjrwb.js",
+      "bytes": 976,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/assets/public-shop-decode-DpVVNqgK.js",
+      "bytes": 2479,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/assets/shop-C8C4dKAI.js",
+      "bytes": 11466,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/assets/shop-RId5t7tN.css",
+      "bytes": 3784,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/assets/taka-public-B0YCb3dw.woff2",
+      "bytes": 704,
+      "encoding": "identity"
+    },
+    {
+      "path": "/mise/app/s/index.html",
+      "bytes": 2349,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/mise-mark.svg",
+      "bytes": 180,
+      "encoding": "gzip"
+    },
+    {
+      "path": "/mise/app/s/sw.js",
+      "bytes": 655,
+      "encoding": "gzip"
+    }
+  ],
+  "errors": []
+}

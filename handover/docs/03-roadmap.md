@@ -57,9 +57,10 @@ The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-loca
 ## Phase 2 — Customer links without a backend (T0/T1) → tag `v0.3.0`
 Spec: `phases/phase-2-links-no-backend.md`
 
-- [ ] **M20** Public shop page + order link: menu or "type what you need", photo attach (preview only), pickup/delivery → "Send on WhatsApp" with a structured message · M · T0
-  - [Implementation and verification notes](../../docs/m20-delivery.md) (in progress; not enabled).
+- [x] **M20** Public shop page + order link: menu or "type what you need", photo attach (preview only), pickup/delivery → "Send on WhatsApp" with a structured message · M · T0
+  - [Implementation and verification notes](../../docs/m20-delivery.md) (complete).
 - [ ] **M21** Paste-to-order: paste a WhatsApp order message (from M20 or free text) → parsed draft order · S · T1
+  - [Implementation and verification notes](../../docs/m21-delivery.md) (in progress; interface not enabled).
 - [ ] **M22** QR posters and counter cards (printable PDF/PNG) for the shop link · S · T0
 - [ ] **M23** Hand-off pattern everywhere: deep link + Copy + "I sent it" for reminders, receipts, win-back · S · T1
 - [ ] **M24** Share target (Android PWA): share text/images into Mise → inbox to sort manually · S · T1
