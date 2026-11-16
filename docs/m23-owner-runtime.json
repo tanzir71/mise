@@ -1,0 +1,74 @@
+{
+  "commit": "ffbc4d4167bcdc32bdcf553c6cb52e5824ca3f99",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43908305334",
+  "visualArtifact": "https://github.com/tanzir71/mise/actions/runs/43908305334/artifacts/14245844696",
+  "entry": "/mise/app/assets/app-DcojBGY-.js",
+  "baseURL": "https://tanzir71.github.io/mise/",
+  "isolation": "fresh browser context for each case",
+  "outboundMessagesSent": 0,
+  "stats": {
+    "startTime": "2026-11-16T16:38:30.651Z",
+    "duration": 59212.414,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "name": "cash receipt sharing and clipboard denial preserve the sale and resume offline",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "closing summary keeps its exact snapshot and confirmation through offline reload",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "shop settings and poster share one exact saved-link attempt; regeneration starts fresh",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "manual win-back with WhatsApp retains literal edits and changes only history",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "manual win-back without a phone retains literal edits and changes only history",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "multipart receipts preserve every line and resume each part without duplicate confirmations",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "all remaining owner message sheets fit and meet axe at 360px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "all remaining owner message sheets fit and meet axe at 390px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "all remaining owner message sheets fit and meet axe at 768px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "all remaining owner message sheets fit and meet axe at 1024px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "all remaining owner message sheets fit and meet axe at 1440px",
+      "status": "passed",
+      "retry": 0
+    }
+  ]
+}

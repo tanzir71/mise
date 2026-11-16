@@ -2,3 +2,5 @@
 .app-dialog.message-handoff>header h2{font:500 16px/24px var(--font-sans);margin:0}.app-dialog .shared-handoff>label>textarea{font:12px/20px var(--font-sans);background:var(--subtle);color:var(--ink)}
 
 .credit-actions .customer-message-action{grid-column:1/-1}
+.handoff-parts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}.handoff-parts .button{min-height:44px}
+.app-dialog .shared-handoff .button:disabled,.handoff-parts .button:disabled{opacity:.5;cursor:default}

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M23 staged recovery (behind `handOffs`): Copy and manual selection remain usable when audit storage is full; multipart previews can be navigated without falsely confirming a part. Pending owner edits remain available in the recovery message.
+
 - M23 staged owner coverage (behind `handOffs`): cash-receipt, day-summary, saved-link/poster and manual customer messages now use the shared hand-off. Exact receipt/summary/link previews and lossless multipart receipts retain independent confirmation progress.
 
 - M23 staged interface (behind `handOffs`): shared credit, quote and supplier hand-offs with editable/resumable previews, explicit delivery confirmation, one-tap manual fallbacks and atomic companion history. Other outbound senders remain pending.
