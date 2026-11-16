@@ -1,0 +1,27 @@
+{
+  "title":"M18 Install Mise and keep local data",
+  "heights":{"390":1000,"1440":1000},
+  "actionSets":{
+    "setup":[
+      {"type":"click","selector":"input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"click","selector":"input[name=\"market\"][value=\"BD\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"fill","selector":"input[name=\"shopName\"]","value":"Rahman Store"},
+      {"type":"fill","selector":"input[name=\"phone\"]","value":"01712345482"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"wait","selector":".today-page[aria-busy=\"false\"]","state":"visible"}
+    ],
+    "more":[{"type":"click","selector":".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"}],
+    "device":[
+      {"type":"click","selector":"main a[href$=\"/settings/device\"]"},
+      {"type":"wait","selector":".pwa-offline .device-state:text-is(\"Ready offline\")","state":"visible"},
+      {"type":"wait","selector":".pwa-storage .device-state:not(:has-text(\"Checking storage\"))","state":"visible"}
+    ]
+  },
+  "pages":[
+    {"id":"m18-more-phone","path":"app/","widths":[390],"actionSets":["setup","more"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"M18 has no dedicated Figma frame. Reuse the M27 grouped rows, original icons, tokens and phone shell. This device adds installation, offline access and local storage. Later connected devices and agents remain outside this phase. Content and height differences are retained and informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]},
+    {"id":"m18-device-phone","path":"app/","widths":[390],"actionSets":["setup","more","device"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"M18 names no dedicated frame; device controls reuse the supplied More shell and existing settings cards, tokens and original icons. Phone controls are 44px. Native install prompts appear only when offered by the browser. Local offline status and complete backup are real; no remote devices or sync are claimed. Content differences remain informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]},
+    {"id":"m18-device-desktop","path":"app/","widths":[1440],"actionSets":["setup","more","device"],"captureStyle":".app-skip{visibility:hidden}","note":"M18 names no dedicated frame. Reuse the supplied Business data settings shell, compact labels, shared cards and original icons for the written installation/offline/storage requirements. Desktop cards have equal height and pinned actions. Content and height differences remain visible and informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"}]}
+  ]
+}

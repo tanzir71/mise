@@ -1,10 +1,11 @@
+import { InstallHint } from './InstallHint';
 import { useState, type FormEvent } from 'react';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import { businessPacks, marketPacks, defaultMarket, type BusinessType, type MarketCode } from '@mise/core/packs';
 import c from '../../../handover/copy/app.en.json';
 import { db } from './data/db';
 
-export function Onboarding({onRestore}:{onRestore?:()=>void}) {
+export function Onboarding({onRestore,showInstall=false}:{onRestore?:()=>void;showInstall?:boolean}) {
   const [step, setStep] = useState(0);
   const [business, setBusiness] = useState<BusinessType>('corner_shop');
   const [market, setMarket] = useState<MarketCode>(() => defaultMarket(Intl.DateTimeFormat().resolvedOptions().timeZone));
@@ -34,5 +35,6 @@ export function Onboarding({onRestore}:{onRestore?:()=>void}) {
       <div className="onboarding-actions">{step > 0 ? <Button kind="secondary" type="button" onClick={() => { setStep(value => value - 1); setError(''); }} disabled={saving}>{c.back}</Button> : null}<Button type="submit" disabled={saving}>{saving ? c.saving : step === 2 ? c.open : c.next}</Button></div>
     </form>
     {onRestore ? <Button type="button" kind="ghost" onClick={onRestore}>Restore a backup</Button> : null}
+    {showInstall ? <InstallHint/> : null}
   </main>;
 }

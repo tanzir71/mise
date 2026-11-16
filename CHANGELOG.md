@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
+- M18 interface: installable app manifest and original-mark icons, install guidance before setup and under This device, explicit native install prompts, offline readiness, manual update checks and a storage-protection request. JSON backup/restore remains available when protection is declined or unavailable and when moving to a Safari home-screen app.
+
 - M17 interface: exports for Orders, Sales, Credit, Stock moves, Customers and Purchases with date ranges, selected columns, masked phone fields, CSV/Excel/PDF and native sharing with download fallbacks. Full JSON backup and reviewed atomic restore are available from Settings and from a fresh browser. Prepared files record their source owner, data and time without claiming they were sent.
 
 - M17 report foundations: read-only Orders, Sales/refunds, Credit, Stock moves, Customers and Purchases projections; shop-calendar date ranges, column/record selection, masked phone fields, Excel-compatible Bengali CSV and exact XLSX output. Schema 8 adds priced supplier invoices with audited recording/undo while retaining stock receipts separately. Schema-7 backups remain restorable. The download/share/print interface is still being implemented.
