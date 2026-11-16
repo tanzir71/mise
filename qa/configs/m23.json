@@ -177,6 +177,183 @@
           "reference": "screens/mobile/M16 · Manager — Stock (quick update, on hand, target, to order).png"
         }
       ]
+    },
+    {
+      "id": "m23-receipt",
+      "path": "app/?flags=handOffs",
+      "widths": [390, 1440],
+      "actionSets": ["boot", "cash"],
+      "actions": [
+        {"type": "click", "selector": "button:text-is(\"Show receipt QR\")"},
+        {"type": "click", "selector": "button:text-is(\"Share receipt\")"},
+        {"type": "wait", "selector": ".shared-handoff[aria-busy=\"false\"]"}
+      ],
+      "note": "M23 has no dedicated frame. The shared sheet composes C05 preview surfaces/type, existing M12/M16/M20 controls and 44px targets. Receipt, day-summary and saved-link text stays exact and read-only; customer win-back is a manually reviewed message. These are composition comparisons against the complete contextual frames, with intentional content, sheet and phone-chrome differences. No connected delivery, payment or customer-segmentation behavior is claimed.",
+      "sections": [
+        {
+          "id": "handoff",
+          "selector": "dialog[open]:has(> .shared-handoff)",
+          "reference": "screens/corner-shop/C03 · Owner turns phone to customer — scan for receipt, save the shop.png"
+        }
+      ]
+    },
+    {
+      "id": "m23-summary",
+      "path": "app/?flags=handOffs",
+      "widths": [390, 1440],
+      "actionSets": ["boot", "cash", "today"],
+      "actions": [
+        {"type": "click", "selector": "button:text-is(\"Count the cash box\")"},
+        {"type": "fill", "selector": "dialog[open] label:has-text(\"Counted cash\") input", "value": "100"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Save day summary\")"},
+        {"type": "click", "selector": "dialog[open] button:text-is(\"Share summary\")"},
+        {"type": "wait", "selector": ".shared-handoff[aria-busy=\"false\"]"}
+      ],
+      "note": "M23 has no dedicated frame. The shared sheet composes C05 preview surfaces/type, existing M12/M16/M20 controls and 44px targets. Receipt, day-summary and saved-link text stays exact and read-only; customer win-back is a manually reviewed message. These are composition comparisons against the complete contextual frames, with intentional content, sheet and phone-chrome differences. No connected delivery, payment or customer-segmentation behavior is claimed.",
+      "sections": [
+        {
+          "id": "handoff",
+          "selector": "dialog[open]:has(> .shared-handoff)",
+          "reference": "screens/corner-shop/C00 · Owner — Today at the corner shop.png"
+        }
+      ]
+    },
+    {
+      "id": "m23-shop-link",
+      "path": "app/?flags=handOffs",
+      "widths": [390, 1440],
+      "actionSets": ["boot", "link"],
+      "actions": [
+        {"type": "click", "selector": "button:text-is(\"Share link\")"},
+        {"type": "wait", "selector": ".shared-handoff[aria-busy=\"false\"]"}
+      ],
+      "note": "M23 has no dedicated frame. The shared sheet composes C05 preview surfaces/type, existing M12/M16/M20 controls and 44px targets. Receipt, day-summary and saved-link text stays exact and read-only; customer win-back is a manually reviewed message. These are composition comparisons against the complete contextual frames, with intentional content, sheet and phone-chrome differences. No connected delivery, payment or customer-segmentation behavior is claimed.",
+      "sections": [
+        {
+          "id": "handoff",
+          "selector": "dialog[open]:has(> .shared-handoff)",
+          "reference": "screens/desktop/Settings › Storefront (link, look, zones, payments).png"
+        }
+      ]
+    },
+    {
+      "id": "m23-win-back",
+      "path": "app/?flags=handOffs",
+      "widths": [390, 1440],
+      "actionSets": ["customers"],
+      "actions": [
+        {"type": "click", "selector": ".khata-list a:has-text(\"Karim bhai\")"},
+        {"type": "click", "selector": "button:text-is(\"Send a message\")"},
+        {"type": "wait", "selector": ".shared-handoff[aria-busy=\"false\"]"}
+      ],
+      "note": "M23 has no dedicated frame. The shared sheet composes C05 preview surfaces/type, existing M12/M16/M20 controls and 44px targets. Receipt, day-summary and saved-link text stays exact and read-only; customer win-back is a manually reviewed message. These are composition comparisons against the complete contextual frames, with intentional content, sheet and phone-chrome differences. No connected delivery, payment or customer-segmentation behavior is claimed.",
+      "sections": [
+        {
+          "id": "handoff",
+          "selector": "dialog[open]:has(> .shared-handoff)",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ]
+    },
+    {
+      "id": "m23-customer-actions",
+      "path": "app/?flags=handOffs",
+      "widths": [390, 1440],
+      "actionSets": ["customers"],
+      "actions": [
+        {"type": "click", "selector": ".khata-list a:has-text(\"Karim bhai\")"},
+        {"type": "wait", "selector": ".customer-heading"}
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "note": "C05 contextual comparison for the manually reviewed customer-message entry point. Existing khata actions and recorded values are preserved; M63 segmentation and targeting remain in their later phase.",
+      "sections": [
+        {
+          "id": "profile",
+          "selector": ".app-shell",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ]
     }
-  ]
+  ],
+  "actionSets": {
+    "boot": [
+      {"type": "click", "selector": "input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "click", "selector": "input[name=\"market\"][value=\"BD\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "fill", "selector": "input[name=\"shopName\"]", "value": "Rahman Store"},
+      {"type": "fill", "selector": "input[name=\"phone\"]", "value": "01712345482"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "wait", "selector": ".today-page[aria-busy=\"false\"]", "state": "visible"}
+    ],
+    "cash": [
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type": "click", "selector": "main a[href$=\"/counter\"]"},
+      {"type": "fill", "selector": "#counter-expression", "value": "100"},
+      {"type": "click", "selector": ".counter-cash"},
+      {"type": "wait", "selector": ".counter-success", "state": "visible"}
+    ],
+    "today": [
+      {"type": "click", "selector": ".app-sidebar nav a[href$=\"/app/\"]:visible,.app-bottom-nav a[href$=\"/app/\"]:visible"},
+      {"type": "wait", "selector": ".today-page[aria-busy=\"false\"]", "state": "visible"}
+    ],
+    "customers": [
+      {"type": "click", "selector": "input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "click", "selector": "input[name=\"market\"][value=\"BD\"]"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "fill", "selector": "input[name=\"shopName\"]", "value": "Rahman Store"},
+      {"type": "fill", "selector": "input[name=\"phone\"]", "value": "01712345482"},
+      {"type": "click", "selector": "button[type=\"submit\"]"},
+      {"type": "wait", "selector": ".app-shell"},
+      {"type": "click", "selector": ".app-sidebar nav a[href$=\"/counter\"]:visible,.app-bottom-nav a[href$=\"/counter\"]:visible"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"},
+      {"type": "wait", "selector": ".khata-page[aria-busy=\"false\"]"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Karim bhai"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": "01711222482"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Allow credit\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Credit limit\") input", "value": "3000"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Monthly reminder\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Day of month\") input", "value": "1"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Opening balance\") input", "value": "1240"},
+      {"type": "fill", "selector": "dialog[open] input[type=\"date\"]", "value": "2026-10-01"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Sumon · tea stall"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": ""},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Allow credit\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Credit limit\") input", "value": "4000"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Monthly reminder\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Day of month\") input", "value": "1"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Opening balance\") input", "value": "4850"},
+      {"type": "fill", "selector": "dialog[open] input[type=\"date\"]", "value": "2026-10-01"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"},
+      {"type": "click", "selector": "button:text-is(\"New customer\")"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"name\"]", "value": "Akter apa"},
+      {"type": "fill", "selector": "dialog[open] input[name=\"phone\"]", "value": ""},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Allow credit\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Credit limit\") input", "value": "2000"},
+      {"type": "click", "selector": "dialog[open] button[role=\"switch\"][aria-label=\"Monthly reminder\"]"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Day of month\") input", "value": "1"},
+      {"type": "fill", "selector": "dialog[open] label:has-text(\"Opening balance\") input", "value": "0"},
+      {"type": "fill", "selector": "dialog[open] input[type=\"date\"]", "value": "2026-10-28"},
+      {"type": "click", "selector": "dialog[open] button:text-is(\"Save customer\")"},
+      {"type": "wait", "selector": ".customer-heading"},
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/khata\"]:visible,.app-bottom-nav a[href$=\"/khata\"]:visible"}
+    ],
+    "link": [
+      {"type": "click", "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"},
+      {"type": "click", "selector": "main a[href$=\"/settings/shop-link\"]"},
+      {"type": "fill", "selector": "label:has-text(\"Opening hours\") textarea", "value": "9 am–11 pm"},
+      {"type": "fill", "selector": "label:has-text(\"Delivery note\") textarea", "value": "Call at the gate · গেটে ফোন করুন"},
+      {"type": "click", "selector": ".shop-link-selection fieldset input[type=checkbox] >> nth=0"},
+      {"type": "click", "selector": "button[form=\"shop-link-settings-form\"]"},
+      {"type": "wait", "selector": ".shop-link-preview-card h2", "state": "visible"}
+    ]
+  }
 }

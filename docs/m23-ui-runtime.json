@@ -1,0 +1,16 @@
+{
+  "commit": "374dac256f42221214f3f8f24b0fb904fd7e7a32",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43900488024",
+  "visualArtifact": "https://github.com/tanzir71/mise/actions/runs/43900488024/artifacts/14242326861",
+  "entry": "/mise/app/assets/app-CbTQOtM5.js",
+  "profile": "isolated temporary Chromium context",
+  "outboundMessagesSent": 0,
+  "immediateCloseReloadRetainsEdit": true,
+  "denialDoesNotConfirm": true,
+  "offlineProgressResumed": true,
+  "oneConfirmationNoMoneyChange": true,
+  "sentDoneDoesNotDuplicate": true,
+  "errors": [],
+  "bdFooterCredit": true,
+  "intlFooterCredit": true
+}
