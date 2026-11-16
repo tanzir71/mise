@@ -1,0 +1,30 @@
+{
+  "title":"M20 Shop link settings (customer page in progress)",
+  "heights":{"390":1000,"1440":1100},
+  "actionSets":{
+    "setup":[
+      {"type":"click","selector":"input[name=\"business\"][value=\"corner_shop\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"click","selector":"input[name=\"market\"][value=\"BD\"]"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"fill","selector":"input[name=\"shopName\"]","value":"Rahman Store"},
+      {"type":"fill","selector":"input[name=\"phone\"]","value":"01712345482"},
+      {"type":"click","selector":"button[type=\"submit\"]"},
+      {"type":"wait","selector":".today-page[aria-busy=\"false\"]","state":"visible"}
+    ],
+    "more":[{"type":"click","selector":".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"}],
+    "link":[
+      {"type":"click","selector":"main a[href$=\"/settings/shop-link\"]"},
+      {"type":"fill","selector":"label:has-text(\"Opening hours\") textarea","value":"9 am–11 pm"},
+      {"type":"fill","selector":"label:has-text(\"Delivery note\") textarea","value":"Call at the gate · গেটে ফোন করুন"},
+      {"type":"click","selector":".shop-link-selection fieldset input[type=checkbox] >> nth=0"},
+      {"type":"click","selector":"button[form=\"shop-link-settings-form\"]"},
+      {"type":"wait","selector":".shop-link-preview-card h2","state":"visible"}
+    ]
+  },
+  "pages":[
+    {"id":"m20-more-phone","path":"app/?flags=shopLinks","widths":[390],"actionSets":["setup","more"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"M20 adds Shop link to the existing M27 setup group. The feature remains disabled by default while the customer page is unfinished. Future staff, agents and connected-device rows remain outside this phase.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]},
+    {"id":"m20-settings-phone","path":"app/?flags=shopLinks","widths":[390],"actionSets":["setup","more","link"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"Responsive adaptation of the supplied Storefront settings hierarchy: Link and sharing, catalogue selection, hours/delivery and a published preview. The written M20 requirements use immutable links and WhatsApp requests. QR printing, automated zones, payments and server tracking wait for their milestones. Phone controls are at least 44px. Reference content and native browser chrome differences remain visible and informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/desktop/Settings › Storefront (link, look, zones, payments).png"}]},
+    {"id":"m20-settings-desktop","path":"app/?flags=shopLinks","widths":[1440],"actionSets":["setup","more","link"],"captureStyle":".app-skip{visibility:hidden}","note":"Implement the M20 subset of Storefront settings using its full Figma context: compact 12px/16px labels, bordered row cards, a 420px preview column, original icons and a 300px published-page preview. The preview and prices come from the saved public packet. No fabricated storefront orders, connected domain, live stock, ETAs or payment confirmations are shown. Future controls and native browser chrome are excluded; differences remain informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/desktop/Settings › Storefront (link, look, zones, payments).png"}]}
+  ]
+}
