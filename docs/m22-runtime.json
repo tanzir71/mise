@@ -1,0 +1,55 @@
+{
+  "commit": "669f1a975aab1113eebb0c1577f9cb7a15cc4261",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43875313913",
+  "entry": "assets/app-Nw5jH_4Z.js",
+  "optInFlag": "qrPosters",
+  "hindLicensePublished": true,
+  "ownerOfflineReload": true,
+  "posterPreparedOffline": true,
+  "previewDecoded": true,
+  "pngSize": [
+    1680,
+    2380
+  ],
+  "pngDecodesExactSavedUrl": true,
+  "pdfSinglePage": true,
+  "pdfs": [
+    {
+      "size": "a5",
+      "mediaBoxPoints": [
+        420,
+        594.95996
+      ],
+      "bytes": 144620
+    },
+    {
+      "size": "card",
+      "mediaBoxPoints": [
+        298.07999,
+        420
+      ],
+      "bytes": 144628
+    }
+  ],
+  "allTwentyTablesUnchanged": true,
+  "allRecordsUnchanged": true,
+  "customerFromQrNoOwnerDatabase": true,
+  "customerOfflineReload": true,
+  "errors": [],
+  "renderedPdfQrMatches": true,
+  "qrLinkSha256": "e231c1f4dbf3a7b2dec4641215a82c35e0881284f009c20cee090b4c54e0dea5",
+  "pdfRenders": [
+    {
+      "size": "a5",
+      "width": 841,
+      "height": 1190,
+      "qrDecoded": true
+    },
+    {
+      "size": "card",
+      "width": 845,
+      "height": 1190,
+      "qrDecoded": true
+    }
+  ]
+}

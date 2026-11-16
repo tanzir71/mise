@@ -1,3 +1,4 @@
+import { handoffEventSession,handoffSourceTables,validateHandoffHistory } from './handoff';
 import { stockAtoms, stockNameKey } from './stock-quantity';
 import { creditBalance, entryDelta } from './khata';
 import { orderLineTotal } from './order-lines';
@@ -30,6 +31,11 @@ export function validateBackupLinks(t:BackupTables):void {
   unique(t.stockMoves.map(m => pair(m.stockItemId,m.revision)),'stock revisions');unique(t.stockMoves.map(m => m.undoOf),'stock reversals');
   unique(t.dayClosings.map(c => c.activeKey === undefined ? undefined : pair(c.outletId,c.activeKey)),'active day closings');
   for (const item of t.items) ensure(link('categories',item.categoryId).outletId === item.outletId,'a catalogue category belongs to another outlet');
+  validateHandoffHistory(t.events);
+  for(const event of t.events)if(event.command==='handoff.prepare'){
+    const state=handoffEventSession(event),source=link(handoffSourceTables[state.draft.source.kind],state.draft.source.id);
+    ensure(state.draft.source.kind==='shop'?source.id===outlet.id:'outletId' in source?source.outletId===outlet.id:'businessId' in source&&source.businessId===business.id,'a message source belongs to another shop');
+  }
   for (const event of t.events) {
     if (event.actor.type === 'member') link('members',event.actor.id);
     if (event.undoOf) link('events',event.undoOf);

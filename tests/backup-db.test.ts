@@ -64,7 +64,7 @@ async function fullFixture() {
 
 test('all twenty tables round-trip into a fresh database with exact records and totals, including Bengali and undo history',async () => {
   const {db:source,account} = await fullFixture(), backup = await source.readBackup();
-  expect(backup.schemaVersion).toBe(8);expect(backupTableNames).toHaveLength(20);
+  expect(backup.schemaVersion).toBe(9);expect(backupTableNames).toHaveLength(20);
   for (const table of backupTableNames) expect(backup.tables[table].length,table).toBeGreaterThan(0);
   expect(JSON.stringify(backup)).toContain('চা কম মিষ্টি');expect(parseBackup(`\uFEFF${JSON.stringify(backup)}`)).toEqual(backup);
   const target = await boot(false), encoded = JSON.stringify(backup), preview = await target.previewRestore(encoded);
@@ -73,7 +73,7 @@ test('all twenty tables round-trip into a fresh database with exact records and 
   target.close();await target.open();const restored = await target.readBackup();
   for (const table of backupTableNames.filter(t => t !== 'events')) expect(restored.tables[table],table).toEqual(backup.tables[table]);
   expect(restored.tables.events.filter(e => e.command !== 'backup.restore')).toEqual(backup.tables.events);
-  expect(restored.tables.events.find(e => e.command === 'backup.restore')).toMatchObject({actor:{type:'system',id:'local-backup-restore'},at,after:{sourceExportedAt:at,schemaVersion:8}});
+  expect(restored.tables.events.find(e => e.command === 'backup.restore')).toMatchObject({actor:{type:'system',id:'local-backup-restore'},at,after:{sourceExportedAt:at,schemaVersion:9}});
   expect(todayOverview(await target.readToday())).toEqual(todayOverview(await source.readToday()));
   const original = await source.readCreditLedger(account.id), copy = await target.readCreditLedger(account.id);
   expect(creditBalance(copy.account,copy.entries)).toBe(creditBalance(original.account,original.entries));
@@ -119,7 +119,7 @@ test('an audit failure after clearing and writing imported tables rolls back the
 test('unsupported tables, schema versions, fractional money, broken links and duplicate IDs fail before any write',async () => {
   const {db:source} = await fullFixture(), target = await boot(), original = await source.readBackup(), before = backupToken(await target.readBackup());
   const mutations:((v:typeof original) => void)[] = [
-    b => {b.schemaVersion = 99 as 8;},b => {delete (b.tables as Partial<typeof b.tables>).orderRefunds;},
+    b => {b.schemaVersion = 99 as 9;},b => {delete (b.tables as Partial<typeof b.tables>).orderRefunds;},
     b => {Object.assign(b.tables,{futureTable:[]});},b => {b.tables.sales[0].amount = 25.5;},b => {b.tables.sales[0].amount = Number.MAX_SAFE_INTEGER+1;},
     b => {b.tables.stockItems[0].onHand = -1;},b => {b.tables.creditEntries[0].accountId = newClosingId();},
     b => {b.tables.items.push({...b.tables.items[0]});},b => {b.tables.customers[0].phone = '01712345483';},
@@ -158,18 +158,18 @@ test('market changes, archived contacts/stock and zero-total orders remain valid
   expect(await target.customers.toArray()).toEqual(await db.customers.toArray());expect(await target.stockItems.toArray()).toEqual(await db.stockItems.toArray());
 });
 
-test('schema 7 records and backup files upgrade to schema 8 with only an empty purchase table added',async () => {
+test('schema 7 records and backup files upgrade to schema 9 with an empty purchase table and hand-off indexes',async () => {
   const {db:source} = await fullFixture(),records:Record<string,unknown[]> = {},stores:Record<string,string> = {};
   for (const table of source.tables.filter(t => t.name !== 'purchases')) {
-    stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.map(i => i.src)].join(',');
+    stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.filter(i => !['handoffId','handoffTopic','[handoffId+handoffRevision]'].includes(i.name)).map(i => i.src)].join(',');
     records[table.name] = (await table.toArray()).filter(row => table.name !== 'events' || !row.command.startsWith('purchase.'));
   }
   const name = `mise-purchases-v7-${randomUUID()}`,legacy = new Dexie(name);legacy.version(7).stores(stores);
   for (const table of Object.keys(stores)) await legacy.table(table).bulkPut(records[table]);legacy.close();
-  const upgraded = new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(8);expect(await upgraded.purchases.count()).toBe(0);
+  const upgraded = new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(9);expect(await upgraded.purchases.count()).toBe(0);
   for (const table of Object.keys(stores)) expect(await upgraded.table(table).toArray(),table).toEqual(records[table]);
   const oldFile = {format:'mise-backup',formatVersion:1,schemaVersion:7,exportedAt:at,tables:records},target = await boot(false);
-  const normalised = parseBackup(JSON.stringify(oldFile));expect(normalised.schemaVersion).toBe(8);expect(normalised.tables.purchases).toEqual([]);
+  const normalised = parseBackup(JSON.stringify(oldFile));expect(normalised.schemaVersion).toBe(9);expect(normalised.tables.purchases).toEqual([]);
   await target.restoreBackup(JSON.stringify(oldFile),await target.previewRestore(JSON.stringify(oldFile)));
   for (const table of Object.keys(stores).filter(t => t !== 'events')) expect(await target.table(table).toArray(),table).toEqual(JSON.parse(JSON.stringify(records[table])));
   expect(todayOverview(await target.readToday())).toEqual(todayOverview(await upgraded.readToday()));

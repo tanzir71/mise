@@ -23,7 +23,8 @@ export function parseBackup(input:unknown):MiseBackup {
     if (Object.hasOwn(oldTables,'purchases') || Object.keys(oldTables).length !== backupTableNames.length-1) throw new Error('The schema-7 backup has unsupported tables.');
     return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION,tables:{...oldTables,purchases:[]}});
   }
-  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
+  if (backup.schemaVersion === 8) return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
+  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
   if (Object.keys(backup).some(k => !['format','formatVersion','schemaVersion','exportedAt','tables'].includes(k))) throw new Error('The backup has unsupported metadata.');
   backupTime(backup.exportedAt,'exportedAt');
   const tables = backupRecord(backup.tables,'tables');

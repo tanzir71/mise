@@ -1,6 +1,6 @@
 import type * as M from './models';
 
-export const BACKUP_SCHEMA_VERSION = 8;
+export const BACKUP_SCHEMA_VERSION = 9;
 export const BACKUP_FORMAT_VERSION = 1;
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;
 export interface BackupTables {
