@@ -4,6 +4,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
+### Added
+
+- M20 foundation: bounded public shop-link packets, bilingual structured order messages, and reviewed, atomic link generation with an owner audit and ten-minute undo. The customer page and Settings entry remain in progress behind the disabled `shopLinks` flag.
+
 ## [0.2.0] - 2026-11-16
 
 ### Added

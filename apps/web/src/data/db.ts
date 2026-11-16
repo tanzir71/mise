@@ -20,6 +20,7 @@ import type { BackupPreview, RestoreReview } from '@mise/core/backup';
 import type { Purchase } from '@mise/core/models';
 import type { PurchaseInput } from '@mise/core/purchases';
 import type { ExportAuditInput } from '@mise/core/export-audit';
+import type { ShopLinkInput,ShopLinkReview } from '@mise/core/shop-links';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -418,6 +419,12 @@ export class MiseDatabase extends Dexie {
   }
   async recordPreparedExport(input:ExportAuditInput):Promise<void> {
     return (await import('./export-audit')).recordPreparedExport(this,input);
+  }
+  async generateShopLink(input:ShopLinkInput,review:ShopLinkReview,base:string):Promise<AuditEvent> {
+    return (await import('./shop-links')).generateDatabaseShopLink(this,input,review,base);
+  }
+  async undoShopLink(id:string):Promise<void> {
+    return (await import('./shop-links')).undoDatabaseShopLink(this,id);
   }
   async recordPurchase(input:PurchaseInput):Promise<Purchase> {
     return (await import('./purchases')).recordDatabasePurchase(this,input);
