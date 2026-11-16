@@ -64,7 +64,7 @@ Spec: `phases/phase-2-links-no-backend.md`
 - [ ] **M22** QR posters and counter cards (printable PDF/PNG) for the shop link · S · T0
   - [Implementation and verification notes](../../docs/m22-delivery.md) (behind `qrPosters`; physical print/scan acceptance pending).
 - [ ] **M23** Hand-off pattern everywhere: deep link + Copy + "I sent it" for reminders, receipts, win-back · S · T1
-  - [Implementation notes](../../docs/m23-delivery.md) (all current owner text-message senders behind `handOffs`; public customer integration and enablement pending).
+  - [Implementation notes](../../docs/m23-delivery.md) (owner and customer text-message adapters behind `handOffs`; final sender audit, enablement and delivery verification pending).
 - [ ] **M24** Share target (Android PWA): share text/images into Mise → inbox to sort manually · S · T1
 
 ## Phase 3 — Backend and sync (T2) → tag `v0.4.0` = v1

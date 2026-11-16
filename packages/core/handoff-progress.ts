@@ -27,6 +27,13 @@ export function newHandoffProgress(at:number):HandoffProgress {
 /** Open/Copy never confirm delivery. Only the owner's explicit Sent choice does that. */
 export function changeHandoffProgress(previous:HandoffProgress,choice:HandoffChoice,at:number):HandoffProgress {
   assertHandoffProgress(previous);
+  return transition(previous,choice,at);
+}
+/** Rebuilds progress from validated choices, rather than trusting a stored state snapshot. */
+export function replayHandoffProgress(at:number,steps:readonly (HandoffChoice&{at:number})[]):HandoffProgress {
+  let state=newHandoffProgress(at);for(const {at,...choice} of steps)state=transition(state,choice,at);return state;
+}
+function transition(previous:HandoffProgress,choice:HandoffChoice,at:number):HandoffProgress {
   if(!timestamp(at)||at<previous.updatedAt)throw new Error('Use a message time after the previous action.');
   if(!choice||!choices.includes(choice.type)||Object.keys(choice).some(key=>!['type','channel'].includes(key))||(choice.type==='open'?choice.channel===undefined||!['whatsapp','call','share'].includes(choice.channel):choice.channel!==undefined))throw new Error('Choose a supported message action.');
   if(previous.revision===Number.MAX_SAFE_INTEGER)throw new Error('This message has too many actions. Start a new attempt.');
@@ -34,13 +41,14 @@ export function changeHandoffProgress(previous:HandoffProgress,choice:HandoffCho
   if(choice.type==='sent'&&previous.sentAt!==undefined)throw new Error('This attempt is already marked sent.');
   if(choice.type==='undo-sent'&&(previous.sentAt===undefined||at-previous.sentAt>600000))throw new Error('Undo Sent within ten minutes.');
   const next:HandoffProgress={...previous,revision:previous.revision+1,updatedAt:at};
-  switch(choice.type){
-    case 'open':next.lastAttempt='open';next.channel=choice.channel!;next.openedAt=at;next.status=previous.sentAt===undefined?'opened':'sent';break;
-    case 'copy':next.lastAttempt='copy';next.channel='manual';next.copiedAt=at;next.status=previous.sentAt===undefined?'copied':'sent';break;
-    case 'copy-failed':next.lastAttempt='copy-failed';next.channel='manual';next.failedAt=at;next.status=previous.sentAt===undefined?'failed':'sent';break;
-    case 'failed':next.lastAttempt='failed';next.failedAt=at;next.status='failed';break;
-    case 'sent':next.sentAt=at;next.sentChannel=previous.channel;next.status='sent';break;
-    case 'undo-sent':delete next.sentAt;delete next.sentChannel;next.status=attemptStatus[previous.lastAttempt];break;
+  if(choice.type==='sent'){next.sentAt=at;next.sentChannel=previous.channel;next.status='sent';}
+  else if(choice.type==='undo-sent'){delete next.sentAt;delete next.sentChannel;next.status=attemptStatus[previous.lastAttempt];}
+  else {
+    next.lastAttempt=choice.type;
+    next.status=previous.sentAt===undefined?attemptStatus[choice.type]:'sent';
+    if(choice.type==='open'){next.channel=choice.channel!;next.openedAt=at;}
+    else if(choice.type==='copy'){next.channel='manual';next.copiedAt=at;}
+    else {if(choice.type==='copy-failed')next.channel='manual';next.failedAt=at;}
   }
   return next;
 }

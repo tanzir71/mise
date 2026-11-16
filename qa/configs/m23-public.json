@@ -1,0 +1,340 @@
+{
+  "title": "M23 customer hand-off recovery",
+  "heights": {
+    "390": 1200,
+    "1440": 1100
+  },
+  "publicShops": {
+    "corner": {
+      "v": 1,
+      "code": "RS-7KQ2",
+      "edition": "01K2XH9R008KWYH7AZXJXWTQ0A",
+      "publishedAt": 1794787200000,
+      "name": "Rahman Store",
+      "address": "Road 7, Mohammadpur",
+      "hours": "9 am–11 pm",
+      "phone": "+8801712345482",
+      "deliveryNote": "Call at the gate",
+      "market": "BD",
+      "currency": "BDT",
+      "timezone": "Asia/Dhaka",
+      "mode": "list",
+      "items": [
+        {
+          "id": "napa",
+          "name": "Napa Extra",
+          "nameLocal": "নাপা এক্সট্রা",
+          "unit": "pc",
+          "price": 2000,
+          "category": "Medicines",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "sugar",
+          "name": "Sugar 1 kg",
+          "nameLocal": "চিনি ১ কেজি",
+          "unit": "pc",
+          "price": 14000,
+          "category": "Groceries",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "milk",
+          "name": "Fresh milk 1 L",
+          "nameLocal": "দুধ ১ লিটার",
+          "unit": "pc",
+          "price": 9500,
+          "category": "Groceries",
+          "available": true,
+          "oftenBought": true
+        }
+      ]
+    },
+    "menu": {
+      "v": 1,
+      "code": "RS-7KQ2",
+      "edition": "01K2XH9R008KWYH7AZXJXWTQ0A",
+      "publishedAt": 1794787200000,
+      "name": "Shorshe Kitchen",
+      "address": "Road 7, Mohammadpur",
+      "hours": "9 am–11 pm",
+      "phone": "+8801712345482",
+      "deliveryNote": "Call at the gate",
+      "market": "BD",
+      "currency": "BDT",
+      "timezone": "Asia/Dhaka",
+      "mode": "menu",
+      "items": [
+        {
+          "id": "kacchi",
+          "name": "Kacchi biryani",
+          "nameLocal": "কাচ্চি বিরিয়ানি",
+          "unit": "pc",
+          "price": 32000,
+          "category": "Biryani",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "morog",
+          "name": "Morog polao",
+          "nameLocal": "মোরগ পোলাও",
+          "unit": "pc",
+          "price": 22000,
+          "category": "Rice",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "tehari",
+          "name": "Beef tehari",
+          "nameLocal": "বিফ তেহারি",
+          "unit": "pc",
+          "price": 18000,
+          "category": "Rice",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "borhani",
+          "name": "Borhani",
+          "nameLocal": "বোরহানি",
+          "unit": "pc",
+          "price": 6000,
+          "category": "Drinks",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "water",
+          "name": "Water 500 ml",
+          "nameLocal": "পানি",
+          "unit": "pc",
+          "price": 2000,
+          "category": "Drinks",
+          "available": true,
+          "oftenBought": true
+        },
+        {
+          "id": "firni",
+          "name": "Firni",
+          "nameLocal": "ফিরনি",
+          "unit": "pc",
+          "price": 8000,
+          "category": "Desserts",
+          "available": true,
+          "oftenBought": true
+        }
+      ]
+    }
+  },
+  "pages": [
+    {
+      "id": "m23-public-review",
+      "path": "app/s/?flags=handOffs&lang=en",
+      "publicShop": "corner",
+      "widths": [
+        390,
+        1440
+      ],
+      "actions": [
+        {
+          "type": "fill",
+          "selector": "#public-customer-name",
+          "value": "Sadia · রিনা"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-customer-phone",
+          "value": "01712345482"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-address",
+          "value": "Flat 2C · House 9"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-list",
+          "value": "2 Rice\n১ কেজি চিনি"
+        },
+        {
+          "type": "click",
+          "selector": "[data-action=\"copy\"]"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-review:not([hidden])",
+          "state": "visible"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-status:not(:empty)",
+          "state": "visible"
+        },
+        {
+          "type": "reload"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-review[open]",
+          "state": "visible"
+        }
+      ],
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".public-shop",
+          "reference": "screens/corner-shop/C08 · Customer — Scan the counter QR or open the link · just say what you need.png"
+        }
+      ],
+      "note": "M23 resumes the existing customer form and exact review; no dedicated hand-off frame is supplied."
+    },
+    {
+      "id": "m23-public-failed",
+      "path": "app/s/?flags=handOffs&lang=en",
+      "publicShop": "corner",
+      "widths": [
+        390
+      ],
+      "actions": [
+        {
+          "type": "fill",
+          "selector": "#public-customer-name",
+          "value": "Sadia · রিনা"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-customer-phone",
+          "value": "01712345482"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-address",
+          "value": "Flat 2C · House 9"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-list",
+          "value": "2 Rice\n১ কেজি চিনি"
+        },
+        {
+          "type": "click",
+          "selector": "[data-action=\"copy\"]"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-review:not([hidden])",
+          "state": "visible"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-status:not(:empty)",
+          "state": "visible"
+        },
+        {
+          "type": "click",
+          "selector": "#public-failed"
+        },
+        {
+          "type": "reload"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-review[open]",
+          "state": "visible"
+        }
+      ],
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".public-shop",
+          "reference": "screens/corner-shop/C08 · Customer — Scan the counter QR or open the link · just say what you need.png"
+        }
+      ],
+      "note": "M23 resumes the existing customer form and exact review; no dedicated hand-off frame is supplied."
+    },
+    {
+      "id": "m23-public-menu-bn",
+      "path": "app/s/?flags=handOffs&lang=en",
+      "publicShop": "menu",
+      "widths": [
+        390,
+        1440
+      ],
+      "actions": [
+        {
+          "type": "fill",
+          "selector": "#public-customer-name",
+          "value": "Sadia · রিনা"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-customer-phone",
+          "value": "01712345482"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-address",
+          "value": "Flat 2C · House 9"
+        },
+        {
+          "type": "click",
+          "selector": "button[aria-label=\"Add Kacchi biryani\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "#public-list",
+          "value": "একটু কম ঝাল"
+        },
+        {
+          "type": "click",
+          "selector": "[data-action=\"language\"][data-value=\"bn\"]"
+        },
+        {
+          "type": "click",
+          "selector": "[data-action=\"copy\"]"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-review:not([hidden])",
+          "state": "visible"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-status:not(:empty)",
+          "state": "visible"
+        },
+        {
+          "type": "reload"
+        },
+        {
+          "type": "wait",
+          "selector": "#public-review[open]",
+          "state": "visible"
+        }
+      ],
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".public-shop",
+          "reference": "screens/desktop/Storefront · Restaurant (desktop) — order from a link.png",
+          "widths": [
+            1440
+          ]
+        },
+        {
+          "id": "screen-phone",
+          "selector": ".public-shop",
+          "reference": "screens/mobile/M04 · Guest — QR menu & cart (stall or table).png",
+          "widths": [
+            390
+          ]
+        }
+      ],
+      "note": "M23 resumes the existing customer form and exact review; no dedicated hand-off frame is supplied."
+    }
+  ]
+}

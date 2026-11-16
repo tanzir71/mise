@@ -53,6 +53,7 @@ try {
       const locator = page.locator(action.selector || 'body');
       if (action.type === 'click') await locator.click();
       else if (action.type === 'fill') await locator.fill(action.value);
+      else if (action.type === 'reload') await page.reload();
       else if (action.type === 'select') await locator.selectOption(action.value);
       else if (action.type === 'press') await locator.press(action.value);
       else if (action.type === 'wait') await locator.waitFor({ state: action.state || 'visible' });

@@ -1,7 +1,9 @@
 import { describe,expect,it } from 'vitest';
-import { assertHandoffProgress,changeHandoffProgress,newHandoffProgress,type HandoffChoice } from '../packages/core/handoff-progress';
+import { assertHandoffProgress,changeHandoffProgress,newHandoffProgress,replayHandoffProgress,type HandoffChoice } from '../packages/core/handoff-progress';
 
 describe('shared manual message progress',()=>{
+  it('replays literal choices without accepting a stored confirmation snapshot',()=>{const at=100,steps=[{type:'open',channel:'whatsapp',at},{type:'copy',at:101},{type:'sent',at:102},{type:'copy-failed',at:103}] as const,state=replayHandoffProgress(at,steps);expect(state).toMatchObject({revision:5,status:'sent',sentAt:102,sentChannel:'manual',lastAttempt:'copy-failed'});assertHandoffProgress(state);for(const invalid of [[{type:'execute',at:100}],[{type:'sent',at:99}],[{type:'open',channel:'javascript',at:100}],[{type:'sent',at:100,hidden:true}]])expect(()=>replayHandoffProgress(at,invalid as unknown as Parameters<typeof replayHandoffProgress>[1])).toThrow();});
+  it('replayed intermediate states satisfy the full stored-state validator',()=>{const steps:(HandoffChoice&{at:number})[]=[];for(let i=0;i<100;i++)for(const choice of [{type:'open',channel:'whatsapp'},{type:'failed'},{type:'copy'},{type:'sent'},{type:'copy-failed'},{type:'undo-sent'}] as const){steps.push({...choice,at:100+i});assertHandoffProgress(replayHandoffProgress(100,JSON.parse(JSON.stringify(steps))));}});
   const at=Date.UTC(2026,10,16);
   it('starts unconfirmed and survives a literal JSON round trip',()=>{const state=newHandoffProgress(at),restored=JSON.parse(JSON.stringify(state));assertHandoffProgress(restored);expect(restored).toEqual(state);expect(restored.sentAt).toBeUndefined();});
   for(const channel of ['whatsapp','call','share'] as const)it(`opening ${channel}, failing and copying still require explicit confirmation`,()=>{

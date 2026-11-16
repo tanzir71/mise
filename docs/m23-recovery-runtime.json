@@ -1,0 +1,51 @@
+{
+  "commit": "f9c0241df35a447d4977f2637bcd27b175ed93c1",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43922924099",
+  "visualArtifact": "https://github.com/tanzir71/mise/actions/runs/43922924099/artifacts/14255557314",
+  "entry": "/mise/app/assets/app-DnG6SFcv.js",
+  "baseURL": "https://tanzir71.github.io/mise/",
+  "isolation": "fresh browser context for each case",
+  "outboundMessagesSent": 0,
+  "stats": {
+    "startTime": "2026-11-16T18:10:11.037Z",
+    "duration": 23475.879,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "name": "audit quota failure retains clipboard Copy without recording Sent",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "audit quota failure retains manual selection without recording Sent",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "a long receipt can be copied in full through quota failure without confirming any part",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "a pending owner edit remains the manual fallback when its audit save fails",
+      "status": "passed",
+      "retry": 0
+    }
+  ],
+  "footers": [
+    {
+      "region": "bd",
+      "status": 200,
+      "credit": true
+    },
+    {
+      "region": "intl",
+      "status": 200,
+      "credit": true
+    }
+  ]
+}

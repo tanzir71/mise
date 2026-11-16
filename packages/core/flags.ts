@@ -2,7 +2,12 @@ export const defaultFlags = { uiGallery: false, localApp: true, counter: true, k
 export type FeatureFlag = keyof typeof defaultFlags;
 
 export function flagEnabled(name: FeatureFlag, query = '', stored = ''): boolean {
+  return flagValue(name,defaultFlags[name],query,stored);
+}
+
+/** A single known default can be tree-shaken into small independent entries. */
+export function flagValue(name: string, fallback: boolean, query = '', stored = ''): boolean {
   if (new URLSearchParams(query).get('flags')?.split(',').includes(name)) return true;
-  try { return JSON.parse(stored || '{}')[name] === true || defaultFlags[name]; }
-  catch { return defaultFlags[name]; }
+  try { return JSON.parse(stored || '{}')[name] === true || fallback; }
+  catch { return fallback; }
 }
