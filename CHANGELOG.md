@@ -6,7 +6,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- M20 (in progress): bounded public shop-link packets, bilingual structured order messages, reviewed atomic generation and ten-minute undo; Shop link settings with public fields, explicit item selection, a published preview and copy/share fallbacks. The customer page remains unfinished and `shopLinks` stays disabled by default.
+- M20: bounded public shop links, bilingual structured order messages, audited generation and ten-minute undo; Shop link settings with item selection, preview and copy/share fallbacks. The public customer page supports lists/menu choices, optional voice and photo preview, remembered details/last request, fulfilment/time and WhatsApp/Copy/manual completion, with a separate offline worker and a complete page budget below 60 KB.
 
 ## [0.2.0] - 2026-11-16
 

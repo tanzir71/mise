@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { compareImages } from './visual-diff.mjs';
 import { writeVisualReport } from './visual-report.mjs';
+import LZString from 'lz-string';
 
 const configPaths = process.argv[2] ? [process.argv[2]] : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
@@ -12,7 +13,9 @@ const targets = configs.flatMap(config => config.pages.map(page => {
     if (!Array.isArray(config.actionSets?.[name])) throw new Error(`Unknown visual action set: ${name}`);
     return config.actionSets[name];
   });
-  return { ...page, actions:[...shared,...(page.actions || [])], widths: page.widths || config.widths, heights: page.heights || config.heights, sections: page.sections || config.sections };
+  const publicShop=typeof page.publicShop==='string'?config.publicShops?.[page.publicShop]:page.publicShop;
+  if(page.publicShop&&!publicShop)throw new Error(`Unknown public shop fixture: ${page.publicShop}`);
+  return { ...page, publicShop, actions:[...shared,...(page.actions || [])], widths: page.widths || config.widths, heights: page.heights || config.heights, sections: page.sections || config.sections };
 }));
 const assets = JSON.parse(readFileSync('handover/exports/landing-assets.json', 'utf8'));
 const base = `/${(process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/');
@@ -42,7 +45,9 @@ try {
     const page = await browser.newPage({ viewport: { width, height: target.heights?.[width] || 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
     let clockInstalled = false;
     if ((target.actions || []).some(action => action.type === 'advance-time')) { await page.clock.install(); clockInstalled = true; }
-    await page.goto(new URL(target.path, origin).href);
+    const targetUrl = new URL(target.path, origin);
+    if (target.publicShop) targetUrl.hash = Buffer.from(LZString.compressToUint8Array(JSON.stringify(target.publicShop))).toString('base64url');
+    await page.goto(targetUrl.href);
     await page.evaluate(() => document.fonts.ready);
     for (const action of target.actions || []) {
       const locator = page.locator(action.selector || 'body');
@@ -58,6 +63,7 @@ try {
       }
       else throw new Error(`Unknown capture action: ${action.type}`);
     }
+    await page.evaluate(() => document.fonts.ready);
     const pageMetrics = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth }));
     if (pageMetrics.overflow) throw new Error(`${target.id} overflows at ${width}px.`);
     for (const section of target.sections) {
@@ -85,7 +91,7 @@ try {
       const diff = `diffs/${id}.png`;
       writeFileSync(`${output}/${reference}`, result.reference);
       writeFileSync(`${output}/${diff}`, result.diff);
-      rows.push({ id, page: target.id, section: section.id, width, url: new URL(target.path, origin).href, screen, reference, diff, referenceFile, note: section.note || target.note || '', captureStyle, pageMetrics, ...result.metrics });
+      rows.push({ id, page: target.id, section: section.id, width, url: targetUrl.href, screen, reference, diff, referenceFile, note: section.note || target.note || '', captureStyle, pageMetrics, ...result.metrics });
       console.log(`${id}: ${result.metrics.percent}% difference (informational)`);
     }
     await page.close();
@@ -94,4 +100,5 @@ try {
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2) + '\n');
   writeVisualReport(output, report);
   console.log(`Visual QA: ${rows.length} comparisons → ${output}/report.html`);
+  if(configPaths.some(path=>path.endsWith('/m20.json')))await import('./proof-public-fonts.mjs');
 } finally { await browser?.close(); server?.kill(); }

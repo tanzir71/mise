@@ -1,6 +1,6 @@
 {
-  "title":"M20 Shop link settings (customer page in progress)",
-  "heights":{"390":1000,"1440":1100},
+  "title":"M20 Shop link settings and public customer page",
+  "heights":{"390": 1000, "1440": 1100},
   "actionSets":{
     "setup":[
       {"type":"click","selector":"input[name=\"business\"][value=\"corner_shop\"]"},
@@ -12,7 +12,9 @@
       {"type":"click","selector":"button[type=\"submit\"]"},
       {"type":"wait","selector":".today-page[aria-busy=\"false\"]","state":"visible"}
     ],
-    "more":[{"type":"click","selector":".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"}],
+    "more":[
+      {"type":"click","selector":".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"}
+    ],
     "link":[
       {"type":"click","selector":"main a[href$=\"/settings/shop-link\"]"},
       {"type":"fill","selector":"label:has-text(\"Opening hours\") textarea","value":"9 am–11 pm"},
@@ -22,9 +24,57 @@
       {"type":"wait","selector":".shop-link-preview-card h2","state":"visible"}
     ]
   },
+  "publicShops":{
+    "corner":{
+      "v":1,
+      "code":"RS-7KQ2",
+      "edition":"01K2XH9R008KWYH7AZXJXWTQ0A",
+      "publishedAt":1794787200000,
+      "name":"Rahman Store",
+      "address":"Road 7, Mohammadpur",
+      "hours":"9 am–11 pm",
+      "phone":"+8801712345482",
+      "deliveryNote":"Call at the gate",
+      "market":"BD",
+      "currency":"BDT",
+      "timezone":"Asia/Dhaka",
+      "mode":"list",
+      "items":[
+        {"id":"napa","name":"Napa Extra","nameLocal":"নাপা এক্সট্রা","unit":"pc","price":2000,"category":"Medicines","available":true,"oftenBought":true},
+        {"id":"sugar","name":"Sugar 1 kg","nameLocal":"চিনি ১ কেজি","unit":"pc","price":14000,"category":"Groceries","available":true,"oftenBought":true},
+        {"id":"milk","name":"Fresh milk 1 L","nameLocal":"দুধ ১ লিটার","unit":"pc","price":9500,"category":"Groceries","available":true,"oftenBought":true}
+      ]
+    },
+    "menu":{
+      "v":1,
+      "code":"RS-7KQ2",
+      "edition":"01K2XH9R008KWYH7AZXJXWTQ0A",
+      "publishedAt":1794787200000,
+      "name":"Shorshe Kitchen",
+      "address":"Road 7, Mohammadpur",
+      "hours":"9 am–11 pm",
+      "phone":"+8801712345482",
+      "deliveryNote":"Call at the gate",
+      "market":"BD",
+      "currency":"BDT",
+      "timezone":"Asia/Dhaka",
+      "mode":"menu",
+      "items":[
+        {"id":"kacchi","name":"Kacchi biryani","nameLocal":"কাচ্চি বিরিয়ানি","unit":"pc","price":32000,"category":"Biryani","available":true,"oftenBought":true},
+        {"id":"morog","name":"Morog polao","nameLocal":"মোরগ পোলাও","unit":"pc","price":22000,"category":"Rice","available":true,"oftenBought":true},
+        {"id":"tehari","name":"Beef tehari","nameLocal":"বিফ তেহারি","unit":"pc","price":18000,"category":"Rice","available":true,"oftenBought":true},
+        {"id":"borhani","name":"Borhani","nameLocal":"বোরহানি","unit":"pc","price":6000,"category":"Drinks","available":true,"oftenBought":true},
+        {"id":"water","name":"Water 500 ml","nameLocal":"পানি","unit":"pc","price":2000,"category":"Drinks","available":true,"oftenBought":true},
+        {"id":"firni","name":"Firni","nameLocal":"ফিরনি","unit":"pc","price":8000,"category":"Desserts","available":true,"oftenBought":true}
+      ]
+    }
+  },
   "pages":[
-    {"id":"m20-more-phone","path":"app/?flags=shopLinks","widths":[390],"actionSets":["setup","more"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"M20 adds Shop link to the existing M27 setup group. The feature remains disabled by default while the customer page is unfinished. Future staff, agents and connected-device rows remain outside this phase.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]},
+    {"id":"m20-more-phone","path":"app/?flags=shopLinks","widths":[390],"actionSets":["setup","more"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"M20 adds Shop link to the existing M27 setup group. Future staff, agents and connected-device rows remain outside this phase.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]},
     {"id":"m20-settings-phone","path":"app/?flags=shopLinks","widths":[390],"actionSets":["setup","more","link"],"captureStyle":".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}","note":"Responsive adaptation of the supplied Storefront settings hierarchy: Link and sharing, catalogue selection, hours/delivery and a published preview. The written M20 requirements use immutable links and WhatsApp requests. QR printing, automated zones, payments and server tracking wait for their milestones. Phone controls are at least 44px. Reference content and native browser chrome differences remain visible and informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/desktop/Settings › Storefront (link, look, zones, payments).png"}]},
-    {"id":"m20-settings-desktop","path":"app/?flags=shopLinks","widths":[1440],"actionSets":["setup","more","link"],"captureStyle":".app-skip{visibility:hidden}","note":"Implement the M20 subset of Storefront settings using its full Figma context: compact 12px/16px labels, bordered row cards, a 420px preview column, original icons and a 300px published-page preview. The preview and prices come from the saved public packet. No fabricated storefront orders, connected domain, live stock, ETAs or payment confirmations are shown. Future controls and native browser chrome are excluded; differences remain informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/desktop/Settings › Storefront (link, look, zones, payments).png"}]}
+    {"id":"m20-settings-desktop","path":"app/?flags=shopLinks","widths":[1440],"actionSets":["setup","more","link"],"captureStyle":".app-skip{visibility:hidden}","note":"Implement the M20 subset of Storefront settings using its full Figma context: compact 12px/16px labels, bordered row cards, a 420px preview column, original icons and a 300px published-page preview. The preview and prices come from the saved public packet. No fabricated storefront orders, connected domain, live stock, ETAs or payment confirmations are shown. Future controls and native browser chrome are excluded; differences remain informational.","sections":[{"id":"screen","selector":".app-shell","reference":"screens/desktop/Settings › Storefront (link, look, zones, payments).png"}]},
+    {"id":"m20-customer-list","path":"app/s/?flags=shopLinks","publicShop":"corner","widths":[390],"actions":[{"type":"wait","selector":".public-offline[data-ready=true]"}],"note":"Customer requests follow the supplied C08/M04/storefront type, cards, hierarchy and original icons. Native browser chrome is omitted. M20 uses local remembered details and WhatsApp requests; no live stock, delivery tracking, automatic photo upload or payment confirmation is claimed. Extra contact/manual-handoff fields follow the written acceptance criteria. Sample public shop data is a QA fixture.","sections":[{"id":"screen","selector":".public-shop","reference":"screens/corner-shop/C08 · Customer — Scan the counter QR or open the link · just say what you need.png"}]},
+    {"id":"m20-customer-menu","path":"app/s/?flags=shopLinks","publicShop":"menu","widths":[390],"actions":[{"type":"wait","selector":".public-offline[data-ready=true]"}],"note":"Customer requests follow the supplied C08/M04/storefront type, cards, hierarchy and original icons. Native browser chrome is omitted. M20 uses local remembered details and WhatsApp requests; no live stock, delivery tracking, automatic photo upload or payment confirmation is claimed. Extra contact/manual-handoff fields follow the written acceptance criteria. Sample public shop data is a QA fixture.","sections":[{"id":"screen","selector":".public-shop","reference":"screens/mobile/M04 · Guest — QR menu & cart (stall or table).png"}]},
+    {"id":"m20-customer-desktop","path":"app/s/?flags=shopLinks","publicShop":"menu","widths":[1440],"actions":[{"type":"wait","selector":".public-offline[data-ready=true]"}],"note":"Customer requests follow the supplied C08/M04/storefront type, cards, hierarchy and original icons. Native browser chrome is omitted. M20 uses local remembered details and WhatsApp requests; no live stock, delivery tracking, automatic photo upload or payment confirmation is claimed. Extra contact/manual-handoff fields follow the written acceptance criteria. Sample public shop data is a QA fixture.","sections":[{"id":"screen","selector":".public-shop","reference":"screens/desktop/Storefront · Restaurant (desktop) — order from a link.png"}]}
   ]
 }
