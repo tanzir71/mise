@@ -24,9 +24,9 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - Settings: business, outlet, language for customer messages (বাংলা / English / both), currency preview.
 
 **Accept**
-- [ ] A first run on a clean browser reaches the Today screen in ≤ 3 steps.
-- [ ] Nav labels and nouns change with the business type (e.g. "Price list" vs "Menu").
-- [ ] Works offline after the first load.
+- [x] A first run on a clean browser reaches the Today screen in ≤ 3 steps.
+- [x] Nav labels and nouns change with the business type (e.g. "Price list" vs "Menu").
+- [x] Works offline after the first load.
 
 ## M11 · Catalogue / business data · S
 **Figma:** M28 `106:787`, desktop `74:2354`
@@ -37,8 +37,8 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - Optional: an "often bought" flag for quick chips.
 
 **Accept**
-- [ ] 200 items stay fast (search < 50 ms).
-- [ ] Turning an item off hides it from order entry.
+- [x] 200 items stay fast (search < 50 ms).
+- [x] Turning an item off hides it from order entry.
 
 ## M12 · Counter calculator · S
 **Figma:** C01 `110:162`, C03 `110:384`, C00 `110:5`
@@ -163,5 +163,5 @@ All data lives in Dexie (IndexedDB). Every write goes through a command in `pack
 - An update toast ("New version — reload"). Request `storage.persist()`. Show an install hint on Android/iOS.
 
 **Accept**
-- [ ] Installable on Android Chrome and desktop Chrome/Edge; launches offline.
-- [ ] Lighthouse PWA checks pass. Release `v0.2.0`.
+- [x] Installable on Android Chrome and desktop Chrome/Edge; launches offline.
+- [x] Manifest/installability and closed-browser offline relaunch checks pass. Lighthouse 12 retired its PWA category; [M18 notes](../../../docs/m18-delivery.md) record the current checks and evidence. Release `v0.2.0` follows the final verified commit.

@@ -51,8 +51,8 @@ The app at `/app/`. Works offline. Data in IndexedDB. Spec: `phases/phase-1-loca
   - [Delivery notes and verification](../../docs/m16-delivery.md).
 - [x] **M17** Exports (CSV, XLSX, PDF) + JSON backup/restore · S · T1
   - [Implementation and verification notes](../../docs/m17-delivery.md) (complete).
-- [ ] **M18** PWA: install, offline, update prompt, storage persistence request · S · T1
-  - [Implementation and verification notes](../../docs/m18-delivery.md) (in progress).
+- [x] **M18** PWA: install, offline, update prompt, storage persistence request · S · T1
+  - [Delivery notes and verification](../../docs/m18-delivery.md).
 
 ## Phase 2 — Customer links without a backend (T0/T1) → tag `v0.3.0`
 Spec: `phases/phase-2-links-no-backend.md`

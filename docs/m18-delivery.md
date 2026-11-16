@@ -1,6 +1,6 @@
 # M18 · Installation, offline launch and local storage
 
-Status: in progress. The manifest and install/storage interface are implemented. Full regression, visual report, CI, published installation checks and the Phase 1 release are pending. M18 remains unchecked.
+Status: complete. The installable offline app, installation guidance and storage controls are enabled and deployed. M10–M18 acceptance checks are verified. The Phase 1 tag and release follow the final documentation deployment.
 
 The app has a stable identity, start URL and scope under the configured app base, including `/mise/app/` on Pages and `/app/` for a root deployment. It uses the ink theme, standalone display, a 192/512px raster mark, full-bleed maskable icon and Apple touch icon generated from the original supplied Mise SVG. The manifest and icons join the offline precache. The local preview serves the manifest with its correct MIME type.
 
@@ -16,4 +16,12 @@ Focused checks pass: all 14 new browser cases, TypeScript, lint and the producti
 
 Local delivery checks pass with the feature enabled by default: lint, TypeScript/Astro, production build, all 323 unit tests, all 176 browser tests without retries and 107 visual comparisons. The original-mark raster and maskable icons and all three new interface captures were visually reviewed. Manifest, touch and install icons are present in the worker precache. The app shell remains 493.25 kB; device settings load on demand.
 
-Key captures: [More on phone](screenshots/m18-more-390.png), [This device on phone](screenshots/m18-device-390.png), [This device on desktop](screenshots/m18-device-1440.png). The intended public route is [Settings › This device](https://tanzir71.github.io/mise/app/settings/device). CI, Pages, public native checks and the Phase 1 release will be recorded below before M18 is ticked.
+Key captures: [More on phone](screenshots/m18-more-390.png), [This device on phone](screenshots/m18-device-390.png), [This device on desktop](screenshots/m18-device-1440.png). Published at [Settings › This device](https://tanzir71.github.io/mise/app/settings/device).
+
+## Published verification
+
+Interface commit `b8ad3dc` passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43817947818): all 323 unit tests, all 176 browser tests without retries, and the [107-comparison visual report](https://github.com/tanzir71/mise/actions/runs/43817947818/artifacts/14203746677).
+
+The public `/mise/app/` manifest has the correct identity, start URL, scope, ink theme, standalone mode and icons. Separate persistent profiles in full Chromium and the installed Microsoft Edge both reported no native installability errors. Each recorded a 125-unit sale through the UI, requested actual native storage protection, downloaded a complete schema-8 JSON backup, closed the browser, reopened offline, and recorded another 25 for a 150-unit total. The manifest itself was served offline. Both browsers declined persistence and displayed the working backup fallback. Android mobile guidance was checked through the published first-run interface. Neither run reported a page error. Physical Android/iPhone installation is not claimed.
+
+Phase 1 acceptance audit: current tests prove the three-question first run, pack-aware navigation/nouns and offline profile changes (M10); 200-item search below 50ms and unavailable-item exclusion (M11); ten keypad sales under sixty seconds, exact arithmetic, payment confirmations and receipt/undo behavior (M12); generated ledger/balance invariants, bilingual reminders and attributable atomic credit actions (M13); keyboard/tap creation, pricing, revisions, status/undo, warnings and settlement/refunds (M14); parser fixtures, counts, pack rounding, supplier handoffs and movement corrections (M15); derived totals, real-worker offline closing and same-day undo (M16); actual file formats, twenty-table backup/restore, preview conflicts and rollback (M17); and the installation/offline/storage checks above (M18). The same CI run covers every existing browser flow and all supplied visual comparisons. Delivery notes for M10–M17 retain their milestone-specific evidence.

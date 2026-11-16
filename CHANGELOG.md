@@ -4,37 +4,24 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
-### Landing
+## [0.2.0] - 2026-11-16
 
-- Added the owner's tanziro.com credit to the shared regional footer.
+### Added
 
-### App foundations
+- M10: business and market packs, three-question setup, phone navigation, desktop sidebar, local settings and an audited IndexedDB workspace.
+- M11: catalogue editing, local item names, exact prices, categories, availability, search and reviewed bulk paste.
+- M12: cash-first counter, calculator keypad, given/change, optional customer/items, manually confirmed wallet/card payments, receipts, QR and sales-log undo.
+- M13: customers and khata, balances and limits, explicit over-limit choices, payments/corrections, history, and bilingual reminder/receipt handoffs.
+- M14: manual orders, queue/board, customer lookup and usual orders, typed-item pricing and swaps, fulfilment/status history, warnings, payment, cancellation and refunds.
+- M15: stock targets and pack-rounded needs, reviewed quick updates, night counts, movement corrections, suppliers and bilingual order drafts.
+- M16: record-derived Today totals and payment splits, waiting orders, low stock, due reminders, reviewed cash closing, saved summaries and same-day undo.
+- M17: six datasets in CSV, Excel and PDF with dates/columns and masked phone fields; complete twenty-table JSON backup, reviewed atomic restore and native file sharing with download fallbacks.
+- M18: installable manifest and original Mise icons, install guidance, offline relaunch, explicit updates, native storage-protection requests and direct backup/restore access.
 
-- M18 interface: installable app manifest and original-mark icons, install guidance before setup and under This device, explicit native install prompts, offline readiness, manual update checks and a storage-protection request. JSON backup/restore remains available when protection is declined or unavailable and when moving to a Safari home-screen app.
+### Fixed
 
-- M17 interface: exports for Orders, Sales, Credit, Stock moves, Customers and Purchases with date ranges, selected columns, masked phone fields, CSV/Excel/PDF and native sharing with download fallbacks. Full JSON backup and reviewed atomic restore are available from Settings and from a fresh browser. Prepared files record their source owner, data and time without claiming they were sent.
-
-- M17 report foundations: read-only Orders, Sales/refunds, Credit, Stock moves, Customers and Purchases projections; shop-calendar date ranges, column/record selection, masked phone fields, Excel-compatible Bengali CSV and exact XLSX output. Schema 8 adds priced supplier invoices with audited recording/undo while retaining stock receipts separately. Schema-7 backups remain restorable. The download/share/print interface is still being implemented.
-
-- M17 backup foundations: consistent versioned JSON snapshots of all nineteen local tables, a dry-run shop/count preview, runtime schema/reference checks and atomic replacement with a system audit record. Restore rejects a changed file or any browser write after review, and rolls back the original shop if import or audit storage fails. The export/restore interface and spreadsheet/report formats are still being implemented.
-
-- M16 UI: enabled record-derived Today metrics, payment splits, real waiting/low-stock/reminder queues, offline cash counting with an editable denomination helper, reviewed walk-in overages, variance notes, saved day history, copy/share and a printable PDF summary. Same-day undo preserves later transactions; old-currency summaries keep their original amounts. Added phone/desktop Figma comparisons and responsive/accessibility checks.
-
-- M16 foundations: record-derived Today totals, separate cash movement and sales, completed-order durations, waiting/stock/reminder queues, denomination counting, frozen closing reviews, explicit walk-in overage sales, attributable day summaries and same-day atomic undo. Schema 7 adds closing records while preserving all existing tables. The Today screen was staged while its Figma-based UI and delivery checks were prepared.
-- M15 UI: stock item editing, inline counts and filters, reviewed/editable quick updates, night-count keypad and variance summary, supplier contacts and bilingual drafts with WhatsApp/Copy/Sent, movement history and correction. Counts and revisions work offline; optional speech fills a draft only. Added the three reference comparisons and responsive/axe flows for Stock, count, summary, editors, supplier handoff and history.
-- M15 foundations: exact stock quantities and pack-rounded ordering, reviewed quick-update parsing, atomic night counts, movement history and 24-hour undo, supplier contacts and grouped bilingual drafts with explicit Sent records. Schema 6 adds stock storage without changing existing order/financial records. Stock remains staged until its reference-based screens pass delivery checks.
-- M14: enabled manual orders, the phone queue and desktop board, local status recording and last-change undo, attributable notes/history, customer lookup and refreshed usual orders, typed-item pricing with a keypad, unavailable lines and manually agreed swaps, bilingual WhatsApp/copy handoffs, payment/khata settlement, cancellation and partial refund recording. Added waiting-time controls, scheduled/history views and stale-draft protection. Orders, prices and financial history work offline on this device.
-- M14 settlement foundations: atomic order payments and khata charges, linked receipts, cancellation with credit returns, partial refunds and audited corrections. Preserve the age of unrelated debt, retain physical cash until an actual refund, and keep collected totals after customer archival. Schema 5 adds refund records; Orders remains staged pending its reference-based UI.
-- Fixed explicit app updates during the first installed session. Reload now waits for the new worker to take control in the requesting tab; activating an update does not automatically navigate another tab away from its draft.
-- M14 foundations: manual-order records, exact fractional-quantity pricing, unpriced/out-of-stock/swap gates, business-specific status transitions and undo, optimistic revisions, notes/contact audit records, warning settings, bilingual quotes and an additive database upgrade. Orders remain staged until settlement and UI delivery pass.
-- M13 follow-up: count a customer once in the reminder heading when several currency accounts are due; keep each account's message and balance separate.
-- M13: enabled customer editing, dated opening balances, khata lists/profiles, credit limits and explicit over-limit approval, counter credit sales, payments and audited reversals. Added sequential reminder/receipt/call handoffs with copy fallbacks, editable bilingual wording, archive/restore and separate currency accounts.
-- M13 foundations: customer and credit-account commands, exact entry-derived balances, limit confirmations, atomic credit sales/payments/reversals, FIFO debt ageing, monthly reminder filters, bilingual/custom wording and an additive database upgrade. Khata UI remains behind a flag until its delivery checks pass.
-- M12: enabled the cash-first counter, 4×5 keypad, round/manual given amounts, exact change, optional names/items, confirmed wallet/card recording, real receipt QR and copy fallback, sales log with ten-minute undo, and recorded sales on Today. Optional browser speech previews a calculation; the keypad stays available offline.
-- M12 foundations: exact calculator arithmetic, audited cash/wallet/card sale commands, ten-minute undo, timezone-aware day totals, receipt text and an additive IndexedDB upgrade. Counter UI remains staged until its checks pass.
-- M10 foundations: business/market packs, integer money and E.164 phone helpers, ULID setup commands, removable sample catalogue seeds, and transactional Dexie persistence with audit events.
-- M10: enabled three-step onboarding, pack-aware phone navigation and 240px desktop sidebar, business/outlet/market settings, removable samples, offline shell caching and an explicit reload control for updates. Future counter/order/stock tools remain staged. Added app reference captures and direct-to-main delivery workflow per owner instruction.
-- M11: catalogue item editing with local names, exact prices, units, categories, availability and often-bought flags; search and reviewed bulk paste, atomic audit events, offline persistence, responsive editors and supplied Figma toggle assets.
+- Credit tanziro.com in both regional landing footers.
+- Explicit app updates reload only the requesting tab after its worker takes control, preserving another tab’s open form.
 
 ## [0.1.1] - 2026-11-15
 
