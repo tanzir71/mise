@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### App foundations
 
+- M17 backup foundations: consistent versioned JSON snapshots of all nineteen local tables, a dry-run shop/count preview, runtime schema/reference checks and atomic replacement with a system audit record. Restore rejects a changed file or any browser write after review, and rolls back the original shop if import or audit storage fails. The export/restore interface and spreadsheet/report formats are still being implemented.
+
 - M16 UI: enabled record-derived Today metrics, payment splits, real waiting/low-stock/reminder queues, offline cash counting with an editable denomination helper, reviewed walk-in overages, variance notes, saved day history, copy/share and a printable PDF summary. Same-day undo preserves later transactions; old-currency summaries keep their original amounts. Added phone/desktop Figma comparisons and responsive/accessibility checks.
 
 - M16 foundations: record-derived Today totals, separate cash movement and sales, completed-order durations, waiting/stock/reminder queues, denomination counting, frozen closing reviews, explicit walk-in overage sales, attributable day summaries and same-day atomic undo. Schema 7 adds closing records while preserving all existing tables. The Today screen was staged while its Figma-based UI and delivery checks were prepared.

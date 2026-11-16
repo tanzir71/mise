@@ -15,6 +15,8 @@ import { recordSupplierMessageCommand, sameSupplierMessage, undoSupplierMessageC
 import { closeDayCommand, sameClosingRequest, undoClosingCommand, type ClosingInput } from '@mise/core/closing';
 import type { DayClosing } from '@mise/core/models';
 import type { TodayContext } from '@mise/core/today';
+import type { MiseBackup } from '@mise/core/backup-tables';
+import type { BackupPreview, RestoreReview } from '@mise/core/backup';
 
 export class MiseDatabase extends Dexie {
   businesses!: EntityTable<Business, 'id'>;
@@ -405,6 +407,15 @@ export class MiseDatabase extends Dexie {
       const sale = before.addedSaleId ? await this.sales.get(before.addedSaleId) : undefined, change = undoClosingCommand(before,setup,sale);
       await this.dayClosings.put(change.closing);if (change.sale) await this.sales.put(change.sale);await this.events.bulkAdd(change.events);
     });
+  }
+  async readBackup():Promise<MiseBackup> {
+    return (await import('./backup')).readDatabaseBackup(this);
+  }
+  async previewRestore(input:unknown):Promise<BackupPreview> {
+    return (await import('./backup')).previewDatabaseRestore(this,input);
+  }
+  async restoreBackup(input:unknown,review:RestoreReview):Promise<SetupSnapshot> {
+    return (await import('./backup')).restoreDatabaseBackup(this,input,review);
   }
 }
 export const db = new MiseDatabase(`mise-local:${import.meta.env.BASE_URL}`);
