@@ -10,8 +10,21 @@ import { marketPacks } from '@mise/core/packs';
 import type { CreditEntry, Sale } from '@mise/core/models';
 import { db } from './data/db';
 import { displayName, errorText } from './khata-data';
+import { HandOff } from './HandOff';
+import { useHandoffs } from './handoff-context';
 
-export function CreditHandoff({accountId,purpose,sale,payment,onDone,onSkip,position}: {accountId:string;purpose:'reminder'|'receipt'|'call';sale?:Sale;payment?:CreditEntry;onDone:() => void;onSkip?:() => void;position?:string}) {
+export function CreditHandoff(props:Parameters<typeof LegacyCreditHandoff>[0]){return useHandoffs()?<AuditedCreditHandoff {...props} />:<LegacyCreditHandoff {...props} />;}
+function AuditedCreditHandoff({accountId,purpose,sale,payment,onDone,onSkip,position}:Parameters<typeof LegacyCreditHandoff>[0]){
+  const ledger=useLiveQuery(()=>db.readCreditLedger(accountId),[accountId]);
+  if(!ledger)return <p role="status">Preparing…</p>;
+  const paid=purpose==='reminder'&&creditBalance(ledger.account,ledger.entries)<=0;
+  if(paid||ledger.customer.archivedAt!==undefined)return <p role="status">{paid?'This khata is paid up. No reminder is needed.':'This customer is archived.'}</p>;
+  let text:string;try{text=purpose==='call'?ledger.customer.phone||'Spoke to the customer in person.':purpose==='receipt'?creditReceiptText(ledger,sale,payment):khataReminderText(ledger);}catch(error){return <p role="alert" className="form-error">{errorText(error)}</p>;}
+  return <div className="credit-handoff"><p>{position?`${position} · `:''}{displayName(ledger.customer)} · {formatMoney(creditBalance(ledger.account,ledger.entries),ledger.account.currency)} due</p>
+    {!ledger.customer.phone?<p>No saved number. Copy the message and contact the customer yourself.</p>:null}
+    <HandOff draft={{source:{kind:'credit',id:accountId},purpose,text,template:purpose==='receipt'?JSON.stringify([sale?.id??null,payment?.id??null,text]):text,target:ledger.customer.phone?purpose==='call'?'call':'whatsapp':'copy',phone:ledger.customer.phone,part:1,parts:1}} completion={{kind:'credit'}} confirmLabel={purpose==='call'?'I called':'I sent it'} onComplete={onDone} onSkip={onSkip} /></div>;
+}
+function LegacyCreditHandoff({accountId,purpose,sale,payment,onDone,onSkip,position}: {accountId:string;purpose:'reminder'|'receipt'|'call';sale?:Sale;payment?:CreditEntry;onDone:() => void;onSkip?:() => void;position?:string}) {
   const ledger = useLiveQuery(() => db.readCreditLedger(accountId),[accountId]);
   const [copied,setCopied] = useState(false), [manual,setManual] = useState(false), [opened,setOpened] = useState(false), [saving,setSaving] = useState(false), [error,setError] = useState(''), busy = useRef(false);
   const preview = useMemo(() => {

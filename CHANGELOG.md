@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M23 staged interface (behind `handOffs`): shared credit, quote and supplier hand-offs with editable/resumable previews, explicit delivery confirmation, one-tap manual fallbacks and atomic companion history. Other outbound senders remain pending.
+
 - M23 foundation: durable hand-off attempts and choices in the audit log, strict message snapshots, retry/revision guards and schema-9 backup compatibility with versions 7 and 8. Shared interface integration remains in progress.
 - M22 (behind `qrPosters`): saved-link QR posters and counter cards, market scan copy, offline local fonts, PNG download/open and native PDF printing at A5 or counter-card size.
 - M20: bounded public shop links, bilingual structured order messages, audited generation and ten-minute undo; Shop link settings with item selection, preview and copy/share fallbacks. The public customer page supports lists/menu choices, optional voice and photo preview, remembered details/last request, fulfilment/time and WhatsApp/Copy/manual completion, with a separate offline worker and a complete page budget below 60 KB.

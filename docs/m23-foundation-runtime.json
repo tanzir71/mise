@@ -1,0 +1,166 @@
+{
+  "commit": "82df7f4aa6b36a342751f4f8d7cfcb237e6fc82a",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43887718273",
+  "dexieSchemaFrom": 8,
+  "dexieSchemaTo": 9,
+  "losslessNativeProfile": {
+    "cachedPreviousEntry": "assets/app-Nw5jH_4Z.js",
+    "entry": "/mise/app/assets/app-DmFL6WJr.js",
+    "fromVersion": 80,
+    "toVersion": 90,
+    "explicitReload": false,
+    "comparison": "lossless native records, including undefined properties",
+    "allTwentyTablesPreserved": true,
+    "allOriginalNativeRecordsPreserved": true,
+    "offlineReload": true,
+    "offlineCashSale": true,
+    "indexes": [
+      {
+        "name": "[handoffId+handoffRevision]",
+        "unique": true
+      },
+      {
+        "name": "[orderId+orderRevision]",
+        "unique": false
+      },
+      {
+        "name": "[stockItemId+stockRevision]",
+        "unique": false
+      },
+      {
+        "name": "at",
+        "unique": false
+      },
+      {
+        "name": "closingId",
+        "unique": false
+      },
+      {
+        "name": "command",
+        "unique": false
+      },
+      {
+        "name": "customerId",
+        "unique": false
+      },
+      {
+        "name": "handoffId",
+        "unique": false
+      },
+      {
+        "name": "handoffTopic",
+        "unique": false
+      },
+      {
+        "name": "orderId",
+        "unique": false
+      },
+      {
+        "name": "outletId",
+        "unique": false
+      },
+      {
+        "name": "stockItemId",
+        "unique": false
+      },
+      {
+        "name": "supplierId",
+        "unique": false
+      }
+    ],
+    "recordCounts": {
+      "businesses": 1,
+      "categories": 1,
+      "creditAccounts": 0,
+      "creditEntries": 0,
+      "customers": 0,
+      "dayClosings": 0,
+      "events": 1,
+      "items": 3,
+      "members": 1,
+      "orderCommunications": 0,
+      "orderNotes": 0,
+      "orderRefunds": 0,
+      "orders": 0,
+      "outlets": 1,
+      "purchases": 0,
+      "sales": 0,
+      "stockItems": 0,
+      "stockMoves": 0,
+      "supplierMessages": 0,
+      "suppliers": 0
+    },
+    "sourceHash": "921c9f097f4c7c225e3589aba79e863683e0bfcf7da989654816b0e3c6b5a50d",
+    "errors": []
+  },
+  "cashOrderLinkProfile": {
+    "previousEntry": "/mise/app/assets/app-Nw5jH_4Z.js",
+    "entry": "/mise/app/assets/app-DmFL6WJr.js",
+    "fromVersion": 80,
+    "toVersion": 90,
+    "explicitReload": false,
+    "allTwentyTablesPreserved": true,
+    "allOriginalJsonRecordsPreserved": true,
+    "offlineReload": true,
+    "offlineCashSale": true,
+    "totalCashMinorUnits": 3500,
+    "orderUnchanged": true,
+    "creditUnchanged": true,
+    "indexes": [
+      {
+        "name": "[handoffId+handoffRevision]",
+        "unique": true
+      },
+      {
+        "name": "[orderId+orderRevision]",
+        "unique": false
+      },
+      {
+        "name": "[stockItemId+stockRevision]",
+        "unique": false
+      },
+      {
+        "name": "at",
+        "unique": false
+      },
+      {
+        "name": "closingId",
+        "unique": false
+      },
+      {
+        "name": "command",
+        "unique": false
+      },
+      {
+        "name": "customerId",
+        "unique": false
+      },
+      {
+        "name": "handoffId",
+        "unique": false
+      },
+      {
+        "name": "handoffTopic",
+        "unique": false
+      },
+      {
+        "name": "orderId",
+        "unique": false
+      },
+      {
+        "name": "outletId",
+        "unique": false
+      },
+      {
+        "name": "stockItemId",
+        "unique": false
+      },
+      {
+        "name": "supplierId",
+        "unique": false
+      }
+    ],
+    "sourceHash": "1ff9a80a9e35ea4d25a974534860ffe8225783da37cfbb27f3b786ea68b669f2",
+    "errors": []
+  }
+}

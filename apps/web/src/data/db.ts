@@ -1,4 +1,4 @@
-import type { HandoffDraft,HandoffSession } from '@mise/core/handoff';
+import type { HandoffCompletion,HandoffDraft,HandoffSession } from '@mise/core/handoff';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import Dexie, { type EntityTable } from 'dexie';
 import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus, OrderRefund, StockItem, StockMove, Supplier, SupplierMessage } from '@mise/core/models';
@@ -58,8 +58,9 @@ export class MiseDatabase extends Dexie {
     this.version(9).stores({events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision]'});
   }
   async prepareHandoff(input:HandoffDraft,fresh=false):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,fresh);}
+  async resumeHandoff(input:HandoffDraft):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,false,true);}
   async readHandoff(id:string):Promise<HandoffSession> {return (await import('./handoff')).readDatabaseHandoff(this,id);}
-  async changeHandoff(id:string,revision:number,choice:HandoffChoice,requestId?:string):Promise<HandoffSession> {return (await import('./handoff')).changeDatabaseHandoff(this,id,revision,choice,requestId);}
+  async changeHandoff(id:string,revision:number,choice:HandoffChoice,requestId?:string,completion?:HandoffCompletion):Promise<HandoffSession> {return (await import('./handoff')).changeDatabaseHandoff(this,id,revision,choice,requestId,completion);}
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();
     if (!business) return null;

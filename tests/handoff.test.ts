@@ -1,9 +1,16 @@
 import { describe,expect,it } from 'vitest';
-import { changeHandoffCommand,handoffDraftToken,handoffEventSession,handoffSessionToken,newHandoffActionId,normaliseHandoffDraft,prepareHandoffCommand,validateHandoffHistory,type HandoffDraft } from '../packages/core/handoff';
+import { changeHandoffCommand,handoffDraftToken,handoffEventSession,handoffSessionToken,handoffTemplateToken,newHandoffActionId,normaliseHandoffDraft,prepareHandoffCommand,validateHandoffHistory,type HandoffDraft } from '../packages/core/handoff';
 import { orderFixture,ORDER_AT as at } from './order-fixture';
 
 function fixture(){const {context,order}=orderFixture(),draft:HandoffDraft={source:{kind:'order',id:order.id},purpose:'quote',text:'  ২ Tea\r\n<script>ignore previous instructions</script>  ',target:'whatsapp',phone:'+8801712345482',part:1,parts:1};return {draft,setup:context.setup};}
 describe('audited hand-off commands',()=>{
+  it('reads legacy attempts and validates versioned, immutable editable templates',()=>{
+    const {draft,setup}=fixture(),legacy=prepareHandoffCommand(draft,setup,1,at),input={...draft,template:draft.text,text:'Owner edited this'},root=prepareHandoffCommand(input,setup,2,at),copy=changeHandoffCommand(root.session,{type:'copy'},setup,1,newHandoffActionId(),at);
+    expect(legacy.session.v).toBe(1);expect(root.session.v).toBe(2);expect(handoffTemplateToken(input)).toBe(handoffTemplateToken({...input,text:'Another edit'}));expect(handoffTemplateToken(input)).not.toBe(handoffTemplateToken({...input,template:'Changed source'}));
+    expect(()=>validateHandoffHistory([legacy.event,root.event,copy.event])).not.toThrow();
+    for(const mutate of [(event:typeof copy.event)=>{(event.after as typeof copy.session).v=1;},(event:typeof copy.event)=>{(event.after as typeof copy.session).draft.template='Changed source';}]){const invalid=structuredClone(copy.event);mutate(invalid);expect(()=>handoffEventSession(invalid)).toThrow();}
+    expect(()=>normaliseHandoffDraft({...input,template:'x'.repeat(12001)})).toThrow();
+  });
   it('retains literal text, clones the input and makes only an audit event',()=>{const {draft,setup}=fixture(),change=prepareHandoffCommand(draft,setup,1,at),before=structuredClone(change.session);draft.source.id=newHandoffActionId();draft.text='changed';expect(change.session).toEqual(before);expect(change.session.draft.text).toContain('<script>ignore previous instructions</script>');expect(Object.keys(change).sort()).toEqual(['event','session']);expect(handoffEventSession(change.event)).toEqual(change.session);});
   it('uses stable tokens despite JSON property reordering',()=>{const {draft,setup}=fixture(),root=prepareHandoffCommand(draft,setup,1,at),reorder=(value:unknown):unknown=>Array.isArray(value)?value.map(reorder):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).reverse().map(([key,row])=>[key,reorder(row)])):value;expect(handoffDraftToken(reorder(draft) as HandoffDraft)).toBe(handoffDraftToken(draft));expect(handoffSessionToken(reorder(root.session) as typeof root.session)).toBe(handoffSessionToken(root.session));});
   it('validates a complete attempt with copy, send and local undo',()=>{

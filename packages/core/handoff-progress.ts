@@ -30,14 +30,14 @@ export function changeHandoffProgress(previous:HandoffProgress,choice:HandoffCho
   if(!timestamp(at)||at<previous.updatedAt)throw new Error('Use a message time after the previous action.');
   if(!choice||!choices.includes(choice.type)||Object.keys(choice).some(key=>!['type','channel'].includes(key))||(choice.type==='open'?choice.channel===undefined||!['whatsapp','call','share'].includes(choice.channel):choice.channel!==undefined))throw new Error('Choose a supported message action.');
   if(previous.revision===Number.MAX_SAFE_INTEGER)throw new Error('This message has too many actions. Start a new attempt.');
-  if((choice.type==='failed'||choice.type==='copy-failed')&&previous.sentAt!==undefined)throw new Error('Undo Sent before recording a failure.');
+  if(choice.type==='failed'&&previous.sentAt!==undefined)throw new Error('Undo Sent before recording a failure.');
   if(choice.type==='sent'&&previous.sentAt!==undefined)throw new Error('This attempt is already marked sent.');
   if(choice.type==='undo-sent'&&(previous.sentAt===undefined||at-previous.sentAt>600000))throw new Error('Undo Sent within ten minutes.');
   const next:HandoffProgress={...previous,revision:previous.revision+1,updatedAt:at};
   switch(choice.type){
     case 'open':next.lastAttempt='open';next.channel=choice.channel!;next.openedAt=at;next.status=previous.sentAt===undefined?'opened':'sent';break;
     case 'copy':next.lastAttempt='copy';next.channel='manual';next.copiedAt=at;next.status=previous.sentAt===undefined?'copied':'sent';break;
-    case 'copy-failed':next.lastAttempt='copy-failed';next.channel='manual';next.failedAt=at;next.status='failed';break;
+    case 'copy-failed':next.lastAttempt='copy-failed';next.channel='manual';next.failedAt=at;next.status=previous.sentAt===undefined?'failed':'sent';break;
     case 'failed':next.lastAttempt='failed';next.failedAt=at;next.status='failed';break;
     case 'sent':next.sentAt=at;next.sentChannel=previous.channel;next.status='sent';break;
     case 'undo-sent':delete next.sentAt;delete next.sentChannel;next.status=attemptStatus[previous.lastAttempt];break;

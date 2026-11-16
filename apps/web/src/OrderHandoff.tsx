@@ -5,13 +5,23 @@ import { orderContactLinks, orderQuoteText } from '@mise/core/order-views';
 import type { Order, SetupSnapshot } from '@mise/core/models';
 import { db } from './data/db';
 import { errorText } from './khata-data';
+import { HandOff } from './HandOff';
+import { useHandoffs } from './handoff-context';
 
 function messageParts(text:string):string[] {
   const parts:string[] = [];let remaining = text;
   while (remaining.length > 3500) {const boundary = remaining.lastIndexOf('\n',3500), cut = boundary > 0 ? boundary+1 : 3500;parts.push(remaining.slice(0,cut));remaining = remaining.slice(cut);}
   if (remaining) parts.push(remaining);return parts;
 }
-export function OrderHandoff({order,setup,call = false,onDone}: {order:Order;setup:SetupSnapshot;call?:boolean;onDone:() => void}) {
+export function OrderHandoff(props:Parameters<typeof LegacyOrderHandoff>[0]){return useHandoffs()?<AuditedOrderHandoff {...props} />:<LegacyOrderHandoff {...props} />;}
+function AuditedOrderHandoff({order,setup,call=false,onDone}:Parameters<typeof LegacyOrderHandoff>[0]){
+  const [parts]=useState(()=>messageParts(call?order.customer.phone||'Spoke to the customer in person.':orderQuoteText(order,setup))),[index,setIndex]=useState(0),[revision,setRevision]=useState(order.revision);
+  return <div className="khata-form order-handoff"><p>{order.customer.name} · {order.number}{parts.length>1?` · part ${index+1} of ${parts.length}`:''}</p>
+    {!order.customer.phone?<p>No saved number. Copy the message and contact the customer yourself.</p>:null}
+    <HandOff draft={{source:{kind:'order',id:order.id},purpose:call?'call':'quote',text:parts[index],target:order.customer.phone?call?'call':'whatsapp':'copy',phone:order.customer.phone,part:index+1,parts:parts.length}} completion={{kind:'order',revision}} previewLabel={call?'Call note':'Message preview'} confirmLabel={call?'I called / spoke to them':parts.length>1?'I sent this part':'I sent it'} doneLabel={index+1<parts.length?'Next part':'Done'} onComplete={async()=>{const latest=await db.orders.get(order.id);if(!latest)throw new Error('This order could not be found.');setRevision(latest.revision);if(index+1<parts.length)setIndex(index+1);else onDone();}} />
+  </div>;
+}
+function LegacyOrderHandoff({order,setup,call = false,onDone}: {order:Order;setup:SetupSnapshot;call?:boolean;onDone:() => void}) {
   const [parts] = useState(() => messageParts(call ? order.customer.phone || 'Spoke to the customer in person.' : orderQuoteText(order,setup)));
   const [index,setIndex] = useState(0), [text,setText] = useState(parts[0] || ''), [revision,setRevision] = useState(order.revision), [channel,setChannel] = useState<'whatsapp'|'manual'>('manual');
   const [saving,setSaving] = useState(false), [manual,setManual] = useState(false), [copied,setCopied] = useState(false), [error,setError] = useState(''), busy = useRef(false);
