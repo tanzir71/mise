@@ -1,0 +1,73 @@
+{
+  "baseCommit": "eec56543c891e7b8c8e22a252d87657706927e4e",
+  "schemaVersion": 10,
+  "tableCount": 21,
+  "featureDefaults": {
+    "shareTarget": false
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-bYQL5HAd.js",
+    "customer": "/mise/app/s/assets/shop-agVLnWCT.js"
+  },
+  "localChecks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "unitTests": 471,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "rootBrowserChecks": 32,
+    "pagesPathBrowserChecks": 280,
+    "browserRetries": 0,
+    "requiredExports": 270,
+    "visualComparisons": 139,
+    "visualDifferences": "informational; no new Inbox screen claimed",
+    "visualGeneratedAt": "2026-11-17T06:03:39.341Z",
+    "fontProofs": [
+      {
+        "id": "english",
+        "screenshot": "qa/screens/m20-font-proof-english.png",
+        "sha256": [
+          "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1",
+          "250ba1130c72274eafadcb6360fb99238ae70f5a11d2e01bf4c64c716d131fd5"
+        ],
+        "renderedSamples": 32,
+        "maxWidthDifference": 0.890625,
+        "meanWidthDifference": 0.36962890625
+      },
+      {
+        "id": "bengali",
+        "screenshot": "qa/screens/m20-font-proof-bengali.png",
+        "sha256": [
+          "7ffe9456e2957755ef86a46375cadf2f83a4dd3caea3959873e5e61ca4466265",
+          "c110fb634d109bed8ec82a12e5b4c4f9127eeb36a600637d124f76d9a96df2e7"
+        ],
+        "renderedSamples": 104,
+        "maxWidthDifference": 1.25,
+        "meanWidthDifference": 0.294921875
+      }
+    ],
+    "keyScreenshots": [
+      "qa/screens/m17-phone-export-screen-390.png",
+      "qa/screens/m17-exports-desktop-screen-1440.png",
+      "qa/screens/m17-export-sheet-desktop-screen-1440.png"
+    ]
+  },
+  "logSha256": {
+    "unit": "628353183e12f6f2e92c2a0e40c9c30f114b29e73ee23d2221985e227227f246",
+    "rootBrowser": "7a615ac8e96ed12fca7ec1054d9a258e15b33e51c83251acceea9b32225f673c",
+    "pagesBrowser": "669f7e4c1f950ffed3e4ff659e46f1f0ce6fd769dc8eb5107230ec6e8fc304ed",
+    "visual": "3dad532e5860e8d129d977a8a2c539056dedc0e61fda6ba22ccd966c08bd2785"
+  },
+  "remaining": [
+    "POST share receiver and staged manifest",
+    "Inbox list/detail and editable manual forms",
+    "Android Chrome installed-PWA WhatsApp text/screenshot sharing acceptance"
+  ],
+  "publication": {
+    "automaticWorkflows": "disabled_by_owner",
+    "lastLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "newDeployment": "held"
+  }
+}

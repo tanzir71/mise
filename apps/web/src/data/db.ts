@@ -1,4 +1,7 @@
 import type { HandoffCompletion,HandoffDraft,HandoffSession } from '@mise/core/handoff';
+import type { InboxKind } from '@mise/core/inbox';
+import type { SharedInboxInput,StoredInboxItem } from './inbox';
+import { claimDatabaseInbox } from './inbox';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import Dexie, { type EntityTable } from 'dexie';
 import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus, OrderRefund, StockItem, StockMove, Supplier, SupplierMessage } from '@mise/core/models';
@@ -45,6 +48,7 @@ export class MiseDatabase extends Dexie {
   supplierMessages!: EntityTable<SupplierMessage,'id'>;
   dayClosings!: EntityTable<DayClosing,'id'>;
   purchases!: EntityTable<Purchase,'id'>;
+  inboxItems!: EntityTable<StoredInboxItem,'id'>;
   constructor(name = 'mise-local') {
     super(name);
     this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
@@ -56,7 +60,10 @@ export class MiseDatabase extends Dexie {
     this.version(7).stores({dayClosings:'id,outletId,day,&[outletId+activeKey]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId'});
     this.version(8).stores({purchases:'id,outletId,supplierId,createdAt'});
     this.version(9).stores({events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision]'});
+    this.version(10).stores({inboxItems:'id,outletId,createdAt,kind',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision],inboxId,&[inboxId+inboxRevision]'});
   }
+  async captureInbox(input:SharedInboxInput):Promise<StoredInboxItem> {return (await import('./inbox')).captureDatabaseInbox(this,input);}
+  async changeInbox(id:string,revision:number,change:{kind:InboxKind}|{archived:boolean}):Promise<StoredInboxItem> {return (await import('./inbox')).changeDatabaseInbox(this,id,revision,change);}
   async prepareHandoff(input:HandoffDraft,fresh=false):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,fresh);}
   async resumeHandoff(input:HandoffDraft):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,false,true);}
   async readHandoff(id:string):Promise<HandoffSession> {return (await import('./handoff')).readDatabaseHandoff(this,id);}
@@ -74,6 +81,7 @@ export class MiseDatabase extends Dexie {
       const { business, outlet, owner } = command.snapshot;
       await this.businesses.put(business); await this.outlets.put(outlet); await this.members.put(owner);
       await this.categories.bulkPut(command.categories); await this.items.bulkPut(command.items); await this.events.add(command.event);
+      await claimDatabaseInbox(this);
       return command.snapshot;
     });
   }

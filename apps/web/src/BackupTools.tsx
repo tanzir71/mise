@@ -10,7 +10,7 @@ import { backupFile,canShareFile,downloadFile,shareFile } from './data/export-fi
 import { errorText } from './khata-data';
 import './exports.css';
 
-const tableLabels = ['Shops','Outlets','Owners','Categories','Catalogue items','Recorded actions','Sales','Customers','Credit accounts','Credit entries','Orders','Order notes','Order contact records','Refunds','Stock items','Stock moves','Suppliers','Supplier contact records','Day summaries','Purchases'];
+const tableLabels = ['Shops','Outlets','Owners','Categories','Catalogue items','Recorded actions','Sales','Customers','Credit accounts','Credit entries','Orders','Order notes','Order contact records','Refunds','Stock items','Stock moves','Suppliers','Supplier contact records','Day summaries','Purchases','Shared inbox items'];
 export function BackupTools({setup}:{setup?:SetupSnapshot}) {
   const [preview,setPreview] = useState<BackupPreview|null>(null),[text,setText] = useState(''),[filename,setFilename] = useState(''),[confirmed,setConfirmed] = useState(false),[saving,setSaving] = useState(false),[error,setError] = useState(''),[message,setMessage] = useState(''),[ready,setReady] = useState<File|null>(null);
   const busy = useRef(false),fileInput = useRef<HTMLInputElement>(null);

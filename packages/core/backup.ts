@@ -18,13 +18,13 @@ export function parseBackup(input:unknown):MiseBackup {
   }
   const backup = backupRecord(value,'file');
   if (backup.format !== 'mise-backup' || backup.formatVersion !== BACKUP_FORMAT_VERSION) throw new Error('Choose a supported Mise JSON backup.');
-  if (backup.schemaVersion === 7) {
-    const oldTables = backupRecord(backup.tables,'tables');
-    if (Object.hasOwn(oldTables,'purchases') || Object.keys(oldTables).length !== backupTableNames.length-1) throw new Error('The schema-7 backup has unsupported tables.');
-    return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION,tables:{...oldTables,purchases:[]}});
+  if ([7,8,9].includes(backup.schemaVersion as number)) {
+    const version=backup.schemaVersion,oldTables=backupRecord(backup.tables,'tables');
+    const expected=backupTableNames.filter(name=>name!=='inboxItems'&&(version!==7||name!=='purchases'));
+    if(Object.keys(oldTables).length!==expected.length||Object.keys(oldTables).some(name=>!(expected as readonly string[]).includes(name)))throw new Error(`The schema-${String(version)} backup has unsupported tables.`);
+    return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION,tables:{...oldTables,...(version===7?{purchases:[]}:{}),inboxItems:[]}});
   }
-  if (backup.schemaVersion === 8) return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
-  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
+  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
   if (Object.keys(backup).some(k => !['format','formatVersion','schemaVersion','exportedAt','tables'].includes(k))) throw new Error('The backup has unsupported metadata.');
   backupTime(backup.exportedAt,'exportedAt');
   const tables = backupRecord(backup.tables,'tables');

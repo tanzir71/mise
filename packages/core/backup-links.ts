@@ -1,3 +1,4 @@
+import { validateInboxHistory } from './inbox-history';
 import { handoffEventSession,handoffSourceTables,validateHandoffHistory } from './handoff';
 import { stockAtoms, stockNameKey } from './stock-quantity';
 import { creditBalance, entryDelta } from './khata';
@@ -14,13 +15,14 @@ export function validateBackupLinks(t:BackupTables):void {
   const unique = (keys:(string|undefined)[],label:string) => {const present = keys.filter(key => key !== undefined);ensure(new Set(present).size === present.length,`${label} contains duplicate keys`);};
   const pair = (...parts:unknown[]) => JSON.stringify(parts);
   const count = backupTableNames.reduce((sum,name) => sum+t[name].length,0);
-  if (!count) return;
+  validateInboxHistory(t.inboxItems,t.events);
+  if (!count||count===t.inboxItems.length&&t.inboxItems.every(item=>item.outletId===null)) return;
   ensure(t.businesses.length === 1 && t.outlets.length === 1,'this local version requires one business and one outlet');
   const business = t.businesses[0], outlet = t.outlets[0];
   ensure(outlet.businessId === business.id,'the outlet belongs to another business');
   ensure(t.members.some(m => m.active && m.businessId === business.id && m.outletIds.includes(outlet.id)),'the shop has no active owner');
   for (const member of t.members) {ensure(member.businessId === business.id,'a member belongs to another business');for (const id of member.outletIds) ensure(link('outlets',id).businessId === member.businessId,'a member has a foreign outlet');}
-  for (const table of backupTableNames) for (const row of t[table]) if ('outletId' in row) ensure(row.outletId === outlet.id,`${table} contains a foreign outlet`);
+  for (const table of backupTableNames) for (const row of t[table]) if ('outletId' in row && row.outletId!==null) ensure(row.outletId === outlet.id,`${table} contains a foreign outlet`);
   for (const customer of t.customers) ensure(customer.businessId === business.id,'a customer belongs to another business');
   unique(t.customers.map(c => c.phone && pair(c.businessId,c.phone)),'customer phones');
   unique(t.creditAccounts.map(a => pair(a.outletId,a.customerId,a.currency)),'credit accounts');
