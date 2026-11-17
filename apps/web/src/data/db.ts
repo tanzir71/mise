@@ -10,8 +10,9 @@ import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
 import { marketPacks } from '@mise/core/packs';
-import { saveCustomerCommand, archiveCustomerCommand, type CustomerInput } from '@mise/core/customers';
-import { creditBalance, defaultCreditTerms, saveCreditTermsCommand, openingBalanceCommand, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
+import { archiveCustomerCommand, type CustomerInput } from '@mise/core/customers';
+import { customerSaveMutation,type CustomerSaveOptions } from '@mise/core/customer-mutation';
+import { creditBalance, saveCreditTermsCommand, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
 import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } from '@mise/core/credit-sales';
 import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
 import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOrderCancellationCommand, refundOrderCommand, undoOrderRefundCommand, type OrderMoneyChange, type OrderMoneyContext, type OrderSettlementInput, type OrderRefundInput } from '@mise/core/order-payments';
@@ -131,21 +132,15 @@ export class MiseDatabase extends LocalStore {
     return {setup,account,customer,entries:await this.creditEntries.where('accountId').equals(accountId).toArray()};
   }
   async readCreditLedger(accountId: string): Promise<LedgerContext> { return this.transaction('r',this.tables,() => this.ledgerContext(accountId)); }
-  async saveCustomer(input: CustomerInput, options: { id?: string; credit?: CreditTermsInput; opening?: {amount:number;occurredAt:number} } = {}): Promise<Customer> {
+  async saveCustomer(input: CustomerInput, options: CustomerSaveOptions = {}): Promise<Customer> {
     return this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
-      const before = options.id ? await this.customers.get(options.id) : null;
-      if (options.id && !before) throw new Error('Customer not found.');
-      const command = saveCustomerCommand(input,setup,await this.customers.where('businessId').equals(setup.business.id).toArray(),before);
-      const existing = await this.creditAccounts.where('[outletId+customerId+currency]').equals([setup.outlet.id,command.customer.id,setup.outlet.currency]).first();
-      if (options.opening && existing) throw new Error('Opening balances are only available on a new khata.');
-      await this.customers.put(command.customer); await this.events.add(command.event);
-      if (!existing || options.credit) {
-        const terms = saveCreditTermsCommand(options.credit || defaultCreditTerms,command.customer,setup,existing || null);
-        await this.creditAccounts.put(terms.account); await this.events.add(terms.event);
-        if (options.opening) { const opening = openingBalanceCommand(options.opening.amount,options.opening.occurredAt,{setup,customer:command.customer,account:terms.account,entries:[]}); await this.creditEntries.add(opening.entry); await this.events.add(opening.event); }
-      }
-      return command.customer;
+      const mutation=customerSaveMutation(input,options,{setup,customers:await this.customers.where('businessId').equals(setup.business.id).toArray(),accounts:await this.creditAccounts.where('outletId').equals(setup.outlet.id).toArray()});
+      await this.customers.put(mutation.customer);
+      if(mutation.account)await this.creditAccounts.put(mutation.account);
+      if(mutation.entry)await this.creditEntries.add(mutation.entry);
+      await this.events.bulkAdd(mutation.events);
+      return mutation.customer;
     });
   }
   async saveCreditTerms(customerId: string, input: CreditTermsInput, accountId?: string): Promise<CreditAccount> {

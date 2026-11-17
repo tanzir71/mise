@@ -1,10 +1,11 @@
 import { ulid } from 'ulid';
-import { customerEvent } from './customers';
+import { customerEvent,type CustomerSetup } from './customers';
 import type { AuditEvent, CreditAccount, CreditEntry, CreditReminder, Customer, OrderRefund, Sale, PaymentMethod, SetupSnapshot } from './models';
 
 export interface CreditTermsInput { allowed: boolean; limit: number; reminder: CreditReminder }
 export const defaultCreditTerms: CreditTermsInput = { allowed:false, limit:0, reminder:{enabled:false,dayOfMonth:2,tone:'gentle',channel:'whatsapp'} };
 export interface LedgerContext { setup: SetupSnapshot; customer: Customer; account: CreditAccount; entries: CreditEntry[] }
+type CustomerLedgerContext=Omit<LedgerContext,'setup'>&{setup:CustomerSetup};
 export interface OverLimitConfirmation { balance: number; limit: number }
 export class CreditLimitError extends Error {
   constructor(public balance: number, public limit: number, public proposed: number) { super('This would exceed the customer’s credit limit. Confirm Give anyway to continue.'); this.name = 'CreditLimitError'; }
@@ -35,27 +36,27 @@ export function activeEntries(account: CreditAccount, entries: CreditEntry[]): C
   const records = accountEntries(account,entries), reversed = new Set(records.map(entry => entry.reversalOf).filter(Boolean));
   return records.filter(entry => !entry.reversalOf && !reversed.has(entry.id));
 }
-export function validateCreditContext(context: LedgerContext, active = true) {
+export function validateCreditContext(context: CustomerLedgerContext, active = true) {
   const { setup, customer, account } = context;
   if (customer.businessId !== setup.business.id || account.customerId !== customer.id || account.outletId !== setup.outlet.id) throw new Error('This khata belongs to another shop.');
   if (active && customer.archivedAt !== undefined) throw new Error('Restore this customer before changing their khata.');
 }
-export function saveCreditTermsCommand(input: CreditTermsInput, customer: Customer, setup: SetupSnapshot, before: CreditAccount | null = null, at = Date.now()): { account: CreditAccount; event: AuditEvent } {
+export function saveCreditTermsCommand(input: CreditTermsInput, customer: Customer, setup: CustomerSetup, before: CreditAccount | null = null, at = Date.now(), newId:(kind:'account'|'event')=>string=()=>ulid(at)): { account: CreditAccount; event: AuditEvent } {
   if (customer.businessId !== setup.business.id || customer.archivedAt !== undefined) throw new Error('Choose an active customer from this shop.');
   if (before && (before.customerId !== customer.id || before.outletId !== setup.outlet.id)) throw new Error('This khata belongs to another customer or outlet.');
   safeAmount(input.limit); if (input.limit < 0) throw new Error('The credit limit cannot be negative.');
   if (!Number.isInteger(input.reminder.dayOfMonth) || input.reminder.dayOfMonth < 1 || input.reminder.dayOfMonth > 31 || !['gentle','direct'].includes(input.reminder.tone) || input.reminder.channel !== 'whatsapp') throw new Error('Choose a monthly reminder day from 1 to 31 and a supported tone.');
-  const account: CreditAccount = { id: before?.id || ulid(at), customerId:customer.id, outletId:setup.outlet.id, currency:before?.currency || setup.outlet.currency, allowed:Boolean(input.allowed), limit:input.limit, reminder:{...input.reminder,enabled:Boolean(input.reminder.enabled)}, createdAt:before?.createdAt ?? at, updatedAt:at };
-  return { account, event:customerEvent(before ? 'khata.settings' : 'khata.create',customer.id,before,account,setup,at) };
+  const account: CreditAccount = { id: before?.id || newId('account'), customerId:customer.id, outletId:setup.outlet.id, currency:before?.currency || setup.outlet.currency, allowed:Boolean(input.allowed), limit:input.limit, reminder:{...input.reminder,enabled:Boolean(input.reminder.enabled)}, createdAt:before?.createdAt ?? at, updatedAt:Math.max(at,before?.createdAt??at) };
+  return { account, event:customerEvent(before ? 'khata.settings' : 'khata.create',customer.id,before,account,setup,at,()=>newId('event')) };
 }
-function entryCommand(context: LedgerContext, values: Pick<CreditEntry,'type'|'amount'|'note'> & Partial<Pick<CreditEntry,'saleId'|'orderId'|'refundId'|'returnsChargeId'|'methodName'|'occurredAt'|'reversalOf'|'purpose'|'overLimit'>>, command: string, at: number, active = true): { entry: CreditEntry; event: AuditEvent } {
+function entryCommand(context: CustomerLedgerContext, values: Pick<CreditEntry,'type'|'amount'|'note'> & Partial<Pick<CreditEntry,'saleId'|'orderId'|'refundId'|'returnsChargeId'|'methodName'|'occurredAt'|'reversalOf'|'purpose'|'overLimit'>>, command: string, at: number, active = true, newId:(kind:'entry'|'event')=>string=()=>ulid(at)): { entry: CreditEntry; event: AuditEvent } {
   validateCreditContext(context,active); safeAmount(values.amount);
   if (values.note.length > 4000) throw new Error('Keep this note within 4,000 characters.');
-  const event = customerEvent(command,context.customer.id,null,null,context.setup,at);
+  const event = customerEvent(command,context.customer.id,null,null,context.setup,at,()=>newId('event'));
   if (values.orderId) event.orderId = values.orderId;
   const sequence = accountEntries(context.account,context.entries).reduce((max,entry) => Math.max(max,entry.sequence),0)+1;
   if (!Number.isSafeInteger(sequence)) throw new Error('The khata sequence exceeds the supported range.');
-  const entry: CreditEntry = { id:ulid(at), accountId:context.account.id, customerId:context.customer.id, outletId:context.account.outletId, currency:context.account.currency, sequence, ...values, createdBy:context.setup.owner.id, eventId:event.id, createdAt:at, updatedAt:at };
+  const entry: CreditEntry = { id:newId('entry'), accountId:context.account.id, customerId:context.customer.id, outletId:context.account.outletId, currency:context.account.currency, sequence, ...values, createdBy:context.setup.owner.id, eventId:event.id, createdAt:at, updatedAt:at };
   event.after = entry; return { entry,event };
 }
 export function chargeCreditCommand(amount: number, context: LedgerContext, options: { confirmation?: OverLimitConfirmation; note?: string; saleId?: string } = {}, at = Date.now()) {
@@ -74,11 +75,11 @@ export function recordCreditPaymentCommand(amount: number, method: PaymentMethod
   if (!['cash','wallet','card'].includes(method) || (method === 'wallet' && (!wallet || wallet === 'Cash' || !wallets.includes(wallet)))) throw new Error('Choose a supported payment method.');
   return entryCommand(context,{type:'payment',amount,note,methodName:method === 'wallet' ? wallet : method === 'card' ? 'Card' : 'Cash'},'khata.payment',at);
 }
-export function openingBalanceCommand(amount: number, occurredAt: number, context: LedgerContext, at = Date.now()) {
+export function openingBalanceCommand(amount: number, occurredAt: number, context: CustomerLedgerContext, at = Date.now(), newId:(kind:'entry'|'event')=>string=()=>ulid(at)) {
   validateCreditContext(context); safeAmount(amount,true);
   if (accountEntries(context.account,context.entries).length) throw new Error('An opening balance can only be set on an empty khata.');
   if (!Number.isSafeInteger(occurredAt) || occurredAt < 0 || occurredAt > at) throw new Error('Choose a balance date up to today.');
-  return entryCommand(context,{type:'adjustment',amount,note:'Opening balance',occurredAt},'khata.opening-balance',at);
+  return entryCommand(context,{type:'adjustment',amount,note:'Opening balance',occurredAt},'khata.opening-balance',at,true,newId);
 }
 export const canUndoCreditEntry = (entry: CreditEntry, entries: CreditEntry[], at = Date.now()) => entry.type !== 'reminder' && !entry.reversalOf && at >= entry.createdAt && at-entry.createdAt <= 600000 && !entries.some(value => value.reversalOf === entry.id);
 export function undoCreditEntryCommand(entry: CreditEntry, context: LedgerContext, at = Date.now(), fromSale = false) {

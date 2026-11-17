@@ -75,6 +75,19 @@ function decodeFields(values:Record<string,CloudValue>,fields:FieldMap,table:Bac
   }
   return row;
 }
+/** Server command transport only: validate and authorize the mutation separately. */
+export function encodeCommandRecord(table:BackupTable,row:unknown,businessId:string):CloudRecord {
+  const map=cloudRecordMaps[table];return {table:map.table,values:{...encodeFields(row,map.fields),business_id:businessId}};
+}
+/** SQL row_to_json retains literal JSON; convert it through the same field map. */
+export function decodeCommandRecord(table:BackupTable,row:Record<string,unknown>):Record<string,unknown>{
+  const map=cloudRecordMaps[table],values:Record<string,CloudValue>={};
+  for(const [column,spec] of Object.entries(map.fields)){
+    const value=row[column],{kind}=field(spec);
+    values[column]=value===null||value===undefined?null:kind==='j'||kind==='e'?JSON.stringify(value):value as CloudValue;
+  }
+  return decodeFields(values,map.fields,table);
+}
 async function fileHash(data:string):Promise<string>{
   const raw=atob(data),bytes=new Uint8Array(raw.length);
   for(let index=0;index<raw.length;index++)bytes[index]=raw.charCodeAt(index);

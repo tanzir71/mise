@@ -11,7 +11,7 @@ it('reuses strict shared intent validation and never accepts actor, tenant, SQL 
 });
 it('rejects bad credentials, MIME, body bounds, origins and methods before applying a command',async()=>{
   const apply=vi.fn(),handler=createCommandsHandler({store:{apply},origins:new Set([origin])});
-  expect((await handler(request(command,{Authorization:''}))).status).toBe(401);expect((await handler(request(command,{'Content-Type':'text/plain'}))).status).toBe(415);expect((await handler(request('x'.repeat(4097)))).status).toBe(413);expect((await handler(request('{bad'))).status).toBe(400);expect((await handler(request(command,{Origin:'https://foreign.test'}))).status).toBe(403);expect((await handler(request(command,{},'GET'))).status).toBe(405);expect((await handler(request(command,{},'OPTIONS'))).status).toBe(204);expect(apply).not.toHaveBeenCalled();
+  expect((await handler(request(command,{Authorization:''}))).status).toBe(401);expect((await handler(request(command,{'Content-Type':'text/plain'}))).status).toBe(415);expect((await handler(request('x'.repeat(32001)))).status).toBe(413);expect((await handler(request('{bad'))).status).toBe(400);expect((await handler(request(command,{Origin:'https://foreign.test'}))).status).toBe(403);expect((await handler(request(command,{},'GET'))).status).toBe(405);expect((await handler(request(command,{},'OPTIONS'))).status).toBe(204);expect(apply).not.toHaveBeenCalled();
 });
 it('returns only a validated uncached receipt with the same ID and immutable request identity',async()=>{
   const apply=vi.fn(async()=>({...receipt,auth_user_id:'PRIVATE ID',private:'SECRET'})),handler=createCommandsHandler({store:{apply},origins:new Set([origin])});

@@ -1,0 +1,320 @@
+{
+  "baseCommit": "3f59264596097aec590f5bfc71b5860a99ba9dd5",
+  "date": "2026-11-18",
+  "status": "M30 in progress; atomic customer/khata commands prepared; signed-owner HTTP/OTP, UI/outbox and remaining commands open",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "nativeDatabase": "PGlite 0.3.16 / PostgreSQL 17.5",
+    "hostedDatabase": "PostgreSQL 17.12"
+  },
+  "checks": {
+    "unitTests": 1086,
+    "unitFiles": 70,
+    "unitWorkers": 4,
+    "nativeCustomerChecks": 59,
+    "clientTransportChecks": 13,
+    "exactBundleChecks": 1,
+    "lint": "passed including secret guard",
+    "typecheck": "passed;86 Astro check files clean",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "browserChecks": 298,
+    "browserRetries": 0,
+    "browserDuration": "4.3m",
+    "visual": "No new product layout or visual comparison claimed"
+  },
+  "deployment": {
+    "migrationVersions": [
+      "20261117081808",
+      "20261117085319",
+      "20261117102312",
+      "20261117114114",
+      "20261117122734",
+      "20261117130209",
+      "20261117134918",
+      "20261117141552",
+      "20261117145205",
+      "20261117152037",
+      "20261117161027",
+      "20261117171100",
+      "20261117171949",
+      "20261117182909",
+      "20261117190239",
+      "20261117192844"
+    ],
+    "commands": {
+      "version": 4,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "sourceSha256": "d0a7405b0b301a236feedcb05fbc7e6dddfe836e30e20df8b97325c5fa2132a2",
+      "deployedBundleSha256": "21c6e146b5664118c640f1d4fee8b6cda154b03f42cabfc5ee5712b3ce6876e3",
+      "bytes": 180443,
+      "sourceFiles": 17
+    },
+    "projectDetailsRedacted": true,
+    "newSecrets": [],
+    "authProvidersChanged": false
+  },
+  "supportedCommands": [
+    "customer.create",
+    "customer.update",
+    "customer.archive",
+    "customer.restore",
+    "khata.settings",
+    "existing catalogue protocol unchanged"
+  ],
+  "atomicity": {
+    "sameSharedLocalServerSave": true,
+    "customerTermsOpeningAndAuditsTogether": true,
+    "failedAuditRollsBackAll": true,
+    "workingCopyReplaced": false,
+    "shopSchema": 10,
+    "backupTables": 21,
+    "receiptIsChangeCursor": false
+  },
+  "scope": {
+    "originalVerifiedJwt": true,
+    "liveConfirmedPhone": true,
+    "ownerOrAssignedManager": true,
+    "managerNeedsSelectedCustomerAssociation": true,
+    "globalStatusRequiresEveryAssociatedOutletForManagers": true,
+    "statusAuditOutletMustAlreadyBeAssociated": true,
+    "ordinaryContextHasNoOutsideBalancePreview": true,
+    "ordinarySnapshotsIgnoreOtherOutletLedger": true,
+    "rawClientWritesAllowed": false
+  },
+  "recovery": {
+    "canonicalIntentPropertyOrderIndependent": true,
+    "opaqueProofHashed": true,
+    "snapshotRetries": 3,
+    "preparationTtlSeconds": 60,
+    "maxActivePreparationsPerCaller": 100,
+    "originalActorReceiptReplay": true,
+    "globalAuditIdsAcrossCommandFamilies": true,
+    "phoneUniquenessBusinessWide": true
+  },
+  "limits": {
+    "requestBytes": 32000,
+    "bodyDeadlineMs": 5000,
+    "encodedCommitBytes": 512000,
+    "maxCommitRecords": 6,
+    "clientRequestTimeoutMs": 45000
+  },
+  "hostedSqlProof": {
+    "kind": "rolled-back PostgreSQL roles using shared-code fixture; no positive signed-owner HTTP upload/write",
+    "primarySave": {
+      "receipts": 1,
+      "auditRows": 3,
+      "accountRows": 1,
+      "customerRows": 1,
+      "ledgerBalance": 12345,
+      "originalActor": true,
+      "receiptReplay": true,
+      "openingEntries": 1,
+      "normalizedPhone": true,
+      "rawStagingDenied": true,
+      "ticketsAfterCommit": 0,
+      "managerOtherOutletRows": 0,
+      "literalUnicodeRoundTrip": true,
+      "ordinaryCallerFinishDenied": true,
+      "differentConfirmedUserDenied": true,
+      "managerAllAssignedCanPrepare": true,
+      "managerUnassignedStatusDenied": true,
+      "managerOrdinaryContextRedacted": true,
+      "managerRevocationAtFinishDenied": true
+    },
+    "postRollback": {
+      "authUsers": 0,
+      "businesses": 0,
+      "customers": 0,
+      "accounts": 0,
+      "entries": 0,
+      "events": 0,
+      "receipts": 0,
+      "tickets": 0
+    }
+  },
+  "hostedCatalog": {
+    "protected_tables": 40,
+    "missing_forced_rls": 0,
+    "public_definers": 0,
+    "anonymous_table_grants": 0,
+    "private_helpers_closed": true,
+    "auth_users": 0,
+    "businesses": 0,
+    "customers": 0,
+    "accounts": 0,
+    "entries": 0,
+    "events": 0,
+    "receipts": 0,
+    "tickets": 0
+  },
+  "advisors": {
+    "securityWarnError": 0,
+    "performanceWarnError": 0,
+    "unindexedForeignKeys": 0,
+    "intentionalPrivateNoPolicyInfo": 11,
+    "unusedIndexInfo": 79
+  },
+  "privacy": {
+    "scope": "current source, staged index, reachable history and built output",
+    "knownValuesChecked": 8,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretDeploymentFindings": 21,
+    "coverageFindings": 0,
+    "matchedValuesPrinted": false,
+    "serverKeysInClient": false
+  },
+  "publication": {
+    "workflows": "all three remain disabled; verify after push",
+    "pages": "held by owner; no workflow dispatch/publication",
+    "cloudProductControlsEnabled": false
+  },
+  "unfinished": [
+    "real owner/manager phone OTP",
+    "positive signed-owner HTTP commands and upload",
+    "atomic UI snapshot/outbox integration",
+    "money/payment/order/stock command families",
+    "staff/agent resources",
+    "public capability HTTP/rate limits",
+    "real 5000-record throttled-3G upload acceptance"
+  ],
+  "sourceHashes": {
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/catalogue-save.ts": "9b4bfa3c2d0239683bdb5c04c9434e71e1f8de82781e9ffb2bf94f9ec5c80442",
+    "packages/core/cloud-commands.ts": "ba070408a5e43d5ef83ceee9aacd51e729b64b3570c2b28684d4bd5fe01f8fbe",
+    "packages/core/cloud-records.ts": "30cb6e56c06d6584be3293cb702575ae7ddd6bc60f17ab073423f1dc3d8fd381",
+    "packages/core/customer-mutation.ts": "bc4ef7c9b41c96ae29ff255096df896307fa58b5af6dbb1549d78b7bf214c9b8",
+    "packages/core/customers.ts": "39f0e5bf9319aa08bc9d69d73113f349a8cf067d0168011eca345ca26812b3c4",
+    "packages/core/khata.ts": "cfa7cd64e073d6246a6a79e0d533c330c1ae400a4dc6c8102e8a9a6450cb2c71",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "packages/core/phone.ts": "e1ec8d78648f8d3b626544aef7aa7fb22c3ece3d4419d4ce216455980d873c5d",
+    "packages/core/shop-commands.ts": "50a9374c5391dd9eef444362054cba3d03347574a15716b3f52f59d840bc1a40",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "supabase/functions/_shared/auth-http.ts": "c268c1aea32857990d163ddd727abe00c9840ca27def8da6a6a34ec7b82c17fb",
+    "supabase/functions/_shared/catalogue-write.ts": "0fc0e9981afa8649a944e7df7813d6fb9215593e00ee1c370f1106741231f978",
+    "supabase/functions/_shared/commands-handler.ts": "41ee7a21f8156e5e889f8caa06057134f7e21c555495828dd893fb1e9f6d18dd",
+    "supabase/functions/_shared/customer-write.ts": "f9b7364b0856b60abcc19386ee1e192f71567411630688686f035c1536eef89c",
+    "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+    "supabase/functions/commands/index.ts": "b9bf4e09a069b828f6130cf681e4b8e57895cc44885c331670aa0f26def25401",
+    "apps/web/src/data/db.ts": "9e896bcfca0e8845cfc0d72a4f23b8e5cc129d585dde3e77a4244faa6004c5ca",
+    "apps/web/src/data/shop-command-remote.ts": "816f6c69d28352046e40b7d8a21a1449672dcb1bb326e7d4530b1b702de29dd0",
+    "supabase/migrations/20261117182909_customer_commands.sql": "55746af763c9cd466b9e98aff2f494aa2bea4693627faf4fe10a71e0dc67fc11",
+    "supabase/migrations/20261117190239_customer_command_fk_index.sql": "01f6b5095e7aa0612558bfecd119ee654d5e8fff40abbbcbb5474a5eeeff8b7a",
+    "supabase/migrations/20261117192844_customer_status_scope.sql": "5965979818b523ff617ad3fc767b46cb690a937532001ebb22e13dde566b5bc0",
+    "tests/customer-command-bundle.test.ts": "005247042db005a417fdf4e82c67adbcd7aa057921afe87f162419f776caf7d7",
+    "tests/customer-commands.test.ts": "e8641134a5e3b40ab82af6ce2eab1066739ba490a3d4e897c651c8a07520c2c3",
+    "tests/customer-hosted-fixture.ts": "a7187855ff2445bc95a2040ff0b70b6a9c2e932738cbf091924fad785266514f",
+    "tests/shop-command-remote.test.ts": "53484cfb4a88a727c6e12e8ecc2842b2c7144692b8545b0292e88b00c2f8ebcb",
+    "tests/commands-handler.test.ts": "2639d7766385be5ca33f74a33c402f4e84c4a6a52856261aae0eed82e5325535"
+  },
+  "hostedHttpProof": {
+    "checks": [
+      {
+        "name": "missing-jwt",
+        "status": 401,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "forged-jwt",
+        "status": 401,
+        "ok": true,
+        "cacheControl": null,
+        "allowOrigin": "*"
+      },
+      {
+        "name": "anonymous-cannot-write",
+        "status": 401,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io",
+        "expectedStatuses": [
+          401,
+          403
+        ]
+      },
+      {
+        "name": "service-cannot-bootstrap-owner",
+        "status": 403,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "foreign-origin",
+        "status": 403,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": null
+      },
+      {
+        "name": "method-boundary",
+        "status": 405,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "bounded-body",
+        "status": 413,
+        "ok": true,
+        "transport": "native Chromium cross-origin fetch"
+      },
+      {
+        "name": "unsupported-intent",
+        "status": 400,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "browser-preflight",
+        "status": 204,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      }
+    ],
+    "realOwnerJwt": false,
+    "phoneOtp": false,
+    "credentialsLogged": false,
+    "complete": true,
+    "harnessNotes": [
+      "The reused Node probe connection timed out on an oversized body; independent native curl returned 413 in 797 ms and Chromium cross-origin fetch returned 413 in 403 ms.",
+      "Anonymous Data API permission denial is accepted as 401 or 403."
+    ]
+  },
+  "hostedBrowserProof": {
+    "transport": "native Chromium cross-origin fetch",
+    "status": 413,
+    "ok": true,
+    "durationMs": 403,
+    "origin": "https://tanzir71.github.io",
+    "bodyLimitBytes": 32000,
+    "credentialsLogged": false,
+    "tracesSaved": false,
+    "harness": "in-memory page at allowed origin; not a product route or publication"
+  },
+  "logHashes": {
+    "mise-customer-unit.log": "377b16c67e875f4946be501b86cb5d0cc1f13b790e61619e055310b885e57fed",
+    "mise-customer-lint.log": "994d0aea00a950b847fabb752b79ea3714b45b4a308cbdb45d7cb3d5dee7be23",
+    "mise-customer-typecheck.log": "237d2dab45dddbbb4de3ad0ef7df544439d298971657272c5655e7581827c2be",
+    "mise-customer-build-root.log": "a2e5195a5034235129071a50d465605cd3afa30912e168774ba0b5d421e75cff",
+    "mise-customer-build-pages.log": "de71102cdd181c1c20cf300854e0e3bf239240330edea60a0740035ccabb8a79",
+    "mise-customer-e2e.log": "affb13a96af8b3728b8296b88468e8e77e871bfc598045c49aadc2a28e816c9d",
+    "mise-customer-db-dry.log": "80ef01beecc904559c91871269a90bafe90f2cf098b132f8f76632480d7cbdf2",
+    "mise-customer-db-push.log": "37bec19cc5fe2316084f4713a41d58c34d28d7d519c1854a82780f9c35799416",
+    "mise-customer-db-index.log": "f072b24ad4a90d4bd16537b72a927e8887822299868b90d6634e6d4936680b65",
+    "mise-customer-db-scope.log": "a4559c5a44eb5606b493517f0889b483f16f3b392662f83197ffb8c9307de9ef"
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-CcT9cC0p.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  }
+}
