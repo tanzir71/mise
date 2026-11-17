@@ -1,0 +1,288 @@
+{
+  "baseCommit": "a19b71b5aa02ea9ae1e8d9bef08f10adc779d765",
+  "generatedAt": "2026-11-17 13:43:57 UTC",
+  "status": "M30 in progress; owner PIN services deployed; app Auth/sync unavailable",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "supabaseCli": "3.2.0",
+    "localPostgres": "17.5 via @electric-sql/pglite 0.3.16; in-process/no listener",
+    "hostedPostgres": "17.12"
+  },
+  "localChecks": {
+    "unitTests": 747,
+    "unitFiles": 55,
+    "tenantChecks": 69,
+    "shopRecordChecks": 65,
+    "publicCapabilityChecks": 49,
+    "deviceOwnerPostgresChecks": 52,
+    "postgresChecks": 235,
+    "pinCryptoChecks": 16,
+    "deviceHandlerChecks": 7,
+    "ownerHandlerChecks": 12,
+    "lint": "passed",
+    "typecheck": "passed; Astro 79 files clean; server modules included",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "pagesBrowserChecks": 296,
+    "browserRetries": 0,
+    "browserDuration": "6.9m",
+    "clientServerImports": "none",
+    "localAuthFixture": "Test-only UID boundary; no actual JWT/OTP verification"
+  },
+  "ownerPin": {
+    "entry": "supabase/functions/staff-pin/index.ts",
+    "auth": "Caller JWT forwarded with publishable key; no service identity or decoded-claim authority",
+    "authorization": "Owner-only scoped preflight; live access rechecked by audited mutation",
+    "set": "Active assigned staff/kitchen; server PBKDF2 600000 + scoped HMAC pepper",
+    "clear": "Same-business inactive/unassigned staff allowed; no hashing secret needed",
+    "requestBytes": 2048,
+    "bodyDeadlineMs": 5000,
+    "rpcDeadlineMs": 5000,
+    "cors": "exact origin",
+    "cache": "no-store",
+    "credentialLogging": false
+  },
+  "hosted": {
+    "project": "imzbqggkoquhkyawvjmz",
+    "organization": "rnrjlctuwkxbectaarbz",
+    "ownerSelectedOrganization": true,
+    "quotedMonthlyCost": 0,
+    "region": "ap-southeast-1",
+    "dashboard": "https://supabase.com/dashboard/project/imzbqggkoquhkyawvjmz",
+    "productionConfig": "deploy/supabase/config.toml",
+    "declaredConfigDrift": 0,
+    "auth": {
+      "email": false,
+      "phone": false,
+      "anonymous": false,
+      "signup": false,
+      "otherExternalProviders": false,
+      "accessTokenExpirySeconds": 900,
+      "localTestOtpTransferred": false
+    },
+    "migrations": [
+      {
+        "version": "20261117081808",
+        "name": "tenant_foundation"
+      },
+      {
+        "version": "20261117085319",
+        "name": "shop_records"
+      },
+      {
+        "version": "20261117102312",
+        "name": "public_capabilities"
+      },
+      {
+        "version": "20261117114114",
+        "name": "device_auth"
+      },
+      {
+        "version": "20261117122734",
+        "name": "owner_pin_admin"
+      },
+      {
+        "version": "20261117130209",
+        "name": "hosted_fk_indexes"
+      }
+    ],
+    "schema": {
+      "tables": [
+        {
+          "schema": "public",
+          "tables": 29,
+          "rls_enabled_forced": true
+        },
+        {
+          "schema": "private",
+          "tables": 5,
+          "rls_enabled_forced": true
+        }
+      ],
+      "serverVersion": "17.12",
+      "functionOwners": [
+        "postgres"
+      ],
+      "publicDefiners": 0,
+      "anonPublicSelect": 0,
+      "authenticatedDirectWrites": 0
+    },
+    "functions": [
+      {
+        "id": "643d933e-0b05-41f6-b258-58c10ea19be3",
+        "name": "device-pin",
+        "status": "ACTIVE",
+        "version": 1,
+        "verifyJwt": false,
+        "bundleSha256": "efed1e985eb9448a69f24d9ba64901b8416d57206d346a8e14129826ac3da213"
+      },
+      {
+        "id": "9428c4dd-8587-4591-ad6f-8c076574297d",
+        "name": "staff-pin",
+        "status": "ACTIVE",
+        "version": 1,
+        "verifyJwt": true,
+        "bundleSha256": "6e1af7cb371095f1c09b373fbfc8d4e9a5eb546581c2f39218b257bd70514de1"
+      }
+    ],
+    "secretNames": [
+      "MISE_SERVICE_API_KEY",
+      "MISE_PUBLISHABLE_API_KEY",
+      "MISE_STAFF_PIN_PEPPER_V1",
+      "MISE_ALLOWED_ORIGINS"
+    ],
+    "secretValuesInRepository": false,
+    "fixtureCleanup": {
+      "pins": 0,
+      "events": 0,
+      "devices": 0,
+      "members": 0,
+      "outlets": 0,
+      "attempts": 0,
+      "sessions": 0,
+      "authUsers": 0,
+      "businesses": 0,
+      "fixtureBusinessRows": 0
+    },
+    "advisors": {
+      "security": [
+        {
+          "name": "rls_enabled_no_policy",
+          "level": "INFO",
+          "count": 5,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+        }
+      ],
+      "performance": [
+        {
+          "name": "unused_index",
+          "level": "INFO",
+          "count": 77,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index"
+        }
+      ],
+      "warningOrErrorCount": 0,
+      "foreignKeyIndexNoticesResolved": true,
+      "remaining": "Intentional private default-deny tables; unused-index INFO after small/empty workload"
+    },
+    "authSmoke": {
+      "deviceUnknownTokenStatus": 401,
+      "deviceError": "Check the device and PIN, then try again.",
+      "deviceCors": [
+        "https://tanzir71.github.io"
+      ],
+      "deviceCacheControl": [
+        "no-store"
+      ],
+      "ownerInvalidJwtStatus": 401
+    },
+    "liveDeviceProof": {
+      "project": "imzbqggkoquhkyawvjmz",
+      "mode": "synthetic device fixture; no Auth account or SMS",
+      "wrongPin": 401,
+      "correctPin": 200,
+      "scopedSessionRead": 200,
+      "scopeVerified": true,
+      "permissions": [
+        "counter.sell",
+        "orders.read"
+      ],
+      "logout": 200,
+      "postLogoutIsNull": true,
+      "fiveFailuresThenRateLimit": 429,
+      "retryAfter": [
+        "895"
+      ],
+      "anonymousRawTableDenied": 401,
+      "authAccountsCreated": 0,
+      "messagesSent": 0
+    }
+  },
+  "credentialCleanup": {
+    "completed": false,
+    "rejection": "Automatic approval review rejected PowerShell removal: blocked by policy",
+    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "files": [
+      "api-keys.json",
+      "edge.env",
+      "fixture.json",
+      "session-response.json"
+    ],
+    "location": "outside repository",
+    "alternativeDeletionRouteAttempted": false,
+    "databaseFixtureCleanup": "completed independently"
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "ownerEntryChange": "embedded CHANGELOG copy"
+  },
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastVerifiedLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "Production SMS configuration and real owner/manager phone OTP",
+    "Positive hosted owner JWT, manager outlet and public resource-isolation checks",
+    "Device/PIN app interface and browser session handling",
+    "Scoped staff/agent data, audited commands and private Storage",
+    "Reviewed resumable 5000-record/3G migration under 60s",
+    "Remaining milestone acceptance and publication under owner instructions"
+  ],
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-3GhpiuFc.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "dd26e04706c18b2be28c359498079025200e1a2f571d1ab77651a53e1aa54b0a",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "supabase/migrations/20261117102312_public_capabilities.sql": "23fa0311a7206fe02e4bfb37e6e1c9b5fa9d0d9f0b3f894c661b832909012324",
+    "supabase/migrations/20261117114114_device_auth.sql": "53a4b8dc3dc55ddd54b2b0f91149fb5afbbd21a14fdbe486a0c1e029aa919637",
+    "supabase/migrations/20261117122734_owner_pin_admin.sql": "31d74cd0c277db83407e47545bc63bc4e50e3c9ddd326524d9d3bb4f6c84da3c",
+    "supabase/migrations/20261117130209_hosted_fk_indexes.sql": "230545c612f5ac349f58e48827483bae560d2b315526c0793d2610567e4bc3bd",
+    "supabase/functions/_shared/staff-pin.ts": "07731988c47056d0389c859b6fc35c041dbc0488fe6bca21623034fd51a1baba",
+    "supabase/functions/_shared/auth-http.ts": "fbb27e236446c8cd77c16b6a2013eb53743799dd2fa316a23ee5ecd241e763fe",
+    "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+    "supabase/functions/_shared/owner-pin-handler.ts": "0dc9697156a40dd171f91bf55090c5c4e03bfdc3215646ad1adf0e524cc37d83",
+    "supabase/functions/device-pin/index.ts": "048c6685c40ab8b5ef87134490a73e5bf90a6923e4861a035ebd26873f8bb05c",
+    "supabase/functions/staff-pin/index.ts": "c17500ea83e2493708fd1caa42fa1ace643fd415d87548b7c7d9a1237a544368",
+    "supabase/functions/.env.example": "cb2b900585f717eab49fc7a0bb56c2861107383c58a9da0bdf089b1ad6b5cb72",
+    "supabase/config.toml": "8ec4c092624cb56750bc6a5fce08bee302414ef518555d45d0f7e55754272d1b",
+    "deploy/supabase/config.toml": "55d3dd935c856550cb64024d2f9e348997d1a9f20b1afe40b0eb91a4eef582aa",
+    "deploy/supabase/.gitignore": "72f26c4e5b24740472ded06041118c703172aaf428f1a55ba3a5e98e413bdcb7",
+    "tests/device-auth.test.ts": "0be83f64b0de1f8fbd1bede29acf4fe1a1ccb71fb9020ae67cb68ee90383a15f",
+    "tests/device-pin-handler.test.ts": "b8366407231661cd44bfd178ce6c7ed78f3ee6c20cbc9c8f6799f52dd89666e4",
+    "tests/owner-pin-handler.test.ts": "f6409bb6f080a6cc1957b75085a8c8aaec234383a3d83a23b2a835a42c7ea619",
+    "tests/staff-pin.test.ts": "69cdb32376592a08a0c7bc0ce8614423b27ebb14c07fa8b8c099d89c611a864b",
+    "tests/fixtures/supabase-auth.sql": "1f02395438d3cb1ef8ee82c21856971fcbff0a02739d6e4b6af0a6ba1c27ad17",
+    "CHANGELOG.md": "94e5abbc703aa552f9a03564d8d34fe8ee6cac3d84b0b110085a4cf7bdba2ee1"
+  },
+  "logSha256": {
+    "unit": "cd452a110919e79aa24efa59a230350f1fd35a70ad9034464f1bc8b649411071",
+    "typecheck": "5da632af18d4a64e1c597050f92f83a7628a19c7f635b22d77f9b710358ec03d",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "c2e3eb922139f415024cded89b1962da0eda8f0c83ad2c2c7b7539c169282bfc",
+    "pagesBuild": "ded34af09aa755c7b81bb3945767d43fbe9ac66076a3ac3291e838b9e916b231",
+    "pagesBrowser": "3f99d67b56cd0710311858fa903979b28fefff16ee0f2bb5b92096f23199f343",
+    "nativeFinalIndexes": "107f4d98acf2ca26a920315d1b7e66648c50d9cda52fe4337f7e78801f65fc19",
+    "configBefore": "01c5918802e8e6fbbc257a12f080ffa8a636ed04e32d91f6eebc04a8b47acba7",
+    "configApply": "91fa16d93bad813a7c7285e698f09278edd4f7d34a59058a5e4bc965992a8f67",
+    "configAfter": "5a338606ef32c756dc91106b4bda0ec4409841106cffdfc7ca3487ecfe48f3dd",
+    "authSettings": "849432dfa584bbd247cd94d9aaeabcb7a421bcb40a7db353a55dd29d51429bb4",
+    "migrationDryRun": "f4125cf9ef3a99729dc5fd6150a2e14a23429d6f6ead868e79a2e16b1841d2df",
+    "migrationApply": "0164c34919f4cd81de62e366c0d93e6d73157ee36af81d43fad5383f662a2f70",
+    "indexApply": "2a14c7447945322cc1b503dcf97ec4ad1d5af04f7b8a19e241973ea45be3f315",
+    "authSmoke": "8501873da5ae7db6a9bc418fc3519450e153a1e79d9420e46f1d55d0e67ef0c1",
+    "liveDevice": "bb6900a93f01713b25b87a0176615fd420ed7e489faa40956d62df82c6c8ecde"
+  }
+}

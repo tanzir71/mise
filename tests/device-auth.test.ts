@@ -5,6 +5,7 @@ import {afterAll,beforeAll,beforeEach,expect,it} from 'vitest';
 import {newInboxId} from '../packages/core/inbox';
 import {createStaffPin,deriveStaffPin,type PinCredential} from '../supabase/functions/_shared/staff-pin';
 import {createDevicePinHandler} from '../supabase/functions/_shared/device-pin-handler';
+import {createOwnerPinHandler,OwnerPinDenied,type OwnerPinStore} from '../supabase/functions/_shared/owner-pin-handler';
 
 const id=(n:number)=>String(n).padStart(26,'0'),uid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const business=id(1),outlet=id(11),branch=id(12),staff=id(104),kitchen=id(105),foreignStaff=id(108),branchStaff=id(109);
@@ -39,7 +40,7 @@ async function login(device:Device,member=staff,pin='0042'){
 async function read(device:Device,session:Session){return (await asRole<{data:Record<string,unknown>|null}>(null,'anon','select public.read_device_session($1,$2) as data',[device.token,session.token]))[0].data;}
 beforeAll(async()=>{
   db=await PGlite.create();
-  for(const path of ['./fixtures/supabase-auth.sql','../supabase/migrations/20261117081808_tenant_foundation.sql','../supabase/migrations/20261117085319_shop_records.sql','../supabase/migrations/20261117102312_public_capabilities.sql','../supabase/migrations/20261117114114_device_auth.sql'])
+  for(const path of ['./fixtures/supabase-auth.sql','../supabase/migrations/20261117081808_tenant_foundation.sql','../supabase/migrations/20261117085319_shop_records.sql','../supabase/migrations/20261117102312_public_capabilities.sql','../supabase/migrations/20261117114114_device_auth.sql','../supabase/migrations/20261117122734_owner_pin_admin.sql','../supabase/migrations/20261117130209_hosted_fk_indexes.sql'])
     await db.exec(readFileSync(new URL(path,import.meta.url),'utf8'));
   for(const n of [1,2,3,4,5])await db.query('insert into auth.users(id,phone,phone_confirmed_at) values($1,$2,now())',[uid(n),`1415555010${n}`]);
   for(const b of [1,2])await db.query('insert into public.businesses(id,name,business_type,market_code,created_at,updated_at) values($1,$2,$3,$4,1,1)',[id(b),JSON.stringify(`Shop ${b}`),'corner_shop','BD']);
@@ -214,4 +215,49 @@ it('HTTP rejects foreign origins, extra proof fields and oversized chunked bodie
 });
 it('missing pepper configuration fails closed without disclosing credential material',async()=>{
   const d=await enrol(),response=await handler(new Map())(request(d));expect(response.status).toBe(503);const text=await response.text();expect(text).not.toContain(d.token);expect(text).not.toContain(credentials[staff].salt);expect(text).not.toContain(credentials[staff].verifier);
+});
+
+// Test-only verified-identity boundary; production forwards the original JWT.
+const ownerJwt=(n:number)=>`fixture.owner_${n}.signature`;
+function ownerStore():OwnerPinStore{
+  async function rpc(jwt:string,query:string,params:unknown[]){
+    const n=[1,2,3,4,5].find(n=>ownerJwt(n)===jwt);if(n===undefined)throw new OwnerPinDenied(401);
+    try{return (await asRole<{data:unknown}>(n,'authenticated',query,params))[0].data;}
+    catch(error){if((error as {code?:string}).code==='42501')throw new OwnerPinDenied();throw error;}
+  }
+  return {context:(jwt,o,m,action)=>rpc(jwt,'select public.staff_pin_context($1,$2,$3) as data',[o,m,action]),
+    set:(jwt,o,m,e,c)=>rpc(jwt,'select public.set_staff_pin($1,$2,$3,$4,$5,$6) as data',[o,m,e,c.salt,c.verifier,c.pepperVersion]),
+    clear:(jwt,o,m,e)=>rpc(jwt,'select public.clear_staff_pin($1,$2,$3) as data',[o,m,e])};
+}
+const ownerRequest=(n=1,action='set',pin='9876',target=outlet,member=staff)=>new Request('https://functions.test/staff-pin',{method:'POST',headers:{Authorization:`Bearer ${ownerJwt(n)}`,'Content-Type':'application/json',Origin:'https://shop.test'},body:JSON.stringify({action,outletId:target,memberId:member,...(action==='set'?{pin}:{})})});
+const ownerHandler=(store=ownerStore(),key:Uint8Array|undefined=pepper)=>createOwnerPinHandler({store,pepper:key,origins:new Set(['https://shop.test']),newId:()=>newInboxId()});
+it('owner context returns only authorized scope/configuration and never a salt or verifier',async()=>{
+  const context=await ownerStore().context(ownerJwt(1),outlet,staff,'set');expect(context).toEqual({businessId:business,outletId:outlet,memberId:staff,configured:true});
+  for(const actor of ['anon','service_role'] as const)await expect(asRole(null,actor,'select public.staff_pin_context($1,$2,$3)',[outlet,staff,'set'])).rejects.toMatchObject({code:'42501'});
+});
+it.each([2,3,4,5])('owner PIN HTTP rejects non-owner/foreign operator %s without changing the credential',async n=>{
+  const previous=(await db.query('select revision from private.staff_pins where member_id=$1',[staff])).rows;
+  expect((await ownerHandler()(ownerRequest(n))).status).toBe(403);expect((await db.query('select revision from private.staff_pins where member_id=$1',[staff])).rows).toEqual(previous);
+});
+it('owner PIN HTTP rejects a same-business staff member not assigned to the selected outlet',async()=>{
+  expect((await ownerHandler()(ownerRequest(1,'set','9876',outlet,branchStaff))).status).toBe(403);
+});
+it('owner PIN HTTP sets a usable new PIN, invalidates prior sessions and returns only audit metadata',async()=>{
+  const d=await enrol(),old=await login(d),response=await ownerHandler()(ownerRequest());expect(response.status).toBe(200);
+  const result=await response.json() as Record<string,unknown>;expect(Object.keys(result).sort()).toEqual(['changedAt','memberId','revision']);expect(result.memberId).toBe(staff);expect(await read(d,old)).toBeNull();
+  expect(await login(d,staff,'0042')).toBeNull();expect(await read(d,await login(d,staff,'9876'))).not.toBeNull();
+});
+it('PIN removal works for inactive/unassigned staff and remains available without the pepper',async()=>{
+  const d=await enrol(),s=await login(d);await db.query('update public.members set active=false where id=$1',[staff]);await db.query('delete from public.member_outlets where member_id=$1 and outlet_id=$2',[staff,outlet]);
+  const handle=createOwnerPinHandler({store:ownerStore(),origins:new Set(['https://shop.test'])}),response=await handle(ownerRequest(1,'clear'));expect(response.status).toBe(200);expect(await response.json()).toEqual({memberId:staff,cleared:true});expect(await read(d,s)).toBeNull();
+});
+it('owner authorization is checked again after the KDF before a PIN changes',async()=>{
+  const store=ownerStore(),previous=(await db.query('select revision from private.staff_pins where member_id=$1',[staff])).rows;
+  const handle=ownerHandler({...store,set:async(...args)=>{await db.query('update public.members set active=false where id=$1',[id(101)]);return store.set(...args);}});
+  expect((await handle(ownerRequest())).status).toBe(403);expect((await db.query('select revision from private.staff_pins where member_id=$1',[staff])).rows).toEqual(previous);
+});
+it('owner PIN HTTP audit failure preserves the existing PIN and session',async()=>{
+  const d=await enrol(),s=await login(d),collision=(await db.query<{id:string}>('select id from public.events limit 1')).rows[0].id;
+  const handle=createOwnerPinHandler({store:ownerStore(),pepper,origins:new Set(['https://shop.test']),newId:()=>collision});
+  expect((await handle(ownerRequest())).status).toBe(503);expect(await read(d,s)).not.toBeNull();expect(await login(d,staff,'0042')).not.toBeNull();
 });

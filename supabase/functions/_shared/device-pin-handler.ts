@@ -1,4 +1,5 @@
 import {deriveStaffPin} from './staff-pin.ts';
+import {authHttp,AuthBodyError,readAuthBody} from './auth-http.ts';
 
 export interface PinChallenge {allowed:true;attemptId:string;businessId:string;memberId:string;salt:string;pepperVersion:string;expiresAt:number}
 export interface PinBackoff {allowed:false;retryAt:number}
@@ -18,34 +19,15 @@ export function deviceAuthId(at=Date.now()):string{
   for(let i=0;i<16;i++){suffix=alphabet[Number(random&31n)]+suffix;random>>=5n;}
   return prefix+suffix;
 }
-class BodyTooLarge extends Error {}
-class BodyTimedOut extends Error {}
-async function body(request:Request):Promise<unknown>{
-  if(Number(request.headers.get('content-length')||0)>2048)throw new BodyTooLarge();
-  const reader=request.body?.getReader();if(!reader)throw new Error('Missing body');
-  const chunks:Uint8Array[]=[];let length=0,timer:ReturnType<typeof setTimeout>|undefined;
-  const deadline=new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new BodyTimedOut()),5000);});
-  try{while(true){const part=await Promise.race([reader.read(),deadline]);if(part.done)break;length+=part.value.byteLength;if(length>2048)throw new BodyTooLarge();chunks.push(part.value);}}
-  catch(error){void reader.cancel().catch(()=>{});throw error;}
-  finally{clearTimeout(timer);reader.releaseLock();}
-  const bytes=new Uint8Array(length);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
-  return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
-}
 export function createDevicePinHandler(deps:{store:DevicePinStore;peppers:ReadonlyMap<string,Uint8Array>;origins:ReadonlySet<string>;newId?:()=>string;now?:()=>number}){
   // Copy secrets/config once; requests cannot alter another request's auth context.
   const peppers=new Map([...deps.peppers].map(([version,key])=>[version,new Uint8Array(key)])),origins=new Set(deps.origins),newId=deps.newId??deviceAuthId,now=deps.now??Date.now;
   return async(request:Request):Promise<Response>=>{
-    const origin=request.headers.get('origin');
-    const headers=new Headers({'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Pragma':'no-cache','Vary':'Origin'});
-    if(origin&&origins.has(origin))headers.set('Access-Control-Allow-Origin',origin);
-    const reply=(status:number,value:unknown,extra:Record<string,string>={})=>{const result=new Headers(headers);for(const [k,v] of Object.entries(extra))result.set(k,v);return new Response(JSON.stringify(value),{status,headers:result});};
-    if(origin&&!origins.has(origin))return reply(403,{error:'This origin is not allowed.'});
-    if(request.method==='OPTIONS')return new Response(null,{status:204,headers:new Headers([...headers,['Access-Control-Allow-Methods','POST, OPTIONS'],['Access-Control-Allow-Headers','authorization, content-type, apikey']])});
-    if(request.method!=='POST')return reply(405,{error:'Use POST.'},{Allow:'POST, OPTIONS'});
+    const {reply,blocked}=authHttp(request,origins);if(blocked)return blocked;
     const deviceToken=request.headers.get('authorization')?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
     if(!deviceToken)return reply(401,{error:'Check the device and PIN, then try again.'});
     if(!/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type')||''))return reply(415,{error:'Use JSON.'});
-    let input:unknown;try{input=await body(request);}catch(error){return reply(error instanceof BodyTooLarge?413:error instanceof BodyTimedOut?408:400,{error:'Enter a member and four digits.'});}
+    let input:unknown;try{input=await readAuthBody(request);}catch(error){return reply(error instanceof AuthBodyError?error.status:400,{error:'Enter a member and four digits.'});}
     if(!object(input)||Object.keys(input).sort().join(',')!=='memberId,pin'||typeof input.memberId!=='string'||!ulid.test(input.memberId)||typeof input.pin!=='string'||!/^[0-9]{4}$/.test(input.pin))return reply(400,{error:'Enter a member and four digits.'});
     try{
       const attemptId=newId(),challenge=await deps.store.begin(attemptId,deviceToken,input.memberId);

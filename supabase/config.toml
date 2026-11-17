@@ -66,3 +66,7 @@ token_verifications = 30
 # The reserve/finish database protocol is service-only; it never trusts user claims.
 [functions.device-pin]
 verify_jwt = false
+
+# Owner JWT is verified at the platform and forwarded to scoped database RPCs.
+[functions.staff-pin]
+verify_jwt = true
