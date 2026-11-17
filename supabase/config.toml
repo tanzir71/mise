@@ -70,3 +70,7 @@ verify_jwt = false
 # Owner JWT is verified at the platform and forwarded to scoped database RPCs.
 [functions.staff-pin]
 verify_jwt = true
+
+# Own authentication: enrolled device secret plus short staff session.
+[functions.device-orders]
+verify_jwt = false

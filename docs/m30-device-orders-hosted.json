@@ -1,0 +1,273 @@
+{
+  "baseCommit": "9dece834849657bdd8923780ad7b05a45294b593",
+  "generatedAt": "2026-11-17 14:08:40 UTC",
+  "status": "M30 in progress; scoped device-order service deployed; shared-screen/Auth/sync app interface unavailable",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "supabaseCli": "3.2.0",
+    "localPostgres": "17.5 via @electric-sql/pglite 0.3.16; in-process/no listener",
+    "hostedPostgres": "17.12"
+  },
+  "localChecks": {
+    "unitTests": 788,
+    "unitFiles": 57,
+    "deviceOrderIntegration": 35,
+    "deviceOrderHandlerTransport": 6,
+    "previousNativePostgresChecks": 235,
+    "nativeSuite": "All seven migrations; Request -> handler -> real PostgreSQL -> mode-specific response; test-only owner UID fixture and service role, not real hosted JWT/OTP",
+    "businessPacks": [
+      "corner_shop",
+      "restaurant",
+      "online_shop",
+      "food_stall"
+    ],
+    "recordCountInPrimaryOutlet": 103,
+    "covered": [
+      "literal NUL and lone surrogate code units",
+      "counter unknown prices and pending substitutions",
+      "terminal orders and tied creation timestamps",
+      "second outlet and different business isolation",
+      "nested-field redaction",
+      "device/session mismatch and unknown credentials",
+      "live permission and assignment/role/member changes",
+      "device/session expiry or revocation and PIN removal",
+      "bounded cursor and page validation",
+      "service-only raw RPC grants",
+      "CORS, uncached response, fixed service adapter and generic errors"
+    ],
+    "lint": "passed",
+    "typecheck": "passed; Astro79 clean; server modules included",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "browserChecks": 296,
+    "browserRetries": 0,
+    "browserDuration": "5.9m"
+  },
+  "authorization": {
+    "credentials": "device bearer plus short session in POST body",
+    "scope": "derived from live SQL device session; no caller-selected business/outlet/mode",
+    "requiredPermission": "orders.read",
+    "sqlClientGrants": false,
+    "publicWrapper": "security invoker, volatile/POST-only, empty search path",
+    "privateRead": "security definer, stable statement snapshot, empty search path; service-only",
+    "rawLineData": "server-only serialized JSON; never sent raw to browser",
+    "projection": "strict explicit field allowlists in Edge JavaScript",
+    "kitchen": "operational ticket fields; no money/customer/payment/audit",
+    "counter": "order prices, total, payment kind/status and customer-name snapshot; no linked private records/contact/ledger/audit",
+    "bodyBytes": 2048,
+    "bodyDeadlineMs": 5000,
+    "rpcDeadlineMs": 5000,
+    "cache": "no-store",
+    "redirects": "error",
+    "key": "sb_secret_ server key in apikey only",
+    "credentialLogging": false
+  },
+  "pagination": {
+    "order": [
+      "created_at",
+      "id"
+    ],
+    "defaultLimit": 50,
+    "maximumLimit": 100,
+    "terminalOrdersIncluded": true,
+    "index": "orders_device_page_idx",
+    "scope": "bounded history listing, not M31 change cursor or realtime/conflict/sync proof"
+  },
+  "hosted": {
+    "project": "imzbqggkoquhkyawvjmz",
+    "migrations": [
+      {
+        "version": "20261117081808",
+        "name": "tenant_foundation"
+      },
+      {
+        "version": "20261117085319",
+        "name": "shop_records"
+      },
+      {
+        "version": "20261117102312",
+        "name": "public_capabilities"
+      },
+      {
+        "version": "20261117114114",
+        "name": "device_auth"
+      },
+      {
+        "version": "20261117122734",
+        "name": "owner_pin_admin"
+      },
+      {
+        "version": "20261117130209",
+        "name": "hosted_fk_indexes"
+      },
+      {
+        "version": "20261117134918",
+        "name": "device_order_reads"
+      }
+    ],
+    "function": {
+      "id": "2ce6898a-742f-4c07-81b2-a2956f2ca799",
+      "name": "device-orders",
+      "status": "ACTIVE",
+      "version": 1,
+      "verifyJwt": false,
+      "bundleSha256": "89214478deee61282793865fc60bd20c3a6a9cb6eb07bba92f1b1e838c7f8521"
+    },
+    "catalog": {
+      "index": "CREATE INDEX orders_device_page_idx ON public.orders USING btree (business_id, outlet_id, created_at, id)",
+      "functions": [
+        {
+          "anon": false,
+          "name": "read_device_orders",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "private",
+          "definer": true,
+          "service": true,
+          "volatility": "s",
+          "authenticated": false
+        },
+        {
+          "anon": false,
+          "name": "read_device_orders",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "public",
+          "definer": false,
+          "service": true,
+          "volatility": "v",
+          "authenticated": false
+        }
+      ]
+    },
+    "fixtureCleanup": {
+      "pins": 0,
+      "events": 0,
+      "orders": 0,
+      "devices": 0,
+      "members": 0,
+      "outlets": 0,
+      "attempts": 0,
+      "sessions": 0,
+      "authUsers": 0,
+      "businesses": 0
+    },
+    "authAccountsCreated": 0,
+    "messagesSent": 0,
+    "newSecrets": false,
+    "newCredentialFiles": false,
+    "advisors": {
+      "security": [
+        {
+          "name": "rls_enabled_no_policy",
+          "level": "INFO",
+          "count": 5,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+        }
+      ],
+      "performance": [
+        {
+          "name": "unused_index",
+          "level": "INFO",
+          "count": 77,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index"
+        }
+      ],
+      "warningOrErrorCount": 0
+    },
+    "liveProof": {
+      "project": "imzbqggkoquhkyawvjmz",
+      "fixture": "synthetic direct session; no Auth account, OTP or PIN login claimed",
+      "counterStatus": 200,
+      "kitchenStatus": 200,
+      "sourceOutletOrders": 2,
+      "branchOrderExcluded": true,
+      "terminalStatusRetained": true,
+      "paginationVerified": true,
+      "literalUnicodeVerified": true,
+      "counterPrice": 1300,
+      "kitchenMoneyAndCustomerExcluded": true,
+      "unknownFieldsExcluded": true,
+      "crossDeviceSession": 401,
+      "unknownDevice": 401,
+      "foreignOrigin": 403,
+      "rawRpcDenied": 401,
+      "getDenied": 405,
+      "cacheControl": "no-store",
+      "credentialsWrittenToDisk": false,
+      "authAccountsCreated": 0,
+      "messagesSent": 0,
+      "probe": "Node fetch/JSON.parse verified original NUL and lone-surrogate code units; initial PowerShell probe failed its literal comparison",
+      "livePermissionRemovalStatus": 401
+    }
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "ownerEntryChange": "embedded CHANGELOG copy"
+  },
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastVerifiedLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "priorCredentialCleanup": {
+    "completed": false,
+    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "reason": "Earlier automatic approval review blocked removal; no retry or alternative deletion route",
+    "outsideRepository": true
+  },
+  "remaining": [
+    "Real owner/manager phone OTP and positive hosted JWT/resource isolation",
+    "Device/PIN shared-screen interface, caching, browser session lifecycle and queued taps",
+    "Remaining staff/agent resources, audited commands and private Storage",
+    "Reviewed resumable 5000-record upload under 60s on 3G",
+    "M31 convergence/change cursor/realtime and all later milestones",
+    "Remaining delivery/publication gates under owner instructions"
+  ],
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-CRJE7LyR.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "556563b719391e4d82c1d220be5b8abfa0070ca259824d7debaaf0ec9b91e00d",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "supabase/migrations/20261117102312_public_capabilities.sql": "23fa0311a7206fe02e4bfb37e6e1c9b5fa9d0d9f0b3f894c661b832909012324",
+    "supabase/migrations/20261117114114_device_auth.sql": "53a4b8dc3dc55ddd54b2b0f91149fb5afbbd21a14fdbe486a0c1e029aa919637",
+    "supabase/migrations/20261117122734_owner_pin_admin.sql": "31d74cd0c277db83407e47545bc63bc4e50e3c9ddd326524d9d3bb4f6c84da3c",
+    "supabase/migrations/20261117130209_hosted_fk_indexes.sql": "230545c612f5ac349f58e48827483bae560d2b315526c0793d2610567e4bc3bd",
+    "supabase/migrations/20261117134918_device_order_reads.sql": "30e3233544cf4652c86c6046b2bd2104e8d98ce8d225ed36df6321bfa45115ec",
+    "supabase/functions/_shared/device-orders-handler.ts": "75f701b0cd0d629e25f4d7abb3228619dd13b8b89732ad7b47ff6dd44ffc439e",
+    "supabase/functions/device-orders/index.ts": "588f4ba301e83e58e7d548cf37148a9d72f437c98215e4ea9744ec1f334da1c6",
+    "supabase/functions/_shared/auth-http.ts": "fbb27e236446c8cd77c16b6a2013eb53743799dd2fa316a23ee5ecd241e763fe",
+    "supabase/config.toml": "6fc706658dc1d7535dfbe4441e1fad3d810f8fbf667960b6c27a629c6f66318d",
+    "tests/device-orders.test.ts": "56a25e21c35b177f2daee00a460e095247e8176ec7e7e85179dd74db6209d34c",
+    "tests/device-orders-handler.test.ts": "b9274ef7049d4faadffa179264ed140f623bb7c01b02ba69ebb6644681c95684",
+    "CHANGELOG.md": "7cc475c7d828604baa9e5e99f9fdfe37631625c85ebcd54bbc2e62b22cae50aa"
+  },
+  "logSha256": {
+    "unit": "3566944d62ca8982a6954e012be4303b25eab3f921cfaddf4851fec5a8d83922",
+    "typecheck": "3cf58011c527c16abfefa4d3957ca482997a45f2e551356ac7517f1d3fd02d65",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "872bae709887cc1f920b2f6adf88d321795624821294733f96780507cfc4e037",
+    "pagesBuild": "3ac666b9034262919d81acc93f4d7d27ecd9f48b4615c9fc377644f8c2a76f46",
+    "pagesBrowser": "51bfd118d10afc5d50bfb51b983048b68e4bb87d610e820a216b0aa1577aa74c",
+    "focused": "9e6f0629072bf84bdadab14967093c8da06b367083bccdbef3ea3ff53e0825b6",
+    "migrationDryRun": "f4f8f56a451154f317165324984c86be770bfb88336bb200a3c0f688a8fd19a2",
+    "migrationApply": "39447d8796e203b6bfc66c0d2986a47ac2971b01bc57932cc414dcb2d46505fb",
+    "hostedLive": "be868b27c53ce5a0d2426d012ee1993572b4f9c904964a5cc56d7465ece40715"
+  }
+}
