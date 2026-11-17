@@ -5,7 +5,7 @@ import type { AuditEvent, CreditAccount, CreditEntry, CreditReminder, Customer, 
 export interface CreditTermsInput { allowed: boolean; limit: number; reminder: CreditReminder }
 export const defaultCreditTerms: CreditTermsInput = { allowed:false, limit:0, reminder:{enabled:false,dayOfMonth:2,tone:'gentle',channel:'whatsapp'} };
 export interface LedgerContext { setup: SetupSnapshot; customer: Customer; account: CreditAccount; entries: CreditEntry[] }
-type CustomerLedgerContext=Omit<LedgerContext,'setup'>&{setup:CustomerSetup};
+export type CustomerLedgerContext=Omit<LedgerContext,'setup'>&{setup:CustomerSetup};
 export interface OverLimitConfirmation { balance: number; limit: number }
 export class CreditLimitError extends Error {
   constructor(public balance: number, public limit: number, public proposed: number) { super('This would exceed the customer’s credit limit. Confirm Give anyway to continue.'); this.name = 'CreditLimitError'; }
@@ -59,7 +59,7 @@ function entryCommand(context: CustomerLedgerContext, values: Pick<CreditEntry,'
   const entry: CreditEntry = { id:newId('entry'), accountId:context.account.id, customerId:context.customer.id, outletId:context.account.outletId, currency:context.account.currency, sequence, ...values, createdBy:context.setup.owner.id, eventId:event.id, createdAt:at, updatedAt:at };
   event.after = entry; return { entry,event };
 }
-export function chargeCreditCommand(amount: number, context: LedgerContext, options: { confirmation?: OverLimitConfirmation; note?: string; saleId?: string } = {}, at = Date.now()) {
+export function chargeCreditCommand(amount: number, context: CustomerLedgerContext, options: { confirmation?: OverLimitConfirmation; note?: string; saleId?: string } = {}, at = Date.now(), newId:(kind:'entry'|'event')=>string=()=>ulid(at)) {
   validateCreditContext(context); safeAmount(amount,true);
   const { account } = context;
   if (!account.allowed) throw new Error('Credit is turned off for this customer.');
@@ -67,13 +67,13 @@ export function chargeCreditCommand(amount: number, context: LedgerContext, opti
   const balance = creditBalance(account,context.entries), proposed = checked(BigInt(balance)+BigInt(amount));
   const over = proposed > account.limit;
   if (over && (options.confirmation?.balance !== balance || options.confirmation.limit !== account.limit)) throw new CreditLimitError(balance,account.limit,proposed);
-  return entryCommand(context,{type:'charge',amount,note:options.note || '',saleId:options.saleId,overLimit:over ? {balance,limit:account.limit} : undefined},'khata.charge',at);
+  return entryCommand(context,{type:'charge',amount,note:options.note || '',saleId:options.saleId,overLimit:over ? {balance,limit:account.limit} : undefined},'khata.charge',at,true,newId);
 }
-export function recordCreditPaymentCommand(amount: number, method: PaymentMethod, wallet: string | undefined, context: LedgerContext, wallets: string[], note = '', at = Date.now()) {
+export function recordCreditPaymentCommand(amount: number, method: PaymentMethod, wallet: string | undefined, context: CustomerLedgerContext, wallets: string[], note = '', at = Date.now(), newId:(kind:'entry'|'event')=>string=()=>ulid(at)) {
   validateCreditContext(context); safeAmount(amount,true);
   if (amount > creditBalance(context.account,context.entries)) throw new Error('A payment cannot exceed the amount due.');
   if (!['cash','wallet','card'].includes(method) || (method === 'wallet' && (!wallet || wallet === 'Cash' || !wallets.includes(wallet)))) throw new Error('Choose a supported payment method.');
-  return entryCommand(context,{type:'payment',amount,note,methodName:method === 'wallet' ? wallet : method === 'card' ? 'Card' : 'Cash'},'khata.payment',at);
+  return entryCommand(context,{type:'payment',amount,note,methodName:method === 'wallet' ? wallet : method === 'card' ? 'Card' : 'Cash'},'khata.payment',at,true,newId);
 }
 export function openingBalanceCommand(amount: number, occurredAt: number, context: CustomerLedgerContext, at = Date.now(), newId:(kind:'entry'|'event')=>string=()=>ulid(at)) {
   validateCreditContext(context); safeAmount(amount,true);
@@ -82,7 +82,7 @@ export function openingBalanceCommand(amount: number, occurredAt: number, contex
   return entryCommand(context,{type:'adjustment',amount,note:'Opening balance',occurredAt},'khata.opening-balance',at,true,newId);
 }
 export const canUndoCreditEntry = (entry: CreditEntry, entries: CreditEntry[], at = Date.now()) => entry.type !== 'reminder' && !entry.reversalOf && at >= entry.createdAt && at-entry.createdAt <= 600000 && !entries.some(value => value.reversalOf === entry.id);
-export function undoCreditEntryCommand(entry: CreditEntry, context: LedgerContext, at = Date.now(), fromSale = false) {
+export function undoCreditEntryCommand(entry: CreditEntry, context: CustomerLedgerContext, at = Date.now(), fromSale = false, newId:(kind:'entry'|'event')=>string=()=>ulid(at)) {
   validateCreditContext(context);
   const stored = accountEntries(context.account,context.entries).find(value => value.id === entry.id);
   if (!stored) throw new Error('Credit entry not found.');
@@ -93,12 +93,12 @@ export function undoCreditEntryCommand(entry: CreditEntry, context: LedgerContex
   const delta = -entryDelta(entry), balance = creditBalance(context.account,context.entries);
   if (BigInt(balance)+BigInt(delta) < 0n) throw new Error('This credit has been partly paid. Undo the payment before undoing the charge.');
   checked(BigInt(balance)+BigInt(delta));
-  const result = entryCommand(context,{type:'adjustment',amount:delta,note:'Entry undone',reversalOf:entry.id},'khata.undo',at);
+  const result = entryCommand(context,{type:'adjustment',amount:delta,note:'Entry undone',reversalOf:entry.id},'khata.undo',at,true,newId);
   result.event.before = entry; result.event.undoOf = entry.eventId; return result;
 }
-export function recordCommunicationCommand(context: LedgerContext, purpose: 'reminder'|'receipt'|'call', text: string, channel: 'whatsapp'|'manual'|'call', at = Date.now()) {
+export function recordCommunicationCommand(context: CustomerLedgerContext, purpose: 'reminder'|'receipt'|'call', text: string, channel: 'whatsapp'|'manual'|'call', at = Date.now(), newId:(kind:'entry'|'event')=>string=()=>ulid(at)) {
   if (!['reminder','receipt','call'].includes(purpose) || !['whatsapp','manual','call'].includes(channel)) throw new Error('Choose a supported message action.');
-  return entryCommand(context,{type:'reminder',amount:0,note:text,purpose,methodName:channel},`khata.${purpose}-sent`,at);
+  return entryCommand(context,{type:'reminder',amount:0,note:text,purpose,methodName:channel},`khata.${purpose}-sent`,at,true,newId);
 }
 function orderCharge(sale: Sale, context: LedgerContext) {
   validateCreditContext(context,false);

@@ -1,4 +1,6 @@
-import {parseShopCommand,parseShopCommandReceipt,isCustomerCommand,type ShopCommand} from '../../../packages/core/shop-commands.ts';
+import {parseShopCommand,parseShopCommandReceipt,isCustomerCommand,isMoneyCommand,type ShopCommand} from '../../../packages/core/shop-commands.ts';
+import {moneyWritePlan} from '../../../packages/core/money-commands.ts';
+import {moneyFingerprint,moneyWriteFields,MoneyMutationInvalid,MoneyMutationConflict} from './money-write.ts';
 import {authHttp,AuthBodyError,readAuthBody} from './auth-http.ts';
 import {catalogueFingerprint,catalogueWriteFields} from './catalogue-write.ts';
 import {customerFingerprint,customerWriteFields,CustomerMutationInvalid} from './customer-write.ts';
@@ -17,7 +19,7 @@ export function createCommandsHandler(deps:{store:CommandStore;origins:ReadonlyS
     let raw:unknown;try{raw=await readAuthBody(request,32000);}catch(error){return reply(error instanceof AuthBodyError?error.status:400,{error:'Check the command request.'});}
     let command:ShopCommand;try{command=parseShopCommand(raw);}catch{return reply(400,{error:'Choose a supported shop action and its exact fields.'});}
     try{return reply(200,parseShopCommandReceipt(await deps.store.apply(jwt,command),command));}
-    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
+    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
   };
 }
 export function createCommandStore(apiUrl:string,publishableKey:string,send:typeof fetch=fetch,options:{serviceKey?:string;newId?:()=>string}={}):CommandStore {
@@ -31,7 +33,19 @@ export function createCommandStore(apiUrl:string,publishableKey:string,send:type
     if(r.status===409){let code:unknown,details:unknown;try{const error=await r.json();code=error.code;details=error.details;}catch{/* Only the fixed error tag controls retry; backend details remain private. */}if(retryTag&&code==='PT409'&&details===retryTag)throw new CatalogueSnapshotChanged();throw new CommandConflict();}
     if(!r.ok)throw new Error('Command unavailable');return r.json();
   }
-  return {apply:async(jwt,c)=>{
+  return {apply:async(jwt,value)=>{
+    const c=parseShopCommand(value);
+    if(isMoneyCommand(c)){
+      if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Money writes unavailable');
+      const hash=await moneyFingerprint(c),newId=options.newId??deviceAuthId;
+      for(let attempt=0;attempt<3;attempt++){
+        const ticket=newId(),prepared=await rpc('prepare_money_write',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_outlet_id:c.outletId,p_plan:moneyWritePlan(c),p_hash:hash,p_occurred_at:c.occurredAt},publishableKey,jwt);
+        if(prepared?.done===true)return prepared.receipt;
+        const fields=moneyWriteFields(prepared,c,ticket);
+        try{return await rpc('finish_money_write',fields,options.serviceKey,undefined,'money_snapshot_changed');}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
+      }
+      throw new CommandConflict();
+    }
     if(isCustomerCommand(c)){
       if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Customer writes unavailable');
       const hash=await customerFingerprint(c),newId=options.newId??deviceAuthId;

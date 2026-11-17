@@ -2,11 +2,12 @@ import { ulid } from 'ulid';
 import { calculateAmount, normalizeExpression } from './calc';
 import { currencyDigits, formatMoney } from './money';
 import { orderableItems } from './catalogue';
-import type { AuditEvent, Item, Sale, PaymentMethod, SetupSnapshot } from './models';
+import type { CustomerSetup } from './customers';
+import type { AuditEvent, Item, Sale, PaymentMethod } from './models';
 
 export interface SaleInput { expression: string; method: PaymentMethod; wallet?: string; given?: number; who?: string; items?: { itemId: string; qty: number; unitPrice: number }[] }
-export interface SaleContext { setup: SetupSnapshot; items: Item[]; wallets: string[] }
-export function recordSaleCommand(input: SaleInput, context: SaleContext, at = Date.now()): { sale: Sale; event: AuditEvent } {
+export interface SaleContext { setup: CustomerSetup; items: Item[]; wallets: string[] }
+export function recordSaleCommand(input: SaleInput, context: SaleContext, at = Date.now(), newId:(kind:'sale'|'event')=>string=()=>ulid(at)): { sale: Sale; event: AuditEvent } {
   const { setup } = context, amount = calculateAmount(input.expression, setup.outlet.currency);
   if (amount === null || amount <= 0) throw new Error('Enter a total greater than zero.');
   if (!['cash', 'wallet', 'card'].includes(input.method)) throw new Error('Choose a payment method.');
@@ -27,16 +28,16 @@ export function recordSaleCommand(input: SaleInput, context: SaleContext, at = D
   });
   let shopLink: string | undefined;
   if (setup.outlet.shopLink) { try { const url = new URL(setup.outlet.shopLink); if (url.protocol === 'https:') shopLink = url.href; } catch { /* A receipt still works without a shop link. */ } }
-  const eventId = ulid(at);
-  const sale: Sale = { id: ulid(at), outletId: setup.outlet.id, expression: normalizeExpression(input.expression), amount, currency: setup.outlet.currency, method: input.method, methodName: input.method === 'wallet' ? input.wallet! : input.method === 'cash' ? 'Cash' : 'Card', given, change: given === undefined ? undefined : given - amount, who: input.who?.trim() || '', items, shopName: setup.business.name, shopLink, timezone: setup.outlet.timezone, createdBy: setup.owner.id, eventId, createdAt: at, updatedAt: at };
+  const eventId = newId('event');
+  const sale: Sale = { id: newId('sale'), outletId: setup.outlet.id, expression: normalizeExpression(input.expression), amount, currency: setup.outlet.currency, method: input.method, methodName: input.method === 'wallet' ? input.wallet! : input.method === 'cash' ? 'Cash' : 'Card', given, change: given === undefined ? undefined : given - amount, who: input.who?.trim() || '', items, shopName: setup.business.name, shopLink, timezone: setup.outlet.timezone, createdBy: setup.owner.id, eventId, createdAt: at, updatedAt: at };
   return { sale, event: { id: eventId, outletId: sale.outletId, actor: { type: 'member', id: setup.owner.id }, command: 'sale.record', before: null, after: sale, at } };
 }
 export const canUndoSale = (sale: Sale, at = Date.now()) => !sale.closingId && sale.voidedAt === undefined && at >= sale.createdAt && at - sale.createdAt <= 600000;
-export function undoSaleCommand(sale: Sale, actorId: string, at = Date.now()): { sale: Sale; event: AuditEvent } {
+export function undoSaleCommand(sale: Sale, actorId: string, at = Date.now(), newId:()=>string=()=>ulid(at)): { sale: Sale; event: AuditEvent } {
   if (sale.closingId) throw new Error('Undo this receipt through its day closing.');
   if (!canUndoSale(sale, at)) throw new Error('A sale can be undone once, within 10 minutes.');
   const after = { ...sale, voidedAt: at, voidReason: 'undo' as const, updatedAt: at };
-  return { sale: after, event: { id: ulid(at), outletId: sale.outletId, actor: { type: 'member', id: actorId }, command: 'sale.undo', before: sale, after, undoOf: sale.eventId, at } };
+  return { sale: after, event: { id: newId(), outletId: sale.outletId, actor: { type: 'member', id: actorId }, command: 'sale.undo', before: sale, after, undoOf: sale.eventId, at } };
 }
 export function dailySales(sales: Sale[], timezone: string, at = Date.now()): Sale[] {
   const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' });

@@ -41,5 +41,7 @@ test('copy and native sharing use the exact saved link and retain a manual copy 
 test('the generated preview opens the public page and both owner and customer workers reopen offline',async({page,context})=>{
   await start(page);const url=await generate(page);const [publicPage]=await Promise.all([context.waitForEvent('page'),page.getByRole('link',{name:'Preview',exact:true}).click()]);await expect(publicPage.getByRole('heading',{name:'Rahman Store',exact:true})).toBeVisible();expect(publicPage.url()).toBe(url);await expect(publicPage.locator('.public-offline')).toHaveText('Form ready offline');
   const scopes=await publicPage.evaluate(async()=>(await navigator.serviceWorker.getRegistrations()).map(reg=>reg.scope));expect(scopes).toHaveLength(2);expect(scopes.some(scope=>scope.endsWith('/app/'))).toBe(true);expect(scopes.some(scope=>scope.endsWith('/app/s/'))).toBe(true);
+  // The customer worker's ready notice does not establish owner-worker control.
+  await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));});
   await context.setOffline(true);await publicPage.reload();await expect(publicPage.getByRole('heading',{name:'Rahman Store',exact:true})).toBeVisible();await page.reload();await expect(page.getByRole('textbox',{name:'Published shop link',exact:true})).toHaveValue(url);await expect(page.getByRole('heading',{name:'Settings › Shop link'})).toBeVisible();
 });
