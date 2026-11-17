@@ -1,0 +1,138 @@
+{
+  "baseCommit": "fc617a99b3ffa1d3959785a4588bbef49a107ac0",
+  "generatedAt": "2026-11-17T11:31:34.0603368Z",
+  "status": "M30 in progress; customer capability SQL only; no hosted or client integration",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "declaredNodeMinimum": "20.19.0"
+  },
+  "engine": {
+    "package": "@electric-sql/pglite",
+    "version": "0.3.16",
+    "postgresVersion": "17.5",
+    "mode": "in-process; no database service or network listener",
+    "authBoundary": "test-only claim-to-UID fixture; no JWT/OTP/session verification"
+  },
+  "capabilities": {
+    "privateTable": "private.public_links",
+    "rls": "enabled and forced; no client table grants",
+    "rpc": [
+      "create_public_link",
+      "revoke_public_link",
+      "read_order_link",
+      "read_khata_link"
+    ],
+    "exposedFunctions": "security invoker; private privileged implementations",
+    "secret": "256-bit URL-safe server token returned once; SHA-256 hash only at rest",
+    "defaultOrderDays": 7,
+    "defaultKhataDays": 30,
+    "maximumDays": 90,
+    "issuers": "confirmed active owner or assigned manager; live Auth/membership locks",
+    "audit": "atomic create/revoke events; no token/hash in audit",
+    "readScope": "one resource and purpose; no caller-selected scope identifiers",
+    "customerAccount": "not required; token is the read authority",
+    "invalidExpiredRevoked": "null",
+    "khata": "exact balance and cursor-limited financial entries; private notes/contact/limits excluded",
+    "order": "tracking, items, prices and payment status; merchant notes/source/contact/audit excluded",
+    "operatorDeactivation": "prevents new grants; existing business-owned grants persist until expiry/revocation",
+    "lostCreateResponse": "revoke known ID and create a fresh grant; repeated IDs never replace secrets"
+  },
+  "localChecks": {
+    "unitTests": 660,
+    "unitFiles": 51,
+    "tenantChecks": 69,
+    "shopRecordChecks": 65,
+    "capabilityChecks": 49,
+    "postgresChecks": 183,
+    "lint": "passed",
+    "typecheck": "passed; Astro 79 files, no errors/warnings/hints",
+    "finalTsc": "passed",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "pagesBrowserChecks": 296,
+    "browserRetries": 0,
+    "browserDuration": "7.6m",
+    "focusedOfflineReports": 6,
+    "focusedPosterRegeneration": 3
+  },
+  "browserHistory": [
+    {
+      "passed": 295,
+      "failed": 1,
+      "failure": "Offline PDF setup waiting for initial service-worker control after document navigations",
+      "correction": "Wait for first worker control before restore reload; original offline/PDF assertions preserved"
+    },
+    {
+      "passed": 295,
+      "failed": 1,
+      "failure": "Poster regeneration test read old published URL after reused status text",
+      "correction": "Wait for the actual published URL to change before decoding the QR"
+    },
+    {
+      "passed": 296,
+      "failed": 0,
+      "retries": 0
+    }
+  ],
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-CGoLbMvX.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "92a5492e12e5af541d971a13e930529d56f879a6b0ea19d903f78ec9aae0639f",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "supabase/migrations/20261117102312_public_capabilities.sql": "23fa0311a7206fe02e4bfb37e6e1c9b5fa9d0d9f0b3f894c661b832909012324",
+    "packages/core/cloud-records.ts": "4dd00f4c330e2ecc0a1e0e147abb259959eeb0ef3f4335757533686879b0ffd5",
+    "tests/tenant-foundation.test.ts": "bce37d73d6c5c33a860333df73400a336fea7392060d8fce5b80192510463ca2",
+    "tests/shop-records.test.ts": "9038d1a0023034f5f46004d9af100565ba2a0f44d31aa37b0b3359cc1313a724",
+    "tests/public-capabilities.test.ts": "ce489ec8209299a050eb93f3141ca0c72b3dcb92fed4c2f7bd1e95b6caf34917",
+    "tests/fixtures/supabase-auth.sql": "1f02395438d3cb1ef8ee82c21856971fcbff0a02739d6e4b6af0a6ba1c27ad17",
+    "tests/e2e/exports.spec.ts": "418a775a497f45560f84d8c31bee24133f4a2277ea3328ce18d20f77fd1b742a",
+    "tests/e2e/shop-poster.spec.ts": "61cd6e566f6eb8e9596f370734fd9f0b756b9405a19a72279ae8ff98f8f308cc",
+    "CHANGELOG.md": "65176967a84eb03e5ac3ab4068aaca15fb952248d68d91a108a7f36ad3e7a674"
+  },
+  "logSha256": {
+    "unit": "ab3451378ee6655a81c3c6e17626b7124c0fd911482e0b815c03c3b3bff53d3b",
+    "typecheck": "27834537ccf039d58a4b0634cd87d740cf1fb5751bca2dba3e05b21ecf9e83a0",
+    "finalTsc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "d78b9b76fed9e534fffe05521194728c03b7662cc238482dc500aed197d9ffad",
+    "pagesBuild": "0c1d30502f4964851d4d1f359b9e4a779a0a02c44cb59c5f752a1dcbd23a5eb5",
+    "pagesBrowser": "06b123f15ce878b4e04790cc2dc8f442c04d6d869415bb60760be1c2f65105fc",
+    "offlineReports": "9228eb75f44547f73b7d3bc5a8029aafb8b57a10146c662bc8329943487e0126",
+    "posterRegeneration": "cb78710ec8c87f4e200d142de70515c0e73575fd328782aed01176257f133d71",
+    "firstBrowser": "d316f6ebad1a64315352cdb2ee90f52022d892f5f8050c0188adbbe458f8351f",
+    "secondBrowser": "8d76129309a5a3c002790dbe018ec15124aeaae19809c7df1baa50d8855531c6",
+    "firstPdfTrace": "2b45bf6033ea1128f3966339d65e39373ec24bb324c3ab23053f6a053a813c25",
+    "secondPosterTrace": "6691fe16b39e1c6cefc1af21874ed9f9e99cd00211eb9953eb5ed07fe54987a2"
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "ownerEntryChange": "embedded CHANGELOG copy"
+  },
+  "hostedChanges": "none",
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastVerifiedLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "Hosted project and phone-only Auth/SMS verification",
+    "Device enrolment/PIN and constrained staff/agent access",
+    "Transactional audited commands",
+    "Public capability HTTP/cache/rate-limit integration and owner/customer UI",
+    "Private Storage objects and API integration",
+    "Reviewed resumable 5000-record migration under 3G/60-second gate",
+    "Target-runtime advisors/API tests and delivery verification"
+  ]
+}

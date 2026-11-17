@@ -1,6 +1,6 @@
 # M30 · Supabase foundation
 
-Status: **in progress**. Tenancy, shop-record SQL and an inert migration codec are implemented locally; the app continues to use its existing offline database. No hosted project has been created or modified, and no sign-in or sync interface is enabled. M30 and Phase 3 remain unticked.
+Status: **in progress**. Tenancy, shop-record SQL, an inert migration codec and isolated customer-link SQL are implemented locally; the app continues to use its existing offline database. No hosted project has been created or modified, and no sign-in, sync or new customer-link interface is enabled. M30 and Phase 3 remain unticked.
 
 ## Tenant schema
 
@@ -22,6 +22,18 @@ Free-form strings, original arrays and audit snapshots use PostgreSQL `json`. Th
 
 Inbox image metadata derives object paths from business/outlet/item/image ULIDs rather than filenames. Immutable metadata and positions cap each item at four images; an atomic parent-row reservation enforces the 10 MB total without an aggregate read/write race. The private Storage bucket, object permissions and upload/download integration are **not implemented yet**. Metadata and local file hashes do not establish that any object was uploaded.
 
+## Customer-link capabilities
+
+The third migration, `20261117102312_public_capabilities.sql`, adds a private, forced-RLS capability table and four explicit RPC entry points. A confirmed, active owner or an assigned manager can issue or revoke a link. These mutations check and lock live membership, outlet assignment and Auth state, and append an event in the same transaction. Staff, agents and anonymous callers cannot issue or revoke links. Direct table access remains denied.
+
+The database creates a 256-bit, URL-safe random token and returns it once. Only its SHA-256 hash persists; audit metadata contains neither token nor hash. Repeating a create ID cannot replace the original grant. If the response is lost, the caller must revoke that known link ID and issue a fresh one; HTTP retry/recovery integration is still pending. Default expiry is seven days for orders and thirty days for khata, with an explicit ninety-day ceiling. Revocation is idempotent and takes effect on the next read. Existing grants belong to the business and survive the issuing operator's later deactivation; expiry and explicit revocation control customer access independently.
+
+An order token returns that order's tracking, item, price and payment-status projection. Khata tokens return that account's name, exact derived balance and a cursor-bounded financial ledger. Customer line instructions are part of the order; merchant order notes, original source messages, customer contact details, credit limits, internal payment details and audit identities are excluded. Disabling further credit does not hide an existing balance. SQL money totals outside JavaScript's safe-integer range fail explicitly. Literal JSON fields travel as serialized JSON tokens to preserve the original Unicode values.
+
+Customer reads intentionally require no account: the unguessable token is their authority. They accept no caller-selected business, outlet or resource ID, and cannot switch resource or purpose. Invalid, unknown, expired, revoked and wrong-purpose tokens all return null. Public entry points use security invoker; privileged implementations stay in the unexposed private schema with an empty search path and explicit execution grants. Built-in hashing is documented in the [PostgreSQL binary-string reference](https://www.postgresql.org/docs/17/functions-binarystring.html); the [Supabase function guidance](https://supabase.com/docs/guides/database/functions) covers execution privileges and search paths.
+
+These are local SQL contracts, not published customer pages. Rate limiting, HTTP/cache behavior, hosted API verification, owner link-management UI and the M33/M35 customer interfaces remain to be implemented before publication.
+
 ## Local verification
 
 `pnpm exec vitest run tests/tenant-foundation.test.ts` loads the actual migration into an ephemeral in-process PostgreSQL engine and executes queries as non-bypass `authenticated` and `anon` roles. It verifies owner/manager isolation, metadata spoofing, unassigned/inactive/unconfirmed identities, immediate revocation, Auth bans/deletion, multi-business membership, cross-tenant foreign keys, direct-write denial and future-object grants. The first run caught the inherited function-execution grant; the migration now revokes the global default.
@@ -29,6 +41,14 @@ Inbox image metadata derives object paths from business/outlet/item/image ULIDs 
 PGlite is pinned to **0.3.16**, which reports PostgreSQL **17.5**, matching the target major version. Its current 0.5 series uses PostgreSQL 18. The test asserts major 17 to make a future tooling upgrade explicit. PGlite is a development-only dependency and opens no network listener. The test Auth fixture supplies only the `auth.users` fields and claim-to-UID boundary needed by these policies. It does not verify Supabase JWT signatures, phone OTP, sessions, PostgREST or hosted configuration. Those remain separate acceptance gates.
 
 The first tenant increment passed 546 unit tests and 296 browser checks; its evidence is preserved in [m30-tenant-local.json](m30-tenant-local.json). The shop-record increment passes **611 unit tests** across 50 files, including **134 PostgreSQL checks**, lint and TypeScript/Astro checks. The 65 new checks load both migrations, round-trip actual app transactions from every local table and exercise all 23 outlet-record tables across two same-business outlets and another business. They cover literal source and original image bytes, unpriced orders, deleted-item snapshots, refunds, ledger reversals, stock corrections, closings, customer privacy, denied direct writes, scoped financial references and the exact image-byte budget. Both production base paths build successfully and all **296 `/mise/` browser checks pass without retries**. Logs, source hashes and compiled entries are in [m30-records-local.json](m30-records-local.json). The prior 142 visual comparisons remain the current layout evidence; this increment changes only the embedded changelog copy in the app.
+
+The customer-capability increment passes **660 unit tests** across 51 files, including **183 PostgreSQL checks** (69 tenancy, 65 shop records and 49 capability checks). The new suite loads all three real migrations against core-generated records in two outlets and a separate business. It verifies hashed one-time tokens, role and live-Auth restrictions, scope and purpose isolation, expiry, immediate/idempotent revocation, atomic audit rollback, exact ledger pagination and balance arithmetic, excluded merchant fields, and explicit overflow failure. Lint and TypeScript/Astro checks pass. This remains a test-only Auth boundary; it does not establish hosted JWT, OTP or API behavior.
+
+The first full browser run passed 295 checks and timed out in the offline PDF setup while waiting for service-worker control after restore and route navigations. The two offline report tests now verify initial worker control before restore reloads the document. Their financial, Bengali, PDF and offline assertions are unchanged. Both tests then passed three independent repetitions each, with no retries. The original failed log and trace are retained locally; this setup correction changes no production app code.
+
+The second full run passed 295 checks, including the PDF, and exposed a separate early read in the poster regeneration test. Its status text already existed from the first generation, so the test could read the old published URL before the new transaction's view updated. It now waits for the actual URL to change before downloading and decoding the QR; all original QR-content and literal-name assertions remain. Three independent repetitions pass without retries. This also changes only test synchronization.
+
+The final full run passes **all 296 browser checks without retries** in 7.6 minutes. Both `/` and `/mise/` production builds pass. Source, compiled-entry and log hashes, including the two initial failures and focused verification, are recorded in [m30-capabilities-local.json](m30-capabilities-local.json). No layout changed; the prior 142 visual comparisons remain the layout evidence, with no new visual run claimed. These local checks used Node 24.22.2 and pnpm 10.33.2; the repository's Node 20.19+ requirement is unchanged.
 
 ## Configuration and external state
 
@@ -40,11 +60,11 @@ Automatic approval review rejected the combined local-config/database-start comm
 
 ## Remaining M30 work
 
-- Complete the identity/device/capability schema and private Storage integration; the 21-table local-record mapping is implemented.
+- Complete the identity/device schema and private Storage integration; the 21-table local-record mapping and resource-specific capability SQL are implemented.
 - Provision the dedicated project, verify phone-only Auth settings, configure SMS and test real owner/manager authentication.
 - Implement device enrolment, protected four-digit staff PIN verification and constrained staff/agent access.
 - Implement transactional `/commands` with shared validation and audit writes; keep direct browser writes denied.
-- Add resource-specific public capabilities and prove that each token can read only its own order or khata.
+- Complete public capability HTTP/rate-limit integration and hosted tests; local SQL tests cover isolation, expiry and revocation.
 - Build the reviewed local-to-cloud upload and prove a resumable 5,000-record upload under the required 3G/60-second gate.
 - Run Supabase database advisors, target-runtime database/API tests and full delivery verification before enabling sync or ticking M30.
 
