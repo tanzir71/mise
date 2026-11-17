@@ -88,6 +88,7 @@ pnpm lint && pnpm typecheck
   - Add any decision to `handover/DECISIONS.md`.
 - **When unsure:** write the question in `handover/QUESTIONS.md`, pick the most reasonable option, note it, and keep going. Do not stop for questions that can be decided later.
 - **Never commit secrets.** Keep `.env.example` up to date.
+- **Local credential protection:** run `pnpm security:install-hooks` once per clone. Keep the commit/push guards enabled; production builds also check generated output. Before pushing, run `pnpm check:secrets --history --artifacts`. Actual Supabase project/organization details and all credential values stay in ignored private files or the server secret manager.
 - **Keep the build portable:** it must work under `BASE_PATH=/<repo>/` (GitHub Pages) and `BASE_PATH=/` (Vercel and custom domains). Owners can self-host on their own Vercel with their AI agent (see `handover/docs/08-distribution.md`).
 - **Do not add a backend, paid service or native app before its phase in the roadmap.**
 

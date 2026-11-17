@@ -1,38 +1,53 @@
 # Deployment credentials
 
-Commit configuration templates with blank credential values. Keep actual Supabase
-project/organization references, dashboard links and deployment records outside the
-repository. Public verification reports use redacted identifiers.
+Actual Supabase credentials, project/organization references and private operational
+records stay outside Git. Environment templates contain names and blank values.
+`.env*`, `.private/`, `.secrets/`, key exports and Supabase CLI temporary files are
+ignored. Server API keys, PIN peppers and access tokens belong in the server secret
+manager; they must never use a public build-variable prefix.
 
-Server API keys, legacy service-role keys, database passwords, personal access
-tokens and PIN peppers belong in the deployment secret manager. Never prefix them
-with `VITE_` or `PUBLIC_`, import them into browser code, or write them to logs.
-Supabase publishable keys are designed for clients, but actual deployment values
-still stay out of this repository. RLS and scoped server authorization protect data.
+This includes legacy service-role keys, database passwords and personal access
+tokens. Do not import them into browser code or write them to logs. Publishable
+keys are designed for clients, but this repository still keeps actual deployment
+values private. Ignore rules do not protect files that are already tracked or
+force-added.
 
-Local `.env` files, API-key exports, `edge.env`, private credential directories and
-Supabase CLI caches are ignored. Ignore rules do not protect already tracked or
-force-added files.
+Run `pnpm security:install-hooks` once in each clone. The installed pre-commit hook
+scans working files and index blobs, including a staged secret whose working copy
+has since been cleaned. The pre-push hook also scans reachable Git history and
+`site/`. `pnpm lint` checks source/index files and `pnpm build` checks the completed
+static output. These checks run locally while GitHub workflows remain disabled.
 
-`pnpm lint` includes `pnpm check:secrets`. The guard scans current files and staged
-Git blobs, reports file locations and rule names without matched values, and fails
-on credentials or deployment endpoints. Use `pnpm check:secrets --history --artifacts`
-before publication to also inspect reachable Git history and the built `site/`.
-ZIP downloads are inspected with bounded extraction; incomplete archive coverage
-fails the check. The optional `--known-directory <private-directory>` also compares
-against actual API keys and PIN peppers in memory, without printing their values.
-That directory must remain outside the repository.
+For a full audit, run:
 
-Scanning is a defense against accidental disclosure, not a substitute for reviewing
-changes. If a credential is published, revoke/rotate it before considering Git
-history cleanup. Nonsecret project identifiers in older commits are recorded
-separately; sanitizing current files does not remove those older references.
+```sh
+pnpm check:secrets --history --artifacts
+```
 
-These checks run locally. GitHub Actions and Pages publication remain stopped under
-the owner's instruction.
+The guard checks credential patterns, filenames, commit/tag messages and ZIP
+contents. Its optional `--known-directory` input compares private local key/pepper
+values in memory; keep that directory outside the repository and its path out of
+public evidence. Findings contain rule names and redacted locations, never matched
+values. Hooks depend on Node and installed dependencies; a missing dependency or
+incomplete scan blocks the operation.
 
-The 17 November 2026 audit found no credentials in current files, staged blobs,
-reachable Git history or the existing built site, including exact comparisons
-against the configured API keys and PIN pepper. Current delivery notes were
-redacted; older commits retain nonsecret project metadata. Nine guard tests cover
-redaction, ZIP contents, staged/history leaks and ignored local configuration.
+ZIP extraction is bounded; incomplete archive coverage fails the scan. Thirteen
+guard tests cover redaction, ZIP contents, ignored configuration, staged/history
+leaks, filename-only leaks, commit/tag messages and real blocked commit/push attempts.
+
+The 18 November 2026 audit found **zero credentials** in current files, the index,
+reachable history and built output. Current files and output also contain no actual
+deployment references. Earlier commits retain nonsecret project identifiers; their
+presence does not provide database or server access. Published history was preserved.
+
+The same day's live read-only verification found all **38 public/private application
+tables** enforcing row-level security, zero anonymous table grants, zero public
+security-definer functions and a private image bucket. Supabase security advisors
+reported no warnings or errors. Nine informational private-table notices describe
+the intentional absence of direct-access policies. No hosted authentication or
+storage configuration was changed by this audit.
+
+Local checks reduce accidental disclosure; they do not replace row-level security
+or review of future authentication changes. If a credential ever reaches a public
+location, rotate it and remove the exposed value; deleting the latest file alone
+does not remove Git history.

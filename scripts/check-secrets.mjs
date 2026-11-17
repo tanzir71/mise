@@ -19,8 +19,8 @@ function location(path,known){let safe=path;for(const [, ,pattern] of rules)safe
 /** Findings contain locations and rule names only, never matched values. */
 export function inspectSecretBytes(bytes,path,known=[],depth=0){
   const data=Buffer.from(bytes),text=data.toString('latin1'),findings=[],safePath=location(path,known);
-  for(const [rule,kind,pattern] of rules)if(pattern.test(text))findings.push({path:safePath,rule,kind});
-  for(const item of known)if(item.value.length>=16&&data.includes(Buffer.from(item.value)))findings.push({path:safePath,rule:item.rule,kind:item.kind});
+  for(const [rule,kind,pattern] of rules)if(pattern.test(text)||pattern.test(path))findings.push({path:safePath,rule,kind});
+  for(const item of known)if(item.value.length>=16&&(data.includes(Buffer.from(item.value))||path.includes(item.value)))findings.push({path:safePath,rule:item.rule,kind:item.kind});
   if(data[0]===80&&data[1]===75&&data[2]===3&&data[3]===4){
     if(depth>=2)return [...findings,{path:safePath,rule:'nested-archive-limit',kind:'coverage'}];
     let total=0;
@@ -49,14 +49,14 @@ export function auditRepository({history=false,artifacts=false,knownDirectory}={
   // Inspect index blobs too: a clean working copy can hide an earlier staged secret.
   const index=git(['ls-files','--stage','-z']).split('\0').filter(Boolean).map(line=>{const match=line.match(/^\d+ ([a-f0-9]{40}) \d\t([\s\S]+)$/);if(!match)throw new Error('Git index audit incomplete.');return {id:match[1],path:match[2]};});
   function inspectBlobs(blobs,label){for(let at=0;at<blobs.length;at+=8){const group=blobs.slice(at,at+8),output=git(['cat-file','--batch'],group.map(b=>b.id).join('\n')+'\n',true);let offset=0;
-    for(const blob of group){const end=output.indexOf(10,offset),header=output.subarray(offset,end).toString('ascii').split(' '),size=Number(header[2]);if(header[0]!==blob.id||header[1]!=='blob'||!Number.isSafeInteger(size)||end+1+size>output.length)throw new Error('Git object audit incomplete.');inspect(output.subarray(end+1,end+1+size),label+blob.id.slice(0,12)+':'+blob.path);offset=end+size+2;}
+    for(const blob of group){const end=output.indexOf(10,offset),header=output.subarray(offset,end).toString('ascii').split(' '),size=Number(header[2]);if(header[0]!==blob.id||header[1]!== (blob.type??'blob')||!Number.isSafeInteger(size)||end+1+size>output.length)throw new Error('Git object audit incomplete.');const name=blob.type&&blob.type!=='blob'?blob.type+(blob.path?':'+blob.path:''):blob.path;inspect(output.subarray(end+1,end+1+size),label+blob.id.slice(0,12)+':'+name);offset=end+size+2;}
   }}
   inspectBlobs(index,'index:');
   if(artifacts&&lstatSync('site',{throwIfNoEntry:false})?.isDirectory())for(const path of walk('site'))inspect(readFileSync(path),'artifact:'+relative('.',path).replaceAll('\\','/'));
   if(history){
     const entries=git(['rev-list','--objects','--all']).trim().split('\n').filter(Boolean).map(line=>({id:line.slice(0,40),path:line.slice(41)}));
     const metadata=git(['cat-file','--batch-check=%(objectname) %(objecttype) %(objectsize)'],entries.map(e=>e.id).join('\n')+'\n').trim().split('\n');
-    const blobs=metadata.flatMap((line,i)=>line.split(' ')[1]==='blob'?[entries[i]]:[]);
+    const blobs=metadata.flatMap((line,i)=>{const type=line.split(' ')[1];return ['blob','commit','tag'].includes(type)?[{...entries[i],type}]:[];});
     inspectBlobs(blobs,'history:');
   }
   const credentials=findings.filter(f=>f.kind==='credential'),coverage=findings.filter(f=>f.kind==='coverage'),currentDeployment=findings.filter(f=>f.kind==='deployment'&&!f.path.startsWith('history:'));

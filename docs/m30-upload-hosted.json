@@ -1,0 +1,307 @@
+{
+  "baseCommit": "113ca0d88d99e4b125070a9f1a82fb70b63be7c3",
+  "date": "2026-11-18",
+  "status": "M30 in progress; private authenticated staging/promotion and transport prepared; real signed-owner HTTP/OTP, UI/outbox and 3G acceptance open",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "nativeDatabase": "PGlite 0.3.16 / PostgreSQL 17.5",
+    "hostedDatabase": "PostgreSQL 17.12"
+  },
+  "checks": {
+    "unitTests": 1013,
+    "unitFiles": 67,
+    "unitWorkers": 4,
+    "stagingTransportChecks": 47,
+    "uploadHandlerChecks": 16,
+    "edgeBundleBootChecks": 1,
+    "secretGuardChecks": 13,
+    "lint": "passed including local secret guard",
+    "typecheck": "passed;84 Astro files clean",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "browserChecks": 298,
+    "browserRetries": 0,
+    "browserDuration": "4.0m",
+    "visual": "No new product layout or visual comparison claimed",
+    "finalRebuildSmoke": {
+      "checks": 4,
+      "retries": 0,
+      "duration": "3.8s",
+      "scope": "landing/app/gallery and catalogue CRUD/offline at 390/1440px"
+    }
+  },
+  "deployment": {
+    "migrationVersions": [
+      "20261117081808",
+      "20261117085319",
+      "20261117102312",
+      "20261117114114",
+      "20261117122734",
+      "20261117130209",
+      "20261117134918",
+      "20261117141552",
+      "20261117145205",
+      "20261117152037",
+      "20261117161027",
+      "20261117171100",
+      "20261117171949"
+    ],
+    "functions": [
+      {
+        "name": "commands",
+        "version": 3,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "device-orders",
+        "version": 1,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "inbox-image",
+        "version": 1,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "staff-pin",
+        "version": 1,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "device-pin",
+        "version": 1,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "migration-upload",
+        "version": 1,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      }
+    ],
+    "uploadBundle": {
+      "sourceSha256": "d4fe9c85a27310b90eda15a2f9fe9fd5bcda10a157250b7aeb475f2c970ea9ae",
+      "bytes": 79407,
+      "sourceFiles": 26
+    },
+    "projectDetailsRedacted": true,
+    "newCredentialNames": [],
+    "authProvidersChanged": false
+  },
+  "hostedRoleProof": {
+    "kind": "rolled-back SQL role test using shared fixture codec; not a positive signed-owner HTTP upload",
+    "sourceRecords": 31,
+    "originalImages": 1,
+    "promotions": 1,
+    "originalActor": true,
+    "rawStagingDenied": true,
+    "originalImageCompleted": true,
+    "literalUnicodeRoundTrip": true,
+    "privateChunksAfterCommit": 0,
+    "differentConfirmedUserDenied": true,
+    "postRollback": {
+      "authUsers": 0,
+      "businesses": 0,
+      "items": 0,
+      "events": 0,
+      "privateUploads": 0,
+      "privateChunks": 0
+    }
+  },
+  "advisors": {
+    "securityWarnError": 0,
+    "performanceWarnError": 0,
+    "intentionalPrivateNoPolicyInfo": 9,
+    "unusedIndexesInfo": 78
+  },
+  "limits": {
+    "backupBytes": 52428800,
+    "rawChunkBytes": 262144,
+    "compressedChunkBytes": 393216,
+    "requestBytes": 600000,
+    "stagingDays": 7,
+    "promotionLeaseSeconds": 120,
+    "readBodyDeadlineSeconds": 90,
+    "clientRequestTimeoutSeconds": 120
+  },
+  "security": {
+    "publicTables": 29,
+    "privateTables": 9,
+    "allApplicationTablesForceRls": true,
+    "anonymousTableGrants": 0,
+    "publicSecurityDefiners": 0,
+    "privateImageBucket": true,
+    "credentialsInJournal": false,
+    "rawClientWritesAllowed": false,
+    "identity": "original verified caller, live confirmed phone; service cannot bootstrap owner"
+  },
+  "recovery": {
+    "sameManifestResume": true,
+    "lostPartReply": true,
+    "lostStorageReply": true,
+    "lostFinalReply": true,
+    "commitReceiptNeverRegresses": true,
+    "changedOrRevokedIdentityDenied": true,
+    "noExistingBusinessOverwrite": true,
+    "atomicRecordsAuditReceipt": true,
+    "failedLeaseCanRelease": true
+  },
+  "privacyAudit": {
+    "scope": "current source, staged index, reachable history including commit/tag messages, filenames and built output",
+    "knownValuesChecked": 8,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretDeploymentFindings": 21,
+    "coverageFindings": 0,
+    "matchedValuesPrinted": false,
+    "localGitHooksEnabled": true,
+    "buildOutputGuardEnabled": true
+  },
+  "unfinished": [
+    "real signed-owner positive HTTP upload",
+    "production phone OTP",
+    "real 5000-record throttled-3G transfer under 60 seconds",
+    "Edge CPU/memory capacity for large backups",
+    "atomic UI snapshot/outbox integration",
+    "safe general abandoned-image cleanup",
+    "remaining M30 command and staff/agent resources"
+  ],
+  "publication": {
+    "workflows": "all three disabled_manually",
+    "activeRuns": 0,
+    "pages": "held by owner; no workflow dispatch or publication",
+    "productCloudControlsEnabled": false
+  },
+  "sourceHashes": {
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/backup-links.ts": "033753615260e09e8b9d7500712a5a763a4eeabbec7af123468bfa4ea8110e2b",
+    "packages/core/backup-schema.ts": "c3aa5639fcae14402daae1df10a2eaea763131a1366030ec5e055e7562219fdf",
+    "packages/core/backup-tables.ts": "5556c3f881ab0bb8bea484abb218cc91b8c45512743519474f06adc571f90937",
+    "packages/core/backup.ts": "de18d8accaa9f1f56a3a00a97264e21a0749b0a624e2d5dd95fecbcd2e7a0d37",
+    "packages/core/cloud-records.ts": "4dd00f4c330e2ecc0a1e0e147abb259959eeb0ef3f4335757533686879b0ffd5",
+    "packages/core/cloud-upload-runner.ts": "05cb5643f3e77b13eda34c963d3c4d276b1e56e287e3c24b0bbf51ff0835687a",
+    "packages/core/cloud-upload.ts": "3469faf90da10af1d303ddf3102c6dd8abeb9eb17adde449baf9ef3bcb071fe9",
+    "packages/core/handoff-progress.ts": "520ed0f7e9bfacfb375a0132d416115b9b87888b960e6f71485203870e2dd7c3",
+    "packages/core/handoff.ts": "bb439e56d154c2afded8e5df5f2c457b263918935f2e0cf80cf8e3e2ff751939",
+    "packages/core/inbox-history.ts": "5a678be6f3c880c153369d75f26ea0865a3b54d01b9150286454b762787a2ef4",
+    "packages/core/inbox-image.ts": "0836f8d4edcb64b6f754955c098b124f8c6dd7c4546e2d187fe8b7fc647f6341",
+    "packages/core/inbox.ts": "ea100df21a9b07db3879b20b49cf42517875f9d9a9085a1106305e8eb07ccae1",
+    "packages/core/khata.ts": "e5e03352beaac256e5360e6546d1a704c588316f05730ff77b8159e1cf95842b",
+    "packages/core/order-limits.ts": "661ff0d6056d178f6c303e2b52e745bfab0c93011d6b3019a0539faf001ee0e4",
+    "packages/core/order-lines.ts": "248fd350990b5b97b76bb2fd352d4247ae6b3370bd0494f636e950c5201ca56f",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "packages/core/public-shop.ts": "c1b0380b3f4504ee1ec47959c9743ad85886ab06c3be0d0f14749bf3da75c0dc",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "supabase/functions/_shared/auth-http.ts": "c268c1aea32857990d163ddd727abe00c9840ca27def8da6a6a34ec7b82c17fb",
+    "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+    "supabase/functions/_shared/inbox-image-handler.ts": "0577c3e5e4e57255597813ea605fd046e3524ca2975bd556b1504f406daeed65",
+    "supabase/functions/_shared/inbox-image-store.ts": "7f8f3f6643aa71e72af6486b5ccbc6ae32184f4245fb2e78e2546475cdfa9b0a",
+    "supabase/functions/_shared/upload-handler.ts": "731b158f3e70f25bd43ae25dc9cfc783361c0e287e22d0c27d66884582484630",
+    "supabase/functions/_shared/upload-store.ts": "9e5ef359b1f010dbfc31d233a9ae774674e8c290f696a5db10c77f851a7ab737",
+    "supabase/functions/migration-upload/index.ts": "bd8fe07c2e2ec2e2bfc98af2d74e2d95c9d6458057e38a78964e8a27a0d5e0e1",
+    "supabase/migrations/20261117171100_initial_upload_staging.sql": "bb8d91bf5760e5356d52b61196849df300a2b75100aace42d7ca605b2d6ef49c",
+    "supabase/migrations/20261117171949_initial_upload_promotion.sql": "ef9066fe9a54ac5e40d01430ef408fda1e32b84d63d78281d7ab449383468a3b",
+    "apps/web/src/data/cloud-upload-remote.ts": "e6ac966419ce66a542bae7cc8d3ce30cee2348ba9c72c0cf930a08ec465c4d4f",
+    "scripts/edge-bundle.mjs": "6c50705564a747b6427af19a944ec9b360cebd61834b0e2bdebfec6c306d36d1",
+    "scripts/check-secrets.mjs": "3425c21d5a4a16931b062ca9fa948166027edb2af71f8c59b27fa6627b1d088b",
+    "scripts/build.mjs": "cae6e6accf275664111488056ff022eb41c0e9d1478e66025ebed0ccdcf6fc1c",
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "tests/secret-guard.test.ts": "bff4bce4128e25adaf48ae49a172a89c3eb8a54cb4967d068ba1e0e73232606e",
+    "tests/upload-staging.test.ts": "d919ab5f413ba3ccccefc0c6ef04e222217c956496770c2c9e051b6968f410ef",
+    "tests/upload-handler.test.ts": "2c5f84f6c21c65ff42d489c12181cfb5521eed49bc74865cf1ebe574a100b713",
+    "tests/upload-bundle.test.ts": "8f0363ab7cd88f96d6e02f0d903a89be7522436b1fc888f2b82516cc859850ef",
+    "tests/upload-hosted-fixture.ts": "0278456736d01f033a6e5387d4b92fc1211859f88e533c716ce33113a77ed6e3"
+  },
+  "hostedHttpProof": {
+    "kind": "live negative JWT/method/origin probes; not a positive signed-owner upload",
+    "checks": [
+      {
+        "name": "missing-jwt",
+        "status": 401,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "forged-jwt",
+        "status": 401,
+        "ok": true,
+        "cacheControl": null,
+        "allowOrigin": "*"
+      },
+      {
+        "name": "confirmed-phone-boundary",
+        "status": 401,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "service-cannot-bootstrap-owner",
+        "status": 403,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "foreign-origin",
+        "status": 403,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": null
+      },
+      {
+        "name": "method-boundary",
+        "status": 405,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      },
+      {
+        "name": "preflight",
+        "status": 204,
+        "ok": true,
+        "cacheControl": "no-store",
+        "allowOrigin": "https://tanzir71.github.io"
+      }
+    ],
+    "realOwnerJwt": false,
+    "phoneOtp": false,
+    "throttled3G": false,
+    "credentialsLogged": false
+  },
+  "hostedStorageProof": {
+    "images": 1,
+    "bytes": 92,
+    "originalBytesVerified": true,
+    "cleanup": [
+      {
+        "deleted": true,
+        "readAfterDeleteStatus": 400
+      }
+    ],
+    "objectsAfterCleanup": 0
+  },
+  "logHashes": {
+    "mise-security-unit.log": "4a4c27ff6d92c93ecf164e2c66b3ad74ece2e463824416200f1e4cd502f017c7",
+    "mise-security-lint.log": "cc802398798af2fbd307e1f77b22295133f8419fc456201335ae5accdab48e58",
+    "mise-security-typecheck.log": "342b01abb079e2f3f49bdb040b9d3dfb1ca40869d53db4c3e7d2dbf08708333c",
+    "mise-security-build-root.log": "5d15ab7b944b6ff49acb1bdc718886bf87dd235dee8adb28c3762bab26fa6b0d",
+    "mise-security-build-pages.log": "f4f5ae7343f82967663b78204158f49224cda8fc6d43aa0ae48fe768656c8507",
+    "mise-security-e2e.log": "abd6cc44894167b4dc377765d1eb15290671b8b8f8cabb6ee4662547b5cc68c7",
+    "mise-security-final-smoke.log": "082db1f0f1ca822b0aa981ab45ffa5273cb6448ce7aac7d95e39da5309a18dbf"
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-Cij5aCcQ.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  }
+}

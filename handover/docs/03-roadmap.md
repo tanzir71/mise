@@ -72,7 +72,7 @@ Spec: `phases/phase-2-links-no-backend.md`
 Spec: `phases/phase-3-backend-sync.md`
 
 - [ ] **M30** Supabase project, schema, row-level security, phone OTP + device PIN, outlet/roles · L · T2
-  - [Implementation notes](../../docs/m30-delivery.md) (dedicated project, eleven migrations, PIN/screen/image services, private bucket and audited catalogue CRUD/availability commands deployed; local upload snapshots/recovery prepared. Phone OTP, real owner-JWT writes, app interfaces, other command types, staff/agent resources and hosted reviewed upload remain open).
+  - [Implementation notes](../../docs/m30-delivery.md) (dedicated project, thirteen migrations, PIN/screen/image services, private bucket and audited catalogue CRUD/availability commands deployed; local snapshot/recovery and authenticated hosted upload staging/promotion prepared. Phone OTP, positive signed-owner HTTP upload/writes, app/outbox interfaces, other command types and staff/agent resources remain open).
 - [ ] **M31** Sync engine: local-first outbox, realtime pull, conflict rules · L · T2
 - [ ] **M32** Kitchen / pack / counter screen on a second device; Got it / Ready; 2-minute unacknowledged alarm · M · T2
 - [ ] **M33** Order link writes real orders (no WhatsApp step needed); live tracking page for customers · M · T2

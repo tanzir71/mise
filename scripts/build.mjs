@@ -16,3 +16,4 @@ writeFileSync('site/.nojekyll', '');
 cpSync('site/app/index.html', 'site/404.html');
 hardenSite('site');
 execFileSync(process.execPath, ['scripts/check-image-budgets.mjs'], { stdio: 'inherit' });
+execFileSync(process.execPath, ['scripts/check-secrets.mjs', '--artifacts'], { stdio: 'inherit' });

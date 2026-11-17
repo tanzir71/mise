@@ -23,7 +23,8 @@
     "check:exports": "node handover/scripts/export-figma.mjs --check --only=landing",
     "check:marketing": "node scripts/check-marketing.mjs",
     "check:images": "node scripts/check-image-budgets.mjs",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "security:install-hooks": "git config --local core.hooksPath .githooks"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
