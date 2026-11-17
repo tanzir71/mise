@@ -1,0 +1,282 @@
+{
+  "baseCommit": "cb2f5a51cbfeb7116db009a5ef2ce88b3a4233e0",
+  "generatedAt": "2026-11-17 15:10:36 UTC",
+  "status": "M30 in progress; first typed commands deployed; cloud interfaces and other command types unavailable",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "supabaseCli": "3.2.0",
+    "localPostgres": "17.5 via @electric-sql/pglite 0.3.16; in-process/no listener",
+    "hostedPostgres": "17.12"
+  },
+  "localChecks": {
+    "unitTests": 856,
+    "unitFiles": 61,
+    "newNativeHttpPostgres": 32,
+    "newHandlerTransport": 7,
+    "nativeMigrations": 9,
+    "fixture": "test-only Auth UID/claims boundary; no actual Supabase JWT signature/OTP or multiple-connection concurrency proof",
+    "scope": "two businesses; three outlets; core-generated catalogue; original literal Unicode",
+    "covered": [
+      "original owner/assigned-manager identity and exact transaction audit",
+      "core-compatible Item snapshots including NUL/lone surrogate text",
+      "same-ID replay without duplicate mutation/event",
+      "older receipt replay preserves newer item state",
+      "reused intent ID and different actor denied",
+      "same-business branch and foreign-business isolation",
+      "staff/agent/outsider/anon/service denied",
+      "latest-state setters and ordered receipts preserve previous values",
+      "guarded undo and stale/no-op-newer-intent protection",
+      "audit collision rolls back item and receipt",
+      "live member/assignment/phone/Auth revocation denies writes and retries",
+      "unrelated variants/photo fields and future creation time retained",
+      "strict DTO identity/scope/SQL field rejection and safe receipt projection"
+    ],
+    "lint": "passed",
+    "typecheck": "passed; 81 Astro files clean; strict server/core/tests checked",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "browserChecks": 296,
+    "browserRetries": 0,
+    "browserDuration": "6.7m"
+  },
+  "commands": {
+    "endpoint": "commands",
+    "intents": [
+      "catalogue.availability",
+      "catalogue.undo"
+    ],
+    "authorization": "platform JWT; original JWT and publishable key forwarded to fixed RPC; no service identity",
+    "scope": "derived from actual item or original private receipt",
+    "roles": "confirmed active owner or assigned manager",
+    "requestId": "ULID supplied by device; bound to original actor/Auth identity and exact intent",
+    "transaction": "item update + receipt + metadata audit atomic; failure rolls back",
+    "duplicateSerialization": "transaction advisory lock of command ID",
+    "writeSerialization": "outlet row lock then target item row lock; all future outlet command handlers must share this protocol",
+    "replay": "return historical acceptance receipt, never reapply over newer state",
+    "setConflictRule": "apply to latest committed state; record previous value and actual server acceptance time",
+    "undo": "inverse derived from source receipt; latest availability receipt and current flag must still match",
+    "ordering": "monotonic receipt sequence; not a complete M31 change feed or sync proof",
+    "futureCreatedAt": "preserve record creation timestamp/clamp item update separately from honest audit server time",
+    "otherFields": "prices, variants, photos, category and names remain unchanged",
+    "auditJson": "construct JSON without extracting literal Unicode into PostgreSQL text/jsonb",
+    "requestBytes": 2048,
+    "bodyDeadlineMs": 5000,
+    "rpcDeadlineMs": 5000,
+    "cors": "exact configured origins",
+    "cache": "no-store",
+    "credentialLogging": false
+  },
+  "hosted": {
+    "project": "imzbqggkoquhkyawvjmz",
+    "migrations": [
+      {
+        "version": "20261117081808",
+        "name": "tenant_foundation"
+      },
+      {
+        "version": "20261117085319",
+        "name": "shop_records"
+      },
+      {
+        "version": "20261117102312",
+        "name": "public_capabilities"
+      },
+      {
+        "version": "20261117114114",
+        "name": "device_auth"
+      },
+      {
+        "version": "20261117122734",
+        "name": "owner_pin_admin"
+      },
+      {
+        "version": "20261117130209",
+        "name": "hosted_fk_indexes"
+      },
+      {
+        "version": "20261117134918",
+        "name": "device_order_reads"
+      },
+      {
+        "version": "20261117141552",
+        "name": "inbox_image_storage"
+      },
+      {
+        "version": "20261117145205",
+        "name": "catalogue_commands"
+      }
+    ],
+    "function": {
+      "id": "0b14501b-03ba-428b-a3ba-74472f97ffb6",
+      "name": "commands",
+      "status": "ACTIVE",
+      "version": 1,
+      "verifyJwt": true,
+      "bundleSha256": "206c6491e185a1aac6dc2c2df581fc6a6b9645a7e15280d63220afec49710b17"
+    },
+    "catalog": {
+      "tables": [
+        {
+          "count": 6,
+          "schema": "private",
+          "forcedRls": true
+        },
+        {
+          "count": 29,
+          "schema": "public",
+          "forcedRls": true
+        }
+      ],
+      "itemRows": 0,
+      "authUsers": 0,
+      "eventRows": 0,
+      "functions": [
+        {
+          "anon": false,
+          "name": "apply_catalogue_command",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "public",
+          "definer": false,
+          "service": false,
+          "authenticated": true
+        },
+        {
+          "anon": false,
+          "name": "apply_catalogue_command",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "private",
+          "definer": true,
+          "service": false,
+          "authenticated": true
+        }
+      ],
+      "receiptRows": 0,
+      "publicDefiners": 0,
+      "receiptDirectSelect": {
+        "anon": false,
+        "service": false,
+        "authenticated": false
+      }
+    },
+    "advisors": {
+      "security": [
+        {
+          "name": "rls_enabled_no_policy",
+          "level": "INFO",
+          "count": 6,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+        }
+      ],
+      "performance": [
+        {
+          "name": "unused_index",
+          "level": "INFO",
+          "count": 80,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index"
+        }
+      ],
+      "warningOrErrorCount": 0
+    },
+    "positiveOwnerManagerJwtWritesVerified": false,
+    "phoneOtpVerified": false,
+    "multipleConnectionConcurrencyVerified": false,
+    "authAccountsCreated": 0,
+    "messagesSent": 0,
+    "domainFixturesCreated": 0,
+    "newCredentialFiles": false,
+    "newSecretVariables": false,
+    "liveProof": {
+      "project": "imzbqggkoquhkyawvjmz",
+      "mode": "live Deno/Data API negative authorization checks; positive owner/manager JWT remains unverified",
+      "signedAnonymousIdentity": 401,
+      "ownHandlerErrorVerified": true,
+      "cacheControl": "no-store",
+      "forgedJwt": 401,
+      "callerIdentityFields": 400,
+      "foreignOrigin": 403,
+      "getDenied": 405,
+      "anonymousRawRpc": 401,
+      "authAccountsCreated": 0,
+      "messagesSent": 0,
+      "domainFixturesCreated": 0,
+      "credentialFilesCreated": false
+    }
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "compiledEntryChange": "embedded CHANGELOG copy"
+  },
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastVerifiedLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "priorCredentialCleanup": {
+    "completed": false,
+    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "reason": "Earlier automatic approval review blocked removal; no retry or alternative deletion route",
+    "outsideRepository": true
+  },
+  "remaining": [
+    "Remaining catalogue CRUD, financial/order/stock and other typed command handlers",
+    "Staff/device and agent command authorization",
+    "Real phone OTP and positive hosted owner/manager JWT and concurrency gates",
+    "Reviewed resumable 5000-record/3G migration and private-image/app integration",
+    "Browser Auth/session lifecycle and shared-screen interfaces",
+    "M31 sync outbox/convergence/realtime and all later milestones",
+    "Remaining milestone acceptance/publication under owner instructions"
+  ],
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-C_1cdTOa.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "86b83c29e84f6c85db611922aad5cbb812b570f515507cd7bd187c2f65be2b2f",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "supabase/migrations/20261117102312_public_capabilities.sql": "23fa0311a7206fe02e4bfb37e6e1c9b5fa9d0d9f0b3f894c661b832909012324",
+    "supabase/migrations/20261117114114_device_auth.sql": "53a4b8dc3dc55ddd54b2b0f91149fb5afbbd21a14fdbe486a0c1e029aa919637",
+    "supabase/migrations/20261117122734_owner_pin_admin.sql": "31d74cd0c277db83407e47545bc63bc4e50e3c9ddd326524d9d3bb4f6c84da3c",
+    "supabase/migrations/20261117130209_hosted_fk_indexes.sql": "230545c612f5ac349f58e48827483bae560d2b315526c0793d2610567e4bc3bd",
+    "supabase/migrations/20261117134918_device_order_reads.sql": "30e3233544cf4652c86c6046b2bd2104e8d98ce8d225ed36df6321bfa45115ec",
+    "supabase/migrations/20261117141552_inbox_image_storage.sql": "ce7da33d23095dbc5d97b53809892d47ba5335170a58a28ae2dffa41e1fc6435",
+    "supabase/migrations/20261117145205_catalogue_commands.sql": "1c6e0f46a37a338be8a5f6514224b3f820ddaf12338dbadb900947c0b1ff30fc",
+    "supabase/functions/commands/index.ts": "dd89c4433ba1559257f6ceb162c5369f40629e51696ccf93bafc289b163512c9",
+    "supabase/functions/_shared/commands-handler.ts": "a267dfe2e52594bbd4b0f6c2f0d7fa11cfc8a97571a9683c7e7c67cdce2ff519",
+    "supabase/functions/_shared/auth-http.ts": "fbb27e236446c8cd77c16b6a2013eb53743799dd2fa316a23ee5ecd241e763fe",
+    "packages/core/cloud-commands.ts": "be7c730e39df872ec0f3d586b423b0049ff5092b593ac03e3023f8ae349eddb9",
+    "supabase/config.toml": "6847b55af918ac600f36c469892e841336d19bf0bd46a62240cb33879851ccdc",
+    "supabase/functions/.env.example": "22e7da07306ea07b93aafce870541d912cbae72081cbb5790d1ade867ffc0237",
+    "tests/cloud-commands.test.ts": "515839b00c6e9c2a963a744323c22d47831d99ecce901c0615cfa560771170cb",
+    "tests/commands-handler.test.ts": "73cc53737bf92d26492d2fc22028ea10da7369070ca94f6f639d498df841b3a3",
+    "CHANGELOG.md": "9d22b8250d0a319c3211e5ec5eb7dc659db23746162db1bfa4b86b1f9bca50c1"
+  },
+  "logSha256": {
+    "unit": "d423e36d2ff1d5b099301df511715e4aa39ee25305982dff13a6fa5a3cbcf787",
+    "typecheck": "d24ad912eea05ae4d803bfcd6fb67cea8dd5f08b2533d3ecb48fd242c4073afc",
+    "finalTsc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "37d9206a232a5c0af78531ced0767a1430311f15cb5024bbe7d416648efe69d4",
+    "pagesBuild": "a0dcce6022d7b910f35f7888038e86c6d2d5e5057a5355d3e4494fd63bea443b",
+    "pagesBrowser": "ec43412e4ddb93f0df2503c3a223b0394a35c653437c3b74884874b36dbc36fd",
+    "initialFocused": "02b42a8a7b02b75a76fbffe26992a7240f29a68cfd39203a610b5214c07e0147",
+    "migrationDryRun": "658e765f4f172265b960c08d29f1c1a93b6eaca685f7ee50727536edde136754",
+    "migrationApply": "564f5943c0157cada929e65a7dbf30b71bf7eac606ec84afdb8f368c07df6bfa",
+    "hostedLive": "d09c41f9e9cee2470ce5347ee654c003b3fddcef493ebed61b6edf563cebba6e"
+  }
+}

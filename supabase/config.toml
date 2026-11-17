@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.inbox-image]
 verify_jwt = true
+
+[functions.commands]
+verify_jwt = true

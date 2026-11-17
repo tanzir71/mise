@@ -6,7 +6,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- M30 preparation: the cloud foundation, staff PIN services, scoped screen reads and private image transfers are prepared, with record isolation, original-file checks, expiry and revocation. Sign-in, sync and these new links remain unavailable in the app while the full milestone is in progress.
+- M30 preparation: scoped access, original-image transfers and catalogue availability changes with undo are prepared. Sign-in, sync and cloud interfaces remain unavailable while the full milestone is in progress.
 - M24 interface (behind `shareTarget`): opt-in Android share manifest, bounded offline POST receiver, local Inbox with source-image previews and manual-add fallback, reversible sorting/archive, and editable order/payment/invoice/stock forms. The standard install remains unchanged while installed Android acceptance is pending.
 - M24 storage foundation (behind `shareTarget`): local shared-text and image records, reversible manual classification/archive, atomic audit history, and byte-preserving JSON image backups. Schema 10 upgrades existing databases and imports schema-7/8/9 backups. Installed Android acceptance remains open.
 - M23: a shared hand-off for receipts, reminders and calls, order quotes, supplier requests, summaries, shop links and customer messages. Reviewed text and explicit send progress resume offline; opening or copying leaves confirmation to the sender.
