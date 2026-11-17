@@ -1,0 +1,105 @@
+{
+  "baseCommit": "45dee1760f5c62f1cd9caa3aa8c77dbbdf29059c",
+  "generatedAt": "2026-11-17T09:57:09.1198588Z",
+  "status": "M30 in progress; SQL shop records and inert migration plan only",
+  "engine": {
+    "package": "@electric-sql/pglite",
+    "version": "0.3.16",
+    "postgresVersion": "17.5",
+    "mode": "in-process; no database service or network listener",
+    "authBoundary": "test-only claim-to-UID fixture; no JWT/OTP/session verification"
+  },
+  "schema": {
+    "publicTables": 29,
+    "rlsEnabledAndForced": 29,
+    "localTablesRoundTripped": 21,
+    "outletRecordTablesTested": 23,
+    "contexts": "two outlets in one business and an outlet in another business",
+    "browserWrites": "denied",
+    "publicCapabilities": "not implemented"
+  },
+  "codec": {
+    "version": 1,
+    "module": "packages/core/cloud-records.ts",
+    "sideEffects": "none; returns rows and separate file bodies",
+    "checks": [
+      "validated source before JSON serialization",
+      "exact reverse backup-token comparison",
+      "original source including escaped NUL/lone surrogate",
+      "unpriced order remains pending",
+      "deleted-item snapshots and financial undo history",
+      "original image bytes and SHA-256",
+      "explicit customer/outlet associations",
+      "reject missing/tampered/extra images and image-order gaps",
+      "reject unsupported fields/versions and foreign-business metadata"
+    ]
+  },
+  "storage": {
+    "metadata": "immutable; ULID-derived paths; atomic parent image-byte reservation",
+    "perFileBytes": 5242880,
+    "perItemBytes": 10485760,
+    "maxFiles": 4,
+    "objectsUploaded": 0,
+    "privateBucketAndApi": "pending"
+  },
+  "localChecks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "unitTests": 611,
+    "unitFiles": 50,
+    "tenantChecks": 69,
+    "shopRecordChecks": 65,
+    "nativePostgresChecks": 134,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "pagesBrowserChecks": 296,
+    "browserRetries": 0
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-DVddp3H2.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "0e54190e31fabd607686d0b037e04af549fd0ef4a32c7819bedd93e1da096ad1",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "packages/core/cloud-records.ts": "4dd00f4c330e2ecc0a1e0e147abb259959eeb0ef3f4335757533686879b0ffd5",
+    "tests/shop-records.test.ts": "9038d1a0023034f5f46004d9af100565ba2a0f44d31aa37b0b3359cc1313a724",
+    "tests/shop-data-fixture.ts": "36ed469dde4771db690d89183d569bd589e9246210948e9068387389a30282eb"
+  },
+  "logSha256": {
+    "unit": "7a5f09d0af5292dfa5c0b6c777a20eea041031aaf12eb6225d3a0c2bbf889211",
+    "typecheck": "f10bb098ccfa8f3bdd8d88ea16d3042418f6c33426bb964c2d2b9e5bf7ea652a",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "0aeea0ed5064c6c51b41f6574c94b74892140f96075996ad737e927f5dc09341",
+    "pagesBuild": "1beb3b906b29e520a4a08f475aa48fd9a4e2ef723a242d827bfe1927990c7860",
+    "pagesBrowser": "f5797475c840912de3d245cb57a69be713cc1b049c18fcf5b6991b82cc939555"
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "ownerEntryChange": "embedded CHANGELOG copy"
+  },
+  "hostedChanges": "none",
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "Hosted project and phone-only Auth/SMS verification",
+    "Device enrolment/PIN and constrained staff/agent access",
+    "Transactional audited commands",
+    "Resource-specific public capabilities",
+    "Private Storage objects and API integration",
+    "Reviewed resumable 5000-record migration under 3G/60-second gate",
+    "Target-runtime advisors/API tests and delivery verification"
+  ]
+}
