@@ -1,11 +1,11 @@
 import { ulid } from 'ulid';
 import type { AuditEvent, SetupSnapshot } from './models';
+import {inboxImageTypes,validateInboxImageBytes,type InboxImageType} from './inbox-image';
+export {inboxImageTypes,validateInboxImageBytes,type InboxImageType} from './inbox-image';
 
 export const inboxLimits = { title:200, text:12000, url:2400, files:4, imageBytes:5*1024*1024, totalBytes:10*1024*1024 } as const;
 export const inboxKinds = ['unclassified','order','payment','stock','question','other'] as const;
 export type InboxKind = typeof inboxKinds[number];
-export const inboxImageTypes = ['image/jpeg','image/png','image/webp'] as const;
-export type InboxImageType = typeof inboxImageTypes[number];
 export interface InboxImage { id:string; name:string; type:InboxImageType; size:number }
 export interface InboxItem<Image extends InboxImage = InboxImage> {
   id:string;outletId:string|null;revision:number;title:string;text:string;url:string;images:Image[];
@@ -63,10 +63,6 @@ export function changeInboxCommand<Image extends InboxImage>(before:InboxItem<Im
   if('kind' in change?before.kind===change.kind:before.archived===change.archived)return null;
   const item={...before,...change,revision:before.revision+1,updatedAt:Math.max(at,before.updatedAt)};
   return {item,event:event(item,before,setup,'kind' in change?'inbox.classify':change.archived?'inbox.archive':'inbox.reopen')};
-}
-export function validateInboxImageBytes(type:InboxImageType,bytes:Uint8Array):void {
-  const matches=type==='image/png'?bytes.length>=8&&[137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n):type==='image/jpeg'?bytes.length>=3&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255:bytes.length>=12&&[82,73,70,70].every((n,i)=>bytes[i]===n)&&[87,69,66,80].every((n,i)=>bytes[i+8]===n);
-  if(!matches)throw new Error('The shared image contents do not match its JPEG, PNG or WebP type.');
 }
 export function inboxImageBase64(bytes:Uint8Array):string {
   let binary='';for(let offset=0;offset<bytes.length;offset+=8192)binary+=String.fromCharCode(...bytes.subarray(offset,offset+8192));return btoa(binary);

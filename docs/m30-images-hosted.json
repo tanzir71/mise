@@ -1,0 +1,347 @@
+{
+  "baseCommit": "9b31c5b449a0f5ebb65ef630a3e5ae6f876c615c",
+  "generatedAt": "2026-11-17 14:39:33 UTC",
+  "status": "M30 in progress; private image service/bucket deployed; phone OTP and app integration unavailable",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "supabaseCli": "3.2.0",
+    "localPostgres": "17.5 via @electric-sql/pglite 0.3.16; in-process/no listener",
+    "hostedPostgres": "17.12"
+  },
+  "localChecks": {
+    "unitTests": 817,
+    "unitFiles": 59,
+    "imageNativeHttpPostgres": 22,
+    "imageHandlerTransport": 7,
+    "nativeMigrations": 8,
+    "fixture": "Test-only auth.uid claim boundary and Storage metadata/RLS tables; no native S3 server or actual JWT signature/OTP proof",
+    "covered": [
+      "owner and assigned-manager upload/download",
+      "unassigned manager, foreign owner, staff and unknown identity denial",
+      "anonymous/service RPC denial",
+      "exact original file signatures, length and SHA256",
+      "lost response, immutable duplicates and one completion audit",
+      "failed audit leaves private object retryable and completion unset",
+      "missing/wrong size/MIME/hash Storage proof",
+      "mid-upload member revocation and mid-download Auth revocation",
+      "corrupted stored bytes denied without overwrite",
+      "restrictive bucket policy withstands permissive policies and preserves unrelated buckets",
+      "private bucket drift denied",
+      "bounded/timed streams, original JWT forwarding, fixed service adapter"
+    ],
+    "lint": "passed",
+    "typecheck": "passed; 80 Astro files clean; server and pure core module included",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "browserChecks": 296,
+    "browserRetries": 0,
+    "browserDuration": "6.0m"
+  },
+  "bucket": {
+    "name": "mise-inbox",
+    "public": false,
+    "maximumFileBytes": 5242880,
+    "allowedMimeTypes": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "configuration": "deploy/supabase/inbox-bucket.json",
+    "managedThrough": "Storage API only; SQL reads metadata and adds restrictive access policy",
+    "clientDirectAccess": "denied for anon/authenticated despite permissive policies"
+  },
+  "protocol": {
+    "platformJwt": true,
+    "scope": "saved image ID -> live owner/assigned-manager Auth/member/outlet check; no caller-selected path/tenant",
+    "ownerRpcKey": "publishable; original JWT forwarded for context and completion",
+    "storageKey": "server sb_secret_ in apikey only",
+    "upload": "exact saved binary bytes + shared signature validator + SHA256 before immutable Storage POST",
+    "retry": "verify existing immutable object after duplicate/lost response; never overwrite",
+    "completion": "private bucket + server-owned actual Storage size/MIME/hash proof; uploadedAt and one audit event commit atomically",
+    "download": "verify bytes and repeat caller authorization before response; no signed URL",
+    "bodyMaximumBytes": 5242880,
+    "bodyDeadlineMs": 90000,
+    "rpcDeadlineMs": 5000,
+    "storageRequestDeadlineMs": 10000,
+    "cache": "no-store",
+    "contentTypeOptions": "nosniff",
+    "cors": "exact configured origins",
+    "credentialLogging": false,
+    "transactionLimit": "Storage and PostgreSQL are separate transactions; interrupted transfer can retain a private unconfirmed object for retry"
+  },
+  "hosted": {
+    "project": "imzbqggkoquhkyawvjmz",
+    "migrations": [
+      {
+        "version": "20261117081808",
+        "name": "tenant_foundation"
+      },
+      {
+        "version": "20261117085319",
+        "name": "shop_records"
+      },
+      {
+        "version": "20261117102312",
+        "name": "public_capabilities"
+      },
+      {
+        "version": "20261117114114",
+        "name": "device_auth"
+      },
+      {
+        "version": "20261117122734",
+        "name": "owner_pin_admin"
+      },
+      {
+        "version": "20261117130209",
+        "name": "hosted_fk_indexes"
+      },
+      {
+        "version": "20261117134918",
+        "name": "device_order_reads"
+      },
+      {
+        "version": "20261117141552",
+        "name": "inbox_image_storage"
+      }
+    ],
+    "function": {
+      "id": "6fa60eca-3ead-458b-ba54-9249a1132b50",
+      "name": "inbox-image",
+      "status": "ACTIVE",
+      "version": 1,
+      "verifyJwt": true,
+      "bundleSha256": "f53df34767deaf18017f9431e1475437900bb24094c6dfca54aca8ceaa587e62"
+    },
+    "catalog": {
+      "object": {
+        "path": "00000000000000000000730001/00000000000000000000730011/00000000000000000000730021/00000000000000000000730031",
+        "bucket": "mise-inbox",
+        "metadata": {
+          "eTag": "\"68dbda6f69a69fa2c5120bd0f2bfe2c4\"",
+          "size": 92,
+          "mimetype": "image/png",
+          "cacheControl": "no-cache",
+          "lastModified": "2026-11-17T14:33:09Z",
+          "contentLength": 92,
+          "httpStatusCode": 200
+        },
+        "userMetadata": {
+          "probe": "mise-inbox-verification-v1",
+          "sha256": "0fd1aded9d34a2c660af2af2e746387a7f7d77eb4b4758d4fc8d86d216f3cf75"
+        },
+        "serverProofMatches": true
+      },
+      "policy": {
+        "name": "mise_inbox_server_only",
+        "check": "(bucket_id <> 'mise-inbox'::text)",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "using": "(bucket_id <> 'mise-inbox'::text)",
+        "command": "ALL",
+        "permissive": "RESTRICTIVE"
+      },
+      "functions": [
+        {
+          "anon": false,
+          "name": "complete_inbox_image",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "public",
+          "definer": false,
+          "service": false,
+          "authenticated": true
+        },
+        {
+          "anon": false,
+          "name": "complete_inbox_image",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "private",
+          "definer": true,
+          "service": false,
+          "authenticated": true
+        },
+        {
+          "anon": false,
+          "name": "inbox_image_context",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "public",
+          "definer": false,
+          "service": false,
+          "authenticated": true
+        },
+        {
+          "anon": false,
+          "name": "inbox_image_context",
+          "owner": "postgres",
+          "config": [
+            "search_path=\"\""
+          ],
+          "schema": "private",
+          "definer": true,
+          "service": false,
+          "authenticated": true
+        }
+      ]
+    },
+    "cleanup": {
+      "bucket": {
+        "id": "mise-inbox",
+        "limit": 5242880,
+        "public": false,
+        "mimeTypes": [
+          "image/jpeg",
+          "image/png",
+          "image/webp"
+        ]
+      },
+      "authUsers": 0,
+      "businesses": 0,
+      "inboxImages": 0,
+      "publicDefiners": 0,
+      "storageObjects": 0
+    },
+    "advisors": {
+      "security": [
+        {
+          "name": "rls_enabled_no_policy",
+          "level": "INFO",
+          "count": 5,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+        }
+      ],
+      "performance": [
+        {
+          "name": "unused_index",
+          "level": "INFO",
+          "count": 77,
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index"
+        }
+      ],
+      "warningOrErrorCount": 0
+    },
+    "newSecretVariables": false,
+    "credentialValuesInRepository": false,
+    "positiveOwnerManagerJwtTransferVerified": false,
+    "phoneOtpVerified": false,
+    "authAccountsCreated": 0,
+    "messagesSent": 0,
+    "newCredentialFiles": false,
+    "storageApiProof": {
+      "project": "imzbqggkoquhkyawvjmz",
+      "mode": "direct Storage API synthetic object; no positive owner JWT or phone OTP claimed",
+      "path": "00000000000000000000730001/00000000000000000000730011/00000000000000000000730021/00000000000000000000730031",
+      "ownedFixturePaths": [
+        "00000000000000000000730001/00000000000000000000730011/00000000000000000000730021/00000000000000000000730031",
+        "00000000000000000000730001/00000000000000000000730011/00000000000000000000730021/00000000000000000000730032",
+        "00000000000000000000730001/00000000000000000000730011/00000000000000000000730021/00000000000000000000730033"
+      ],
+      "bytes": 92,
+      "sha256": "0fd1aded9d34a2c660af2af2e746387a7f7d77eb4b4758d4fc8d86d216f3cf75",
+      "uploadStatus": 200,
+      "downloadStatus": 200,
+      "bytesIdentical": true,
+      "duplicateDenied": 400,
+      "anonymousReadDenied": 400,
+      "publicReadDenied": 400,
+      "anonymousUploadDenied": 400,
+      "invalidMimeDenied": 400,
+      "oversizeDenied": 400,
+      "anonymousListStatus": 200,
+      "anonymousListCount": 0,
+      "forgedJwtDenied": 401,
+      "liveDenoAnonymousIdentityDenied": 401,
+      "credentialsWrittenToDisk": false,
+      "authAccountsCreated": 0,
+      "messagesSent": 0,
+      "cleanup": "completed through exact-path Storage API deletion; verified empty fixture prefix",
+      "cleanupStatus": 200,
+      "remainingFixtureObjects": 0
+    }
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "compiledEntryChange": "shared image validator extraction and embedded CHANGELOG copy"
+  },
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastVerifiedLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "priorCredentialCleanup": {
+    "completed": false,
+    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "reason": "Earlier automatic approval review blocked removal; no retry or alternative deletion route",
+    "outsideRepository": true
+  },
+  "remaining": [
+    "Real phone OTP and positive hosted owner/manager JWT resource/transfer verification",
+    "Reviewed image/migration app integration and resumable 5000-record upload under60s on3G",
+    "Transactional commands and remaining staff/agent data",
+    "Device/PIN UI, browser auth/session lifecycle and shared screens",
+    "M31 sync convergence/change cursor/realtime and all later milestones",
+    "Remaining acceptance/publication under owner instructions"
+  ],
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-B0NgHPUO.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "fb52b0039318fddeaf91061a4cce514d98f4a0301829ae3b1caf32c20bb754e1",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "supabase/migrations/20261117102312_public_capabilities.sql": "23fa0311a7206fe02e4bfb37e6e1c9b5fa9d0d9f0b3f894c661b832909012324",
+    "supabase/migrations/20261117114114_device_auth.sql": "53a4b8dc3dc55ddd54b2b0f91149fb5afbbd21a14fdbe486a0c1e029aa919637",
+    "supabase/migrations/20261117122734_owner_pin_admin.sql": "31d74cd0c277db83407e47545bc63bc4e50e3c9ddd326524d9d3bb4f6c84da3c",
+    "supabase/migrations/20261117130209_hosted_fk_indexes.sql": "230545c612f5ac349f58e48827483bae560d2b315526c0793d2610567e4bc3bd",
+    "supabase/migrations/20261117134918_device_order_reads.sql": "30e3233544cf4652c86c6046b2bd2104e8d98ce8d225ed36df6321bfa45115ec",
+    "supabase/migrations/20261117141552_inbox_image_storage.sql": "ce7da33d23095dbc5d97b53809892d47ba5335170a58a28ae2dffa41e1fc6435",
+    "supabase/functions/_shared/inbox-image-handler.ts": "0577c3e5e4e57255597813ea605fd046e3524ca2975bd556b1504f406daeed65",
+    "supabase/functions/_shared/inbox-image-store.ts": "7f8f3f6643aa71e72af6486b5ccbc6ae32184f4245fb2e78e2546475cdfa9b0a",
+    "supabase/functions/inbox-image/index.ts": "774b8bbbafe13a752245f1017ab8c1bed405c4f2bd9d9ef18b2fd24f5f55dcfb",
+    "supabase/functions/_shared/auth-http.ts": "fbb27e236446c8cd77c16b6a2013eb53743799dd2fa316a23ee5ecd241e763fe",
+    "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+    "supabase/functions/_shared/staff-pin.ts": "07731988c47056d0389c859b6fc35c041dbc0488fe6bca21623034fd51a1baba",
+    "packages/core/inbox-image.ts": "0836f8d4edcb64b6f754955c098b124f8c6dd7c4546e2d187fe8b7fc647f6341",
+    "packages/core/inbox.ts": "ea100df21a9b07db3879b20b49cf42517875f9d9a9085a1106305e8eb07ccae1",
+    "supabase/config.toml": "9bed0bbf67b1b1a70bef26f28fb826a08d5870516ca77bb71f05d1bd50bd8699",
+    "deploy/supabase/inbox-bucket.json": "0e4b1a45e64cda76b529bffa88531961a297d219c1e9cfc77e237184f18aa1c1",
+    "tests/inbox-image-storage.test.ts": "d1e32209241b7f0fa5ab56a5529867a7691509613f7516773d09223759ccf034",
+    "tests/inbox-image-handler.test.ts": "2a9e33f2ced917f5e19d74075ccede0f937ee630da3cbdf3f92be496168166ff",
+    "tests/device-orders.test.ts": "e8b19794b9fd70c69ba8b68e3e3717a737cd67e1e4b976d4405db510fd0a9ec0",
+    "tests/fixtures/supabase-auth.sql": "1f02395438d3cb1ef8ee82c21856971fcbff0a02739d6e4b6af0a6ba1c27ad17",
+    "tests/fixtures/supabase-storage.sql": "126bfe5163ca1e8df4beef7b5b392494ce5fc0073eab240666be7d7630229164",
+    "CHANGELOG.md": "1d60731172018d35a8742642cf02c8f0da96f637d29ea52ff9614ac55b6c5a9c"
+  },
+  "logSha256": {
+    "unit": "2afb1651c288249975cf8abc62df01fb52deae17ac70f622e60f1847001ce0eb",
+    "typecheck": "878a63213f70021a7528e246ee7209ac171275401d77cfc0bd0c143e74ff9607",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "76783d8141e39226ddd7dfce52accb062b6b0435460c27750c7f836476878739",
+    "pagesBuild": "59d6abbf058867492b3d4a06530e6c4aa2eea7b203fe28391c5575c1169a8355",
+    "pagesBrowser": "9d4f9426459053f21b27f55d72817992cb323bc1be2d81214d9cbac91c82950a",
+    "initialFocused": "d49f7d34d39ec2c2519ddd604ed5895c858fb314c852953f02b584785656fd76",
+    "migrationDryRun": "71b20e1bf36bb0a2e8f5331121f1b586e0cc9c0c8386d445a2218eae2306f9b0",
+    "migrationApply": "9073ba200fd17c24b035f553c9ca843b248545dd2420384f2aa691a9ffa42bd9",
+    "hostedStorage": "62cdc952285ee520a337a0b122de8f80fa48a4c79dce8b2716341ba87a5d1c21"
+  }
+}

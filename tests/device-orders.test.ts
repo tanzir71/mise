@@ -34,7 +34,7 @@ async function pageQuery(sql:Sql,device:Device,session:Session,after:Page['next'
 async function page(shop=shops[0],after:Page['next']=null,limit:number|null=50,kitchen=false){return db.transaction(sql=>pageQuery(sql,kitchen?shop.kitchenDevice:shop.counter,kitchen?shop.kitchenSession:shop.session,after,limit));}
 async function rollback(action:(sql:Sql)=>Promise<void>){const marker=new Error('rollback');try{await db.transaction(async sql=>{await action(sql);throw marker;});}catch(error){if(error!==marker)throw error;}}
 beforeAll(async()=>{
-  db=await PGlite.create();await db.exec(readFileSync(new URL('./fixtures/supabase-auth.sql',import.meta.url),'utf8'));
+  db=await PGlite.create();for(const name of ['supabase-auth.sql','supabase-storage.sql'])await db.exec(readFileSync(new URL('./fixtures/'+name,import.meta.url),'utf8'));
   const migrationDir=new URL('../supabase/migrations/',import.meta.url);
   for(const name of readdirSync(migrationDir).filter(n=>n.endsWith('.sql')).sort())await db.exec(readFileSync(new URL(name,migrationDir),'utf8'));
   for(const [index,businessType] of (['corner_shop','restaurant','online_shop','food_stall'] as BusinessType[]).entries()){
