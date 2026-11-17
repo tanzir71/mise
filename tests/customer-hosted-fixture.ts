@@ -13,15 +13,15 @@ export async function customerHostedFixture(){
   const base=await prepareCloudMigration(createBackup(tables),subject),ticketId=newInboxId();
   const command=parseShopCommand({id:newInboxId(),type:'customer.create',customerId:newInboxId(),outletId:s.outlet.id,
     input:{name:'করিম\0'+String.fromCharCode(0xd800),nickname:'Probe',phone:'০১৭১২৩৪৫৪৮৪',address:'',notes:'Synthetic only',tags:[' Regular ','regular']},
-    credit:{...defaultCreditTerms,allowed:true,limit:50000},opening:{amount:12345,occurredAt:at-86400000}}) as CustomerCommand;
+    ids:{accountId:newInboxId(),accountEventId:newInboxId(),openingEntryId:newInboxId(),openingEventId:newInboxId()},credit:{...defaultCreditTerms,allowed:true,limit:50000},opening:{amount:12345,occurredAt:at-86400000}}) as CustomerCommand;
   const contextJson=JSON.stringify({business:{id:s.business.id,name:s.business.name,business_type:s.business.businessType,market_code:s.business.marketCode,languages:s.business.languages,created_at:at,updated_at:at},
     outlet:{id:s.outlet.id,business_id:s.business.id,name:s.outlet.name,address:s.outlet.address,currency:s.outlet.currency,timezone:s.outlet.timezone,created_at:at,updated_at:at},customer:null,accounts:[],hasBalance:false});
-  const fields=customerWriteFields({done:false,ticketId,token:'x'.repeat(43),businessId:s.business.id,outletId:s.outlet.id,actorId:s.owner.id,at,contextJson},command,ticketId,newInboxId);
+  const fields=customerWriteFields({done:false,ticketId,token:'x'.repeat(43),businessId:s.business.id,outletId:s.outlet.id,actorId:s.owner.id,at,contextJson},command,ticketId);
   return {subject,otherSubject,businessId:s.business.id,outletId:s.outlet.id,actorId:s.owner.id,baseRecords:base.records,command,hash:await customerFingerprint(command),ticketId,records:fields.p_records as CloudRecord[]};
 }
 /** A single SQL statement group; MZ002 rolls back every synthetic identity/write. */
 export async function customerHostedProofSql(){
-  const f=await customerHostedFixture(),c=f.command,quote=(v:unknown)=>"'"+String(v).replaceAll("'","''")+"'";
+  const f=await customerHostedFixture(),c=f.command;if(!('ids'in c))throw new Error('Profile IDs required');const quote=(v:unknown)=>"'"+String(v).replaceAll("'","''")+"'";
   const managerSubject='00000000-0000-4000-8000-000000009003',managerId=newInboxId(),branchId=newInboxId(),branchAccountId=newInboxId(),ordinaryCommandId=newInboxId(),ordinaryTicketId=newInboxId(),statusCommandId=newInboxId(),statusTicketId=newInboxId();
   const value=(v:unknown)=>v===null?'null':typeof v==='number'||typeof v==='boolean'?String(v):quote(v);
   const tables=new Set(['businesses','outlets','members','member_outlets']);
@@ -31,6 +31,7 @@ export async function customerHostedProofSql(){
     {table:'member_outlets',values:{business_id:f.businessId,member_id:managerId,outlet_id:f.outletId}}];
   const inserts=baseRecords.map(r=>{if(!tables.has(r.table)||Object.keys(r.values).some(k=>!/^[a-z_]+$/.test(k)))throw new Error('Unexpected fixture table');return insert(r);}).join('\n');
   const branchAccount:CloudRecord={table:'credit_accounts',values:{...f.records.find(r=>r.table==='credit_accounts')!.values,id:branchAccountId,outlet_id:branchId}};
+  const recordClock=f.records.find(r=>r.table==='customers')!.values.created_at;
   const name=f.records.find(r=>r.table==='customers')!.values.name;
   const sql=`do $verify$
 declare p jsonb;r jsonb;again jsonb;proof jsonb;ordinary jsonb;status_context jsonb;records jsonb:=${quote(JSON.stringify(f.records))}::jsonb;
@@ -44,18 +45,19 @@ begin
   ${inserts}
   perform set_config('request.jwt.claims',jsonb_build_object('sub',${quote(f.subject)},'role','authenticated')::text,true);
   perform set_config('role','authenticated',true);
-  p:=public.prepare_customer_write(${quote(c.id)},${quote(f.ticketId)},${quote(c.type)},${quote(c.customerId)},${quote(c.outletId)},null,${quote(f.hash)});
+  p:=public.prepare_customer_intent(${quote(c.id)},${quote(f.ticketId)},${quote(c.type)},${quote(c.customerId)},${quote(c.outletId)},null,${quote(f.hash)},${quote(JSON.stringify(c.ids))}::jsonb);
+  records:=replace(records::text,${quote(String(recordClock))},p->>'at')::jsonb;
   begin perform public.finish_customer_write(${quote(f.ticketId)},p->>'token',records);
   exception when insufficient_privilege then caller_finish_denied:=true;end;
   begin perform 1 from private.customer_write_tickets;
   exception when insufficient_privilege then raw_denied:=true;end;
   perform set_config('request.jwt.claims',jsonb_build_object('sub',${quote(f.otherSubject)},'role','authenticated','user_metadata',jsonb_build_object('role','owner'))::text,true);
-  begin perform public.prepare_customer_write(${quote(c.id)},${quote(f.ticketId)},${quote(c.type)},${quote(c.customerId)},${quote(c.outletId)},null,${quote(f.hash)});
+  begin perform public.prepare_customer_intent(${quote(c.id)},${quote(f.ticketId)},${quote(c.type)},${quote(c.customerId)},${quote(c.outletId)},null,${quote(f.hash)},${quote(JSON.stringify(c.ids))}::jsonb);
   exception when insufficient_privilege then other_denied:=true;end;
   perform set_config('request.jwt.claims','{"role":"service_role"}',true);perform set_config('role','service_role',true);
   r:=public.finish_customer_write(${quote(f.ticketId)},p->>'token',records);
   perform set_config('role','authenticated',true);perform set_config('request.jwt.claims',jsonb_build_object('sub',${quote(f.subject)},'role','authenticated')::text,true);
-  again:=public.prepare_customer_write(${quote(c.id)},${quote(f.ticketId)},${quote(c.type)},${quote(c.customerId)},${quote(c.outletId)},null,${quote(f.hash)});
+  again:=public.prepare_customer_intent(${quote(c.id)},${quote(f.ticketId)},${quote(c.type)},${quote(c.customerId)},${quote(c.outletId)},null,${quote(f.hash)},${quote(JSON.stringify(c.ids))}::jsonb);
   if again->>'done'<>'true' or again->'receipt'<>r then raise exception 'Receipt replay failed';end if;
   perform set_config('role','postgres',true);
   select count(*) into primary_tickets from private.customer_write_tickets where command_id=${quote(c.id)};
@@ -64,15 +66,15 @@ begin
   perform set_config('request.jwt.claims',jsonb_build_object('sub',${quote(managerSubject)},'role','authenticated','user_metadata',jsonb_build_object('role','owner'))::text,true);
   perform set_config('role','authenticated',true);
   select count(*) into manager_other_rows from public.credit_accounts where id=${quote(branchAccountId)};
-  ordinary:=public.prepare_customer_write(${quote(ordinaryCommandId)},${quote(ordinaryTicketId)},'customer.update',${quote(c.customerId)},${quote(c.outletId)},null,${quote('a'.repeat(64))});
+  ordinary:=public.prepare_customer_intent(${quote(ordinaryCommandId)},${quote(ordinaryTicketId)},'customer.update',${quote(c.customerId)},${quote(c.outletId)},null,${quote('a'.repeat(64))},${quote(JSON.stringify({...c.ids,accountEventId:newInboxId(),openingEntryId:newInboxId(),openingEventId:newInboxId()}))}::jsonb);
   manager_context_redacted:=right(replace(ordinary->>'contextJson',' ',''),length('"hasBalance":false}'))='"hasBalance":false}'
     and strpos(ordinary->>'contextJson',${quote(branchAccountId)})=0;
-  begin perform public.prepare_customer_write(${quote(statusCommandId)},${quote(statusTicketId)},'customer.archive',${quote(c.customerId)},${quote(c.outletId)},null,${quote('b'.repeat(64))});
+  begin perform public.prepare_customer_intent(${quote(statusCommandId)},${quote(statusTicketId)},'customer.archive',${quote(c.customerId)},${quote(c.outletId)},null,${quote('b'.repeat(64))},null);
   exception when insufficient_privilege then manager_status_denied:=true;end;
   perform set_config('role','postgres',true);
   insert into public.member_outlets values(${quote(f.businessId)},${quote(managerId)},${quote(branchId)});
   perform set_config('role','authenticated',true);
-  status_context:=public.prepare_customer_write(${quote(statusCommandId)},${quote(statusTicketId)},'customer.archive',${quote(c.customerId)},${quote(c.outletId)},null,${quote('b'.repeat(64))});
+  status_context:=public.prepare_customer_intent(${quote(statusCommandId)},${quote(statusTicketId)},'customer.archive',${quote(c.customerId)},${quote(c.outletId)},null,${quote('b'.repeat(64))},null);
   manager_all_assigned:=status_context->>'done'='false';
   perform set_config('role','postgres',true);
   delete from public.member_outlets where business_id=${quote(f.businessId)} and member_id=${quote(managerId)} and outlet_id=${quote(branchId)};
@@ -82,6 +84,8 @@ begin
   perform set_config('role','postgres',true);
   proof:=jsonb_build_object('originalActor',(select bool_and(actor_id=${quote(f.actorId)}) from public.events where business_id=${quote(f.businessId)}),
    'literalUnicodeRoundTrip',(select name::text=${quote(name)} from public.customers where id=${quote(c.customerId)}),
+   'deviceIdsRetained',r->>'accountId'=${quote(c.ids.accountId)} and r->>'accountEventId'=${quote(c.ids.accountEventId)} and r->>'entryId'=${quote(c.ids.openingEntryId)} and r->>'openingEventId'=${quote(c.ids.openingEventId)} and exists(select 1 from public.credit_entries e where e.id=${quote(c.ids.openingEntryId)} and e.account_id=${quote(c.ids.accountId)} and e.event_id=${quote(c.ids.openingEventId)}),
+   'serverClockAgrees',exists(select 1 from public.customers saved where saved.id=${quote(c.customerId)} and saved.updated_at=(p->>'at')::bigint and saved.updated_at=(r->>'customerUpdatedAt')::bigint) and (select bool_and(at=(r->>'at')::bigint) from public.events where business_id=${quote(f.businessId)}),
    'normalizedPhone',(select phone='+8801712345484' from public.customers where id=${quote(c.customerId)}),
    'customerRows',(select count(*) from public.customers where business_id=${quote(f.businessId)}),
    'accountRows',(select count(*) from public.credit_accounts where business_id=${quote(f.businessId)} and outlet_id=${quote(f.outletId)}),
@@ -95,7 +99,7 @@ begin
    'receiptReplay',again->'receipt'=r,'rawStagingDenied',raw_denied,'ordinaryCallerFinishDenied',caller_finish_denied,'differentConfirmedUserDenied',other_denied);
   if not other_denied or not raw_denied or not caller_finish_denied or not manager_context_redacted or not manager_status_denied or not manager_all_assigned or not manager_revoked_finish or manager_other_rows<>0 or (proof->>'customerRows')::int<>1 or (proof->>'accountRows')::int<>1
    or (proof->>'openingEntries')::int<>1 or (proof->>'ledgerBalance')::int<>12345 or (proof->>'auditRows')::int<>3 or (proof->>'receipts')::int<>1
-   or (proof->>'ticketsAfterCommit')::int<>0 or (proof->>'literalUnicodeRoundTrip')::boolean is not true or (proof->>'originalActor')::boolean is not true then
+   or (proof->>'deviceIdsRetained')::boolean is not true or (proof->>'serverClockAgrees')::boolean is not true or (proof->>'ticketsAfterCommit')::int<>0 or (proof->>'literalUnicodeRoundTrip')::boolean is not true or (proof->>'originalActor')::boolean is not true then
    raise exception 'Customer command verification failed';end if;
   raise exception using errcode='MZ002',message='Rollback synthetic customer command fixture';
  exception when sqlstate 'MZ002' then null;

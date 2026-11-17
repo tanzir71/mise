@@ -50,9 +50,9 @@ export function createCommandStore(apiUrl:string,publishableKey:string,send:type
       if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Customer writes unavailable');
       const hash=await customerFingerprint(c),newId=options.newId??deviceAuthId;
       for(let attempt=0;attempt<3;attempt++){
-        const ticket=newId(),prepared=await rpc('prepare_customer_write',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_customer_id:c.customerId,p_outlet_id:c.outletId,p_account_id:c.type==='khata.settings'?c.accountId:null,p_hash:hash},publishableKey,jwt);
+        const ticket=newId(),prepared=await rpc('prepare_customer_intent',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_customer_id:c.customerId,p_outlet_id:c.outletId,p_account_id:c.type==='khata.settings'?c.accountId:null,p_hash:hash,p_ids:'ids'in c?c.ids:null},publishableKey,jwt);
         if(prepared?.done===true)return prepared.receipt;
-        const fields=customerWriteFields(prepared,c,ticket,newId);
+        const fields=customerWriteFields(prepared,c,ticket);
         try{return await rpc('finish_customer_write',fields,options.serviceKey,undefined,'customer_snapshot_changed');}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
       }
       throw new CommandConflict();

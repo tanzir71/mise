@@ -80,3 +80,8 @@ or explicit reconciliation with the offline working copy. This money protocol
 retains its own supplied IDs but does not claim full offline convergence. Remaining
 M30 work includes phone OTP, signed-owner HTTP writes/uploads, upload performance,
 staff/agent resources, order/stock commands and the reviewed app/outbox boundary.
+
+The later [customer identity increment](m30-customer-identity.md) resolves the
+related-ID prerequisite above with strict device-generated plans. The full outbox,
+ordered delivery and retained conflict review remain open. Its hosted version and
+verification follow the historical money-command evidence recorded here.

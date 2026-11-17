@@ -51,3 +51,8 @@ Local checks reduce accidental disclosure; they do not replace row-level securit
 or review of future authentication changes. If a credential ever reaches a public
 location, rotate it and remove the exposed value; deleting the latest file alone
 does not remove Git history.
+
+The six Git/Node process integration fixtures have an explicit thirty-second test
+budget. Their assertions still verify history detection, redaction and rejected
+real commits/pushes; they do not benchmark filesystem or process-start latency.
+Application and transfer deadlines are separate.

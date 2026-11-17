@@ -8,3 +8,5 @@
 - Resolved M23/M63 overlap: M23 explicitly requires win-back hand-off now, so add a manually reviewed message for one existing customer. Leave identity merging, segmentation and targeting in M63. No backend or automated sending is introduced.
 
 - Resolved for M30 financial admission: preserve the device occurrence time, but enforce the existing undo deadline using the live server clock. Keep expired/rejected offline intents for explicit review when M31 is implemented. New-customer/account related-ID reconciliation also remains an explicit prerequisite to enabling the outbox. No owner sign-off is requested.
+
+- Resolved M30 customer/account identity: strict device-generated companion-ID plans now retain the exact account/opening/audit IDs from the local mutation. Conflicting current-account creation returns retained-intent review. M31 still needs ordered delivery and conflict resolution; the outbox remains unavailable.

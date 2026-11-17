@@ -91,3 +91,8 @@ Real owner/manager phone OTP and signed-owner HTTP writes remain open, along wit
 the UI/outbox boundary, money/payment/order/stock commands, staff/agent resources,
 upload performance and the rest of M30. GitHub workflows and Pages publication remain
 stopped by the owner.
+
+The later [financial command increment](m30-money-commands.md) adds counter/khata
+money actions. The subsequent [customer identity increment](m30-customer-identity.md)
+requires device-generated related-ID plans and closes the legacy preparation RPC.
+The verification counts and deployed version above describe this earlier increment.
