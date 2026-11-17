@@ -1,0 +1,130 @@
+{
+  "baseCommit": "1aeb0cad4d643d2e6e8612696a53d84cfb5cebbe",
+  "status": "M30 in progress; local reviewed snapshot/recovery engine prepared; hosted upload and product controls incomplete",
+  "privacyAudit": {
+    "scope": "current files, staged index, reachable Git history and built site",
+    "knownValuesChecked": 8,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretDeploymentFindings": 21,
+    "coverageFindings": 0,
+    "matchedValuesPrinted": false
+  },
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "vitest": "3.2.7",
+    "browser": "native Playwright Chromium"
+  },
+  "checks": {
+    "unitTests": 945,
+    "unitFiles": 64,
+    "unitWorkers": 4,
+    "newUploadUnitDatabaseChecks": 22,
+    "lint": "passed including local secret guard",
+    "typecheck": "passed;84 Astro files clean",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "browserChecks": 298,
+    "browserRetries": 0,
+    "browserDuration": "7.1m",
+    "newNativeBrowserChecks": 2,
+    "newNativeCases": [
+      "5000 exact local records and original image; native Blob/IndexedDB; full page reload",
+      "lost part reply; close/reopen journal; skip accepted chunk; one final receipt; working copy retained"
+    ],
+    "visual": "No new product layout or visual comparison claimed"
+  },
+  "protocol": {
+    "version": 1,
+    "source": "complete validated JSON backup, frozen before first await",
+    "tables": 21,
+    "maxSourceBytes": 52428800,
+    "rawChunkBytes": 262144,
+    "maxCompressedChunkBytes": 393216,
+    "encoding": "independent gzip parts",
+    "manifest": "immutable ASCII-only scope/count/size metadata with exact chunk, source and review SHA-256 hashes",
+    "receiverValidation": "compressed hashes, expansion bounds, full source hash, shared backup/link/image validation, exact decoded scope/count/review comparison",
+    "resume": "same ID and manifest; authoritative server ACKs; no resending acknowledged chunks",
+    "finalization": "required caller gate; source-current check; explicit bound receipt; accepted result retained across cancellation race"
+  },
+  "journal": {
+    "database": "mise-cloud-uploads",
+    "sourceShopSchema": 10,
+    "shopTables": 21,
+    "backupChanged": false,
+    "credentialsStored": false,
+    "contains": "prepared manifests, compressed Blobs, remote progress and acceptance receipt",
+    "existingIds": "cannot overwrite",
+    "acceptedReceipts": "cannot regress to an uncommitted state",
+    "quotaFailure": "no partial journal and no shop data changes",
+    "syncEnabled": false
+  },
+  "verifiedFailureCases": [
+    "NUL/lone surrogate and original image round trip",
+    "same content with different export time/record ordering remains review-equivalent",
+    "source mutation after preparation does not change frozen snapshot",
+    "malformed/count-spoofed manifest and unsupported identity fields rejected",
+    "changed/missing chunks and validly hashed decompression bomb rejected",
+    "changed scope/review/source hash rejected",
+    "lost part reply recovered from server ACKs",
+    "lost commit reply returns original receipt without second promotion",
+    "local change blocks final gate and preserves both snapshots",
+    "wrong/duplicate/out-of-range/sparse ACKs rejected",
+    "omitted final receipt cannot report success",
+    "abort preserves remote progress",
+    "accepted final receipt persists when cancellation races response",
+    "outbox gate failure prevents final request",
+    "IndexedDB close/reopen and full page reload preserve native Blobs",
+    "duplicate journal IDs and corrupted bindings rejected",
+    "corrupt persisted bytes cannot be promoted",
+    "quota failure preserves working data"
+  ],
+  "verificationBoundary": {
+    "receiver": "test-only MemoryCloudUpload; used in Node/database and isolated native Chromium tests",
+    "harness": "built in memory; HTTP interception only; no shipped test route",
+    "supabaseOperationsThisIncrement": 0,
+    "realSignedOwnerJwt": "unverified",
+    "hostedStagingPromotion": "not implemented",
+    "originalFileHostedPromotion": "not implemented",
+    "throttled3GUnder60Seconds": "unverified",
+    "snapshotOutboxBoundary": "must be integrated before product controls",
+    "cloudUi": "not connected",
+    "m30": "incomplete"
+  },
+  "delivery": {
+    "mode": "direct main; no PR or sign-off",
+    "workflows": "owner-disabled; no dispatch or re-enable",
+    "pages": "publication held by owner"
+  },
+  "generatedAt": "2026-11-17T17:00:41.364Z",
+  "sourceHashes": {
+    "packages/core/cloud-upload.ts": "3469faf90da10af1d303ddf3102c6dd8abeb9eb17adde449baf9ef3bcb071fe9",
+    "packages/core/cloud-upload-runner.ts": "05cb5643f3e77b13eda34c963d3c4d276b1e56e287e3c24b0bbf51ff0835687a",
+    "apps/web/src/data/cloud-upload.ts": "95fa90441d2a327c3187a7ed37c726a7910b0188b4123157535d48db5c25c37d",
+    "tests/cloud-upload-fixture.ts": "3c02e697c4275a4d8fa6180f46020a1b87c2135b62ad99a7630cbfc8f0f1fa80",
+    "tests/cloud-upload.test.ts": "c321b68b90e0d3e4d4910a568407e0224ce8a0bceebf5d1b4291f29094781b3a",
+    "tests/cloud-upload-db.test.ts": "0a43202d6288ebde4bd5043b552b9d845aaf8849e3d564f17bbdb2e073c75d8d",
+    "tests/e2e/cloud-upload.spec.ts": "407d7ae860acd9ccefc044290f4971dec724d5db872c12e88e9d35b7e8b1837f",
+    "tests/fixtures/cloud-upload-browser.ts": "ec152a4b103479841787a0e5813e81b606c1cb2a3a1faadf58da7c0cefba9713"
+  },
+  "logs": {
+    "unit": "3c694ac4e42efad381c874be7ad977a91f03676977238bfae63ab2edd761eee2",
+    "lint": "5e64c9bdbf0811f566aa4ae8caafde8e4db7a0177845c1c447e3d00f0b033147",
+    "typecheck": "1eb8b515df276f5d1512f05f24d9b4484d1f16e2a1464c8237bb158e5784edeb",
+    "build-root": "53a6c7f04507b86ba15d52ef064131aecf8850aa92588394e5f4b07bc7877be6",
+    "build-pages": "2965d853443822d56f03e1fb4c0d5631f077485ff148f8ec92ff016bba5fe077",
+    "browser": "6fb38b0b66d38f5c53137aa6a98e43a394237db3faa5a1fcef02733acd27904b",
+    "e2e": "891587ecdb20cf35405d710ae17a832e00f89bf2164142d86b618224d74e5942"
+  },
+  "compiled": {
+    "ownerEntry": "/mise/app/assets/app-DM56XCCl.js",
+    "customerEntry": "/mise/app/s/assets/shop-BZ9RXiOJ.js",
+    "ownerSha256": "0fdf07b3290a2bdecdfe4087cbaa74f27976885a006a5511f4e746b86948c605",
+    "customerSha256": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f",
+    "harnessInSite": false,
+    "journalInSite": false
+  }
+}

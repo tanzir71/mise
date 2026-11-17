@@ -136,6 +136,8 @@ The first-command increment passes **856 unit tests across 61 files**, including
 
 The catalogue CRUD increment passes **923 unit tests across 62 files**, including 67 native command HTTP/PostgreSQL checks and 30 handler/transport checks. All eleven migrations load in the native suite. Coverage includes maximum-length escaped input, normalized category races, full-row retention, exact replay, actor/scope isolation, all live identity revocations, audit rollback and bounded tagged conflicts. Lint and strict TypeScript/Astro checks pass (82 Astro files clean). Both production bases build, and **296 browser checks pass with no retries in 6.8 minutes**; after the final changelog rebuild, both catalogue CRUD/offline smoke cases pass again at 390/1440 px. No layout or new visual comparison is claimed. [m30-catalogue-hosted.json](m30-catalogue-hosted.json) records source/build/log hashes and the separate native, hosted-role and actual HTTP proof boundaries.
 
+The local upload-recovery increment passes **945 unit tests across 64 files**, including 22 new snapshot/runner/journal checks. Lint and strict TypeScript/Astro checks pass (84 Astro files clean); both production bases build. **All 298 browser checks pass with no retries in 7.1 minutes**, including two isolated native Chromium checks for 5,000-record Blob/IndexedDB durability, full-page reload and lost-reply recovery. The receiver in those new tests is a fixture, so no hosted upload, phone OTP or 3G timing is claimed. The new journal and harness are absent from shipped JavaScript; no product layout or new visual comparison is claimed. [m30-upload-local.json](m30-upload-local.json) records hashes and the exact verification scope; [m30-upload.md](m30-upload.md) defines the remaining hosted/outbox contract.
+
 Earlier, `supabase db advisors --type all --fail-on error` against the local stack exited 1 with `ECONNREFUSED 127.0.0.1:54322`. No local database service was started. The actual hosted advisor checks are recorded below; the embedded engine alone does not establish hosted behavior.
 
 ## Configuration and external state
@@ -158,6 +160,7 @@ Earlier automatic approval review rejected the combined local-config/database-st
 
 ## Remaining M30 work
 
+- Local immutable upload snapshots, gzip chunk validation, resumable transfer orchestration and a separate credential-free IndexedDB journal are implemented; see [the upload contract and verification limits](m30-upload.md). Connect them to authenticated hosted staging/promotion, original-file delivery and the snapshot/outbox boundary before enabling cloud controls or claiming the 3G/60-second gate.
 - Complete remaining staff/agent resources and private-image migration/UI integration; the bucket, RPCs and image endpoint are deployed, with positive hosted owner/manager transfer verification still open.
 - Configure the production SMS provider and test real owner/manager phone OTP; email/anonymous sign-in must stay disabled.
 - Complete the device/PIN interface, with scoped staff data/commands and browser session handling; both PIN HTTP functions are deployed.
