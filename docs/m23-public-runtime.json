@@ -1,0 +1,167 @@
+{
+  "commit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+  "ciRun": "https://github.com/tanzir71/mise/actions/runs/43927944995",
+  "visualArtifact": "https://github.com/tanzir71/mise/actions/runs/43927944995/artifacts/14255874654",
+  "ownerEntry": "/mise/app/assets/app-DQxMfEy6.js",
+  "publicEntry": "/mise/app/s/assets/shop-C8EtdM6z.js",
+  "baseURL": "https://tanzir71.github.io/mise/",
+  "isolation": "fresh browser context for each case",
+  "outboundMessagesSent": 0,
+  "stats": {
+    "startTime": "2026-11-16T18:31:56.066Z",
+    "duration": 29636.358,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "name": "a customer request and each explicit choice resume offline without creating an owner database",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "menu quantities, notes, requested time and payment restore exactly",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "failed external opening selects the exact request and remains unconfirmed after reload",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "a changed edition starts fresh and Forget removes the complete local trail",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "clipboard and storage denial keep a selected request with an honest progress notice",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "a delayed copy cannot replace or confirm a newer prepared request",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "a resumed photo-only request reopens the exact snapshot and keeps the attachment reminder",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "Forget also invalidates a clipboard completion already in flight",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public en hand-off controls and resumed review fit and meet axe at 360px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public en hand-off controls and resumed review fit and meet axe at 390px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public en hand-off controls and resumed review fit and meet axe at 768px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public en hand-off controls and resumed review fit and meet axe at 1024px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public en hand-off controls and resumed review fit and meet axe at 1440px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public bn hand-off controls and resumed review fit and meet axe at 360px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public bn hand-off controls and resumed review fit and meet axe at 390px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public bn hand-off controls and resumed review fit and meet axe at 768px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public bn hand-off controls and resumed review fit and meet axe at 1024px",
+      "status": "passed",
+      "retry": 0
+    },
+    {
+      "name": "public bn hand-off controls and resumed review fit and meet axe at 1440px",
+      "status": "passed",
+      "retry": 0
+    }
+  ],
+  "resources": {
+    "bytes": 59728,
+    "parts": [
+      {
+        "path": "/mise/app/s/assets/geist-public-DLU4sjwV.woff2",
+        "bytes": 10472,
+        "encoding": "identity"
+      },
+      {
+        "path": "/mise/app/s/assets/hind-public-p_zvPAp4.woff2",
+        "bytes": 26112,
+        "encoding": "identity"
+      },
+      {
+        "path": "/mise/app/s/assets/shop-BC9sbTGt.css",
+        "bytes": 3450,
+        "encoding": "gzip"
+      },
+      {
+        "path": "/mise/app/s/assets/shop-C8EtdM6z.js",
+        "bytes": 15962,
+        "encoding": "gzip"
+      },
+      {
+        "path": "/mise/app/s/assets/taka-public-B0YCb3dw.woff2",
+        "bytes": 704,
+        "encoding": "identity"
+      },
+      {
+        "path": "/mise/app/s/index.html",
+        "bytes": 2309,
+        "encoding": "gzip"
+      },
+      {
+        "path": "/mise/app/mise-mark.svg",
+        "bytes": 180,
+        "encoding": "gzip"
+      },
+      {
+        "path": "/mise/app/s/sw.js",
+        "bytes": 539,
+        "encoding": "gzip"
+      }
+    ]
+  },
+  "footers": [
+    {
+      "region": "bd",
+      "status": 200,
+      "credit": true
+    },
+    {
+      "region": "intl",
+      "status": 200,
+      "credit": true
+    }
+  ]
+}

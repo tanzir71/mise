@@ -6,15 +6,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- M23 staged customer recovery: reviewed requests, form choices and explicit send progress resume offline; new attempts preserve earlier confirmations, Forget clears the local trail, and denied storage or clipboard access retains manual Copy.
+- M23: a shared hand-off for receipts, reminders and calls, order quotes, supplier requests, summaries, shop links and customer messages. Reviewed text and explicit send progress resume offline; opening or copying leaves confirmation to the sender.
+- M23 recovery: manual Copy remains available when storage or the clipboard fails, long messages keep every part, and customer requests retain form choices and photo reminders. Forget clears the customer’s local trail; backups retain owner message history.
 
-- M23 staged recovery (behind `handOffs`): Copy and manual selection remain usable when audit storage is full; multipart previews can be navigated without falsely confirming a part. Pending owner edits remain available in the recovery message.
-
-- M23 staged owner coverage (behind `handOffs`): cash-receipt, day-summary, saved-link/poster and manual customer messages now use the shared hand-off. Exact receipt/summary/link previews and lossless multipart receipts retain independent confirmation progress.
-
-- M23 staged interface (behind `handOffs`): shared credit, quote and supplier hand-offs with editable/resumable previews, explicit delivery confirmation, one-tap manual fallbacks and atomic companion history. Other outbound senders remain pending.
-
-- M23 foundation: durable hand-off attempts and choices in the audit log, strict message snapshots, retry/revision guards and schema-9 backup compatibility with versions 7 and 8. Shared interface integration remains in progress.
 - M22 (behind `qrPosters`): saved-link QR posters and counter cards, market scan copy, offline local fonts, PNG download/open and native PDF printing at A5 or counter-card size.
 - M20: bounded public shop links, bilingual structured order messages, audited generation and ten-minute undo; Shop link settings with item selection, preview and copy/share fallbacks. The public customer page supports lists/menu choices, optional voice and photo preview, remembered details/last request, fulfilment/time and WhatsApp/Copy/manual completion, with a separate offline worker and a complete page budget below 60 KB.
 - M21: paste English/Bangla customer requests into editable order drafts, with explicit count/unit suggestions, unsaved counter pricing, clipboard/manual fallbacks and owner-confirmed creation. Complete original requests survive order saves and JSON backup/restore; payment preferences never record money.

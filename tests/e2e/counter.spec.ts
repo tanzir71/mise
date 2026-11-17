@@ -11,6 +11,8 @@ async function start(page: Page, width = 390) {
   await page.locator(width >= 1024 ? '.app-sidebar a[href$="/counter"]' : '.app-bottom-nav a[href$="/counter"]').click();
   await expect(page.locator('.counter-page')).toHaveAttribute('aria-busy','false');
 }
+async function receiptMessage(page:Page){await page.getByRole('button',{name:'Share receipt',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Share receipt',exact:true});await expect(dialog.locator('.shared-handoff')).toHaveAttribute('aria-busy','false');return dialog;}
+
 test('ten cash sales take under sixty seconds with only the keypad, including offline reload', async ({page,context}) => {
   await start(page);
   await page.evaluate(async () => { await navigator.serviceWorker.ready; if (!navigator.serviceWorker.controller) await new Promise<void>(resolve => navigator.serviceWorker.addEventListener('controllerchange',() => resolve(),{once:true})); });
@@ -36,12 +38,12 @@ for (const width of [390,1440]) test(`cash change, genuine receipt QR and audite
   const qr = page.getByRole('img',{name:'QR code containing this receipt',exact:true}); await expect(qr).toBeVisible();
   const pixels = await qr.evaluate((image: HTMLImageElement) => { const canvas=document.createElement('canvas'); canvas.width=image.naturalWidth; canvas.height=image.naturalHeight; const context=canvas.getContext('2d')!; context.drawImage(image,0,0); return {width:canvas.width,height:canvas.height,data:Array.from(context.getImageData(0,0,canvas.width,canvas.height).data)}; });
   const decoded = jsQR(new Uint8ClampedArray(pixels.data),pixels.width,pixels.height);
-  expect(decoded?.data).toBe(await page.locator('.receipt-text pre').textContent());
+  const preview=await receiptMessage(page); expect(decoded?.data).toBe(await preview.getByRole('textbox',{name:'Message preview',exact:true}).inputValue()); await preview.getByRole('button',{name:'Close message',exact:true}).click();
   expect(decoded?.data).toContain('Total: ৳245 · Cash'); expect(decoded?.data).toContain('Change: ৳255');
   const axe = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze(); expect(axe.violations).toEqual([]);
   if (width===390) {
     await page.evaluate(() => Object.defineProperty(navigator,'clipboard',{value:{writeText:async () => { throw Error('Blocked'); }},configurable:true}));
-    await page.getByRole('button',{name:'Copy receipt',exact:true}).click(); await expect(page.getByRole('textbox',{name:'Receipt text',exact:true})).toHaveValue(decoded!.data);
+    const sharing=await receiptMessage(page); await sharing.getByRole('button',{name:'Copy message',exact:true}).click(); await expect(sharing.getByRole('textbox',{name:'Copy by hand',exact:true})).toHaveValue(decoded!.data); await sharing.getByRole('button',{name:'Close message',exact:true}).click();
   }
   await page.getByRole('button',{name:'Next sale',exact:true}).click();
   if (width<1024) await page.locator('.counter-log>summary').click();
@@ -59,7 +61,7 @@ test('item naming hides unavailable items and keeps names in the receipt', async
   await dialog.getByRole('searchbox').fill('Soap'); await dialog.locator('.counter-item-list button').click(); await dialog.getByRole('button',{name:'Done',exact:true}).click();
   await page.getByRole('button',{name:'Who?',exact:true}).click(); await page.getByLabel('Name (optional)',{exact:true}).fill('Akter apa'); await page.getByRole('button',{name:'Use this name',exact:true}).click();
   await page.locator('.counter-cash').click(); await page.getByRole('button',{name:'Show receipt QR',exact:true}).click();
-  await expect(page.locator('.receipt-text pre')).toContainText('For: Akter apa'); await expect(page.locator('.receipt-text pre')).toContainText('1 × Soap');
+  const sharing=await receiptMessage(page),text=await sharing.getByRole('textbox',{name:'Message preview',exact:true}).inputValue(); expect(text).toContain('For: Akter apa'); expect(text).toContain('1 × Soap');
 });
 test('wallet payments require explicit confirmation and preserve the selected method', async ({page}) => {
   await start(page); await page.getByLabel('Calculation',{exact:true}).fill('910'); await page.getByRole('button',{name:'bKash',exact:true}).click();
@@ -103,7 +105,7 @@ test('an oversized receipt keeps its complete text when one QR cannot hold it', 
   await picker.getByRole('button',{name:'Done',exact:true}).click(); await page.locator('.counter-cash').click();
   await page.getByRole('button',{name:'Show receipt QR',exact:true}).click();
   await expect(page.locator('.receipt-card')).toContainText('Couldn’t create this receipt QR. Copy the receipt text instead.');
-  for (const name of names) await expect(page.locator('.receipt-text pre')).toContainText(name);
+  const sharing=await receiptMessage(page),pieces:string[]=[];while(true){await expect(sharing.locator('.shared-handoff')).toHaveAttribute('aria-busy','false');pieces.push(await sharing.getByRole('textbox',{name:'Message preview',exact:true}).inputValue());const next=sharing.getByRole('button',{name:'View next part',exact:true});if(!await next.count()||await next.isDisabled())break;await next.click();}for(const name of names)expect(pieces.join('')).toContain(name);
 });
 for (const width of [360,390,768,1024,1440]) test(`counter fits ${width}px`, async ({page}) => {
   await start(page,width); await page.getByLabel('Calculation',{exact:true}).fill('245');

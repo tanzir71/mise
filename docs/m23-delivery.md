@@ -1,6 +1,6 @@
 # M23 · Shared message hand-off
 
-Status: all current owner text-message entry points are staged behind `handOffs`, which remains off by default. They cover credit reminders/receipts/calls, priced orders/calls, supplier drafts, cash receipts, closing summaries, saved shop links/poster sharing and manual customer win-back. The small public customer adapter and final enablement remain open.
+Status: the source implementation enables shared hand-offs by default for every current owner communication sender and the public customer request page. The owner stopped GitHub Actions and automatic Pages publication on 17 November. The live deployment remains commit `9ea1991`; default-on publication is held under that instruction.
 
 `packages/core/handoff-progress.ts` is a browser-independent protocol shared by the owner and the small public customer page. Open and Copy never imply delivery. Clipboard denial and Didn't work remain unconfirmed; only explicit Sent records confirmation and its channel. Later Copy/Open choices preserve that confirmation. Undo removes only the local sent mark, within ten minutes, and restores the latest attempt, including same-timestamp failures or reopened apps. It cannot recall an external message.
 
@@ -48,6 +48,29 @@ Recovery commit `f9c0241` passed [CI and Pages](https://github.com/tanzir71/mise
 
 The customer adapter now shares the same strict choice reducer through a bounded local event history, without importing the owner database. It restores literal notes, item quantities, fulfilment, payment and requested time; opening or copying does not confirm sending. A reviewed photo-only request retains its exact message and separate-attachment reminder after reload without storing the image. Sent requests retain their confirmation until an explicit new attempt, and stale clipboard completions cannot replace a newer request or recreate forgotten history. Storage exhaustion retains the previous durable snapshot and exposes the current manual message with an unsaved-progress notice. Different link editions retain separate history.
 
-Keep `handOffs` default off while this customer increment completes full/root/visual, CI and published verification. Final enablement and the complete sender audit remain open.
+During customer-adapter staging, `handOffs` stayed off until full/root/visual and published verification completed. The subsequent source audit is listed below.
 
 Customer local verification passes lint, TypeScript/Astro, all 461 unit tests, a frozen-lockfile install, both production bases, 83 root-path hand-off/export/public checks, all 278 `/mise/` browser checks without retries and 139 visual comparisons with both original-font proofs. The complete hardened public resource set measures 59,959 encoded HTTP body bytes across eight resources, including all three unchanged fonts and its real offline worker. The gate remains strictly below 60,000. Three inspected reference comparisons are `m23-public-review-screen-390.png`, `m23-public-failed-screen-390.png` and `m23-public-menu-bn-screen-1440.png`; the report also includes Bangla phone and English desktop recovery. Final CI and actual Pages verification follow this staged push.
+
+The final source routing audit finds these current communication senders:
+
+| Sender | Shared route | Preserved behavior |
+| --- | --- | --- |
+| Counter receipts | `Receipt` → `MessageHandoff` | Exact financial preview; lossless parts |
+| Day summaries | `ClosingSummary` → `MessageHandoff` | Exact saved closing snapshot |
+| Khata reminders, receipts and calls | `CreditHandoff` → `HandOff` | Explicit confirmation and atomic credit history |
+| Priced-order messages and calls | `OrderHandoff` → `HandOff` | Per-part progress and stale-order guards |
+| Supplier requests | `SupplierHandoff` → `HandOff` | Explicit supplier history; stock stays unchanged |
+| Shop links and posters | `ShopLinkSettings` / `ShopPoster` → `MessageHandoff` | One immutable published-link identity |
+| Manual customer messages | `CustomerMessage` → `MessageHandoff` | Reviewed literal text and optional phone |
+| Public customer requests | DOM adapter → shared pure choice reducer | Offline form/history recovery; no owner database |
+
+File exports keep M17’s audited download/share recovery; clipboard paste and restore are inbound review flows. The routing audit is complete. Default-on source verification and the owner’s publication override are recorded below.
+
+Customer-adapter commit `9ea1991` passed [CI and Pages](https://github.com/tanzir71/mise/actions/runs/43927944995): 461 unit tests, 278 browser checks and the [139-comparison visual artifact](https://github.com/tanzir71/mise/actions/runs/43927944995/artifacts/14255874654). The three customer recovery screenshots named above are in that artifact. All eighteen customer hand-off cases also pass on the actual published entry `/mise/app/s/assets/shop-C8EtdM6z.js`, paired with owner entry `/mise/app/assets/app-DQxMfEy6.js`. Fresh isolated contexts cover offline resumption, explicit Sent, new attempts, menu/time/payment restoration, denied storage/clipboard, stale completion, photo reminders, Forget, both languages and five widths with axe. No external messages were sent or owner database created. The full public resource set measures **59,728 encoded HTTP body bytes on Pages**. Both regional tanziro.com footer links remain present. See [m23-public-runtime.json](m23-public-runtime.json). Source routing is audited; default-on regression and final enablement remain pending.
+
+The default-on source passes all local checks: lint, TypeScript/Astro, 461 unit tests, both production bases, 83 root-path hand-off/export/public checks, all 278 `/mise/` browser checks without retries, and 139 visual comparisons with both original-font proofs. Existing receipt, order, supplier, khata, summary and poster checks now exercise the shared review sheet while retaining their exact-text, money, QR, clipboard and printing assertions. The public budget check uses the configured HTTP/HTTPS preview origin and still counts every resource against the unchanged 60,000-byte limit.
+
+Three inspected default-on captures are `m23-credit-handoff-390.png`, `m23-order-handoff-390.png` and `m23-supplier-handoff-390.png`; the full local report is `qa/report.html`. [Local enablement evidence](m23-enablement-local.json) records the compiled entries and check counts.
+
+On 17 November the owner requested stopping GitHub Actions and workflows. Pages, Figma exports and device builds are disabled; no workflow is dispatched or re-enabled for this source increment. The current live app remains [the last deployed build](https://tanzir71.github.io/mise/app/) (`9ea1991`), where the shared feature is staged. Default-on publication and its returning-browser verification are held, so M23’s delivery checkbox stays open. Continue independent M24 source work with local checks.

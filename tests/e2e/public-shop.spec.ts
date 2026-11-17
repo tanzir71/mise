@@ -2,6 +2,7 @@ import {expect,test,type Page} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {readFileSync} from 'node:fs';
 import {get as httpGet} from 'node:http';
+import {get as httpsGet} from 'node:https';
 import {encodeShopPayload} from '../../packages/core/public-shop-codec';
 import {parseOrderMessage} from '../../packages/core/orderMessage';
 import {normalizeBase} from '../../packages/core/paths';
@@ -19,7 +20,7 @@ async function details(page:Page){await page.getByLabel('Your name',{exact:true}
 async function copied(page:Page){await page.getByRole('button',{name:'Copy message',exact:true}).click();await expect(page.locator('.public-status')).toContainText('Message copied');return page.evaluate(()=>(window as unknown as {copied:string}).copied);}
 
 test('a shared customer link opens without an owner flag or workspace',async({page})=>{
-  const shop=publicShopFixture();await page.goto('app/s/#'+encodeShopPayload(shop));await expect(page.getByRole('heading',{level:1})).toHaveText(shop.name);expect(await page.evaluate(()=>localStorage.getItem('mise.flags'))).toBeNull();expect(await page.locator('.app-shell').count()).toBe(0);
+  const shop=publicShopFixture();await page.goto('app/s/#'+encodeShopPayload(shop));await expect(page.getByRole('heading',{level:1})).toHaveText(shop.name);expect(await page.evaluate(()=>localStorage.getItem('mise.flags'))).toBeNull();expect(await page.locator('.app-shell').count()).toBe(0);await expect(page.getByRole('button',{name:"Didn't work",exact:true})).toBeVisible();
 });
 
 test('suggested chips respect the public often-bought and availability flags',async({page})=>{
@@ -77,10 +78,11 @@ test('oversized photos and unavailable storage preserve the manual ordering path
   await page.addInitScript(()=>Object.defineProperty(Storage.prototype,'setItem',{value:()=>{throw new Error('Storage unavailable');}}));await open(page);await details(page);await page.locator('input[type=file]').setInputFiles({name:'too-large.png',mimeType:'image/png',buffer:Buffer.alloc(5000001)});await expect(page.getByRole('alert')).toContainText('smaller than 5 MB');await expect(page.locator('.public-photo-row')).not.toBeVisible();await page.getByLabel('What do you need?',{exact:true}).fill('1 kg sugar');expect(parseOrderMessage(await copied(page))).toMatchObject({items:['1 kg sugar'],photo:false});
 });
 
-test('the complete public offline resource set stays below 60,000 encoded body bytes',async()=>{
+test('the complete public offline resource set stays below 60,000 encoded body bytes',async({baseURL})=>{
   const base=`${normalizeBase(process.env.BASE_PATH)}app/`,manifest=JSON.parse(readFileSync('site/app/s/resources.json','utf8')) as {resources:string[]};let bytes=0;const parts:Record<string,number>={};
   for(const url of manifest.resources){
-    const size=await new Promise<number>((resolve,reject)=>{httpGet(new URL(url,'http://127.0.0.1:4321'),{headers:{'Accept-Encoding':'gzip'}},response=>{if(response.statusCode!==200){response.resume();reject(new Error(`${url}: ${response.statusCode}`));return;}let length=0;response.on('data',chunk=>{length+=chunk.length;});response.on('end',()=>resolve(length));response.on('error',reject);}).on('error',reject);});
+    const target=new URL(url,baseURL),get=target.protocol==='https:'?httpsGet:httpGet;
+    const size=await new Promise<number>((resolve,reject)=>{get(target,{headers:{'Accept-Encoding':'gzip'}},response=>{if(response.statusCode!==200){response.resume();reject(new Error(`${url}: ${response.statusCode}`));return;}let length=0;response.on('data',chunk=>{length+=chunk.length;});response.on('end',()=>resolve(length));response.on('error',reject);}).on('error',reject);});
     parts[url.slice(base.length)]=size;bytes+=size;
   }
   expect(manifest.resources.every(url=>url.startsWith(base+'s/')||url===base+'mise-mark.svg')).toBe(true);expect(manifest.resources.filter(url=>url.endsWith('.woff2'))).toHaveLength(3);expect(bytes,JSON.stringify(parts,null,2)).toBeLessThan(60000);

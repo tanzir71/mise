@@ -1,0 +1,33 @@
+{
+  "baseCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+  "featureDefault": {
+    "handOffs": true
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-fOzEXL3R.js",
+    "customer": "/mise/app/s/assets/shop-agVLnWCT.js"
+  },
+  "localChecks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "unitTests": 461,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "rootBrowserChecks": 83,
+    "pagesPathBrowserChecks": 278,
+    "browserRetries": 0,
+    "visualComparisons": 139,
+    "fontProofs": [
+      "english",
+      "bengali"
+    ],
+    "completeCustomerBudgetBytesLessThan": 60000
+  },
+  "publication": {
+    "automaticWorkflows": "disabled_by_owner",
+    "defaultOnDeployment": "held",
+    "lastLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  }
+}
