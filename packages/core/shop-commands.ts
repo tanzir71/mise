@@ -2,15 +2,17 @@ import {parseCloudCommand,parseCloudCommandReceipt,type CloudCommand,type CloudC
 import type {CustomerInput} from './customers';
 import type {CreditTermsInput} from './khata';
 import {isMoneyCommandType,parseMoneyCommand,parseMoneyCommandReceipt,type MoneyCommand,type MoneyCommandReceipt} from './money-commands';
+import {isStockCommandType,parseStockCommand,parseStockCommandReceipt,type StockCommand,type StockCommandReceipt} from './stock-commands';
 /** Reserve every possible companion ID once on the originating device. */
 export interface CustomerRecordIds {accountId:string;accountEventId:string;openingEntryId:string;openingEventId:string}
 export type CustomerCommand=
   |{id:string;type:'customer.create'|'customer.update';customerId:string;outletId:string;input:CustomerInput;credit:CreditTermsInput|null;opening:{amount:number;occurredAt:number}|null;ids:CustomerRecordIds}
   |{id:string;type:'customer.archive'|'customer.restore';customerId:string;outletId:string}
   |{id:string;type:'khata.settings';customerId:string;outletId:string;accountId:string|null;input:CreditTermsInput;ids:CustomerRecordIds};
-export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand;
+export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand;
 export interface CustomerCommandReceipt {id:string;type:CustomerCommand['type'];customerId:string;outletId:string;accountId:string|null;accountEventId:string|null;entryId:string|null;openingEventId:string|null;at:number;customerUpdatedAt:number;accountUpdatedAt:number|null}
-export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt;
+export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt;
+export function isStockCommand(c:ShopCommand):c is StockCommand{return isStockCommandType(c.type);}
 export function isMoneyCommand(c:ShopCommand):c is MoneyCommand {return isMoneyCommandType(c.type);}
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const id=(v:unknown):v is string=>typeof v==='string'&&/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v);
@@ -26,6 +28,7 @@ function recordIds(v:unknown,commandId:string,customerId:string):CustomerRecordI
   return {accountId:v.accountId as string,accountEventId:v.accountEventId as string,openingEntryId:v.openingEntryId as string,openingEventId:v.openingEventId as string};
 }
 export function parseShopCommand(v:unknown):ShopCommand {
+  if(object(v)&&isStockCommandType(v.type))return parseStockCommand(v);
   if(object(v)&&isMoneyCommandType(v.type))return parseMoneyCommand(v);
   if(!object(v)||typeof v.type!=='string'||(!v.type.startsWith('customer.')&&v.type!=='khata.settings'))return parseCloudCommand(v);
   if(!id(v.id)||!id(v.customerId)||!id(v.outletId))throw new Error('Use valid command and shop IDs.');
@@ -41,6 +44,7 @@ export function parseShopCommand(v:unknown):ShopCommand {
   throw new Error('Choose a supported customer action and its exact fields.');
 }
 export function parseShopCommandReceipt(v:unknown,c:ShopCommand):ShopCommandReceipt {
+  if(isStockCommand(c))return parseStockCommandReceipt(v,c);
   if(isMoneyCommand(c))return parseMoneyCommandReceipt(v,c);
   if(!isCustomerCommand(c))return parseCloudCommandReceipt(v,c);
   if(!object(v)||v.id!==c.id||v.type!==c.type||v.customerId!==c.customerId||v.outletId!==c.outletId||!(v.accountId===null||id(v.accountId))||!integer(v.at)||!integer(v.customerUpdatedAt)||!(v.accountUpdatedAt===null||integer(v.accountUpdatedAt))||((v.accountId===null)!==(v.accountUpdatedAt===null))||((c.type==='customer.archive'||c.type==='customer.restore')!==(v.accountId===null))||(c.type==='khata.settings'&&c.accountId!==null&&v.accountId!==c.accountId))throw new Error('Invalid customer command receipt.');

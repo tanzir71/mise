@@ -40,10 +40,10 @@ reachable history and built output. Current files and output also contain no act
 deployment references. Earlier commits retain nonsecret project identifiers; their
 presence does not provide database or server access. Published history was preserved.
 
-The same day's live read-only verification found all **41 public/private application
+The same day's live read-only verification found all **42 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
-reported no warnings or errors. Twelve informational private-table notices describe
+reported no warnings or errors. Thirteen informational private-table notices describe
 the intentional absence of direct-access policies. No hosted authentication or
 storage configuration was changed by this audit.
 

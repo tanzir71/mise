@@ -2,6 +2,7 @@ import {expect,it,vi} from 'vitest';
 import {createShopCommandRemote} from '../apps/web/src/data/shop-command-remote';
 import type {CustomerCommand} from '../packages/core/shop-commands';
 import type {MoneyCommand} from '../packages/core/money-commands';
+import {stockBatchHeader,type StockCommand} from '../packages/core/stock-commands';
 const id=(n:number)=>String(n).padStart(26,'0'),jwt='user.valid.signature',key='sb_publishable_test_only';
 const command=():CustomerCommand=>({id:id(1),type:'customer.create',customerId:id(2),outletId:id(3),input:{name:'Karim',nickname:'',phone:'01712345482',address:'',notes:'',tags:['tea']},credit:null,opening:null,ids:{accountId:id(4),accountEventId:id(5),openingEntryId:id(6),openingEventId:id(7)}});
 const receipt=()=>({id:id(1),type:'customer.create',customerId:id(2),outletId:id(3),accountId:id(4),accountEventId:id(5),entryId:null,openingEventId:null,at:123,customerUpdatedAt:123,accountUpdatedAt:123});
@@ -19,3 +20,18 @@ it('freezes financial IDs, occurrence time, item lines and credit confirmation b
  c.input.items[0].qty=2;c.input.confirmation!.balance=999;c.occurredAt=99;allow(jwt);expect((await run).id).toBe(id(1));expect(JSON.parse(send.mock.calls[0][1]?.body as string)).toEqual(original);
 });
 it('freezes customer companion IDs before Auth refresh and validates against that original plan',async()=>{let allow:(jwt:string)=>void=()=>{};const pending=new Promise<string>(resolve=>{allow=resolve;}),send=vi.fn<typeof fetch>(async()=>new Response(JSON.stringify(receipt()))),remote=createShopCommandRemote('https://database.test',key,()=>pending,send),c=command(),run=remote.apply(c);if('ids'in c){c.ids.accountId=id(9);c.ids.accountEventId=id(8);}allow(jwt);expect(await run).toEqual(receipt());expect(JSON.parse(send.mock.calls[0][1]?.body as string).ids).toEqual({accountId:id(4),accountEventId:id(5),openingEntryId:id(6),openingEventId:id(7)});});
+const stockBatch=():Extract<StockCommand,{type:'stock.batch'}>=>({id:id(1),outletId:id(2),occurredAt:10,type:'stock.batch',count:true,batchId:id(3),changes:[{id:id(4),revision:1,eventId:id(1),moveId:id(5),reason:'count',source:'count',quantity:0,note:'\0'.repeat(1000)}]});
+const stockReceipt=()=>({id:id(1),outletId:id(2),occurredAt:10,at:20,type:'stock.batch',batchId:id(3),undoOf:null,results:[{stockItemId:id(4),eventId:id(1),moveId:id(5),revision:2,onHand:0,updatedAt:20}]});
+it('stock batches use pre-body outlet admission and retain exact IDs, notes and zero counts through Auth refresh',async()=>{
+ const c=stockBatch(),expected=structuredClone(c);
+ let allow:(value:string)=>void=()=>{};const pending=new Promise<string>(resolve=>{allow=resolve;}),send=vi.fn<typeof fetch>(async()=>new Response(JSON.stringify(stockReceipt()))),remote=createShopCommandRemote('https://database.test',key,()=>pending,send);
+ // A maximum-length valid note exceeds the normal endpoint limit in a small batch.
+ for(let n=6;n<12;n++){const row={...c.changes[0],id:id(n*2),eventId:id(n*2+1),moveId:id(n*2+100)};c.changes.push(row);expected.changes.push({...row});}
+ const response={...stockReceipt(),results:expected.changes.map(x=>({stockItemId:x.id,eventId:x.eventId,moveId:x.moveId,revision:2,onHand:0,updatedAt:20}))};send.mockImplementation(async()=>new Response(JSON.stringify(response)));
+ expect(new TextEncoder().encode(JSON.stringify(c)).length).toBeGreaterThan(32000);const run=remote.apply(c);c.changes[0].note='Changed';c.changes[0].quantity=4;c.batchId=id(90);allow(jwt);expect(await run).toEqual(response);
+ const options=send.mock.calls[0][1]!;expect(options.headers).toMatchObject({[stockBatchHeader]:id(2)});expect(JSON.parse(options.body as string)).toEqual(expected);
+});
+it('an oversized stock batch is refused before Auth, and a forged stock receipt stays unconfirmed',async()=>{
+ const c=stockBatch();c.changes[0].note=' '.repeat(8_000_001);const auth=vi.fn(async()=>jwt),send=vi.fn<typeof fetch>(),remote=createShopCommandRemote('https://database.test',key,auth,send);await expect(remote.apply(c)).rejects.toThrow('too large');expect(auth).not.toHaveBeenCalled();expect(send).not.toHaveBeenCalled();
+ send.mockImplementation(async()=>new Response(JSON.stringify({...stockReceipt(),results:[{...stockReceipt().results[0],moveId:id(99)}]})));await expect(remote.apply(stockBatch())).rejects.toThrow('unconfirmed');
+});

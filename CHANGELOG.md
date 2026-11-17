@@ -7,6 +7,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 ### Added
 
 - M30 preparation: scoped access, original-image transfers, audited catalogue edits, customer/khata saves, counter receipts, khata payments, availability changes with undo and resumable reviewed uploads are prepared. Customer and financial commands retain device record IDs, and financial records retain their occurrence times. Rows, audits and receipts commit together. Sign-in, sync and cloud interfaces remain unavailable while the full milestone is in progress.
+- M30 stock commands: item saves/archive/restore, relative movements, physical counts, atomic batches of up to 1,000 items and guarded undo retain device IDs and original movement times. Relative movements can merge across newer relative changes; a newer physical count requires review. Larger batches require an authenticated outlet check before their body is read.
 - M24 interface (behind `shareTarget`): opt-in Android share manifest, bounded offline POST receiver, local Inbox with source-image previews and manual-add fallback, reversible sorting/archive, and editable order/payment/invoice/stock forms. The standard install remains unchanged while installed Android acceptance is pending.
 - M24 storage foundation (behind `shareTarget`): local shared-text and image records, reversible manual classification/archive, atomic audit history, and byte-preserving JSON image backups. Schema 10 upgrades existing databases and imports schema-7/8/9 backups. Installed Android acceptance remains open.
 - M23: a shared hand-off for receipts, reminders and calls, order quotes, supplier requests, summaries, shop links and customer messages. Reviewed text and explicit send progress resume offline; opening or copying leaves confirmation to the sender.
@@ -18,6 +19,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Fixed
 
+- Decode escaped stock-name and closing-day keys without adding an extra layer of quotes; literal Bengali, NUL and surrogate data survive the cloud codec.
 - Return expected catalogue conflicts promptly as HTTP 409, with bounded server retries for changed snapshots.
 - Keep deployment credentials and project-specific operational details out of the repository; local lint now checks for accidentally committed secrets.
 - Check for exposed credentials before local commits, pushes and production builds, including Git commit/tag messages and filenames; audit reports redact matched values.

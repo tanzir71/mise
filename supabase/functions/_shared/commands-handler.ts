@@ -1,4 +1,6 @@
-import {parseShopCommand,parseShopCommandReceipt,isCustomerCommand,isMoneyCommand,type ShopCommand} from '../../../packages/core/shop-commands.ts';
+import {parseShopCommand,parseShopCommandReceipt,isCustomerCommand,isMoneyCommand,isStockCommand,type ShopCommand} from '../../../packages/core/shop-commands.ts';
+import {stockBatchBodyLimit,stockBatchHeader,stockWritePlan} from '../../../packages/core/stock-commands.ts';
+import {stockFingerprint,stockWriteFields,StockMutationConflict,StockMutationInvalid} from './stock-write.ts';
 import {moneyWritePlan} from '../../../packages/core/money-commands.ts';
 import {moneyFingerprint,moneyWriteFields,MoneyMutationInvalid,MoneyMutationConflict} from './money-write.ts';
 import {authHttp,AuthBodyError,readAuthBody} from './auth-http.ts';
@@ -8,33 +10,50 @@ import {deviceAuthId} from './device-pin-handler.ts';
 export class CommandDenied extends Error {constructor(readonly status:401|403=403){super('Command access denied.');}}
 export class CommandConflict extends Error {}
 class CatalogueSnapshotChanged extends Error {}
-export interface CommandStore {apply(jwt:string,command:ShopCommand):Promise<unknown>}
+export interface CommandStore {apply(jwt:string,command:ShopCommand):Promise<unknown>;admitStockBatch?(jwt:string,outletId:string):Promise<void>}
 export function createCommandsHandler(deps:{store:CommandStore;origins:ReadonlySet<string>}){
   const origins=new Set(deps.origins);
   return async(request:Request):Promise<Response>=>{
-    const {reply,blocked}=authHttp(request,origins);if(blocked)return blocked;
+    const {reply,blocked}=authHttp(request,origins,[stockBatchHeader.toLowerCase()]);if(blocked)return blocked;
     const auth=request.headers.get('authorization')||'',jwt=auth.length<=8192?auth.match(/^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/)?.[1]:undefined;
     if(!jwt)return reply(401,{error:'Sign in again to make this change.'});
     if(!/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type')||''))return reply(415,{error:'Use JSON.'});
-    let raw:unknown;try{raw=await readAuthBody(request,32000);}catch(error){return reply(error instanceof AuthBodyError?error.status:400,{error:'Check the command request.'});}
+    const batchOutlet=request.headers.get(stockBatchHeader);
+    if(batchOutlet!==null){
+      if(!/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(batchOutlet))return reply(400,{error:'Check the batch outlet.'});
+      try{if(!deps.store.admitStockBatch)throw new CommandDenied();await deps.store.admitStockBatch(jwt,batchOutlet);}catch(error){return reply(error instanceof CommandDenied?error.status:503,{error:'Batch changes are unavailable for this account.'});}
+    }
+    let raw:unknown;try{raw=await readAuthBody(request,batchOutlet===null?32000:stockBatchBodyLimit,batchOutlet===null?5000:30000);}catch(error){return reply(error instanceof AuthBodyError?error.status:400,{error:'Check the command request.'});}
     let command:ShopCommand;try{command=parseShopCommand(raw);}catch{return reply(400,{error:'Choose a supported shop action and its exact fields.'});}
+    if(batchOutlet!==null&&(command.type!=='stock.batch'||command.outletId!==batchOutlet))return reply(400,{error:'Keep the admitted stock batch and outlet.'});
     try{return reply(200,parseShopCommandReceipt(await deps.store.apply(jwt,command),command));}
-    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
+    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof StockMutationInvalid?reply(400,{error:error.message}):error instanceof StockMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
   };
 }
 export function createCommandStore(apiUrl:string,publishableKey:string,send:typeof fetch=fetch,options:{serviceKey?:string;newId?:()=>string}={}):CommandStore {
   const root=new URL(apiUrl);
   if(root.username||root.password||root.search||root.hash||root.pathname!=='/'||(root.protocol!=='https:'&&!(root.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(root.hostname)))||!/^sb_publishable_[A-Za-z0-9_-]+$/.test(publishableKey))throw new Error('Commands are not configured.');
-  async function rpc(name:string,args:Record<string,unknown>,key:string,jwt?:string,retryTag?:string){
+  async function rpc(name:string,args:Record<string,unknown>,key:string,jwt?:string,retryTag?:string,deadlineMs=5000){
     const headers:Record<string,string>={apikey:key,'Content-Type':'application/json'};if(jwt)headers.Authorization='Bearer '+jwt;
-    const r=await send(new URL('rest/v1/rpc/'+name,root),{method:'POST',redirect:'error',signal:AbortSignal.timeout(5000),headers,body:JSON.stringify(args)});
+    const r=await send(new URL('rest/v1/rpc/'+name,root),{method:'POST',redirect:'error',signal:AbortSignal.timeout(deadlineMs),headers,body:JSON.stringify(args)});
     if(r.status===401&&!jwt)throw new Error('Server command credentials unavailable');
     if(r.status===401||r.status===403)throw new CommandDenied(r.status);
     if(r.status===409){let code:unknown,details:unknown;try{const error=await r.json();code=error.code;details=error.details;}catch{/* Only the fixed error tag controls retry; backend details remain private. */}if(retryTag&&code==='PT409'&&details===retryTag)throw new CatalogueSnapshotChanged();throw new CommandConflict();}
     if(!r.ok)throw new Error('Command unavailable');return r.json();
   }
-  return {apply:async(jwt,value)=>{
+  return {admitStockBatch:async(jwt,outletId)=>{if(await rpc('admit_stock_batch',{p_outlet_id:outletId},publishableKey,jwt)!==true)throw new CommandDenied();},apply:async(jwt,value)=>{
     const c=parseShopCommand(value);
+    if(isStockCommand(c)){
+      if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Stock writes unavailable');
+      const hash=await stockFingerprint(c),newId=options.newId??deviceAuthId,deadline=c.type==='stock.batch'?45000:5000;
+      for(let attempt=0;attempt<3;attempt++){
+        const ticket=newId(),prepared=await rpc('prepare_stock_write',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_outlet_id:c.outletId,p_plan:stockWritePlan(c),p_hash:hash,p_occurred_at:c.occurredAt},publishableKey,jwt,undefined,deadline);
+        if(prepared?.done===true)return prepared.receipt;
+        const fields=stockWriteFields(prepared,c,ticket);
+        try{return await rpc('finish_stock_write',fields,options.serviceKey,undefined,'stock_snapshot_changed',deadline);}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
+      }
+      throw new CommandConflict();
+    }
     if(isMoneyCommand(c)){
       if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Money writes unavailable');
       const hash=await moneyFingerprint(c),newId=options.newId??deviceAuthId;

@@ -1,0 +1,12 @@
+import {expect,it} from 'vitest';
+import {decodeCommandRecord,encodeCommandRecord} from '../packages/core/cloud-records';
+import {stockNameKey} from '../packages/core/stock-quantity';
+import {parseStockCommand,parseStockCommandReceipt,stockWritePlan,type StockCommand} from '../packages/core/stock-commands';
+const id=(n:number)=>String(n).padStart(26,'0'),literal='চাল\0'+String.fromCharCode(0xd800);
+it('SQL escaped text keys round-trip once while literal JSON labels retain their original code units',()=>{
+ const source={id:id(1),outletId:id(2),activeKey:stockNameKey(literal),name:literal,nameLocal:literal,category:literal,aliases:[literal],unit:'kg',revision:1,onHand:20,target:30,packSize:1,lowAt:5,eventId:id(3),createdAt:1,updatedAt:1},record=encodeCommandRecord('stockItems',source,id(4)),sql={...record.values,name:literal,name_local:literal,category:literal,aliases:[literal],unit:'kg'};
+ expect(decodeCommandRecord('stockItems',sql)).toEqual(source);
+});
+const command=():StockCommand=>({id:id(1),occurredAt:10,type:'stock.create',outletId:id(2),stockItemId:id(3),moveId:id(4),input:{name:'Rice',nameLocal:'চাল',unit:'kg',category:'Food',aliases:['rice',' rice '],onHand:20.125,target:30,packSize:1.5,lowAt:null,supplierId:null}});
+it('stock plans bind IDs and exact thousandths without passing tenant, actor or SQL fields',()=>{const c=parseStockCommand(command());expect(stockWritePlan(c).rows[0]).toMatchObject({itemId:id(3),eventId:id(1),moveId:id(4),reason:'count',quantity:20.125});expect('input'in c&&c.input.aliases).toEqual(['rice']);for(const extra of [{actorId:id(5)},{businessId:id(5)},{sql:'ignored'},{moveId:id(1)},{occurredAt:-1}])expect(()=>parseStockCommand({...command(),...extra})).toThrow();});
+it('receipts bind each result to the planned movement/audit and preserve the reviewed revision for counts',()=>{const c=command(),receipt={id:c.id,type:c.type,outletId:c.outletId,occurredAt:c.occurredAt,at:100,batchId:null,undoOf:null,results:[{stockItemId:id(3),eventId:id(1),moveId:id(4),revision:1,onHand:20.125,updatedAt:100,private:'removed'}]};expect(parseStockCommandReceipt(receipt,c).results[0]).not.toHaveProperty('private');for(const r of [{...receipt.results[0],eventId:id(9)},{...receipt.results[0],revision:2},{...receipt.results[0],onHand:20.1234}])expect(()=>parseStockCommandReceipt({...receipt,results:[r]},c)).toThrow();});

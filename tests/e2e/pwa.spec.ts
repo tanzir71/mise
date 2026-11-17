@@ -1,31 +1,10 @@
-import { test,expect,chromium,type BrowserContext,type Page } from '@playwright/test';
+import {test,expect,type Page} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { normalizeBase } from '../../packages/core/paths';
+import {flags,setup,device,controlled,cash} from './helpers/pwa';
 
-async function flags(context:BrowserContext){await context.addInitScript(()=>localStorage.setItem('mise.flags',JSON.stringify({pwa:true})));}
-async function setup(page:Page){
-  await page.goto('app/');await page.getByRole('radio',{name:/^Corner shop/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('radio',{name:/^Bangladesh/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByLabel('Shop name',{exact:true}).fill('Install test');await page.getByLabel('Phone number',{exact:true}).fill('01712345482');await page.getByRole('button',{name:'Open Mise',exact:true}).click();await expect(page.locator('.today-page')).toHaveAttribute('aria-busy','false');
-}
-async function device(page:Page){await page.goto('app/settings/device');await expect(page.getByRole('heading',{name:'Settings › This device',exact:true})).toBeVisible();}
-async function controlled(page:Page){await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));});}
-async function cash(page:Page,amount:string){await page.goto('app/counter');await page.getByLabel('Calculation',{exact:true}).fill(amount);await page.locator('.counter-cash').click();await expect(page.getByLabel('Calculation',{exact:true})).toHaveValue('');}
 async function offerInstall(page:Page,outcome:'accepted'|'dismissed',reject=false){return page.evaluate(({outcome,reject})=>{const event=new Event('beforeinstallprompt',{cancelable:true}),state=window as unknown as {installCalls?:number};Object.assign(event,{prompt:async()=>{state.installCalls=(state.installCalls||0)+1;if(reject)throw new Error('Unavailable');},userChoice:Promise.resolve({outcome})});window.dispatchEvent(event);return event.defaultPrevented;},{outcome,reject});}
 async function accessible(page:Page){expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);}
 
-test('the real manifest is installable and a closed browser reopens its saved shop offline',async({baseURL},info)=>{
-  test.setTimeout(60000);
-  const options={baseURL,headless:true,channel:'chromium',args:['--bypass-app-banner-engagement-checks'],viewport:{width:390,height:844}},profile=info.outputPath('offline-profile');
-  let context=await chromium.launchPersistentContext(profile,options);
-  try{
-    await flags(context);let page=await context.newPage();await setup(page);await controlled(page);
-    const cdp=await context.newCDPSession(page),manifest=await cdp.send('Page.getAppManifest'),data=JSON.parse(manifest.data!);expect(manifest.errors).toEqual([]);expect(data).toMatchObject({name:'Mise',display:'standalone',theme_color:'#141414',start_url:`${normalizeBase(process.env.BASE_PATH)}app/`,scope:`${normalizeBase(process.env.BASE_PATH)}app/`,id:`${normalizeBase(process.env.BASE_PATH)}app/`});
-    expect((await cdp.send('Page.getInstallabilityErrors')).installabilityErrors).toEqual([]);
-    for(const icon of data.icons as {src:string;sizes:string}[]){const size=Number(icon.sizes.split('x')[0]),image=await page.evaluate(async({src,url})=>{const image=new Image();image.src=new URL(src,url).href;await image.decode();return {width:image.naturalWidth,height:image.naturalHeight};},{src:icon.src,url:manifest.url});expect(image).toEqual({width:size,height:size});}
-    const manifestResponse=await page.request.get(manifest.url);expect(manifestResponse.headers()['content-type']).toContain('application/manifest+json');
-    await cash(page,'100');await device(page);await expect(page.locator('.pwa-offline')).toContainText('Ready offline');await context.close();
-    context=await chromium.launchPersistentContext(profile,options);await context.setOffline(true);page=await context.newPage();await page.goto('app/');await expect(page.locator('[data-metric=sales] strong')).toHaveText('৳100');await cash(page,'25');await page.goto('app/');await expect(page.locator('[data-metric=sales] strong')).toHaveText('৳125');await device(page);await expect(page.locator('.pwa-offline')).toContainText('Ready offline');
-  }finally{await context.close();}
-});
 test('a deferred install prompt is invoked once, cancellation retains the manual steps',async({page,context})=>{
   await flags(context);await page.goto('app/');await page.locator('.onboarding-install>summary').click();expect(await offerInstall(page,'dismissed')).toBe(true);await page.getByRole('button',{name:'Install on this device',exact:true}).evaluate((button:HTMLButtonElement)=>{button.click();button.click();});await expect(page.locator('.onboarding-install [role=status]')).toContainText('install later');expect(await page.evaluate(()=>(window as unknown as {installCalls:number}).installCalls)).toBe(1);await expect(page.locator('.onboarding-install ol')).toContainText('Chrome or Edge');await expect(page.getByRole('button',{name:'Install on this device',exact:true})).not.toBeVisible();
 });

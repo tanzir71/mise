@@ -1,0 +1,240 @@
+{
+  "date": "2026-11-18",
+  "baseCommit": "17972de59d2b89bf273500bdbe608fc412785082",
+  "status": "M30 in progress; audited stock commands deployed; app/outbox interfaces unavailable",
+  "checks": {
+    "unitTests": 1201,
+    "unitFiles": 75,
+    "unitWorkers": 2,
+    "unitDurationSeconds": 236.82,
+    "nativeStockChecks": 49,
+    "codecChecks": 3,
+    "clientTransportChecks": 17,
+    "exactStockBundleBoot": 1,
+    "lint": "passed including source/index credential guard",
+    "typecheck": "passed;89 Astro check files clean",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "visual": "No new product layout or visual comparison claimed",
+    "testScheduling": "The initial four-worker run exceeded the default5s customer quota-fixture budget and two30s deployment-build budgets. The quota's100 separate preparations now have a scoped30s fixture budget, and the default unit pool uses two workers. All1201 tests passed in the final two-worker run. Product/request deadlines were not relaxed to fix tests.",
+    "nativeBrowserFollowup": {
+      "passed": 6,
+      "failed": 0,
+      "repeatedNativeRestarts": 3,
+      "repeatedStockAxe1440": 3,
+      "durationSeconds": 39.4,
+      "nativeRestartDurationsMs": [
+        4254,
+        4713,
+        4342
+      ]
+    },
+    "browserHarness": "Native restart fixture uses a short OS temporary profile with verified cleanup, actual worker/controller polling, closed-browser assertions and a CDP lifecycle attachment. Playwright trace recording is off only in that file after a repeated shutdown stall/corrupt trace ZIP; all functional assertions and60s deadline remain. Other browser cases retain traces.",
+    "browser": {
+      "passed": 298,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "durationSeconds": 400,
+      "workers": 2
+    },
+    "browserInitial": {
+      "passed": 296,
+      "failed": 2,
+      "notes": "Native persistent-profile trace/activation issue and one stock1440Axe timeout. Three native restarts and three unchanged stock1440 checks passed after the fixture fix; the complete final298-test run then passed without retries."
+    }
+  },
+  "deployment": {
+    "migrationVersions": [
+      "20261117081808",
+      "20261117085319",
+      "20261117102312",
+      "20261117114114",
+      "20261117122734",
+      "20261117130209",
+      "20261117134918",
+      "20261117141552",
+      "20261117145205",
+      "20261117152037",
+      "20261117161027",
+      "20261117171100",
+      "20261117171949",
+      "20261117182909",
+      "20261117190239",
+      "20261117192844",
+      "20261117202047",
+      "20261117203202",
+      "20261117205719",
+      "20261117214105"
+    ],
+    "commands": {
+      "version": 7,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "bytes": 232209,
+      "sha256": "229c36dd7db8c49518d894fbefbd2d44e51d23ca49cde2b9c033180c47458386",
+      "ezbrSha256": "d4d09af243e6acd712b2bbd62fb6a70815e8fc74464d4071a5117dfab67b6418",
+      "sourceFiles": 28
+    },
+    "seedRoleVaultChanges": false,
+    "sourceHashesMatchCurrentFiles": true,
+    "deployedModuleMatchesValidatedBundle": true
+  },
+  "hostedRoleProof": {
+    "proof": {
+      "commands": 9,
+      "receipts": 9,
+      "replayExact": true,
+      "firstQuantity": 21,
+      "firstRestored": true,
+      "pendingTickets": 0,
+      "secondQuantity": 8,
+      "countBatchRetained": true,
+      "privateReadsDenied": true,
+      "otherIdentityDenied": true,
+      "literalUnicodeRetained": true,
+      "ordinaryCompletionDenied": true,
+      "otherBatchAdmissionDenied": true,
+      "deviceIdsAndClocksRetained": true
+    },
+    "auth_rows": 0,
+    "business_rows": 0,
+    "ticket_rows": 0
+  },
+  "catalog": {
+    "migrations": 20,
+    "application_tables": 42,
+    "all_force_rls": true,
+    "anonymous_table_grants": 0,
+    "direct_write_grants": 0,
+    "public_security_definers": 0,
+    "auth_users": 0,
+    "businesses": 0,
+    "stock_items": 0,
+    "stock_moves": 0,
+    "events": 0,
+    "receipts": 0,
+    "tickets": 0,
+    "private_tables_without_direct_policies": 13,
+    "image_bucket_private": true
+  },
+  "advisors": {
+    "security": {
+      "warn": 0,
+      "error": 0,
+      "infoLintGroups": 1
+    },
+    "performance": {
+      "warn": 0,
+      "error": 0,
+      "infoLintGroups": 1
+    }
+  },
+  "limitations": [
+    "Phone OTP and positive real-owner JWT HTTP writes/transfers remain unverified.",
+    "The full1000-item batch has native handler/store/PostgreSQL capacity evidence, not a positive signed-owner hosted HTTP transfer.",
+    "M31 field merging/loser logs, ordered outbox delivery and two-browser convergence remain unfinished.",
+    "No app cloud controls, paid provider, real messages or workflow dispatch enabled."
+  ],
+  "sourceHashes": {
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/calc.ts": "38b8e78484a7792551071f7f44cc639717a760c669ff9c8d92167ac772cf1ed0",
+    "packages/core/catalogue-save.ts": "9b4bfa3c2d0239683bdb5c04c9434e71e1f8de82781e9ffb2bf94f9ec5c80442",
+    "packages/core/catalogue.ts": "5ae9770f861750d246adc43f70c61d191110cf77575d6225f6ae47a827194bca",
+    "packages/core/cloud-commands.ts": "ba070408a5e43d5ef83ceee9aacd51e729b64b3570c2b28684d4bd5fe01f8fbe",
+    "packages/core/cloud-records.ts": "25babc5da2eb3ff3e2a5e070021b67d048b33dbc1dcb2f57e290806fc3038c82",
+    "packages/core/credit-sales.ts": "7f5d9d5410677ef16876cabca7d98fd4d7e07b16cf3efbcdad48b2ec9219a5fd",
+    "packages/core/customer-mutation.ts": "bc4ef7c9b41c96ae29ff255096df896307fa58b5af6dbb1549d78b7bf214c9b8",
+    "packages/core/customers.ts": "39f0e5bf9319aa08bc9d69d73113f349a8cf067d0168011eca345ca26812b3c4",
+    "packages/core/khata.ts": "443625cd538ab11eb81d83ca3e6e55cca693e11c38c28e4095eda1066e20dc45",
+    "packages/core/money-commands.ts": "f451d374a4c158c4052cba53b5fa014c0e28d8eca94570cb6625683486e33398",
+    "packages/core/money.ts": "e0423962cd74585e8c52fbe548c48ca99f614efbfa2ed4542aa201529caafdc1",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "packages/core/phone.ts": "e1ec8d78648f8d3b626544aef7aa7fb22c3ece3d4419d4ce216455980d873c5d",
+    "packages/core/sales.ts": "1527ea77d7e44ed6e7a7fe364001c91f9a2cbf44ee0a04bc990d1f460d643870",
+    "packages/core/shop-access.ts": "268e85d247938968dde2bd638af4b226c639d5d516fff4d9f4c0754236afc7f1",
+    "packages/core/shop-commands.ts": "4c3dfb58723d01de0a091c10f8e9f14ceeb5b190f12377ef6bde9160a2ca3850",
+    "packages/core/stock-commands.ts": "08f4139ddf2119d75fdad484cd69eec9ffb6c066274fc06efb7aa152d21b40c0",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "packages/core/stock.ts": "eec3400b9f11498f4872457f04e1fdb9a759b6f70a59c80b032894302fbb3de9",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/catalogue-write.ts": "0fc0e9981afa8649a944e7df7813d6fb9215593e00ee1c370f1106741231f978",
+    "supabase/functions/_shared/commands-handler.ts": "32f9c83cafea2becc6dbda1dd65c069aadf28f4e4981873030810913e7761812",
+    "supabase/functions/_shared/customer-write.ts": "2c284aa26d36b2ee2e96d2ad6f7ce718f377fabf00eb1afc951cf56d603104c2",
+    "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+    "supabase/functions/_shared/money-write.ts": "2e39c82f623b486e1244058e1fbe5c7c65401c90a232aac0a601e67f767f5ad2",
+    "supabase/functions/_shared/stock-write.ts": "d286d549105a2c643d50751bcdb78bcdb9acb8c0b821be6445cf06c465339574",
+    "supabase/functions/commands/index.ts": "b9bf4e09a069b828f6130cf681e4b8e57895cc44885c331670aa0f26def25401"
+  },
+  "httpNegativeChecks": [
+    {
+      "name": "missing Bearer",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "anonymous stock write",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "service identity cannot prepare owner stock",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "name": "foreign origin",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "name": "malformed batch header",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "anonymous batch admission",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "extra request identity",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "raw anonymous admission RPC",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "stock batch preflight",
+      "status": 204,
+      "ok": true
+    }
+  ],
+  "artifacts": {
+    "appEntry": "/mise/app/assets/app-C8aCAPhy.js",
+    "customerEntry": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "publication": {
+    "workflows": "all3 disabled_manually; no dispatch or re-enable",
+    "pages": "held by owner",
+    "lastPublishedSha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "privacyAudit": {
+    "ok": true,
+    "files": 1092,
+    "objects": 4507,
+    "archiveFiles": 0,
+    "history": true,
+    "artifacts": true,
+    "knownValuesChecked": 8,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalDeploymentFindings": 21,
+    "coverageFindings": 0
+  }
+}
