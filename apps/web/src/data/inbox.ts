@@ -1,4 +1,4 @@
-import type { MiseDatabase } from './db';
+import type { LocalStore } from './local-store';
 import { newInboxId, captureInboxCommand, changeInboxCommand, claimInboxCommand, inboxImageBase64, inboxImageBytes, validateInboxContent, validateInboxImageBytes, type InboxBackupItem, type InboxContent, type InboxImage, type InboxImageType, type InboxItem, type InboxKind } from '@mise/core/inbox';
 
 export interface StoredInboxImage extends InboxImage { blob:Blob }
@@ -12,19 +12,19 @@ export async function prepareInboxContent(input:SharedInboxInput):Promise<InboxC
   await Promise.all(images.map(async image=>validateInboxImageBytes(image.type,new Uint8Array(await image.blob.slice(0,12).arrayBuffer()))));
   return content;
 }
-export async function captureDatabaseInbox(db:MiseDatabase,input:SharedInboxInput):Promise<StoredInboxItem> {
+export async function captureDatabaseInbox(db:LocalStore,input:SharedInboxInput):Promise<StoredInboxItem> {
   const content=await prepareInboxContent(input);
   return db.transaction('rw',db.inboxItems,db.businesses,db.outlets,db.members,db.events,async()=>{
     const command=captureInboxCommand(content,await db.setup());
     await db.inboxItems.add(command.item);if(command.event)await db.events.add(command.event);return command.item;
   });
 }
-export async function claimDatabaseInbox(db:MiseDatabase):Promise<void> {
+export async function claimDatabaseInbox(db:LocalStore):Promise<void> {
   const setup=await db.setup();if(!setup)return;
   const pending=(await db.inboxItems.toArray()).filter(item=>item.outletId===null);
   for(const before of pending){const command=claimInboxCommand(before,setup);await db.inboxItems.put(command.item);await db.events.add(command.event);}
 }
-export async function changeDatabaseInbox(db:MiseDatabase,id:string,revision:number,change:{kind:InboxKind}|{archived:boolean}):Promise<StoredInboxItem> {
+export async function changeDatabaseInbox(db:LocalStore,id:string,revision:number,change:{kind:InboxKind}|{archived:boolean}):Promise<StoredInboxItem> {
   return db.transaction('rw',db.inboxItems,db.businesses,db.outlets,db.members,db.events,async()=>{
     const setup=await db.setup(),before=await db.inboxItems.get(id);if(!setup||!before)throw new Error('Shared item not found.');
     const command=changeInboxCommand(before,setup,revision,change);if(!command)return before;

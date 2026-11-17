@@ -1,0 +1,32 @@
+import { useRef,useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Link } from 'react-router-dom';
+import { Button } from '@mise/ui/primitives.tsx';
+import type { SetupSnapshot,CreditEntry } from '@mise/core/models';
+import { parseMoney,formatMoney } from '@mise/core/money';
+import { orderLineTotal } from '@mise/core/order-lines';
+import { marketPacks } from '@mise/core/packs';
+import { CreditHandoff,CreditPaymentForm } from './CreditHandoff';
+import { useKhata,errorText,displayName } from './khata-data';
+import { db } from './data/db';
+
+export function InboxPayment({setup,text,onDone}:{setup:SetupSnapshot;text:string;onDone:()=>void}) {
+  const {data}=useKhata(setup),[accountId,setAccountId]=useState(''),[receipt,setReceipt]=useState<CreditEntry|null>(null);
+  const ledger=useLiveQuery(()=>accountId?db.readCreditLedger(accountId):undefined,[accountId]);
+  const accounts=(data?.accounts??[]).filter(account=>account.currency===setup.outlet.currency&&data?.customers.some(c=>c.id===account.customerId&&c.archivedAt===undefined));
+  if(receipt)return <div className="inbox-manual"><p role="status">Payment recorded. Review and share the receipt.</p><CreditHandoff accountId={accountId} purpose="receipt" payment={receipt} onDone={onDone} onSkip={onDone}/></div>;
+  return <div className="inbox-manual"><h2>Record a payment</h2><p>Choose the customer and confirm the money received. Sharing a message does not record a payment.</p><label className="inbox-field">Customer<select value={accountId} onChange={event=>setAccountId(event.target.value)}><option value="">Choose customer</option>{accounts.map(account=><option key={account.id} value={account.id}>{displayName(data!.customers.find(c=>c.id===account.customerId)!)}</option>)}</select></label>{!accounts.length?<p>No customer accounts yet. <Link to="/khata">Add a customer</Link></p>:null}{text.length>1000?<p>The full source stays above. Add a short payment note by hand.</p>:null}{ledger?<CreditPaymentForm key={accountId} ledger={ledger} initial={{amount:'',note:text.length<=1000?text:''}} onSaved={(entry,shareReceipt)=>{if(shareReceipt)setReceipt(entry);else onDone();}}/>:null}</div>;
+}
+type InvoiceLine={key:string;name:string;unit:string;qty:string;price:string};
+const blankLine=():InvoiceLine=>({key:crypto.randomUUID(),name:'',unit:'pc',qty:'1',price:''});
+export function InboxInvoice({setup,text,onDone}:{setup:SetupSnapshot;text:string;onDone:()=>void}) {
+  const [supplier,setSupplier]=useState(''),[reference,setReference]=useState(''),[note,setNote]=useState(text.length<=4000?text:''),[paid,setPaid]=useState('Due'),[lines,setLines]=useState<InvoiceLine[]>([blankLine()]),[error,setError]=useState(''),[saving,setSaving]=useState(false),busy=useRef(false);
+  const patch=(key:string,change:Partial<InvoiceLine>)=>setLines(values=>values.map(line=>line.key===key?{...line,...change}:line));
+  const wallets=marketPacks[setup.business.marketCode]['pay/wallets'].filter(value=>value!=='Cash');
+  let total:number|null=null;try{total=lines.reduce((sum,line)=>{const price=parseMoney(line.price,setup.outlet.currency);if(price===null||!line.qty.trim())throw new Error();const value=orderLineTotal(price,Number(line.qty)),next=sum+value;if(!Number.isSafeInteger(next))throw new Error();return next;},0);}catch{/* Incomplete manual amounts remain unsaved. */}
+  async function save(){if(busy.current)return;busy.current=true;setSaving(true);setError('');try{
+    const purchase=await db.recordPurchase({supplierName:supplier,reference,note,paid:paid==='Due'?'due':paid==='Cash'?'cash':paid==='Card'?'card':'wallet',...(wallets.includes(paid)?{wallet:paid}:{}),lines:lines.map(line=>{const unitPrice=parseMoney(line.price,setup.outlet.currency);if(unitPrice===null||!line.qty.trim())throw new Error('Enter every quantity and unit price.');return {name:line.name,unit:line.unit,qty:Number(line.qty),unitPrice};})});
+    onDone();return purchase;
+  }catch(error){setError(errorText(error));}finally{busy.current=false;setSaving(false);}}
+  return <form className="inbox-manual" onSubmit={event=>{event.preventDefault();void save();}}><h2>Record an invoice</h2><p>Enter the invoice lines and prices. Stock is received separately after you count it.</p><fieldset disabled={saving}><label className="inbox-field">Supplier<input required maxLength={120} value={supplier} onChange={event=>setSupplier(event.target.value)}/></label><label className="inbox-field">Invoice reference<input maxLength={120} value={reference} onChange={event=>setReference(event.target.value)}/></label>{lines.map((line,index)=><fieldset key={line.key} className="inbox-invoice-line"><legend>Item {index+1}</legend><label className="inbox-field">Item name<input required maxLength={120} value={line.name} onChange={event=>patch(line.key,{name:event.target.value})}/></label><div className="inbox-line-amounts"><label className="inbox-field">Quantity<input inputMode="decimal" required value={line.qty} onChange={event=>patch(line.key,{qty:event.target.value})}/></label><label className="inbox-field">Unit<input required maxLength={24} value={line.unit} onChange={event=>patch(line.key,{unit:event.target.value})}/></label><label className="inbox-field">Unit price ({setup.outlet.currency})<input inputMode="decimal" required value={line.price} onChange={event=>patch(line.key,{price:event.target.value})}/></label></div>{lines.length>1?<Button kind="ghost" type="button" onClick={()=>setLines(values=>values.filter(value=>value.key!==line.key))}>Remove item {index+1}</Button>:null}</fieldset>)}<Button kind="secondary" type="button" disabled={lines.length>=200} onClick={()=>setLines(values=>[...values,blankLine()])}>Add invoice item</Button><label className="inbox-field">Invoice payment<select value={paid} onChange={event=>setPaid(event.target.value)}>{['Due','Cash',...wallets,'Card'].map(method=><option key={method}>{method}</option>)}</select></label><label className="inbox-field">Invoice note<textarea rows={3} maxLength={4000} value={note} onChange={event=>setNote(event.target.value)}/></label></fieldset>{text.length>4000?<p>The full source stays above. Add a short invoice note by hand.</p>:null}<p>Total {total===null?'—':formatMoney(total,setup.outlet.currency)}</p>{error?<p className="form-error" role="alert">{error}</p>:null}<Button type="submit" disabled={saving||total===null}>{saving?'Saving…':'Save invoice'}</Button></form>;
+}

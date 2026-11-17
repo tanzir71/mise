@@ -47,8 +47,8 @@ function LegacyCreditHandoff({accountId,purpose,sale,payment,onDone,onSkip,posit
       {copied ? <p role="status">Copied. Mark done after you finish.</p> : null}{manual ? <label>Copy by hand<textarea aria-label="Copy by hand" readOnly value={preview.text} rows={6} autoFocus onFocus={event => event.target.select()} /></label> : null}<p>Opening another app or copying does not mark this done.</p></>}
     {preview.error || error ? <p role="alert" className="form-error">{preview.error || error}</p> : null}<footer className="sheet-actions">{onSkip ? <Button kind="secondary" disabled={saving} onClick={onSkip}>Skip</Button> : null}<Button disabled={saving || unavailable || (purpose === 'call' && !ledger.customer.phone)} onClick={() => void done()}>{saving ? 'Saving…' : purpose === 'call' ? 'I called' : 'I sent it'}</Button></footer></div>;
 }
-export function CreditPaymentForm({ledger,onSaved}: {ledger:LedgerContext;onSaved:(entry:CreditEntry,receipt:boolean) => void}) {
-  const [amount,setAmount] = useState(() => moneyInputValue(Math.max(0,creditBalance(ledger.account,ledger.entries)),ledger.account.currency)), [method,setMethod] = useState('Cash'), [note,setNote] = useState(''), [receipt,setReceipt] = useState(false), [saving,setSaving] = useState(false), [error,setError] = useState(''), busy = useRef(false);
+export function CreditPaymentForm({ledger,onSaved,initial}: {ledger:LedgerContext;onSaved:(entry:CreditEntry,receipt:boolean) => void;initial?:{amount:string;note:string}}) {
+  const [amount,setAmount] = useState(() => initial?.amount??moneyInputValue(Math.max(0,creditBalance(ledger.account,ledger.entries)),ledger.account.currency)), [method,setMethod] = useState('Cash'), [note,setNote] = useState(initial?.note??''), [receipt,setReceipt] = useState(false), [saving,setSaving] = useState(false), [error,setError] = useState(''), busy = useRef(false);
   const wallets = marketPacks[ledger.setup.business.marketCode]['pay/wallets'].filter(wallet => wallet !== 'Cash');
   return <form className="khata-form" onSubmit={async event => {
     event.preventDefault(); if (busy.current) return; busy.current = true; setSaving(true); setError('');

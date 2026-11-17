@@ -52,6 +52,7 @@ function boot(){
   function restore(value:PublicAttempt){const d=value.draft;name.value=d.name;phone.value=d.phone;address.value=d.address;fulfilment=d.fulfilment;payment=d.payment;text.value=value.form.text;quantities.clear();for(const [id,count] of value.form.quantities)quantities.set(id,count);time.value=value.form.customTime;chooseTime(value.form.when,false);pressed('[data-action=payment]',payment);pressed('[data-action=fulfilment]',fulfilment);get('address-row').hidden=fulfilment==='pickup';address.required=fulfilment==='delivery';translate();}
   function last(){const previous=memory.last;get<HTMLButtonElement>('last').disabled=!previous;get('last-hint').textContent=previous?new Intl.DateTimeFormat(language==='bn'?'bn-BD':'en',{day:'numeric',month:'short',timeZone:shop.timezone}).format(previous.at)+' · '+previous.draft.items.slice(0,3).join(', ').slice(0,90):w().noLast;get('greeting').textContent=memory.name?`${w().welcome}, ${memory.name}`:'';get('greeting').hidden=!memory.name;}
   function remember(completed?:CustomerMemory['last']){
+    clearTimeout(timer);
     try{const previous=readMemory(shop,localStorage);memory={v:1,name:name.value.trim(),phone:normalisePublicPhone(phone.value,shop.market)||previous.phone,address:address.value,language,...(completed?{last:completed}:previous.last?{last:previous.last}:{})};localStorage.setItem(memoryKey(shop),JSON.stringify(memory));last();}catch{get('status').textContent='Details were not saved. You can still send or copy.';}
   }
   function translate(){

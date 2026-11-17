@@ -1,0 +1,269 @@
+{
+  "title": "M24 Shared Inbox manual review",
+  "pages": [
+    {
+      "id": "m24-source-review",
+      "path": "app/?flags=shareTarget",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".today-page[aria-busy=\"false\"]",
+          "state": "visible"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/more\"]:visible"
+        },
+        {
+          "type": "click",
+          "selector": "main a[href$=\"/inbox\"]"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/inbox/new\"]:visible"
+        },
+        {
+          "type": "fill",
+          "selector": "label:has-text(\"Shared text\") textarea",
+          "value": "২টা কাচ্চি আর ১টা বোরহানি\nবাড়ি ৫, রোড ১২, ধানমন্ডি · bKash করে দিচ্ছি"
+        },
+        {
+          "type": "click",
+          "selector": "button:text-is(\"Save to Inbox\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".inbox-detail"
+        }
+      ],
+      "note": "M24 uses M25 source/review cards, spacing and original Figma icons. Screenshot recognition, confidence and automatic Capture rules belong to later phases. Source text/title are literal; no Messenger provenance is inferred. Manual sorting opens existing editable order/payment/stock forms and the local invoice form; it does not change money or stock. Native status/phone chrome is omitted; controls are 44px for touch access. Differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".inbox-detail",
+          "reference": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png"
+        }
+      ]
+    },
+    {
+      "id": "m24-classified-review",
+      "path": "app/?flags=shareTarget",
+      "widths": [
+        390
+      ],
+      "heights": {
+        "390": 1000
+      },
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".today-page[aria-busy=\"false\"]",
+          "state": "visible"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/more\"]:visible"
+        },
+        {
+          "type": "click",
+          "selector": "main a[href$=\"/inbox\"]"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/inbox/new\"]:visible"
+        },
+        {
+          "type": "fill",
+          "selector": "label:has-text(\"Shared text\") textarea",
+          "value": "২টা কাচ্চি আর ১টা বোরহানি\nবাড়ি ৫, রোড ১২, ধানমন্ডি · bKash করে দিচ্ছি"
+        },
+        {
+          "type": "click",
+          "selector": "button:text-is(\"Save to Inbox\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".inbox-detail"
+        },
+        {
+          "type": "click",
+          "selector": "[aria-label=\"What is this?\"] button:text-is(\"Order\")"
+        },
+        {
+          "type": "wait",
+          "selector": "dialog[open] textarea[aria-label=\"Order message\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[aria-label=\"Close manual review\"]"
+        }
+      ],
+      "note": "M24 uses M25 source/review cards, spacing and original Figma icons. Screenshot recognition, confidence and automatic Capture rules belong to later phases. Source text/title are literal; no Messenger provenance is inferred. Manual sorting opens existing editable order/payment/stock forms and the local invoice form; it does not change money or stock. Native status/phone chrome is omitted; controls are 44px for touch access. Differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".inbox-detail",
+          "reference": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png"
+        }
+      ]
+    },
+    {
+      "id": "m24-classified-desktop",
+      "path": "app/?flags=shareTarget",
+      "widths": [
+        1440
+      ],
+      "heights": {
+        "1440": 1000
+      },
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Rahman Store"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".today-page[aria-busy=\"false\"]",
+          "state": "visible"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/more\"]:visible"
+        },
+        {
+          "type": "click",
+          "selector": "main a[href$=\"/inbox\"]"
+        },
+        {
+          "type": "click",
+          "selector": "a[href$=\"/inbox/new\"]:visible"
+        },
+        {
+          "type": "fill",
+          "selector": "label:has-text(\"Shared text\") textarea",
+          "value": "২টা কাচ্চি আর ১টা বোরহানি\nবাড়ি ৫, রোড ১২, ধানমন্ডি · bKash করে দিচ্ছি"
+        },
+        {
+          "type": "click",
+          "selector": "button:text-is(\"Save to Inbox\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".inbox-detail"
+        },
+        {
+          "type": "click",
+          "selector": "[aria-label=\"What is this?\"] button:text-is(\"Order\")"
+        },
+        {
+          "type": "wait",
+          "selector": "dialog[open] textarea[aria-label=\"Order message\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[aria-label=\"Close manual review\"]"
+        }
+      ],
+      "note": "M24 uses M25 source/review cards, spacing and original Figma icons. Screenshot recognition, confidence and automatic Capture rules belong to later phases. Source text/title are literal; no Messenger provenance is inferred. Manual sorting opens existing editable order/payment/stock forms and the local invoice form; it does not change money or stock. Native status/phone chrome is omitted; controls are 44px for touch access. Differences remain informational.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".inbox-detail",
+          "reference": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png"
+        }
+      ]
+    }
+  ]
+}

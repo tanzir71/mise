@@ -8,8 +8,8 @@ import type { StockItem } from '@mise/core/models';
 import { db } from './data/db';
 import { quantityInput } from './stock-data';
 import { errorText } from './khata-data';
-export function StockQuickUpdate({items,outletId,onSaved,online}: {items:StockItem[];outletId:string;onSaved:() => void;online:boolean}) {
-  const [text,setText] = useState(''), [preview,setPreview] = useState<QuickStockPreview|null>(null), [quantities,setQuantities] = useState<string[]>([]), [editing,setEditing] = useState(false), [error,setError] = useState(''), [saving,setSaving] = useState(false), busy = useRef(false);
+export function StockQuickUpdate({items,outletId,onSaved,online,initialText=''}: {items:StockItem[];outletId:string;onSaved:() => void;online:boolean;initialText?:string}) {
+  const [text,setText] = useState(initialText), [preview,setPreview] = useState<QuickStockPreview|null>(null), [quantities,setQuantities] = useState<string[]>([]), [editing,setEditing] = useState(false), [error,setError] = useState(''), [saving,setSaving] = useState(false), busy = useRef(false);
   const speech = useStockSpeech(online,text => {setText(text);setPreview(null);setError('');},() => setError('Could not hear the stock update. Type it and review.'));
   function review() {speech.cancel();const result = quickUpdate(text,items,outletId);setPreview(result);setQuantities(result.changes.map(change => String(change.quantity)));setEditing(false);setError('');}
   const edited = (() => {try {return preview?.changes.map((change,i) => {const quantity = quantityInput(quantities[i] || '');if (!quantity && change.reason !== 'count') throw new Error('Use a positive quantity.');const before = stockAtoms(change.before), amount = stockAtoms(quantity), after = stockNumber(change.reason === 'count' ? amount : before+(change.reason === 'received' ? amount : -amount));return {...change,quantity,after,note:quantity === change.quantity ? change.note : `${change.clause} · reviewed amount ${quantity} ${change.unit}`};}) || [];}catch{return null;}})();

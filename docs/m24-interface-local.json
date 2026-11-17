@@ -1,0 +1,100 @@
+{
+  "baseCommit": "52be995f025418d121b4a7abd341d93d2208ac49",
+  "schemaVersion": 10,
+  "tableCount": 21,
+  "featureDefaults": {
+    "shareTarget": false
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-Co4U9k46.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "localChecks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "unitTests": 477,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "rootBrowserChecks": 48,
+    "additionalRootPublicChecks": 2,
+    "pagesPathBrowserChecks": 296,
+    "browserRetries": 0,
+    "sharingCases": 16,
+    "sharingRepetitions": 2,
+    "requiredExports": 270,
+    "axeWidths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "publicEncodedBodyByteLimit": 60000,
+    "visualComparisons": 142,
+    "visualGeneratedAt": "2026-11-17T07:56:41.319Z",
+    "visualDifferences": "informational; manual M25 adaptation omits native chrome and future recognition/rules",
+    "fontProofs": [
+      {
+        "id": "english",
+        "screenshot": "qa/screens/m20-font-proof-english.png",
+        "sha256": [
+          "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1",
+          "250ba1130c72274eafadcb6360fb99238ae70f5a11d2e01bf4c64c716d131fd5"
+        ],
+        "renderedSamples": 32,
+        "maxWidthDifference": 0.890625,
+        "meanWidthDifference": 0.36962890625
+      },
+      {
+        "id": "bengali",
+        "screenshot": "qa/screens/m20-font-proof-bengali.png",
+        "sha256": [
+          "7ffe9456e2957755ef86a46375cadf2f83a4dd3caea3959873e5e61ca4466265",
+          "c110fb634d109bed8ec82a12e5b4c4f9127eeb36a600637d124f76d9a96df2e7"
+        ],
+        "renderedSamples": 104,
+        "maxWidthDifference": 1.25,
+        "meanWidthDifference": 0.294921875
+      }
+    ],
+    "keyScreenshots": [
+      "docs/screenshots/m24-source-review-390.png",
+      "docs/screenshots/m24-classified-review-390.png",
+      "docs/screenshots/m24-classified-desktop-1440.png"
+    ]
+  },
+  "screenshotSha256": {
+    "docs/screenshots/m24-source-review-390.png": "831aa0ecf2afdbf0b59339d059b7a2bed531646c3d623c9446fc40473629bf22",
+    "docs/screenshots/m24-classified-review-390.png": "a99a961ec8b1bff44a363931116422af0f8821b90e44da45b8fca0e3e957cea6",
+    "docs/screenshots/m24-classified-desktop-1440.png": "96769556a75b06d18c29dea955573defb36d3506aa18d3c1200f87f577888788"
+  },
+  "logSha256": {
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "typecheck": "ddb0b02416c01b2138f0eabf977966e6fe2aabf929e0309f15e73fa1aa746e5e",
+    "unit": "f8525532c3237e394cb01ecebe4c27196a2dd07a09133230a1c6819aed7cc6ba",
+    "rootBuild": "e5c542a226cc063b2e2adc0aab98b7ab2a612daec62d0676bb2b349ef6544ec2",
+    "rootBrowser": "3aee7330f6da2ea67aaaeaf4ec2f752691603f88e9e05b259a95104a11a75031",
+    "rootPublic": "24915dce39a8ea2d906cfb5575b76921fd71bec60752f9eed7e903f40bef3d43",
+    "pagesBuild": "710dd35b277d2f31eb8694a952c5bad2459b64491e4026bef6736c38622735ef",
+    "pagesBrowser": "5aa7c753ad51c1c684891e5642be06d14dc52d64e01c6c449c3d564745eddb8c",
+    "sharingRepeated": "c9125b19b58a675a5356cc39f0ff6fe1aa318d4442179ec4bd6d3ff2139c439f",
+    "visual": "cd648253cd5cfd12c2c3816552c3b7ad6fe83a7571a5f5b33a7ec518cd6592f8"
+  },
+  "remaining": [
+    "Installed Android Chrome WhatsApp text and screenshot sharing acceptance",
+    "M24 publication and Phase 2 release; M22 physical print/scan gate also remains open"
+  ],
+  "androidVerification": {
+    "status": "not_verified",
+    "emulator": "API 34 started and connected to ADB, then shut down and task-owned files removed",
+    "automaticApproval": "Chrome inspection/navigation command rejected: blocked by policy",
+    "workaroundAttempted": false
+  },
+  "publication": {
+    "automaticWorkflows": "disabled_by_owner",
+    "lastLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "newDeployment": "held"
+  }
+}

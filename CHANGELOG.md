@@ -6,13 +6,18 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- M24 storage foundation (behind `shareTarget`): local shared-text and image records, reversible manual classification/archive, atomic audit history, and byte-preserving JSON image backups. Schema 10 upgrades existing databases and imports schema-7/8/9 backups. The share receiver and Inbox interface remain in progress.
+- M24 interface (behind `shareTarget`): opt-in Android share manifest, bounded offline POST receiver, local Inbox with source-image previews and manual-add fallback, reversible sorting/archive, and editable order/payment/invoice/stock forms. The standard install remains unchanged while installed Android acceptance is pending.
+- M24 storage foundation (behind `shareTarget`): local shared-text and image records, reversible manual classification/archive, atomic audit history, and byte-preserving JSON image backups. Schema 10 upgrades existing databases and imports schema-7/8/9 backups. Installed Android acceptance remains open.
 - M23: a shared hand-off for receipts, reminders and calls, order quotes, supplier requests, summaries, shop links and customer messages. Reviewed text and explicit send progress resume offline; opening or copying leaves confirmation to the sender.
 - M23 recovery: manual Copy remains available when storage or the clipboard fails, long messages keep every part, and customer requests retain form choices and photo reminders. Forget clears the customer’s local trail; backups retain owner message history.
 
 - M22 (behind `qrPosters`): saved-link QR posters and counter cards, market scan copy, offline local fonts, PNG download/open and native PDF printing at A5 or counter-card size.
 - M20: bounded public shop links, bilingual structured order messages, audited generation and ten-minute undo; Shop link settings with item selection, preview and copy/share fallbacks. The public customer page supports lists/menu choices, optional voice and photo preview, remembered details/last request, fulfilment/time and WhatsApp/Copy/manual completion, with a separate offline worker and a complete page budget below 60 KB.
 - M21: paste English/Bangla customer requests into editable order drafts, with explicit count/unit suggestions, unsaved counter pricing, clipboard/manual fallbacks and owner-confirmed creation. Complete original requests survive order saves and JSON backup/restore; payment preferences never record money.
+
+### Fixed
+
+- M23 recovery: immediate customer-detail saves cancel their older debounce so storage failure cannot overwrite the latest Copy/manual-selection notice.
 
 ## [0.2.0] - 2026-11-16
 

@@ -1,10 +1,11 @@
+import Dexie from 'dexie';
 import type { HandoffCompletion,HandoffDraft,HandoffSession } from '@mise/core/handoff';
 import type { InboxKind } from '@mise/core/inbox';
 import type { SharedInboxInput,StoredInboxItem } from './inbox';
 import { claimDatabaseInbox } from './inbox';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
-import Dexie, { type EntityTable } from 'dexie';
-import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderNote, OrderCommunication, OrderStatus, OrderRefund, StockItem, StockMove, Supplier, SupplierMessage } from '@mise/core/models';
+import { LocalStore } from './local-store';
+import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
@@ -27,54 +28,13 @@ import type { PurchaseInput } from '@mise/core/purchases';
 import type { ExportAuditInput } from '@mise/core/export-audit';
 import type { ShopLinkInput,ShopLinkReview } from '@mise/core/shop-links';
 
-export class MiseDatabase extends Dexie {
-  businesses!: EntityTable<Business, 'id'>;
-  outlets!: EntityTable<Outlet, 'id'>;
-  members!: EntityTable<Member, 'id'>;
-  categories!: EntityTable<Category, 'id'>;
-  items!: EntityTable<Item, 'id'>;
-  events!: EntityTable<AuditEvent, 'id'>;
-  sales!: EntityTable<Sale, 'id'>;
-  customers!: EntityTable<Customer, 'id'>;
-  creditAccounts!: EntityTable<CreditAccount, 'id'>;
-  creditEntries!: EntityTable<CreditEntry, 'id'>;
-  orders!: EntityTable<Order,'id'>;
-  orderNotes!: EntityTable<OrderNote,'id'>;
-  orderCommunications!: EntityTable<OrderCommunication,'id'>;
-  orderRefunds!: EntityTable<OrderRefund,'id'>;
-  stockItems!: EntityTable<StockItem,'id'>;
-  stockMoves!: EntityTable<StockMove,'id'>;
-  suppliers!: EntityTable<Supplier,'id'>;
-  supplierMessages!: EntityTable<SupplierMessage,'id'>;
-  dayClosings!: EntityTable<DayClosing,'id'>;
-  purchases!: EntityTable<Purchase,'id'>;
-  inboxItems!: EntityTable<StoredInboxItem,'id'>;
-  constructor(name = 'mise-local') {
-    super(name);
-    this.version(1).stores({ businesses: 'id', outlets: 'id,businessId', members: 'id,businessId', categories: 'id,outletId', items: 'id,outletId,categoryId', events: 'id,outletId,at,command' });
-    this.version(2).stores({ sales: 'id,outletId,createdAt' });
-    this.version(3).stores({ customers:'id,businessId,phone,&[businessId+phone]', creditAccounts:'id,outletId,customerId,&[outletId+customerId+currency]', creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,&reversalOf,&[accountId+sequence]', events:'id,outletId,at,command,customerId' });
-    this.version(4).stores({orders:'id,outletId,status,customer.id,createdAt,&[outletId+sequence],&[outletId+number]',orderNotes:'id,orderId,outletId,&[orderId+revision]',orderCommunications:'id,orderId,outletId,&[orderId+revision]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision]'});
-    this.version(5).stores({orderRefunds:'id,outletId,orderId,saleId,createdAt',sales:'id,outletId,createdAt,orderId',creditEntries:'id,outletId,accountId,customerId,createdAt,saleId,eventId,orderId,refundId,&reversalOf,&[accountId+sequence]'});
-    this.version(6).stores({stockItems:'id,outletId,supplierId,category,&[outletId+activeKey]',stockMoves:'id,outletId,stockItemId,createdAt,countBatchId,&undoOf,&[stockItemId+revision]',suppliers:'id,outletId',supplierMessages:'id,outletId,supplierId,createdAt',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision]'});
-    this.version(7).stores({dayClosings:'id,outletId,day,&[outletId+activeKey]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId'});
-    this.version(8).stores({purchases:'id,outletId,supplierId,createdAt'});
-    this.version(9).stores({events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision]'});
-    this.version(10).stores({inboxItems:'id,outletId,createdAt,kind',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision],inboxId,&[inboxId+inboxRevision]'});
-  }
+export class MiseDatabase extends LocalStore {
   async captureInbox(input:SharedInboxInput):Promise<StoredInboxItem> {return (await import('./inbox')).captureDatabaseInbox(this,input);}
   async changeInbox(id:string,revision:number,change:{kind:InboxKind}|{archived:boolean}):Promise<StoredInboxItem> {return (await import('./inbox')).changeDatabaseInbox(this,id,revision,change);}
   async prepareHandoff(input:HandoffDraft,fresh=false):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,fresh);}
   async resumeHandoff(input:HandoffDraft):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,false,true);}
   async readHandoff(id:string):Promise<HandoffSession> {return (await import('./handoff')).readDatabaseHandoff(this,id);}
   async changeHandoff(id:string,revision:number,choice:HandoffChoice,requestId?:string,completion?:HandoffCompletion):Promise<HandoffSession> {return (await import('./handoff')).changeDatabaseHandoff(this,id,revision,choice,requestId,completion);}
-  async setup(): Promise<SetupSnapshot | null> {
-    const business = await this.businesses.toCollection().first();
-    if (!business) return null;
-    const [outlet, owner] = await Promise.all([this.outlets.where('businessId').equals(business.id).first(), this.members.where('businessId').equals(business.id).first()]);
-    if (!outlet || !owner) throw new Error('Shop data is incomplete. Keep this browser’s data and try again.');
-    return { business, outlet, owner };
-  }
   async saveSetup(input: SetupInput): Promise<SetupSnapshot> {
     return this.transaction('rw', this.tables, async () => {
       const command = setupCommand(input, await this.setup());

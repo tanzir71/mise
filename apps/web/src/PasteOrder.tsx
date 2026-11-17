@@ -11,8 +11,8 @@ import {OrderPricing,type OrderPriceDraft} from './OrderPricing';
 import {errorText} from './khata-data';
 
 type Review={parsed:PastedOrderDraft;input:OrderInput;notes:string[];price:OrderPriceDraft};
-export function PasteOrder({setup,onSaved,onCancel}:{setup:SetupSnapshot;onSaved:(order:Order)=>void;onCancel:()=>void}){
-  const [text,setText]=useState(''),[error,setError]=useState(''),[reading,setReading]=useState(false),[review,setReview]=useState<Review|null>(null),[stage,setStage]=useState<'paste'|'price'|'details'>('paste');
+export function PasteOrder({setup,onSaved,onCancel,initialText=''}:{setup:SetupSnapshot;onSaved:(order:Order)=>void;onCancel:()=>void;initialText?:string}){
+  const [text,setText]=useState(initialText),[error,setError]=useState(''),[reading,setReading]=useState(false),[review,setReview]=useState<Review|null>(null),[stage,setStage]=useState<'paste'|'price'|'details'>('paste');
   const field=useRef<HTMLTextAreaElement>(null),busy=useRef(false);
   async function clipboard(){
     if(busy.current)return;busy.current=true;setReading(true);setError('');const before=text;
