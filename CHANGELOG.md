@@ -18,6 +18,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Fixed
 
+- Keep deployment credentials and project-specific operational details out of the repository; local lint now checks for accidentally committed secrets.
 - M23 recovery: immediate customer-detail saves cancel their older debounce so storage failure cannot overwrite the latest Copy/manual-selection notice.
 
 ## [0.2.0] - 2026-11-16

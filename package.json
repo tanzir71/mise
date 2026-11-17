@@ -11,7 +11,7 @@
     "dev:web": "pnpm --filter @mise/web dev",
     "build": "node scripts/build.mjs",
     "preview": "node scripts/serve.mjs",
-    "lint": "eslint .",
+    "lint": "node scripts/check-secrets.mjs && eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit && pnpm --filter @mise/landing check",
     "test": "vitest run",
@@ -22,7 +22,8 @@
     "qa:visual": "node scripts/qa-visual.mjs",
     "check:exports": "node handover/scripts/export-figma.mjs --check --only=landing",
     "check:marketing": "node scripts/check-marketing.mjs",
-    "check:images": "node scripts/check-image-budgets.mjs"
+    "check:images": "node scripts/check-image-budgets.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

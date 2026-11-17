@@ -70,7 +70,7 @@
     "credentialLogging": false
   },
   "hosted": {
-    "project": "imzbqggkoquhkyawvjmz",
+    "project": "configured-project",
     "migrations": [
       {
         "version": "20261117081808",
@@ -195,7 +195,7 @@
     "newCredentialFiles": false,
     "newSecretVariables": false,
     "liveProof": {
-      "project": "imzbqggkoquhkyawvjmz",
+      "project": "configured-project",
       "mode": "live Deno/Data API negative authorization checks; positive owner/manager JWT remains unverified",
       "signedAnonymousIdentity": 401,
       "ownHandlerErrorVerified": true,
@@ -225,7 +225,7 @@
   },
   "priorCredentialCleanup": {
     "completed": false,
-    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "directory": "private temporary deployment directory (outside repository)",
     "reason": "Earlier automatic approval review blocked removal; no retry or alternative deletion route",
     "outsideRepository": true
   },

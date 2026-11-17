@@ -128,7 +128,7 @@ Earlier, `supabase db advisors --type all --fail-on error` against the local sta
 
 The CLI is pinned to **3.2.0**. The local config exposes only `public`, requires explicit API grants, disables the email provider, anonymous sign-in and local mail service, and uses 900-second access tokens with refresh-token rotation. A reserved fictional phone with a fixed OTP is configured for local development only; never push this test code to a hosted project. Unneeded local Studio, analytics, storage and realtime services are disabled for this first increment.
 
-The owner selected **tanzir71's Org** for Mise. The dedicated project is [`imzbqggkoquhkyawvjmz`](https://supabase.com/dashboard/project/imzbqggkoquhkyawvjmz), in Singapore (`ap-southeast-1`), on the quoted **$0/month** plan. Its managed database reports PostgreSQL **17.12**. No unrelated project was changed.
+The dedicated Mise project belongs to the owner-selected organization and is hosted in Singapore (`ap-southeast-1`), on the quoted **$0/month** plan. Its managed database reports PostgreSQL **17.12**. No unrelated project was changed.
 
 Hosted configuration is isolated in `deploy/supabase/config.toml`. The CLI's reviewed diff was applied with an explicit project ref; a follow-up diff has zero declared changes. A direct `/auth/v1/settings` read confirms email, phone, anonymous users and every external provider are disabled, and signups are disabled. Access-token expiry is fifteen minutes. The local fictional phone/test OTP was never transferred. Twilio credentials and actual phone OTP remain unconfigured; phone/signups should be enabled only when that setup is ready.
 
@@ -138,7 +138,7 @@ The deployed `device-pin` v1 uses its custom device/PIN authentication (`verify_
 
 Hosted security/performance advisors have no WARN/ERROR findings. The six [RLS-without-policy notices](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) are intentional private default-deny tables with no direct client grants. The 80 [unused-index notices](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index) are informational after the empty project's small verification workload; required constraint/FK indexes are retained. Full workload performance remains part of the 5,000-record gate.
 
-Automatic approval review rejected removal of the four temporary credential/fixture files, stating **"blocked by policy"**. No deletion command executed and no alternative route was attempted. They remain in `C:\Users\tanzir\AppData\Local\Temp\mise-m30-provision-imzbqggkoquhkyawvjmz`, outside the repository. Database fixture cleanup succeeded independently. Do not confuse this retained local copy with the configured server secret manager.
+Automatic approval review rejected removal of the four temporary credential/fixture files, stating **"blocked by policy"**. No deletion command executed and no alternative route was attempted. They remain in a private temporary deployment directory, outside the repository. Database fixture cleanup succeeded independently. Do not confuse this retained local copy with the configured server secret manager.
 
 Earlier automatic approval review rejected the combined local-config/database-start command, stating **"blocked by policy"** without further detail. No local database service was started through another route. The later dedicated hosted project and API-based function deployments are separate authorized operations; the local-stack gate remains open.
 

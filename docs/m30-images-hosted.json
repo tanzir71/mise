@@ -73,7 +73,7 @@
     "transactionLimit": "Storage and PostgreSQL are separate transactions; interrupted transfer can retain a private unconfirmed object for retry"
   },
   "hosted": {
-    "project": "imzbqggkoquhkyawvjmz",
+    "project": "configured-project",
     "migrations": [
       {
         "version": "20261117081808",
@@ -241,7 +241,7 @@
     "messagesSent": 0,
     "newCredentialFiles": false,
     "storageApiProof": {
-      "project": "imzbqggkoquhkyawvjmz",
+      "project": "configured-project",
       "mode": "direct Storage API synthetic object; no positive owner JWT or phone OTP claimed",
       "path": "00000000000000000000730001/00000000000000000000730011/00000000000000000000730021/00000000000000000000730031",
       "ownedFixturePaths": [
@@ -286,7 +286,7 @@
   },
   "priorCredentialCleanup": {
     "completed": false,
-    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "directory": "private temporary deployment directory (outside repository)",
     "reason": "Earlier automatic approval review blocked removal; no retry or alternative deletion route",
     "outsideRepository": true
   },

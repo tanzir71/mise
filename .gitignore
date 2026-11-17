@@ -5,6 +5,13 @@ dist/
 .env
 .env.*
 !.env.example
+# Deployment credentials and private operational records stay outside Git.
+.private/
+.secrets/
+api-keys*.json
+edge.env
+*.pem
+*.p12
 test-results/
 playwright-report/
 .vercel/

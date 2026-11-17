@@ -46,12 +46,12 @@
     "credentialLogging": false
   },
   "hosted": {
-    "project": "imzbqggkoquhkyawvjmz",
-    "organization": "rnrjlctuwkxbectaarbz",
+    "project": "configured-project",
+    "organization": "owner-selected-organization",
     "ownerSelectedOrganization": true,
     "quotedMonthlyCost": 0,
     "region": "ap-southeast-1",
-    "dashboard": "https://supabase.com/dashboard/project/imzbqggkoquhkyawvjmz",
+    "dashboard": "configured privately",
     "productionConfig": "deploy/supabase/config.toml",
     "declaredConfigDrift": 0,
     "auth": {
@@ -180,7 +180,7 @@
       "ownerInvalidJwtStatus": 401
     },
     "liveDeviceProof": {
-      "project": "imzbqggkoquhkyawvjmz",
+      "project": "configured-project",
       "mode": "synthetic device fixture; no Auth account or SMS",
       "wrongPin": 401,
       "correctPin": 200,
@@ -204,7 +204,7 @@
   "credentialCleanup": {
     "completed": false,
     "rejection": "Automatic approval review rejected PowerShell removal: blocked by policy",
-    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "directory": "private temporary deployment directory (outside repository)",
     "files": [
       "api-keys.json",
       "edge.env",

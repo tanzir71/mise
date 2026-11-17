@@ -77,7 +77,7 @@
     "scope": "bounded history listing, not M31 change cursor or realtime/conflict/sync proof"
   },
   "hosted": {
-    "project": "imzbqggkoquhkyawvjmz",
+    "project": "configured-project",
     "migrations": [
       {
         "version": "20261117081808",
@@ -183,7 +183,7 @@
       "warningOrErrorCount": 0
     },
     "liveProof": {
-      "project": "imzbqggkoquhkyawvjmz",
+      "project": "configured-project",
       "fixture": "synthetic direct session; no Auth account, OTP or PIN login claimed",
       "counterStatus": 200,
       "kitchenStatus": 200,
@@ -222,7 +222,7 @@
   },
   "priorCredentialCleanup": {
     "completed": false,
-    "directory": "%TEMP%\\mise-m30-provision-imzbqggkoquhkyawvjmz",
+    "directory": "private temporary deployment directory (outside repository)",
     "reason": "Earlier automatic approval review blocked removal; no retry or alternative deletion route",
     "outsideRepository": true
   },
