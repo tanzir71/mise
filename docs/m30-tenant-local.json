@@ -1,0 +1,76 @@
+{
+  "baseCommit": "1d7105aa09aa814e52de2fe821729b4a3164aaa8",
+  "generatedAt": "2026-11-17T08:45:49.9783393Z",
+  "status": "M30 in progress; tenant foundation only",
+  "targetPostgresMajor": 17,
+  "testEngine": {
+    "package": "@electric-sql/pglite",
+    "version": "0.3.16",
+    "postgresVersion": "17.5",
+    "mode": "ephemeral, in process, no network listener",
+    "authBoundary": "test-only auth.users fields and auth.uid claim lookup; no JWT/OTP verification"
+  },
+  "tables": [
+    "businesses",
+    "outlets",
+    "members",
+    "member_outlets"
+  ],
+  "localChecks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "unitTests": 546,
+    "unitFiles": 49,
+    "tenantTests": 69,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "pagesBrowserChecks": 296,
+    "browserRetries": 0
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-Djh170ta.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "36130b92be447c2d5290caf76f59ebe4e843995c61c7b2cd2555a579ab5ac5f3",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "ownerEntryNote": "The app embeds CHANGELOG.md; the new M30 note changes its entry hash.",
+  "customerEntryNote": "The isolated customer entry retains the M24 shop-BZ9RXiOJ.js hash.",
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/config.toml": "be37741ebd743b97368cadb911db8c3406abcb93edb4d164baeefa91e0bc7cbf",
+    "tests/fixtures/supabase-auth.sql": "1f02395438d3cb1ef8ee82c21856971fcbff0a02739d6e4b6af0a6ba1c27ad17",
+    "tests/tenant-foundation.test.ts": "bce37d73d6c5c33a860333df73400a336fea7392060d8fce5b80192510463ca2"
+  },
+  "logSha256": {
+    "unit": "def9586c7919154c9b3b03d8a59758faf34cb00c0c974eb9dd7d871ed87dbd44",
+    "typecheck": "100de0e22fb0bb7329069e3b49d4674433e2dcdf20cc5797047d826e9d07c68a",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "cf1be4ddfdd6cdc631941e4b56194ed26917d149ec080257958a0ca5fd173d44",
+    "pagesBuild": "cb861f31568b8c4f40c7ee197dade7952d009c56f3431dd00a3b45907d4beef9",
+    "pagesBrowser": "f9ac21cc95bbab5d2cb497fd954ab4f62c72fcc51a3b416b098951d07298bc9a"
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newScreenChanges": false,
+    "newVisualRun": false
+  },
+  "hostedChanges": "none; no Mise project created or existing project modified",
+  "localSupabaseStack": "not running; read-only CLI status reports supabase_db_mise absent",
+  "automaticApproval": "Combined config/database-start command rejected: blocked by policy; no database service startup retried through another route",
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none"
+  },
+  "remaining": [
+    "Complete domain schema and audited command transactions",
+    "Hosted project, phone-only Auth, SMS and target-runtime/advisor verification",
+    "Device enrolment and staff PIN; scoped staff/agent access",
+    "Resource-specific public order/khata capabilities",
+    "Reviewed resumable 5000-record migration under 3G/60-second gate"
+  ]
+}
