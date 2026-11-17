@@ -61,3 +61,8 @@ template = "Your Mise code is {{ .Code }}"
 sms_sent = 30
 sign_in_sign_ups = 30
 token_verifications = 30
+
+# This endpoint authenticates an enrolled device secret plus a staff PIN itself.
+# The reserve/finish database protocol is service-only; it never trusts user claims.
+[functions.device-pin]
+verify_jwt = false

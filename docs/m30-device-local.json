@@ -1,0 +1,184 @@
+{
+  "baseCommit": "e4674c0a1cae1e5e6427bc3d3341ce43538ce372",
+  "generatedAt": "2026-11-17T12:21:57.9093168Z",
+  "status": "M30 in progress; device/PIN backend source only; app feature unavailable",
+  "runtime": {
+    "node": "24.22.2",
+    "pnpm": "10.33.2",
+    "denoEntrypoint": "type-checked; not executed or deployed"
+  },
+  "engine": {
+    "package": "@electric-sql/pglite",
+    "version": "0.3.16",
+    "postgresVersion": "17.5",
+    "mode": "in-process; no database service or network listener",
+    "authBoundary": "test-only claim-to-UID fixture; no hosted JWT/OTP/session verification"
+  },
+  "schema": {
+    "publicTables": 29,
+    "newPrivateTables": [
+      "devices",
+      "staff_pins",
+      "staff_pin_attempts",
+      "device_sessions"
+    ],
+    "privateRls": "enabled and forced; no client/service direct table grants",
+    "exposedFunctions": "invokers; private privileged implementations with empty search paths",
+    "newMigration": "20261117114114_device_auth.sql"
+  },
+  "devices": {
+    "modes": [
+      "kitchen",
+      "counter"
+    ],
+    "enrolment": "confirmed active owner or assigned manager",
+    "secret": "one-time 256-bit URL-safe token, SHA-256 hash only",
+    "expiryDays": 90,
+    "revocation": "immediate on next read; idempotent and audited"
+  },
+  "pins": {
+    "administration": "owner-only global member PIN",
+    "format": "four ASCII digits",
+    "kdf": "PBKDF2-HMAC-SHA256, 600000 iterations",
+    "saltBytes": 16,
+    "verifier": "HMAC-SHA256 with separate server pepper over business/member scope and derived key",
+    "pepper": "32-64 bytes in Edge Function secrets; no fallback",
+    "stored": "salt, verifier, version, revision and identity snapshot; no raw PIN",
+    "linkedAuth": "live bans/deletion checked; retained Auth UUID snapshot prevents hard-delete fallback"
+  },
+  "attempts": {
+    "perDevice": 5,
+    "perMemberAcrossDevices": 5,
+    "windowMs": 900000,
+    "leaseMs": 60000,
+    "charged": "before KDF; includes unknown, abandoned and wrong attempts",
+    "successfulRefund": "own reservation only, and only within the same window",
+    "replay": "denied"
+  },
+  "sessions": {
+    "expiryMs": 43200000,
+    "secret": "separate random token, hash only at rest",
+    "boundTo": [
+      "business",
+      "outlet",
+      "device",
+      "member",
+      "PIN revision"
+    ],
+    "authorization": "live active member, assignment, Auth state and permission intersection",
+    "kitchenCeiling": [
+      "orders.read",
+      "orders.acknowledge",
+      "orders.ready"
+    ],
+    "explicitDenial": "false/invalid values remove defaults",
+    "revocation": [
+      "PIN rotation/removal",
+      "member deactivation or assignment removal",
+      "linked Auth ban/deletion/change",
+      "device expiry/revocation",
+      "session expiry/logout"
+    ],
+    "rawShopDataAndCommands": "not enabled"
+  },
+  "http": {
+    "entry": "supabase/functions/device-pin/index.ts",
+    "auth": "custom device bearer plus PIN; verify_jwt=false intentionally",
+    "protocol": "service-only reserve and finish RPCs",
+    "apiKey": "new sb_secret_ key in apikey only; server env only",
+    "requestBytes": 2048,
+    "bodyDeadlineMs": 5000,
+    "rpcDeadlineMs": 5000,
+    "redirects": "error",
+    "cors": "exact configured origins",
+    "responses": "no-store; generic errors; no credential logs",
+    "nativeVerification": "Request -> real Web Crypto -> real SQL; no hosted gateway"
+  },
+  "audit": "enrol/revoke, PIN set/clear and session start/end atomic with metadata-only events; audit failure rolls back the security change",
+  "localChecks": {
+    "unitTests": 725,
+    "unitFiles": 54,
+    "tenantChecks": 69,
+    "shopRecordChecks": 65,
+    "publicCapabilityChecks": 49,
+    "devicePostgresChecks": 42,
+    "postgresChecks": 225,
+    "pinCryptoChecks": 16,
+    "handlerChecks": 7,
+    "lint": "passed",
+    "typecheck": "passed; Astro79 clean, server sources included",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "pagesBrowserChecks": 296,
+    "browserRetries": 0,
+    "browserDuration": "7.3m",
+    "serverOnlyDeadline": "added after static browser pass; subsequent full unit/type/lint pass; static sources and entries unchanged",
+    "clientServerImports": "none"
+  },
+  "advisors": {
+    "command": "supabase db advisors --type all --fail-on error",
+    "target": "local 127.0.0.1:54322",
+    "exitCode": 1,
+    "result": "ECONNREFUSED; database service absent",
+    "status": "acceptance gate remains open",
+    "serviceStarted": false
+  },
+  "compiledEntries": {
+    "owner": "/mise/app/assets/app-0ow4DNnU.js",
+    "customer": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "compiledSha256": {
+    "owner": "1b870c09ea12f12be907da42bd1e507184662b71b26ef3573725cc966f29fd6c",
+    "customer": "fb50137e2cc770f425cfea0cb733b3934302b8f0de2460eed46cd2af54966b7f"
+  },
+  "sourceSha256": {
+    "supabase/migrations/20261117081808_tenant_foundation.sql": "d83c926964e26a99e85ea72276602f71bcaae7a4ee2bdc211ca3350b94dc2ccb",
+    "supabase/migrations/20261117085319_shop_records.sql": "5ba2d2e3f99652ceace7e9437fb15d475be887389873b1a5503e63ddfa90e8a0",
+    "supabase/migrations/20261117102312_public_capabilities.sql": "23fa0311a7206fe02e4bfb37e6e1c9b5fa9d0d9f0b3f894c661b832909012324",
+    "supabase/migrations/20261117114114_device_auth.sql": "53a4b8dc3dc55ddd54b2b0f91149fb5afbbd21a14fdbe486a0c1e029aa919637",
+    "supabase/functions/_shared/staff-pin.ts": "07731988c47056d0389c859b6fc35c041dbc0488fe6bca21623034fd51a1baba",
+    "supabase/functions/_shared/device-pin-handler.ts": "f8e7790ab2e54196fe12cf6c363a09b7d8685cfc56ece20401a2fa0d8dc0661e",
+    "supabase/functions/device-pin/index.ts": "048c6685c40ab8b5ef87134490a73e5bf90a6923e4861a035ebd26873f8bb05c",
+    "supabase/functions/.env.example": "a9068304f711a3eef7196dcb3697f15611d0fed276acf39647977a9713269852",
+    "supabase/config.toml": "c323f9c1d84bdcd2a93c5fb37c1b42ef84da08498a42dab2d14d92cd89298fcc",
+    "tsconfig.json": "efb63b1eff5840ff286f9954977663508ce8143f584ad9bfe5647607c858b484",
+    "tests/device-auth.test.ts": "4dfa36e5b9df7328d583205685c99f0bfbb0488eaa2d164dab9f985ba4b907b8",
+    "tests/staff-pin.test.ts": "69cdb32376592a08a0c7bc0ce8614423b27ebb14c07fa8b8c099d89c611a864b",
+    "tests/device-pin-handler.test.ts": "b8366407231661cd44bfd178ce6c7ed78f3ee6c20cbc9c8f6799f52dd89666e4",
+    "tests/fixtures/supabase-auth.sql": "1f02395438d3cb1ef8ee82c21856971fcbff0a02739d6e4b6af0a6ba1c27ad17",
+    "CHANGELOG.md": "67310d56a79f4830e8eadec26a44de45e293b311c613f5230e5c04a97de71cd2"
+  },
+  "logSha256": {
+    "unit": "b8e2c3bc527fde129c539d7518aa11bde5216edd1967ba9cdd41e19fe16ef6e1",
+    "typecheck": "63b49b8ed60d85d8fb3586c4652755f82ad2d8e01c7fa9976a4420476863af85",
+    "lint": "1b53cc48aa2cc0e6bf43e7d87a54ade1e889464937fbbe50fd6d076863b45cd1",
+    "rootBuild": "6adc8ce5fd36e3409637c7f03e7b7e4a1a4e98d5f0effb9aa5fa20ffe177fa5d",
+    "pagesBuild": "0f735c8408fff434f4638918a8c20632ada6cb8870baf4d2e1989101f6954c1f",
+    "pagesBrowser": "cdc85ef0078f770288848e4a34937cee1aa2430a4c138e678a01aad5455f1088",
+    "advisors": "db1e40c88af230d2ea9b4f0d3cd5971cbb5c86e21d006a09e67f024f7b38b9e1"
+  },
+  "visualEvidence": {
+    "source": "docs/m24-interface-local.json",
+    "comparisons": 142,
+    "newLayoutChanges": false,
+    "newVisualRun": false,
+    "ownerEntryChange": "embedded CHANGELOG copy"
+  },
+  "hostedChanges": "none; no project, function deployment or SMS",
+  "publication": {
+    "workflows": "disabled_by_owner",
+    "newDeployment": "none",
+    "lastVerifiedLiveCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "Owner PIN administration HTTP/UI and device enrolment/PIN interface",
+    "Scoped staff data projections, commands and browser session handling",
+    "Hosted project and phone-only Auth/SMS verification",
+    "Transactional audited commands and private Storage",
+    "Reviewed resumable 5000-record/3G migration",
+    "Supabase advisors and target Deno/API/runtime verification",
+    "Remaining milestone acceptance and deployment under owner instructions"
+  ]
+}

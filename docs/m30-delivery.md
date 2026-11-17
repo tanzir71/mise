@@ -1,6 +1,6 @@
 # M30 · Supabase foundation
 
-Status: **in progress**. Tenancy, shop-record SQL, an inert migration codec and isolated customer-link SQL are implemented locally; the app continues to use its existing offline database. No hosted project has been created or modified, and no sign-in, sync or new customer-link interface is enabled. M30 and Phase 3 remain unticked.
+Status: **in progress**. Tenancy, shop-record SQL, an inert migration codec, customer capabilities and device/PIN authentication are prepared locally; the app continues to use its existing offline database. No hosted project has been created or modified, and no sign-in, sync, shared-screen or new customer-link interface is enabled. M30 and Phase 3 remain unticked.
 
 ## Tenant schema
 
@@ -34,6 +34,20 @@ Customer reads intentionally require no account: the unguessable token is their 
 
 These are local SQL contracts, not published customer pages. Rate limiting, HTTP/cache behavior, hosted API verification, owner link-management UI and the M33/M35 customer interfaces remain to be implemented before publication.
 
+## Device enrolment and staff PINs
+
+The fourth CLI-created migration, `20261117114114_device_auth.sql`, adds four private, forced-RLS tables for devices, PIN verifiers, reserved attempts and short sessions. A confirmed active owner or an assigned manager can enrol or revoke kitchen/counter devices. Enrolment returns a random token once; only its SHA-256 hash persists, with a ninety-day lifetime. Device loss is handled by revocation and fresh enrolment. Device metadata and security events contain no token or verifier.
+
+The owner manages the staff member's global PIN; a manager's outlet permissions do not grant a cross-outlet PIN reset. The server-only module uses an independent 16-byte salt and PBKDF2-HMAC-SHA256 with 600,000 iterations, then an HMAC with a separate pepper and business/member scope. The database receives no raw PIN, and the pepper is not stored there. A missing secret or unsupported version fails closed. This uses built-in Web Crypto rather than an added runtime dependency; see the [OWASP password-storage guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+Before deriving a verifier, the service-only RPC reserves a try under row locks. Five attempts per fifteen-minute server window apply to each device and to the member across devices. Unknown members, abandoned requests and wrong proofs consume attempts. A successful login refunds its reservation without clearing earlier failures. Each attempt expires after one minute and is usable once. A successful finish atomically writes its audit and issues a separate, hashed, twelve-hour session bound to that device, member and PIN revision.
+
+Session reads check current membership, outlet assignment, mode and permission booleans. Kitchen mode is restricted to three order permissions; explicit false values remove role defaults. Counter mode grants only explicitly enabled counter/order/khata permissions from its allowlist. PIN rotation/removal, logout, device revocation/expiry and member deactivation affect the next read. If a member has an Auth identity, bans, deletion and identity changes also invalidate access. The private PIN retains the linked UUID snapshot, so `ON DELETE SET NULL` cannot silently turn a deleted Auth identity into an accountless staff session. A staff member without an Auth account can use their owner-enabled PIN.
+
+`supabase/functions/device-pin/index.ts` wires the login handler to two fixed service-only RPCs. Its custom device authentication intentionally uses `verify_jwt=false`; no caller can supply an arbitrary database command or successful PIN proof. The handler validates the device bearer token and bounded 2 KB JSON with a five-second read deadline, rejects unexpected fields/origins, derives the proof on the server, and returns only the short session. Responses are uncached, errors do not expose backend details, and no request credentials are logged. The new `sb_secret_…` API key goes only in `apikey`, with redirects disabled; see [Supabase key migration](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys) and [function authorization headers](https://supabase.com/docs/guides/functions/auth-headers). Server-only variable names are in `supabase/functions/.env.example`; there are no configured values or fallback credentials.
+
+All public RPCs are invokers with explicit grants; privileged implementations remain private with empty search paths. A device/session grants no raw shop-table reads, owner mutation, financial operation or agent access. This increment does not implement owner PIN setup over HTTP, the enrolment/PIN UI, staff data projections, staff commands, session persistence in the browser or shared-screen routes. The Deno entry point is type-checked, but local HTTP tests invoke its shared handler against embedded PostgreSQL, not a running Supabase gateway. Hosted execution, advisors, real key handling and runtime resource limits remain acceptance gates.
+
 ## Local verification
 
 `pnpm exec vitest run tests/tenant-foundation.test.ts` loads the actual migration into an ephemeral in-process PostgreSQL engine and executes queries as non-bypass `authenticated` and `anon` roles. It verifies owner/manager isolation, metadata spoofing, unassigned/inactive/unconfirmed identities, immediate revocation, Auth bans/deletion, multi-business membership, cross-tenant foreign keys, direct-write denial and future-object grants. The first run caught the inherited function-execution grant; the migration now revokes the global default.
@@ -50,6 +64,12 @@ The second full run passed 295 checks, including the PDF, and exposed a separate
 
 The final full run passes **all 296 browser checks without retries** in 7.6 minutes. Both `/` and `/mise/` production builds pass. Source, compiled-entry and log hashes, including the two initial failures and focused verification, are recorded in [m30-capabilities-local.json](m30-capabilities-local.json). No layout changed; the prior 142 visual comparisons remain the layout evidence, with no new visual run claimed. These local checks used Node 24.22.2 and pnpm 10.33.2; the repository's Node 20.19+ requirement is unchanged.
 
+The shared-device suite exercises all four migrations and the real request handler, Web Crypto derivation and service-only SQL protocol together. It covers wrong/unknown credentials, cross-device/outlet/business denial, charged and cross-device rate limits, live permissions, Auth hard deletion, expiry, replay denial, owner-only PIN removal, logout, audit rollback and bounded input. A separate server test cancels a stalled body at its five-second deadline before any database call.
+
+Final local checks pass **725 unit tests** across 54 files, including **225 PostgreSQL checks** (69 tenancy, 65 shop records, 49 customer capabilities and 42 device/PIN tests), plus 16 PIN-derivation and seven handler/configuration checks. TypeScript/Astro and lint pass, including server modules in strict type checking. Both static build bases pass and all **296 browser checks pass without retries** in 7.3 minutes. The final body-deadline change is server-only and passed the subsequent full unit/type/lint checks; the static sources and compiled entries are unchanged. There are no server-function imports in the app or shared packages. [m30-device-local.json](m30-device-local.json) records source, log and compiled hashes. No layout changed or new visual run is claimed; the prior 142 comparisons remain the layout evidence.
+
+`supabase db advisors --type all --fail-on error` was attempted against the local stack and exited 1 with `ECONNREFUSED 127.0.0.1:54322`. No database service was started. Embedded PostgreSQL checks do not replace this unavailable target-runtime advisor gate.
+
 ## Configuration and external state
 
 The CLI is pinned to **3.2.0**. The local config exposes only `public`, requires explicit API grants, disables the email provider, anonymous sign-in and local mail service, and uses 900-second access tokens with refresh-token rotation. A reserved fictional phone with a fixed OTP is configured for local development only; never push this test code to a hosted project. Unneeded local Studio, analytics, storage and realtime services are disabled for this first increment.
@@ -60,9 +80,9 @@ Automatic approval review rejected the combined local-config/database-start comm
 
 ## Remaining M30 work
 
-- Complete the identity/device schema and private Storage integration; the 21-table local-record mapping and resource-specific capability SQL are implemented.
+- Complete constrained staff/agent access and private Storage integration; the legacy record mapping, capability SQL and device/PIN protocol are implemented locally.
 - Provision the dedicated project, verify phone-only Auth settings, configure SMS and test real owner/manager authentication.
-- Implement device enrolment, protected four-digit staff PIN verification and constrained staff/agent access.
+- Complete owner PIN administration over HTTP and the device/PIN interface, with scoped staff data and commands; the server login handler is prepared but not deployed.
 - Implement transactional `/commands` with shared validation and audit writes; keep direct browser writes denied.
 - Complete public capability HTTP/rate-limit integration and hosted tests; local SQL tests cover isolation, expiry and revocation.
 - Build the reviewed local-to-cloud upload and prove a resumable 5,000-record upload under the required 3G/60-second gate.
