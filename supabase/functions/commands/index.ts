@@ -4,6 +4,6 @@ let handler:(request:Request)=>Promise<Response>;
 try{
   const origins=new Set((Deno.env.get('MISE_ALLOWED_ORIGINS')||'').split(',').filter(Boolean));
   if(!origins.size||[...origins].some(origin=>new URL(origin).origin!==origin))throw new Error('Origins required');
-  handler=createCommandsHandler({store:createCommandStore(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('MISE_PUBLISHABLE_API_KEY')||''),origins});
+  handler=createCommandsHandler({store:createCommandStore(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('MISE_PUBLISHABLE_API_KEY')||'',fetch,{serviceKey:Deno.env.get('MISE_SERVICE_API_KEY')}),origins});
 }catch{handler=async()=>new Response(JSON.stringify({error:'Changes are unavailable. Try again later.'}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}
 Deno.serve(handler);

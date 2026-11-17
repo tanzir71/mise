@@ -1,19 +1,10 @@
 import { ulid } from 'ulid';
-import type { AuditEvent, Category, Item } from './models';
+import type { AuditEvent, Item } from './models';
 import { parseMoney } from './money';
-export interface ItemInput { name: string; nameLocal: string; price: number; unit: string; category: string; available: boolean; oftenBought: boolean }
-export interface CatalogueContext { outletId: string; actorId: string; categories: Category[] }
-export interface ItemCommand { item: Item; category?: Category; event: AuditEvent }
+import {saveCatalogueItem,type ItemInput,type CatalogueContext,type ItemCommand} from './catalogue-save';
+export type {ItemInput,CatalogueContext,ItemCommand} from './catalogue-save';
 export function saveItemCommand(input: ItemInput, context: CatalogueContext, before: Item | null = null, at = Date.now()): ItemCommand {
-  const name = input.name.trim(), unit = input.unit.trim(), categoryName = input.category.trim() || 'Uncategorised';
-  if (!name || name.length > 120 || input.nameLocal.trim().length > 120) throw new Error('Use an item name between 1 and 120 characters.');
-  if (!unit || unit.length > 16 || categoryName.length > 80) throw new Error('Enter a unit and a category of at most 80 characters.');
-  if (!Number.isSafeInteger(input.price) || input.price < 0) throw new Error('Enter a valid non-negative price.');
-  if (before && before.outletId !== context.outletId) throw new Error('This item belongs to another outlet.');
-  const existing = context.categories.find(category => category.outletId === context.outletId && category.name.normalize('NFKC').toLowerCase() === categoryName.normalize('NFKC').toLowerCase());
-  const category: Category = existing || { id: ulid(at), outletId: context.outletId, name: categoryName, sort: context.categories.length, createdAt: at, updatedAt: at };
-  const item: Item = { id: before?.id || ulid(at), outletId: context.outletId, name, nameLocal: input.nameLocal.trim(), price: input.price, unit, categoryId: category.id, available: Boolean(input.available), oftenBought: Boolean(input.oftenBought), isSample: false, createdAt: before?.createdAt ?? at, updatedAt: at };
-  return { item, category: existing ? undefined : category, event: { id: ulid(at), outletId: context.outletId, actor: { type: 'member', id: context.actorId }, command: before ? 'catalogue.update' : 'catalogue.create', before, after: { item, category: existing ? null : category }, at } };
+  return saveCatalogueItem(input,context,before,at,()=>ulid(at));
 }
 export function itemAvailabilityCommand(item: Item, available: boolean, actorId: string, at = Date.now()): ItemCommand {
   const after = { ...item, available, updatedAt: at };

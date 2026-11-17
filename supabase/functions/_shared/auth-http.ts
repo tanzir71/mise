@@ -1,12 +1,12 @@
 // Common limits for credential endpoints. No credential values are logged here.
 export class AuthBodyError extends Error {constructor(readonly status:400|408|413){super('Invalid authentication request.');}}
-export async function readAuthBody(request:Request):Promise<unknown>{
-  if(Number(request.headers.get('content-length')||0)>2048)throw new AuthBodyError(413);
+export async function readAuthBody(request:Request,maxBytes=2048):Promise<unknown>{
+  if(Number(request.headers.get('content-length')||0)>maxBytes)throw new AuthBodyError(413);
   const reader=request.body?.getReader();if(!reader)throw new AuthBodyError(400);
   const chunks:Uint8Array[]=[];let length=0,timer:ReturnType<typeof setTimeout>|undefined;
   const deadline=new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new AuthBodyError(408)),5000);});
   try{
-    while(true){const part=await Promise.race([reader.read(),deadline]);if(part.done)break;length+=part.value.byteLength;if(length>2048)throw new AuthBodyError(413);chunks.push(part.value);}
+    while(true){const part=await Promise.race([reader.read(),deadline]);if(part.done)break;length+=part.value.byteLength;if(length>maxBytes)throw new AuthBodyError(413);chunks.push(part.value);}
   }catch(error){void reader.cancel().catch(()=>{});throw error;}
   finally{clearTimeout(timer);reader.releaseLock();}
   const bytes=new Uint8Array(length);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
