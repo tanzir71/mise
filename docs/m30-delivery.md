@@ -170,6 +170,11 @@ The expanded `commands` v4 supports strict customer create/update/archive/restor
 
 ## Remaining M30 work
 
+Shared order/payment/cancellation/refund commands now preserve all device record
+and companion-audit identities, including their linked khata reversals. This is
+preparation for the complete atomic remote order transaction, which remains open.
+See [the order identity contract and verification limits](m30-order-identity.md).
+
 - Local immutable upload snapshots, gzip chunk validation, resumable transfer orchestration and a separate credential-free IndexedDB journal are implemented; see [the upload contract and verification limits](m30-upload.md). The authenticated staging/promotion service and original-file checks are now deployed; complete the snapshot/outbox boundary and positive signed-owner HTTP verification before enabling controls or claiming the 3G/60-second gate.
 - Complete remaining staff/agent resources and private-image migration/UI integration; the bucket, RPCs and image endpoint are deployed, with positive hosted owner/manager transfer verification still open.
 - Configure the production SMS provider and test real owner/manager phone OTP; email/anonymous sign-in must stay disabled.

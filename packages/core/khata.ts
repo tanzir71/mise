@@ -6,6 +6,7 @@ export interface CreditTermsInput { allowed: boolean; limit: number; reminder: C
 export const defaultCreditTerms: CreditTermsInput = { allowed:false, limit:0, reminder:{enabled:false,dayOfMonth:2,tone:'gentle',channel:'whatsapp'} };
 export interface LedgerContext { setup: SetupSnapshot; customer: Customer; account: CreditAccount; entries: CreditEntry[] }
 export type CustomerLedgerContext=Omit<LedgerContext,'setup'>&{setup:CustomerSetup};
+export type CreditEntryIds=(kind:'entry'|'event')=>string;
 export interface OverLimitConfirmation { balance: number; limit: number }
 export class CreditLimitError extends Error {
   constructor(public balance: number, public limit: number, public proposed: number) { super('This would exceed the customer’s credit limit. Confirm Give anyway to continue.'); this.name = 'CreditLimitError'; }
@@ -100,37 +101,37 @@ export function recordCommunicationCommand(context: CustomerLedgerContext, purpo
   if (!['reminder','receipt','call'].includes(purpose) || !['whatsapp','manual','call'].includes(channel)) throw new Error('Choose a supported message action.');
   return entryCommand(context,{type:'reminder',amount:0,note:text,purpose,methodName:channel},`khata.${purpose}-sent`,at,true,newId);
 }
-function orderCharge(sale: Sale, context: LedgerContext) {
+function orderCharge(sale: Sale, context: CustomerLedgerContext) {
   validateCreditContext(context,false);
   const charge = accountEntries(context.account,context.entries).find(entry => entry.saleId === sale.id && entry.type === 'charge');
   if (!sale.orderId || sale.method !== 'credit' || sale.creditAccountId !== context.account.id || sale.customerId !== context.customer.id || sale.outletId !== context.account.outletId || sale.currency !== context.account.currency || !charge || charge.amount !== sale.amount || context.entries.some(entry => entry.reversalOf === charge.id)) throw new Error('The order charge does not match this khata.');
   return charge;
 }
-export function returnOrderCreditCommand(sale: Sale, context: LedgerContext, note: string, at = Date.now()) {
+export function returnOrderCreditCommand(sale: Sale, context: CustomerLedgerContext, note: string, at = Date.now(), newId:CreditEntryIds=()=>ulid(at)) {
   const charge = orderCharge(sale,context); if (sale.voidedAt !== undefined) throw new Error('This sale is already cancelled or undone.');
   const balance = creditBalance(context.account,context.entries); if (balance < 0) throw new Error('Review this khata before cancelling credit.');
   const returned = Math.min(balance,sale.amount), refundDue = sale.amount-returned;
-  const result = entryCommand(context,{type:'adjustment',amount:-returned,note,saleId:sale.id,orderId:sale.orderId,returnsChargeId:charge.id},'khata.order-return',at,false);
+  const result = entryCommand(context,{type:'adjustment',amount:-returned,note,saleId:sale.id,orderId:sale.orderId,returnsChargeId:charge.id},'khata.order-return',at,false,newId);
   result.event.before = charge; return {...result,refundDue};
 }
-export function restoreOrderCreditCommand(sale: Sale, entryId: string, context: LedgerContext, at = Date.now()) {
+export function restoreOrderCreditCommand(sale: Sale, entryId: string, context: CustomerLedgerContext, at = Date.now(), newId:CreditEntryIds=()=>ulid(at)) {
   orderCharge(sale,context);
   const entry = accountEntries(context.account,context.entries).find(entry => entry.id === entryId);
   if (sale.voidReason !== 'order-cancel' || sale.voidedAt === undefined || !entry || entry.type !== 'adjustment' || entry.amount > 0 || entry.orderId !== sale.orderId || entry.saleId !== sale.id || context.entries.some(value => value.reversalOf === entry.id)) throw new Error('The cancellation does not match this khata.');
   checked(BigInt(creditBalance(context.account,context.entries))-BigInt(entry.amount));
-  const result = entryCommand(context,{type:'adjustment',amount:-entry.amount,note:'Credit cancellation undone',saleId:sale.id,orderId:sale.orderId,reversalOf:entry.id},'khata.order-return-undo',at);
+  const result = entryCommand(context,{type:'adjustment',amount:-entry.amount,note:'Credit cancellation undone',saleId:sale.id,orderId:sale.orderId,reversalOf:entry.id},'khata.order-return-undo',at,true,newId);
   result.event.before = entry; result.event.undoOf = entry.eventId; return result;
 }
-export function recordOrderCreditRefundCommand(refund: OrderRefund, context: LedgerContext, at = Date.now()) {
+export function recordOrderCreditRefundCommand(refund: OrderRefund, context: CustomerLedgerContext, at = Date.now(), newId:CreditEntryIds=()=>ulid(at)) {
   validateCreditContext(context,false); safeAmount(refund.amount,true);
   if (refund.accountId !== context.account.id || refund.customerId !== context.customer.id || refund.currency !== context.account.currency || refund.outletId !== context.account.outletId) throw new Error('The refund does not match this khata.');
-  return entryCommand(context,{type:'refund',amount:refund.amount,note:refund.note,saleId:refund.saleId,orderId:refund.orderId,refundId:refund.id,methodName:refund.methodName},'khata.order-refund',at,false);
+  return entryCommand(context,{type:'refund',amount:refund.amount,note:refund.note,saleId:refund.saleId,orderId:refund.orderId,refundId:refund.id,methodName:refund.methodName},'khata.order-refund',at,false,newId);
 }
-export function undoOrderCreditRefundCommand(refund: OrderRefund, context: LedgerContext, at = Date.now()) {
+export function undoOrderCreditRefundCommand(refund: OrderRefund, context: CustomerLedgerContext, at = Date.now(), newId:CreditEntryIds=()=>ulid(at)) {
   validateCreditContext(context,false);
   const entry = accountEntries(context.account,context.entries).find(value => value.id === refund.creditEntryId);
   if (refund.accountId !== context.account.id || refund.currency !== context.account.currency || !entry || entry.type !== 'refund' || entry.refundId !== refund.id || entry.orderId !== refund.orderId || entry.amount !== refund.amount || !canUndoCreditEntry(entry,context.entries,at)) throw new Error('This refund record cannot be undone.');
-  const result = entryCommand(context,{type:'adjustment',amount:0,note:'Refund record undone',saleId:refund.saleId,orderId:refund.orderId,refundId:refund.id,reversalOf:entry.id},'khata.order-refund-undo',at,false);
+  const result = entryCommand(context,{type:'adjustment',amount:0,note:'Refund record undone',saleId:refund.saleId,orderId:refund.orderId,refundId:refund.id,reversalOf:entry.id},'khata.order-refund-undo',at,false,newId);
   result.event.before = entry; result.event.undoOf = entry.eventId; return result;
 }
 /** FIFO ageing excludes reversal pairs, so undoing a payment restores the original age. */

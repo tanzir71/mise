@@ -12,13 +12,15 @@ export function orderLineTotal(price: number, qty: number): number {
   // Round each line to the nearest minor unit, with halves rounded up.
   return checkedOrderAmount((BigInt(price)*quantity+500n)/1000n);
 }
-export function prepareOrderLines(input: OrderLineInput[], items: Item[], outletId: string, before: OrderLine[] = [], at = Date.now()): OrderLine[] {
+export function prepareOrderLines(input: OrderLineInput[], items: Item[], outletId: string, before: OrderLine[] = [], at = Date.now(), newId:()=>string=()=>ulid(at)): OrderLine[] {
   if (!input.length || input.length > 200) throw new Error('Use between 1 and 200 order lines.');
   const ids = new Set<string>(), catalogue = new Map(items.filter(item => item.outletId === outletId).map(item => [item.id,item]));
   return input.map(value => {
     const old = value.id ? before.find(line => line.id === value.id) : undefined;
     if (value.id && (!old || ids.has(value.id))) throw new Error('Choose unique lines from this order.');
-    const id = old?.id || ulid(at); ids.add(id);
+    const id = old?.id || newId();
+    if(ids.has(id)||!old&&before.some(line=>line.id===id))throw new Error('Choose unique lines from this order.');
+    ids.add(id);
     const item = value.itemId ? catalogue.get(value.itemId) : undefined, name = value.name.trim(), unit = value.unit.trim(), unavailable = Boolean(value.unavailable);
     if (value.unavailable !== undefined && typeof value.unavailable !== 'boolean') throw new Error('Mark availability explicitly.');
     const note = value.note?.trim() || ''; if (note.length > 500) throw new Error('Keep an item note within 500 characters.');
