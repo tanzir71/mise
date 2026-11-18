@@ -1,0 +1,186 @@
+{
+  "checkedAt": "2026-11-18T07:31:17.792Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Same-database initial-upload capture boundary and typed financial intent delivery; upload UI remains gated",
+  "storage": {
+    "localSchema": 11,
+    "backupSchema": 10,
+    "shopTables": 21,
+    "internalTables": [
+      "cloudState",
+      "outbox"
+    ],
+    "internalStateInBackup": false,
+    "credentialsInSyncStores": false,
+    "rawRecoveryRowsSentToServer": false
+  },
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "98ac51369f2e3ab1c02dbe46a947f23a176b2aca208d797d28cc7e9a58993cc1"
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 97,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "finalTsc": true
+    },
+    "units": {
+      "passed": 1601,
+      "files": 90,
+      "durationSeconds": 198.61,
+      "logSha256": "94e48e5f014a5ee9d447e5212cf97197719ff4d4e300b3921be2c0aae700823c"
+    },
+    "browser": {
+      "passed": 314,
+      "base": "/mise/",
+      "failed": 0,
+      "retries": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "globalErrors": 0,
+      "durationSeconds": 334.343683,
+      "reportSha256": "e3c9ddd9c373f8fb1d206092a84e70bb810b09ffa15a3cf0a3eabed3994984b5"
+    },
+    "nativeBoundary": {
+      "newCases": 3,
+      "focusedCasesPassed": 4,
+      "scenarios": [
+        "offline cash and atomic original intent survive reload",
+        "downloaded JSON backup excludes sync state",
+        "native queue constraint failure rolls cash/audit/fence back",
+        "offline receiving worker retains original image bytes",
+        "existing complete-record restore remains compatible"
+      ]
+    },
+    "rootSmoke": {
+      "passed": 5,
+      "retries": 0,
+      "globalErrors": 0,
+      "includes": [
+        "three native boundary cases",
+        "runtime OTP/reload/sign-out",
+        "signed-in backup isolation"
+      ],
+      "reportSha256": "77f9f9a24d78ef936087f841c3a043401611ab5a954edb1b2f8857f50e4880a8"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "htmlSha256": "4163bab45e9c9bb4bff4f8431b94ee4cf80aca00883e6c6e666d917c3b1b27b6",
+        "logSha256": "67e24c7b7dd402af109eae2402a4f4a9d7a393a8efe6c844616fdc44a01fdd4d",
+        "passed": true
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "htmlSha256": "e79771c42aecbd17eb551f2da397f8e521d838adf2a6c1c7ecff8353063a88b4",
+        "logSha256": "ba27e1680cba1ec8f6fc20fc493929a60a1413265eed55127f1e08db8e2e67f9"
+      }
+    ],
+    "visual": {
+      "layoutChanged": false,
+      "newVisualRun": false,
+      "previousComparisons": 15,
+      "previousEvidence": "docs/m30-auth-local.json",
+      "ciArtifactPublished": false
+    }
+  },
+  "capture": {
+    "normalApp": true,
+    "receivingWorker": true,
+    "narrowTransactions": true,
+    "bulkModify": true,
+    "rangeDelete": true,
+    "parallelWrites": true,
+    "sharedClientFence": true,
+    "queueFailureRollsBack": true,
+    "missingRecoveryStopsPromotion": true,
+    "unsupportedWorkRetainedAndStopsDelivery": true,
+    "acceptedReceiptsRetained": true,
+    "cancelRequiresServerConfirmation": true,
+    "cancelDoesNotDiscardHistory": true,
+    "acceptedUploadCannotBeCancelled": true
+  },
+  "financialIntentKinds": [
+    "sale.record",
+    "sale.credit",
+    "sale.undo",
+    "khata.payment",
+    "khata.undo",
+    "khata.communication"
+  ],
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "hosted": {
+    "readOnlyChecks": true,
+    "applicationTables": 47,
+    "forcedRls": 47,
+    "effectiveAnonymousAccess": 0,
+    "effectiveDirectClientWrites": 0,
+    "securityAdvisorWarnings": 0,
+    "securityAdvisorErrors": 0,
+    "auth": {
+      "checkedAt": "2026-11-18T07:01:58.476Z",
+      "readOnly": true,
+      "requests": 1,
+      "phoneEnabled": false,
+      "phoneAutoconfirm": false,
+      "emailEnabled": false,
+      "anonymousEnabled": false,
+      "signupDisabled": true,
+      "smsRequests": 0
+    },
+    "newMigrations": 0,
+    "edgeDeployments": 0,
+    "newUsers": 0,
+    "newSms": 0,
+    "positiveActualOwnerHttpProven": false
+  },
+  "verificationNotes": [
+    {
+      "resolved": true,
+      "issue": "A full unit run exposed two Date.now calls making a restored OTP cooldown differ by 1ms.",
+      "change": "Use one sentAt for the saved challenge and emitted cooldown; retain the exact assertion.",
+      "initialLogSha256": "0a6643503caa883e55378b07ade5cf3063b0d6ddaf4dcb5f4ce8b1dd3f821788"
+    }
+  ],
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "nonfinancial command adapters",
+    "canonical receipt and pull reconciliation",
+    "full upload/outbox app controls",
+    "production OTP and actual signed-owner HTTP proof",
+    "remaining M30 resources and full acceptance",
+    "later handover roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/local-store.ts": "bd6f5edb9a2ef04518ad72265b061bc27d0614f7fbbce96dd86a37e2075e93d7",
+    "apps/web/src/data/outbox-capture.ts": "6d5bbf91144149bd472fef69c911ec78d249d92815ddde8a45ea8f82e8ea10a9",
+    "apps/web/src/data/local-outbox.ts": "6789fae1a165ac8fdc3f423d4b29feeab990ae6450045b2d617577f58cb72e23",
+    "apps/web/src/data/cloud-command-remote.ts": "e52b9027d949a7baec58215a49008e5c477cd8f661cf30f8ad9990cb5fa1d166",
+    "apps/web/src/data/db.ts": "f6e121239aca6b50355653ce08ace7c791d0dd7d623a417937c65b29a78e2884",
+    "apps/web/src/data/backup.ts": "e99276dc24af0483bf03d869157a2ebe72e1f1500c73d60edcd32a0aae192ae6",
+    "apps/web/src/data/cloud-upload.ts": "3dbaf1ffa633af2060fccf9147f06a322b1f0e752eafe65ec378f695944200a1",
+    "apps/web/src/data/phone-auth.ts": "7a9370fde0047196776205cbff0556cad0537a91ee5424b34698aa8ef5df9d7f",
+    "packages/core/cloud-connection.ts": "c38757b86300173e935e5b9d98100e627f27bf850e6337beecada881bd7f31f4",
+    "packages/core/local-outbox.ts": "040892fdd4e523dcdf55a3155fb1c1744e299a35e2ced8705c4f2106283251dc",
+    "tests/local-outbox-db.test.ts": "6a4e7387b17c3a58ee42efc5b007f3be45a75a2720090d28c488c94320f433cb",
+    "tests/cloud-command-remote.test.ts": "41446e7b3864966e7671f8ce8f255f2aa81339ff4e52819f7d2ce63d516eaa4a",
+    "tests/e2e/outbox-boundary.spec.ts": "493791d5561ccf6d18215e12154dd5d52603ab86657dbb5d3774d70704a4b270"
+  }
+}

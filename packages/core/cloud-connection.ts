@@ -17,4 +17,9 @@ export function readCloudConnection(storage:KeyStorage):CloudConnection|null {
 }
 export function saveCloudConnection(storage:KeyStorage,input:unknown):CloudConnection {const config=parseCloudConnection(input);try{storage.setItem(cloudConnectionStorageKey,JSON.stringify(config));}catch{throw new Error('This browser could not save the connection. Try again.');}return config;}
 export async function cloudAuthStorageKey(input:CloudConnection,scope:string){const config=parseCloudConnection(input);const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([config.apiUrl,config.publishableKey,scope]))));return 'mise.cloud.auth.'+Array.from(hash,b=>b.toString(16).padStart(2,'0')).join('');}
+/** A private target identifier, never a credential or an authorization decision. */
+export async function cloudConnectionTarget(input:CloudConnection,scope:string,userId:string):Promise<string>{
+ const config=parseCloudConnection(input);if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(userId)||!scope||scope.length>2048)throw new Error('Use the verified account and local shop scope.');
+ const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(['mise-cloud-target-v1',config.apiUrl,config.publishableKey,scope,userId.toLowerCase()]))));return Array.from(hash,b=>b.toString(16).padStart(2,'0')).join('');
+}
 export function normalisePhoneCode(value:string):string {const code=value.replace(/[০-৯]/g,d=>String(d.charCodeAt(0)-0x09e6)).replace(/\s/g,'');if(!/^\d{6,10}$/.test(code))throw new Error('Enter the verification code from your SMS.');return code;}

@@ -11,9 +11,9 @@ const databases:(MiseDatabase|CloudUploadJournal)[]=[];
 afterEach(async()=>{await Promise.all(databases.splice(0).map(db=>db.delete()));});
 async function boot(){const db=new MiseDatabase('mise-upload-shop-test-'+randomUUID());databases.push(db);const source=cloudUploadFixture(),review=await db.previewRestore(source);await db.restoreBackup(source,review);return db;}
 function journal(name='mise-upload-journal-test-'+randomUUID()){const db=new CloudUploadJournal(name);databases.push(db);return db;}
-it('keeps immutable chunks across close/reopen without changing the shop schema or its JSON backup',async()=>{
+it('keeps immutable chunks across close/reopen while keeping sync metadata out of its JSON backup',async()=>{
   const db=await boot(),before=await db.readBackup(),cache=journal(),saved=await cache.prepare(db,uploadId()),name=cache.name;cache.close();const reopened=journal(name),loaded=await reopened.readSnapshot(uploadId());
-  expect(loaded.manifestHash).toBe(saved.manifestHash);expect(loaded.chunks[0]).toBeInstanceOf(Blob);expect(backupToken(await readCloudUpload(loaded))).toBe(backupToken(before));expect(backupToken(await db.readBackup())).toBe(backupToken(before));expect(db.tables.map(t=>t.name).sort()).toEqual([...backupTableNames].sort());expect(db.verno).toBe(10);expect(JSON.stringify(loaded)).not.toMatch(/api_key|access_token|refresh_token|authorization/i);
+  expect(loaded.manifestHash).toBe(saved.manifestHash);expect(loaded.chunks[0]).toBeInstanceOf(Blob);expect(backupToken(await readCloudUpload(loaded))).toBe(backupToken(before));expect(backupToken(await db.readBackup())).toBe(backupToken(before));expect(db.tables.map(t=>t.name).sort()).toEqual([...backupTableNames,'cloudState','outbox'].sort());expect(db.verno).toBe(11);expect(JSON.stringify(loaded)).not.toMatch(/api_key|access_token|refresh_token|authorization/i);
 });
 it('uses remote ACKs after restart, retains the accepted receipt and does not resend an accepted chunk',async()=>{
   const db=await boot(),cache=journal(),snapshot=await cache.prepare(db,uploadId()),remote=new MemoryCloudUpload();remote.losePartReply=0;

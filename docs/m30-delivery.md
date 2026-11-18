@@ -282,3 +282,20 @@ proof uses intercepted synthetic responses on a reserved `.test` host, with no S
 or hosted user creation. The count review sends no shop data and does not enable
 sync. Actual OTP, the positive owner HTTP path, complete upload activation and the
 outbox remain required. GitHub workflows and Pages publication remain stopped.
+
+## Initial upload and local change queue
+
+Local schema 11 now keeps the upload boundary and outbox in the same IndexedDB
+database as shop records. The snapshot stays immutable while later writes commit
+with their recovery rows and original intent identities. Normal, worker and narrow
+transactions share the same persistent ordering fence. Backup files still use
+schema 10 and contain only the 21 shop tables. Six financial intent kinds have
+typed delivery and persistent receipts; other writes remain retained for review
+and stop ordered delivery. Server-confirmed staging cancellation preserves history
+and allows a fresh review without wiping local data. See the
+[implementation and verification notes](m30-outbox-boundary.md).
+
+Full nonfinancial adapters, canonical receipt/pull reconciliation and upload/outbox
+controls remain unfinished. This increment enables no sync interface, commissions
+no phone provider and changes no hosted schema or service. M30 stays unticked and
+GitHub workflows and Pages publication remain stopped.

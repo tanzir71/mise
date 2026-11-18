@@ -3,6 +3,7 @@ import {assertCloudUploadCurrent,cloudUploadManifestHash,parseCloudUploadManifes
 import {parseCloudUploadProgress,runCloudUpload,type CloudUploadProgress,type CloudUploadRemote} from '@mise/core/cloud-upload-runner';
 import type {MiseDatabase} from './db';
 import {readDatabaseBackup} from './backup';
+import {beginLocalUpload,assertLocalUploadCoverage,acceptLocalUpload} from './local-outbox';
 
 interface StoredCloudUpload extends CloudUploadPlan {id:string;businessId:string;manifestHash:string;progress:CloudUploadProgress|null}
 /** Separate from shop/backup tables. No JWT, API key or other credential belongs here. */
@@ -42,4 +43,11 @@ export async function uploadDatabaseSnapshot(db:MiseDatabase,journal:CloudUpload
   return runCloudUpload(snapshot,remote,{signal:options.signal,progress:value=>journal.acknowledge(id,value),beforeCommit:async manifest=>{
     await options.beforeCommit();await assertCloudUploadCurrent(manifest,await readDatabaseBackup(db));
   }});
+}
+/** Initial upload with a same-database fence; every later local write is retained atomically. */
+export async function uploadWithLocalOutbox(db:MiseDatabase,journal:CloudUploadJournal,id:string,targetHash:string,remote:CloudUploadRemote,options:{signal?:AbortSignal}={}){
+ const snapshot=await journal.readSnapshot(id);await beginLocalUpload(db,snapshot,targetHash);
+ await assertLocalUploadCoverage(db,snapshot,targetHash);
+ const receipt=await runCloudUpload(snapshot,remote,{signal:options.signal,progress:value=>journal.acknowledge(id,value),beforeCommit:async()=>{await assertLocalUploadCoverage(db,snapshot,targetHash);}});
+ await acceptLocalUpload(db,snapshot,targetHash,receipt);return receipt;
 }

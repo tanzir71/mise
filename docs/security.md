@@ -79,6 +79,14 @@ verification. The [Auth/privacy evidence](m30-auth-local.json) records the lates
 redacted audit and live read-only access checks. The older identifiers described
 above remain historical; no history rewrite or credential rotation is claimed.
 
+The upload boundary stores only a connection/account fingerprint in internal sync
+state. Project URLs, publishable keys and session credentials remain separate.
+`cloudState` and `outbox` are excluded from the explicit 21-table JSON backup.
+Recovery rows stay local; network delivery accepts only validated domain intents
+through the authenticated command endpoint. New queue identities are insert-only,
+and an incomplete sequence blocks delivery. See the
+[local boundary verification](m30-outbox-local.json).
+
 The nine Git/Node process integration fixtures have an explicit thirty-second test
 budget. Their assertions still verify history detection, redaction and rejected
 real commits/pushes; they do not benchmark filesystem or process-start latency.

@@ -5,6 +5,7 @@ import type { SharedInboxInput,StoredInboxItem } from './inbox';
 import { claimDatabaseInbox } from './inbox';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import { LocalStore } from './local-store';
+import {withOutboxIntent} from './outbox-capture';
 import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
@@ -97,7 +98,8 @@ export class MiseDatabase extends LocalStore {
     return this.transaction('rw', this.tables, async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
       const command = recordSaleCommand(input, { setup, wallets: marketPacks[setup.business.marketCode]['pay/wallets'], items: await this.items.where('outletId').equals(setup.outlet.id).toArray() });
-      await this.sales.add(command.sale); await this.events.add(command.event); return command.sale;
+      const sale=command.sale;
+      return withOutboxIntent(this,{id:command.event.id,type:'sale.record',outletId:sale.outletId,saleId:sale.id,occurredAt:sale.createdAt,input:{expression:sale.expression,method:input.method,wallet:input.method==='wallet'?sale.methodName:null,given:sale.given??null,who:sale.who,items:sale.items.map(line=>({itemId:line.itemId!,qty:line.qty,unitPrice:line.unitPrice}))}},async()=>{await this.sales.add(sale);await this.events.add(command.event);return sale;});
     });
   }
   async undoSale(id: string): Promise<void> {
@@ -118,11 +120,10 @@ export class MiseDatabase extends LocalStore {
         const charge = context.entries.find(entry => entry.saleId === sale.id && entry.type === 'charge');
         if (!charge) throw new Error('Credit charge not found.');
         const command = undoCreditSaleCommand(sale,charge,context);
-        await this.sales.put(command.sale); await this.events.add(command.event);
-        await this.creditEntries.add(command.entry); await this.events.add(command.creditEvent); return;
+        await withOutboxIntent(this,{id:command.event.id,type:'sale.undo',outletId:sale.outletId,saleId:sale.id,occurredAt:command.event.at,entryId:command.entry.id,creditEventId:command.creditEvent.id},async()=>{await this.sales.put(command.sale);await this.events.add(command.event);await this.creditEntries.add(command.entry);await this.events.add(command.creditEvent);});return;
       }
       const command = undoSaleCommand(sale, setup.owner.id);
-      await this.sales.put(command.sale); await this.events.add(command.event);
+      await withOutboxIntent(this,{id:command.event.id,type:'sale.undo',outletId:sale.outletId,saleId:sale.id,occurredAt:command.event.at,entryId:null,creditEventId:null},async()=>{await this.sales.put(command.sale);await this.events.add(command.event);});
     });
   }
   private async ledgerContext(accountId: string): Promise<LedgerContext> {
@@ -166,14 +167,14 @@ export class MiseDatabase extends LocalStore {
     return this.transaction('rw',this.tables,async () => {
       const context = await this.ledgerContext(input.accountId);
       const command = recordCreditSaleCommand(input,context,{setup:context.setup,wallets:marketPacks[context.setup.business.marketCode]['pay/wallets'],items:await this.items.where('outletId').equals(context.setup.outlet.id).toArray()});
-      await this.sales.add(command.sale); await this.events.add(command.event);
-      await this.creditEntries.add(command.entry); await this.events.add(command.creditEvent); return command.sale;
+      const sale=command.sale;
+      return withOutboxIntent(this,{id:command.event.id,type:'sale.credit',outletId:sale.outletId,saleId:sale.id,accountId:input.accountId,entryId:command.entry.id,creditEventId:command.creditEvent.id,occurredAt:sale.createdAt,input:{expression:sale.expression,items:sale.items.map(line=>({itemId:line.itemId!,qty:line.qty,unitPrice:line.unitPrice})),confirmation:command.entry.overLimit??null}},async()=>{await this.sales.add(sale);await this.events.add(command.event);await this.creditEntries.add(command.entry);await this.events.add(command.creditEvent);return sale;});
     });
   }
   async recordCreditPayment(accountId: string, amount: number, method: PaymentMethod, wallet?: string, note = ''): Promise<CreditEntry> {
     return this.transaction('rw',this.tables,async () => {
       const context = await this.ledgerContext(accountId), command = recordCreditPaymentCommand(amount,method,wallet,context,marketPacks[context.setup.business.marketCode]['pay/wallets'],note);
-      await this.creditEntries.add(command.entry); await this.events.add(command.event); return command.entry;
+      return withOutboxIntent(this,{id:command.event.id,type:'khata.payment',outletId:command.entry.outletId,accountId,entryId:command.entry.id,occurredAt:command.event.at,input:{amount:command.entry.amount,method,wallet:method==='wallet'?command.entry.methodName??null:null,note:command.entry.note}},async()=>{await this.creditEntries.add(command.entry);await this.events.add(command.event);return command.entry;});
     });
   }
   async undoCreditEntry(id: string): Promise<void> {
@@ -181,13 +182,13 @@ export class MiseDatabase extends LocalStore {
       const entry = await this.creditEntries.get(id); if (!entry) throw new Error('Credit entry not found.');
       if (entry.refundId) { await this.undoOrderRefund(entry.refundId); return; }
       const command = undoCreditEntryCommand(entry,await this.ledgerContext(entry.accountId));
-      await this.creditEntries.add(command.entry); await this.events.add(command.event);
+      await withOutboxIntent(this,{id:command.event.id,type:'khata.undo',outletId:entry.outletId,entryId:entry.id,reversalId:command.entry.id,occurredAt:command.event.at},async()=>{await this.creditEntries.add(command.entry);await this.events.add(command.event);});
     });
   }
   async recordCommunication(accountId: string, purpose: 'reminder'|'receipt'|'call', text: string, channel: 'whatsapp'|'manual'|'call'): Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const command = recordCommunicationCommand(await this.ledgerContext(accountId),purpose,text,channel);
-      await this.creditEntries.add(command.entry); await this.events.add(command.event);
+      await withOutboxIntent(this,{id:command.event.id,type:'khata.communication',outletId:command.entry.outletId,accountId,entryId:command.entry.id,occurredAt:command.event.at,input:{purpose,text:command.entry.note,channel}},async()=>{await this.creditEntries.add(command.entry);await this.events.add(command.event);});
     });
   }
   async saveCreditMessaging(input: CreditMessaging): Promise<void> {

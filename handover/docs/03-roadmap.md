@@ -78,6 +78,7 @@ Spec: `phases/phase-3-backend-sync.md`
   - [Complete manual message transactions](../../docs/m30-handoff-commands.md) retain exact drafts, explicit Sent companions, canonical attempt generations and guarded corrections. Clone-local credential checks also run automatically before commits, pushes and builds.
   - [Original Inbox captures and manual sorting](../../docs/m30-inbox-commands.md) retain literal sources, immutable pending image metadata and complete reversible history without recording money or orders.
   - [Runtime phone sign-in and private configuration](../../docs/m30-auth-interface.md) add an opt-in device connection, OTP/session interface and saved local count review. Real OTP commissioning, initial upload activation and outbox integration remain open; M30 stays unticked.
+  - [Same-database upload and change queue](../../docs/m30-outbox-boundary.md) retain concurrent local edits, worker images and financial intent identities through retries and confirmed cancellation. Remaining command adapters, canonical reconciliation and full upload controls stay gated; no sync interface is enabled.
 - [ ] **M31** Sync engine: local-first outbox, realtime pull, conflict rules · L · T2
 - [ ] **M32** Kitchen / pack / counter screen on a second device; Got it / Ready; 2-minute unacknowledged alarm · M · T2
 - [ ] **M33** Order link writes real orders (no WhatsApp step needed); live tracking page for customers · M · T2

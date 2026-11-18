@@ -1,9 +1,13 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Business, Outlet, Member, Category, Item, Sale, Customer, CreditAccount, CreditEntry, AuditEvent, SetupSnapshot, Order, OrderNote, OrderCommunication, OrderRefund, StockItem, StockMove, Supplier, SupplierMessage, DayClosing, Purchase } from '@mise/core/models';
 import type { StoredInboxItem } from './inbox';
+import {installOutboxCapture} from './outbox-capture';
+import type {LocalCloudState,LocalOutboxEntry} from '@mise/core/local-outbox';
 
 /** Shared schema and read-only setup lookup; safe to import in the receiving worker. */
 export class LocalStore extends Dexie {
+  cloudState!:EntityTable<LocalCloudState,'id'>;
+  outbox!:EntityTable<LocalOutboxEntry,'id'>;
   businesses!: EntityTable<Business, 'id'>;
   outlets!: EntityTable<Outlet, 'id'>;
   members!: EntityTable<Member, 'id'>;
@@ -37,6 +41,8 @@ export class LocalStore extends Dexie {
     this.version(8).stores({purchases:'id,outletId,supplierId,createdAt'});
     this.version(9).stores({events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision]'});
     this.version(10).stores({inboxItems:'id,outletId,createdAt,kind',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision],inboxId,&[inboxId+inboxRevision]'});
+    this.version(11).stores({cloudState:'id',outbox:'id,uploadId,&[uploadId+sequence],status'});
+    installOutboxCapture(this);
   }
   async setup(): Promise<SetupSnapshot | null> {
     const business = await this.businesses.toCollection().first();

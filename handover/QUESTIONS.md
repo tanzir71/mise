@@ -1,5 +1,7 @@
 # Open questions
 
+- Resolved M30 upload storage: initial upload and local writes need one native IndexedDB transaction boundary. Local schema 11 therefore adds two internal stores while portable backups remain schema 10. Typed financial intents can be delivered; all other local writes remain retained recovery evidence until their adapters and canonical reconciliation are ready. This does not enable the sync interface or complete M30.
+
 - Resolved by the refinement handover: all indexed Figma exports are supplied. Phase R replaces the previous HTML/CSS marketing previews with those images and compares the new hero with the exported references.
 - Owner configuration: set PUBLIC_WHATSAPP_URL / PUBLIC_DEMO_URL before accepting contact or demo requests. No number or booking service is invented.
 
