@@ -1,0 +1,279 @@
+{
+  "date": "2026-11-18",
+  "baseCommit": "f3a2b658587e9102e75c600e1848567f2c3c8e35",
+  "status": "M30 in progress; complete order commands deployed; app/outbox interfaces unavailable",
+  "checks": {
+    "unitTests": 1352,
+    "unitFiles": 80,
+    "unitWorkers": 2,
+    "unitDurationSeconds": 91.1768046875,
+    "nativeOrderChecks": 70,
+    "clientTransportChecks": 21,
+    "exactOrderBundleBoot": 1,
+    "lint": "passed including source/index credential guard",
+    "typecheck": "passed;91 Astro check files clean",
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "visual": "No new product layout or visual comparison claimed",
+    "browser": {
+      "passed": 298,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "globalErrors": 0,
+      "durationSeconds": 384.922284,
+      "workers": 2,
+      "retries": 0
+    }
+  },
+  "deployment": {
+    "migrationVersions": [
+      "20261117081808",
+      "20261117085319",
+      "20261117102312",
+      "20261117114114",
+      "20261117122734",
+      "20261117130209",
+      "20261117134918",
+      "20261117141552",
+      "20261117145205",
+      "20261117152037",
+      "20261117161027",
+      "20261117171100",
+      "20261117171949",
+      "20261117182909",
+      "20261117190239",
+      "20261117192844",
+      "20261117202047",
+      "20261117203202",
+      "20261117205719",
+      "20261117214105",
+      "20261117233106",
+      "20261118004147"
+    ],
+    "commands": {
+      "version": 9,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "bytes": 299086,
+      "sha256": "e35e6cbbcefbf97c137f1c22b8e508ba1df0ac71677d405481aae9fc5677c047",
+      "ezbrSha256": "1f8554dbf73faae7c3e8305d3c65f1475e9fa622382ea829e9c6b355506ec7a3",
+      "sourceFiles": 37
+    },
+    "seedRoleVaultChanges": false,
+    "sourceHashesMatchCurrentFiles": true,
+    "deployedModuleMatchesValidatedBundle": true
+  },
+  "hostedRoleProof": {
+    "proof": {
+      "notes": 1,
+      "audits": 23,
+      "commands": 13,
+      "receipts": 13,
+      "replayExact": true,
+      "refundVoided": true,
+      "communications": 1,
+      "creditReversed": true,
+      "pendingTickets": 0,
+      "walletRestored": true,
+      "privateReadsDenied": true,
+      "otherIdentityDenied": true,
+      "orderHistoryRetained": true,
+      "literalUnicodeRetained": true,
+      "ordinaryCompletionDenied": true,
+      "deviceIdsAndClocksRetained": true,
+      "otherLargeBodyAdmissionDenied": true
+    },
+    "auth_rows": 0,
+    "business_rows": 0,
+    "ticket_rows": 0
+  },
+  "catalog": {
+    "migrations": 22,
+    "application_tables": 44,
+    "forced_rls_tables": 44,
+    "private_tables": 15,
+    "public_definers": 0,
+    "anonymous_table_grants": 0,
+    "direct_client_write_grants": 0,
+    "auth_users": 0,
+    "businesses": 0,
+    "orders": 0,
+    "sales": 0,
+    "events": 0,
+    "order_tickets": 0,
+    "public_buckets": 0,
+    "stored_objects": 0,
+    "all_force_rls": true,
+    "image_bucket_private": true
+  },
+  "advisors": {
+    "security": {
+      "warn": 0,
+      "error": 0,
+      "infoLintGroups": 1,
+      "infoFindings": 15
+    },
+    "performance": {
+      "warn": 0,
+      "error": 0,
+      "infoLintGroups": 1,
+      "infoFindings": 77
+    }
+  },
+  "limitations": [
+    "Phone OTP and positive real-owner JWT HTTP writes/transfers remain unverified.",
+    "The complete200-line order has native handler/store/PostgreSQL capacity evidence, not a positive signed-owner hosted HTTP transfer.",
+    "M31 accepted-row reconciliation, server-time field merging, ordered outbox delivery and two-browser convergence remain unfinished.",
+    "Closing, confirmed hand-off/Inbox, staff/agent resources and other M30 gates remain open.",
+    "No app cloud controls, paid provider, real messages or workflow dispatch enabled."
+  ],
+  "sourceHashes": {
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/calc.ts": "38b8e78484a7792551071f7f44cc639717a760c669ff9c8d92167ac772cf1ed0",
+    "packages/core/catalogue-save.ts": "9b4bfa3c2d0239683bdb5c04c9434e71e1f8de82781e9ffb2bf94f9ec5c80442",
+    "packages/core/catalogue.ts": "5ae9770f861750d246adc43f70c61d191110cf77575d6225f6ae47a827194bca",
+    "packages/core/cloud-commands.ts": "ba070408a5e43d5ef83ceee9aacd51e729b64b3570c2b28684d4bd5fe01f8fbe",
+    "packages/core/cloud-records.ts": "25babc5da2eb3ff3e2a5e070021b67d048b33dbc1dcb2f57e290806fc3038c82",
+    "packages/core/credit-sales.ts": "7f5d9d5410677ef16876cabca7d98fd4d7e07b16cf3efbcdad48b2ec9219a5fd",
+    "packages/core/customer-mutation.ts": "bc4ef7c9b41c96ae29ff255096df896307fa58b5af6dbb1549d78b7bf214c9b8",
+    "packages/core/customers.ts": "39f0e5bf9319aa08bc9d69d73113f349a8cf067d0168011eca345ca26812b3c4",
+    "packages/core/khata.ts": "e79a89f955ae9763dc2750cd9a6c113f4842f3cdebda5eef83fa2e644765cff4",
+    "packages/core/money-commands.ts": "f451d374a4c158c4052cba53b5fa014c0e28d8eca94570cb6625683486e33398",
+    "packages/core/money.ts": "e0423962cd74585e8c52fbe548c48ca99f614efbfa2ed4542aa201529caafdc1",
+    "packages/core/order-commands.ts": "19dde3104a1a4a9015ef989d9316d96cd6887cfc696390b42c22f4dedd25268e",
+    "packages/core/order-limits.ts": "661ff0d6056d178f6c303e2b52e745bfab0c93011d6b3019a0539faf001ee0e4",
+    "packages/core/order-lines.ts": "d45aed0ad0ec62dd00c438ced216733cf252cc5ee5d51144fa72b950cd274471",
+    "packages/core/order-payments.ts": "37291d3588d25df22a902c5fb9b0217965fc0304c2e67165d624e5d6b391f359",
+    "packages/core/orders.ts": "d9f5bb8ee46ae6469f7e9b3bfdad30f13c6e3f2c142fcdb53e97ec392facefb9",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "packages/core/phone.ts": "e1ec8d78648f8d3b626544aef7aa7fb22c3ece3d4419d4ce216455980d873c5d",
+    "packages/core/purchase-commands.ts": "90cb10df90588a847acc26a20ffc6eeacea5b97d5e90e90dcb109e97dcce6080",
+    "packages/core/purchases.ts": "67da2c99859b71a40b15ccb7635c74b54a2c7309b39b4b4f4e42dce4b23e8189",
+    "packages/core/sales.ts": "1527ea77d7e44ed6e7a7fe364001c91f9a2cbf44ee0a04bc990d1f460d643870",
+    "packages/core/shop-access.ts": "268e85d247938968dde2bd638af4b226c639d5d516fff4d9f4c0754236afc7f1",
+    "packages/core/shop-commands.ts": "e5417389ad67671dba5e557022301552c46d3476c0fe36848a097677931204ae",
+    "packages/core/stock-commands.ts": "08f4139ddf2119d75fdad484cd69eec9ffb6c066274fc06efb7aa152d21b40c0",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "packages/core/stock.ts": "16d4bdc03e7e082d5028988bdc315e51698e00b5be7015e23f31873465284351",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/catalogue-write.ts": "0fc0e9981afa8649a944e7df7813d6fb9215593e00ee1c370f1106741231f978",
+    "supabase/functions/_shared/commands-handler.ts": "d1605925aa86583545da37ee446e7c16fa01b71aeb2fc09331ee7b1d124642cc",
+    "supabase/functions/_shared/customer-write.ts": "2c284aa26d36b2ee2e96d2ad6f7ce718f377fabf00eb1afc951cf56d603104c2",
+    "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+    "supabase/functions/_shared/money-write.ts": "2e39c82f623b486e1244058e1fbe5c7c65401c90a232aac0a601e67f767f5ad2",
+    "supabase/functions/_shared/order-write.ts": "a8bac8c6849e7d6450ca88cf8db2f3bd52cad1bd996b5c877f0accd9d65c5e4c",
+    "supabase/functions/_shared/purchase-write.ts": "7d7cd0c6946d238ec2632ac6f3b56b609e0178460ad562a9f8d66667f7a45235",
+    "supabase/functions/_shared/stock-write.ts": "d286d549105a2c643d50751bcdb78bcdb9acb8c0b821be6445cf06c465339574",
+    "supabase/functions/commands/index.ts": "b9bf4e09a069b828f6130cf681e4b8e57895cc44885c331670aa0f26def25401"
+  },
+  "httpNegativeChecks": [
+    {
+      "name": "missing Bearer",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "anonymous order write",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "service identity cannot prepare owner order",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "name": "foreign origin",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "name": "malformed order header",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "anonymous larger order admission",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "service identity cannot admit larger order",
+      "status": 403,
+      "ok": true
+    },
+    {
+      "name": "ambiguous order and invoice admission",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "ambiguous order and stock admission",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "extra caller identity",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "fractional minor-unit price",
+      "status": 400,
+      "ok": true
+    },
+    {
+      "name": "raw anonymous order admission RPC",
+      "status": 401,
+      "ok": true
+    },
+    {
+      "name": "all three large-body preflight headers",
+      "status": 204,
+      "ok": true
+    },
+    {
+      "name": "ordinary command body remains limited to32KB",
+      "status": 413,
+      "ok": true
+    }
+  ],
+  "publication": {
+    "workflows": "all3 disabled_manually; no dispatch or re-enable",
+    "pages": "held by owner",
+    "lastPublishedSha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "httpProbeExecution": {
+    "admissionAndCorsChecks": 13,
+    "isolatedCurlBodyCheck": 1,
+    "combinedProcessLimitation": "The combined fetch/curl process timed out locally on the size probe; a separate curl process returned413 with the original15-second transport limit. Application deadlines were unchanged."
+  },
+  "verificationHashes": {
+    "supabase/migrations/20261118004147_order_commands.sql": "a3e1dea90854ddcbc2d7ca5bc7cc58d2515beb30b4b5a9e988aa40c9879eee88",
+    "tests/order-commands.test.ts": "507b8701e622b80a74acec3e75148abe760cd7ea275fba475b5a41a108117823",
+    "tests/order-command-bundle.test.ts": "500bba434af5c80e98b721f6754ed024b31054577e13b1d412efa30681820771",
+    "tests/order-hosted-fixture.ts": "a0474b271cbfaf1f262086b5609a73f4ab2c0d0b8e47053d3c6208cc65b477bc",
+    "tests/order-identity.test.ts": "98997155c8abe1bfb76888af97997b80500b2507aa4fb8e40b857851abf1cb29",
+    "tests/shop-command-remote.test.ts": "619f7a63d68b9a5e2add8ad443bc992d09cfec75a9b3d30269523e7a298be485"
+  },
+  "artifacts": {
+    "appEntry": "/mise/app/assets/app-C5e3dyHU.js",
+    "customerEntry": "/mise/app/s/assets/shop-BZ9RXiOJ.js"
+  },
+  "privacyAudit": {
+    "ok": true,
+    "files": 1110,
+    "objects": 4602,
+    "archiveFiles": 0,
+    "history": true,
+    "artifacts": true,
+    "knownValuesChecked": 8,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalDeploymentFindings": 21,
+    "coverageFindings": 0
+  }
+}

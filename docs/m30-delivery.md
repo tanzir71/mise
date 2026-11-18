@@ -170,16 +170,15 @@ The expanded `commands` v4 supports strict customer create/update/archive/restor
 
 ## Remaining M30 work
 
-Shared order/payment/cancellation/refund commands now preserve all device record
-and companion-audit identities, including their linked khata reversals. This is
-preparation for the complete atomic remote order transaction, which remains open.
-See [the order identity contract and verification limits](m30-order-identity.md).
+Complete atomic remote order transactions now preserve device order, line,
+payment, cancellation, refund and companion-audit identities, including linked
+khata reversals. See [the order command contract and verification limits](m30-order-commands.md).
 
 - Local immutable upload snapshots, gzip chunk validation, resumable transfer orchestration and a separate credential-free IndexedDB journal are implemented; see [the upload contract and verification limits](m30-upload.md). The authenticated staging/promotion service and original-file checks are now deployed; complete the snapshot/outbox boundary and positive signed-owner HTTP verification before enabling controls or claiming the 3G/60-second gate.
 - Complete remaining staff/agent resources and private-image migration/UI integration; the bucket, RPCs and image endpoint are deployed, with positive hosted owner/manager transfer verification still open.
 - Configure the production SMS provider and test real owner/manager phone OTP; email/anonymous sign-in must stay disabled.
 - Complete the device/PIN interface, with scoped staff data/commands and browser session handling; both PIN HTTP functions are deployed.
-- Extend transactional `/commands` beyond the deployed catalogue, customer/khata, counter/payment, stock and supplier/invoice families to complete order, closing, hand-off/Inbox and other intents; preserve shared validation, scoped authorization, idempotent receipts and atomic audits. Supplier messages need their complete confirmed hand-off transaction. Keep raw browser writes denied.
+- Extend transactional `/commands` beyond the deployed catalogue, customer/khata, counter/payment, stock, supplier/invoice and order families to closing, hand-off/Inbox and other intents; preserve shared validation, scoped authorization, idempotent receipts and atomic audits. Supplier messages need their complete confirmed hand-off transaction. Keep raw browser writes denied.
 - Complete public capability HTTP/rate-limit integration and hosted tests; local SQL tests cover isolation, expiry and revocation.
 - Finish the reviewed upload interface/outbox integration and prove a resumable 5,000-record upload under the required 3G/60-second gate.
 - Complete positive owner JWT/resource-isolation tests, remaining target-runtime checks and full delivery verification before enabling sync or ticking M30; hosted advisors and device/PIN tests are recorded above.
@@ -201,3 +200,18 @@ The hosted service now supports stock creation/editing, archive/restore, relativ
 ## Suppliers and priced invoices
 
 Supplier creation/editing/archive/restore, complete 200-line invoice recording and ten-minute guarded undo now share local validation and preserve device IDs. Invoices do not receive stock, create counter sales or change customer debt. Larger invoice bodies require an original-caller outlet check before reading. All 21 migrations and `commands` v8 are deployed with JWT verification enabled. The exact deployment module, rolled-back six-action hosted fixture and thirteen HTTP/CORS checks pass. All 43 application tables force RLS; there are no anonymous table grants, direct client writes or public security-definer functions. See [supplier/invoice implementation and verification](m30-purchase-commands.md). Remaining M30 gates and the app/outbox boundary stay open.
+
+## Complete order transactions
+
+All eleven order command types now reuse the complete local lifecycle: create/edit,
+compound save-and-pay, statuses and undo, notes/contact history, payment and undo,
+cancellation/restore, partial refunds and undo, and warning settings. Related device
+IDs survive bounded retries, with a canonical outlet number assigned under lock.
+The complete 200-line body requires original-caller outlet admission before reading.
+All 22 migrations and `commands` v9 are deployed with JWT verification enabled.
+The exact deployment module and thirteen-action rolled-back hosted role fixture
+pass, including credit reversal, wallet/refund restoration and historical replay.
+All 44 application tables force RLS, with zero anonymous grants, direct client
+writes or public security-definer functions. See [implementation and verification](m30-order-commands.md)
+and [redacted evidence](m30-order-hosted.json). Remaining M30 acceptance gates and
+the app/outbox boundary stay open; GitHub workflows and Pages publication stay held.

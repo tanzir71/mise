@@ -38,10 +38,10 @@ recorded nonsecret deployment references; no history rewrite is claimed. Local
 commit/push/build guards remain enabled. Public evidence contains no actual
 deployment reference, credential value or private operational path.
 
-This is shared-domain preparation for the complete remote order transaction.
-`POST /commands` does not yet accept order intents, and it does not establish
-hosted order admission, atomic replay receipts, live authorization/undo-clock
-checks, outbox delivery or two-browser convergence. Those remain required before
-enabling sync or ticking M30/M31. No product layout or visual comparison is claimed.
+This identity increment was shared-domain preparation. The subsequent
+[complete order transaction increment](m30-order-commands.md) adds hosted order
+admission, atomic replay receipts and live authorization/undo-clock checks.
+Positive owner HTTP, outbox delivery and two-browser convergence remain required
+before enabling sync or ticking M30/M31. No product layout or visual comparison is claimed.
 GitHub Actions and Pages remain held by the owner; deployment credentials and
 actual project/organization references remain outside current repository files.

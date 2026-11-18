@@ -112,7 +112,7 @@ test('credit payment and undo retain every charge, reversal and companion-audit 
  expect(paid.entries[0]).toMatchObject({id:ids.ids.entry,eventId:ids.ids.creditEvent,saleId:ids.ids.sale,orderId:created.order.id,amount:2500,sequence:1});
  expect(paid.events.find(e=>e.command==='khata.charge')).toMatchObject({id:ids.ids.creditEvent,after:paid.entries[0]});expect(paid.sales[0].eventId).toBe(ids.ids.saleEvent);
  const ledger=withEntries(context,paid),undoIds=identities(),undone=undoOrderPaymentCommand(paid.order,paid.sales[0],ledger,2,at+2,undoIds.factory().newId);linked(undone,undoIds.ids);
- expect(undone.entries[0]).toMatchObject({id:undoIds.ids.entry,eventId:undoIds.ids.creditEvent,reversalOf:ids.ids.entry,sequence:2});
+ expect(undone.entries[0]).toMatchObject({id:undoIds.ids.entry,eventId:undoIds.ids.creditEvent,reversalOf:ids.ids.entry,orderId:created.order.id,saleId:ids.ids.sale,sequence:2});
  expect(undone.events.find(e=>e.command==='khata.undo')).toMatchObject({id:undoIds.ids.creditEvent,undoOf:ids.ids.creditEvent});
  expect(creditBalance(ledger.ledger!.account,[...ledger.ledger!.entries,...undone.entries])).toBe(0);
 });

@@ -75,7 +75,9 @@ export function undoOrderPaymentCommand(before: Order, sale: Sale|undefined, con
     if (original.method === 'credit') {
       const ledger = ledgerFor(before,context), entry = ledger.entries.find(entry => entry.saleId === original.id && entry.type === 'charge');
       if (!entry) throw new Error('The credit charge is missing.');
-      const undone = undoCreditSaleCommand(original,entry,ledger,at,kind=>newId(kind==='event'?'saleEvent':kind)); change.sales.push(undone.sale); change.entries.push(undone.entry); change.events.push({...undone.event,orderId:before.id},{...undone.creditEvent,orderId:before.id});
+      const undone = undoCreditSaleCommand(original,entry,ledger,at,kind=>newId(kind==='event'?'saleEvent':kind));
+      undone.entry.orderId=before.id;undone.entry.saleId=original.id;
+      change.sales.push(undone.sale); change.entries.push(undone.entry); change.events.push({...undone.event,orderId:before.id},{...undone.creditEvent,orderId:before.id});
     } else { const undone = undoSaleCommand(original,context.setup.owner.id,at,()=>newId('saleEvent')); change.sales.push(undone.sale); change.events.push({...undone.event,orderId:before.id,customerId:before.customer.id}); }
   }
   change.order.payment = {method:before.payment.method,wallet:before.payment.wallet,status:'pending'}; return change;
