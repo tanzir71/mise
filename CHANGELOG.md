@@ -6,6 +6,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 durable download captures original scoped changes and tombstones in their source transactions. Fixed PostgreSQL snapshot windows, hashed fragments, bounded gzip responses and signed cursors retain large records and exact retries. Owner/manager access is checked before body reading and again on cached pages. The runtime transport remains separate from shop writes; canonical application and sync activation stay gated.
+
+- Credential checks now compare the dedicated server cursor-signing key from private configuration, including staged files, history and generated output. No deployment value is added to source or public build variables.
+
 - M30 canonical download groundwork now validates PostgreSQL snapshot cursors without losing 64-bit precision or skipping a transaction that commits late. A PostgreSQL oracle and overlapping read-only hosted transactions verify the primitive. Change-feed delivery, reconciliation and cloud activation remain gated.
 
 - M30 legacy supplier sent records now queue their original message and audit identities before correction. Hosted saves bind the complete literal assertion, recheck owner/manager outlet access and preserve physical time without inventing hand-off history, sending messages or changing stock/money. Exact retries and lost correction replies retain their original ordering. Cloud activation remains gated.

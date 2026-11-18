@@ -3,7 +3,7 @@
 Actual Supabase credentials, project/organization references and private operational
 records stay outside Git. Environment templates contain names and blank values.
 `.env*`, `.private/`, `.secrets/`, key exports and Supabase CLI temporary files are
-ignored. Server API keys, PIN peppers and access tokens belong in the server secret
+ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
 This includes legacy service-role keys, database passwords and personal access
@@ -28,7 +28,7 @@ pnpm check:secrets --history --artifacts
 
 The guard checks credential patterns, filenames, commit/tag messages and ZIP
 contents. Clone-local Git configuration `mise.secretScanDirectory` automatically
-loads private key/pepper values for every scan; `mise.privateDeploymentRef` is
+loads private key/pepper/cursor-signing values for every scan; `mise.privateDeploymentRef` is
 repeatable and checks plain project/organization IDs too. The configured directory
 stays outside the repository; its path and all values remain in `.git/config` and
 out of public evidence. `--known-directory` can explicitly select the private input.
@@ -36,7 +36,7 @@ Values are compared in memory. Findings contain rule names and redacted location
 never matched values. Hooks depend on Node and installed dependencies; a missing
 dependency, unreadable configured input or incomplete scan blocks the operation.
 
-ZIP extraction is bounded; incomplete archive coverage fails the scan. Sixteen
+ZIP extraction is bounded; incomplete archive coverage fails the scan. Seventeen
 guard tests cover redaction, ZIP contents, ignored configuration, staged/history
 leaks, filename-only leaks, commit/tag messages, automatic clone-local comparisons,
 unavailable private input and real blocked commit/push attempts.
@@ -45,17 +45,17 @@ The 18 November 2026 audit found **zero credentials** in current files, the inde
 reachable history and built output. Current files and output also contain no actual
 deployment references. Earlier commits retain nonsecret project identifiers; their
 presence does not provide database or server access. Published history was preserved.
-The latest audit fetched remote branches/tags first and compared nine private
-key, pepper and deployment values in memory. It found zero credentials, zero
+The latest audit fetched remote branches/tags first and compared ten private
+key, pepper, cursor-signing and deployment values in memory. It found zero credentials, zero
 current deployment references and zero coverage gaps; the 22 historical findings
 were nonsecret deployment references. Commit/push hooks remain enabled. The
-[Inbox evidence](m30-inbox-hosted.json) records the redacted counts.
+[scoped-download evidence](m30-sync-feed-local.json) records the latest redacted counts.
 
 GitHub's repository secret scanning and push protection are also enabled. The
 latest owner-authenticated, read-only API check returned zero open secret alerts.
 These protections remain enabled independently of the stopped Actions workflows.
 
-The same day's latest live verification found all **51 public/private application
+The same day's latest live verification found all **56 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
 reported no warnings or errors. Informational private-table notices describe
@@ -66,6 +66,14 @@ Local checks reduce accidental disclosure; they do not replace row-level securit
 or review of future authentication changes. If a credential ever reaches a public
 location, rotate it and remove the exposed value; deleting the latest file alone
 does not remove Git history.
+
+The scoped-download cursor uses a dedicated server-only HMAC key. Its exact value
+joins the automatic clone-local comparisons; the repository template stays blank.
+Only this new secret was published. Download projections exclude member Auth UUIDs
+and image storage paths, and cached pages recheck live access. The hosted SQL-role
+fixture was explicitly cleaned up; no persistent account or test data remains.
+Hosted HTTP acceptance is still pending because the API hostname did not resolve
+from this machine during that verification run.
 
 The runtime phone sign-in interface accepts only a publishable key. Device
 connection settings stay separate from the SDK session, which is scoped to the

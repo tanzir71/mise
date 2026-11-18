@@ -1,0 +1,316 @@
+{
+  "checkedAt": "2026-11-18T17:28:57.307Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Atomic scoped change capture, fixed-snapshot durable pages, dedicated HMAC cursor and bounded gzip runtime transport; no canonical application or sync UI",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "045b524c14c2dc6d7f5e734f89d0aa9e31127279aa3604fbdab39e3fc46ab457"
+    },
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 108,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "8dc24fa09e9a6c566a8392597546a3e6fe22ccbaf4728dd7e58e119edce2ea4b"
+    },
+    "units": {
+      "passed": 1990,
+      "files": 106,
+      "newFeedCases": 25,
+      "newProtocolCases": 12,
+      "secretGuardCases": 17,
+      "reportSha256": "deae36a243d2b8b1476ac60a501952cdb2b4c11b7da4d9d78f0873c763ed10b8"
+    },
+    "browser": {
+      "passed": 366,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "9cb8ffca11a6d10c5057ad7af7ec69a474569e2e2d8ecc477417c9f69aafcaaf"
+    },
+    "rootSmoke": {
+      "passed": 9,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "4107ab2a591196f7b85e403ac6008230cf9d92837c84c9bcb661e1f6bf713cff"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "postDocumentationRefresh": true,
+        "logSha256": "d22b58b1a46e136697e22827d7dfdeaccbae5f93171da769d9b700b98b0ebdb3",
+        "htmlSha256": "3699eed2450fa6bad8643676d0a640f975ad86cdedbf23e21a9a60a341334c2d"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "postDocumentationRefresh": true,
+        "logSha256": "3a5379a55b1d98982bcaffceaee385b1039bf0e15548388aa8953f6b427db64e",
+        "htmlSha256": "90a8bc4c113c75d16a64dfe6b6622aa091eb2feae131f22e7c243b90d90bb9f6"
+      }
+    ],
+    "exports": {
+      "passed": true,
+      "present": 270,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "visual": {
+      "comparisons": 45,
+      "changedProductScreens": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "report": "qa/report.html",
+      "reportSha256": "30b367850579e0176b17a884833f9ecad2db52cff4e0ccc36258fb20c700d8a6",
+      "resultsSha256": "753b30c168b5e1f877bb532057446c9d3656b0649586ed793b0f7b45289d1ffd",
+      "threeCapturesInspected": true,
+      "keyScreens": {
+        "qa/screens/m30-link-screen-360.png": "c32248587da1903eea2fb2e25a3ddaa4d3fc0d50d25f469fe32d79d86e94b4b3",
+        "qa/screens/m30-link-screen-390.png": "7b4514d5d30e4cd4cd781d99a22ab184358a043cb7539b6c293979a3c552df67",
+        "qa/screens/m30-link-screen-1440.png": "5ef47024ed0bccd8ca1308bfd32f63c39d7e45b921905982d706cac88db6c90c"
+      },
+      "exactFrameMatchClaimed": false,
+      "newCiArtifact": false
+    }
+  },
+  "invariants": {
+    "capturedSourceTables": 24,
+    "portableTables": 21,
+    "privateNewTables": 5,
+    "sourceTransactionAtomic": true,
+    "topLevelTransactionIdsOnly": true,
+    "ordinalIsNotCommitCursor": true,
+    "fixedSnapshotWindow": true,
+    "lateEarlierOrdinalCommitPreserved": true,
+    "scopeEpochAccountRoleBound": true,
+    "freshAdmissionBeforeBodyReader": true,
+    "cachedPageLiveRevocationChecked": true,
+    "visibilityVersionHeldDuringRead": true,
+    "explicitProjectionOnly": true,
+    "memberAuthUuidExcluded": true,
+    "imageStoragePathExcluded": true,
+    "literalNulAndLoneSurrogatesRetained": true,
+    "largeRowsFragmentedNotOmitted": true,
+    "wholeRecordSha256Checked": true,
+    "gzipExpansionBounded": true,
+    "rawFragmentBytesPerPage": 196608,
+    "maxFragmentsPerPage": 256,
+    "readWindowLifetimeHours": 24,
+    "maxPendingWindowsPerAccount": 10,
+    "dedicatedHmacServerKey": true,
+    "readServiceUsesOriginalJwtNotServiceKey": true,
+    "runtimeConnectionOnly": true,
+    "requestsFrozenBeforeAuthRefresh": true,
+    "canonicalApplicationImplemented": false,
+    "canonicalConvergenceClaimed": false,
+    "acceptedCursorOrOutboxMutated": false,
+    "cloudSetup": false
+  },
+  "hosted": {
+    "changed": true,
+    "newMigrations": 1,
+    "totalMigrations": 31,
+    "newFunctionDeployments": 1,
+    "newReadFunction": {
+      "name": "sync-read",
+      "version": 1,
+      "verifyJwt": true,
+      "status": "ACTIVE"
+    },
+    "existingFunctionVersionsAfterSecretPublication": [
+      {
+        "name": "migration-upload",
+        "beforeVersion": 1,
+        "afterVersion": 2,
+        "bundleUnchanged": true,
+        "jwtSettingUnchanged": true,
+        "active": true
+      },
+      {
+        "name": "staff-pin",
+        "beforeVersion": 1,
+        "afterVersion": 2,
+        "bundleUnchanged": true,
+        "jwtSettingUnchanged": true,
+        "active": true
+      },
+      {
+        "name": "device-orders",
+        "beforeVersion": 1,
+        "afterVersion": 2,
+        "bundleUnchanged": true,
+        "jwtSettingUnchanged": true,
+        "active": true
+      },
+      {
+        "name": "commands",
+        "beforeVersion": 17,
+        "afterVersion": 18,
+        "bundleUnchanged": true,
+        "jwtSettingUnchanged": true,
+        "active": true
+      },
+      {
+        "name": "device-pin",
+        "beforeVersion": 1,
+        "afterVersion": 2,
+        "bundleUnchanged": true,
+        "jwtSettingUnchanged": true,
+        "active": true
+      },
+      {
+        "name": "inbox-image",
+        "beforeVersion": 1,
+        "afterVersion": 2,
+        "bundleUnchanged": true,
+        "jwtSettingUnchanged": true,
+        "active": true
+      }
+    ],
+    "counts": {
+      "migrations": 31,
+      "application_tables": 56,
+      "forced_rls_tables": 56,
+      "auth_users": 0,
+      "public_buckets": 0,
+      "private_buckets": 1,
+      "anonymous_table_grants": 0,
+      "authenticated_table_writes": 0,
+      "public_security_definers": 0,
+      "direct_private_feed_grants": 0,
+      "businesses": 0,
+      "feed_rows": 0,
+      "read_windows": 0
+    },
+    "advisors": {
+      "warnings": 0,
+      "errors": 0,
+      "intentionalPrivateTableNotices": 27
+    },
+    "independentConcurrentFeedProof": {
+      "checkedAt": "2026-11-18T17:21:39.257Z",
+      "sqlRoleProof": true,
+      "genuineSignedOwnerHttp": false,
+      "actualDatabaseOverlap": true,
+      "overlapMs": 6021,
+      "heldWriteAllocatedEarlier": true,
+      "earlierWindowExcludedInflight": true,
+      "earlierWindowIncludedCommitted": true,
+      "nextWindowIncludedLateEarlierOrdinal": true,
+      "coveredWriteNotRepeated": true,
+      "cachedReplayStable": true,
+      "fullRecordHashesVerified": true,
+      "privateProjection": true,
+      "roles": {
+        "anonymousExecutionDenied": true,
+        "assignedManagerAdmitted": true,
+        "cachedPageRevocationDenied": true,
+        "privateReadDenied": true,
+        "serviceExecutionDenied": true,
+        "unassignedManagerDenied": true
+      },
+      "temporaryCommittedFixture": true,
+      "fixtureCleanup": {
+        "fixture_businesses": 0,
+        "fixture_changes": 0,
+        "fixture_scope_versions": 0,
+        "fixture_users": 0,
+        "fixture_windows": 0,
+        "total_auth_users": 0
+      },
+      "newPersistentAuthUsers": 0,
+      "messagesSent": 0
+    },
+    "onlyNewCursorSecretPublished": true,
+    "authConfigurationChanged": false,
+    "vaultUnchanged": true,
+    "actualOwnerSignedHttpProven": false,
+    "httpAdmissionVerified": false,
+    "apiHostnameResolution": {
+      "resolved": false,
+      "systemDnsError": "ENOTFOUND",
+      "independentDnsError": "ENOTFOUND",
+      "publicControlHostsResolved": true
+    }
+  },
+  "functionalDownload": {
+    "items": 5000,
+    "completed": true,
+    "compressedSqlHttpPath": true,
+    "realOwnerJwt": false,
+    "threeGThrottle": false,
+    "m30UploadBenchmarkProven": false
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "liveTransactionIdsPublished": false,
+    "projectAndCredentialValuesPublished": false,
+    "testInterfacesShipped": false,
+    "testFixtureMarkersInStaticOutput": 0
+  },
+  "edgeBundle": {
+    "bytes": 22209,
+    "sha256": "4256108debe11f78e385827a8b7908627da885bf9401316818d538aeb24064d6",
+    "sourceHashes": {
+      "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+      "packages/core/cloud-records.ts": "1432bef013a1cc8a62a6d743bd4889a51d55eb8fe90609f566b2d2b0db465d75",
+      "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+      "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+      "packages/core/sync-read.ts": "8ce95363803eb12f6e6521fe2bc5fbb9a4a1b4084c47fa79443fbffae1f18a1c",
+      "packages/core/sync-snapshot.ts": "487d6d80826fe664a279b5db088feb498a00317fdae7c63a2538aa31ea91b175",
+      "packages/core/sync-wire.ts": "fa26598f4c32059deb4a60bba030fca4b3773d175301a1492cc8e9baf6207a4e",
+      "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+      "supabase/functions/_shared/sync-read-handler.ts": "611636c879b56f8ce5f5dee279d5632d9cd09ef4c26e5721333d6638df45b5ec",
+      "supabase/functions/sync-read/index.ts": "cf4ba73ba51fe7d1d5686c06189b304eb7ebdbc0107b1166390cfb177213bdcf"
+    }
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "immutable complete-window staging and remote coverage journal",
+    "explicit active operator/outlet selection",
+    "trusted atomic no-echo canonical application",
+    "pending original intent overlay and conflict reconciliation",
+    "image-byte delivery and complete cloud controls",
+    "hosted HTTP admission after API DNS resolution",
+    "real OTP, genuine signed-owner HTTP and5000-record3G acceptance",
+    "remaining M30 resources and later milestones"
+  ],
+  "sourceHashes": {
+    "supabase/migrations/20261118161727_canonical_sync_feed.sql": "e514e0c0d9f45eb22807f6ca5b6b25c4ba61ab61b42c107b0352f595b1f93a3f",
+    "supabase/functions/_shared/sync-read-handler.ts": "611636c879b56f8ce5f5dee279d5632d9cd09ef4c26e5721333d6638df45b5ec",
+    "supabase/functions/sync-read/index.ts": "cf4ba73ba51fe7d1d5686c06189b304eb7ebdbc0107b1166390cfb177213bdcf",
+    "supabase/config.toml": "b8d441470698a6b1e5eab877060b121f52dcdf67872a7e027abce8cb04c2b4d9",
+    "supabase/functions/.env.example": "29621522518a3f8aa931fb6bc8f74f6263a82456b8dcabe3120a4a985a9b101f",
+    "packages/core/sync-read.ts": "8ce95363803eb12f6e6521fe2bc5fbb9a4a1b4084c47fa79443fbffae1f18a1c",
+    "packages/core/sync-wire.ts": "fa26598f4c32059deb4a60bba030fca4b3773d175301a1492cc8e9baf6207a4e",
+    "apps/web/src/data/cloud-sync-remote.ts": "1b4d5a5beeb39a4fe038a2b7b14436d08cf5ea9a5e2f94564b9fadc59e5d6813",
+    "scripts/check-secrets.mjs": "77888aa0d6f1ec75c433e0a13dac4b524277189a0904d42c9bf703ce192f20ed",
+    "tests/sync-feed.test.ts": "cc475e2c026d04a42853030f9b4cb14a8fa96cf8eb26ed70cc49d2373534179b",
+    "tests/sync-read.test.ts": "2ae2a49a5f03a6f0ccd0583dd62a9d5c11aa16ccf7834c9726ddaa1763ef7bfb",
+    "tests/secret-guard.test.ts": "8700e3e3d1461f1e0774ab08e9cf16b7ee6623bd1dc244bdd067295776db2b8d"
+  }
+}
