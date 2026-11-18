@@ -39,11 +39,16 @@ The 18 November 2026 audit found **zero credentials** in current files, the inde
 reachable history and built output. Current files and output also contain no actual
 deployment references. Earlier commits retain nonsecret project identifiers; their
 presence does not provide database or server access. Published history was preserved.
+The latest audit fetched remote branches/tags first and compared eight private
+key, pepper and deployment values in memory. It found zero credentials, zero
+current deployment references and zero coverage gaps; the 21 historical findings
+were nonsecret deployment references. Commit/push hooks remain enabled. The
+[supplier/invoice evidence](m30-purchase-hosted.json) records the redacted counts.
 
-The same day's live read-only verification found all **42 public/private application
+The same day's live read-only verification found all **43 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
-reported no warnings or errors. Thirteen informational private-table notices describe
+reported no warnings or errors. Fourteen informational private-table notices describe
 the intentional absence of direct-access policies. No hosted authentication or
 storage configuration was changed by this audit.
 

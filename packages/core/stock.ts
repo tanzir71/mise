@@ -82,16 +82,17 @@ export function archiveStockItemCommand(before:StockItem,archive:boolean,revisio
   const audit = stockEvent(item,context.setup,archive ? 'stock.archive' : 'stock.restore',before,at,newId);return {items:[item],moves:[],events:[audit]};
 }
 export interface SupplierInput {name:string;phone:string;note:string}
-export function saveSupplierCommand(input:SupplierInput,setup:SetupSnapshot,before:Supplier|null = null,revision = 0,at = Date.now()) {
+export type SupplierIds=(kind:'supplier'|'event')=>string;
+export function saveSupplierCommand(input:SupplierInput,setup:ShopSetup,before:Supplier|null = null,revision = 0,at = Date.now(),newId:SupplierIds=()=>ulid(at)) {
   validateShop(setup);if (before && (before.outletId !== setup.outlet.id || before.revision !== revision)) throw new Error('This supplier changed or belongs to another outlet. Reopen it.');
   if (before && (!Number.isSafeInteger(revision) || revision < 1 || revision >= Number.MAX_SAFE_INTEGER)) throw new Error('The supplier revision exceeds the supported range.');
   const name = text(input.name,120,'the supplier name'), phone = input.phone.trim() ? normalisePhone(input.phone,setup.business.marketCode) : undefined;
   if (!name || (input.phone.trim() && !phone) || input.note.trim().length > 2000) throw new Error('Enter a supplier name, a complete phone number if given, and a note within 2,000 characters.');
-  const supplier:Supplier = {id:before?.id || ulid(at),outletId:setup.outlet.id,revision:(before?.revision || 0)+1,name,phone:phone || undefined,note:input.note.trim(),archivedAt:before?.archivedAt,eventId:'',createdAt:before?.createdAt ?? at,updatedAt:at};
-  const audit = event(setup,before ? 'supplier.update' : 'supplier.create',before,supplier,at);audit.supplierId = supplier.id;supplier.eventId = audit.id;return {supplier,event:audit};
+  const supplier:Supplier = {id:before?.id || newId('supplier'),outletId:setup.outlet.id,revision:(before?.revision || 0)+1,name,phone:phone || undefined,note:input.note.trim(),archivedAt:before?.archivedAt,eventId:'',createdAt:before?.createdAt ?? at,updatedAt:at};
+  const audit = event(setup,before ? 'supplier.update' : 'supplier.create',before,supplier,at,()=>newId('event'));audit.supplierId = supplier.id;supplier.eventId = audit.id;return {supplier,event:audit};
 }
-export function archiveSupplierCommand(before:Supplier,archive:boolean,revision:number,setup:SetupSnapshot,at = Date.now()) {
+export function archiveSupplierCommand(before:Supplier,archive:boolean,revision:number,setup:ShopSetup,at = Date.now(),newId:SupplierIds=()=>ulid(at)) {
   validateShop(setup);if (before.outletId !== setup.outlet.id || before.revision !== revision || (before.archivedAt !== undefined) === archive) throw new Error('Reopen this supplier before changing its archive state.');
   if (!Number.isSafeInteger(revision) || revision < 1 || revision >= Number.MAX_SAFE_INTEGER) throw new Error('The supplier revision exceeds the supported range.');
-  const supplier = {...before,revision:before.revision+1,archivedAt:archive ? at : undefined,updatedAt:at}, audit = event(setup,archive ? 'supplier.archive' : 'supplier.restore',before,supplier,at);audit.supplierId = supplier.id;supplier.eventId = audit.id;return {supplier,event:audit};
+  const supplier = {...before,revision:before.revision+1,archivedAt:archive ? at : undefined,updatedAt:at}, audit = event(setup,archive ? 'supplier.archive' : 'supplier.restore',before,supplier,at,()=>newId('event'));audit.supplierId = supplier.id;supplier.eventId = audit.id;return {supplier,event:audit};
 }
