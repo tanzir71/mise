@@ -1,0 +1,215 @@
+{
+  "checkedAt": "2026-11-18T11:48:55.5645740Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Preserve and select the original bound upload snapshot across refresh, first acknowledgement, offline restart, concurrent tabs and recovery; no cloud activation",
+  "checks": {
+    "previewOwnership": {
+      "initialPassed": 85,
+      "initialReportSha256": "83cc56f2d69bb2083b7b91cd1dc24d4621eed5306d0e2a3732f9c06296bb3685",
+      "initialFailed": 260,
+      "initialApplicationAssertionFailures": 0,
+      "initialConnectionRefused": 260,
+      "finalRunsSequential": true,
+      "assertionsAndApplicationDeadlinesUnchanged": true
+    },
+    "cancellationAssertion": {
+      "initialPassed": 23,
+      "deadlineUnchanged": true,
+      "initialFailed": 1,
+      "initialReportSha256": "b76c1d4b6ce46713caa5fdf5fc37a343346091052c83033f5e101696f57dd857",
+      "waitForCommittedSnapshot": true,
+      "expectedSnapshotCountUnchanged": 3
+    },
+    "units": {
+      "reportSha256": "99003e3bb0ff8e589f0ec0adb3cf3f104a16752946d76ac001d35e820cc8b96d",
+      "newReviewCases": 21,
+      "files": 96,
+      "durationSeconds": 163.158629,
+      "passed": 1739
+    },
+    "browser": {
+      "globalErrors": 0,
+      "skipped": 0,
+      "passed": 345,
+      "failed": 0,
+      "reportSha256": "01801824f1fabf67ddd5023aac11d60eb23a204171863df0cdcafcc5b38aad8f",
+      "flaky": 0,
+      "retries": 0,
+      "base": "/mise/",
+      "durationSeconds": 365.341489
+    },
+    "exports": {
+      "present": 270,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16",
+      "passed": true
+    },
+    "rootSmoke": {
+      "globalErrors": 0,
+      "skipped": 0,
+      "passed": 24,
+      "failed": 0,
+      "reportSha256": "4a2595823f12cecc18fdc12c1d130d228373ab1d4dc5c46d3fe3ca6ba30f4d9b",
+      "flaky": 0,
+      "retries": 0,
+      "base": "/",
+      "durationSeconds": 35.748283
+    },
+    "visual": {
+      "dedicatedAuthFrameExists": false,
+      "comparisons": 30,
+      "states": [
+        "connection",
+        "verification-code",
+        "verified-review",
+        "armed",
+        "accepted",
+        "recovery"
+      ],
+      "threeCapturesInspected": true,
+      "exactFrameMatchClaimed": false,
+      "reportSha256": "a1cd5f696e051de40e9333fd563e418053e9edf0f4a0ca7e95837af40a4fba80",
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "resultsSha256": "8d2cc35046458e0860ef2e50b8291ee46c67fb14efc85b044653f0a71789ede1",
+      "keyScreens": {
+        "qa/screens/m30-upload-review-armed-phone-screen-390.png": "6464ab29f7cfbf4e7b015406d4850718e7900b850ba9cce5cf64f9cc49e716bd",
+        "qa/screens/m30-upload-review-accepted-desktop-screen-1440.png": "50afe1ededd4214c24f9cc4d6b79fbaf718a0045811ca4c5ad8a4b4ead02d054",
+        "qa/screens/m30-upload-review-recovery-phone-screen-360.png": "cd50d98279f66e19b16c1ed89fd9b5ce0936589601846b883d4aa5926ab433cd"
+      },
+      "report": "qa/report.html",
+      "references": [
+        "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+        "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+      ],
+      "newCiArtifact": false,
+      "pixelDifferencesInformational": true,
+      "overflow": false,
+      "newStateComparisons": 15
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "e35f23adcd91033fc139ec95609cad333d952d6d763bd5c1e02086bb6e85fd86",
+        "htmlSha256": "508fc34c294943f8b9ddbaa1c906cf700ee33aae4b51d2b7ddfdcc7790cc2aca"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "8de90b7571fdd528dd787022c0272ded8e60b590fb23afa35b43a95fc63b82be",
+        "htmlSha256": "b82eed65c2a43107829a552ea68745b5ad8fdbeb6505ac3ff473eb443f28ca50"
+      }
+    ],
+    "typecheck": {
+      "passed": true,
+      "finalTscLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checkedFiles": 101,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "8e1473dcbe9bc0f47ca7a8c9d7fb557bf32ec02cfa98783e1728864826c4bb0c"
+    },
+    "nativeReview": {
+      "overflow": false,
+      "axeWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "confirmedCancellation": true,
+      "newerCompetingReview": true,
+      "offlineReloadAndCounterEdits": true,
+      "readOnlyRecovery": true,
+      "newCases": 9,
+      "crossTabArmingAcceptance": true,
+      "axeViolations": 0
+    },
+    "lint": {
+      "logSha256": "9427c954bbf2978bbcadea5db6c80957d3e40729b8188f8593849400fc48312f",
+      "passed": true
+    }
+  },
+  "invariants": {
+    "backwardsClockSelection": true,
+    "missingOrDamagedOriginalFailsClosed": true,
+    "concurrentPreparationKeepsBothSources": true,
+    "schemaOneBlobsRetained": true,
+    "atomicSnapshotAndSelection": true,
+    "journalSchema": 2,
+    "boundPayloadAndReceiptValidated": true,
+    "crossTabSubscriptionsCleanedUp": true,
+    "originalBoundIdAndHash": true,
+    "backupTables": 21,
+    "noAutomaticSnapshotPruning": true,
+    "orphanProgressRequiresRecovery": true,
+    "localShopRemainsUsable": true,
+    "obsoleteResultsDiscarded": true,
+    "firstAckNotRequiredForRetention": true,
+    "shopSchema": 11,
+    "acceptedReceiptCannotBeReplaced": true,
+    "backupSchema": 10,
+    "hashingOutsideLiveQuery": true,
+    "staleChunkAcksUnioned": true,
+    "cancelledSourcesAndQueuesRetained": true,
+    "selectedReviewScope": [
+      "business",
+      "outlet",
+      "local owner"
+    ]
+  },
+  "privacy": {
+    "historyRewritten": false,
+    "knownPrivateValuesChecked": 9,
+    "runtimeConnectionOutsideShopAndJournal": true,
+    "coverageGaps": 0,
+    "credentialFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "currentDeploymentFindings": 0,
+    "testFixtureMarkersInStaticOutput": 0,
+    "testInterfacesShipped": false
+  },
+  "hosted": {
+    "actualOwnerSignedHttpProven": false,
+    "newMigrations": 0,
+    "changed": false,
+    "newEdgeDeployments": 0,
+    "newPersistentAuthUsers": 0,
+    "authConfigurationChanged": false,
+    "realMessagesSent": 0,
+    "smsRequests": 0
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newPagesDeployment": false,
+    "newCiRun": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "legacy direct supplier writes and missing payment occurrence review",
+    "unsupported settings/export/shop-link writes",
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox/image-delivery controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "5000-record 3G upload acceptance",
+    "other M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "AGENTS.md": "b63c13490f29dbee312599d8d4cbb82d983b9cec98a546589e05010df7d21838",
+    "apps/web/src/CloudSetup.tsx": "be0070c7579246c0da70e151792dc2f528c9395e9c571335887869ca1133c47f",
+    "apps/web/src/data/cloud-upload.ts": "e88b7c9fbcd305fb810b818cd9bccb25e82d6ae25d6586a38c126cdd2647080d",
+    "scripts/qa-visual.mjs": "e8a5fd7a9ef708367839754d3161fe26288f63b31f3a849a73afaf5dce1836b3",
+    "qa/configs/m30-upload-review.json": "8f7a07c05b108465219d46d697f4b8671837ee3ab2373206a7ca00a6ab2566c2",
+    "tests/cloud-upload-review.test.ts": "34e23a16351f79d8f190d1d9d195246c5f0ecab61efe89a57601a76e2ed36783",
+    "tests/e2e/cloud-upload-review.spec.ts": "8240bf3033f4a4a0c26a2c5cf8d6199e319a046a96aae28ca7d514e93ac49e33",
+    "tests/fixtures/cloud-upload-review-browser.ts": "8a0f585a5e4855a53966ce4be158ebb229ed132b80290d2489f1e192a850e43c",
+    "tests/fixtures/install-upload-review.mjs": "8aebebc4e61be41490b1e131864a10b73bd4df14a8b63b8a7a22aaffa7789c77"
+  }
+}

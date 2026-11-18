@@ -314,3 +314,14 @@ unplanned catalogue entry points. All 26 migrations and `commands` v13 are
 deployed; no sync control is enabled. See the
 [catalogue implementation and verification](m30-catalogue-outbox.md). Remaining
 M30 acceptance gates stay open; Actions and Pages publication remain held.
+
+## Original upload review recovery
+
+Count-review refresh now preserves all snapshots and follows the exact active
+upload before its first acknowledgement and through cross-tab changes, reload or
+lost responses. A scoped durable selection survives backwards clocks; missing or
+damaged originals require read-only recovery. Concurrent chunk acknowledgements
+preserve verified progress. The separate journal upgrades without changing shop
+or portable backup schemas. See [implementation and verification](m30-upload-review.md).
+Full upload activation and remaining M30 gates stay open. No hosted service,
+workflow or Pages deployment is changed.

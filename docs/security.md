@@ -121,3 +121,10 @@ older unplanned catalogue entry points deny client and service execution. Hosted
 checks confirm no anonymous table access or direct authenticated table writes.
 Runtime connection settings and server secrets remain outside source, build
 variables, shop records, command payloads and portable backups.
+
+The [upload-review recovery verification](m30-upload-review-local.json) repeats
+the source/index/history/build-output audit. Journal selection contains only the
+original local shop identities and upload ID; it stores no project connection,
+JWT or API key. Bound reviews verify their complete original payload and receipt.
+Read-only recovery cannot silently replace missing evidence. Synthetic test/QA
+interfaces stay outside the shipped application.

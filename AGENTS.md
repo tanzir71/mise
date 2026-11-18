@@ -82,6 +82,7 @@ pnpm lint && pnpm typecheck
 
 - **Owner delivery override (15 Nov 2026): commit and push directly to `main`; do not create PRs or request sign-off.** Keep increments small and run the required checks before each push. Confirm CI and Pages deployment afterward.
 - **Feature flags:** put unfinished user-facing work behind a flag in `packages/core/flags.ts`, default off.
+- **Local preview ownership:** browser tests and visual QA share port 4321. Run them sequentially unless a separately owned preview is kept alive for both; either tool may stop the temporary server it started when it finishes.
 - **Documentation per milestone:**
   - Update `CHANGELOG.md` (Keep a Changelog style).
   - Tick the milestone in `handover/docs/03-roadmap.md`.

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 upload review recovery: refreshing counts preserves every original snapshot, and an active upload keeps its exact source through reload, concurrent tabs and lost acknowledgements. A durable selection survives backwards clocks; missing or damaged evidence offers read-only recovery. Stale chunk acknowledgements retain verified progress. Cloud controls remain gated.
+
 - M30 catalogue queue: create, edit, availability, delete and guarded sample removal retain original outlet/item/category/audit IDs and occurrence times. Full-size paste keeps one atomic local transaction and ordered resumable item commands. Hosted preparation binds the complete normalized input, and older unplanned catalogue RPC grants are closed. Cloud controls remain off; credentials and actual deployment values stay outside source and static output.
 
 - M30 Inbox queue: original manual and worker captures now retain typed commands with their literal sources, image IDs, creation times and complete manual sorting history. Full image hashes are computed before the writer opens; bytes remain local. Queue/audit failures roll back the whole action, and missing Web Crypto retains images for review without blocking local saving. Text-only recovery checks keep their backup reader inside the active transaction. Cloud controls remain off.

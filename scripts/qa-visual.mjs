@@ -6,8 +6,9 @@ import { compareImages } from './visual-diff.mjs';
 import { writeVisualReport } from './visual-report.mjs';
 import LZString from 'lz-string';
 import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
+import { installUploadReviewFixture } from '../tests/fixtures/install-upload-review.mjs';
 
-const configPaths = process.argv[2] ? [process.argv[2]] : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
+const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
 const targets = configs.flatMap(config => config.pages.map(page => {
   const shared = (page.actionSets || []).flatMap(name => {
@@ -45,7 +46,7 @@ try {
   for (const target of targets) for (const width of target.widths) {
     const page = await browser.newPage({ viewport: { width, height: target.heights?.[width] || 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
     if (target.phoneAuthFixture) await installPhoneAuthFixture(page);
-    let clockInstalled = false;
+    let clockInstalled = false,reviewFixtureInstalled=false;
     if ((target.actions || []).some(action => action.type === 'advance-time')) { await page.clock.install(); clockInstalled = true; }
     const targetUrl = new URL(target.path, origin);
     if (target.publicShop) targetUrl.hash = Buffer.from(LZString.compressToUint8Array(JSON.stringify(target.publicShop))).toString('base64url');
@@ -63,6 +64,11 @@ try {
         if (!Number.isSafeInteger(action.milliseconds) || action.milliseconds < 0 || action.milliseconds > 604800000) throw new Error('Visual time advance must be between zero and seven days.');
         if (!clockInstalled) { await page.clock.install(); clockInstalled = true; }
         await page.clock.fastForward(action.milliseconds);
+      }
+      else if(action.type==='upload-review'){
+        if(!['arm','accept','removeOriginal'].includes(action.value))throw new Error('Use an explicit local upload-review fixture action.');
+        if(!reviewFixtureInstalled){await installUploadReviewFixture(page);reviewFixtureInstalled=true;}
+        await page.evaluate(value=>window.miseUploadReviewTest[value](),action.value);
       }
       else throw new Error(`Unknown capture action: ${action.type}`);
     }
