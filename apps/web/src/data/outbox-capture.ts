@@ -6,14 +6,18 @@ import {newInboxId} from '@mise/core/inbox';
 import {parseShopCommand,type ShopCommand} from '@mise/core/shop-commands';
 
 interface Capture {state:LocalCloudState;entry:LocalOutboxEntry;changes:Map<string,LocalOutboxEntry['changes'][number]>;persist:Promise<void>;inserted?:boolean}
-const intents=new WeakMap<Transaction,ShopCommand>();
+const intents=new WeakMap<Transaction,readonly ShopCommand[]>();
 /** Annotate the actual writes, never infer authority or a command from stored row changes. */
 export async function withOutboxIntent<T>(db:Dexie,input:ShopCommand,write:()=>Promise<T>):Promise<T>{
+ return withOutboxIntents(db,[input],write);
+}
+/** One atomic local group, with durable delivery progress for each original intent. */
+export async function withOutboxIntents<T>(db:Dexie,inputs:readonly ShopCommand[],write:()=>Promise<T>):Promise<T>{
  const tx=Dexie.currentTransaction;if(!tx||tx.db!==db||tx.mode!=='readwrite')throw new Error('Queue the command in its local write transaction.');
- const previous=intents.get(tx),command=parseShopCommand(input);intents.set(tx,command);
+ const previous=intents.get(tx),commands=inputs.map(parseShopCommand);if(!commands.length||commands.length>1000||new Set(commands.map(command=>command.id)).size!==commands.length)throw new Error('Keep between one and 1,000 distinct original commands.');intents.set(tx,commands);
  try{return await write();}catch(error){try{tx.abort();}catch{/* A failed financial command stays atomic even if its caller catches it. */}throw error;}finally{if(previous)intents.set(tx,previous);else intents.delete(tx);}
 }
-function currentIntent():ShopCommand|undefined {for(let tx:Transaction|undefined=Dexie.currentTransaction;tx;tx=tx.parent){const command=intents.get(tx);if(command)return command;}return undefined;}
+function currentIntent():readonly ShopCommand[]|undefined {for(let tx:Transaction|undefined=Dexie.currentTransaction;tx;tx=tx.parent){const commands=intents.get(tx);if(commands)return commands;}return undefined;}
 /** All writes, including the receiving worker and narrow/raw transactions, share this fence. */
 export function installOutboxCapture(db:Dexie):void {
  // Below user hooks (2), above observability (0): internal writes still notify readers.
@@ -57,7 +61,7 @@ export function installOutboxCapture(db:Dexie):void {
      }
      if(changed){
       if(!intent)capture.entry.status='retained';
-      else{const saved=capture.entry.commands.find(c=>c.id===intent.id);if(saved&&JSON.stringify(saved)!==JSON.stringify(intent))throw new Error('A queued action identity changed.');if('outletId'in intent&&intent.outletId!==capture.state.outletId)throw new Error('This queued action belongs to another outlet.');if(!saved)capture.entry.commands.push(intent);}
+      else for(const command of intent){const saved=capture.entry.commands.find(c=>c.id===command.id);if(saved&&JSON.stringify(saved)!==JSON.stringify(command))throw new Error('A queued action identity changed.');if('outletId'in command&&command.outletId!==capture.state.outletId)throw new Error('This queued action belongs to another outlet.');if(!saved)capture.entry.commands.push(command);}
       capture.entry.changes=[...capture.changes.values()];
       const pending=keep(capture.persist).then(()=>keep(outbox.mutate({type:capture.inserted?'put':'add',trans:request.trans,values:[structuredClone(capture.entry)]})).then(saved=>{
        if(saved.numFailures)throw new Error('The local change could not be queued.');

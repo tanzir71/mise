@@ -77,15 +77,16 @@ it('retries return the original receipt after later edits without repeating or o
   const c=create(),first=await store().apply('user.1.signature',c);const later={...c,id:newInboxId(),type:'customer.update' as const,opening:null,ids:plannedIds(c.ids.accountId)};if(!('input'in later))throw Error();later.input={...later.input,name:'Later'};await store().apply('user.1.signature',later);expect(await store().apply('user.1.signature',c)).toEqual(first);expect((await db.query<{name:string}>('select name from public.customers where id=$1',[c.customerId])).rows[0].name).toBe('Later');expect((await counts()).receipts).toBe(2);
 });
 it('a changed intent or another actor cannot take over an accepted command ID',async()=>{const c=create();expect((await http(1,c)).status,lastError).toBe(200);expect((await http(2,c)).status).toBe(403);expect((await http(1,{...c,opening:null})).status).toBe(409);expect((await counts()).receipts).toBe(1);});
-it('customer and legacy catalogue commands share a global audit ID without partial cross-family writes',async()=>{
-  const c=create();expect((await http(1,c)).status,lastError).toBe(200);const item=newInboxId();
-  await db.query('insert into public.items(id,business_id,outlet_id,name,price,unit,available,is_sample,created_at,updated_at) values($1,$2,$3,$4,1,$5,false,false,1,1)',[item,source.snapshot.business.id,source.snapshot.outlet.id,'"Tea"','"pc"']);
+it('customer and catalogue device commands share a global audit ID without partial cross-family writes',async()=>{
+  const c=create();expect((await http(1,c)).status,lastError).toBe(200);const item=newInboxId(),categoryId=newInboxId();
+  await db.query('insert into public.categories(id,business_id,outlet_id,name,sort,created_at,updated_at) values($1,$2,$3,$4,0,1,1)',[categoryId,source.snapshot.business.id,source.snapshot.outlet.id,'"Catalogue fixture"']);
+  await db.query('insert into public.items(id,business_id,outlet_id,name,price,unit,available,is_sample,created_at,updated_at,category_id) values($1,$2,$3,$4,1,$5,false,false,1,1,$6)',[item,source.snapshot.business.id,source.snapshot.outlet.id,'"Tea"','"pc"',categoryId]);
   try{
-    await expect(asRole(1,'authenticated','select public.apply_catalogue_command($1,$2,$3,$4,$5)',[c.id,'catalogue.availability',item,true,null])).rejects.toMatchObject({code:'23505'});
+    await expect(asRole(1,'authenticated','select public.apply_catalogue_intent($1,$2,$3,$4,$5,$6,$7)',[c.id,'catalogue.availability',item,source.snapshot.outlet.id,true,null,Date.now()])).rejects.toMatchObject({code:'23505'});
     expect((await db.query<{available:boolean}>('select available from public.items where id=$1',[item])).rows[0].available).toBe(false);
-    const other=newInboxId();await asRole(1,'authenticated','select public.apply_catalogue_command($1,$2,$3,$4,$5)',[other,'catalogue.availability',item,true,null]);
+    const other=newInboxId();await asRole(1,'authenticated','select public.apply_catalogue_intent($1,$2,$3,$4,$5,$6,$7)',[other,'catalogue.availability',item,source.snapshot.outlet.id,true,null,Date.now()]);
     expect((await http(1,{...create(),id:other})).status).toBe(409);expect((await counts()).receipts).toBe(1);expect((await counts()).events).toBe(4);
-  }finally{await db.query('delete from public.items where id=$1',[item]);}
+  }finally{await db.query('delete from public.items where id=$1',[item]);await db.query('delete from public.categories where id=$1',[categoryId]);}
 });
 it.each([3,4,5,6])('operator %s cannot use another outlet or a staff/agent identity for customer writes',async n=>{expect((await http(n,create())).status).toBe(403);expect((await counts()).events).toBe(0);});
 it('a manager cannot read another outlet customer through a selected-outlet context',async()=>{const c={...edit(),customerId:branchCustomer.id};expect((await http(2,c)).status).toBe(403);expect((await counts()).events).toBe(0);});

@@ -5,9 +5,10 @@ import type { SharedInboxInput,StoredInboxItem } from './inbox';
 import { claimDatabaseInbox } from './inbox';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import { LocalStore } from './local-store';
-import {withOutboxIntent} from './outbox-capture';
+import {withOutboxIntent,withOutboxIntents} from './outbox-capture';
 import {stockSaveIntent,stockAdjustmentIntent,stockBatchIntent,supplierSaveIntent,closingIntent} from './outbox-intents';
 import {customerSaveIntent,creditTermsIntent} from '@mise/core/customer-intent';
+import {catalogueSaveIntent,catalogueAvailabilityIntent,catalogueDeleteIntent} from '@mise/core/catalogue-intent';
 import {reserveOrderFinance,orderIntentBase,orderSaveIntent,orderSettlementInput,orderRefundInput} from '@mise/core/order-intent';
 import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
@@ -55,7 +56,7 @@ export class MiseDatabase extends LocalStore {
       const [item, setup] = await Promise.all([this.items.get(id), this.setup()]);
       if (!item || !setup || item.outletId !== setup.outlet.id) throw new Error('Sample item not found.');
       const event = removeSampleCommand(item, setup.owner.id);
-      await this.items.delete(id); await this.events.add(event);
+      await withOutboxIntent(this,catalogueDeleteIntent(item,event),async()=>{await this.items.delete(id);await this.events.add(event);});
     });
   }
   async saveItem(input: ItemInput, id?: string): Promise<Item> {
@@ -64,9 +65,7 @@ export class MiseDatabase extends LocalStore {
       const before = id ? await this.items.get(id) : null;
       if (id && !before) throw new Error('Item not found.');
       const command = saveItemCommand(input, { outletId: setup.outlet.id, actorId: setup.owner.id, categories: await this.categories.where('outletId').equals(setup.outlet.id).toArray() }, before);
-      if (command.category) await this.categories.add(command.category);
-      await this.items.put(command.item); await this.events.add(command.event);
-      return command.item;
+      return withOutboxIntent(this,catalogueSaveIntent(command,input),async()=>{if(command.category)await this.categories.add(command.category);await this.items.put(command.item);await this.events.add(command.event);return command.item;});
     });
   }
   async setItemAvailable(id: string, available: boolean): Promise<void> {
@@ -74,7 +73,7 @@ export class MiseDatabase extends LocalStore {
       const [item, setup] = await Promise.all([this.items.get(id), this.setup()]);
       if (!item || !setup || item.outletId !== setup.outlet.id) throw new Error('Item not found.');
       const command = itemAvailabilityCommand(item, available, setup.owner.id);
-      await this.items.put(command.item); await this.events.add(command.event);
+      await withOutboxIntent(this,catalogueAvailabilityIntent(command),async()=>{await this.items.put(command.item);await this.events.add(command.event);});
     });
   }
   async deleteItem(id: string): Promise<void> {
@@ -82,7 +81,7 @@ export class MiseDatabase extends LocalStore {
       const [item, setup] = await Promise.all([this.items.get(id), this.setup()]);
       if (!item || !setup || item.outletId !== setup.outlet.id) throw new Error('Item not found.');
       const event = deleteItemCommand(item, setup.owner.id);
-      await this.items.delete(id); await this.events.add(event);
+      await withOutboxIntent(this,catalogueDeleteIntent(item,event),async()=>{await this.items.delete(id);await this.events.add(event);});
     });
   }
   async addItems(inputs: ItemInput[]): Promise<void> {
@@ -90,11 +89,12 @@ export class MiseDatabase extends LocalStore {
     await this.transaction('rw', this.tables, async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
       const categories = await this.categories.where('outletId').equals(setup.outlet.id).toArray();
+      const changes:ReturnType<typeof saveItemCommand>[]=[];
       for (const input of inputs) {
         const command = saveItemCommand(input, { outletId: setup.outlet.id, actorId: setup.owner.id, categories });
-        if (command.category) { await this.categories.add(command.category); categories.push(command.category); }
-        await this.items.add(command.item); await this.events.add(command.event);
+        if(command.category)categories.push(command.category);changes.push(command);
       }
+      return withOutboxIntents(this,changes.map((change,index)=>catalogueSaveIntent(change,inputs[index])),async()=>{const added=changes.flatMap(change=>change.category?[change.category]:[]);if(added.length)await this.categories.bulkAdd(added);await this.items.bulkAdd(changes.map(change=>change.item));await this.events.bulkAdd(changes.map(change=>change.event));});
     });
   }
   async recordSale(input: SaleInput): Promise<Sale> {

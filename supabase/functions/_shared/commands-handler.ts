@@ -14,7 +14,8 @@ import {stockFingerprint,stockWriteFields,StockMutationConflict,StockMutationInv
 import {moneyWritePlan} from '../../../packages/core/money-commands.ts';
 import {moneyFingerprint,moneyWriteFields,MoneyMutationInvalid,MoneyMutationConflict} from './money-write.ts';
 import {authHttp,AuthBodyError,readAuthBody} from './auth-http.ts';
-import {catalogueFingerprint,catalogueWriteFields} from './catalogue-write.ts';
+import {isCatalogueWrite,catalogueRecordPlan} from '../../../packages/core/cloud-commands.ts';
+import {catalogueFingerprint,catalogueWriteFields,CatalogueMutationInvalid,CatalogueMutationConflict} from './catalogue-write.ts';
 import {customerFingerprint,customerWriteFields,CustomerMutationInvalid} from './customer-write.ts';
 import {deviceAuthId} from './device-pin-handler.ts';
 export class CommandDenied extends Error {constructor(readonly status:401|403=403){super('Command access denied.');}}
@@ -42,7 +43,7 @@ export function createCommandsHandler(deps:{store:CommandStore;origins:ReadonlyS
     if(handoffOutlet!==null&&(command.type!=='handoff.prepare'||command.outletId!==handoffOutlet))return reply(400,{error:'Keep the admitted message attempt and outlet.'});
     if(inboxOutlet!==null&&(command.type!=='inbox.capture'||command.outletId!==inboxOutlet))return reply(400,{error:'Keep the admitted Inbox capture and outlet.'});
     try{return reply(200,parseShopCommandReceipt(await deps.store.apply(jwt,command),command));}
-    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof InboxMutationInvalid?reply(400,{error:error.message}):error instanceof InboxMutationConflict?reply(409,{error:error.message}):error instanceof HandoffMutationInvalid?reply(400,{error:error.message}):error instanceof HandoffMutationConflict?reply(409,{error:error.message}):error instanceof ClosingMutationInvalid?reply(400,{error:error.message}):error instanceof ClosingMutationConflict?reply(409,{error:error.message}):error instanceof OrderMutationInvalid?reply(400,{error:error.message}):error instanceof OrderMutationConflict?reply(409,{error:error.message}):error instanceof PurchaseMutationInvalid?reply(400,{error:error.message}):error instanceof PurchaseMutationConflict?reply(409,{error:error.message}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof StockMutationInvalid?reply(400,{error:error.message}):error instanceof StockMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
+    catch(error){return error instanceof CatalogueMutationInvalid?reply(400,{error:error.message}):error instanceof CatalogueMutationConflict?reply(409,{error:error.message}):error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof InboxMutationInvalid?reply(400,{error:error.message}):error instanceof InboxMutationConflict?reply(409,{error:error.message}):error instanceof HandoffMutationInvalid?reply(400,{error:error.message}):error instanceof HandoffMutationConflict?reply(409,{error:error.message}):error instanceof ClosingMutationInvalid?reply(400,{error:error.message}):error instanceof ClosingMutationConflict?reply(409,{error:error.message}):error instanceof OrderMutationInvalid?reply(400,{error:error.message}):error instanceof OrderMutationConflict?reply(409,{error:error.message}):error instanceof PurchaseMutationInvalid?reply(400,{error:error.message}):error instanceof PurchaseMutationConflict?reply(409,{error:error.message}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof StockMutationInvalid?reply(400,{error:error.message}):error instanceof StockMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
   };
 }
 export function createCommandStore(apiUrl:string,publishableKey:string,send:typeof fetch=fetch,options:{serviceKey?:string;newId?:()=>string}={}):CommandStore {
@@ -55,6 +56,7 @@ export function createCommandStore(apiUrl:string,publishableKey:string,send:type
     if(r.status===401||r.status===403)throw new CommandDenied(r.status);
     if(r.status===400&&(name==='prepare_handoff_write'||name==='finish_handoff_write')){let code:unknown;try{code=(await r.json()).code;}catch{/* Backend messages and details stay private. */}if(code==='22023')throw new HandoffMutationInvalid('Review the exact message source, choice and companion records.');}
     if(r.status===400&&(name==='prepare_inbox_write'||name==='finish_inbox_write')){let code:unknown;try{code=(await r.json()).code;}catch{/* Backend messages and details stay private. */}if(code==='22023')throw new InboxMutationInvalid('Review the exact original source, images and manual Inbox action.');}
+    if(r.status===400&&(name==='prepare_catalogue_intent'||name==='finish_catalogue_intent')){let code:unknown;try{code=(await r.json()).code;}catch{/* Backend details stay private. */}if(code==='22023')throw new CatalogueMutationInvalid('Review the exact catalogue source, category and original IDs.');}
     if(r.status===409){let code:unknown,details:unknown;try{const error=await r.json();code=error.code;details=error.details;}catch{/* Only the fixed error tag controls retry; backend details remain private. */}if(retryTag&&code==='PT409'&&details===retryTag)throw new CatalogueSnapshotChanged();throw new CommandConflict();}
     if(!r.ok)throw new Error('Command unavailable');return r.json();
   }
@@ -148,17 +150,17 @@ export function createCommandStore(apiUrl:string,publishableKey:string,send:type
       }
       throw new CommandConflict();
     }
-    if(c.type==='catalogue.create'||c.type==='catalogue.update'||c.type==='catalogue.delete'){
+    if(isCatalogueWrite(c)){
       if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Catalogue writes unavailable');
       const hash=await catalogueFingerprint(c),newId=options.newId??deviceAuthId;
       for(let attempt=0;attempt<3;attempt++){
-        const ticket=newId(),prepared=await rpc('prepare_catalogue_write',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_item_id:c.itemId,p_outlet_id:c.type==='catalogue.create'?c.outletId:null,p_hash:hash},publishableKey,jwt);
+        const ticket=newId(),prepared=await rpc('prepare_catalogue_intent',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_item_id:c.itemId,p_outlet_id:c.outletId,p_hash:hash,p_occurred_at:c.occurredAt,p_plan:catalogueRecordPlan(c)},publishableKey,jwt);
         if(prepared?.done===true)return prepared.receipt;
-        const fields=catalogueWriteFields(prepared,c,ticket,newId);
-        try{return await rpc('finish_catalogue_write',fields,options.serviceKey,undefined,'catalogue_snapshot_changed');}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
+        const fields=catalogueWriteFields(prepared,c,ticket);
+        try{return await rpc('finish_catalogue_intent',fields,options.serviceKey,undefined,'catalogue_snapshot_changed');}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
       }
       throw new CommandConflict();
     }
-    return rpc('apply_catalogue_command',{p_id:c.id,p_type:c.type,p_item_id:c.type==='catalogue.availability'?c.itemId:null,p_available:c.type==='catalogue.availability'?c.available:null,p_undo_of:c.type==='catalogue.undo'?c.undoOf:null},publishableKey,jwt);
+    return rpc('apply_catalogue_intent',{p_id:c.id,p_type:c.type,p_item_id:c.type==='catalogue.availability'?c.itemId:null,p_outlet_id:c.outletId,p_available:c.type==='catalogue.availability'?c.available:null,p_undo_of:c.type==='catalogue.undo'?c.undoOf:null,p_occurred_at:c.occurredAt},publishableKey,jwt);
   }};
 }

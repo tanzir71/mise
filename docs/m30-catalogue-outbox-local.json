@@ -1,0 +1,242 @@
+{
+  "checkedAt": "2026-11-18T11:13:08.7489926Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Original catalogue lifecycle and full-size local paste retain typed local intents; hosted proof binds normalized fields and device identities; cloud controls remain off",
+  "intentKinds": [
+    "catalogue.create",
+    "catalogue.update",
+    "catalogue.availability",
+    "catalogue.delete",
+    "catalogue.remove-sample"
+  ],
+  "serverOnlyGuardedUndo": "catalogue.undo",
+  "checks": {
+    "nativeCatalogue": {
+      "queueFailureRollback": true,
+      "newCases": 5,
+      "thousandItemPaste": true,
+      "offlineLifecycleAndReload": true,
+      "inputRetainedForRetry": true
+    },
+    "rootSmoke": {
+      "base": "/",
+      "passed": 33,
+      "reportSha256": "876cf8a2feed29318ac85515c8be120dc12b0969522e9ff16f64b78c8cef2fec",
+      "retries": 0,
+      "skipped": 0,
+      "failed": 0,
+      "globalErrors": 0,
+      "flaky": 0,
+      "durationSeconds": 61.364918
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "487becf3135d79b55afeb1a49a99f1fd35624a2339ea65ccfa8d1aebae99f2d8",
+        "htmlSha256": "efdfd64302b13b172a861fec2dbfe83c7120d741f2def59fd18f887a525e05fe"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "876c08033ff3df3b7669f95cbf9257d86793ae9f611222f1e0356b00d9dbf713",
+        "htmlSha256": "9dbf1af0bc4d6d2121b520c87698127633c7ec78bfbb9ab52c141a486bc3d4f8"
+      }
+    ],
+    "exports": {
+      "passed": true,
+      "present": 270,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "lint": {
+      "logSha256": "1ee0d9955ae54c3efb834df8817820db7216229db2cd8a7999660ab7800b3c1c",
+      "passed": true
+    },
+    "units": {
+      "newAdapterTests": 16,
+      "files": 95,
+      "passed": 1718,
+      "durationSeconds": 213.81556,
+      "newSqlHttpTests": 11,
+      "reportSha256": "6f2defebfd3733ba61ae3da24ac596bcf5c82977b9aa55887da8127e7d5cf36e"
+    },
+    "browser": {
+      "base": "/mise/",
+      "passed": 336,
+      "reportSha256": "cbcd3ff88203451307a17bab2ef03d90841a9ca4f1c035004e873dbaa5f95586",
+      "retries": 0,
+      "skipped": 0,
+      "failed": 0,
+      "globalErrors": 0,
+      "flaky": 0,
+      "durationSeconds": 671.017621
+    },
+    "typecheck": {
+      "logSha256": "d2160a4f055eb9bd69bda66037ae2ba9030ffef285a4ba94f41e4ed1e55dc9ca",
+      "hints": 0,
+      "passed": true,
+      "warnings": 0,
+      "errors": 0,
+      "checkedFiles": 101
+    },
+    "visual": {
+      "layoutChanged": false,
+      "previousComparisons": 15,
+      "newCiArtifact": false,
+      "previousEvidence": "docs/m30-auth-local.json",
+      "newVisualRun": false
+    }
+  },
+  "invariants": {
+    "originalOutletItemCategoryAuditIds": true,
+    "queueAndAuditFailuresRollBack": true,
+    "remoteAtomicity": "per item/category/receipt/audit",
+    "atomicLocalPaste": true,
+    "backupSchema": 10,
+    "categoryIdentityConflictRequiresReview": true,
+    "lostAcceptedReplyKeepsIds": true,
+    "durablePerCommandResume": true,
+    "missingLegacyCategoryRequiresReview": true,
+    "canonicalAdmissionMetadata": true,
+    "sampleRemovalGuardAndAudit": true,
+    "normalizedFieldsBound": true,
+    "localPasteMaximum": 1000,
+    "canonicalLiteralTokenProof": true,
+    "oneGroupedQueueEntry": true,
+    "originalOccurrenceAndCreationTime": true,
+    "retainedSourceStopsLaterDelivery": true,
+    "backupTables": 21,
+    "literalNulAndLoneSurrogatesRetained": true
+  },
+  "serverMutationReplay": {
+    "actualSerializedQueueValues": true,
+    "commands": 8,
+    "acceptedReceiptsDurable": true,
+    "httpHandlerAndPostgres": true,
+    "localEntries": 7,
+    "positiveActualOwnerHttpProven": false,
+    "canonicalLocalConvergenceProven": false
+  },
+  "privacy": {
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "knownPrivateValuesChecked": 9,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "hosted": {
+    "publicBuckets": 0,
+    "actualOwnerSignedHttpProven": false,
+    "smsRequests": 0,
+    "bundle": {
+      "allSourceHashesMatch": true,
+      "sha256": "461aefac154b4334ee92b59bdd928c0985646861203792ffdd7e526adfa4528d",
+      "bytes": 368384,
+      "sourceFiles": 54
+    },
+    "migrations": 26,
+    "newMigrations": 1,
+    "advisors": {
+      "INFO": 1
+    },
+    "newPersistentAuthUsers": 0,
+    "directAuthenticatedWrites": 0,
+    "realMessagesSent": 0,
+    "weakRlsTables": 0,
+    "unplannedEndpointGrants": 0,
+    "applicationTables": 47,
+    "edge": {
+      "functionCount": 6,
+      "commands": {
+        "version": 13,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      }
+    },
+    "roleProofSqlSha256": "0444e855b4e947b5f4c25637475c128d51c17c0ac6a8b66fb6e42b80f62a1afa",
+    "anonymousTableAccess": 0,
+    "roleProof": {
+      "proof": {
+        "items": 0,
+        "audits": 6,
+        "commands": 6,
+        "receipts": 6,
+        "categories": 2,
+        "originalActor": true,
+        "pendingTickets": 0,
+        "privateReadsDenied": true,
+        "otherIdentityDenied": true,
+        "legacyEndpointDenied": true,
+        "sampleAuditPreserved": true,
+        "deletedSourceRetained": true,
+        "normalizedFieldsBound": true,
+        "noFinancialSideEffects": true,
+        "ordinaryCompletionDenied": true,
+        "realItemSampleRemovalDenied": true,
+        "categoryIdentityAndCreationTime": true
+      },
+      "auth_rows": 0,
+      "business_rows": 0,
+      "ticket_rows": 0
+    },
+    "localRoleProofMatchesHosted": true,
+    "publicSecurityDefiners": 0,
+    "authConfigurationChanged": false,
+    "httpGuards": {
+      "checkedAt": "2026-11-18T11:07:20.216Z",
+      "passed": true,
+      "realOwnerJwtUsed": false,
+      "rows": [
+        {
+          "name": "preflight",
+          "status": 204,
+          "allowOrigin": "https://tanzir71.github.io",
+          "noStore": true
+        },
+        {
+          "name": "missing-jwt",
+          "status": 401,
+          "allowOrigin": "*",
+          "noStore": false
+        },
+        {
+          "name": "invalid-jwt",
+          "status": 401,
+          "allowOrigin": "*",
+          "noStore": false
+        }
+      ]
+    }
+  },
+  "publication": {
+    "newPagesDeployment": false,
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "legacy direct supplier writes and missing payment occurrence review",
+    "unsupported settings/export/shop-link writes",
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox/image-delivery controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "5000-record 3G upload acceptance",
+    "other M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/db.ts": "c507b6250246a8fc23ed8574819dfda634c87bab557473eea29318f2d76d7883",
+    "apps/web/src/data/outbox-capture.ts": "c56e5385c542fe007463a80e30a81b745964391e116a6f8ae4c870a8cddb4d3d",
+    "packages/core/cloud-commands.ts": "337893203a6a0329d924b22c443df441ad5e7b8943c99502e5ac8d77b59786a5",
+    "packages/core/catalogue-intent.ts": "07f97a397322a316a0e56b0178b7da00326da6b4a8219a32732438a1b194f8d4",
+    "supabase/functions/_shared/catalogue-write.ts": "4134bc07c29961a3d42194a339dc2ebc275d5ecb3b87255317cada912e580a09",
+    "supabase/functions/_shared/commands-handler.ts": "0c29fe2a5f26b605ab1b8d2934b7b90cc012c1732b7bb544163b85d3b67b4e6d",
+    "supabase/migrations/20261118100020_catalogue_device_intents.sql": "8b0640b92a2d6670415e88158e64e9f1fe150042ed0129fd5b7c321d422e4d58",
+    "tests/catalogue-outbox-adapters.test.ts": "df6987bec624c409aacfb56b4f0fc2fa54463144cf93d6b350fc8ba89d5997eb",
+    "tests/cloud-commands.test.ts": "376313d87140a9601ade51831c5fcee062dc3d1a1a413f5885aa479065eae6d1",
+    "tests/commands-handler.test.ts": "73ca58dabc896dd1b73974adaad46f3aebec98ae187de16a5478fffbf77739be",
+    "tests/customer-commands.test.ts": "3f34e44665102a6e45189fa901b84db3b705df0d4441c185f04b8041700acd4f",
+    "tests/e2e/catalogue-outbox.spec.ts": "fbfa691614b8b7d2b1bebc591f34dd9b56cae0bd1b8c0731ea45415ab29ea7fd"
+  }
+}

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 catalogue queue: create, edit, availability, delete and guarded sample removal retain original outlet/item/category/audit IDs and occurrence times. Full-size paste keeps one atomic local transaction and ordered resumable item commands. Hosted preparation binds the complete normalized input, and older unplanned catalogue RPC grants are closed. Cloud controls remain off; credentials and actual deployment values stay outside source and static output.
+
 - M30 Inbox queue: original manual and worker captures now retain typed commands with their literal sources, image IDs, creation times and complete manual sorting history. Full image hashes are computed before the writer opens; bytes remain local. Queue/audit failures roll back the whole action, and missing Web Crypto retains images for review without blocking local saving. Text-only recovery checks keep their backup reader inside the active transaction. Cloud controls remain off.
 
 - M30 manual-message queue: preparation, Open/Copy/failure, explicit Sent and undo now retain typed commands with complete original history. Sent commits its credit, order or supplier companion in the same transaction and queue entry; supplier resends reuse the original confirmation. Failed queue/audit writes roll back the whole action, while Copy remains available when preparation cannot be saved. Supplier correction keeps its new audit ID. Cloud controls remain off.

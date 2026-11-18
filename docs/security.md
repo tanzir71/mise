@@ -112,3 +112,12 @@ all 16 guard tests within its 1,691-test unit run. Captures project only literal
 source fields and original image metadata/hashes into commands; Blob bytes remain
 local. Connection settings, Auth sessions and server credentials stay outside the
 shop database, recovery entries and portable backups.
+
+The [catalogue queue verification](m30-catalogue-outbox-local.json) repeats the
+nine-value source/index/history/build audit and all 16 guard tests within its
+1,718-test run. Catalogue commands project only editable domain values. The
+private server plan binds their full normalized fields and original identities;
+older unplanned catalogue entry points deny client and service execution. Hosted
+checks confirm no anonymous table access or direct authenticated table writes.
+Runtime connection settings and server secrets remain outside source, build
+variables, shop records, command payloads and portable backups.

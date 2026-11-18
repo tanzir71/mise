@@ -1,4 +1,11 @@
+import 'fake-indexeddb/auto';
 import {readFileSync,readdirSync} from 'node:fs';
+import {randomUUID} from 'node:crypto';
+import {MiseDatabase} from '../apps/web/src/data/db';
+import {CloudUploadJournal,uploadWithLocalOutbox} from '../apps/web/src/data/cloud-upload';
+import {assertLocalUploadCoverage,beginLocalUpload,deliverLocalOutbox} from '../apps/web/src/data/local-outbox';
+import {parseShopCommand,parseShopCommandReceipt} from '../packages/core/shop-commands';
+import {MemoryCloudUpload,uploadId} from './cloud-upload-fixture';
 import {PGlite} from '@electric-sql/pglite';
 import {afterAll,beforeAll,beforeEach,expect,it} from 'vitest';
 import {setupCommand} from '../packages/core/setup';
@@ -7,26 +14,26 @@ import {createBackup} from '../packages/core/backup';
 import {prepareCloudMigration,type CloudRecord} from '../packages/core/cloud-records';
 import {itemAvailabilityCommand} from '../packages/core/catalogue';
 import {newInboxId} from '../packages/core/inbox';
-import {parseCloudCommand,type CatalogueWrite,type CloudCommand,type CloudCommandReceipt} from '../packages/core/cloud-commands';
+import {catalogueRecordPlan,parseCloudCommand,type CatalogueWrite,type CloudCommand,type CloudCommandReceipt} from '../packages/core/cloud-commands';
 import {catalogueFingerprint,catalogueWriteFields} from '../supabase/functions/_shared/catalogue-write';
 import {createCommandsHandler,createCommandStore} from '../supabase/functions/_shared/commands-handler';
 import type {Item,SetupCommand} from '../packages/core/models';
 const uid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,origin='https://shop.test';
 const literal='পণ্য\u0000'+String.fromCharCode(0xd800);let db:PGlite,source:SetupCommand,branch:SetupCommand,foreign:SetupCommand;
 const actors:{n:number;id:string;role:string;outlet:string;business:string}[]=[];
-const initialCatalogue:CloudRecord[]=[];
+const initialCatalogue:CloudRecord[]=[];let lastError='';
 async function asRole<T>(n:number|null,role:'anon'|'authenticated'|'service_role',query:string,args:unknown[]=[]){return db.transaction(async sql=>{
   await sql.exec(`set local role ${role}`);await sql.query("select set_config('request.jwt.claims',$1,true)",[JSON.stringify({role,...(n?{sub:uid(n)}:{}),user_metadata:{role:'owner',businessId:'spoof'}})]);return (await sql.query<T>(query,args)).rows;
 });}
-async function rpc(n:number,c:CloudCommand){return (await asRole<{data:CloudCommandReceipt}>(n,'authenticated','select public.apply_catalogue_command($1,$2,$3,$4,$5) as data',[c.id,c.type,c.type==='catalogue.availability'?c.itemId:null,c.type==='catalogue.availability'?c.available:null,c.type==='catalogue.undo'?c.undoOf:null]))[0].data;}
-const change=(available=false,itemId=source.items[0].id,id=newInboxId()):CloudCommand=>({id,type:'catalogue.availability',itemId,available});
-const undo=(undoOf:string,id=newInboxId()):CloudCommand=>({id,type:'catalogue.undo',undoOf});
+async function rpc(n:number,c:CloudCommand){return (await asRole<{data:CloudCommandReceipt}>(n,'authenticated','select public.apply_catalogue_intent($1,$2,$3,$4,$5,$6,$7) as data',[c.id,c.type,c.type==='catalogue.availability'?c.itemId:null,c.outletId,c.type==='catalogue.availability'?c.available:null,c.type==='catalogue.undo'?c.undoOf:null,c.occurredAt]))[0].data;}
+const change=(available=false,itemId=source.items[0].id,id=newInboxId(),occurredAt=Date.now()):CloudCommand=>({id,type:'catalogue.availability',itemId,available,occurredAt,outletId:([source,branch,foreign].find(setup=>setup.items.some(item=>item.id===itemId))??source).snapshot.outlet.id});
+const undo=(undoOf:string,id=newInboxId()):CloudCommand=>({id,type:'catalogue.undo',undoOf,outletId:source.snapshot.outlet.id,occurredAt:Date.now()});
 function nativeStore(beforeFinish?:(fields:Record<string,unknown>)=>Promise<void>){return createCommandStore('https://database.test','sb_publishable_test_only',async(url,options)=>{
   const name=new URL(String(url)).pathname.split('/').at(-1)!,headers=new Headers(options?.headers),args=JSON.parse(options?.body as string),service=headers.get('apikey')==='sb_secret_test_only',n=service?null:Number(headers.get('Authorization')!.split('.')[1]);
-  const fields:Record<string,string[]>={apply_catalogue_command:['p_id','p_type','p_item_id','p_available','p_undo_of'],prepare_catalogue_write:['p_id','p_ticket_id','p_type','p_item_id','p_outlet_id','p_hash'],finish_catalogue_write:['p_ticket_id','p_token','p_name_json','p_local_json','p_unit_json','p_price','p_category_id','p_new_category_json','p_available','p_often_bought']};
-  if(!fields[name])throw new Error('Unexpected RPC');if(name==='finish_catalogue_write'){expect(service).toBe(true);expect(headers.has('Authorization')).toBe(false);await beforeFinish?.(args);}else expect(service).toBe(false);
+  const fields:Record<string,string[]>={apply_catalogue_intent:['p_id','p_type','p_item_id','p_outlet_id','p_available','p_undo_of','p_occurred_at'],prepare_catalogue_intent:['p_id','p_ticket_id','p_type','p_item_id','p_outlet_id','p_hash','p_occurred_at','p_plan'],finish_catalogue_intent:['p_ticket_id','p_token','p_name_json','p_local_json','p_unit_json','p_price','p_category_id','p_new_category_json','p_available','p_often_bought']};
+  if(!fields[name])throw new Error('Unexpected RPC');if(name==='finish_catalogue_intent'){expect(service).toBe(true);expect(headers.has('Authorization')).toBe(false);await beforeFinish?.(args);}else expect(service).toBe(false);
   try{const result=await asRole<{data:unknown}>(n,service?'service_role':'authenticated',`select public.${name}(${fields[name].map((_,i)=>`$${i+1}`).join(',')}) as data`,fields[name].map(k=>args[k]));return new Response(JSON.stringify(result[0].data));}
-  catch(error){const {code,detail:details}=error as {code:string;detail?:string};return new Response(JSON.stringify({code,details}),{status:code==='42501'?403:code==='23505'||code==='PT409'?409:code==='22023'?400:500});}
+  catch(error){const {code,detail:details,message}=error as {code:string;detail?:string;message?:string};lastError=JSON.stringify({code,message});return new Response(JSON.stringify({code,details}),{status:code==='42501'?403:code==='23505'||code==='PT409'?409:code==='22023'?400:500});}
 }, {serviceKey:'sb_secret_test_only'});}
 async function http(n:number,c:unknown,beforeFinish?:(fields:Record<string,unknown>)=>Promise<void>){const handler=createCommandsHandler({origins:new Set([origin]),store:nativeStore(beforeFinish)});return handler(new Request('https://api.test/commands',{method:'POST',headers:{Authorization:`Bearer user.${n}.signature`,Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(c)}));}
 async function counts(){return (await db.query<{receipts:number;events:number}>("select (select count(*)::integer from private.command_receipts) as receipts,(select count(*)::integer from public.events where command like 'catalogue.%') as events")).rows[0];}
@@ -42,7 +49,7 @@ beforeAll(async()=>{
   actors.push({n:1,id:source.snapshot.owner.id,role:'owner',outlet:source.snapshot.outlet.id,business:source.snapshot.business.id},{n:4,id:foreign.snapshot.owner.id,role:'owner',outlet:foreign.snapshot.outlet.id,business:foreign.snapshot.business.id});
   for(const [n,role,outlet] of [[2,'manager',source.snapshot.outlet.id],[3,'manager',branch.snapshot.outlet.id],[5,'staff',source.snapshot.outlet.id],[6,'agent',source.snapshot.outlet.id]] as const){const id=newInboxId();await db.query('insert into public.members(id,business_id,auth_user_id,name,role,created_at,updated_at) values($1,$2,$3,$4,$5,1,1)',[id,source.snapshot.business.id,uid(n),'"Person"',role]);actors.push({n,id,role,outlet,business:source.snapshot.business.id});await db.query('insert into public.member_outlets values($1,$2,$3)',[source.snapshot.business.id,id,outlet]);}
 },30_000);
-beforeEach(async()=>{
+beforeEach(async()=>{lastError='';
   await db.exec("delete from private.catalogue_write_tickets;delete from private.command_receipts;delete from public.events where command like 'catalogue.%';delete from public.items;delete from public.categories;update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null;update public.members set active=true");
   for(const a of actors){await db.query('update public.members set role=$1,auth_user_id=$2 where id=$3',[a.role,uid(a.n),a.id]);await db.query('insert into public.member_outlets values($1,$2,$3) on conflict do nothing',[a.business,a.id,a.outlet]);}
   for(const record of initialCatalogue){const keys=Object.keys(record.values);await db.query(`insert into public.${record.table}(${keys.join(',')}) values(${keys.map((_,i)=>`$${i+1}`).join(',')})`,Object.values(record.values));}
@@ -55,7 +62,7 @@ it.each([1,2])('operator %s applies one availability intent and its core-compati
 });
 it('identical retries return the same receipt and do not repeat writes or audits',async()=>{const c=change(),first=await rpc(1,c),second=await rpc(1,c);expect(second).toEqual(first);expect(await counts()).toEqual({receipts:1,events:1});});
 it('replaying an older accepted command never overwrites a newer catalogue change',async()=>{const c=change(false),first=await rpc(1,c);await rpc(1,change(true));expect(await rpc(1,c)).toEqual(first);expect((await item()).available).toBe(true);expect(await counts()).toEqual({receipts:2,events:2});});
-it.each(['value','target','type'])('a reused ID with different %s intent is rejected without another change',async field=>{const c=change();await rpc(1,c);const next=field==='value'?change(true,source.items[0].id,c.id):field==='target'?change(false,source.items[1].id,c.id):undo(c.id,c.id);expect((await http(1,next)).status).toBe(409);expect(await counts()).toEqual({receipts:1,events:1});});
+it.each(['value','target','type'])('a reused ID with different %s intent is rejected without another change',async field=>{const c=change();await rpc(1,c);const next=field==='value'?change(true,source.items[0].id,c.id,c.occurredAt):field==='target'?change(false,source.items[1].id,c.id,c.occurredAt):undo(newInboxId(),c.id);expect((await http(1,next)).status).toBe(409);expect(await counts()).toEqual({receipts:1,events:1});});
 it('another assigned operator cannot take over a receipt ID',async()=>{const c=change();await rpc(1,c);expect((await http(2,c)).status).toBe(403);expect(await counts()).toEqual({receipts:1,events:1});});
 it.each([3,4,5,6,7])('operator %s cannot change another outlet/business or bypass their role',async n=>{expect((await http(n,change())).status).toBe(403);expect(await counts()).toEqual({receipts:0,events:0});expect((await item()).available).toBe(source.items[0].available);});
 it('owners cover their branch and managers remain assigned to the correct branch',async()=>{expect((await http(1,change(false,branch.items[0].id))).status).toBe(200);expect((await http(3,change(true,branch.items[0].id))).status).toBe(200);expect((await http(2,change(false,branch.items[0].id))).status).toBe(403);expect((await http(4,change(false,foreign.items[0].id))).status).toBe(200);});
@@ -71,35 +78,35 @@ it('raw authenticated writes and receipt reads remain denied',async()=>{await ex
 it.each([{}, {id:'bad',type:'catalogue.availability'}, {id:'0'.repeat(26),type:'catalogue.availability',itemId:'0'.repeat(26),available:'false'}, {id:'0'.repeat(26),type:'catalogue.undo',undoOf:'0'.repeat(26),role:'owner'}])('shared validation refuses unsupported or spoofed intent %j',async value=>{expect(()=>parseCloudCommand(value)).toThrow();expect((await http(1,value)).status).toBe(400);expect(await counts()).toEqual({receipts:0,events:0});});
 
 const input=()=>({name:` ${literal} `,nameLocal:literal,price:1234,unit:' pc ',category:' New Drinks ',available:true,oftenBought:false});
-const create=():CatalogueWrite=>({id:newInboxId(),type:'catalogue.create',itemId:newInboxId(),outletId:source.snapshot.outlet.id,input:input()});
+const create=():Extract<CatalogueWrite,{type:'catalogue.create'}>=>({id:newInboxId(),type:'catalogue.create',itemId:newInboxId(),outletId:source.snapshot.outlet.id,occurredAt:Date.now(),categoryId:newInboxId(),input:input()});
 interface Prepared {done:false;ticketId:string;token:string;outletId:string;actorId:string;at:number;itemJson:string;categoriesJson:string}
-async function prepare(n:number,c:CatalogueWrite){return (await asRole<{data:Prepared}>(n,'authenticated','select public.prepare_catalogue_write($1,$2,$3,$4,$5,$6) as data',[c.id,newInboxId(),c.type,c.itemId,c.type==='catalogue.create'?c.outletId:null,await catalogueFingerprint(parseCloudCommand(c) as CatalogueWrite)]))[0].data;}
-function finishFields(p:Prepared,c:CatalogueWrite){return catalogueWriteFields(p,parseCloudCommand(c) as CatalogueWrite,p.ticketId,newInboxId);}
+async function prepare(n:number,value:CatalogueWrite){const c=parseCloudCommand(value) as CatalogueWrite;return (await asRole<{data:Prepared}>(n,'authenticated','select public.prepare_catalogue_intent($1,$2,$3,$4,$5,$6,$7,$8) as data',[c.id,newInboxId(),c.type,c.itemId,c.outletId,await catalogueFingerprint(c),c.occurredAt,catalogueRecordPlan(c)]))[0].data;}
+function finishFields(p:Prepared,c:CatalogueWrite){return catalogueWriteFields(p,parseCloudCommand(c) as CatalogueWrite,p.ticketId);}
 async function finish(p:Prepared,c:CatalogueWrite,role:'authenticated'|'service_role'='service_role'){
   const f=finishFields(p,c),keys=['p_ticket_id','p_token','p_name_json','p_local_json','p_unit_json','p_price','p_category_id','p_new_category_json','p_available','p_often_bought'];
-  return asRole<{data:CloudCommandReceipt}>(role==='authenticated'?1:null,role,'select public.finish_catalogue_write('+keys.map((_,i)=>`$${i+1}`).join(',')+') as data',keys.map(k=>f[k]));
+  return asRole<{data:CloudCommandReceipt}>(role==='authenticated'?1:null,role,'select public.finish_catalogue_intent('+keys.map((_,i)=>`$${i+1}`).join(',')+') as data',keys.map(k=>f[k]));
 }
 it.each([1,2])('operator %s creates and edits with shared Unicode validation and normalized category reuse',async n=>{
-  const c=create(),created=await http(n,c);expect(created.status).toBe(200);const receipt=await created.json();expect(receipt.type).toBe('catalogue.create');
+  const c=create(),created=await http(n,c);expect(created.status,lastError).toBe(200);const receipt=await created.json();expect(receipt.type).toBe('catalogue.create');
   const before=(await db.query<{name:string;category_id:string;created_at:number}>('select name,category_id,created_at from public.items where id=$1',[c.itemId])).rows[0];expect(before.name).toBe(literal);
-  const edited=await http(n,{id:newInboxId(),type:'catalogue.update',itemId:c.itemId,input:{...input(),price:4567,category:'Ｎｅｗ Ｄｒｉｎｋｓ',available:false}});expect(edited.status).toBe(200);
+  const edited=await http(n,{id:newInboxId(),type:'catalogue.update',itemId:c.itemId,outletId:c.outletId,occurredAt:Date.now(),categoryId:c.categoryId,input:{...input(),price:4567,category:'Ｎｅｗ Ｄｒｉｎｋｓ',available:false}});expect(edited.status).toBe(200);
   const after=(await db.query<{category_id:string;price:number;created_at:number;available:boolean}>('select category_id,price,created_at,available from public.items where id=$1',[c.itemId])).rows[0];expect(after).toEqual({category_id:before.category_id,price:4567,created_at:before.created_at,available:false});expect(await counts()).toEqual({receipts:2,events:2});
 });
 it('create, edit and delete replay their original receipts without recreating a deleted item',async()=>{
   const c=create(),first=await nativeStore().apply('user.1.signature',parseCloudCommand(c));expect(await nativeStore().apply('user.1.signature',parseCloudCommand(c))).toEqual(first);
-  const edit:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:c.itemId,input:{...input(),available:false}};await nativeStore().apply('user.1.signature',parseCloudCommand(edit));expect(await nativeStore().apply('user.1.signature',parseCloudCommand(c))).toEqual(first);
-  const remove:CatalogueWrite={id:newInboxId(),type:'catalogue.delete',itemId:c.itemId},deleted=await nativeStore().apply('user.1.signature',remove);expect((deleted as CloudCommandReceipt).available).toBeNull();expect(await nativeStore().apply('user.1.signature',remove)).toEqual(deleted);
+  const edit:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:c.itemId,outletId:c.outletId,occurredAt:Date.now(),categoryId:c.categoryId,input:{...input(),available:false}};await nativeStore().apply('user.1.signature',parseCloudCommand(edit));expect(await nativeStore().apply('user.1.signature',parseCloudCommand(c))).toEqual(first);
+  const remove:CatalogueWrite={id:newInboxId(),type:'catalogue.delete',itemId:c.itemId,outletId:c.outletId,occurredAt:Date.now()},deleted=await nativeStore().apply('user.1.signature',remove);expect((deleted as CloudCommandReceipt).available).toBeNull();expect(await nativeStore().apply('user.1.signature',remove)).toEqual(deleted);
   expect((await db.query('select id from public.items where id=$1',[c.itemId])).rows).toEqual([]);expect(await counts()).toEqual({receipts:3,events:3});
 });
 it.each([3,4,5,6,7])('operator %s cannot prepare a foreign/unassigned create or supply service mutations',async n=>{expect((await http(n,create())).status).toBe(403);expect((await db.query('select id from private.catalogue_write_tickets')).rows).toEqual([]);expect(await counts()).toEqual({receipts:0,events:0});});
 it('ordinary authenticated callers cannot finish even their own valid ticket',async()=>{const c=create(),p=await prepare(1,c);await expect(finish(p,c,'authenticated')).rejects.toMatchObject({code:'42501'});expect(await counts()).toEqual({receipts:0,events:0});});
 it('context changes rebase the original set intent and audit the latest state',async()=>{
-  let calls=0;const c:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:source.items[0].id,input:input()};
+  let calls=0;const c:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:source.items[0].id,outletId:source.snapshot.outlet.id,occurredAt:Date.now(),categoryId:newInboxId(),input:input()};
   expect((await http(1,c,async()=>{if(calls++===0)await rpc(1,change(false));})).status).toBe(200);expect(calls).toBe(2);
   const e=(await db.query<{before_data:Item;after_data:{item:Item}}>('select before_data,after_data from public.events where id=$1',[c.id])).rows[0];expect(e.before_data.available).toBe(false);expect(e.after_data.item.available).toBe(true);expect(await counts()).toEqual({receipts:2,events:2});
 });
-it('a concurrent normalized category creation is reused after bounded re-preparation',async()=>{
-  let calls=0;const c=create();expect((await http(1,c,async()=>{if(calls++===0){const other=create();expect((await http(1,other)).status).toBe(200);}})).status).toBe(200);expect(calls).toBe(2);
+it('a concurrent normalized category creation with the same planned identity is reused after bounded re-preparation',async()=>{
+  let calls=0;const c=create();expect((await http(1,c,async()=>{if(calls++===0){const other={...create(),categoryId:c.categoryId};expect((await http(1,other)).status).toBe(200);}})).status).toBe(200);expect(calls).toBe(2);
   const rows=(await db.query<{name:string}>('select name from public.categories where outlet_id=$1',[source.snapshot.outlet.id])).rows;expect(rows.filter(r=>r.name.normalize('NFKC').toLowerCase()==='new drinks')).toHaveLength(1);
 });
 it('expired or invalid tickets and private snapshots cannot bypass the one-minute scope proof',async()=>{
@@ -116,9 +123,9 @@ it('audit collisions roll back a newly created category, item and receipt as one
 });
 it('edit retains unsupported variants/photos and delete retains the full original row privately',async()=>{
   await db.query('update public.items set variants=$1,photo_ref=$2 where id=$3',[JSON.stringify([{name:literal,price:1234}]),'original/photo',source.items[0].id]);
-  const c:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:source.items[0].id,input:input()};expect((await http(1,c)).status).toBe(200);
+  const c:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:source.items[0].id,outletId:source.snapshot.outlet.id,occurredAt:Date.now(),categoryId:newInboxId(),input:input()};expect((await http(1,c)).status).toBe(200);
   const after=(await db.query<{variants:unknown;photo_ref:string}>('select variants,photo_ref from public.items where id=$1',[c.itemId])).rows[0];expect(after).toEqual({variants:[{name:literal,price:1234}],photo_ref:'original/photo'});
-  const remove:CatalogueWrite={id:newInboxId(),type:'catalogue.delete',itemId:c.itemId};expect((await http(1,remove)).status).toBe(200);
+  const remove:CatalogueWrite={id:newInboxId(),type:'catalogue.delete',itemId:c.itemId,outletId:c.outletId,occurredAt:Date.now()};expect((await http(1,remove)).status).toBe(200);
   const retained=(await db.query<{before_record:{variants:unknown;photo_ref:string};after_record:unknown}>('select before_record,after_record from private.command_receipts where id=$1',[remove.id])).rows[0];expect(retained.before_record.variants).toEqual(after.variants);expect(retained.before_record.photo_ref).toBe(after.photo_ref);expect(retained.after_record).toBeNull();
 });
 it('valid maximum-length escaped Unicode fits the bounded command request and round-trips',async()=>{
@@ -145,10 +152,56 @@ it.each(['active','assignment','role','subject','phone','phone-number','ban','de
 it('create/update/delete IDs bind the exact normalized request and original operator',async()=>{
   const c=create();expect((await http(1,c)).status).toBe(200);
   expect((await http(1,{...c,input:{...input(),price:999}})).status).toBe(409);expect((await http(2,c)).status).toBe(403);
-  expect((await http(1,{id:c.id,type:'catalogue.delete',itemId:c.itemId})).status).toBe(409);
+  expect((await http(1,{id:c.id,type:'catalogue.delete',itemId:c.itemId,outletId:c.outletId,occurredAt:Date.now()})).status).toBe(409);
   expect((await http(1,{...c,itemId:newInboxId()})).status).toBe(409);expect(await counts()).toEqual({receipts:1,events:1});
 });
 it('catalogue edits prevent an older availability undo from erasing a newer intent',async()=>{
-  const old=await rpc(1,change(false));expect((await http(1,{id:newInboxId(),type:'catalogue.update',itemId:old.itemId,input:{...input(),available:false}})).status).toBe(200);
+  const old=await rpc(1,change(false));expect((await http(1,{id:newInboxId(),type:'catalogue.update',itemId:old.itemId,outletId:source.snapshot.outlet.id,occurredAt:Date.now(),categoryId:newInboxId(),input:{...input(),available:false}})).status).toBe(200);
   expect((await http(1,undo(old.id))).status).toBe(409);expect(await counts()).toEqual({receipts:2,events:2});
+});
+
+it('device item/category creation times and identities survive later canonical admission metadata',async()=>{
+ const c={...create(),occurredAt:Date.now()-86400000},r=await http(1,c);expect(r.status,lastError).toBe(200);const receipt=await r.json() as CloudCommandReceipt;expect(receipt).toMatchObject({itemId:c.itemId,categoryId:c.categoryId,occurredAt:c.occurredAt});expect(receipt.at).toBeGreaterThan(c.occurredAt);
+ const item=(await db.query<{created_at:number;updated_at:number;category_id:string}>('select created_at,updated_at,category_id from public.items where id=$1',[c.itemId])).rows[0],category=(await db.query<{created_at:number;updated_at:number}>('select created_at,updated_at from public.categories where id=$1',[c.categoryId])).rows[0];expect(item).toEqual({created_at:c.occurredAt,updated_at:receipt.itemUpdatedAt,category_id:c.categoryId});expect(category).toEqual({created_at:c.occurredAt,updated_at:receipt.at});expect((await db.query<{at:number}>('select at from public.events where id=$1',[c.id])).rows[0].at).toBe(receipt.at);
+ for(const changed of [{...c,categoryId:newInboxId()},{...c,occurredAt:c.occurredAt+1}])expect((await http(1,changed)).status).toBe(409);expect(await counts()).toEqual({receipts:1,events:1});
+});
+it('a competing category identity requires review without silently remapping the original item',async()=>{
+ let other:ReturnType<typeof create>|undefined,calls=0;const c=create(),r=await http(1,c,async()=>{if(calls++===0){other=create();expect((await http(1,other)).status,lastError).toBe(200);}});expect(r.status).toBe(409);expect(await r.text()).toContain('original intent');expect(other!.categoryId).not.toBe(c.categoryId);expect((await db.query('select id from public.items where id=$1',[c.itemId])).rows).toEqual([]);expect((await db.query<{category_id:string}>('select category_id from public.items where id=$1',[other!.itemId])).rows[0].category_id).toBe(other!.categoryId);expect(await counts()).toEqual({receipts:1,events:1});
+});
+it('a preparation plan cannot replace IDs, time or normalized input under an unchanged claimed fingerprint',async()=>{
+ const c=create(),p=await prepare(1,c),hash=await catalogueFingerprint(c),original=catalogueRecordPlan(c);
+ for(const field of ['category','time','price','literal'] as const){const plan=structuredClone(original);let at=c.occurredAt;if(field==='category')plan.categoryId=newInboxId();else if(field==='time')at++;else if(field==='price')plan.input!.price++;else plan.input!.nameJson=JSON.stringify('Replaced');await expect(asRole(1,'authenticated','select public.prepare_catalogue_intent($1,$2,$3,$4,$5,$6,$7,$8)',[c.id,newInboxId(),c.type,c.itemId,c.outletId,hash,at,plan])).rejects.toMatchObject({code:'22023'});}
+ const changed={...c,input:{...c.input,price:c.input.price+1}};await expect(prepare(1,changed)).rejects.toMatchObject({code:'23505'});expect(await counts()).toEqual({receipts:0,events:0});await finish(p,c);expect(await counts()).toEqual({receipts:1,events:1});
+});
+it('service completion cannot substitute any normalized catalogue field from a valid preparation',async()=>{
+ const c=create(),p=await prepare(1,c),original=finishFields(p,c),keys=Object.keys(original);
+ for(const changed of [{p_name_json:JSON.stringify('Other')},{p_local_json:JSON.stringify('Other')},{p_unit_json:JSON.stringify('other')},{p_price:c.input.price+1},{p_category_id:newInboxId()},{p_new_category_json:JSON.stringify('Other')},{p_available:false},{p_often_bought:true}]){const fields:Record<string,unknown>={...original,...changed};await expect(asRole(null,'service_role','select public.finish_catalogue_intent('+keys.map((_,i)=>'$'+(i+1)).join(',')+')',keys.map(key=>fields[key]))).rejects.toMatchObject({code:'22023'});}
+ expect(await counts()).toEqual({receipts:0,events:0});await finish(p,c);expect(await counts()).toEqual({receipts:1,events:1});
+});
+it('sample removal keeps its own audit type, original source, category and replay receipt',async()=>{
+ const c:CatalogueWrite={id:newInboxId(),type:'catalogue.remove-sample',itemId:source.items[0].id,outletId:source.snapshot.outlet.id,occurredAt:Date.now()-1000},r=await http(1,c);expect(r.status,lastError).toBe(200);const receipt=await r.json();expect(receipt).toMatchObject({type:c.type,itemId:c.itemId,occurredAt:c.occurredAt,categoryId:null,available:null});const event=(await db.query<{command:string;before_data:Item;after_data:null}>('select command,before_data,after_data from public.events where id=$1',[c.id])).rows[0];expect(event).toMatchObject({command:'catalogue.remove-sample',before_data:{id:c.itemId,name:literal,isSample:true},after_data:null});expect(await nativeStore().apply('user.1.signature',c)).toEqual(receipt);expect(await counts()).toEqual({receipts:1,events:1});expect((await db.query('select id from public.categories where id=$1',[source.items[0].categoryId])).rows).toHaveLength(1);
+});
+it('an edited real item cannot be removed through a stale sample-removal proof',async()=>{
+ const c:CatalogueWrite={id:newInboxId(),type:'catalogue.remove-sample',itemId:source.items[0].id,outletId:source.snapshot.outlet.id,occurredAt:Date.now()},p=await prepare(1,c),edit:CatalogueWrite={id:newInboxId(),type:'catalogue.update',itemId:c.itemId,outletId:c.outletId,occurredAt:Date.now(),categoryId:newInboxId(),input:input()};expect((await http(1,edit)).status,lastError).toBe(200);await expect(finish(p,c)).rejects.toMatchObject({code:'PT409',detail:'catalogue_snapshot_changed'});expect((await http(1,c)).status).toBe(400);expect((await db.query<{is_sample:boolean}>('select is_sample from public.items where id=$1',[c.itemId])).rows[0].is_sample).toBe(false);expect(await counts()).toEqual({receipts:1,events:1});
+});
+it.each(['anon','authenticated','service_role'] as const)('%s cannot use the retired unplanned catalogue endpoints',async role=>{
+ const c=create(),n=role==='authenticated'?1:null;for(const schema of ['public','private']){await expect(asRole(n,role,`select ${schema}.prepare_catalogue_write($1,$2,$3,$4,$5,$6)`,[c.id,newInboxId(),c.type,c.itemId,c.outletId,await catalogueFingerprint(c)])).rejects.toMatchObject({code:'42501'});await expect(asRole(n,role,`select ${schema}.finish_catalogue_write($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,[newInboxId(),'A'.repeat(43),'"Tea"','""','"pc"',1,c.categoryId,null,true,false])).rejects.toMatchObject({code:'42501'});await expect(asRole(n,role,`select ${schema}.apply_catalogue_command($1,$2,$3,$4,$5)`,[c.id,'catalogue.availability',source.items[0].id,false,null])).rejects.toMatchObject({code:'42501'});}expect(await counts()).toEqual({receipts:0,events:0});
+});
+it('future device clocks and a missing legacy category require review before a native availability mutation',async()=>{
+ const c={...change(),occurredAt:Date.now()+600000};expect((await http(1,c)).status).toBe(409);await db.query('update public.items set category_id=null where id=$1',[source.items[0].id]);const before=await item();expect((await http(1,change(false))).status).toBe(409);expect(await item()).toEqual(before);expect(await counts()).toEqual({receipts:0,events:0});
+});
+
+it('actual local save, edit, toggle, paste, delete and sample-removal queues pass through HTTP into PostgreSQL',async()=>{
+ const local=new MiseDatabase('mise-catalogue-sql-'+randomUUID()),journal=new CloudUploadJournal('mise-catalogue-sql-journal-'+randomUUID()),target='c'.repeat(64);
+ try{
+  const tables=emptyBackupTables();tables.businesses.push(source.snapshot.business);tables.outlets.push(source.snapshot.outlet);tables.members.push(source.snapshot.owner);tables.items.push(...source.items);tables.categories.push(...source.categories);const backup=createBackup(tables);await local.restoreBackup(backup,await local.previewRestore(backup));const snapshot=await journal.prepare(local,uploadId());await beginLocalUpload(local,snapshot,target);await uploadWithLocalOutbox(local,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+  const created=await local.saveItem({...input(),name:'Wire item',category:'Wire category'});await local.saveItem({...input(),name:'Wire item edited',category:'Ｗｉｒｅ ｃａｔｅｇｏｒｙ',price:789},created.id);await local.setItemAvailable(created.id,false);await local.setItemAvailable(created.id,true);await local.addItems([{...input(),name:'Bulk one',category:'Wire category'},{...input(),name:'Bulk two',category:'Wire category'}]);await local.deleteItem(created.id);await local.removeSample(source.items[0].id);
+  const rows=await local.outbox.orderBy('[uploadId+sequence]').toArray(),sent:string[]=[];expect(rows).toHaveLength(7);expect(rows.flatMap(row=>row.commands)).toHaveLength(8);
+  await deliverLocalOutbox(local,target,async value=>{
+   const c=parseShopCommand(JSON.parse(JSON.stringify(value)));if(!c.type.startsWith('catalogue.')||c.type==='catalogue.undo'||!('itemId'in c))throw Error('Expected local catalogue wire command');const response=await http(1,c);expect(response.status,lastError).toBe(200);const receipt=parseShopCommandReceipt(await response.json(),c);expect(receipt).toMatchObject({id:c.id,itemId:c.itemId,outletId:c.outletId,occurredAt:c.occurredAt});sent.push(c.id);
+   const row=rows.find(row=>row.commands.some(command=>command.id===c.id))!,after=row.changes.find(change=>change.table==='items'&&change.key===c.itemId)!.after,event=(await db.query<{command:string;actor_id:string;at:number}>('select command,actor_id,at from public.events where id=$1',[c.id])).rows[0];expect(event).toEqual({command:c.type,actor_id:source.snapshot.owner.id,at:receipt.at});
+   if(after){const saved=(await db.query<{data:Item}>('select private.catalogue_item_snapshot(i) as data from public.items i where i.id=$1',[c.itemId])).rows[0].data;expect(saved).toEqual({...after,updatedAt:(receipt as CloudCommandReceipt).itemUpdatedAt});}else expect((await db.query('select id from public.items where id=$1',[c.itemId])).rows).toHaveLength(0);return receipt;
+  });
+  expect(sent).toEqual(rows.flatMap(row=>row.commands.map(command=>command.id)));expect((await local.outbox.toArray()).every(row=>row.status==='accepted'&&row.receipts.length===row.commands.length)).toBe(true);expect(await counts()).toEqual({receipts:8,events:8});await assertLocalUploadCoverage(local,snapshot,target);
+ }finally{await local.delete();await journal.delete();}
 });

@@ -1,6 +1,6 @@
 # M30 · Supabase foundation
 
-Status: **in progress**. Mise now has a dedicated Supabase project with 25 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database. Runtime phone sign-in and local count review are now available only behind the default-off `cloudSetup` flag; no sync, shared-screen, cloud-image or cloud-command interface is enabled. Production phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/outbox integration remain incomplete. M30 and Phase 3 remain unticked.
+Status: **in progress**. Mise now has a dedicated Supabase project with 26 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database. Runtime phone sign-in and local count review are now available only behind the default-off `cloudSetup` flag; no sync, shared-screen, cloud-image or cloud-command interface is enabled. Production phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/outbox integration remain incomplete. M30 and Phase 3 remain unticked.
 
 ## Tenant schema
 
@@ -83,6 +83,11 @@ Storage and PostgreSQL do not share a transaction: a transfer interrupted before
 Live Storage API checks preserve the exact 92-byte test PNG and reject duplicate writes, anonymous/public reads, anonymous uploads, SVG and a 5 MB + 1 byte payload (all return 400). Anonymous listing returns an empty array. The actual stored size/MIME/server-hash metadata matches the completion predicate. The deployed Deno function rejects a signed anonymous identity with its own uncached error (401); the platform rejects a forged owner JWT (401). The first probe expected 403 for anonymous SQL denial; PostgREST correctly returned 401, and the corrected probe passed. All test paths were removed through the Storage API, with zero remaining objects verified. No Auth account, SMS, message or credential file was created. These checks **do not prove positive owner/manager JWT transfers or phone OTP**; those gates remain open. [m30-images-hosted.json](m30-images-hosted.json) records the evidence.
 
 ## First transactional commands
+
+The next two sections describe the earlier catalogue contract. The current
+device-intent contract requires outlet and occurrence time on every action and
+the saved category ID on create/update; its replacement RPCs close the older
+entry points. See [catalogue queue verification](m30-catalogue-outbox.md).
 
 The original two strict intents in `packages/core/cloud-commands.ts` are `catalogue.availability` (`id`, `itemId`, boolean `available`) and `catalogue.undo` (`id`, `undoOf`). The shared parser rejects extra actor, role, tenant, SQL, money or record fields. The endpoint requires platform JWT verification; these two intents forward the original JWT with a publishable key to one fixed RPC without a service identity. Responses are uncached, exact-origin CORS is enforced, and backend errors expose no private details. The current four-kibibyte limit and additional write intents are described below.
 
@@ -295,7 +300,17 @@ and stop ordered delivery. Server-confirmed staging cancellation preserves histo
 and allows a fresh review without wiping local data. See the
 [implementation and verification notes](m30-outbox-boundary.md).
 
-Full nonfinancial adapters, canonical receipt/pull reconciliation and upload/outbox
+Unsupported write adapters, canonical receipt/pull reconciliation and upload/outbox
 controls remain unfinished. This increment enables no sync interface, commissions
 no phone provider and changes no hosted schema or service. M30 stays unticked and
 GitHub workflows and Pages publication remain stopped.
+
+## Catalogue device intents and queue
+
+Catalogue lifecycle actions and full-size local paste now retain their original
+identities and occurrence times in typed queue transactions. The hosted service
+binds complete normalized fields to its private plan and closes the older
+unplanned catalogue entry points. All 26 migrations and `commands` v13 are
+deployed; no sync control is enabled. See the
+[catalogue implementation and verification](m30-catalogue-outbox.md). Remaining
+M30 acceptance gates stay open; Actions and Pages publication remain held.
