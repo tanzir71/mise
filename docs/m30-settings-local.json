@@ -1,0 +1,283 @@
+{
+  "checkedAt": "2026-11-18T13:05:05.663Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Typed reminder wording and export-preparation commands; manual backup download after audit failure; fresh imported-shop review after confirmed cancellation",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "8723e4f4f3110b45cb6add1b1035918fdcc68327e9c9491b9c8b02e645b0454c"
+    },
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 102,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "a97136225bd6c634d214925403e2981fe521df9ddba9c0153c07bb2ca01742b6",
+      "finalTscLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "units": {
+      "passed": 1790,
+      "files": 98,
+      "newCommandCases": 38,
+      "newAdapterCases": 12,
+      "newRestoreCases": 1,
+      "reportSha256": "3f0585f3708ee409392b294d801514c79547048a9d24894712fe9ea795b56ed2"
+    },
+    "browser": {
+      "base": "/mise/",
+      "passed": 354,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "globalErrors": 0,
+      "durationSeconds": 493.350575,
+      "reportSha256": "473a0a46574fd2f57bf01a744f064aebcb037be551eea4caa712dd3b63428fbb"
+    },
+    "rootSmoke": {
+      "base": "/",
+      "passed": 33,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "globalErrors": 0,
+      "durationSeconds": 59.653957,
+      "reportSha256": "1b1b54858777345e3c6b91399029af9b241fce58593ccf57c0e7023ce588b5b7"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "420e88c527d594cc833bb11249a28cc47b357ce9691c439f544603fd6bae3384",
+        "htmlSha256": "8122bb2639a26e1499e1cb8944e8ef50fc77f42a7b7f0e237cd0caa241371996"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "de3017c2b6b2b5c3952b8b41ccae4f6489b0dcb711ecf1e46271b082241f24af",
+        "htmlSha256": "c6d10b4baed8d2be58bc80fbaee585452608fb4035c5a4333a216935557752e5"
+      }
+    ],
+    "exports": {
+      "present": 270,
+      "passed": true,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "native": {
+      "newCases": 9,
+      "offlineWordingAndDownloadedBackup": true,
+      "queueFailureRetainsFields": true,
+      "preparedFallbackByteEqual": true,
+      "noSecondFallbackWrite": true,
+      "foreignShopRestoreRetainsOriginal": true,
+      "axeViolations": 0,
+      "axeWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    "visual": {
+      "comparisons": 35,
+      "newFallbackComparisons": 5,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "report": "qa/report.html",
+      "reportSha256": "f04a5ce19320b6b03ecfd6c0a16fa054c0dc3b33a789a34e56bc6e8ce8f5bd55",
+      "resultsSha256": "0c576ba8ebe9d253229b3a8ec259dd6caaf65e6f9b521dd614081d37cf25fcf1",
+      "references": [
+        "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+        "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+        "screens/mobile/M29 · Manager — Export (sheet).png",
+        "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png"
+      ],
+      "dedicatedFallbackFrameExists": false,
+      "exactFrameMatchClaimed": false,
+      "pixelDifferencesInformational": true,
+      "threeCapturesInspected": true,
+      "keyScreens": {
+        "qa/screens/m30-settings-backup-fallback-phone-screen-360.png": "1cd264409a6dc07b6de8c7a471351e9a41489e8ded19edf4f283f01507423e0e",
+        "qa/screens/m30-settings-backup-fallback-phone-screen-390.png": "b1b13bb35c3faf333503ca2c8f7efe250b24782785c6ee9f65a10615bd8c441d",
+        "qa/screens/m30-settings-backup-fallback-desktop-screen-1440.png": "bb24aca7d797240ea7ce452809a7bc9130b089524bb8f3f414684be60708c156"
+      },
+      "newCiArtifact": false
+    }
+  },
+  "invariants": {
+    "journalSchema": 2,
+    "shopSchema": 11,
+    "backupSchema": 10,
+    "backupTables": 21,
+    "commandKinds": [
+      "khata.wording",
+      "export.prepare"
+    ],
+    "editableFieldsOnly": true,
+    "originalIdsAndOccurrence": true,
+    "atomicLocalRecordsAuditAndQueue": true,
+    "unknownCompoundWritesStopFifo": true,
+    "exactReplayOriginalActorOnly": true,
+    "sqlConstructedMutationAndAudit": true,
+    "normalizedIntentBound": true,
+    "serviceCannotSubstituteFields": true,
+    "monotonicWordingTimestamp": true,
+    "exportMetadataOnly": true,
+    "noExportDeliveryClaim": true,
+    "noFinancialSideEffects": true,
+    "literalJsonRetained": true,
+    "preparedBackupSurvivesAuditFailure": true,
+    "fallbackNoDatabaseWrite": true,
+    "cancelledOriginalAndQueueRetained": true,
+    "activeScopeMismatchStillDenied": true,
+    "cloudSetup": false
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "runtimeConnectionOutsideShopBackupAndJournal": true,
+    "testInterfacesShipped": false,
+    "testFixtureMarkersInStaticOutput": 0
+  },
+  "hosted": {
+    "changed": true,
+    "newMigrations": 1,
+    "newEdgeDeployments": 1,
+    "migrations": 27,
+    "functions": 6,
+    "commandsVersion": 14,
+    "commandsVerifyJwt": true,
+    "bundle": {
+      "bytes": 376906,
+      "sha256": "719c25f19f5c14db1b50a297be3d3202ad2e8650ae0d638aa81631fb4667b6be",
+      "sourceFiles": 59
+    },
+    "roleFixture": {
+      "bytes": 24022,
+      "sqlSha256": "02966eb5537643411107598021c8e8c55d1d50d7ce6ee3671a6017f94d1d847c",
+      "sameLocallyVerifiedSql": true,
+      "proof": {
+        "audits": 4,
+        "commands": 4,
+        "receipts": 4,
+        "pendingTickets": 0,
+        "noFinancialEffects": true,
+        "privateReadsDenied": true,
+        "normalizedPlanBound": true,
+        "managerActorRetained": true,
+        "latestWordingRetained": true,
+        "literalExportRetained": true,
+        "unassignedOutletDenied": true,
+        "originalActorReplayOnly": true,
+        "ordinaryCompletionDenied": true,
+        "normalizedCompletionBound": true,
+        "originalOccurrenceRetained": true,
+        "literalOutletSourceRetained": true
+      },
+      "auth_rows": 0,
+      "business_rows": 0,
+      "ticket_rows": 0
+    },
+    "access": {
+      "application_tables": 48,
+      "forced_rls_tables": 48,
+      "anonymous_table_access": 0,
+      "authenticated_direct_writes": 0,
+      "settings_ticket_direct_grants": 0,
+      "prepare_authenticated": true,
+      "prepare_anon": false,
+      "prepare_service": false,
+      "finish_authenticated": false,
+      "finish_anon": false,
+      "finish_service": true,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "auth_users": 0,
+      "migrations": 27,
+      "settings_migration": 1
+    },
+    "securityAdvisors": {
+      "info": 1,
+      "warnings": 0,
+      "errors": 0,
+      "intentionallyPolicyFreePrivateTables": 19
+    },
+    "httpGuards": [
+      {
+        "name": "preflight",
+        "status": 204,
+        "allowOrigin": "https://tanzir71.github.io",
+        "noStore": true
+      },
+      {
+        "name": "missing-jwt",
+        "status": 401,
+        "allowOrigin": "*",
+        "noStore": false
+      },
+      {
+        "name": "invalid-jwt",
+        "status": 401,
+        "allowOrigin": "*",
+        "noStore": false
+      }
+    ],
+    "newPersistentAuthUsers": 0,
+    "smsRequests": 0,
+    "realMessagesSent": 0,
+    "authConfigurationChanged": false,
+    "vaultUnchanged": true,
+    "actualOwnerSignedHttpProven": false
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "profile/setup updates and shop-link adapters",
+    "legacy direct supplier writes and missing payment occurrence review",
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox/image-delivery controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "5000-record 3G upload acceptance",
+    "remaining M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/cloud-upload.ts": "ecb0c69b5dc2cbe8d57edfb6112efeaa8251a7abc644665d1fea393f4b73f079",
+    "apps/web/src/BackupTools.tsx": "fa240d1bed99e35eafd312983d2860a6dbd8b219846ac721d7a07b7c656f1554",
+    "apps/web/src/data/db.ts": "c181c33e196282d1c7b4baad925ab9a828c38375fe6da8bf6b6b3503144c90a9",
+    "apps/web/src/data/export-audit.ts": "15ab949a511147dd55ba326d194cc766092b98c2a2775268d84692d6de15847b",
+    "packages/core/export-audit.ts": "a1721a2f6fc67b0799c1e45a4614e6d7b21719884cc1159a77f3c64aca1db82b",
+    "packages/core/khata-messages.ts": "5077dde00aac1b064b7db18be99ba4a6371e829afc54c936f457e01c55784522",
+    "packages/core/settings-commands.ts": "fbe9be41cf3daa17d635d39af1b5fd6464de38b07a74163c23b62420459b51b0",
+    "packages/core/shop-commands.ts": "7f186990901577bc33b23f95ecaa09100d51159f41029f43050dada2605b2e2b",
+    "supabase/functions/_shared/settings-write.ts": "6977d2004a71178ff89245d5732ae08b169e739bcabec873302b2b1ddb3568a1",
+    "supabase/functions/_shared/commands-handler.ts": "ece452a6818292b0ba5deddc4fff3eb6d2da5b3ab1161be69494f464676533b3",
+    "supabase/migrations/20261118120357_settings_audit_commands.sql": "84f2a199b4e640273db545970239a6ed24bc6ff70e58dcb9f997f16019763c04",
+    "tests/settings-commands.test.ts": "edea87d0113f449f78f3e9269eeb123ac8dafcd7c689b47f094d5a0e344cdd5b",
+    "tests/settings-outbox-adapters.test.ts": "c744c9237c2a6cbb874230b6276e569b38eca2fc36e69f62fab04f1148e0e044",
+    "tests/settings-hosted-fixture.ts": "9c497c242bf0ba02361b6693f0b1c0242d9d9e93b37250b62a25fcc69aacde6a",
+    "tests/e2e/settings-outbox.spec.ts": "a072881a90a773eb4597a19a49448aa92a13912c75da27e29ee5736cd60ceea5",
+    "tests/cloud-upload-review.test.ts": "33b337b040cb81aa0da829ce974f2b77ef413e42e99280dd5df4a8510695145a",
+    "tests/e2e/cloud-upload-review.spec.ts": "0c62e55c6dcc70fd5ace8f44a29c2aaa1675aabbaf138969f40343c5d3eb9f96",
+    "tests/fixtures/cloud-upload-review-browser.ts": "83938e2e13c1f70e846c00fb68db7e25323818c408a501898c53f6e72c207b58",
+    "scripts/qa-visual.mjs": "35d9249edcffa7ca15640b944dddd61ffa0f979db4853c6c12cfa06e414f6bee",
+    "qa/configs/m30-settings.json": "8fa6e6a47ab037cd2f58cb596736d4b4121e5d77467000a5c6b32a292e12b305"
+  }
+}

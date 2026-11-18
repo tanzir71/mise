@@ -12,7 +12,9 @@ async function use<T>(task:(db:MiseDatabase,journal:CloudUploadJournal)=>Promise
  try{return await task(db,journal);}finally{db.close();journal.close();}
 }
 const api={
+ replacementBackup:async()=>{const replacement=new MiseDatabase('mise-review-replacement-'+crypto.randomUUID());try{await replacement.saveSetup({businessType:'corner_shop',marketCode:'BD',name:'Replacement shop',phone:'01812345482'});return await replacement.readBackup();}finally{await replacement.delete();}},
  arm:()=>use(async(db,journal)=>{const value=await journal.review(db);if(!value.snapshot)throw Error('Prepare a real local review first.');await beginLocalUpload(db,value.snapshot,target);return value.snapshot.id;}),
+ blockQueue:()=>use(async(db)=>{const state=(await db.cloudState.get('binding'))!;await db.outbox.add({id:'00000000000000000000000997',version:1,uploadId:state.uploadId,businessId:state.businessId,outletId:state.outletId,sequence:state.sequence+1,at:Date.now(),status:'retained',commands:[],receipts:[],changes:[]});}),
  shadow:()=>use(async(db,journal)=>{await db.recordSale({expression:'5',method:'cash'});const saved=await journal.addSnapshot(await prepareCloudUpload(await db.readBackup(),newInboxId()));return saved.id;}),
  accept:()=>use(async(db,journal)=>{const state=(await db.cloudState.get('binding'))!;return uploadWithLocalOutbox(db,journal,state.uploadId,target,new MemoryCloudUpload());}),
  cancel:()=>use(async(db)=>{const state=(await db.cloudState.get('binding'))!;await cancelLocalUpload(db,state.uploadId,target,{cancel:async id=>({id,canceled:true})});}),

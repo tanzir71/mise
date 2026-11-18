@@ -55,7 +55,7 @@ GitHub's repository secret scanning and push protection are also enabled. The
 latest owner-authenticated, read-only API check returned zero open secret alerts.
 These protections remain enabled independently of the stopped Actions workflows.
 
-The same day's live read-only verification found all **47 public/private application
+The same day's latest live verification found all **48 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
 reported no warnings or errors. Informational private-table notices describe
@@ -128,3 +128,12 @@ original local shop identities and upload ID; it stores no project connection,
 JWT or API key. Bound reviews verify their complete original payload and receipt.
 Read-only recovery cannot silently replace missing evidence. Synthetic test/QA
 interfaces stay outside the shipped application.
+
+The [wording/export verification](m30-settings-local.json) repeats the nine-value
+source/index/history/static-output audit. New commands project only editable
+wording or preparation metadata, with no file bytes, connection details or Auth
+fields. Private preparation binds the complete normalized intent and original
+identity; service completion cannot replace those fields. A backup download after
+an audit failure reads the already prepared file and performs no second database
+write or fabricated audit. Old recovery evidence remains separate from portable
+shop backups when a cancelled connection is replaced.

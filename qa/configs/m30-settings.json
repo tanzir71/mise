@@ -1,0 +1,222 @@
+{
+  "title": "M30 settings and backup recovery",
+  "pages": [
+    {
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "setup",
+        "sync",
+        "connection",
+        "verify"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-settings-backup-fallback-phone",
+      "note": "Backup recovery after a synthetic local queue constraint. The original prepared JSON remains available without a false saved-audit claim. Compare the supplied M17 export shell; pixel differences for the added recovery action are informational. No hosted Auth, SMS, upload or real merchant data.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M29 · Manager — Export (sheet).png",
+          "id": "screen",
+          "clip": {
+            "left": 56,
+            "top": 144,
+            "width": 780,
+            "height": 1576
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "upload-review",
+          "value": "arm"
+        },
+        {
+          "type": "upload-review",
+          "value": "blockQueue"
+        },
+        {
+          "type": "click",
+          "selector": "a:text-is(\"Open exports and JSON backup\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".exports-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button:text-is(\"Backup and restore\")"
+        },
+        {
+          "type": "click",
+          "selector": "button:text-is(\"Download JSON backup\")"
+        },
+        {
+          "type": "wait",
+          "selector": "button:text-is(\"Download prepared backup\")"
+        }
+      ]
+    },
+    {
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "setup",
+        "sync",
+        "connection",
+        "verify"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-settings-backup-fallback-desktop",
+      "note": "Backup recovery after a synthetic local queue constraint. The original prepared JSON remains available without a false saved-audit claim. Compare the supplied M17 export shell; pixel differences for the added recovery action are informational. No hosted Auth, SMS, upload or real merchant data.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "id": "screen",
+          "clip": {
+            "left": 28,
+            "top": 100,
+            "width": 1440,
+            "height": 1200
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "upload-review",
+          "value": "arm"
+        },
+        {
+          "type": "upload-review",
+          "value": "blockQueue"
+        },
+        {
+          "type": "click",
+          "selector": "a:text-is(\"Open exports and JSON backup\")"
+        },
+        {
+          "type": "wait",
+          "selector": ".exports-page[aria-busy=\"false\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button:text-is(\"Download JSON backup\")"
+        },
+        {
+          "type": "wait",
+          "selector": "button:text-is(\"Download prepared backup\")"
+        }
+      ]
+    }
+  ],
+  "actionSets": {
+    "setup": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "connection": [
+      {
+        "selector": "input[type=url]",
+        "type": "fill",
+        "value": "https://cloud.test"
+      },
+      {
+        "selector": "input[type=password]",
+        "type": "fill",
+        "value": "sb_publishable_test_only"
+      },
+      {
+        "selector": "button:text-is(\"Save connection\")",
+        "type": "click"
+      },
+      {
+        "selector": "button:text-is(\"Send verification code\")",
+        "type": "click"
+      },
+      {
+        "selector": "input[autocomplete=one-time-code]",
+        "type": "wait"
+      }
+    ],
+    "sync": [
+      {
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible",
+        "type": "click"
+      },
+      {
+        "selector": "main a[href$=\"/settings/sync\"]",
+        "type": "click"
+      },
+      {
+        "selector": ".cloud-setup",
+        "type": "wait"
+      }
+    ],
+    "verify": [
+      {
+        "selector": "input[autocomplete=one-time-code]",
+        "type": "fill",
+        "value": "123456"
+      },
+      {
+        "selector": "button:text-is(\"Verify phone\")",
+        "type": "click"
+      },
+      {
+        "selector": ".cloud-verified",
+        "type": "wait"
+      },
+      {
+        "selector": "button:text-is(\"Prepare local review\")",
+        "type": "click"
+      },
+      {
+        "selector": "button:text-is(\"Review the latest records\")",
+        "type": "wait"
+      }
+    ]
+  }
+}

@@ -196,7 +196,7 @@ export class MiseDatabase extends LocalStore {
     await this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
       const command = saveCreditMessagingCommand(input,setup);
-      await this.outlets.put(command.outlet); await this.events.add(command.event);
+      await withOutboxIntent(this,{id:command.event.id,type:'khata.wording',outletId:command.outlet.id,occurredAt:command.event.at,input:command.outlet.creditMessaging},async()=>{await this.outlets.put(command.outlet);await this.events.add(command.event);});
     });
   }
 

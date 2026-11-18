@@ -3,6 +3,7 @@ import { formatMoney } from './money';
 import { waLink } from './phone';
 import { creditBalance, validateCreditContext, type LedgerContext } from './khata';
 import type { AuditEvent, CreditMessaging, CreditEntry, Sale, SetupSnapshot } from './models';
+import type {ShopSetup} from './shop-access';
 export const defaultCreditMessaging: CreditMessaging = {
   paymentNote:'',
   templates:{
@@ -10,16 +11,21 @@ export const defaultCreditMessaging: CreditMessaging = {
     direct:{en:'Hi {name}, {amount} is due at {shop}. Please settle your balance. {payment} Thank you.',bn:'আসসালামু আলাইকুম {name}, {shop}-এ আপনার বাকি {amount}। অনুগ্রহ করে বাকি পরিশোধ করুন। {payment} ধন্যবাদ!'},
   },
 };
-export function saveCreditMessagingCommand(input: CreditMessaging, setup: SetupSnapshot, at = Date.now()) {
+export function normaliseCreditMessaging(input:CreditMessaging):CreditMessaging {
+  const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
+  if(!object(input)||typeof input.paymentNote!=='string'||!object(input.templates)||!['gentle','direct'].every(tone=>object(input.templates[tone as 'gentle'|'direct'])&&['en','bn'].every(language=>typeof input.templates[tone as 'gentle'|'direct'][language as 'en'|'bn']==='string')))throw new Error('Use the complete payment note and reminder wording.');
   if (input.paymentNote.trim().length > 250) throw new Error('Keep payment instructions within 250 characters.');
-  const templates = structuredClone(input.templates);
+  const templates={gentle:{en:input.templates.gentle.en,bn:input.templates.gentle.bn},direct:{en:input.templates.direct.en,bn:input.templates.direct.bn}};
   for (const tone of ['gentle','direct'] as const) for (const language of ['en','bn'] as const) {
     const template = templates[tone][language].trim();
     if (template.length > 1000 || !['name','shop','amount'].every(token => template.includes(`{${token}}`)) || [...template.matchAll(/\{([^}]+)\}/g)].some(match => !['name','shop','amount','payment'].includes(match[1]))) throw new Error('Use {name}, {shop} and {amount}; {payment} is optional. Keep each template within 1,000 characters.');
     templates[tone][language] = template;
   }
-  const outlet = {...setup.outlet,creditMessaging:{paymentNote:input.paymentNote.trim(),templates},updatedAt:at};
-  const event: AuditEvent = {id:ulid(at),outletId:outlet.id,actor:{type:'member',id:setup.owner.id},command:'khata.wording',before:setup.outlet,after:outlet,at};
+  return {paymentNote:input.paymentNote.trim(),templates};
+}
+export function saveCreditMessagingCommand(input: CreditMessaging, setup: ShopSetup, at = Date.now(),newId:()=>string=()=>ulid(at)) {
+  const outlet = {...setup.outlet,creditMessaging:normaliseCreditMessaging(input),updatedAt:at};
+  const event: AuditEvent = {id:newId(),outletId:outlet.id,actor:{type:'member',id:setup.owner.id},command:'khata.wording',before:setup.outlet,after:outlet,at};
   return {outlet,event};
 }
 const oneLine = (value: string) => value.replace(/\s+/g,' ').trim();

@@ -66,7 +66,7 @@ try {
         await page.clock.fastForward(action.milliseconds);
       }
       else if(action.type==='upload-review'){
-        if(!['arm','accept','removeOriginal'].includes(action.value))throw new Error('Use an explicit local upload-review fixture action.');
+        if(!['arm','accept','removeOriginal','blockQueue'].includes(action.value))throw new Error('Use an explicit local upload-review fixture action.');
         if(!reviewFixtureInstalled){await installUploadReviewFixture(page);reviewFixtureInstalled=true;}
         await page.evaluate(value=>window.miseUploadReviewTest[value](),action.value);
       }

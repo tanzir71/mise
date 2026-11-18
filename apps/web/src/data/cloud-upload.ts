@@ -16,7 +16,7 @@ async function reviewContext(db:MiseDatabase){
     const setup=await db.setup();if(!setup)throw reviewError();
     const saved=await db.cloudState.get('binding'),binding=saved===undefined?null:parseLocalCloudState(saved);
     const scope={businessId:setup.business.id,outletId:setup.outlet.id,ownerId:setup.owner.id};
-    if(binding&&(binding.businessId!==scope.businessId||binding.outletId!==scope.outletId||binding.ownerId!==scope.ownerId))throw reviewError();
+    if(binding&&binding.phase!=='cancelled'&&(binding.businessId!==scope.businessId||binding.outletId!==scope.outletId||binding.ownerId!==scope.ownerId))throw reviewError();
     return {scope,binding};
   });
 }
