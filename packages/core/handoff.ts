@@ -1,6 +1,6 @@
 import { ulid } from 'ulid';
-import type { AuditEvent,SetupSnapshot } from './models';
-import { validateShop } from './shop-access';
+import type { AuditEvent } from './models';
+import { validateShop,type ShopSetup } from './shop-access';
 import { publicRecord,publicText,e164Pattern } from './public-shop';
 import { assertHandoffProgress,changeHandoffProgress,newHandoffProgress,type HandoffChoice,type HandoffProgress } from './handoff-progress';
 
@@ -36,12 +36,13 @@ function session(value:unknown):HandoffSession {
   return {...row,draft} as unknown as HandoffSession;
 }
 export function handoffSessionToken(s:HandoffSession):string {const row=session(s);return JSON.stringify([row.v,row.id,row.outletId,row.eventId,row.generation,row.createdAt,handoffDraftToken(row.draft),progressToken(row.progress),row.sentEventId??null]);}
-export function prepareHandoffCommand(draft:HandoffDraft,setup:SetupSnapshot,generation=1,at=Date.now()):{session:HandoffSession;event:AuditEvent} {
+export function prepareHandoffCommand(draft:HandoffDraft,setup:ShopSetup,generation=1,at=Date.now(),newId:()=>string=()=>ulid(at)):{session:HandoffSession;event:AuditEvent} {
   validateShop(setup);if(!positive(generation)||!time(at))throw new Error('Use a valid message attempt and time.');
-  const id=ulid(at),input=normaliseHandoffDraft(draft),state:HandoffSession={v:input.template===undefined?1:2,id,outletId:setup.outlet.id,eventId:id,generation,createdAt:at,draft:input,progress:newHandoffProgress(at)};
+  const id=newId(),input=normaliseHandoffDraft(draft);if(!validId(id))throw new Error('Keep the original message attempt identity.');
+  const state:HandoffSession={v:input.template===undefined?1:2,id,outletId:setup.outlet.id,eventId:id,generation,createdAt:at,draft:input,progress:newHandoffProgress(at)};
   return {session:state,event:{id,outletId:state.outletId,handoffId:id,handoffRevision:1,handoffTopic:handoffTopic(state.draft),actor:{type:'member',id:setup.owner.id},command:'handoff.prepare',before:null,after:state,at}};
 }
-export function changeHandoffCommand(previous:HandoffSession,choice:HandoffChoice,setup:SetupSnapshot,expectedRevision:number,id=ulid(),at=Date.now()):{session:HandoffSession;event:AuditEvent} {
+export function changeHandoffCommand(previous:HandoffSession,choice:HandoffChoice,setup:ShopSetup,expectedRevision:number,id=ulid(),at=Date.now()):{session:HandoffSession;event:AuditEvent} {
   validateShop(setup);const before=session(previous);
   if(before.outletId!==setup.outlet.id||expectedRevision!==before.progress.revision||!validId(id))throw new Error('This message changed. Reopen it before recording another choice.');
   const after:HandoffSession={...before,eventId:id,draft:normaliseHandoffDraft(before.draft),progress:changeHandoffProgress(before.progress,choice,at)};

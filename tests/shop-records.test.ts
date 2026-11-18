@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import {afterAll,beforeAll,expect,it,vi} from 'vitest';
 import {shopDataFixture} from './shop-data-fixture';
-import {cloudRecordMaps,prepareCloudMigration,readCloudMigration,type CloudMigration,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,prepareCloudMigration,readCloudMigration,type CloudMigration,type CloudRecord} from '../packages/core/cloud-records';
 import {backupToken} from '../packages/core/backup';
 import {backupTableNames,type MiseBackup} from '../packages/core/backup-tables';
 import {newInboxId} from '../packages/core/inbox';
@@ -204,3 +204,5 @@ it('unsafe numeric values and unsupported transport versions cannot be restored'
   const corrupt=structuredClone(plan);corrupt.records.find(row=>row.table==='sales')!.values.amount='9007199254740992';await expect(readCloudMigration(corrupt)).rejects.toThrow();
   await expect(readCloudMigration({...plan,version:2 as 1})).rejects.toThrow(/Unsupported/);
 });
+
+it('required audit JSON nulls survive SQL row decoding without inventing optional ledger fields',()=>{const row=decodeCommandRecord('events',{id:newInboxId(),outlet_id:newInboxId(),actor_type:'member',actor_id:newInboxId(),command:'catalogue.delete',before_data:null,after_data:null,at:1000});expect(row).toMatchObject({before:null,after:null});const encoded=encodeCommandRecord('events',row,newInboxId());expect(encoded.values.before_data).toBe('null');expect(encoded.values.after_data).toBe('null');expect(decodeCommandRecord('creditEntries',{over_limit:null})).not.toHaveProperty('overLimit');});

@@ -84,7 +84,8 @@ export function decodeCommandRecord(table:BackupTable,row:Record<string,unknown>
   const map=cloudRecordMaps[table],values:Record<string,CloudValue>={};
   for(const [column,spec] of Object.entries(map.fields)){
     const value=row[column],{kind}=field(spec);
-    values[column]=value===null||value===undefined?null:kind==='j'?JSON.stringify(value):value as CloudValue;
+    const auditNull=table==='events'&&(column==='before_data'||column==='after_data')&&value===null;
+    values[column]=auditNull?'null':value===null||value===undefined?null:kind==='j'?JSON.stringify(value):value as CloudValue;
   }
   return decodeFields(values,map.fields,table);
 }

@@ -1,6 +1,6 @@
 import type { MiseDatabase } from './db';
 import { changeHandoffCommand,handoffDraftToken,handoffEventSession,handoffSessionToken,handoffSourceTables,handoffTemplateToken,handoffTopic,newHandoffActionId,normaliseHandoffDraft,prepareHandoffCommand,type HandoffCompletion,type HandoffDraft,type HandoffSession } from '@mise/core/handoff';
-import { publicRecord } from '@mise/core/public-shop';
+import {completeHandoffCommand,type HandoffCompletionContext} from '@mise/core/handoff-completion';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import type { SetupSnapshot } from '@mise/core/models';
 
@@ -33,18 +33,17 @@ export async function prepareDatabaseHandoff(db:MiseDatabase,input:HandoffDraft,
     await db.events.add(change.event);return change.session;
   });
 }
-async function complete(db:MiseDatabase,state:HandoffSession,value?:HandoffCompletion):Promise<void>{
-  const {source,purpose,text,phone,part,parts}=state.draft,channel=state.progress.sentChannel==='whatsapp'?'whatsapp':'manual';
-  if(source.kind==='credit'){
-    const input=publicRecord(value,['kind']);if(input.kind!=='credit')throw new Error('Review the credit message before marking it sent.');
-    await db.recordCommunication(source.id,purpose as 'reminder'|'receipt'|'call',text,purpose==='call'?'call':channel);
-  }else if(source.kind==='order'){
-    const input=publicRecord(value,['kind','revision']);if(input.kind!=='order'||!Number.isSafeInteger(input.revision)||(input.revision as number)<1)throw new Error('Review the order before marking its message sent.');
-    await db.recordOrderCommunication(source.id,{purpose:purpose as 'quote'|'call',text,channel:purpose==='call'?'call':channel},input.revision as number);
-  }else if((source.kind==='supplier'||source.kind==='shop')&&purpose==='supplier-order'){
-    const input=publicRecord(value,['kind','supplierName','stockItemIds']);if(input.kind!=='supplier'||typeof input.supplierName!=='string'||!Array.isArray(input.stockItemIds)||input.stockItemIds.some(id=>typeof id!=='string'))throw new Error('Review the supplier draft before marking it sent.');
-    await db.recordSupplierMessage({id:state.id,supplierId:source.kind==='supplier'?source.id:undefined,supplierName:input.supplierName,stockItemIds:input.stockItemIds as string[],phone,text,channel,part,parts});
-  }else if(value!==undefined)throw new Error('This message does not use that completion record.');
+async function complete(db:MiseDatabase,state:HandoffSession,current:SetupSnapshot,value?:HandoffCompletion):Promise<void>{
+  const context:HandoffCompletionContext={setup:current};
+  if(state.draft.source.kind==='credit')context.ledger=await db.readCreditLedger(state.draft.source.id);
+  if(state.draft.source.kind==='order')context.order=await db.orders.get(state.draft.source.id);
+  if((state.draft.source.kind==='supplier'||state.draft.source.kind==='shop')&&state.draft.purpose==='supplier-order'){
+    [context.items,context.suppliers,context.message]=await Promise.all([db.stockItems.where('outletId').equals(current.outlet.id).toArray(),db.suppliers.where('outletId').equals(current.outlet.id).toArray(),db.supplierMessages.get(state.id)]);
+  }
+  const change=completeHandoffCommand(state,value,context,state.progress.updatedAt);
+  if(change.entries.length)await db.creditEntries.bulkAdd(change.entries);
+  if(change.order)await db.orders.put(change.order);if(change.communication)await db.orderCommunications.add(change.communication);
+  if(change.message)await db.supplierMessages.add(change.message);if(change.events.length)await db.events.bulkAdd(change.events);
 }
 export async function changeDatabaseHandoff(db:MiseDatabase,id:string,revision:number,choice:HandoffChoice,requestId=newHandoffActionId(),completion?:HandoffCompletion):Promise<HandoffSession>{
   if(choice.type!=='sent'&&completion!==undefined)throw new Error('Only Sent can complete a business message.');
@@ -59,7 +58,7 @@ export async function changeDatabaseHandoff(db:MiseDatabase,id:string,revision:n
     }
     const before=await latest(db,id,current.outlet.id);await subject(db,before.draft,current);
     const change=changeHandoffCommand(before,choice,current,revision,requestId,Math.max(Date.now(),before.progress.updatedAt));
-    if(choice.type==='sent')await complete(db,change.session,completion);
+    if(choice.type==='sent')await complete(db,change.session,current,completion);
     await db.events.add(change.event);return change.session;
   });
 }

@@ -6,6 +6,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 manual messages: preparation, Open/Copy/failure, explicit Sent and undo retain complete attempt history. Sent commits its credit, order or supplier communication together; supplier resends reuse the original confirmation and never receive stock or change debt. Cloud controls remain unavailable.
 - M30 day closing: the complete reviewed Today snapshot, cash difference and optional walk-in receipt retain device IDs and commit with their audits. Same-day undo retains the original closing, reverses only its linked surplus receipt, and preserves later sales. Original occurrence days and live undo limits remain distinct; sync controls stay unavailable.
 - M30 preparation: scoped access, original-image transfers, audited catalogue edits, customer/khata saves, counter receipts, khata payments, availability changes with undo and resumable reviewed uploads are prepared. Customer and financial commands retain device record IDs, and financial records retain their occurrence times. Rows, audits and receipts commit together. Sign-in, sync and cloud interfaces remain unavailable while the full milestone is in progress.
 - M30 stock commands: item saves/archive/restore, relative movements, physical counts, atomic batches of up to 1,000 items and guarded undo retain device IDs and original movement times. Relative movements can merge across newer relative changes; a newer physical count requires review. Larger batches require an authenticated outlet check before their body is read.
@@ -23,6 +24,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Fixed
 
+- Supabase privacy: local commit, push, lint and production checks automatically compare private deployment values from clone-local Git configuration. Plain project/organization IDs and prefix-free PIN peppers are checked without committing configuration or printing values. An unavailable private input blocks the scan.
+
+- Preserve required audit JSON nulls when reading SQL rows, so original message attempts and deletion snapshots reconstruct without losing their before/after fields.
 - Decode escaped stock-name and closing-day keys without adding an extra layer of quotes; literal Bengali, NUL and surrogate data survive the cloud codec.
 - Return expected catalogue conflicts promptly as HTTP 409, with bounded server retries for changed snapshots.
 - Keep deployment credentials and project-specific operational details out of the repository; local lint now checks for accidentally committed secrets.

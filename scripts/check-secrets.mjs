@@ -31,6 +31,7 @@ export function inspectSecretBytes(bytes,path,known=[],depth=0){
   return findings;
 }
 function git(args,input,buffer=false){const r=spawnSync('git',args,{input,encoding:buffer?undefined:'utf8',maxBuffer:128*1024*1024,windowsHide:true});if(r.status!==0)throw new Error('Git audit command failed: '+args[0]);return r.stdout;}
+function localConfig(name){const r=spawnSync('git',['config','--local','--get-all',name],{encoding:'utf8',maxBuffer:64*1024,windowsHide:true});if(r.status===1)return [];if(r.status!==0)throw new Error('Private audit configuration cannot be read.');return r.stdout.trim().split(/\r?\n/).filter(Boolean);}
 function knownValues(directory){
   if(!directory)return [];
   const result=[],add=(value,rule,kind='credential')=>{if(typeof value==='string'&&value.length>=16)result.push({value,rule,kind});};
@@ -42,7 +43,10 @@ function knownValues(directory){
 }
 function walk(directory){const result=[];for(const entry of readdirSync(directory,{withFileTypes:true})){const path=join(directory,entry.name);if(entry.isSymbolicLink())continue;if(entry.isDirectory())result.push(...walk(path));else if(entry.isFile())result.push(path);}return result;}
 export function auditRepository({history=false,artifacts=false,knownDirectory}={}){
-  const known=knownValues(knownDirectory),findings=[];let objects=0,files=0,archiveFiles=0;
+  const directories=knownDirectory===undefined?localConfig('mise.secretScanDirectory'):[knownDirectory];if(directories.length>1)throw new Error('Choose one private audit directory.');
+  const known=knownValues(directories[0]),references=localConfig('mise.privateDeploymentRef');
+  for(const value of references){if(!/^[a-z]{20}$/.test(value))throw new Error('Invalid private deployment audit reference.');if(!known.some(item=>item.value===value))known.push({value,rule:'known-deployment-reference',kind:'deployment'});}
+  const findings=[];let objects=0,files=0,archiveFiles=0;
   const inspect=(body,path)=>{objects++;if(Buffer.from(body).subarray(0,4).equals(Buffer.from([80,75,3,4])))archiveFiles++;findings.push(...inspectSecretBytes(body,path,known));};
   const tracked=git(['ls-files','--cached','--others','--exclude-standard','-z']).split('\0').filter(Boolean);
   for(const path of new Set(tracked)){if(!lstatSync(path,{throwIfNoEntry:false})?.isFile())continue;files++;inspect(readFileSync(path),'worktree:'+path);}
