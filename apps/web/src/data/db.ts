@@ -13,6 +13,7 @@ import {reserveOrderFinance,orderIntentBase,orderSaveIntent,orderSettlementInput
 import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import {profileIntent} from '@mise/core/profile-commands';
+import {generateDatabaseShopLink,undoDatabaseShopLink} from './shop-links';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
 import { marketPacks } from '@mise/core/packs';
@@ -413,10 +414,10 @@ export class MiseDatabase extends LocalStore {
     return (await import('./export-audit')).recordPreparedExport(this,input);
   }
   async generateShopLink(input:ShopLinkInput,review:ShopLinkReview,base:string):Promise<AuditEvent> {
-    return (await import('./shop-links')).generateDatabaseShopLink(this,input,review,base);
+    return generateDatabaseShopLink(this,input,review,base);
   }
   async undoShopLink(id:string):Promise<void> {
-    return (await import('./shop-links')).undoDatabaseShopLink(this,id);
+    return undoDatabaseShopLink(this,id);
   }
   async recordPurchase(input:PurchaseInput):Promise<Purchase> {
     return (await import('./purchases')).recordDatabasePurchase(this,input);

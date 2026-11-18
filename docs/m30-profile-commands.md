@@ -88,7 +88,8 @@ The [local report](../qa/report.html) includes the
 [390 px settings form](../qa/screens/m30-profile-form-390.png) and
 [desktop settings form](../qa/screens/m30-profile-form-1440.png).
 
-Shop-link generation/undo, legacy direct supplier writes, canonical reconciliation,
+Shop-link generation/undo is covered by the
+[subsequent link increment](m30-link-commands.md). Legacy direct supplier writes, canonical reconciliation,
 full upload/outbox/image controls, real OTP/signed-owner HTTP, the 5,000-record 3G
 gate and subsequent milestones remain open. GitHub Actions and Pages publication
 remain stopped by the owner; this increment creates no CI artifact or Pages deploy.

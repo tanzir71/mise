@@ -2,8 +2,9 @@
 
 Changes to khata wording and prepared-export audits now retain typed commands in
 the same local transaction as their records and history. This covers
-`khata.wording` and `export.prepare`. Shop-link changes and legacy direct supplier
-messages still require their own adapters. Owner profile saves are covered by the
+`khata.wording` and `export.prepare`. Legacy direct supplier messages still require
+their own adapter. Shop-link changes are covered by the
+[subsequent link increment](m30-link-commands.md). Owner profile saves are covered by the
 [subsequent profile increment](m30-profile-commands.md). M30 remains incomplete
 and cloud activation stays gated.
 

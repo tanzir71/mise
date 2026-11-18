@@ -5,6 +5,7 @@ import {purchaseBodyHeader,purchaseBodyLimit} from '@mise/core/purchase-commands
 import {orderBodyHeader,orderBodyLimit} from '@mise/core/order-commands';
 import {handoffBodyHeader,handoffBodyLimit} from '@mise/core/handoff-commands';
 import {inboxBodyHeader,inboxBodyLimit} from '@mise/core/inbox-commands';
+import {linkBodyHeader,linkBodyLimit} from '@mise/core/link-commands';
 
 export class CloudCommandError extends Error {constructor(readonly kind:'auth'|'review'|'retry',message:string){super(message);}}
 /** Only domain intents leave the device. Recovery row changes are never a write API. */
@@ -19,6 +20,7 @@ export function createCloudCommandRemote(input:CloudConnection,getJwt:()=>Promis
   else if(command.type==='order.create'||command.type==='order.update'){headers[orderBodyHeader]=command.outletId;maximum=orderBodyLimit;deadline=120000;}
   else if(command.type==='handoff.prepare'){headers[handoffBodyHeader]=command.outletId;maximum=handoffBodyLimit;deadline=120000;}
   else if(command.type==='inbox.capture'){headers[inboxBodyHeader]=command.outletId;maximum=inboxBodyLimit;deadline=120000;}
+  else if(command.type==='shopLink.generate'){headers[linkBodyHeader]=command.outletId;maximum=linkBodyLimit;deadline=120000;}
   if(new TextEncoder().encode(body).byteLength>maximum)throw new CloudCommandError('review','This saved action is too large. Keep the local copy and review it.');
   signal?.throwIfAborted();const jwt=await getJwt();signal?.throwIfAborted();
   if(typeof jwt!=='string'||jwt.length>8192||!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(jwt))throw new CloudCommandError('auth','Verify your phone before sending local changes.');

@@ -1,0 +1,108 @@
+{
+  "title": "M30 original shop-link publication and queue",
+  "heights": {
+    "390": 1000,
+    "1440": 1100
+  },
+  "actionSets": {
+    "setup": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "more": [
+      {
+        "type": "click",
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
+      }
+    ],
+    "link": [
+      {
+        "type": "click",
+        "selector": "main a[href$=\"/settings/shop-link\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "label:has-text(\"Opening hours\") textarea",
+        "value": "9 am–11 pm"
+      },
+      {
+        "type": "fill",
+        "selector": "label:has-text(\"Delivery note\") textarea",
+        "value": "Call at the gate · গেটে ফোন করুন"
+      },
+      {
+        "type": "click",
+        "selector": ".shop-link-selection fieldset input[type=checkbox] >> nth=0"
+      },
+      {
+        "type": "click",
+        "selector": "button[form=\"shop-link-settings-form\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".shop-link-preview-card h2",
+        "state": "visible"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "m30-link",
+      "path": "app/?flags=shopLinks",
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "setup",
+        "more",
+        "link"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "note": "Original published shop link after the established local generation flow; queue changes add no controls. The supplied Settings Storefront export includes later hosted controls; only the local public snapshot and sharing fields are implemented. Native axe checks use production styles. Full-page captures suppress offscreen skip navigation and pin phone navigation to the document bottom.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Settings › Storefront (link, look, zones, payments).png"
+        }
+      ]
+    }
+  ]
+}
