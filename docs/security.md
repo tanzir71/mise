@@ -101,3 +101,8 @@ saved models; storage metadata and unrelated values stay outside the wire comman
 The [order adapter verification](m30-order-outbox-local.json) repeats that scan and
 all 16 guard tests within its 1,644-test unit run. Order/line/payment requests also
 project only editable fields; full saved models are not serialized as commands.
+
+The [manual-message queue verification](m30-handoff-outbox-local.json) repeats the
+nine-value source/index/history/build scan and all 16 guard tests within its
+1,673-test unit run. Queued message commands contain reviewed domain values and
+companion IDs, with no connection settings, Auth session or server credentials.

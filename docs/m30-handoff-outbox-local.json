@@ -1,0 +1,178 @@
+{
+  "checkedAt": "2026-11-18T09:05:53.3890110Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Original manual hand-off preparation/choice/Sent companions and supplier correction join typed local queue transactions; cloud controls remain off",
+  "intentKinds": [
+    "handoff.prepare",
+    "handoff.change",
+    "supplier-message.undo"
+  ],
+  "choices": [
+    "open",
+    "copy",
+    "copy-failed",
+    "failed",
+    "sent",
+    "undo-sent"
+  ],
+  "sources": [
+    "credit",
+    "customer",
+    "order",
+    "supplier",
+    "sale",
+    "closing",
+    "shop"
+  ],
+  "checks": {
+    "units": {
+      "newAdapterTests": 29,
+      "passed": 1673,
+      "files": 93,
+      "reportSha256": "a8d97663c859f1fb713d1b8274ab49ff6d1a67adcc3415b99ec653f287103297",
+      "durationSeconds": 168.890521
+    },
+    "exports": {
+      "present": 270,
+      "passed": true,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "typecheck": {
+      "warnings": 0,
+      "errors": 0,
+      "hints": 0,
+      "logSha256": "a76c9df2fb4597bcdc29cf22df8fc211e37a9b7d789acb7cd3350d4d05889fea",
+      "passed": true,
+      "checkedFiles": 99
+    },
+    "lint": {
+      "logSha256": "f283ef7bcb96ab91a72eea841f43b57881ed6bd6917621f6a1062bc310aed41d",
+      "passed": true
+    },
+    "nativeHandoff": {
+      "preparationFailureManualCopyAndSelection": true,
+      "actualCompanionIds": true,
+      "correctionAndReload": true,
+      "newCases": 5,
+      "sentConstraintRollback": true,
+      "offlineReminderOrderAndSupplier": true
+    },
+    "browser": {
+      "passed": 326,
+      "durationSeconds": 315.854439,
+      "reportSha256": "0a0bdb7d9d045137ed4c0a98c0f903b3e83236ba637784ac617b191add67dd71",
+      "base": "/mise/",
+      "globalErrors": 0,
+      "flaky": 0,
+      "retries": 0,
+      "skipped": 0,
+      "failed": 0
+    },
+    "rootSmoke": {
+      "passed": 17,
+      "durationSeconds": 21.280978,
+      "reportSha256": "e638364398c4f66168e35178d1f436725e04be47518328258922fc12f7bbacb8",
+      "base": "/",
+      "globalErrors": 0,
+      "flaky": 0,
+      "retries": 0,
+      "skipped": 0,
+      "failed": 0
+    },
+    "visual": {
+      "newCiArtifact": false,
+      "previousEvidence": "docs/m30-auth-local.json",
+      "newVisualRun": false,
+      "previousComparisons": 15,
+      "layoutChanged": false
+    },
+    "builds": [
+      {
+        "logSha256": "0ce37cf510581925c6ace0122f78bcf02cbb480ba946198ab7564f53cf0addaa",
+        "passed": true,
+        "base": "/",
+        "htmlSha256": "eb07b7291df798ecc98f06b1f0bbbac806db0027e931fa66eaef30df605d999f"
+      },
+      {
+        "logSha256": "af60ecdbaf8ea1116296a1bd66d42ba7ce9207e5b5bfce85dd6671334ff4555c",
+        "passed": true,
+        "base": "/mise/",
+        "htmlSha256": "84d38cf911de50d5dc794650c7d1bdd24f86664658ce1087784ca34abe9c7070"
+      }
+    ]
+  },
+  "invariants": {
+    "htmlEditsUseNativeLf": true,
+    "concurrentRevisionGuard": true,
+    "partsMaximum": 100,
+    "resumingAddsNoQueueWrite": true,
+    "creditBalanceUnchanged": true,
+    "originalAttemptActionAndCompanionIds": true,
+    "supplierResendReusesOriginalRecord": true,
+    "exactReviewedTextAndTemplates": true,
+    "onlyExplicitSentConfirms": true,
+    "completeSentTransactionAtomic": true,
+    "orderReviewGuarded": true,
+    "legacyDirectSupplierWritesRetained": true,
+    "reusedCompanionAuditNotDuplicated": true,
+    "rawDomainCrLfRetained": true,
+    "actualNewSupplierCorrectionAudit": true,
+    "domainTextCharacters": 12000,
+    "queueAndAuditFailuresRollBack": true,
+    "supplierDoesNotReceiveStock": true,
+    "invalidControlsAndUnicodeRejected": true,
+    "lostAcceptedReplyKeepsIds": true,
+    "retainedSourceStopsLaterDelivery": true,
+    "requestReplayAddsNoQueueWrite": true,
+    "monotonicActionTimes": true
+  },
+  "serverMutationReplay": {
+    "actualSerializedQueueValues": true,
+    "existingServerBuilder": true,
+    "positiveActualOwnerHttpProven": false,
+    "equalClockIdentityAndDomainComparison": true,
+    "canonicalGenerationAndTimeConvergenceProven": false
+  },
+  "privacy": {
+    "coverageGaps": 0,
+    "knownPrivateValuesChecked": 9,
+    "historicalNonsecretIdentifierFindings": 22,
+    "historyRewritten": false,
+    "currentDeploymentFindings": 0,
+    "credentialFindings": 0
+  },
+  "hosted": {
+    "newAuthUsers": 0,
+    "newMigrations": 0,
+    "changed": false,
+    "realMessagesSent": 0,
+    "newEdgeDeployments": 0,
+    "smsRequests": 0
+  },
+  "publication": {
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false
+  },
+  "remaining": [
+    "original Inbox/worker and catalogue adapters",
+    "legacy direct supplier writes and missing payment occurrence review",
+    "unsupported settings/export/shop-link writes",
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "other M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/db.ts": "c581b11b5e3a8579653f6de6be2daf046d1f13c479640a580bc2cea16fca2a71",
+    "apps/web/src/data/handoff.ts": "09f7eb4b17abc6693aa57dd8f9c9d494020ad429c6bd4ec778541b18fe9b9135",
+    "packages/core/handoff-intent.ts": "0923d17b1b53c40b6b0b11d65fe637fa3f45829af38c05eea9ef8b724cbe813c",
+    "packages/core/handoff-commands.ts": "2bb75aa7e3ab2fef0b627f57515f4b3dafc7c6528050866d8e80dd3c2d98000c",
+    "supabase/functions/_shared/handoff-write.ts": "014a97f6ebb65cd53b250dc4cd5851a9cb9694c67e4acf6ee452cfe029ec79fc",
+    "tests/handoff-outbox-adapters.test.ts": "4b9af6b0dd4343ff1a759bb4fe009b8d2760c819fe933cac5912322eeed3f339",
+    "tests/e2e/handoff-outbox.spec.ts": "d8545216bbf952157002116c628db76fc46a651f609143a5daa2c0f72134ee25",
+    "tests/e2e/outbox-native-helpers.ts": "301386093bbbec5d42e4ae73fd59d1358317f0c9b634dab945b5f985575d76f1"
+  }
+}

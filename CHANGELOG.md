@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 manual-message queue: preparation, Open/Copy/failure, explicit Sent and undo now retain typed commands with complete original history. Sent commits its credit, order or supplier companion in the same transaction and queue entry; supplier resends reuse the original confirmation. Failed queue/audit writes roll back the whole action, while Copy remains available when preparation cannot be saved. Supplier correction keeps its new audit ID. Cloud controls remain off.
+
 - M30 order queue: creation/editing, compound save-and-pay, all four status flows and undo, notes/contact history, payments and corrections, cancellation/refunds and warning settings now save typed intents with their original local records and audits. Compound writes use one command and one occurrence time. Correcting an old receipt cannot undo a newer payment. Legacy payments missing their optional occurrence field remain locally undoable and retained for review; no remote time is invented. Cloud controls remain off.
 
 - M30 local command adapters: customer profiles and khata settings, stock changes and physical-count batches, suppliers, full invoices and day closing now retain executable intents alongside their original local records and audits. Closing undo keeps its own companion audit IDs. Failed queue writes roll back the complete action. Catalogue, order, hand-off and Inbox adapters, reconciliation and the complete upload interface remain unfinished; cloud setup stays gated.

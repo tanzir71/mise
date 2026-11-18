@@ -1,5 +1,10 @@
 # M30 · Complete manual message transactions
 
+The subsequent [local manual-message queue](m30-handoff-outbox.md) attaches these
+commands to the original local preparation, choices and complete Sent transactions.
+Its notes record the newer regression pass; canonical reconciliation and full
+upload/sync controls remain unfinished.
+
 The shared local and server mutation records manual message preparation,
 Open/Copy/failure, explicit Sent and correction. No endpoint opens another app,
 contacts a recipient or sends a message. Opening or copying does not confirm

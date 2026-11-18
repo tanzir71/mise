@@ -368,7 +368,7 @@ export class MiseDatabase extends LocalStore {
   async undoSupplierMessage(id:string):Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(),before = await this.supplierMessages.get(id);if (!setup || !before) throw new Error('Sent record not found.');
-      const change = undoSupplierMessageCommand(before,setup);await this.supplierMessages.put(change.message);await this.events.add(change.event);
+      const change = undoSupplierMessageCommand(before,setup);await withOutboxIntent(this,{id:change.event.id,type:'supplier-message.undo',outletId:before.outletId,occurredAt:change.event.at,messageId:before.id},async()=>{await this.supplierMessages.put(change.message);await this.events.add(change.event);});
     });
   }
   private async todayContext():Promise<TodayContext> {

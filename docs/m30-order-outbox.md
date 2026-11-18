@@ -64,7 +64,11 @@ history rewrite is claimed. No visual layout was changed, so the earlier Auth
 visual comparisons remain the layout evidence; no new visual run or CI artifact
 is claimed.
 
-Remaining: catalogue, manual hand-off and original Inbox adapters; unsupported
+The subsequent [manual-message queue](m30-handoff-outbox.md) includes its reviewed
+order contact and hand-off event in one transaction; it does not split Sent into a
+second order-contact command.
+
+Remaining: catalogue and original Inbox adapters; unsupported
 setup/template/export/shop-link changes; canonical receipt/pull reconciliation;
 full upload/outbox controls; real OTP and signed-owner HTTP acceptance; and the
 other open M30 resources and roadmap milestones. Accepted receipts remain separate

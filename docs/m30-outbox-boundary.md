@@ -53,6 +53,8 @@ values through the existing server mutation builders. The counts below describe
 this boundary's original verification; the adapter notes record the newer pass.
 The [order adapter increment](m30-order-outbox.md) adds the complete order and
 linked financial transactions, including one-command save-and-pay.
+The [manual-message adapter](m30-handoff-outbox.md) joins each hand-off action and
+its complete Sent companions to the same typed transaction.
 
 Delivery preserves order and saves each accepted intent receipt before proceeding.
 A new queue ID is insert-only; later checkpoints update only that transaction's
@@ -86,7 +88,7 @@ Auth user, SMS or owner JWT is created. No visual layout changed. The previous
 M30 Auth visual report remains the layout evidence; no new visual run or CI artifact
 is claimed.
 
-Remaining: catalogue, hand-off and Inbox command adapters, other currently
+Remaining: catalogue and Inbox command adapters, other currently
 unsupported local writes, canonical receipt/pull reconciliation,
 full upload/outbox controls, real production OTP and positive signed-owner HTTP
 proof, plus the other open M30 resources and acceptance gates. The default-off

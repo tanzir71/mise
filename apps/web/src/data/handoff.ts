@@ -1,6 +1,8 @@
 import type { MiseDatabase } from './db';
 import { changeHandoffCommand,handoffDraftToken,handoffEventSession,handoffSessionToken,handoffSourceTables,handoffTemplateToken,handoffTopic,newHandoffActionId,normaliseHandoffDraft,prepareHandoffCommand,type HandoffCompletion,type HandoffDraft,type HandoffSession } from '@mise/core/handoff';
-import {completeHandoffCommand,type HandoffCompletionContext} from '@mise/core/handoff-completion';
+import {completeHandoffCommand,type HandoffCompletionContext,type HandoffCompletionChange} from '@mise/core/handoff-completion';
+import {handoffPrepareIntent,handoffChangeIntent} from '@mise/core/handoff-intent';
+import {withOutboxIntent} from './outbox-capture';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import type { SetupSnapshot } from '@mise/core/models';
 
@@ -30,17 +32,19 @@ export async function prepareDatabaseHandoff(db:MiseDatabase,input:HandoffDraft,
     const active=previous?await latest(db,previous.id,current.outlet.id):undefined;
     if(active&&!fresh&&(handoffDraftToken(active.draft)===handoffDraftToken(draft)||(resume&&handoffTemplateToken(active.draft)===handoffTemplateToken(draft))))return active;
     const change=prepareHandoffCommand(draft,current,(active?.generation||0)+1,Math.max(Date.now(),active?.progress.updatedAt||0));
-    await db.events.add(change.event);return change.session;
+    return withOutboxIntent(db,handoffPrepareIntent(change),async()=>{await db.events.add(change.event);return change.session;});
   });
 }
-async function complete(db:MiseDatabase,state:HandoffSession,current:SetupSnapshot,value?:HandoffCompletion):Promise<void>{
+async function complete(db:MiseDatabase,state:HandoffSession,current:SetupSnapshot,value?:HandoffCompletion):Promise<HandoffCompletionChange>{
   const context:HandoffCompletionContext={setup:current};
   if(state.draft.source.kind==='credit')context.ledger=await db.readCreditLedger(state.draft.source.id);
   if(state.draft.source.kind==='order')context.order=await db.orders.get(state.draft.source.id);
   if((state.draft.source.kind==='supplier'||state.draft.source.kind==='shop')&&state.draft.purpose==='supplier-order'){
     [context.items,context.suppliers,context.message]=await Promise.all([db.stockItems.where('outletId').equals(current.outlet.id).toArray(),db.suppliers.where('outletId').equals(current.outlet.id).toArray(),db.supplierMessages.get(state.id)]);
   }
-  const change=completeHandoffCommand(state,value,context,state.progress.updatedAt);
+  return completeHandoffCommand(state,value,context,state.progress.updatedAt);
+}
+async function writeCompletion(db:MiseDatabase,change:HandoffCompletionChange):Promise<void>{
   if(change.entries.length)await db.creditEntries.bulkAdd(change.entries);
   if(change.order)await db.orders.put(change.order);if(change.communication)await db.orderCommunications.add(change.communication);
   if(change.message)await db.supplierMessages.add(change.message);if(change.events.length)await db.events.bulkAdd(change.events);
@@ -58,7 +62,7 @@ export async function changeDatabaseHandoff(db:MiseDatabase,id:string,revision:n
     }
     const before=await latest(db,id,current.outlet.id);await subject(db,before.draft,current);
     const change=changeHandoffCommand(before,choice,current,revision,requestId,Math.max(Date.now(),before.progress.updatedAt));
-    if(choice.type==='sent')await complete(db,change.session,current,completion);
-    await db.events.add(change.event);return change.session;
+    const effects=choice.type==='sent'?await complete(db,change.session,current,completion):undefined;
+    return withOutboxIntent(db,handoffChangeIntent(before,change,choice,completion,effects),async()=>{if(effects)await writeCompletion(db,effects);await db.events.add(change.event);return change.session;});
   });
 }

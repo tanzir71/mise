@@ -57,7 +57,10 @@ evidence. No new visual run or CI artifact is claimed.
 The [order adapter increment](m30-order-outbox.md) subsequently adds complete order
 and linked financial transactions. The counts above describe this increment.
 
-Remaining work includes catalogue, hand-off and Inbox adapters; unsupported
+The [manual-message queue](m30-handoff-outbox.md) also covers complete hand-off
+transactions and supplier correction.
+
+Remaining work includes catalogue and Inbox adapters; unsupported
 setup/template/export/shop-link writes; canonical receipt and pull reconciliation;
 full upload/outbox controls; real phone OTP and signed-owner HTTP acceptance; and
 the other open M30 resources. Accepted server receipts do not claim that the local
