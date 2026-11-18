@@ -18,6 +18,12 @@ pins the original account, excludes cookies and redirects, and returns fixed
 errors. The private image functions require a live, confirmed, non-anonymous
 phone account in addition to current owner/assigned-manager outlet access.
 
+The [receipt coverage boundary](m31-receipt-coverage.md) returns scoped command
+identities, normalized intent hashes and snapshot visibility, without Auth UUIDs,
+receipt admission identities, receipt payloads or connection settings. It rechecks live access
+before every cached reply. Durable local proof does not unlock an operator or
+grant current membership. Original outbox commands and receipts remain intact.
+
 Run `pnpm security:install-hooks` once in each clone. The installed pre-commit hook
 scans working files and index blobs, including a staged secret whose working copy
 has since been cleaned. The pre-push hook also scans reachable Git history and

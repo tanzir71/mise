@@ -23,7 +23,7 @@ const api={
   await captureDatabaseInbox(db,{title:'Original upgrade image',text:'Keep these source bytes',files:[new File([new Uint8Array(inboxPng)],'original.png',{type:'image/png'})]});
   const plan=await journal.prepare(db,newInboxId());await uploadWithLocalOutbox(db,journal,plan.id,'a'.repeat(64),new MemoryCloudUpload());await db.recordSale({expression:'5',method:'cash'});
   const before=backupToken(await db.readBackup()),queue=await db.outbox.toArray(),binding=await db.cloudState.toArray(),name='mise-stage-native-upgrade-'+crypto.randomUUID(),legacy=new Dexie(name);
-  legacy.version(11).stores(Object.fromEntries(db.tables.filter(t=>t.name!=='syncImages'&&t.name!=='operatorState'&&!(localDownloadTableNames as readonly string[]).includes(t.name)).map(t=>[t.name,[t.schema.primKey.src,...t.schema.indexes.map(i=>i.src)].join(',')])));
+  legacy.version(11).stores(Object.fromEntries(db.tables.filter(t=>t.name!=='syncCoverage'&&t.name!=='syncImages'&&t.name!=='operatorState'&&!(localDownloadTableNames as readonly string[]).includes(t.name)).map(t=>[t.name,[t.schema.primKey.src,...t.schema.indexes.map(i=>i.src)].join(',')])));
   const upgraded=new MiseDatabase(name);
   try{for(const table of legacy.tables)await legacy.table(table.name).bulkPut(await db.table(table.name).toArray());legacy.close();return {before,after:backupToken(await upgraded.readBackup()),queuePreserved:JSON.stringify(await upgraded.outbox.toArray())===JSON.stringify(queue),bindingPreserved:JSON.stringify(await upgraded.cloudState.toArray())===JSON.stringify(binding),downloadRows:await Promise.all(localDownloadTableNames.map(t=>upgraded.table(t).count())),schema:upgraded.verno};}finally{legacy.close();await upgraded.delete();}
  }),

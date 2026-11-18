@@ -1,3 +1,4 @@
+import {localSchemaVersion} from '../../packages/core/local-outbox';
 import {expect,test,type Page} from '@playwright/test';
 import {inboxPng} from '../inbox-fixture';
 // @ts-expect-error Shared isolated browser installer is plain JavaScript.
@@ -24,5 +25,5 @@ test('an empty native manager device stages complete original images without inv
  await images(page);await page.goto('app/');await installSyncImagesFixture(page);await page.evaluate(()=>window.miseSyncImagesTest.prepare(true));expect((await page.evaluate(()=>window.miseSyncImagesTest.resume())).count).toBe(2);const saved=await page.evaluate(()=>window.miseSyncImagesTest.inspect());expect(saved.cache.every(i=>i.target.role==='manager'&&i.actualHash===i.expectedHash)).toBe(true);expect(saved.backup.tables.businesses).toEqual([]);expect(saved.backup.tables.members).toEqual([]);expect(saved.backup.tables.inboxItems).toEqual([]);expect(saved.binding).toBeUndefined();expect(saved.operator).toBeUndefined();expect(saved.queue).toEqual([]);await expect(page.locator('input[name=business]')).toHaveCount(4);
 });
 test('native schema-13 upgrade preserves original image bytes, selected operator, upload receipt, cash queue and download pages',async({page})=>{
- await setup(page);await page.evaluate(()=>window.miseSyncImagesTest.prepare());const upgraded=await page.evaluate(()=>window.miseSyncImagesTest.upgrade());expect(upgraded.before).toBe(upgraded.after);expect(upgraded).toMatchObject({operatorPreserved:true,bindingPreserved:true,queuePreserved:true,pagesPreserved:true,receipt:true,queued:1,cacheRows:0,schema:14});expect(upgraded.originalImages).toEqual([inboxPng.length,inboxPng.length]);
+ await setup(page);await page.evaluate(()=>window.miseSyncImagesTest.prepare());const upgraded=await page.evaluate(()=>window.miseSyncImagesTest.upgrade());expect(upgraded.before).toBe(upgraded.after);expect(upgraded).toMatchObject({operatorPreserved:true,bindingPreserved:true,queuePreserved:true,pagesPreserved:true,receipt:true,queued:1,cacheRows:0,schema:localSchemaVersion});expect(upgraded.originalImages).toEqual([inboxPng.length,inboxPng.length]);
 });

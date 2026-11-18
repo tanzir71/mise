@@ -1,9 +1,11 @@
 import { useSyncExternalStore } from 'react';
 import { registerSW } from 'virtual:pwa-register';
+import { requestWorkerControl } from './pwa-control';
 let waiting = false;
 const listeners = new Set<() => void>();
 registerSW({
   immediate: true,
+  onRegisteredSW(_url,registration) { if(registration)requestWorkerControl(registration); },
   onNeedRefresh() { waiting = true; for (const listener of listeners) listener(); },
   // Only the tab whose owner presses Reload may replace its open form.
   onNeedReload() {},

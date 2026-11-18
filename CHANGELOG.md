@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- Sync groundwork now preserves original saved actions, attachments and recovery evidence while checking which changes are already present online. Interrupted replies, offline reloads and conflicting receipts retain the original work. Full cloud sync remains in development and unavailable by default.
+
 - M30 image downloads now retain fully verified original bytes beside their sealed metadata. Schema 14 adds an immutable internal image cache with exact per-image retries, offline verification and native transaction guards; existing shop data, operator selection, upload receipts and queued cash remain intact. The image boundary rejects anonymous phone accounts. Canonical application and full cloud controls remain gated.
 
 - M30 explicit outlet/member selection now attributes local actions to the chosen owner or manager, retains real assignments, guards owner settings, and supports multi-outlet backup recovery. Schema 13 adds an internal operator table while portable backups stay unchanged. Fresh authenticated metadata discovery, bounded runtime RPC transport and durable sign-out/account locks prepare the canonical sync boundary; full cloud controls remain disabled.
@@ -63,6 +65,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 - M21: paste English/Bangla customer requests into editable order drafts, with explicit count/unit suggestions, unsaved counter pricing, clipboard/manual fallbacks and owner-confirmed creation. Complete original requests survive order saves and JSON backup/restore; payment preferences never record money.
 
 ### Fixed
+
+- First-time offline setup now finishes when you navigate while it is preparing. Your open cash calculation stays in place, and app updates still wait for your Reload action.
 
 - Phone sign-in: the saved challenge and displayed resend cooldown now share one timestamp, preserving the exact cooldown across reloads.
 

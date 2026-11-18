@@ -24,7 +24,7 @@ async function tables(page:Page):Promise<Record<string,Record<string,unknown>[]>
 async function accessible(page:Page){expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);}
 test('fresh-browser restore preserves every source record and recorded totals',async({page})=>{
   await restoreFresh(page);const actual=await tables(page);
-  expect(Object.keys(actual)).toHaveLength(localTableNames.length);expect(actual.cloudState).toEqual([]);expect(actual.outbox).toEqual([]);for(const name of ['syncReads','syncPages','syncRecords','operatorState','syncImages'])expect(actual[name]).toEqual([]);
+  expect(Object.keys(actual)).toHaveLength(localTableNames.length);expect(actual.cloudState).toEqual([]);expect(actual.outbox).toEqual([]);for(const name of ['syncReads','syncPages','syncRecords','operatorState','syncImages','syncCoverage'])expect(actual[name]).toEqual([]);
   for(const [name,rows] of Object.entries(source.tables)) {
     const expected=[...rows].sort((a,b)=>a.id.localeCompare(b.id));
     if(name==='events'){const ids=new Set(rows.map((row:{id:string})=>row.id));expect(actual[name].filter(row=>ids.has(String(row.id)))).toEqual(expected);expect(actual[name].filter(row=>!ids.has(String(row.id)))).toHaveLength(1);}
