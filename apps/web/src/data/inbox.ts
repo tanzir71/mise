@@ -1,5 +1,7 @@
 import type { LocalStore } from './local-store';
 import { newInboxId, captureInboxCommand, changeInboxCommand, claimInboxCommand, inboxImageBase64, inboxImageBytes, validateInboxContent, validateInboxImageBytes, type InboxBackupItem, type InboxContent, type InboxImage, type InboxImageType, type InboxItem, type InboxKind } from '@mise/core/inbox';
+import {inboxCaptureIntent,inboxChangeIntent} from '@mise/core/inbox-intent';
+import {withOutboxIntent} from './outbox-capture';
 
 export interface StoredInboxImage extends InboxImage { blob:Blob }
 export type StoredInboxItem = InboxItem<StoredInboxImage>;
@@ -12,11 +14,21 @@ export async function prepareInboxContent(input:SharedInboxInput):Promise<InboxC
   await Promise.all(images.map(async image=>validateInboxImageBytes(image.type,new Uint8Array(await image.blob.slice(0,12).arrayBuffer()))));
   return content;
 }
+/** Hash full immutable blobs before opening the writer, including in the share worker. */
+async function captureImageHashes(images:readonly StoredInboxImage[]):Promise<string[]|null> {
+  if(!images.length)return [];
+  const subtle=globalThis.crypto?.subtle;if(!subtle)return null;
+  return Promise.all(images.map(async image=>{
+    const bytes=await image.blob.arrayBuffer();if(bytes.byteLength!==image.size)throw new Error('Keep the complete original shared image.');
+    return Array.from(new Uint8Array(await subtle.digest('SHA-256',bytes)),byte=>byte.toString(16).padStart(2,'0')).join('');
+  }));
+}
 export async function captureDatabaseInbox(db:LocalStore,input:SharedInboxInput):Promise<StoredInboxItem> {
-  const content=await prepareInboxContent(input);
+  const content=await prepareInboxContent(input),hashes=await captureImageHashes(content.images);
   return db.transaction('rw',db.inboxItems,db.businesses,db.outlets,db.members,db.events,async()=>{
     const command=captureInboxCommand(content,await db.setup());
-    await db.inboxItems.add(command.item);if(command.event)await db.events.add(command.event);return command.item;
+    const write=async()=>{await db.inboxItems.add(command.item);if(command.event)await db.events.add(command.event);return command.item;};
+    return command.event&&hashes!==null?withOutboxIntent(db,inboxCaptureIntent(command.item,command.event,hashes),write):write();
   });
 }
 export async function claimDatabaseInbox(db:LocalStore):Promise<void> {
@@ -28,7 +40,7 @@ export async function changeDatabaseInbox(db:LocalStore,id:string,revision:numbe
   return db.transaction('rw',db.inboxItems,db.businesses,db.outlets,db.members,db.events,async()=>{
     const setup=await db.setup(),before=await db.inboxItems.get(id);if(!setup||!before)throw new Error('Shared item not found.');
     const command=changeInboxCommand(before,setup,revision,change);if(!command)return before;
-    await db.inboxItems.put(command.item);await db.events.add(command.event);return command.item;
+    return withOutboxIntent(db,inboxChangeIntent(before,command.event,change),async()=>{await db.inboxItems.put(command.item);await db.events.add(command.event);return command.item;});
   });
 }
 /** Blob reads are asynchronous; callers inside a transaction must use Dexie.waitFor. */

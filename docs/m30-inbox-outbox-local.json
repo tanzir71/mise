@@ -1,0 +1,197 @@
+{
+  "checkedAt": "2026-11-18T09:53:32.0355928Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Original manual/worker Inbox captures and manual sorting join their typed local queue transactions; cloud controls remain off",
+  "intentKinds": [
+    "inbox.capture",
+    "inbox.change"
+  ],
+  "sorting": [
+    "order",
+    "payment",
+    "stock",
+    "question",
+    "other",
+    "unclassified",
+    "archive",
+    "reopen"
+  ],
+  "checks": {
+    "exports": {
+      "present": 270,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16",
+      "passed": true
+    },
+    "units": {
+      "reportSha256": "05a23b1107263c9396aae497c141ac7ae0d123f5a47e3d9b9594017f453f40f7",
+      "files": 94,
+      "newAdapterTests": 18,
+      "durationSeconds": 203.276708,
+      "passed": 1691
+    },
+    "nativeInbox": {
+      "selectedFileRetry": true,
+      "nativeQueueRollback": true,
+      "newCases": 5,
+      "reloadAndOriginalImageDownload": true,
+      "missingWebCryptoRetained": true,
+      "workerSaveFailureFallback": true,
+      "offlineCaptureAndSorting": true
+    },
+    "browserLifecycle": {
+      "restoreConnectivityAfterOfflineAssertions": true,
+      "consecutiveProbe": {
+        "flaky": 0,
+        "reportSha256": "e7db2104eb4ba61ca809a6464b86abfdb59d4f1f363c7c4309fcd4109c20a535",
+        "retries": 0,
+        "passed": 3,
+        "skipped": 0,
+        "globalErrors": 0,
+        "failed": 0,
+        "base": "/mise/",
+        "durationSeconds": 43.613756
+      },
+      "initialContextTeardownFailures": 1,
+      "initialTraceSha256": "f5527a5b752a185f125898777bbdc28f02d8459dca6bfe6e61f38de850acf9a5",
+      "initialPassed": 330,
+      "initialBodyExpectationErrors": 0,
+      "initialReportSha256": "a009fe3173e6fb8ff3b8982350274252b560d06c99c06a711e29ec9e76eddad2",
+      "assertionsAndDeadlinesUnchanged": true,
+      "initialBodyExpectationsPassed": 16
+    },
+    "browser": {
+      "flaky": 0,
+      "reportSha256": "e09aaee377477e7cad57cf68c082145da87d3cf6075bf0ec4ecfa8d59bd62346",
+      "retries": 0,
+      "passed": 331,
+      "skipped": 0,
+      "globalErrors": 0,
+      "failed": 0,
+      "base": "/mise/",
+      "durationSeconds": 464.403861
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "eca7d2a7620cb7e93e3f9c9529f988ae1a0fb4ede2b92f75d0faafe1254658e1",
+        "htmlSha256": "fe97858ba6cb1b21223d6060365a6ac54e2bbb35a29a7b7147ebb3a3c5b50a26"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "7e2bcb26851d675a95b132b2e623e2bc098b31d307bcd519b9f73d121a4dd0ee",
+        "htmlSha256": "b470b8adbc3578246cbfb63eb8f4feb05e0bb7001df2fc219353f5fafd1dc7d6"
+      }
+    ],
+    "lint": {
+      "logSha256": "cd47cc90911f86709b54e16f03adad875448b820a126a8d97f1a12f53a870e01",
+      "passed": true
+    },
+    "rootSmoke": {
+      "flaky": 0,
+      "reportSha256": "7365bfef9ec92671be544abf88a1ac7cb0959e5300dce39ed0d3eedd75ba4abf",
+      "retries": 0,
+      "passed": 16,
+      "skipped": 0,
+      "globalErrors": 0,
+      "failed": 0,
+      "base": "/",
+      "durationSeconds": 26.163985
+    },
+    "typecheck": {
+      "errors": 0,
+      "hints": 0,
+      "warnings": 0,
+      "checkedFiles": 100,
+      "logSha256": "e6710354415cccf3435506a1d710791701b8f664b980e22bee21f67e13572dd2",
+      "passed": true
+    },
+    "visual": {
+      "newCiArtifact": false,
+      "newVisualRun": false,
+      "previousEvidence": "docs/m30-auth-local.json",
+      "layoutChanged": false,
+      "previousComparisons": 15
+    }
+  },
+  "invariants": {
+    "literalSourceIncludesNulAndLoneSurrogates": true,
+    "missingCryptoRetainsLocalImages": true,
+    "backupSchema": 10,
+    "concurrentBindingDuringHash": true,
+    "totalImageBytesMaximum": 10485760,
+    "textCaptureWithoutCrypto": true,
+    "noAutomaticMoneyOrdersOrStock": true,
+    "monotonicActionTime": true,
+    "lostAcceptedReplyKeepsIds": true,
+    "manualRevisionAndNoOpGuards": true,
+    "backupTables": 21,
+    "digestFailurePrecedesWrites": true,
+    "queueAndAuditFailuresRollBack": true,
+    "originalCreationTime": true,
+    "consistentBackupReaderLoadedBeforeBoundaryTransaction": true,
+    "imagesMaximum": 4,
+    "completeImageHashOutsideWriter": true,
+    "retainedSourceStopsLaterDelivery": true,
+    "originalBytesInRecovery": true,
+    "metadataOnlyWireAndAudit": true,
+    "imageBytesMaximum": 5242880,
+    "originalItemImageAndAuditIds": true,
+    "onboardingClaimsIntoInitialSnapshot": true
+  },
+  "serverMutationReplay": {
+    "canonicalTimeConvergenceProven": false,
+    "actualSerializedQueueValues": true,
+    "imageBytesUploaded": false,
+    "positiveActualOwnerHttpProven": false,
+    "existingServerBuilder": true,
+    "imageHashCheckedAgainstOriginalBytes": true,
+    "equalClockIdentityAndDomainComparison": true
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "credentialFindings": 0,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "hosted": {
+    "newMigrations": 0,
+    "realMessagesSent": 0,
+    "newAuthUsers": 0,
+    "smsRequests": 0,
+    "changed": false,
+    "newEdgeDeployments": 0
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newPagesDeployment": false,
+    "newCiRun": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "catalogue adapters",
+    "legacy direct supplier writes and missing payment occurrence review",
+    "unsupported settings/export/shop-link writes",
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox/image-delivery controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "other M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/inbox.ts": "e31cff22c28138faab37840849d85f28d1d46accf7c8265c6bae94a6f2b52869",
+    "apps/web/src/data/local-outbox.ts": "126495c9e40aaff255c54446933234672f84d16db3930a1bcb11e12fb467e759",
+    "apps/web/src/data/backup.ts": "e99276dc24af0483bf03d869157a2ebe72e1f1500c73d60edcd32a0aae192ae6",
+    "packages/core/inbox-intent.ts": "995a5925faf2b74e8b70865040129c09841981610a513a5c79ce92efaa5b45ce",
+    "packages/core/inbox-commands.ts": "ea9deba4a4423cf8870481ab73d0706b8a5a66886f4b6aaacd6807be5e0790dd",
+    "supabase/functions/_shared/inbox-write.ts": "b1eea5c56aed023a6a0b7a7759033a2036b7c954d0e886a092441c097cda2c1d",
+    "tests/inbox-outbox-adapters.test.ts": "3280aaa581214ba512b6b1a852aea227cdcab5b4f2000928266294172ef986cd",
+    "tests/e2e/inbox-outbox.spec.ts": "a1e3c4bc8d4c744a9ea95856e2f6987080348dc561308144e3494a900caf745e",
+    "tests/e2e/outbox-boundary.spec.ts": "c174c4b024b5da3be513259c28a0a8a720632bd23c7b42667f96fa8b97c16a54",
+    "tests/e2e/public-handoff.spec.ts": "c3318b66f163079b6d4c991bf6d420cb32534417f331836c962ad851d2be928b",
+    "tests/local-outbox-db.test.ts": "fc9cad1eb3359d65d9769cb491075840e2f461e268b122061528dccd1d70ea75"
+  }
+}

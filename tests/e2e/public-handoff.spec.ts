@@ -4,6 +4,9 @@ import { encodeShopPayload } from '../../packages/core/public-shop-codec';
 import { publicShopFixture } from '../public-shop-fixture';
 import type { PublicAttempt } from '../../apps/web/src/public-shop/handoff';
 
+// Offline assertions finish before Chromium closes the context and flushes its trace.
+test.afterEach(async({context})=>{await context.setOffline(false);});
+
 async function open(page:Page,mode:'list'|'menu'='list',width=390){await page.setViewportSize({width,height:1000});await page.addInitScript(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as unknown as {copied:string}).copied=text;}}});document.addEventListener('click',event=>{if((event.target as Element).closest?.('a')?.hostname==='wa.me')event.preventDefault();});});const shop={...publicShopFixture(),mode};await page.goto(`app/s/?flags=handOffs#${encodeShopPayload(shop)}`);await expect(page.getByRole('heading',{level:1})).toHaveText(shop.name);return shop;}
 async function details(page:Page){await page.getByLabel('Your name',{exact:true}).fill('Sadia');await page.getByLabel('Your phone number',{exact:true}).fill('01712345482');await page.getByLabel('Delivery address',{exact:true}).fill('Flat 2C');}
 async function history(page:Page):Promise<{attempts:PublicAttempt[]}>{return page.evaluate(()=>{const key=Object.keys(localStorage).find(key=>key.startsWith('mise.public-handoff.v1.'))!;return JSON.parse(localStorage.getItem(key)!);});}

@@ -106,3 +106,9 @@ The [manual-message queue verification](m30-handoff-outbox-local.json) repeats t
 nine-value source/index/history/build scan and all 16 guard tests within its
 1,673-test unit run. Queued message commands contain reviewed domain values and
 companion IDs, with no connection settings, Auth session or server credentials.
+
+The [Inbox queue verification](m30-inbox-outbox-local.json) repeats that audit and
+all 16 guard tests within its 1,691-test unit run. Captures project only literal
+source fields and original image metadata/hashes into commands; Blob bytes remain
+local. Connection settings, Auth sessions and server credentials stay outside the
+shop database, recovery entries and portable backups.

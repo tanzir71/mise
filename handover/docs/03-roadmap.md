@@ -82,6 +82,7 @@ Spec: `phases/phase-3-backend-sync.md`
   - [Local domain command adapters](../../docs/m30-domain-adapters.md) retain customer/khata, stock/count, supplier/invoice and closing intents in their original local transactions. Catalogue and Inbox adapters plus canonical reconciliation and full upload controls remain open.
   - [Local order queue](../../docs/m30-order-outbox.md) adds complete order/financial commands, compound save-and-pay, source receipt guards and preserved local legacy undo. Catalogue, Inbox, reconciliation and full upload controls remain open.
   - [Local manual-message queue](../../docs/m30-handoff-outbox.md) keeps preparation, choices, complete Sent companions and supplier corrections in their original transactions. Canonical reconciliation, Inbox/catalogue, legacy direct writes and full upload controls remain open.
+  - [Original Inbox source queue](../../docs/m30-inbox-outbox.md) adds typed manual/worker captures and reversible sorting with original IDs and full image hashes. Bytes remain local; missing Web Crypto retains the source for review. Catalogue, unsupported writes, reconciliation and complete upload/image delivery controls remain open.
 - [ ] **M31** Sync engine: local-first outbox, realtime pull, conflict rules · L · T2
 - [ ] **M32** Kitchen / pack / counter screen on a second device; Got it / Ready; 2-minute unacknowledged alarm · M · T2
 - [ ] **M33** Order link writes real orders (no WhatsApp step needed); live tracking page for customers · M · T2
