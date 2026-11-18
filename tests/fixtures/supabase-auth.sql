@@ -10,6 +10,7 @@ create table auth.users (
   phone_confirmed_at timestamptz,
   banned_until timestamptz,
   deleted_at timestamptz,
+  is_anonymous boolean not null default false,
   raw_user_meta_data jsonb not null default '{}'
 );
 create function auth.uid() returns uuid language sql stable as $$

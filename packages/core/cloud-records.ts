@@ -102,7 +102,7 @@ export async function prepareCloudMigration(source:MiseBackup,authUserId:string)
   // Snapshot before the first async hash so later edits cannot change a reviewed plan.
   parseBackup(source);
   const backup=parseBackup(JSON.stringify(source)),{tables}=backup;
-  if(tables.businesses.length!==1||tables.outlets.length!==1||tables.members.length!==1||!tables.members[0].active)
+  if(tables.businesses.length!==1||tables.outlets.length!==1||tables.members.length!==1||!tables.members[0].active||tables.members[0].role!=='owner')
     throw new Error('Set up one local shop and owner before turning on sync.');
   const businessId=tables.businesses[0].id,outlet=tables.outlets[0];
   const result:CloudMigration={version:1,exportedAt:backup.exportedAt,records:[],files:[]};

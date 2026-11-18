@@ -17,13 +17,34 @@ export function validateBackupLinks(t:BackupTables):void {
   const count = backupTableNames.reduce((sum,name) => sum+t[name].length,0);
   validateInboxHistory(t.inboxItems,t.events);
   if (!count||count===t.inboxItems.length&&t.inboxItems.every(item=>item.outletId===null)) return;
-  ensure(t.businesses.length === 1 && t.outlets.length === 1,'this local version requires one business and one outlet');
-  const business = t.businesses[0], outlet = t.outlets[0];
-  ensure(outlet.businessId === business.id,'the outlet belongs to another business');
-  ensure(t.members.some(m => m.active && m.businessId === business.id && m.outletIds.includes(outlet.id)),'the shop has no active owner');
-  for (const member of t.members) {ensure(member.businessId === business.id,'a member belongs to another business');for (const id of member.outletIds) ensure(link('outlets',id).businessId === member.businessId,'a member has a foreign outlet');}
-  for (const table of backupTableNames) for (const row of t[table]) if ('outletId' in row && row.outletId!==null) ensure(row.outletId === outlet.id,`${table} contains a foreign outlet`);
-  for (const customer of t.customers) ensure(customer.businessId === business.id,'a customer belongs to another business');
+  ensure(t.businesses.length>0&&t.outlets.length>0&&t.members.length>0,'the shop identity records are incomplete');
+  for(const outlet of t.outlets)link('businesses',outlet.businessId);
+  for (const member of t.members) {link('businesses',member.businessId);for (const id of member.outletIds) ensure(link('outlets',id).businessId === member.businessId,'a member has a foreign outlet');}
+  for (const customer of t.customers)link('businesses',customer.businessId);
+  // Scope is checked for every relationship, rather than assuming all rows share
+  // one outlet. Inactive members remain valid historical/recovery references.
+  const scope=(row:Record<string,unknown>)=>typeof row.outletId==='string'?{businessId:link('outlets',row.outletId).businessId,outletId:row.outletId}:typeof row.businessId==='string'?{businessId:row.businessId,outletId:null}:null;
+  const reference=(row:Record<string,unknown>,table:BackupTable,id:unknown)=>{
+    if(id===undefined||id===null)return;ensure(typeof id==='string','a relationship has an invalid identity');const parent=link(table,id),a=scope(row),b=scope(parent as unknown as Record<string,unknown>);
+    ensure(a&&b&&a.businessId===b.businessId&&(!b.outletId||a.outletId===b.outletId),`${table} contains a foreign outlet or business reference`);
+  };
+  const refs:Partial<Record<BackupTable,Record<string,BackupTable>>>={
+    items:{categoryId:'categories'},events:{undoOf:'events',customerId:'customers',orderId:'orders',stockItemId:'stockItems',supplierId:'suppliers',closingId:'dayClosings',inboxId:'inboxItems'},
+    creditAccounts:{customerId:'customers'},creditEntries:{accountId:'creditAccounts',customerId:'customers',saleId:'sales',orderId:'orders',refundId:'orderRefunds',returnsChargeId:'creditEntries',reversalOf:'creditEntries'},
+    sales:{customerId:'customers',creditAccountId:'creditAccounts',orderId:'orders',closingId:'dayClosings'},orders:{statusEventId:'events'},orderNotes:{orderId:'orders'},orderCommunications:{orderId:'orders'},
+    orderRefunds:{saleId:'sales',orderId:'orders',customerId:'customers',accountId:'creditAccounts',creditEntryId:'creditEntries'},stockItems:{supplierId:'suppliers'},stockMoves:{stockItemId:'stockItems',undoOf:'stockMoves'},
+    supplierMessages:{supplierId:'suppliers'},purchases:{supplierId:'suppliers'},dayClosings:{addedSaleId:'sales'}
+  };
+  for(const table of backupTableNames)for(const entry of t[table]){
+    const row=entry as unknown as Record<string,unknown>;
+    if('outletId'in row&&row.outletId!==null)link('outlets',row.outletId as string);
+    for(const [field,parent]of Object.entries(refs[table]??{}))reference(row,parent,row[field]);
+    if('createdBy'in row)reference(row,'members',row.createdBy);if('eventId'in row)reference(row,'events',row.eventId);
+    if(table==='events'){const actor=row.actor as {type:string;id:string};if(actor.type==='member')reference(row,'members',actor.id);}
+    if(table==='orders'){const order=entry as BackupTables['orders'][number];reference(row,'customers',order.customer.id);reference(row,'sales',order.payment.saleId);reference(row,'creditEntries',order.payment.cancellation?.creditEntryId);}
+    if(table==='supplierMessages')for(const id of (entry as BackupTables['supplierMessages'][number]).stockItemIds)reference(row,'stockItems',id);
+    if(table==='purchases')for(const line of (entry as BackupTables['purchases'][number]).lines)reference(row,'stockItems',line.stockItemId);
+  }
   unique(t.customers.map(c => c.phone && pair(c.businessId,c.phone)),'customer phones');
   unique(t.creditAccounts.map(a => pair(a.outletId,a.customerId,a.currency)),'credit accounts');
   unique(t.creditEntries.map(e => pair(e.accountId,e.sequence)),'credit sequences');unique(t.creditEntries.map(e => e.reversalOf),'credit reversals');
@@ -35,7 +56,7 @@ export function validateBackupLinks(t:BackupTables):void {
   for (const item of t.items) ensure(link('categories',item.categoryId).outletId === item.outletId,'a catalogue category belongs to another outlet');
   validateHandoffHistory(t.events);
   for(const event of t.events)if(event.command==='handoff.prepare'){
-    const state=handoffEventSession(event),source=link(handoffSourceTables[state.draft.source.kind],state.draft.source.id);
+    const state=handoffEventSession(event),source=link(handoffSourceTables[state.draft.source.kind],state.draft.source.id),outlet=link('outlets',event.outletId),business=link('businesses',outlet.businessId);
     ensure(state.draft.source.kind==='shop'?source.id===outlet.id:'outletId' in source?source.outletId===outlet.id:'businessId' in source&&source.businessId===business.id,'a message source belongs to another shop');
   }
   for (const event of t.events) {

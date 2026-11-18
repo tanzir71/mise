@@ -1,0 +1,11 @@
+{
+  "title": "M30 explicit outlet and operator recovery",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [{
+    "id": "m30-operators",
+    "path": "app/",
+    "note": "M30 names no operator-picker frame. The supplied M38 all-outlets export guides the calm cards and outlet hierarchy; this local recovery form uses existing onboarding primitives and 44px controls. Pixel differences are informational; no exact frame match or hosted login is claimed.",
+    "actions": [{"type": "operators", "value": "restore"}, {"type": "wait", "selector": ".operator-picker"}],
+    "sections": [{"id": "selection", "selector": ".operator-picker", "reference": "screens/mobile/M38 · Owner — All outlets (every place you own).png"}]
+  }]
+}

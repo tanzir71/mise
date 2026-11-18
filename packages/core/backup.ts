@@ -60,13 +60,13 @@ export function previewBackup(source:MiseBackup,current:MiseBackup):BackupPrevie
   const shop = source.tables.businesses[0], outlet = source.tables.outlets[0];
   if (!shop || !outlet) throw new Error('This backup has no shop to restore.');
   const counts = backupCounts(source);
-  return {shopName:shop.name,outletName:outlet.name,currency:outlet.currency,timezone:outlet.timezone,exportedAt:source.exportedAt,counts,records:Object.values(counts).reduce((a,b) => a+b,0),replacesShopName:current.tables.businesses[0]?.name || null,sourceToken:JSON.stringify([source.schemaVersion,source.exportedAt,backupToken(source)]),currentToken:backupToken(current)};
+  return {shopName:counts.businesses===1?shop.name:`${counts.businesses} shops`,outletName:counts.outlets===1?outlet.name:`${counts.outlets} outlets`,currency:outlet.currency,timezone:outlet.timezone,exportedAt:source.exportedAt,counts,records:Object.values(counts).reduce((a,b) => a+b,0),replacesShopName:current.tables.businesses.length>1?`${current.tables.businesses.length} shops`:current.tables.businesses[0]?.name || null,sourceToken:JSON.stringify([source.schemaVersion,source.exportedAt,backupToken(source)]),currentToken:backupToken(current)};
 }
-export function restoreBackupCommand(source:MiseBackup,current:MiseBackup,review:RestoreReview,at = Date.now()):{tables:BackupTables;event:AuditEvent} {
+export function restoreBackupCommand(source:MiseBackup,current:MiseBackup,review:RestoreReview,at = Date.now(),requestedBy?:{id:string;name:string}|null):{tables:BackupTables;event:AuditEvent} {
   const latest = previewBackup(source,current);backupTime(at,'restore time');
   if (latest.sourceToken !== review.sourceToken) throw new Error('The selected backup changed. Preview it again.');
   if (latest.currentToken !== review.currentToken) throw new Error('This browser’s data changed after the preview. Review the latest data before restoring.');
-  const tables = structuredClone(source.tables), owner = current.tables.members.find(m => m.active);
+  const tables = structuredClone(source.tables), candidates=current.tables.members.filter(m=>m.active&&m.role==='owner'),owner=requestedBy===undefined?(candidates.length===1?candidates[0]:null):requestedBy;
   const event:AuditEvent = {id:ulid(at),outletId:source.tables.outlets[0].id,actor:{type:'system',id:'local-backup-restore'},command:'backup.restore',
     before:{shopName:current.tables.businesses[0]?.name || null,counts:backupCounts(current),requestedBy:owner ? {id:owner.id,name:owner.name} : null},
     after:{shopName:latest.shopName,counts:latest.counts,sourceExportedAt:source.exportedAt,schemaVersion:source.schemaVersion},at};

@@ -7,6 +7,7 @@ import { writeVisualReport } from './visual-report.mjs';
 import LZString from 'lz-string';
 import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
 import { installUploadReviewFixture } from '../tests/fixtures/install-upload-review.mjs';
+import { installOperatorsFixture } from '../tests/fixtures/install-operators.mjs';
 
 const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
@@ -64,6 +65,10 @@ try {
         if (!Number.isSafeInteger(action.milliseconds) || action.milliseconds < 0 || action.milliseconds > 604800000) throw new Error('Visual time advance must be between zero and seven days.');
         if (!clockInstalled) { await page.clock.install(); clockInstalled = true; }
         await page.clock.fastForward(action.milliseconds);
+      }
+      else if(action.type==='operators'){
+        if(action.value!=='restore')throw new Error('Use an explicit local operator recovery fixture.');
+        await installOperatorsFixture(page);await page.evaluate(()=>window.miseOperatorsTest.restoreFixture());await page.reload();
       }
       else if(action.type==='upload-review'){
         if(!['arm','accept','removeOriginal','blockQueue'].includes(action.value))throw new Error('Use an explicit local upload-review fixture action.');

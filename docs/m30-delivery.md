@@ -382,3 +382,14 @@ retains shop data, image Blobs, upload receipts and original outbox entries whil
 portable backups stay at 21 tables/schema 10. Downloads preserve local financial
 writes and exact recovery across offline reload, concurrent tabs and quota failure.
 No domain apply, accepted-cursor advance or sync control is enabled by this step.
+
+The [explicit operator increment](m30-operators.md) replaces first-member lookup
+with selected owner/manager identity, scope-checked multi-outlet backup recovery
+and durable sign-out/account locks. Schema 13 preserves earlier images, queues,
+accepted upload receipts and staged downloads. The dedicated project now has 32
+migrations; the new authenticated metadata wrappers return no Auth UUID or
+credentials. The exact 15-check hosted SQL-role proof rolls back every fixture,
+and unauthenticated RPC HTTP requests return 401. All 56 application tables still
+force RLS; seven Edge Functions and all secrets are unchanged. Actual OTP/owner
+HTTP, legitimate new-device activation, canonical application and convergence
+remain open. GitHub Actions and Pages publication remain stopped.

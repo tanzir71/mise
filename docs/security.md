@@ -79,7 +79,7 @@ does not remove Git history.
 
 The scoped-download cursor uses a dedicated server-only HMAC key. Its exact value
 joins the automatic clone-local comparisons; the repository template stays blank.
-Only this new secret was published. Download projections exclude member Auth UUIDs
+Only the new cursor key was set in the hosted secret manager. Download projections exclude member Auth UUIDs
 and image storage paths, and cached pages recheck live access. The hosted SQL-role
 fixture was explicitly cleaned up; no persistent account or test data remains.
 Hosted HTTP acceptance is still pending because the API hostname did not resolve
@@ -91,6 +91,18 @@ Auth UUIDs and sessions stay outside the three internal download stores and the
 unchanged portable backup. Read sources and pages are immutable on retry; complete
 record hashes and explicit projections are checked before a local integrity seal.
 A received cursor is not an accepted cursor or authority to apply shop changes.
+
+The [operator-selection boundary](m30-operators.md) retains only account/connection
+fingerprints and the hashed SDK session-storage key in its internal state.
+Discovery projections exclude Auth UUIDs, phones and credentials; runtime RPC
+errors are redacted and response bytes are bounded. Explicit sign-out and changed
+accounts lock the cached operator without deleting shop data. Session continuity
+checks can only revoke a selection, and never grant membership or unlock it.
+Portable backups still use the original explicit 21-table allowlist.
+The operator increment also rechecked the live API after its hostname began
+resolving. Unauthenticated member/outlet reads and command/read service requests
+returned 401. Email/anonymous providers, phone activation and signups remain off;
+no SMS or account was created. Genuine signed-owner HTTP acceptance remains open.
 
 The runtime phone sign-in interface accepts only a publishable key. Device
 connection settings stay separate from the SDK session, which is scoped to the

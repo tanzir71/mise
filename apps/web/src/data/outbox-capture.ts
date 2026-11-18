@@ -4,6 +4,7 @@ import {backupTableNames,type BackupTable} from '@mise/core/backup-tables';
 import {localSyncTableNames,parseLocalCloudState,type LocalCloudState,type LocalOutboxEntry} from '@mise/core/local-outbox';
 import {newInboxId} from '@mise/core/inbox';
 import {parseShopCommand,type ShopCommand} from '@mise/core/shop-commands';
+import {localOperatorTableNames} from '@mise/core/operators';
 
 interface Capture {state:LocalCloudState;entry:LocalOutboxEntry;changes:Map<string,LocalOutboxEntry['changes'][number]>;persist:Promise<void>;inserted?:boolean}
 const intents=new WeakMap<Transaction,readonly ShopCommand[]>();
@@ -41,7 +42,8 @@ export function installOutboxCapture(db:Dexie):void {
    return keep(table.getMany({trans:request.trans,keys})).then(before=>({keys,before}));
   }
   return {...down,transaction(stores,mode,options){
-   const names=mode==='readwrite'&&stores.some(name=>(backupTableNames as readonly string[]).includes(name))?[...new Set([...stores,...localSyncTableNames])]:stores;
+   let names=mode==='readwrite'&&stores.some(name=>(backupTableNames as readonly string[]).includes(name))?[...new Set([...stores,...localSyncTableNames])]:stores;
+   if(stores.some(name=>['businesses','outlets','members'].includes(name)))names=[...new Set([...names,...localOperatorTableNames.filter(name=>down.schema.tables.some(t=>t.name===name))])];
    return down.transaction(names,mode,options);
   },table(name){
    const table=down.table(name);if(!(backupTableNames as readonly string[]).includes(name))return table;

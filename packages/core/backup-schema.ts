@@ -3,6 +3,7 @@ import { businessPacks, marketPacks } from './packs';
 import { stockAtoms } from './stock-quantity';
 import { ORDER_SOURCE_MAX_TEXT } from './order-limits';
 import type { BackupTable } from './backup-tables';
+import {memberRoles} from './models';
 
 type Check = (value:unknown,path:string) => void;
 type Shape = Record<string,Check>;
@@ -65,7 +66,7 @@ const shapes:Record<BackupTable,Shape> = {
   inboxItems:{...entity,outletId:nullable(id),...revision,title:text,text,url:text,kind:oneOf(inboxKinds),archived:bool,images:array(backupObject({id,name:text,type:oneOf(inboxImageTypes),size:positive,data:(v,p)=>{if(typeof v!=='string'||v.length>4*Math.ceil(5*1024*1024/3))invalid(p,'exceeds the image size limit');}}))},
   businesses:{...entity,name:text,businessType:business,marketCode:oneOf(Object.keys(marketPacks)),languages:array(oneOf(['en','bn']))},
   outlets:{...entity,businessId:id,name:text,address:text,timezone,currency,shopLink:optional(text),creditMessaging:optional(messaging),orderWarningMinutes:optional(positive)},
-  members:{...entity,businessId:id,outletIds:array(id),name:text,phone,role:oneOf(['owner']),active:bool},
+  members:{...entity,businessId:id,outletIds:array(id),name:text,phone:optional(phone),role:oneOf(memberRoles),active:bool},
   categories:{...owned,name:text,sort:integer},
   items:{...owned,name:text,nameLocal:text,categoryId:id,price:money,unit:text,available:bool,isSample:bool,oftenBought:optional(bool)},
   events:{id,outletId:id,customerId:optional(id),orderId:optional(id),orderRevision:optional(positive),stockItemId:optional(id),stockRevision:optional(positive),supplierId:optional(id),closingId:optional(id),handoffId:optional(id),handoffRevision:optional(positive),handoffTopic:optional(text),inboxId:optional(id),inboxRevision:optional(positive),actor:backupObject({type:oneOf(['member','system','agent']),id:text}),command:text,before:jsonValue,after:jsonValue,at:backupTime,undoOf:optional(id)},

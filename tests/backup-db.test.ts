@@ -71,7 +71,7 @@ test('all twenty-one tables round-trip into a fresh database with exact records 
   expect(JSON.stringify(backup)).toContain('চা কম মিষ্টি');expect(parseBackup(`\uFEFF${JSON.stringify(backup)}`)).toEqual(backup);
   const target = await boot(false), encoded = JSON.stringify(backup), preview = await target.previewRestore(encoded);
   expect(preview).toMatchObject({shopName:shop.name,replacesShopName:null,currency:'BDT',counts:{dayClosings:2,orderNotes:1}});
-  const setup = await target.restoreBackup(encoded,preview);expect(setup.business.name).toBe(shop.name);
+  const setup = await target.restoreBackup(encoded,preview);expect(setup?.business.name).toBe(shop.name);
   target.close();await target.open();const restored = await target.readBackup();
   for (const table of backupTableNames.filter(t => t !== 'events')) expect(restored.tables[table],table).toEqual(backup.tables[table]);
   expect(restored.tables.events.filter(e => e.command !== 'backup.restore')).toEqual(backup.tables.events);
@@ -160,7 +160,7 @@ test('market changes, archived contacts/stock and zero-total orders remain valid
   expect(await target.customers.toArray()).toEqual(await db.customers.toArray());expect(await target.stockItems.toArray()).toEqual(await db.stockItems.toArray());
 });
 
-test('schema 7 records upgrade to local schema 12 while portable backups remain schema 10',async () => {
+test('schema 7 records upgrade to local schema 13 while portable backups remain schema 10',async () => {
   const {db:source} = await fullFixture(),records:Record<string,unknown[]> = {},stores:Record<string,string> = {};
   for (const table of source.tables.filter(t => (backupTableNames as readonly string[]).includes(t.name)&&!['purchases','inboxItems'].includes(t.name))) {
     stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.filter(i => !['handoffId','handoffTopic','[handoffId+handoffRevision]','inboxId','[inboxId+inboxRevision]'].includes(i.name)).map(i => i.src)].join(',');
@@ -168,7 +168,7 @@ test('schema 7 records upgrade to local schema 12 while portable backups remain 
   }
   const name = `mise-purchases-v7-${randomUUID()}`,legacy = new Dexie(name);legacy.version(7).stores(stores);
   for (const table of Object.keys(stores)) await legacy.table(table).bulkPut(records[table]);legacy.close();
-  const upgraded = new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(12);expect(await upgraded.purchases.count()).toBe(0);
+  const upgraded = new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(13);expect(await upgraded.purchases.count()).toBe(0);
   for (const table of Object.keys(stores)) expect(await upgraded.table(table).toArray(),table).toEqual(records[table]);
   const oldFile = {format:'mise-backup',formatVersion:1,schemaVersion:7,exportedAt:at,tables:records},target = await boot(false);
   const normalised = parseBackup(JSON.stringify(oldFile));expect(normalised.schemaVersion).toBe(10);expect(normalised.tables.purchases).toEqual([]);

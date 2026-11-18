@@ -2,9 +2,12 @@ import type { BusinessType, MarketCode, MessageLanguage } from './packs';
 export interface Entity { id: string; createdAt: number; updatedAt: number }
 export interface Business extends Entity { name: string; businessType: BusinessType; marketCode: MarketCode; languages: ('en' | 'bn')[] }
 export interface Outlet extends Entity { businessId: string; name: string; address: string; timezone: string; currency: string; shopLink?: string; creditMessaging?: CreditMessaging; orderWarningMinutes?: number }
-export interface Member extends Entity { businessId: string; outletIds: string[]; name: string; phone: string; role: 'owner'; active: boolean }
+export const memberRoles=['owner','manager','staff','kitchen','rider','agent'] as const;
+export type MemberRole=typeof memberRoles[number];
+export interface Member extends Entity { businessId: string; outletIds: string[]; name: string; phone?: string; role: MemberRole; active: boolean }
 export interface Category extends Entity { outletId: string; name: string; sort: number }
 export interface Item extends Entity { outletId: string; name: string; nameLocal: string; categoryId: string; price: number; unit: string; available: boolean; isSample: boolean; oftenBought?: boolean }
+/** `owner` is the legacy field name for the selected operator, including a manager. */
 export interface SetupSnapshot { business: Business; outlet: Outlet; owner: Member }
 export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; stockItemId?:string; stockRevision?:number; supplierId?:string; closingId?:string; handoffId?:string; handoffRevision?:number; handoffTopic?:string; inboxId?:string; inboxRevision?:number; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
 export interface SetupInput { businessType: BusinessType; marketCode: MarketCode; name: string; phone: string; outletName?: string; address?: string; language?: MessageLanguage; timezone?: string; currency?: string }

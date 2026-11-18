@@ -1,0 +1,252 @@
+{
+  "checkedAt": "2026-11-18T20:09:40.275Z",
+  "milestone": "M30/M31",
+  "complete": false,
+  "scope": "Explicit local operator/outlet selection and authenticated metadata discovery; no canonical application, joined-device receipt fabrication or cloud activation",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "fullLogSha256": "e14b291029cfdd0312d5133c18beb60b15d71f9b7f1c01b5a5672cc3c59aca2f",
+      "updatedFixtureLintPassed": true
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 111,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "76feeb38abc741efaabbc794f6dbd6b13ad8dea29bb702c35465a1ab969c0cb5"
+    },
+    "units": {
+      "passed": 2059,
+      "files": 109,
+      "failed": 0,
+      "logSha256": "6dbbe8434ed9539e21f817c6435594bcc18530eb180d056056b337d2811d3871",
+      "reportSource": "Completed full Vitest run; counts parsed from the terminal summary because the pnpm -- separator did not enable its requested JSON reporter."
+    },
+    "browser": {
+      "passed": 382,
+      "retries": 0,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "errors": 0,
+      "reportSha256": "572052494872c1d655420bb53f8e524fb45ecdcd27a91f80ac73c38af9fcbbf2"
+    },
+    "rootBrowser": {
+      "passed": 25,
+      "retries": 0,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "errors": 0,
+      "reportSha256": "b893a61fc4f7608d3bbe8a949b196c8eefcead86fe4ddc2f49e0ec184f6578fd"
+    },
+    "visual": {
+      "comparisons": 50,
+      "overflow": 0,
+      "inspected": 3,
+      "captures": [
+        "qa/screens/m30-operators-selection-360.png",
+        "qa/screens/m30-operators-selection-768.png",
+        "qa/screens/m30-operators-selection-1440.png"
+      ],
+      "report": "qa/report.html",
+      "reportSha256": "b49ab83d028ec3dbcf049c78c159268b8a375fc7e2562d4e04aee79c2ea18fe2",
+      "exactUnnamedFrameMatchClaimed": false
+    },
+    "exports": 270,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testApisInShippedAssets": false,
+    "newCoverage": {
+      "operatorDatabaseCases": 20,
+      "sqlAndHttpCases": 17,
+      "nativeBrowserCases": 11
+    }
+  },
+  "schema": {
+    "local": 13,
+    "physicalTables": 27,
+    "portable": 10,
+    "portableTables": 21,
+    "internalOperatorTable": "operatorState"
+  },
+  "invariants": {
+    "actualSelectedActor": true,
+    "ownerImplicitAccessWithoutFabricatedAssignments": true,
+    "managerAssignmentRequired": true,
+    "noStaffPromotion": true,
+    "optionalPhonesAndHistoricalRolesPreserved": true,
+    "scopedMultiBusinessRecovery": true,
+    "realWorkerAndMoneyAttribution": true,
+    "staleTabSelectionRejected": true,
+    "formsRemountedOnActorOrOutletChange": true,
+    "ownerProfileGuarded": true,
+    "managerPhoneNotDefaultedToPublicContact": true,
+    "ambiguousRecoveryBackupAvailableWithoutInventedAudit": true,
+    "nativeTransactionOperatorLocks": true,
+    "originalImagesUploadReceiptsQueueAndDownloadJournalPreserved": true,
+    "noUuidOrCredentialInOperatorStateOrBackup": true,
+    "signoutAndAccountChangesPersistLock": true,
+    "cachedIdentityNeverUnlocks": true,
+    "noFakeNewDeviceReadyReceipt": true,
+    "fullCloudControlsDefaultOff": true
+  },
+  "hosted": {
+    "before": {
+      "migrations": 31,
+      "auth_users": 0,
+      "private_buckets": 1,
+      "application_tables": 56,
+      "forced_rls_tables": 56,
+      "anonymous_table_grants": 0,
+      "public_security_definer_functions": 0
+    },
+    "after": {
+      "migrations": 32,
+      "operator_migration": 1,
+      "auth_users": 0,
+      "private_buckets": 1,
+      "public_buckets": 0,
+      "application_tables": 56,
+      "forced_rls_tables": 56,
+      "anonymous_table_grants": 0,
+      "public_security_definer_functions": 0,
+      "metadata_invoker_functions": 2
+    },
+    "functions": {
+      "total": 7,
+      "commandsVersion": 18,
+      "syncReadVersion": 1
+    },
+    "edgeDeployments": 0,
+    "newSecrets": 0,
+    "authConfigurationChanged": false,
+    "securityAdvisors": {
+      "total": 1,
+      "warnings": 0,
+      "errors": 0
+    },
+    "exactRolledBackSqlRoleProof": {
+      "sqlSha256": "b95130c714f63d884f00e4fa3a66c89c0b04b85e56657dfb37bcdca56dd4f474",
+      "checks": {
+        "anonDenied": true,
+        "managerScope": true,
+        "serviceDenied": true,
+        "staffNotPromoted": true,
+        "wrongActorDenied": true,
+        "foreignAccountEmpty": true,
+        "foreignOutletDenied": true,
+        "revocationRechecked": true,
+        "uuidByteFingerprint": true,
+        "anonymousPhoneDenied": true,
+        "ownerImplicitOutlets": true,
+        "actualManagerIdentity": true,
+        "unconfirmedPhoneDenied": true,
+        "ownerAssignmentsUnchanged": true,
+        "noAuthIdentityInProjection": true
+      },
+      "remainingFixtureAuthRows": 0,
+      "remainingFixtureBusinesses": 0
+    },
+    "apiDnsResolved": true,
+    "negativeHttp": {
+      "existingServices": {
+        "authSettings": {
+          "status": 200,
+          "phoneProviderEnabled": false,
+          "phoneAutoConfirm": false,
+          "signupsDisabled": true
+        },
+        "memberTableWithoutJwt": {
+          "status": 401,
+          "denied": true
+        },
+        "outletTableWithoutJwt": {
+          "status": 401,
+          "denied": true
+        },
+        "commandsWithoutJwt": {
+          "status": 401,
+          "denied": true
+        },
+        "syncReadWithoutJwt": {
+          "status": 401,
+          "denied": true
+        }
+      },
+      "metadataRpc": {
+        "metadataDiscoveryWithoutJwt": {
+          "status": 401,
+          "denied": true
+        },
+        "metadataSelectionWithoutJwt": {
+          "status": 401,
+          "denied": true
+        }
+      },
+      "authSettings": {
+        "status": 200,
+        "phoneProviderEnabled": false,
+        "emailProviderEnabled": false,
+        "anonymousProviderEnabled": false,
+        "phoneAutoConfirm": false,
+        "signupsDisabled": true
+      }
+    },
+    "realOtp": false,
+    "genuineOwnerHttp": false,
+    "throttled5000RecordAcceptance": false
+  },
+  "privacy": {
+    "knownPrivateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretDeploymentFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "publication": {
+    "workflowsDisabled": 3,
+    "activeWorkflowRuns": 0,
+    "gitHubSecretScanning": "enabled",
+    "gitHubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "pagesHeld": true,
+    "ciArtifactUploaded": false,
+    "newPagesDeploy": false
+  },
+  "sourceSha256": {
+    "packages/core/operators.ts": "00c7c143a7ab6e562207aa93aefca0ff50affe53629cd340e2e017e89356246b",
+    "packages/core/models.ts": "d3e93a3a2df07f392707aa2a1e5e79344a6f4f495fca427fe3386fdaf4207fbe",
+    "packages/core/local-schema.ts": "2988f68ca0074c438b8bfc5762ac2af8e37abc9ddd27cf31c6f2b8dcc72092e7",
+    "packages/core/local-outbox.ts": "444c0550c81542498b64c50e70fd326486ee66649a719d393b485411a5ca747c",
+    "packages/core/backup-schema.ts": "81c38e166920651797133e0ef4ca32f4850d99867ed0f32fce82e56fc4b36ef9",
+    "packages/core/backup-links.ts": "ee5a909c601a5b70aed4e3f963d628b36b638ee57493d03b6f790df3c3e516c9",
+    "apps/web/src/data/operator-state.ts": "ca0e8adbcc304a73f809c4019742d6cf25322ac6c26debbe805bc4915840672a",
+    "apps/web/src/data/operator-auth.ts": "67169afe0e52ef578016dfdeb7b13edc90e836ad7775fba2019f111eee17e3dc",
+    "apps/web/src/data/operator-remote.ts": "2cf7c56088d7f8f6c774f884a8a77d88ea0657bfa809d49158d4f50563696229",
+    "apps/web/src/data/local-store.ts": "dd1a9fa6919aa1590383be5f6be68fdd4c0291300c82a7d3c27182e7147a6439",
+    "apps/web/src/data/outbox-capture.ts": "72d65fc9e2a754d4c7f77a1c054526c573a93ad306060c53d1acc40804894c61",
+    "apps/web/src/data/backup.ts": "0249a07266b6bcae29947682a350b34d7df8618ec544b27ba8d8649267707e66",
+    "apps/web/src/data/phone-auth.ts": "c9e2d632ab71dada0cd2fdf0e1713d233275c594b56bb95ecc96098e7df69f9f",
+    "apps/web/src/OperatorPicker.tsx": "0b643324509aa565f5b6532ad49f4c5762f925f418899f185409c3a24184463d",
+    "apps/web/src/LocalApp.tsx": "44d6f19ca1e4e8b57b7ba71637f89cf32836a511c96e06015b95fcb351d6c183",
+    "supabase/migrations/20261118184142_operator_contexts.sql": "958bbc38400517974577f9e9c6d0eed96426247562e0d1c4322f2fb988208efb",
+    "tests/operators-db.test.ts": "cf8073621f6e5c6f0066039d2ea374de78a8e34d6f700dfc837f9721b1c5a7d1",
+    "tests/operator-contexts.test.ts": "397e6c94bcea7a620b3f8e423e534ebabe548399cd0bcd60e533814289958645",
+    "tests/operator-hosted-fixture.ts": "04de4e0db3d9269084389c2da78a18e468261cdb488c9d3bf38ded579155fb49",
+    "tests/e2e/operators.spec.ts": "6695180de87b5ea8996c401377afa5cab90fb58461d3360dcd8590676ccf758d",
+    "tests/fixtures/install-operators.mjs": "9fa461900cb5e9c734b617f5c339fd4c5da9abefa83121f74093174c164e9915"
+  },
+  "remaining": [
+    "Legitimate empty-device/joined-device write fence for owners and managers",
+    "Verified image-byte delivery, immutable remote coverage and atomic canonical application",
+    "Original pending-intent rebase and two-browser offline convergence",
+    "Full cloud interface activation after real phone OTP, genuine owner HTTP and 3G acceptance",
+    "Remaining M30 resources and subsequent handover milestones"
+  ]
+}

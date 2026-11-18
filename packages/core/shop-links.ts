@@ -7,7 +7,7 @@ import { publicRecord,publicText,PUBLIC_SHOP_MAX_ITEMS,type PublicShop,type Publ
 import { decodeShopPayload,publicShopUrl } from './public-shop-codec';
 
 export interface ShopLinkInput {phone:string;hours:string;deliveryNote:string;mode:'list'|'menu';itemIds:string[]}
-export type ShopLinkSetup=ShopSetup&{owner:ShopSetup['owner']&{phone:string}};
+export type ShopLinkSetup=ShopSetup&{owner:ShopSetup['owner']&{phone?:string}};
 export interface ShopLinkContext {setup:ShopLinkSetup;items:Item[];categories:Category[]}
 export interface ShopLinkReview {previousUrl:string|null;sourceToken:string}
 function selection(context:ShopLinkContext,ids:string[]):PublicShopItem[]{

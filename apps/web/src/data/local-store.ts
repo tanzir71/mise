@@ -4,9 +4,11 @@ import type { StoredInboxItem } from './inbox';
 import {installOutboxCapture} from './outbox-capture';
 import type {LocalCloudState,LocalOutboxEntry} from '@mise/core/local-outbox';
 import type {LocalSyncDownload,LocalSyncPage,LocalSyncRecord} from '@mise/core/sync-download';
+import {parseLocalOperatorState,resolveOperator,type LocalOperatorState} from '@mise/core/operators';
 
 /** Shared schema and read-only setup lookup; safe to import in the receiving worker. */
 export class LocalStore extends Dexie {
+  operatorState!:EntityTable<LocalOperatorState,'id'>;
   syncReads!:EntityTable<LocalSyncDownload,'id'>;
   syncPages!:Table<LocalSyncPage,[string,number]>;
   syncRecords!:Table<LocalSyncRecord,[string,string]>;
@@ -47,13 +49,19 @@ export class LocalStore extends Dexie {
     this.version(10).stores({inboxItems:'id,outletId,createdAt,kind',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision],inboxId,&[inboxId+inboxRevision]'});
     this.version(11).stores({cloudState:'id',outbox:'id,uploadId,&[uploadId+sequence],status'});
     this.version(12).stores({syncReads:'id,source.targetHash,source.target.outletId',syncPages:'[readId+index],readId',syncRecords:'[readId+changeId],readId'});
+    this.version(13).stores({operatorState:'id'});
+    // Expand the public transaction scope before Dexie validates nested reads.
+    // DBCore expansion alone cannot make a store visible to a parent wrapper.
+    // Identity reads and operator changes share the same native transaction lock.
+    const transaction=this.transaction;
+    this.transaction=((mode:unknown,...args:unknown[])=>{
+      const callback=args.at(-1),tables=args.slice(0,-1).flat(Infinity);
+      if(tables.some(table=>['businesses','outlets','members'].includes(typeof table==='string'?table:(table as {name?:string})?.name??''))&&!tables.some(table=>(typeof table==='string'?table:(table as {name?:string})?.name)==='operatorState'))tables.push(this.operatorState);
+      return Reflect.apply(transaction,this,[mode,...tables,callback]);
+    }) as typeof this.transaction;
     installOutboxCapture(this);
   }
   async setup(): Promise<SetupSnapshot | null> {
-    const business = await this.businesses.toCollection().first();
-    if (!business) return null;
-    const [outlet, owner] = await Promise.all([this.outlets.where('businessId').equals(business.id).first(), this.members.where('businessId').equals(business.id).first()]);
-    if (!outlet || !owner) throw new Error('Shop data is incomplete. Keep this browser’s data and try again.');
-    return { business, outlet, owner };
+    return this.transaction('r',this.businesses,this.outlets,this.members,this.operatorState,async()=>{const [businesses,outlets,members,saved]=await Promise.all([this.businesses.toArray(),this.outlets.toArray(),this.members.toArray(),this.operatorState.get('active')]);return resolveOperator(businesses,outlets,members,saved===undefined?null:parseLocalOperatorState(saved));});
   }
 }

@@ -1,0 +1,7 @@
+.operator-picker .onboarding-card{width:min(100%,640px)}
+.operator-picker fieldset{border:0;padding:0;margin:24px 0;display:grid;gap:8px;min-width:0}
+.operator-picker legend{font-size:14px;margin-bottom:8px;color:var(--text-secondary)}
+.operator-choice{display:flex;align-items:center;gap:16px;min-height:72px;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--surface);cursor:pointer;min-width:0}
+.operator-choice>span{display:grid;gap:4px;min-width:0;overflow-wrap:anywhere}
+.operator-choice strong{font-size:16px;font-weight:500}.operator-choice small,.operator-choice>span>span{color:var(--text-secondary);font-size:13px}
+.operator-picker details{margin-top:24px}.operator-picker summary{cursor:pointer;min-height:44px;display:flex;align-items:center}

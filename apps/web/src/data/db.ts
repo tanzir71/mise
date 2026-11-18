@@ -429,7 +429,7 @@ export class MiseDatabase extends LocalStore {
   async previewRestore(input:unknown):Promise<BackupPreview> {
     return (await import('./backup')).previewDatabaseRestore(this,input);
   }
-  async restoreBackup(input:unknown,review:RestoreReview):Promise<SetupSnapshot> {
+  async restoreBackup(input:unknown,review:RestoreReview):Promise<SetupSnapshot|null> {
     return (await import('./backup')).restoreDatabaseBackup(this,input,review);
   }
 }

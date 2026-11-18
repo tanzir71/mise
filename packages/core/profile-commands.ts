@@ -15,7 +15,7 @@ export function parseProfileCommand(v:unknown):ProfileCommand {
 export function profileIntent(change:SetupCommand):ProfileCommand {
  if(change.event.command!=='setup.update')throw new Error('Initial setup belongs to the reviewed shop upload.');
  const {business,outlet,owner}=change.snapshot;
- return parseProfileCommand({id:change.event.id,type:'setup.update',businessId:business.id,outletId:outlet.id,ownerId:owner.id,occurredAt:change.event.at,input:{businessType:business.businessType,marketCode:business.marketCode,name:business.name,phone:owner.phone,outletName:outlet.name,address:outlet.address,language:business.languages.length===2?'both':business.languages[0],timezone:outlet.timezone,currency:outlet.currency}});
+ return parseProfileCommand({id:change.event.id,type:'setup.update',businessId:business.id,outletId:outlet.id,ownerId:owner.id,occurredAt:change.event.at,input:{businessType:business.businessType,marketCode:business.marketCode,name:business.name,phone:owner.phone??'',outletName:outlet.name,address:outlet.address,language:business.languages.length===2?'both':business.languages[0],timezone:outlet.timezone,currency:outlet.currency}});
 }
 export function profileWritePlan(command:ProfileCommand){const c=parseProfileCommand(command),p=c.input;return {input:{businessType:p.businessType,marketCode:p.marketCode,nameJson:JSON.stringify(p.name),phone:p.phone,outletNameJson:JSON.stringify(p.outletName),addressJson:JSON.stringify(p.address),language:p.language,timezone:p.timezone,currency:p.currency},intentJson:JSON.stringify(c)};}
 export function parseProfileCommandReceipt(v:unknown,c:ProfileCommand):ProfileCommandReceipt {

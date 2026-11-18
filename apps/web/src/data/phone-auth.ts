@@ -1,5 +1,7 @@
 import {createClient,type Session} from '@supabase/supabase-js';
 import {cloudAuthStorageKey,normalisePhoneCode,parseCloudConnection,type CloudConnection,type KeyStorage} from '@mise/core/cloud-connection';
+import {operatorAccountHash} from '@mise/core/operators';
+import {publishOperatorAuth} from './operator-auth';
 export interface PhoneAuthState {phase:'checking'|'signed-out'|'code'|'signed-in'|'offline'|'closed';phone:string|null;userId:string|null;message:string;busy:boolean;resendAt:number;persistent:boolean}
 const initial:PhoneAuthState={phase:'checking',phone:null,userId:null,message:'',busy:false,resendAt:0,persistent:true};
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
@@ -12,7 +14,10 @@ export async function createPhoneAuth(input:CloudConnection,scope:string,options
  const config=parseCloudConnection(input),key=await cloudAuthStorageKey(config,scope),send=options.send??fetch,now=options.now??Date.now;
  let state=Object.freeze({...initial}),closed=false,memoryOnly=false,pendingPhone:string|null=null,verifiedToken:string|null=null,lastToken:string|null=null,checking:Promise<void>|null=null,working=false;
  const listeners=new Set<()=>void>(),memory=new Map<string,string>(),lifetime=new AbortController();
- const emit=(update:Partial<PhoneAuthState>)=>{if(closed&&update.phase!=='closed')return;state=Object.freeze({...state,...update});for(const listener of listeners)listener();};
+ let identityGeneration=0;
+ const emit=(update:Partial<PhoneAuthState>)=>{if(closed&&update.phase!=='closed')return;const previous=state;state=Object.freeze({...state,...update});
+  if(previous.phase!==state.phase||previous.userId!==state.userId){const generation=++identityGeneration;if(state.phase==='signed-in'&&state.userId){void operatorAccountHash(state.userId).then(hash=>{if(generation===identityGeneration&&!closed)publishOperatorAuth(key,hash);}).catch(()=>{if(generation===identityGeneration)publishOperatorAuth(key,null);});}else if(['signed-out','closed','code'].includes(state.phase))publishOperatorAuth(key,null);}
+  for(const listener of listeners)listener();};
  const ensure=()=>{if(closed)throw new PhoneAuthProblem('This sign-in was closed. Open Sync setup again.');};
  const storage={getItem:(name:string)=>{if(closed)return null;if(memoryOnly)return memory.get(name)??null;try{const value=options.storage.getItem(name);if(value===null)memory.delete(name);else memory.set(name,value);return value;}catch{memoryOnly=true;emit({persistent:false});return memory.get(name)??null;}},setItem:(name:string,value:string)=>{if(closed)return;memory.set(name,value);if(memoryOnly)return;try{options.storage.setItem(name,value);}catch{memoryOnly=true;emit({persistent:false});}},removeItem:(name:string)=>{memory.delete(name);try{options.storage.removeItem(name);}catch{memoryOnly=true;emit({persistent:false});}}};
  try{const raw=storage.getItem(key+'.challenge'),saved=raw?JSON.parse(raw):null;if(object(saved)&&phone(saved.phone)&&typeof saved.sentAt==='number'&&Number.isSafeInteger(saved.sentAt)&&saved.sentAt<=now()+300000&&now()-saved.sentAt<=600000){pendingPhone=saved.phone;emit({phone:pendingPhone,resendAt:saved.sentAt+60000});}else if(raw)storage.removeItem(key+'.challenge');}catch{storage.removeItem(key+'.challenge');}

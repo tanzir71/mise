@@ -12,3 +12,5 @@
 - Resolved for M30 financial admission: preserve the device occurrence time, but enforce the existing undo deadline using the live server clock. Keep expired/rejected offline intents for explicit review when M31 is implemented. New-customer/account related-ID reconciliation also remains an explicit prerequisite to enabling the outbox. No owner sign-off is requested.
 
 - Resolved M30 customer/account identity: strict device-generated companion-ID plans now retain the exact account/opening/audit IDs from the local mutation. Conflicting current-account creation returns retained-intent review. M31 still needs ordered delivery and conflict resolution; the outbox remains unavailable.
+
+- Resolved M30 operator-picker reference: M30 names no dedicated frame. Reuse the existing onboarding/card primitives, with M38's outlet hierarchy as a visual reference, and verify all five required widths. Differences are informational; do not claim an exact match or request owner sign-off.

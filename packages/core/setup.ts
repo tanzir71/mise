@@ -18,6 +18,7 @@ export function normaliseSetupInput(input:SetupInput):Required<SetupInput> {
   return {businessType:input.businessType,marketCode:input.marketCode,name,phone,outletName:input.outletName?.trim()||name,address:input.address?.trim()||'',language,timezone,currency};
 }
 export function setupCommand(value: SetupInput, before: SetupSnapshot | null = null, at = Date.now(), id: () => string = () => ulid(at)): SetupCommand {
+  if(before&&before.owner.role!=='owner')throw new Error('Only an owner can change shop details.');
   const input=normaliseSetupInput(value),{name,phone,timezone,currency,language}=input,pack=marketPacks[input.marketCode];
   const languages: SetupSnapshot['business']['languages'] = language === 'both' ? ['en', 'bn'] : [language];
   const updated=(entity?:{createdAt:number;updatedAt:number})=>Math.max(at,entity?.createdAt??at,entity?.updatedAt??at);

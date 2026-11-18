@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 explicit outlet/member selection now attributes local actions to the chosen owner or manager, retains real assignments, guards owner settings, and supports multi-outlet backup recovery. Schema 13 adds an internal operator table while portable backups stay unchanged. Fresh authenticated metadata discovery, bounded runtime RPC transport and durable sign-out/account locks prepare the canonical sync boundary; full cloud controls remain disabled.
+
 - Credential guards now inspect Windows UTF-16 files in both byte orders, with or without a byte-order mark, including ZIP downloads. All 23 security tests pass, including a real rejected commit of a PowerShell credential file. Existing commit, push and build guards remain enabled; GitHub Actions remain stopped.
 
 - M30 downloads now retain their original request, immutable pages and verified records in the shop's IndexedDB. Schema 12 preserves existing images, upload receipts and queued actions; portable backups remain unchanged. Cross-page fragments, complete hashes, exact retries and integrity seals support empty devices, offline reload, concurrent tabs and storage recovery without applying records or advancing an accepted cursor. Cloud controls remain gated.

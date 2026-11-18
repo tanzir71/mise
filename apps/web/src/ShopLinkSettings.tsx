@@ -31,7 +31,7 @@ export function ShopLinkSettings({setup,postersEnabled}:{setup:SetupSnapshot;pos
 function ShopLinkForm({context,event,postersEnabled}:{context:ShopLinkContext;event?:AuditEvent;postersEnabled:boolean}){
   const handoffs=useHandoffs(),[sharing,setSharing]=useState(false);
   const published=savedShop(context.setup.outlet.shopLink),url=published?context.setup.outlet.shopLink!:'',urlField=useRef<HTMLTextAreaElement>(null),busy=useRef(false);
-  const [input,setInput]=useState<ShopLinkInput>(()=>({phone:published?.phone||context.setup.owner.phone,hours:published?.hours||'',deliveryNote:published?.deliveryNote||'',mode:published?.mode||'list',itemIds:published?.items.map(item=>item.id)||[]}));
+  const [input,setInput]=useState<ShopLinkInput>(()=>({phone:published?.phone||(context.setup.owner.role==='owner'?context.setup.owner.phone??'':''),hours:published?.hours||'',deliveryNote:published?.deliveryNote||'',mode:published?.mode||'list',itemIds:published?.items.map(item=>item.id)||[]}));
   const [saving,setSaving]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
   const [poster,setPoster]=useState(false);
   function field<K extends keyof ShopLinkInput>(key:K,value:ShopLinkInput[K]){setInput(current=>({...current,[key]:value}));setMessage('');}
