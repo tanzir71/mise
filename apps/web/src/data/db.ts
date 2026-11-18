@@ -1,3 +1,4 @@
+import {supplierMessageIntent} from '@mise/core/supplier-message-commands';
 import Dexie from 'dexie';
 import type { HandoffCompletion,HandoffDraft,HandoffSession } from '@mise/core/handoff';
 import type { InboxKind } from '@mise/core/inbox';
@@ -367,7 +368,7 @@ export class MiseDatabase extends LocalStore {
     return this.transaction('rw',this.tables,async () => {
       const context = await this.stockContext(),before = await this.supplierMessages.get(input.id);
       if (before) {if (before.outletId !== context.setup.outlet.id || before.voidedAt !== undefined || !sameSupplierMessage(input,before)) throw new Error('This sent record changed. Reopen the supplier draft.');return before;}
-      const change = recordSupplierMessageCommand(input,context);await this.supplierMessages.add(change.message);await this.events.add(change.event);return change.message;
+      const change = recordSupplierMessageCommand(input,context);return withOutboxIntent(this,supplierMessageIntent(change),async()=>{await this.supplierMessages.add(change.message);await this.events.add(change.event);return change.message;});
     });
   }
   async undoSupplierMessage(id:string):Promise<void> {

@@ -18,7 +18,7 @@ export function createCloudCommandRemote(input:CloudConnection,getJwt:()=>Promis
   if(command.type==='stock.batch'){headers[stockBatchHeader]=command.outletId;maximum=stockBatchBodyLimit;deadline=120000;}
   else if(command.type==='purchase.record'){headers[purchaseBodyHeader]=command.outletId;maximum=purchaseBodyLimit;deadline=120000;}
   else if(command.type==='order.create'||command.type==='order.update'){headers[orderBodyHeader]=command.outletId;maximum=orderBodyLimit;deadline=120000;}
-  else if(command.type==='handoff.prepare'){headers[handoffBodyHeader]=command.outletId;maximum=handoffBodyLimit;deadline=120000;}
+  else if(command.type==='handoff.prepare'||command.type==='supplier-message.record'){headers[handoffBodyHeader]=command.outletId;maximum=handoffBodyLimit;deadline=120000;}
   else if(command.type==='inbox.capture'){headers[inboxBodyHeader]=command.outletId;maximum=inboxBodyLimit;deadline=120000;}
   else if(command.type==='shopLink.generate'){headers[linkBodyHeader]=command.outletId;maximum=linkBodyLimit;deadline=120000;}
   if(new TextEncoder().encode(body).byteLength>maximum)throw new CloudCommandError('review','This saved action is too large. Keep the local copy and review it.');

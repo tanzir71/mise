@@ -55,7 +55,7 @@ GitHub's repository secret scanning and push protection are also enabled. The
 latest owner-authenticated, read-only API check returned zero open secret alerts.
 These protections remain enabled independently of the stopped Actions workflows.
 
-The same day's latest live verification found all **50 public/private application
+The same day's latest live verification found all **51 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
 reported no warnings or errors. Informational private-table notices describe
@@ -152,3 +152,5 @@ outlet admission before body reading, followed by exact kind/scope binding and
 fresh authorization for preparation/completion. A complete normalized plan binds
 the exact frozen/restored URL; raw private table access remains denied. Server
 validation never follows a published URL or acts on its literal public text.
+
+The [original supplier assertion verification](m30-supplier-message-local.json) repeats the nine-value source/index/history/static-output scan. The standalone sent command contains only reviewed domain fields and original identities. Full normalized intent binding, private expiring tickets, current owner/assigned-manager checks and SQL-built mutation/audit/receipt protect completion. A hosted role proof preserves literal text, denies direct private reads and rolls back every synthetic Auth/shop row. No real OTP, customer message, Auth/provider setting or secret-manager value is changed.

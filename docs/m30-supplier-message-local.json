@@ -1,0 +1,285 @@
+{
+  "checkedAt": "2026-11-18T15:23:29.776Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Original legacy supplier sent assertions and correction ordering, complete normalized private plans and atomic SQL mutation/audit/receipt",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "bcbc2b48bc2a75763eec3105d2e954162677df239e96686d0d5dbe9824365a05"
+    },
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 105,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "0f7bcddfb928bae8296fad1daae6da2ada77dc0dd89fbd1117b4943572badcb0"
+    },
+    "units": {
+      "passed": 1923,
+      "files": 103,
+      "handoffCommandCases": 89,
+      "newCommandCases": 23,
+      "newAdapterCases": 8,
+      "reportSha256": "b32ccb51986fb1b4983ff8942006e2d8d243d806fe5d6d995513f8ea236f4cf3",
+      "finalAdapterRegression": 29
+    },
+    "browser": {
+      "passed": 366,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "2d2d34b9ecd3e7882e45e2f488c2beb5180b99aa9b5dd5a6b7dd9b88b287eb13"
+    },
+    "rootSmoke": {
+      "passed": 9,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "660399ceb756b3886041d856c50e3dc107d235b1cb91b6e8b37472d01e835c66"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "b5fe0c75b04f865e1c07185170f20bd88a5fab3435a28ce014292eaf90d3048a",
+        "htmlSha256": "7606dcba6da029b2572254d83c6e55029ff66e307f52fd79e44cb4031c0488af"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "c890e9ea9f4ccc5f4922a6b0655f05839d6f7df1fba9bb98be3bad06b74b86c1",
+        "htmlSha256": "5eec90f424fed6644be30dfe29ffeab3724ca70ce4f5e7ce41362120731d1d02"
+      }
+    ],
+    "exports": {
+      "present": 270,
+      "passed": true,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "visual": {
+      "comparisons": 45,
+      "changedProductScreens": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "report": "qa/report.html",
+      "reportSha256": "3b8531c19d1d7988ffc24b4dc79ada498adf849e9ef2ce6f93c7b46b85feadab",
+      "resultsSha256": "cd54e230787b53633701d01e698c34ada85d0900000df72443e1873407cfbceb",
+      "threeCapturesInspected": true,
+      "keyScreens": {
+        "qa/screens/m30-link-screen-360.png": "168e3686852e0d579a2387450edacd242c54b9e9b5b1e42621d7b7d89aa9e729",
+        "qa/screens/m30-link-screen-390.png": "ab9400eddff180d6db7dbe3acd0ae64afe9d443d3799eda0244f75f9a6575ed7",
+        "qa/screens/m30-link-screen-1440.png": "99fa74538a0fa82e25deb9156eee16d63fe3f969f998b01c338e158c739427c6"
+      },
+      "exactFrameMatchClaimed": false,
+      "pixelDifferencesInformational": true,
+      "newCiArtifact": false
+    }
+  },
+  "invariants": {
+    "journalSchema": 2,
+    "shopSchema": 11,
+    "backupSchema": 10,
+    "backupTables": 21,
+    "commandKind": "supplier-message.record",
+    "originalMessageAuditOperatorAndPhysicalOccurrence": true,
+    "noInventedHandoff": true,
+    "literalFieldsAndMultipartPosition": true,
+    "exactLocalRetryReadOnly": true,
+    "originalReceiptReplayOnly": true,
+    "atomicLocalMessageAuditAndQueue": true,
+    "coldCompoundRecordAndCorrection": true,
+    "queueAndAuditFailureRollback": true,
+    "durableReceiptPrefixAfterLostReply": true,
+    "unknownCompoundWritesStopFifo": true,
+    "savedAndManualSupplier": true,
+    "archivedOriginalSourcesAllowed": true,
+    "nulAndLoneSurrogatesLiteral": true,
+    "privatePreparationAndServiceCompletion": true,
+    "normalizedPlanAndCompletionBound": true,
+    "sqlConstructedMutationAuditAndReceipt": true,
+    "liveOwnerOrAssignedManagerRechecked": true,
+    "monotonicUpdatedMetadata": true,
+    "serverAuditClock": true,
+    "existingTwentyFourHourCorrectionRuleUnchanged": true,
+    "noMessagesOrdersStockOrFinancialSideEffects": true,
+    "boundedTaggedRetry": 3,
+    "ticketExpiryMs": 60000,
+    "pendingTicketLimit": 100,
+    "largerRequest": {
+      "defaultBytes": 32000,
+      "admittedBytes": 256000,
+      "legalBodyAboveDefaultExercised": true,
+      "selectedStockIds": 1000,
+      "bothClients": true,
+      "admissionBeforeBodyRead": true,
+      "kindAndOutletBound": true,
+      "multipleHeadersDenied": true
+    },
+    "canonicalConvergenceClaimed": false,
+    "cloudSetup": false
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "runtimeConnectionOutsideShopBackupAndJournal": true,
+    "testInterfacesShipped": false,
+    "testFixtureMarkersInStaticOutput": 0
+  },
+  "hosted": {
+    "changed": true,
+    "newMigrations": 1,
+    "newEdgeDeployments": 1,
+    "migrations": 30,
+    "functions": 6,
+    "commandsVersion": 17,
+    "commandsVerifyJwt": true,
+    "bundle": {
+      "bytes": 419857,
+      "sha256": "45cba2b6d4d21a0196e811fadf6781500f4df2c55a189e2065bce52031cb5b98",
+      "sourceFiles": 71
+    },
+    "roleFixture": {
+      "bytes": 17592,
+      "sqlSha256": "008ab067ceed6bd56d24124003aebb7fd8611c177937e2e46e75e651fb9d20fd",
+      "sameLocallyVerifiedSql": true,
+      "proof": {
+        "commands": 2,
+        "messages": 2,
+        "receipts": 2,
+        "sentAudits": 2,
+        "ownerAdmitted": true,
+        "pendingTickets": 0,
+        "stockUnchanged": true,
+        "managerAdmitted": true,
+        "serverAuditClock": true,
+        "noInventedHandoff": true,
+        "privateReadsDenied": true,
+        "normalizedPlanBound": true,
+        "otherIdentityDenied": true,
+        "managerActorRetained": true,
+        "clientCompletionDenied": true,
+        "noFinancialSideEffects": true,
+        "unassignedOutletDenied": true,
+        "originalLiteralRetained": true,
+        "normalizedCompletionBound": true
+      },
+      "auth_rows": 0,
+      "business_rows": 0,
+      "ticket_rows": 0
+    },
+    "access": {
+      "application_tables": 51,
+      "forced_rls_tables": 51,
+      "anonymous_table_access": 0,
+      "authenticated_direct_writes": 0,
+      "supplier_ticket_direct_grants": 0,
+      "prepare_authenticated": true,
+      "prepare_anon": false,
+      "prepare_service": false,
+      "finish_authenticated": false,
+      "finish_anon": false,
+      "finish_service": true,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1,
+      "auth_users": 0,
+      "migrations": 30,
+      "supplier_migration": 1
+    },
+    "securityAdvisors": {
+      "info": 1,
+      "warnings": 0,
+      "errors": 0
+    },
+    "httpGuards": [
+      {
+        "name": "preflight",
+        "status": 204,
+        "allowOrigin": "https://tanzir71.github.io",
+        "noStore": true,
+        "allowHeaders": [
+          "authorization",
+          "content-type",
+          "apikey",
+          "x-mise-stock-batch",
+          "x-mise-purchase-record",
+          "x-mise-order-write",
+          "x-mise-handoff-write",
+          "x-mise-inbox-write",
+          "x-mise-shop-link-write"
+        ]
+      },
+      {
+        "name": "missing-jwt",
+        "status": 401,
+        "allowOrigin": "*",
+        "noStore": false,
+        "allowHeaders": [
+          "authorization",
+          "x-client-info",
+          "apikey"
+        ]
+      },
+      {
+        "name": "invalid-jwt",
+        "status": 401,
+        "allowOrigin": "*",
+        "noStore": false,
+        "allowHeaders": [
+          "authorization",
+          "x-client-info",
+          "apikey"
+        ]
+      }
+    ],
+    "newPersistentAuthUsers": 0,
+    "smsRequests": 0,
+    "realMessagesSent": 0,
+    "authConfigurationChanged": false,
+    "vaultUnchanged": true,
+    "actualOwnerSignedHttpProven": false
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox/image-delivery controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "5000-record 3G upload acceptance",
+    "remaining M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/db.ts": "e2915d20011dff212939262a2d96230f23da83da692a9201f57d40de7fb2c747",
+    "apps/web/src/data/cloud-command-remote.ts": "aa766910f6f7e095f971d346e41a199b6f4e499a05787271d1e2dc67dacbddbb",
+    "apps/web/src/data/shop-command-remote.ts": "67d7c2028d3bb080045a44383b01523614ea76e2ab7efee8891c2cc525808be8",
+    "packages/core/shop-commands.ts": "dfcac2de9e607869bcec99bb91e3c3c79a6b68ec6e62aa535fa415502344adbb",
+    "packages/core/supplier-message-commands.ts": "3dce2a9e837c1fccc3dbfd66b42da68fc48fcc820699d7bcf75bfee20f8ca793",
+    "supabase/functions/_shared/commands-handler.ts": "803b0e7cf7076a08fc5d544b30ccbd6a7ec6fac94b6c786d35eee25a7d38289c",
+    "supabase/functions/_shared/supplier-message-write.ts": "c6ba28271d39e02b882e1e899d8282763748a503a8a76949eb13b2a3409964c7",
+    "supabase/migrations/20261118145626_supplier_message_records.sql": "e9f4e5a9bd471882e13069d3b2e6684ac89199f1cdb0a4529a7ed0a5ba036574",
+    "tests/handoff-commands.test.ts": "a7b41a2eea2fb054f87376c15eac364392adb78e5f9ba2a0aff2adb72eb75001",
+    "tests/handoff-outbox-adapters.test.ts": "7b3351f0392f0b86243995aa5ce7cc47cf6fffc5d238071c5b7f05cb4aa74a54",
+    "tests/supplier-message-hosted-fixture.ts": "9ef4b5132a6e4a47d64f13ef5f545012be1039582bb57bb288bda43af5944879",
+    "tests/supplier-message-outbox.test.ts": "303abde07eae0c58c0d11d876aa2166b1ad4fb75d20e50b60d7e26ffdb7266c9"
+  }
+}

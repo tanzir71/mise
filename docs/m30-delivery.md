@@ -359,3 +359,7 @@ physical generation time, including after delayed delivery. Local queue/audit
 failures roll back all writes; the statically loaded adapter also supports cold
 compound transactions. See [implementation and verification](m30-link-commands.md).
 Canonical pull/apply, legacy supplier saves and remaining M30 gates stay open.
+
+## Original legacy supplier sent assertions
+
+The [standalone supplier command](m30-supplier-message-commands.md) queues the remaining direct sent save before its existing correction. It preserves the complete original assertion and private actor/scope binding, without a fabricated hand-off or stock/financial side effects. The source and hosted proof are recorded separately in its redacted evidence. M30 remains incomplete; no cloud control, real OTP or signed-owner acceptance is claimed.

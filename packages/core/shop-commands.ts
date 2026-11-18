@@ -1,3 +1,4 @@
+import {parseSupplierMessageCommand,parseSupplierMessageCommandReceipt,type SupplierMessageCommand,type SupplierMessageCommandReceipt} from './supplier-message-commands';
 import {parseCloudCommand,parseCloudCommandReceipt,type CloudCommand,type CloudCommandReceipt} from './cloud-commands';
 import type {CustomerInput} from './customers';
 import type {CreditTermsInput} from './khata';
@@ -17,9 +18,10 @@ export type CustomerCommand=
   |{id:string;type:'customer.create'|'customer.update';customerId:string;outletId:string;input:CustomerInput;credit:CreditTermsInput|null;opening:{amount:number;occurredAt:number}|null;ids:CustomerRecordIds}
   |{id:string;type:'customer.archive'|'customer.restore';customerId:string;outletId:string}
   |{id:string;type:'khata.settings';customerId:string;outletId:string;accountId:string|null;input:CreditTermsInput;ids:CustomerRecordIds};
-export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand|InboxCommand|SettingsCommand|ProfileCommand|LinkCommand;
+export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand|InboxCommand|SettingsCommand|ProfileCommand|LinkCommand|SupplierMessageCommand;
 export interface CustomerCommandReceipt {id:string;type:CustomerCommand['type'];customerId:string;outletId:string;accountId:string|null;accountEventId:string|null;entryId:string|null;openingEventId:string|null;at:number;customerUpdatedAt:number;accountUpdatedAt:number|null}
-export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt;
+export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt;
+export function isSupplierMessageCommand(c:ShopCommand):c is SupplierMessageCommand{return c.type==='supplier-message.record';}
 export function isLinkCommand(c:ShopCommand):c is LinkCommand{return isLinkCommandType(c.type);}
 export function isProfileCommand(c:ShopCommand):c is ProfileCommand{return c.type==='setup.update';}
 export function isSettingsCommand(c:ShopCommand):c is SettingsCommand{return isSettingsCommandType(c.type);}
@@ -44,6 +46,7 @@ function recordIds(v:unknown,commandId:string,customerId:string):CustomerRecordI
   return {accountId:v.accountId as string,accountEventId:v.accountEventId as string,openingEntryId:v.openingEntryId as string,openingEventId:v.openingEventId as string};
 }
 export function parseShopCommand(v:unknown):ShopCommand {
+  if(object(v)&&v.type==='supplier-message.record')return parseSupplierMessageCommand(v);
   if(object(v)&&isLinkCommandType(v.type))return parseLinkCommand(v);
   if(object(v)&&v.type==='setup.update')return parseProfileCommand(v);
   if(object(v)&&isSettingsCommandType(v.type))return parseSettingsCommand(v);
@@ -68,6 +71,7 @@ export function parseShopCommand(v:unknown):ShopCommand {
   throw new Error('Choose a supported customer action and its exact fields.');
 }
 export function parseShopCommandReceipt(v:unknown,c:ShopCommand):ShopCommandReceipt {
+  if(isSupplierMessageCommand(c))return parseSupplierMessageCommandReceipt(v,c);
   if(isLinkCommand(c))return parseLinkCommandReceipt(v,c);
   if(isProfileCommand(c))return parseProfileCommandReceipt(v,c);
   if(isSettingsCommand(c))return parseSettingsCommandReceipt(v,c);

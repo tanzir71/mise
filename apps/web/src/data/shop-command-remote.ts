@@ -12,7 +12,7 @@ export function createShopCommandRemote(apiUrl:string,publishableKey:string,getJ
   catch{throw new Error('Cloud commands are not configured.');}
   return {async apply(value:unknown,signal?:AbortSignal):Promise<ShopCommandReceipt>{
     // Serialize before asking for Auth: edits during refresh cannot alter this intent.
-    const command=parseShopCommand(value),body=JSON.stringify(command),orderSave=command.type==='order.create'||command.type==='order.update',handoffSave=command.type==='handoff.prepare',inboxSave=command.type==='inbox.capture',linkSave=command.type==='shopLink.generate';
+    const command=parseShopCommand(value),body=JSON.stringify(command),orderSave=command.type==='order.create'||command.type==='order.update',handoffSave=command.type==='handoff.prepare'||command.type==='supplier-message.record',inboxSave=command.type==='inbox.capture',linkSave=command.type==='shopLink.generate';
     if(new TextEncoder().encode(body).byteLength>(command.type==='stock.batch'?stockBatchBodyLimit:command.type==='purchase.record'?purchaseBodyLimit:orderSave?orderBodyLimit:handoffSave?handoffBodyLimit:inboxSave?inboxBodyLimit:linkSave?linkBodyLimit:32000))throw new Error('This reviewed change is too large. Shorten its text before sending.');
     let jwt:string;try{jwt=await getJwt();}catch{throw new Error('Sign in again to send this change.');}
     if(jwt.length>8192||!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(jwt))throw new Error('Sign in again to send this change.');
