@@ -12,6 +12,12 @@ keys are designed for clients, but this repository still keeps actual deployment
 values private. Ignore rules do not protect files that are already tracked or
 force-added.
 
+The [original-image boundary](m30-sync-images.md) keeps runtime connection and
+session values outside cached image records and portable backups. Its transport
+pins the original account, excludes cookies and redirects, and returns fixed
+errors. The private image functions require a live, confirmed, non-anonymous
+phone account in addition to current owner/assigned-manager outlet access.
+
 Run `pnpm security:install-hooks` once in each clone. The installed pre-commit hook
 scans working files and index blobs, including a staged secret whose working copy
 has since been cleaned. The pre-push hook also scans reachable Git history and

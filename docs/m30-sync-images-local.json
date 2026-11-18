@@ -1,0 +1,265 @@
+{
+  "checkedAt": "2026-11-18T21:31:51.256Z",
+  "milestone": "M30/M31",
+  "complete": false,
+  "scope": "Original private image-byte delivery and durable verification; no canonical application, accepted cursor, fabricated joined-device receipt or cloud activation",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "fullLogSha256": "345831d6677e6728fbf30904aa921b86841823837d4d5458f97754fdb82f00ad",
+      "newFixtureLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 112,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "448dd06b4a2abac6eba0ce0be3ada66c1c9cdbb25fe59b5bb8fb7331dde8da9c"
+    },
+    "units": {
+      "passed": 2108,
+      "files": 111,
+      "failed": 0,
+      "pending": 0,
+      "reportSha256": "45c5f6b6108300c0dbdcc04c36ba58c4482cd3da85f858c71331a0dc43532d6b"
+    },
+    "browser": {
+      "passed": 388,
+      "retries": 0,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "errors": 0,
+      "reportSha256": "d3edd0f5784d105258db332c9db4bfa68dd8df48457207df650bf8448dfeff74",
+      "workers": 1
+    },
+    "rootBrowser": {
+      "passed": 31,
+      "retries": 0,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "errors": 0,
+      "reportSha256": "b86b12fc2c055aa3da1fa92c613b326620e28481b1545c7f11e0833928bb737d",
+      "workers": 1
+    },
+    "visual": {
+      "comparisons": 50,
+      "overflow": 0,
+      "uiChanged": false,
+      "reportSha256": "5c230c39c4a3b0163436c5b4d7dcf9d970ca5f8d6fe17f418eefde8d3034afe2",
+      "exactUnnamedFrameMatchClaimed": false
+    },
+    "exports": 270,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testApisInShippedAssets": false,
+    "newCoverage": {
+      "imageTransportCases": 23,
+      "imageDatabaseCases": 18,
+      "imageServiceSqlAndHttpCases": 30,
+      "newNativeBrowserCases": 6,
+      "exactHostedRoleChecks": 16
+    },
+    "initialParallelBrowser": {
+      "passed": 386,
+      "failed": 2,
+      "newImageCasesPassed": 6,
+      "failures": [
+        "Existing operator fixture service-worker wait timed out",
+        "Existing operator restore navigation timed out"
+      ],
+      "reportSha256": "fd46d118ea4749ff69aa64a698dba006b4e2a6a7ef6551875e91541dff02536e",
+      "diagnosticOperatorChecks": 11,
+      "diagnosticFailures": 0,
+      "diagnosticReportSha256": "5f55f1d4e25caa25b5b644d35fd98bb170f3e26944e732f2376d4e56d9e38991",
+      "productionFixClaimed": false
+    }
+  },
+  "schema": {
+    "local": 14,
+    "physicalTables": 28,
+    "portable": 10,
+    "portableTables": 21,
+    "internalImageTable": "syncImages"
+  },
+  "invariants": {
+    "fullOriginalBytesAndSha256": true,
+    "actualDecodedByteCount": true,
+    "mimeAndSignatureChecked": true,
+    "metadataSealReconstructed": true,
+    "literalNamesRetainedInOriginalRecords": true,
+    "sourceAccountOutletAndConnectionFingerprints": true,
+    "originalJwtPinnedWithPostReadAccountCheck": true,
+    "wholeRequestTimeoutAndCancellation": true,
+    "noCookiesOrRedirects": true,
+    "noProviderDiagnostics": true,
+    "perImageDurableRetry": true,
+    "nativeConcurrentTabs": true,
+    "offlineFullByteVerification": true,
+    "quotaRollback": true,
+    "corruptionRetainedWithoutOverwrite": true,
+    "nativeWriteGuards": true,
+    "noBlobCryptoOrNetworkInsideWriter": true,
+    "originalImagesOperatorReceiptQueueAndPagesPreservedOnUpgrade": true,
+    "noCredentialsAuthUuidSignedUrlsOrStoragePathsInCache": true,
+    "noDomainApplicationOrAcceptedCursor": true,
+    "noFabricatedNewDeviceOwnerOrReceipt": true,
+    "noOutboxEcho": true,
+    "fullCloudControlsDefaultOff": true
+  },
+  "hosted": {
+    "before": {
+      "migrations": 32,
+      "auth_users": 0,
+      "application_tables": 56,
+      "forced_rls_tables": 56,
+      "buckets": 1,
+      "public_buckets": 0,
+      "public_security_definers": 0,
+      "anonymous_table_grants": 0
+    },
+    "after": {
+      "migrations": 33,
+      "auth_users": 0,
+      "application_tables": 56,
+      "forced_rls_tables": 56,
+      "buckets": 1,
+      "public_buckets": 0,
+      "public_security_definers": 0,
+      "anonymous_table_grants": 0
+    },
+    "functions": [
+      {
+        "name": "commands",
+        "version": 18,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "device-orders",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "device-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "inbox-image",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "migration-upload",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "staff-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "sync-read",
+        "version": 1,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      }
+    ],
+    "edgeDeployments": 0,
+    "newSecrets": 0,
+    "authConfigurationChanged": false,
+    "securityAdvisors": {
+      "warnings": 0,
+      "errors": 0
+    },
+    "exactRolledBackSqlRoleProof": {
+      "sqlSha256": "6ffdf4d1d0304dabef638fc6ae23c277b526395ca960062043df1f4b38f13e95",
+      "checks": {
+        "owner": true,
+        "staffDenied": true,
+        "assignedManager": true,
+        "serviceRoleDenied": true,
+        "bucketStillPrivate": true,
+        "anonymousRoleDenied": true,
+        "bannedAccountDenied": true,
+        "revokedMemberDenied": true,
+        "deletedAccountDenied": true,
+        "foreignAccountDenied": true,
+        "noUploadOrCompletion": true,
+        "unassignedOutletDenied": true,
+        "unconfirmedPhoneDenied": true,
+        "ownerMissingObjectDenied": true,
+        "managerMissingObjectDenied": true,
+        "anonymousConfirmedPhoneDenied": true
+      },
+      "remainingFixtureAuthRows": 0,
+      "remainingFixtureBusinesses": 0,
+      "remainingFixtureImages": 0
+    },
+    "negativeImageHttpWithoutJwt": {
+      "checkedAt": "2026-11-18T21:29:52.390Z",
+      "status": 401,
+      "denied": true,
+      "credentialValuesLogged": false,
+      "projectDetailsLogged": false
+    },
+    "realOtp": false,
+    "genuineOwnerHttp": false,
+    "nativeHostedStoragePositiveAcceptance": false,
+    "throttled5000RecordAcceptance": false
+  },
+  "privacy": {
+    "knownPrivateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretDeploymentFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "publication": {
+    "workflowsDisabled": 3,
+    "activeWorkflowRuns": 0,
+    "gitHubSecretScanning": "enabled",
+    "gitHubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "pagesHeld": true,
+    "ciArtifactUploaded": false,
+    "newPagesDeploy": false
+  },
+  "sourceSha256": {
+    "packages/core/sync-images.ts": "cf17c8363ef6087608dbfec23b72fa93871b31c71bbb09f7557deea75f34abf8",
+    "packages/core/local-schema.ts": "e1356a6d3ab991f4ffd4baa98f52bbc6d1a1fa0374d3f4c58a8f4410b2ae96b3",
+    "packages/core/local-outbox.ts": "aed2164bc960a83d2203001546dc8719f5097e56a55d10e9ba344ad99470dee0",
+    "apps/web/src/data/cloud-image-remote.ts": "0c7bac96e6cd7be594e31c1e5b99b4186b32b860e062bc3d235140ee6144cb53",
+    "apps/web/src/data/cloud-sync-images.ts": "5f73c4173886eb17a2eaaa60316ab7df6df05a72a89e768e4adae98caab8ec59",
+    "apps/web/src/data/cloud-sync-journal.ts": "fa45960616ab9f707933c8e6f31cac443824c90d88d27382028fa139e46c5db9",
+    "apps/web/src/data/local-store.ts": "168e1d0201916410d6403ea29abc7546e37a7a2e89326d0e85ed9b470cfa2084",
+    "supabase/migrations/20261118204041_image_account_guard.sql": "a04402e02e27d05e056cd053cc1cccdea7c19b3944cf90110bd465c1613536a3",
+    "tests/cloud-image-remote.test.ts": "cc5ce93368d9850f1bf04050afed9f507c03fe371b7fee71dbf2eb380e370429",
+    "tests/sync-images-db.test.ts": "1f391fa9e4c900fa352b60b5a8b8f4c28fda46cd96065a256ddfe46ad68e5866",
+    "tests/sync-images-fixture.ts": "01a0737f3255dc8310460c9cb06e9330e311689393a56e34f5b0973d050c6443",
+    "tests/inbox-image-storage.test.ts": "c7923f1a24a97dcb06bbcb065979c2147fb6ea618286e4648b76d89bdb5ba3c0",
+    "tests/image-hosted-fixture.ts": "9b40b7483022e27ae6542136051ffa16a5b86955fb4824a8659ad399429f7037",
+    "tests/e2e/sync-images.spec.ts": "16bb13b021c3ba77220a78b6e3866f14bdaf38374822e912e4066e983a0231f6",
+    "tests/fixtures/sync-images-browser.ts": "88a97f4428fb3f07a03a47d0a90a9c35cd2c3087150bcc93f69571650577f0e7",
+    "tests/fixtures/install-sync-images.mjs": "fe6229cc4a9cf157a71f0c92a0ef9faceb200865364529f153bfcd697ddee6ab"
+  },
+  "remaining": [
+    "Legitimate new-device join and immutable remote coverage for owners and managers",
+    "Atomic canonical application and original pending-intent reconciliation",
+    "Two-browser offline convergence",
+    "Real phone OTP, genuine owner/image HTTP and 3G acceptance before full cloud activation",
+    "Remaining M30 resources and subsequent handover milestones"
+  ]
+}

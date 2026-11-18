@@ -2,7 +2,7 @@ import type {BackupTable} from './backup-tables';
 import type {ShopCommand,ShopCommandReceipt} from './shop-commands';
 import type {CloudUploadReceipt} from './cloud-upload-runner';
 
-export const localSchemaVersion=13;
+export const localSchemaVersion=14;
 export const localSyncTableNames=['cloudState','outbox'] as const;
 export interface LocalCloudState {
  id:'binding';version:1;uploadId:string;businessId:string;outletId:string;ownerId:string;

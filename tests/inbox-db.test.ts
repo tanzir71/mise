@@ -1,3 +1,5 @@
+import {localTableNames} from '../packages/core/local-schema';
+import {localSchemaVersion} from '../packages/core/local-outbox';
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
@@ -88,6 +90,6 @@ test('a same-size image change invalidates an already reviewed restore',async()=
 test('schema 9 upgrades preserve all twenty existing native tables and add an empty indexed Inbox',async()=>{
   const source=await boot();await source.recordSale({expression:'123',method:'cash'});const records=await source.readBackup(),stores=Object.fromEntries(source.tables.filter(t=>t.name!=='inboxItems').map(t=>[t.name,[t.schema.primKey.src,...t.schema.indexes.filter(i=>!['inboxId','[inboxId+inboxRevision]'].includes(i.name)).map(i=>i.src)].join(',')]));
   const name=`mise-v9-${randomUUID()}`,legacy=new Dexie(name);legacy.version(9).stores(stores);await legacy.open();for(const table of backupTableNames.filter(t=>t!=='inboxItems'))await legacy.table(table).bulkPut(records.tables[table]);legacy.close();
-  const upgraded=await boot(false,name);expect(upgraded.verno).toBe(13);expect(upgraded.tables).toHaveLength(27);expect(await upgraded.inboxItems.count()).toBe(0);for(const table of backupTableNames.filter(t=>t!=='inboxItems'))expect(await upgraded.table(table).toArray()).toEqual(records.tables[table]);expect(upgraded.events.schema.indexes.find(i=>i.name==='[inboxId+inboxRevision]')?.unique).toBe(true);
+  const upgraded=await boot(false,name);expect(upgraded.verno).toBe(localSchemaVersion);expect(upgraded.tables).toHaveLength(localTableNames.length);expect(await upgraded.inboxItems.count()).toBe(0);for(const table of backupTableNames.filter(t=>t!=='inboxItems'))expect(await upgraded.table(table).toArray()).toEqual(records.tables[table]);expect(upgraded.events.schema.indexes.find(i=>i.name==='[inboxId+inboxRevision]')?.unique).toBe(true);
   const old=structuredClone(records) as unknown as {schemaVersion:number;tables:Record<string,unknown>};old.schemaVersion=9;delete old.tables.inboxItems;expect(parseBackup(JSON.stringify(old)).tables).toEqual(records.tables);
 });

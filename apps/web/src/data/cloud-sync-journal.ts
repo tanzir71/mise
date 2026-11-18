@@ -88,3 +88,19 @@ export async function runSyncDownload(db:LocalStore,id:string,target:SyncDownloa
  while(!state.receivedCursor){signal?.throwIfAborted();const page=await remote.page(structuredClone(state.window!),state.pages,signal);signal?.throwIfAborted();state=await appendSyncDownloadPage(db,id,target,page);}
  return verifySyncDownload(db,id,target,signal);
 }
+/** Read-only staging guards shared with original image-byte hydration. */
+export type {Context as SyncDownloadContext};
+export {context as readSyncDownloadContext,current as assertSyncDownloadContext};
+/** Bind a detached record snapshot to the original complete staging seal. */
+export async function readVerifiedSyncRecords(db:LocalStore,id:string,target:SyncDownloadTarget,signal?:AbortSignal):Promise<{context:Context;records:LocalSyncRecord[]}>{
+ const state=await verifySyncDownload(db,id,target,signal),before=await context(db,id,target);if(syncDownloadToken(state)!==syncDownloadToken(before.state))throw syncDownloadError();
+ const snapshot=await db.transaction('r',db.cloudState,db.syncReads,db.syncPages,db.syncRecords,async()=>{
+  const latest=await current(db,before);if(syncDownloadToken(latest)!==syncDownloadToken(state))throw syncDownloadError();
+  return {records:await db.syncRecords.where('readId').equals(id).toArray(),pages:await db.syncPages.where('readId').equals(id).sortBy('index')};
+ });
+ if(snapshot.records.length!==state.records||snapshot.pages.length!==state.pages||snapshot.pages.some((p,i)=>p.readId!==id||p.index!==i))throw syncDownloadError();
+ snapshot.records.sort((a,b)=>BigInt(a.changeId)<BigInt(b.changeId)?-1:BigInt(a.changeId)>BigInt(b.changeId)?1:0);
+ const recordHashes:{changeId:string;hash:string}[]=[];for(const record of snapshot.records){signal?.throwIfAborted();if(record.readId!==id)throw syncDownloadError();recordHashes.push({changeId:record.changeId,hash:await digest(record)});}
+ if(await digest({sourceHash:state.sourceHash,window:state.window,pageHashes:snapshot.pages.map(p=>p.hash),recordHashes,cursor:state.receivedCursor})!==state.seal)throw syncDownloadError();
+ signal?.throwIfAborted();return {context:before,records:snapshot.records};
+}

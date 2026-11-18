@@ -1,6 +1,12 @@
 import {readFileSync,readdirSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import {afterAll,beforeAll,beforeEach,expect,it} from 'vitest';
+import {createServer} from 'node:http';
+import {once} from 'node:events';
+import {createCloudImageRemote} from '../apps/web/src/data/cloud-image-remote';
+import {cloudConnectionTarget} from '../packages/core/cloud-connection';
+import {operatorAccountHash} from '../packages/core/operators';
+import type {SyncImageSource} from '../packages/core/sync-images';
 import {shopDataFixture} from './shop-data-fixture';
 import {prepareCloudMigration} from '../packages/core/cloud-records';
 import {createBackup} from '../packages/core/backup';
@@ -40,7 +46,7 @@ beforeAll(async()=>{
   for(const [backup,n,skip] of [[source,1,false],[foreign,4,false],[createBackup(b),1,true]] as const){const plan=await prepareCloudMigration(backup,uid(n));await db.transaction(async sql=>{for(const record of plan.records){if(skip&&['businesses','members'].includes(record.table))continue;const keys=Object.keys(record.values);await sql.query(`insert into public.${record.table}(${keys.join(',')}) values(${keys.map((_,i)=>`$${i+1}`).join(',')})`,Object.values(record.values));}});}
   for(const [n,role,outlet] of [[2,'manager',source.tables.outlets[0].id],[3,'manager',branch],[5,'staff',source.tables.outlets[0].id]] as const){const member=newInboxId();await db.query('insert into public.members(id,business_id,auth_user_id,name,role,created_at,updated_at) values($1,$2,$3,$4,$5,1,1)',[member,source.tables.businesses[0].id,uid(n),'"Person"',role]);await db.query('insert into public.member_outlets values($1,$2,$3)',[source.tables.businesses[0].id,member,outlet]);}
 },30_000);
-beforeEach(async()=>{objects.clear();await db.exec("delete from storage.objects;delete from public.events where command='inbox.image.upload';update public.inbox_images set uploaded_at=null;update auth.users set banned_until=null,deleted_at=null,phone_confirmed_at=now();update public.members set active=true;update storage.buckets set public=false");});
+beforeEach(async()=>{objects.clear();await db.exec("delete from storage.objects;delete from public.events where command='inbox.image.upload';update public.inbox_images set uploaded_at=null;update auth.users set banned_until=null,deleted_at=null,is_anonymous=false,phone_confirmed_at=now();update public.members set active=true;update storage.buckets set public=false");});
 afterAll(async()=>{await db?.close();});
 it.each([1,2])('verified operator %s derives only the image metadata and canonical scoped path',async n=>{const meta=await context(n);expect(meta.path).toBe(`${meta.businessId}/${meta.outletId}/${meta.inboxId}/${meta.id}`);expect(meta.size).toBe(inboxPng.length);expect(meta.type).toBe('image/png');expect(meta).not.toHaveProperty('name');expect(meta).not.toHaveProperty('text');});
 it.each([3,4,5,6])('operator %s cannot access an unassigned, foreign or unprivileged image',async n=>{await expect(context(n)).rejects.toMatchObject({code:'42501'});expect((await handler()(request(n))).status).toBe(403);expect(objects.size).toBe(0);});
@@ -82,3 +88,25 @@ it('restrictive bucket policy defeats permissive policies for reads/writes but p
   expect(await asRole(1,'authenticated',"insert into storage.objects(bucket_id,name) values('unrelated','ok') returning name")).toEqual([{name:'ok'}]);
 });
 it('public bucket drift refuses context and completion',async()=>{await db.exec("update storage.buckets set public=true where id='mise-inbox'");await expect(context()).rejects.toMatchObject({code:'55000'});await expect(rpc(1,'complete_inbox_image',[image,newInboxId()])).rejects.toMatchObject({code:'55000'});expect((await handler()(request())).status).toBe(503);});
+
+it('rejects an anonymous account even if it has a confirmed phone and an owner membership',async()=>{
+ const meta=await context();await storagePut(meta,inboxPng);await db.query('update auth.users set is_anonymous=true where id=$1',[uid(1)]);await expect(context()).rejects.toMatchObject({code:'42501'});await expect(rpc(1,'complete_inbox_image',[image,newInboxId()])).rejects.toMatchObject({code:'42501'});expect((await handler()(request(1,'GET'))).status).toBe(403);expect((await handler()(request())).status).toBe(403);expect(await uploadCount()).toBe(0);
+});
+it('rechecks anonymous-account drift after fetching bytes and before upload completion',async()=>{
+ const meta=await context();await storagePut(meta,inboxPng);const h=handler({get:async()=>{await db.query('update auth.users set is_anonymous=true where id=$1',[uid(1)]);return new Uint8Array(inboxPng);}});expect((await h(request(1,'GET'))).status).toBe(403);expect(await uploadCount()).toBe(0);
+ await db.query('update auth.users set is_anonymous=false where id=$1',[uid(1)]);const put=handler({put:async()=>{await db.query('update auth.users set is_anonymous=true where id=$1',[uid(1)]);return false;}});expect((await put(request())).status).toBe(403);expect((await db.query<{uploaded_at:number|null}>('select uploaded_at from public.inbox_images where id=$1',[image])).rows[0].uploaded_at).toBeNull();
+});
+async function withImageHttp<T>(run:(apiUrl:string)=>Promise<T>){
+ const h=handler();let apiUrl='';const server=createServer(async(req,res)=>{try{const headers=new Headers();for(const [key,value]of Object.entries(req.headers))if(value!==undefined)headers.set(key,Array.isArray(value)?value.join(','):value);const response=await h(new Request(apiUrl+req.url,{method:req.method,headers}));res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()));}catch{res.writeHead(503,{'Content-Type':'application/json'});res.end('{"error":"Unavailable"}');}});
+ server.listen(0,'127.0.0.1');await once(server,'listening');apiUrl='http://127.0.0.1:'+(server.address() as {port:number}).port;try{return await run(apiUrl);}finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));}
+}
+async function clientSource(n:number,apiUrl:string):Promise<SyncImageSource>{
+ const meta=await context(),member=(await db.query<{id:string;role:string}>('select id,role from public.members where auth_user_id=$1',[uid(n)])).rows[0],scope='/mise/app/'+meta.businessId,config={apiUrl,publishableKey:'sb_publishable_test_only'};
+ return {version:1,readId:newInboxId(),sourceHash:'a'.repeat(64),readSeal:'b'.repeat(64),changeId:'1',recordHash:'c'.repeat(64),target:{targetHash:await cloudConnectionTarget(config,scope,uid(n)),accountHash:await operatorAccountHash(uid(n)),businessId:meta.businessId,outletId:meta.outletId,actorId:member?.id??newInboxId(),role:member?.role==='owner'?'owner':'manager'},image:{id:meta.id,businessId:meta.businessId,outletId:meta.outletId,inboxId:meta.inboxId,type:meta.type,size:meta.size,sha256:meta.sha256}};
+}
+it.each([1,2])('operator %s downloads original bytes through real client HTTP, image handler and SQL access checks',async n=>{
+ const meta=await context();await storagePut(meta,inboxPng);await rpc(1,'complete_inbox_image',[image,newInboxId()]);const before=await uploadCount();await withImageHttp(async apiUrl=>{const source=await clientSource(n,apiUrl),config={apiUrl,publishableKey:'sb_publishable_test_only'},remote=createCloudImageRemote(config,'/mise/app/'+meta.businessId,async()=>({jwt:jwt(n),userId:uid(n)})),blob=await remote.get(source);expect(new Uint8Array(await blob.arrayBuffer())).toEqual(inboxPng);expect(blob.type).toBe('image/png');});expect(await uploadCount()).toBe(before);
+});
+it.each([3,4,5,6])('client HTTP still denies forbidden operator %s when it knows an image ID and hash',async n=>{
+ const meta=await context();await storagePut(meta,inboxPng);await withImageHttp(async apiUrl=>{const source=await clientSource(n,apiUrl),remote=createCloudImageRemote({apiUrl,publishableKey:'sb_publishable_test_only'},'/mise/app/'+meta.businessId,async()=>({jwt:jwt(n),userId:uid(n)}));await expect(remote.get(source)).rejects.toMatchObject({kind:'auth'});});expect(await uploadCount()).toBe(0);
+});

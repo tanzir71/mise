@@ -1,3 +1,4 @@
+import {localSchemaVersion} from '../packages/core/local-outbox';
 import { inboxImageFile } from './inbox-fixture';
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
@@ -160,7 +161,7 @@ test('market changes, archived contacts/stock and zero-total orders remain valid
   expect(await target.customers.toArray()).toEqual(await db.customers.toArray());expect(await target.stockItems.toArray()).toEqual(await db.stockItems.toArray());
 });
 
-test('schema 7 records upgrade to local schema 13 while portable backups remain schema 10',async () => {
+test('schema 7 records upgrade to the current local schema while portable backups remain schema 10',async () => {
   const {db:source} = await fullFixture(),records:Record<string,unknown[]> = {},stores:Record<string,string> = {};
   for (const table of source.tables.filter(t => (backupTableNames as readonly string[]).includes(t.name)&&!['purchases','inboxItems'].includes(t.name))) {
     stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.filter(i => !['handoffId','handoffTopic','[handoffId+handoffRevision]','inboxId','[inboxId+inboxRevision]'].includes(i.name)).map(i => i.src)].join(',');
@@ -168,7 +169,7 @@ test('schema 7 records upgrade to local schema 13 while portable backups remain 
   }
   const name = `mise-purchases-v7-${randomUUID()}`,legacy = new Dexie(name);legacy.version(7).stores(stores);
   for (const table of Object.keys(stores)) await legacy.table(table).bulkPut(records[table]);legacy.close();
-  const upgraded = new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(13);expect(await upgraded.purchases.count()).toBe(0);
+  const upgraded = new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(localSchemaVersion);expect(await upgraded.purchases.count()).toBe(0);
   for (const table of Object.keys(stores)) expect(await upgraded.table(table).toArray(),table).toEqual(records[table]);
   const oldFile = {format:'mise-backup',formatVersion:1,schemaVersion:7,exportedAt:at,tables:records},target = await boot(false);
   const normalised = parseBackup(JSON.stringify(oldFile));expect(normalised.schemaVersion).toBe(10);expect(normalised.tables.purchases).toEqual([]);

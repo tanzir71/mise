@@ -1,3 +1,4 @@
+import {localSchemaVersion} from '../../packages/core/local-outbox';
 import {expect,test,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 // @ts-expect-error Shared local-only native browser installer is plain JavaScript.
@@ -20,9 +21,9 @@ test('native progress failure rolls back its inserted page and retries the origi
  await setup(page);const prepared=await page.evaluate(()=>window.miseSyncStageTest.prepare()),failed=await page.evaluate(()=>window.miseSyncStageTest.failProgress());expect(failed.blocked).toBe(true);expect(failed.pages).toBe(0);expect(failed.state.pages).toBe(0);const result=await page.evaluate(()=>window.miseSyncStageTest.resume()),saved=await page.evaluate(()=>window.miseSyncStageTest.inspect());expect(result.id).toBe(prepared.id);expect(saved.recordCount).toBe(prepared.expectedRecords);expect(saved.seal).toBeTruthy();expect(saved.queue).toEqual([]);
 });
 test('an empty native device can stage a new account without changing onboarding or inventing an upload',async({page})=>{
- await page.goto('app/');await expect(page.locator('input[name=business][value=corner_shop]')).toBeVisible();await installSyncStageFixture(page);const prepared=await page.evaluate(()=>window.miseSyncStageTest.prepare(true));await page.evaluate(()=>window.miseSyncStageTest.resume());const saved=await page.evaluate(()=>window.miseSyncStageTest.inspect());expect(saved.recordCount).toBe(prepared.expectedRecords);expect(saved.businessCount).toBe(0);expect(saved.binding).toBeUndefined();expect(saved.schema).toBe(13);expect(saved.seal).toBeTruthy();expect(saved.queue).toEqual([]);await expect(page.locator('input[name=business][value=corner_shop]')).toBeVisible();
+ await page.goto('app/');await expect(page.locator('input[name=business][value=corner_shop]')).toBeVisible();await installSyncStageFixture(page);const prepared=await page.evaluate(()=>window.miseSyncStageTest.prepare(true));await page.evaluate(()=>window.miseSyncStageTest.resume());const saved=await page.evaluate(()=>window.miseSyncStageTest.inspect());expect(saved.recordCount).toBe(prepared.expectedRecords);expect(saved.businessCount).toBe(0);expect(saved.binding).toBeUndefined();expect(saved.schema).toBe(localSchemaVersion);expect(saved.seal).toBeTruthy();expect(saved.queue).toEqual([]);await expect(page.locator('input[name=business][value=corner_shop]')).toBeVisible();
 });
 
 test('native schema upgrade preserves an original image, cash intent and accepted upload before adding download stores',async({page})=>{
- await setup(page);const result=await page.evaluate(()=>window.miseSyncStageTest.upgradeLegacy());expect(result.after).toBe(result.before);expect(result.queuePreserved).toBe(true);expect(result.bindingPreserved).toBe(true);expect(result.downloadRows).toEqual([0,0,0]);expect(result.schema).toBe(13);
+ await setup(page);const result=await page.evaluate(()=>window.miseSyncStageTest.upgradeLegacy());expect(result.after).toBe(result.before);expect(result.queuePreserved).toBe(true);expect(result.bindingPreserved).toBe(true);expect(result.downloadRows).toEqual([0,0,0]);expect(result.schema).toBe(localSchemaVersion);
 });

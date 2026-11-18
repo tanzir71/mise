@@ -1,3 +1,5 @@
+import {localTableNames} from '../packages/core/local-schema';
+import {localSchemaVersion} from '../packages/core/local-outbox';
 import 'fake-indexeddb/auto';
 import { randomUUID } from 'node:crypto';
 import { afterEach,beforeEach,expect,test,vi } from 'vitest';
@@ -80,7 +82,7 @@ test('older generation cannot overwrite a newer link and undo restores a legacy 
 test('existing schema-eight full backup restores the exact public link and audit without new tables or losing private records',async()=>{
   const source=await boot();await source.recordSale({expression:'125',method:'cash'});await generate(source);const backup=await source.readBackup();
   const target=await boot(false),review=await target.previewRestore(backup);await target.restoreBackup(backup,review);target.close();await target.open();
-  expect(target.verno).toBe(13);expect(target.tables).toHaveLength(27);const restored=await target.readBackup();
+  expect(target.verno).toBe(localSchemaVersion);expect(target.tables).toHaveLength(localTableNames.length);const restored=await target.readBackup();
   for(const table of backupTableNames.filter(table=>table!=='events'))expect(restored.tables[table],table).toEqual(backup.tables[table]);
   expect(restored.tables.events.filter(event=>event.command!=='backup.restore')).toEqual(backup.tables.events);expect(await packet(target)).toEqual(await packet(source));
 });

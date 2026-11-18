@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 image downloads now retain fully verified original bytes beside their sealed metadata. Schema 14 adds an immutable internal image cache with exact per-image retries, offline verification and native transaction guards; existing shop data, operator selection, upload receipts and queued cash remain intact. The image boundary rejects anonymous phone accounts. Canonical application and full cloud controls remain gated.
+
 - M30 explicit outlet/member selection now attributes local actions to the chosen owner or manager, retains real assignments, guards owner settings, and supports multi-outlet backup recovery. Schema 13 adds an internal operator table while portable backups stay unchanged. Fresh authenticated metadata discovery, bounded runtime RPC transport and durable sign-out/account locks prepare the canonical sync boundary; full cloud controls remain disabled.
 
 - Credential guards now inspect Windows UTF-16 files in both byte orders, with or without a byte-order mark, including ZIP downloads. All 23 security tests pass, including a real rejected commit of a PowerShell credential file. Existing commit, push and build guards remain enabled; GitHub Actions remain stopped.
