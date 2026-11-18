@@ -1,0 +1,165 @@
+{
+  "checkedAt": "2026-11-18T16:03:55.828Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "PostgreSQL top-level transaction snapshot cursor primitive for planned canonical download; no feed or canonical application yet",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "6675bab2ad5d87263d8592becd1635ee57f1a281e662abe6b4ac8e56ac2441ad"
+    },
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 106,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "44bfab626520cd54b1c3cf0e29da8bc57e4ab84bbf1eecfa1bd8367516aa9904"
+    },
+    "units": {
+      "passed": 1952,
+      "files": 104,
+      "newSnapshotCases": 29,
+      "postgresqlOraclePairs": 60,
+      "reportSha256": "efa1032d4d24092c2e8228e93c4a1969c73f7b3df0e8142aa07824dd222f303f"
+    },
+    "browser": {
+      "passed": 366,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "37e80b22e77e6886daf61b0f0b7fea002c65cf7f94fc8069bb5fc1ce43e7546d"
+    },
+    "rootSmoke": {
+      "passed": 9,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "ddc0ef72ad3e29bfbe4485e405b4470822e9e19dc74655c30381414ee2f408d4"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "54aa82b9095f08c441060830ba6d152b70ef77e07632492873f324d7a8be928c",
+        "htmlSha256": "9e03376e292e60d919a40e1be19f28af3ee6de4a8956557ade51c41afbd09772"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "62b4c9dbff11b31601028b89474e6e17a8df392c64aa79dd4256a26e225b98d4",
+        "htmlSha256": "c3cb7f9b67721fb4ce9628b7096ddd113f157f2113416a76118edce93a4ff81d"
+      }
+    ],
+    "exports": {
+      "passed": true,
+      "present": 270,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "visual": {
+      "comparisons": 45,
+      "changedProductScreens": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "report": "qa/report.html",
+      "reportSha256": "7e7d9e7a7b36917d04eb44549ff45ce15ea75245f7abb627efc2689f2c4e80a4",
+      "resultsSha256": "6204b5655eab1d96564f6b40ad6adf93e0a15f726fb3603232ca2e4089fd6c0b",
+      "threeCapturesInspected": true,
+      "keyScreens": {
+        "qa/screens/m30-link-screen-360.png": "4fdc311e0b97cc0c85bd6877b6556e1ce4e6d2d3ba5ae1da7b4d555ec5269034",
+        "qa/screens/m30-link-screen-390.png": "d5bf2e28ed395ac5729987c5c8ae8a56f063fda0570baed8a9748daee0557c75",
+        "qa/screens/m30-link-screen-1440.png": "77cba50641353563eca04d13dfe00330b41a89f91ebf337f3bdf0fdaaff1c226"
+      },
+      "exactFrameMatchClaimed": false,
+      "newCiArtifact": false
+    }
+  },
+  "invariants": {
+    "topLevelTransactionIdsOnly": true,
+    "uint64PrecisionRetained": true,
+    "noJavascriptNumberTransactionIds": true,
+    "strictSnapshotBoundsAndInFlightOrder": true,
+    "zeroSnapshotBoundsRejectedLikePostgresql": true,
+    "immutableParsedState": true,
+    "firstPullAndExactReplay": true,
+    "lateCommitPreserved": true,
+    "backwardsSnapshotsDenied": true,
+    "cursorIsNotAuthorization": true,
+    "timestampsAndAllocatedRowIdsNotCommitCursor": true,
+    "feedImplemented": false,
+    "canonicalApplicationImplemented": false,
+    "canonicalConvergenceClaimed": false,
+    "cloudSetup": false,
+    "portableSchemaUnchanged": true
+  },
+  "hosted": {
+    "changed": false,
+    "newMigrations": 0,
+    "newFunctionDeployments": 0,
+    "newPersistentAuthUsers": 0,
+    "newMessages": 0,
+    "newDomainRows": 0,
+    "authConfigurationChanged": false,
+    "vaultUnchanged": true,
+    "independentConcurrentReadProof": {
+      "checkedAt": "2026-11-18T15:38:53.469Z",
+      "overlapMs": 4884,
+      "actualDatabaseOverlap": true,
+      "earlier_snapshot_keeps_inflight": true,
+      "later_snapshot_includes_committed": true,
+      "onlySelectQueries": true,
+      "domainRowsChanged": 0
+    },
+    "counts": {
+      "auth_users": 0,
+      "migrations": 30,
+      "application_tables": 51,
+      "forced_rls_tables": 51,
+      "public_buckets": 0,
+      "private_buckets": 1
+    },
+    "actualOwnerSignedHttpProven": false
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "liveTransactionIdsPublished": false,
+    "projectAndCredentialValuesPublished": false,
+    "testInterfacesShipped": false,
+    "testFixtureMarkersInStaticOutput": 0
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "scope/epoch-bound durable change feed",
+    "fixed snapshot window pagination and bounded/bootstrap download",
+    "explicit active operator/outlet selection",
+    "immutable remote coverage journal and trusted no-echo application",
+    "pending original intent overlay and conflict reconciliation",
+    "full upload/outbox/image controls",
+    "real OTP, genuine signed-owner HTTP and5000-record3G acceptance",
+    "remaining M30 resources and later milestones"
+  ],
+  "sourceHashes": {
+    "packages/core/sync-snapshot.ts": "487d6d80826fe664a279b5db088feb498a00317fdae7c63a2538aa31ea91b175",
+    "tests/sync-snapshot.test.ts": "9d9e7e4135d7b7c9989ae108c9468c5d1a3697c045accbfd7ab2aab8800127df"
+  }
+}
