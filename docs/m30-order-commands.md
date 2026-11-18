@@ -87,7 +87,7 @@ refund correction, native PWA restart and responsive axe checks. See
 [redacted deployment and verification evidence](m30-order-hosted.json).
 
 Actual phone OTP, positive signed-owner HTTP writes/uploads, app/outbox integration,
-remaining closing/hand-off/Inbox and staff/agent resources, and M31 convergence
+remaining confirmed hand-off/Inbox and staff/agent resources, and M31 convergence
 remain open. Product cloud controls stay unavailable. No new layout, visual
 comparison or live Pages publication is claimed; workflows remain disabled.
 Actual deployment references, credentials and private operational paths stay out

@@ -2,19 +2,25 @@ import { ulid } from 'ulid';
 import { closingPreview, dayKey, safeTotal, type TodayContext } from './today';
 import { formatMoney, moneyInputValue } from './money';
 import { recordSaleCommand } from './sales';
-import { validateShop } from './shop-access';
-import type { AuditEvent, DayClosing, Sale, SetupSnapshot } from './models';
+import { validateShop, type NamedShopSetup } from './shop-access';
+import type { AuditEvent, DayClosing, DaySummary, Sale } from './models';
 
 export interface ClosingInput { id:string;day:string;fingerprint:string;countedCash:number;addDifference:boolean;note:string }
 export interface ClosingChange { closing:DayClosing;sale?:Sale;events:AuditEvent[] }
+export type ClosingIds=(kind:'event'|'sale'|'saleEvent')=>string;
 export const newClosingId = (at = Date.now()) => ulid(at);
 export function sameClosingRequest(input:ClosingInput, record:DayClosing):boolean {
   return input.id === record.id && input.day === record.day && input.fingerprint === record.previewFingerprint && input.countedCash === record.countedCash && input.addDifference === (record.addedWalkIn > 0) && input.note.trim() === record.note;
 }
-function event(setup:SetupSnapshot, closing:DayClosing, command:string, before:unknown, after:unknown, at:number):AuditEvent {
-  return {id:ulid(at),outletId:closing.outletId,closingId:closing.id,actor:{type:'member',id:setup.owner.id},command,before,after,at};
+function event(setup:NamedShopSetup, closing:DayClosing, command:string, before:unknown, after:unknown, at:number,id:string):AuditEvent {
+  return {id,outletId:closing.outletId,closingId:closing.id,actor:{type:'member',id:setup.owner.id},command,before,after,at};
 }
-export function closeDayCommand(input:ClosingInput, context:TodayContext, at = Date.now()):ClosingChange {
+/** The displayed snapshot includes the linked receipt committed with this closing. */
+export function closingSummaryWithOverage(summary:DaySummary,amount:number):DaySummary {
+  if(!Number.isSafeInteger(amount)||amount<=0)throw new Error('Use a positive walk-in amount.');
+  return {...summary,sales:safeTotal([summary.sales,amount]),saleCount:safeTotal([summary.saleCount,1]),cashSales:safeTotal([summary.cashSales,amount]),expectedCash:safeTotal([summary.expectedCash,amount]),split:summary.split.map(row=>row.method==='cash'?{...row,amount:safeTotal([row.amount,amount]),count:safeTotal([row.count,1])}:row)};
+}
+export function closeDayCommand(input:ClosingInput, context:TodayContext<NamedShopSetup>, at = Date.now(),newId:ClosingIds=()=>ulid(at)):ClosingChange {
   const {setup} = context; validateShop(setup);
   if (!/^[0-9A-HJKMNP-TV-Z]{26}$/.test(input.id)) throw new Error('Reopen the closing review.');
   if (!Number.isSafeInteger(input.countedCash) || input.countedCash < 0) throw new Error('Enter a non-negative cash count in minor units.');
@@ -33,17 +39,17 @@ export function closeDayCommand(input:ClosingInput, context:TodayContext, at = D
   };
   const events:AuditEvent[] = []; let sale:Sale|undefined;
   if (input.addDifference) {
-    const change = recordSaleCommand({expression:moneyInputValue(difference,summary.currency).replace(',','.'),method:'cash',who:'Walk-in'}, {setup,items:[],wallets:[]},at);
+    const change = recordSaleCommand({expression:moneyInputValue(difference,summary.currency).replace(',','.'),method:'cash',who:'Walk-in'}, {setup,items:[],wallets:[]},at,kind=>newId(kind==='sale'?'sale':'saleEvent'));
     sale = {...change.sale,closingId:closing.id};closing.addedSaleId = sale.id;
     events.push({...change.event,closingId:closing.id,after:sale});
     // Keep the displayed snapshot consistent with the receipt written in the same transaction.
-    closing.summary = {...summary,sales:safeTotal([summary.sales,difference]),saleCount:summary.saleCount+1,cashSales:safeTotal([summary.cashSales,difference]),expectedCash:input.countedCash,split:summary.split.map(row => row.method === 'cash' ? {...row,amount:safeTotal([row.amount,difference]),count:row.count+1} : row)};
+    closing.summary = closingSummaryWithOverage(summary,difference);
   }
-  const closingEvent = event(setup,closing,'closing.record',null,closing,at);closing.eventId = closingEvent.id;events.push(closingEvent);
+  const closingEvent = event(setup,closing,'closing.record',null,closing,at,newId('event'));closing.eventId = closingEvent.id;events.push(closingEvent);
   return {closing,sale,events};
 }
 export const canUndoClosing = (record:DayClosing, at = Date.now()) => record.voidedAt === undefined && at >= record.createdAt && dayKey(at,record.timezone) === record.day;
-export function undoClosingCommand(before:DayClosing, setup:SetupSnapshot, sale:Sale|undefined, at = Date.now()):ClosingChange {
+export function undoClosingCommand(before:DayClosing, setup:NamedShopSetup, sale:Sale|undefined, at = Date.now(),newId:ClosingIds=()=>ulid(at)):ClosingChange {
   validateShop(setup);
   if (before.outletId !== setup.outlet.id) throw new Error('Choose a closing from this shop.');
   if (!canUndoClosing(before,at)) throw new Error('A closing can be undone once, on the same shop day.');
@@ -52,9 +58,9 @@ export function undoClosingCommand(before:DayClosing, setup:SetupSnapshot, sale:
   if (before.addedSaleId) {
     if (!sale || sale.id !== before.addedSaleId || sale.closingId !== before.id || sale.outletId !== before.outletId || sale.currency !== before.currency || sale.method !== 'cash' || sale.amount !== before.addedWalkIn || sale.voidedAt !== undefined || sale.orderId || sale.customerId) throw new Error('The closing’s walk-in receipt changed. Review its history.');
     undoneSale = {...sale,voidedAt:at,voidReason:'undo',updatedAt:at};
-    const saleEvent = event(setup,closing,'sale.closing-undo',sale,undoneSale,at);saleEvent.undoOf = sale.eventId;events.push(saleEvent);
+    const saleEvent = event(setup,closing,'sale.closing-undo',sale,undoneSale,at,newId('saleEvent'));saleEvent.undoOf = sale.eventId;events.push(saleEvent);
   }
-  const closingEvent = event(setup,closing,'closing.undo',before,closing,at);closingEvent.undoOf = before.eventId;events.push(closingEvent);
+  const closingEvent = event(setup,closing,'closing.undo',before,closing,at,newId('event'));closingEvent.undoOf = before.eventId;events.push(closingEvent);
   return {closing,sale:undoneSale,events};
 }
 export function daySummaryText(record:DayClosing):string {

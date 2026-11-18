@@ -17,6 +17,8 @@ scans working files and index blobs, including a staged secret whose working cop
 has since been cleaned. The pre-push hook also scans reachable Git history and
 `site/`. `pnpm lint` checks source/index files and `pnpm build` checks the completed
 static output. These checks run locally while GitHub workflows remain disabled.
+ESLint excludes ignored private tooling and secret directories; the separate
+credential guard continues to inspect all tracked and staged files.
 
 For a full audit, run:
 
@@ -43,12 +45,12 @@ The latest audit fetched remote branches/tags first and compared eight private
 key, pepper and deployment values in memory. It found zero credentials, zero
 current deployment references and zero coverage gaps; the 21 historical findings
 were nonsecret deployment references. Commit/push hooks remain enabled. The
-[order evidence](m30-order-hosted.json) records the redacted counts.
+[closing evidence](m30-closing-hosted.json) records the redacted counts.
 
-The same day's live read-only verification found all **44 public/private application
+The same day's live read-only verification found all **45 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
-reported no warnings or errors. Fifteen informational private-table notices describe
+reported no warnings or errors. Sixteen informational private-table notices describe
 the intentional absence of direct-access policies. No hosted authentication or
 storage configuration was changed by this audit.
 

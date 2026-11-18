@@ -1,4 +1,6 @@
-import {parseShopCommand,parseShopCommandReceipt,isCustomerCommand,isMoneyCommand,isStockCommand,isPurchaseCommand,isOrderCommand,type ShopCommand} from '../../../packages/core/shop-commands.ts';
+import {parseShopCommand,parseShopCommandReceipt,isCustomerCommand,isMoneyCommand,isStockCommand,isPurchaseCommand,isOrderCommand,isClosingCommand,type ShopCommand} from '../../../packages/core/shop-commands.ts';
+import {closingWritePlan} from '../../../packages/core/closing-commands.ts';
+import {closingFingerprint,closingWriteFields,ClosingMutationInvalid,ClosingMutationConflict} from './closing-write.ts';
 import {orderBodyHeader,orderBodyLimit,orderWritePlan,isOrderSave} from '../../../packages/core/order-commands.ts';
 import {orderFingerprint,orderWriteFields,OrderMutationConflict,OrderMutationInvalid} from './order-write.ts';
 import {purchaseBodyHeader,purchaseBodyLimit,purchaseWritePlan} from '../../../packages/core/purchase-commands.ts';
@@ -34,7 +36,7 @@ export function createCommandsHandler(deps:{store:CommandStore;origins:ReadonlyS
     if(purchaseOutlet!==null&&(command.type!=='purchase.record'||command.outletId!==purchaseOutlet))return reply(400,{error:'Keep the admitted invoice and outlet.'});
     if(orderOutlet!==null&&(!isOrderCommand(command)||!isOrderSave(command)||command.outletId!==orderOutlet))return reply(400,{error:'Keep the admitted order save and outlet.'});
     try{return reply(200,parseShopCommandReceipt(await deps.store.apply(jwt,command),command));}
-    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof OrderMutationInvalid?reply(400,{error:error.message}):error instanceof OrderMutationConflict?reply(409,{error:error.message}):error instanceof PurchaseMutationInvalid?reply(400,{error:error.message}):error instanceof PurchaseMutationConflict?reply(409,{error:error.message}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof StockMutationInvalid?reply(400,{error:error.message}):error instanceof StockMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
+    catch(error){return error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof ClosingMutationInvalid?reply(400,{error:error.message}):error instanceof ClosingMutationConflict?reply(409,{error:error.message}):error instanceof OrderMutationInvalid?reply(400,{error:error.message}):error instanceof OrderMutationConflict?reply(409,{error:error.message}):error instanceof PurchaseMutationInvalid?reply(400,{error:error.message}):error instanceof PurchaseMutationConflict?reply(409,{error:error.message}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof StockMutationInvalid?reply(400,{error:error.message}):error instanceof StockMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
   };
 }
 export function createCommandStore(apiUrl:string,publishableKey:string,send:typeof fetch=fetch,options:{serviceKey?:string;newId?:()=>string}={}):CommandStore {
@@ -50,6 +52,17 @@ export function createCommandStore(apiUrl:string,publishableKey:string,send:type
   }
   return {admitStockBatch:async(jwt,outletId)=>{if(await rpc('admit_stock_batch',{p_outlet_id:outletId},publishableKey,jwt)!==true)throw new CommandDenied();},admitPurchaseRecord:async(jwt,outletId)=>{if(await rpc('admit_purchase_record',{p_outlet_id:outletId},publishableKey,jwt)!==true)throw new CommandDenied();},admitOrderWrite:async(jwt,outletId)=>{if(await rpc('admit_order_write',{p_outlet_id:outletId},publishableKey,jwt)!==true)throw new CommandDenied();},apply:async(jwt,value)=>{
     const c=parseShopCommand(value);
+    if(isClosingCommand(c)){
+      if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Closing writes unavailable');
+      const hash=await closingFingerprint(c),newId=options.newId??deviceAuthId;
+      for(let attempt=0;attempt<3;attempt++){
+        const ticket=newId(),prepared=await rpc('prepare_closing_write',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_outlet_id:c.outletId,p_plan:closingWritePlan(c),p_hash:hash,p_occurred_at:c.occurredAt},publishableKey,jwt);
+        if(prepared?.done===true)return prepared.receipt;
+        const fields=closingWriteFields(prepared,c,ticket);
+        try{return await rpc('finish_closing_write',fields,options.serviceKey,undefined,'closing_snapshot_changed');}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
+      }
+      throw new CommandConflict();
+    }
     if(isOrderCommand(c)){
       if(!options.serviceKey||!/^sb_secret_[A-Za-z0-9_-]+$/.test(options.serviceKey))throw new Error('Order writes unavailable');
       const hash=await orderFingerprint(c),newId=options.newId??deviceAuthId,deadline=isOrderSave(c)?15000:5000;

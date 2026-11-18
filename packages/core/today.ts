@@ -3,11 +3,11 @@ import { civilDay, creditOverview } from './khata-reports';
 import { saleCashIn, refundCashOut } from './order-payments';
 import { isOrderFinished } from './orders';
 import { stockIsLow } from './stock';
-import { validateShop } from './shop-access';
+import { validateShop, type NamedShopSetup } from './shop-access';
 import type { CreditAccount, CreditEntry, Customer, DayClosing, DaySummary, Order, OrderRefund, Sale, SetupSnapshot, StockItem } from './models';
 
-export interface TodayContext {
-  setup:SetupSnapshot; sales:Sale[]; orders:Order[]; refunds:OrderRefund[];
+export interface TodayContext<S extends NamedShopSetup=SetupSnapshot> {
+  setup:S; sales:Sale[]; orders:Order[]; refunds:OrderRefund[];
   accounts:CreditAccount[]; entries:CreditEntry[]; customers:Customer[]; stock:StockItem[]; closings:DayClosing[];
 }
 export function dayKey(at:number, timezone:string):string {
@@ -26,7 +26,7 @@ export function safeTotal(values:number[]):number {
   return Number(total);
 }
 /** Current records, grouped by the outlet's civil day. A saved closing keeps its own immutable snapshot. */
-export function todayOverview(context:TodayContext, at = Date.now()) {
+export function todayOverview(context:TodayContext<NamedShopSetup>, at = Date.now()) {
   const {setup} = context; validateShop(setup);
   const {id:outletId,currency,timezone} = setup.outlet, day = dayKey(at,timezone);
   const onDay = (record:{createdAt:number}) => record.createdAt <= at && dayKey(record.createdAt,timezone) === day;
@@ -60,7 +60,7 @@ export function todayOverview(context:TodayContext, at = Date.now()) {
   const collectedPeople = new Set(payments.map(entry => entry.customerId)).size;
   return {summary,waiting,lowStock,dueReminders,closing,givenPeople,collectedPeople};
 }
-export function closingPreview(context:TodayContext, at = Date.now()) {
+export function closingPreview(context:TodayContext<NamedShopSetup>, at = Date.now()) {
   const {summary} = todayOverview(context,at);
   return {summary,fingerprint:JSON.stringify(summary)};
 }

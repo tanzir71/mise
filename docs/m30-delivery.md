@@ -178,7 +178,7 @@ khata reversals. See [the order command contract and verification limits](m30-or
 - Complete remaining staff/agent resources and private-image migration/UI integration; the bucket, RPCs and image endpoint are deployed, with positive hosted owner/manager transfer verification still open.
 - Configure the production SMS provider and test real owner/manager phone OTP; email/anonymous sign-in must stay disabled.
 - Complete the device/PIN interface, with scoped staff data/commands and browser session handling; both PIN HTTP functions are deployed.
-- Extend transactional `/commands` beyond the deployed catalogue, customer/khata, counter/payment, stock, supplier/invoice and order families to closing, hand-off/Inbox and other intents; preserve shared validation, scoped authorization, idempotent receipts and atomic audits. Supplier messages need their complete confirmed hand-off transaction. Keep raw browser writes denied.
+- Extend transactional `/commands` beyond the deployed catalogue, customer/khata, counter/payment, stock, supplier/invoice, order and closing families to confirmed hand-off/Inbox and other intents; preserve shared validation, scoped authorization, idempotent receipts and atomic audits. Supplier messages need their complete confirmed hand-off transaction. Keep raw browser writes denied.
 - Complete public capability HTTP/rate-limit integration and hosted tests; local SQL tests cover isolation, expiry and revocation.
 - Finish the reviewed upload interface/outbox integration and prove a resumable 5,000-record upload under the required 3G/60-second gate.
 - Complete positive owner JWT/resource-isolation tests, remaining target-runtime checks and full delivery verification before enabling sync or ticking M30; hosted advisors and device/PIN tests are recorded above.
@@ -215,3 +215,19 @@ All 44 application tables force RLS, with zero anonymous grants, direct client
 writes or public security-definer functions. See [implementation and verification](m30-order-commands.md)
 and [redacted evidence](m30-order-hosted.json). Remaining M30 acceptance gates and
 the app/outbox boundary stay open; GitHub workflows and Pages publication stay held.
+
+## Reviewed day closing
+
+Closing now recomputes the complete reviewed Today snapshot at the original
+device time, preserving the cash count, optional surplus sale and all device IDs.
+Same-day undo retains original snapshots, reverses only the linked surplus receipt
+and preserves later sales. The live database day uses the original closing
+timezone, independently of preparation time or changed outlet settings. All 23
+migrations and `commands` v10 are deployed with JWT verification enabled. The exact
+deployed module matches the checked bundle; the rolled-back five-action hosted
+fixture passes with eight audits and historical replay. Fourteen actual HTTP/CORS
+checks pass. All 45 application tables force RLS, with zero anonymous table grants,
+direct client writes or public security-definer functions; advisors report no
+warnings or errors. See [implementation and verification](m30-closing-commands.md)
+and [redacted evidence](m30-closing-hosted.json). Phone OTP, positive signed-owner
+HTTP and remaining M30/outbox gates stay open. GitHub workflows remain disabled.
