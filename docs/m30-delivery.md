@@ -1,6 +1,6 @@
 # M30 · Supabase foundation
 
-Status: **in progress**. Mise now has a dedicated Supabase project with 24 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database, with no sign-in, sync, shared-screen, cloud-image or cloud-command interface enabled. Phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources, Inbox commands and reviewed upload/UI integration remain incomplete. M30 and Phase 3 remain unticked.
+Status: **in progress**. Mise now has a dedicated Supabase project with 25 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database, with no sign-in, sync, shared-screen, cloud-image or cloud-command interface enabled. Phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/UI integration remain incomplete. M30 and Phase 3 remain unticked.
 
 ## Tenant schema
 
@@ -178,7 +178,7 @@ khata reversals. See [the order command contract and verification limits](m30-or
 - Complete remaining staff/agent resources and private-image migration/UI integration; the bucket, RPCs and image endpoint are deployed, with positive hosted owner/manager transfer verification still open.
 - Configure the production SMS provider and test real owner/manager phone OTP; email/anonymous sign-in must stay disabled.
 - Complete the device/PIN interface, with scoped staff data/commands and browser session handling; both PIN HTTP functions are deployed.
-- Extend transactional `/commands` beyond the deployed catalogue, customer/khata, counter/payment, stock, supplier/invoice, order, closing and complete hand-off families to Inbox and other intents; preserve shared validation, scoped authorization, idempotent receipts and atomic audits. Keep raw browser writes denied.
+- Extend transactional `/commands` beyond the deployed catalogue, customer/khata, counter/payment, stock, supplier/invoice, order, closing, complete hand-off and Inbox families to remaining staff/agent and other intents; preserve shared validation, scoped authorization, idempotent receipts and atomic audits. Keep raw browser writes denied.
 - Complete public capability HTTP/rate-limit integration and hosted tests; local SQL tests cover isolation, expiry and revocation.
 - Finish the reviewed upload interface/outbox integration and prove a resumable 5,000-record upload under the required 3G/60-second gate.
 - Complete positive owner JWT/resource-isolation tests, remaining target-runtime checks and full delivery verification before enabling sync or ticking M30; hosted advisors and device/PIN tests are recorded above.
@@ -248,3 +248,20 @@ automatically compare private deployment values without publishing them. See
 [implementation and verification](m30-handoff-commands.md), [redacted evidence](m30-handoff-hosted.json)
 and [credential safeguards](security.md). Inbox, Auth commissioning and the
 remaining M30/outbox gates stay open; GitHub workflows remain disabled.
+
+## Original Inbox captures and sorting
+
+Capture retains original title/text/URL, creation and capture times, image IDs,
+names, types, sizes and hashes. Private image bytes upload separately; metadata
+cannot mark them uploaded. Reviewed classification, archive and reopen preserve
+complete source history and reject stale revisions. Repeated current choices
+keep the source unchanged and retain one command-metadata audit/replay receipt.
+No sorting action creates an order, money or stock. All 25 migrations and
+`commands` v12 are deployed with JWT verification enabled. The exact module,
+fourteen-action rolled-back hosted fixture and sixteen HTTP/CORS checks pass.
+All 47 application tables force RLS; anonymous table grants, direct client writes
+and public security-definer functions remain absent. Advisors report no warnings
+or errors. See [implementation and verification](m30-inbox-commands.md) and
+[redacted evidence](m30-inbox-hosted.json). Phone OTP, positive signed-owner HTTP,
+staff/agent resources and remaining app/upload/outbox gates stay open. GitHub
+workflows remain disabled and private deployment values stay outside the repo.

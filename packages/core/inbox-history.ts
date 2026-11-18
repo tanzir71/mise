@@ -1,10 +1,10 @@
 import type { AuditEvent } from './models';
 import { inboxSnapshot, validateInboxItem, type InboxItem } from './inbox';
 
-function key(item:InboxItem):string {
+export function inboxSnapshotToken(item:InboxItem):string {
   return JSON.stringify([item.id,item.outletId,item.revision,item.title,item.text,item.url,item.images.map(i=>[i.id,i.name,i.type,i.size]),item.kind,item.archived,item.createdAt,item.updatedAt]);
 }
-function snapshot(value:unknown):InboxItem {
+export function validateInboxSnapshot(value:unknown):InboxItem {
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid Inbox audit snapshot.');
   const item=value as InboxItem;validateInboxItem(item);
   const fields=['id','outletId','revision','title','text','url','images','kind','archived','createdAt','updatedAt'];
@@ -25,18 +25,18 @@ export function validateInboxHistory(items:readonly InboxItem[],events:readonly 
     if(history.length!==item.revision)throw new Error('Inbox audit history is incomplete.');
     let previous:InboxItem|null=null;
     for(const [index,event] of history.entries()){
-      const after=snapshot(event.after);
+      const after=validateInboxSnapshot(event.after);
       if(after.id!==item.id||after.outletId!==item.outletId||event.outletId!==item.outletId||after.revision!==index+1||event.inboxRevision!==after.revision||event.at!==after.updatedAt||event.actor.type!=='member')throw new Error('Invalid Inbox audit revision.');
       if(!previous){if(event.command!=='inbox.capture'||event.before!==null||after.kind!=='unclassified'||after.archived)throw new Error('Invalid Inbox capture history.');}
       else {
-        const before=snapshot(event.before);if(key(before)!==key(previous)||after.updatedAt<before.updatedAt)throw new Error('Inbox audit history contains a fork.');
+        const before=validateInboxSnapshot(event.before);if(inboxSnapshotToken(before)!==inboxSnapshotToken(previous)||after.updatedAt<before.updatedAt)throw new Error('Inbox audit history contains a fork.');
         const classified=event.command==='inbox.classify'&&after.kind!==before.kind;
         const archived=(event.command==='inbox.archive'||event.command==='inbox.reopen')&&after.archived===(event.command==='inbox.archive')&&after.archived!==before.archived;
         const expected={...before,revision:before.revision+1,updatedAt:after.updatedAt,...(classified?{kind:after.kind}:archived?{archived:after.archived}:{})};
-        if((!classified&&!archived)||key(after)!==key(expected))throw new Error('Invalid manual Inbox action.');
+        if((!classified&&!archived)||inboxSnapshotToken(after)!==inboxSnapshotToken(expected))throw new Error('Invalid manual Inbox action.');
       }
       previous=after;
     }
-    if(!previous||key(previous)!==key(inboxSnapshot(item)))throw new Error('Inbox record differs from its audit history.');
+    if(!previous||inboxSnapshotToken(previous)!==inboxSnapshotToken(inboxSnapshot(item)))throw new Error('Inbox record differs from its audit history.');
   }
 }

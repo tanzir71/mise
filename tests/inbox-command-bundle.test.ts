@@ -1,0 +1,28 @@
+import {expect,it} from 'vitest';
+// @ts-expect-error Deployment packaging is a standalone Node module.
+import {edgeBundle} from '../scripts/edge-bundle.mjs';
+import {cloudRecordMaps,encodeCommandRecord} from '../packages/core/cloud-records';
+import {inboxBodyHeader,inboxCommandMutation,type InboxCommand} from '../packages/core/inbox-commands';
+import {setupCommand} from '../packages/core/setup';
+const id=(n:number)=>String(n).padStart(26,'0');
+it('the exact deployable module retains original JWT admission, every literal image fact and an unchanged-source audit',async()=>{
+ const bundle=await edgeBundle('commands');for(const p of ['packages/core/inbox-commands.ts','packages/core/inbox.ts','packages/core/inbox-history.ts','supabase/functions/_shared/inbox-write.ts'])expect(bundle.sourceHashes).toHaveProperty(p);
+ const setup=setupCommand({businessType:'corner_shop',marketCode:'BD',name:'Shop',phone:'01712345482'},null,1).snapshot,literal='আসল\0'+String.fromCharCode(0xd800),c:Extract<InboxCommand,{type:'inbox.capture'}>={id:id(4),itemId:id(5),outletId:setup.outlet.id,createdAt:500,occurredAt:1000,type:'inbox.capture',input:{title:literal,text:literal,url:literal,images:[{id:id(6),name:literal,type:'image/png',size:92,sha256:'a'.repeat(64)}]}},created=inboxCommandMutation(c,setup,null),no:Extract<InboxCommand,{type:'inbox.change'}>={id:id(7),itemId:c.itemId,outletId:c.outletId,occurredAt:2000,type:'inbox.change',revision:1,change:{kind:'unclassified'}};
+ const raw=(table:'businesses'|'outlets'|'inboxItems'|'events',value:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,value,setup.business.id).values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const base={outletId:c.outletId,itemId:c.itemId,createdAt:500,updatedAt:1000,revision:1,kind:'unclassified',archived:false,imageCount:1,imageBytes:92,at:10000},receipt={...base,id:c.id,type:c.type,occurredAt:1000,eventId:c.id,changed:true},noop={...base,id:no.id,type:no.type,occurredAt:2000,eventId:null,changed:false};
+ const runtime=globalThis as unknown as {Deno?:unknown},previousDeno=runtime.Deno,previousFetch=globalThis.fetch;let handler:((r:Request)=>Promise<Response>)|undefined;const calls:string[]=[];
+ try{
+  runtime.Deno={env:{get:(name:string)=>({SUPABASE_URL:'https://api.test',MISE_PUBLISHABLE_API_KEY:'sb_publishable_test_only',MISE_SERVICE_API_KEY:'sb_secret_test_only',MISE_ALLOWED_ORIGINS:'https://shop.test'} as Record<string,string>)[name]},serve:(callback:typeof handler)=>{handler=callback;}};
+  globalThis.fetch=async(url,options)=>{const name=new URL(String(url)).pathname.split('/').at(-1)!,a=JSON.parse(options?.body as string),h=new Headers(options?.headers);calls.push(name);
+   if(name!=='finish_inbox_write'){expect(h.get('apikey')).toBe('sb_publishable_test_only');expect(h.get('Authorization')).toBe('Bearer user.valid.signature');}
+   if(name==='admit_inbox_write')return new Response('true');
+   if(name==='prepare_inbox_write'){const changing=a.p_type==='inbox.change';expect(a.p_plan).toMatchObject(changing?{itemId:c.itemId,revision:1,change:no.change,input:null}:{itemId:c.itemId,createdAt:500,input:{titleJson:JSON.stringify(literal),textJson:JSON.stringify(literal),images:[{nameJson:JSON.stringify(literal),sha256:'a'.repeat(64)}]}});return new Response(JSON.stringify({done:false,ticketId:a.p_ticket_id,token:'z'.repeat(43),businessId:setup.business.id,outletId:setup.outlet.id,actorId:setup.owner.id,at:10000,contextJson:JSON.stringify({business:raw('businesses',setup.business),outlet:raw('outlets',setup.outlet),item:changing?raw('inboxItems',created.item):null,latest:changing?raw('events',created.event):null,images:changing?[{id:id(6),business_id:setup.business.id,outlet_id:c.outletId,inbox_item_id:c.itemId,position:0,name:literal,type:'image/png',size:92,sha256:'a'.repeat(64)}]:[]})}));}
+   expect(name).toBe('finish_inbox_write');expect(h.get('apikey')).toBe('sb_secret_test_only');expect(h.has('Authorization')).toBe(false);const rows=a.p_records as {table:string;values:Record<string,unknown>}[];
+   if(rows.length===1){expect(rows[0].values).toMatchObject({id:no.id,command:'command.noop',inbox_id:null,inbox_revision:null,at:10000});return new Response(JSON.stringify(noop));}
+   expect(rows).toHaveLength(3);expect(rows.find(r=>r.table==='inbox_items')!.values).toMatchObject({id:c.itemId,text:JSON.stringify(literal),created_at:500,updated_at:1000});expect(rows.find(r=>r.table==='inbox_images')!.values).toMatchObject({id:id(6),name:JSON.stringify(literal),sha256:'a'.repeat(64),position:0,uploaded_at:null});expect(rows.find(r=>r.table==='events')!.values).toMatchObject({id:c.id,inbox_id:c.itemId,inbox_revision:1,at:1000});return new Response(JSON.stringify(receipt));
+  };
+  await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64')+'#inbox');expect(handler).toBeTypeOf('function');
+  for(const command of [c,no]){const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',...(command.type==='inbox.capture'?{[inboxBodyHeader]:c.outletId}:{})},body:JSON.stringify(command)}));expect(response.status).toBe(200);const body=await response.text();expect(body).not.toMatch(/sb_secret_|contextJson|ticketId|token/);expect(JSON.parse(body)).toEqual(command.type==='inbox.capture'?receipt:noop);}
+  expect(calls).toEqual(['admit_inbox_write','prepare_inbox_write','finish_inbox_write','prepare_inbox_write','finish_inbox_write']);
+ }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
+},30000);

@@ -49,12 +49,12 @@ The latest audit fetched remote branches/tags first and compared nine private
 key, pepper and deployment values in memory. It found zero credentials, zero
 current deployment references and zero coverage gaps; the 22 historical findings
 were nonsecret deployment references. Commit/push hooks remain enabled. The
-[hand-off evidence](m30-handoff-hosted.json) records the redacted counts.
+[Inbox evidence](m30-inbox-hosted.json) records the redacted counts.
 
-The same day's live read-only verification found all **46 public/private application
+The same day's live read-only verification found all **47 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
-reported no warnings or errors. Seventeen informational private-table notices describe
+reported no warnings or errors. Eighteen informational private-table notices describe
 the intentional absence of direct-access policies. No hosted authentication or
 storage configuration was changed by this audit.
 

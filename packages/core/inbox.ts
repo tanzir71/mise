@@ -1,5 +1,6 @@
 import { ulid } from 'ulid';
-import type { AuditEvent, SetupSnapshot } from './models';
+import type { AuditEvent } from './models';
+import type {ShopSetup} from './shop-access';
 import {inboxImageTypes,validateInboxImageBytes,type InboxImageType} from './inbox-image';
 export {inboxImageTypes,validateInboxImageBytes,type InboxImageType} from './inbox-image';
 
@@ -42,27 +43,28 @@ export function validateInboxItem(item:InboxItem):void {
 export function inboxSnapshot(item:InboxItem):InboxItem {
   return {...item,images:item.images.map(({id,name,type,size})=>({id,name,type,size}))};
 }
-function event(item:InboxItem,before:InboxItem|null,setup:SetupSnapshot,command:string):AuditEvent {
-  return {id:ulid(item.updatedAt),outletId:setup.outlet.id,inboxId:item.id,inboxRevision:item.revision,actor:{type:'member',id:setup.owner.id},command,before:before?inboxSnapshot(before):null,after:inboxSnapshot(item),at:item.updatedAt};
+function event(item:InboxItem,before:InboxItem|null,setup:ShopSetup,command:string,newId=()=>ulid(item.updatedAt)):AuditEvent {
+  const id=newId();assertInboxId(id);return {id,outletId:setup.outlet.id,inboxId:item.id,inboxRevision:item.revision,actor:{type:'member',id:setup.owner.id},command,before:before?inboxSnapshot(before):null,after:inboxSnapshot(item),at:item.updatedAt};
 }
-export function captureInboxCommand<Image extends InboxImage>(input:InboxContent<Image>,setup:SetupSnapshot|null,at=Date.now(),id=ulid(at)):{item:InboxItem<Image>;event?:AuditEvent} {
+export function captureInboxCommand<Image extends InboxImage>(input:InboxContent<Image>,setup:ShopSetup|null,at=Date.now(),id=ulid(at),newEventId?:()=>string):{item:InboxItem<Image>;event?:AuditEvent} {
   validateInboxContent(input);time(at);assertInboxId(id);
   const item:InboxItem<Image>={id,outletId:setup?.outlet.id??null,revision:1,title:input.title,text:input.text,url:input.url,images:[...input.images],kind:'unclassified',archived:false,createdAt:at,updatedAt:at};
-  return {item,...(setup?{event:event(item,null,setup,'inbox.capture')}:{})};
+  return {item,...(setup?{event:event(item,null,setup,'inbox.capture',newEventId)}:{})};
 }
-export function claimInboxCommand<Image extends InboxImage>(before:InboxItem<Image>,setup:SetupSnapshot,at=Date.now()):{item:InboxItem<Image>;event:AuditEvent} {
+export function claimInboxCommand<Image extends InboxImage>(before:InboxItem<Image>,setup:ShopSetup,at=Date.now(),newEventId?:()=>string):{item:InboxItem<Image>;event:AuditEvent} {
   validateInboxItem(before);time(at);if(before.outletId!==null)throw new Error('This shared item already belongs to a shop.');
   const item={...before,outletId:setup.outlet.id,updatedAt:Math.max(at,before.updatedAt)};
-  return {item,event:event(item,null,setup,'inbox.capture')};
+  return {item,event:event(item,null,setup,'inbox.capture',newEventId)};
 }
-export function changeInboxCommand<Image extends InboxImage>(before:InboxItem<Image>,setup:SetupSnapshot,revision:number,change:{kind:InboxKind}|{archived:boolean},at=Date.now()):{item:InboxItem<Image>;event:AuditEvent}|null {
+export function changeInboxCommand<Image extends InboxImage>(before:InboxItem<Image>,setup:ShopSetup,revision:number,change:{kind:InboxKind}|{archived:boolean},at=Date.now(),newEventId?:()=>string):{item:InboxItem<Image>;event:AuditEvent}|null {
   validateInboxItem(before);time(at);
   if(before.outletId!==setup.outlet.id)throw new Error('Shared item not found in this shop.');
   if(before.revision!==revision)throw new Error('This shared item changed. Reload it before sorting.');
   if(Object.keys(change).length!==1||('kind' in change? !inboxKinds.includes(change.kind):typeof change.archived!=='boolean'))throw new Error('Choose a supported Inbox action.');
   if('kind' in change?before.kind===change.kind:before.archived===change.archived)return null;
+  if(before.revision===Number.MAX_SAFE_INTEGER)throw new Error('This shared item needs review before another revision.');
   const item={...before,...change,revision:before.revision+1,updatedAt:Math.max(at,before.updatedAt)};
-  return {item,event:event(item,before,setup,'kind' in change?'inbox.classify':change.archived?'inbox.archive':'inbox.reopen')};
+  return {item,event:event(item,before,setup,'kind' in change?'inbox.classify':change.archived?'inbox.archive':'inbox.reopen',newEventId)};
 }
 export function inboxImageBase64(bytes:Uint8Array):string {
   let binary='';for(let offset=0;offset<bytes.length;offset+=8192)binary+=String.fromCharCode(...bytes.subarray(offset,offset+8192));return btoa(binary);

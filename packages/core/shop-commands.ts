@@ -7,15 +7,17 @@ import {isPurchaseCommandType,parsePurchaseCommand,parsePurchaseCommandReceipt,t
 import {isOrderCommandType,parseOrderCommand,parseOrderCommandReceipt,type OrderCommand,type OrderCommandReceipt} from './order-commands';
 import {isClosingCommandType,parseClosingCommand,parseClosingCommandReceipt,type ClosingCommand,type ClosingCommandReceipt} from './closing-commands';
 import {isHandoffCommandType,parseHandoffCommand,parseHandoffCommandReceipt,type HandoffCommand,type HandoffCommandReceipt} from './handoff-commands';
+import {isInboxCommandType,parseInboxCommand,parseInboxCommandReceipt,type InboxCommand,type InboxCommandReceipt} from './inbox-commands';
 /** Reserve every possible companion ID once on the originating device. */
 export interface CustomerRecordIds {accountId:string;accountEventId:string;openingEntryId:string;openingEventId:string}
 export type CustomerCommand=
   |{id:string;type:'customer.create'|'customer.update';customerId:string;outletId:string;input:CustomerInput;credit:CreditTermsInput|null;opening:{amount:number;occurredAt:number}|null;ids:CustomerRecordIds}
   |{id:string;type:'customer.archive'|'customer.restore';customerId:string;outletId:string}
   |{id:string;type:'khata.settings';customerId:string;outletId:string;accountId:string|null;input:CreditTermsInput;ids:CustomerRecordIds};
-export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand;
+export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand|InboxCommand;
 export interface CustomerCommandReceipt {id:string;type:CustomerCommand['type'];customerId:string;outletId:string;accountId:string|null;accountEventId:string|null;entryId:string|null;openingEventId:string|null;at:number;customerUpdatedAt:number;accountUpdatedAt:number|null}
-export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt;
+export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt;
+export function isInboxCommand(c:ShopCommand):c is InboxCommand{return isInboxCommandType(c.type);}
 export function isHandoffCommand(c:ShopCommand):c is HandoffCommand{return isHandoffCommandType(c.type);}
 export function isClosingCommand(c:ShopCommand):c is ClosingCommand{return isClosingCommandType(c.type);}
 export function isOrderCommand(c:ShopCommand):c is OrderCommand{return isOrderCommandType(c.type);}
@@ -36,6 +38,7 @@ function recordIds(v:unknown,commandId:string,customerId:string):CustomerRecordI
   return {accountId:v.accountId as string,accountEventId:v.accountEventId as string,openingEntryId:v.openingEntryId as string,openingEventId:v.openingEventId as string};
 }
 export function parseShopCommand(v:unknown):ShopCommand {
+  if(object(v)&&isInboxCommandType(v.type))return parseInboxCommand(v);
   if(object(v)&&isHandoffCommandType(v.type))return parseHandoffCommand(v);
   if(object(v)&&isClosingCommandType(v.type))return parseClosingCommand(v);
   if(object(v)&&isOrderCommandType(v.type))return parseOrderCommand(v);
@@ -56,6 +59,7 @@ export function parseShopCommand(v:unknown):ShopCommand {
   throw new Error('Choose a supported customer action and its exact fields.');
 }
 export function parseShopCommandReceipt(v:unknown,c:ShopCommand):ShopCommandReceipt {
+  if(isInboxCommand(c))return parseInboxCommandReceipt(v,c);
   if(isHandoffCommand(c))return parseHandoffCommandReceipt(v,c);
   if(isClosingCommand(c))return parseClosingCommandReceipt(v,c);
   if(isOrderCommand(c))return parseOrderCommandReceipt(v,c);

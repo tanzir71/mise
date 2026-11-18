@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 Inbox transactions: original source text, creation times and image metadata keep their device identities. Manual classification, archive and reopen retain complete history and reject stale reviews. Unchanged choices retain the source revision and an original-actor replay receipt. Capturing metadata leaves image bytes pending private upload and never records orders, money or stock. Cloud controls remain unavailable.
+
 - M30 manual messages: preparation, Open/Copy/failure, explicit Sent and undo retain complete attempt history. Sent commits its credit, order or supplier communication together; supplier resends reuse the original confirmation and never receive stock or change debt. Cloud controls remain unavailable.
 - M30 day closing: the complete reviewed Today snapshot, cash difference and optional walk-in receipt retain device IDs and commit with their audits. Same-day undo retains the original closing, reverses only its linked surplus receipt, and preserves later sales. Original occurrence days and live undo limits remain distinct; sync controls stay unavailable.
 - M30 preparation: scoped access, original-image transfers, audited catalogue edits, customer/khata saves, counter receipts, khata payments, availability changes with undo and resumable reviewed uploads are prepared. Customer and financial commands retain device record IDs, and financial records retain their occurrence times. Rows, audits and receipts commit together. Sign-in, sync and cloud interfaces remain unavailable while the full milestone is in progress.

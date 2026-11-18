@@ -72,10 +72,11 @@ Spec: `phases/phase-2-links-no-backend.md`
 Spec: `phases/phase-3-backend-sync.md`
 
 - [ ] **M30** Supabase project, schema, row-level security, phone OTP + device PIN, outlet/roles · L · T2
-  - [Implementation notes](../../docs/m30-delivery.md) (dedicated project, 24 migrations, PIN/screen/image services, private bucket, catalogue/customer/khata saves with device-generated related IDs, audited counter/credit/payment/undo, atomic stock, supplier/invoice, order, closing and complete manual hand-off commands deployed; local snapshot/recovery and authenticated hosted upload staging/promotion prepared. Phone OTP, positive signed-owner HTTP upload/writes, app/outbox interfaces, Inbox commands and staff/agent resources remain open).
+  - [Implementation notes](../../docs/m30-delivery.md) (dedicated project, 25 migrations, PIN/screen/image services, private bucket, catalogue/customer/khata saves with device-generated related IDs, audited counter/credit/payment/undo, atomic stock, supplier/invoice, order, closing, complete manual hand-off and original Inbox capture/sorting commands deployed; local snapshot/recovery and authenticated hosted upload staging/promotion prepared. Phone OTP, positive signed-owner HTTP upload/writes, app/outbox interfaces and staff/agent resources remain open).
   - [Complete order transactions](../../docs/m30-order-commands.md) retain shared lifecycle and linked financial identities; no sync controls are enabled.
   - [Reviewed day closing](../../docs/m30-closing-commands.md) retains the full Today calculation, linked surplus receipts and original-timezone same-day undo.
   - [Complete manual message transactions](../../docs/m30-handoff-commands.md) retain exact drafts, explicit Sent companions, canonical attempt generations and guarded corrections. Clone-local credential checks also run automatically before commits, pushes and builds.
+  - [Original Inbox captures and manual sorting](../../docs/m30-inbox-commands.md) retain literal sources, immutable pending image metadata and complete reversible history without recording money or orders.
 - [ ] **M31** Sync engine: local-first outbox, realtime pull, conflict rules · L · T2
 - [ ] **M32** Kitchen / pack / counter screen on a second device; Got it / Ready; 2-minute unacknowledged alarm · M · T2
 - [ ] **M33** Order link writes real orders (no WhatsApp step needed); live tracking page for customers · M · T2
