@@ -6,14 +6,16 @@ import { claimDatabaseInbox } from './inbox';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import { LocalStore } from './local-store';
 import {withOutboxIntent} from './outbox-capture';
+import {stockSaveIntent,stockAdjustmentIntent,stockBatchIntent,supplierSaveIntent,closingIntent} from './outbox-intents';
+import {customerSaveIntent,creditTermsIntent} from '@mise/core/customer-intent';
 import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
 import { marketPacks } from '@mise/core/packs';
 import { archiveCustomerCommand, type CustomerInput } from '@mise/core/customers';
-import { customerSaveMutation,type CustomerSaveOptions } from '@mise/core/customer-mutation';
-import { creditBalance, saveCreditTermsCommand, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
+import type {CustomerSaveOptions} from '@mise/core/customer-mutation';
+import { creditBalance, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
 import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } from '@mise/core/credit-sales';
 import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
 import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOrderCancellationCommand, refundOrderCommand, undoOrderRefundCommand, type OrderMoneyChange, type OrderMoneyContext, type OrderSettlementInput, type OrderRefundInput } from '@mise/core/order-payments';
@@ -136,12 +138,12 @@ export class MiseDatabase extends LocalStore {
   async saveCustomer(input: CustomerInput, options: CustomerSaveOptions = {}): Promise<Customer> {
     return this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
-      const mutation=customerSaveMutation(input,options,{setup,customers:await this.customers.where('businessId').equals(setup.business.id).toArray(),accounts:await this.creditAccounts.where('outletId').equals(setup.outlet.id).toArray()});
-      await this.customers.put(mutation.customer);
+      const {command,mutation}=customerSaveIntent(input,options,{setup,customers:await this.customers.where('businessId').equals(setup.business.id).toArray(),accounts:await this.creditAccounts.where('outletId').equals(setup.outlet.id).toArray()});
+      return withOutboxIntent(this,command,async()=>{await this.customers.put(mutation.customer);
       if(mutation.account)await this.creditAccounts.put(mutation.account);
       if(mutation.entry)await this.creditEntries.add(mutation.entry);
       await this.events.bulkAdd(mutation.events);
-      return mutation.customer;
+      return mutation.customer;});
     });
   }
   async saveCreditTerms(customerId: string, input: CreditTermsInput, accountId?: string): Promise<CreditAccount> {
@@ -150,8 +152,8 @@ export class MiseDatabase extends LocalStore {
       if (!setup || !customer) throw new Error('Customer not found.');
       const before = accountId ? await this.creditAccounts.get(accountId) : await this.creditAccounts.where('[outletId+customerId+currency]').equals([setup.outlet.id,customerId,setup.outlet.currency]).first();
       if (accountId && !before) throw new Error('Khata not found.');
-      const command = saveCreditTermsCommand(input,customer,setup,before || null);
-      await this.creditAccounts.put(command.account); await this.events.add(command.event); return command.account;
+      const {command,mutation}=creditTermsIntent(input,customer,setup,before??null);
+      return withOutboxIntent(this,command,async()=>{await this.creditAccounts.put(mutation.account);await this.events.add(mutation.event);return mutation.account;});
     });
   }
   async archiveCustomer(id: string, archive = true): Promise<void> {
@@ -160,7 +162,7 @@ export class MiseDatabase extends LocalStore {
       if (!setup || !customer) throw new Error('Customer not found.');
       const accounts = await this.creditAccounts.where('customerId').equals(id).toArray(), entries = await this.creditEntries.where('customerId').equals(id).toArray();
       const command = archiveCustomerCommand(customer,setup,accounts.some(account => creditBalance(account,entries) !== 0),archive);
-      await this.customers.put(command.customer); await this.events.add(command.event);
+      await withOutboxIntent(this,{id:command.event.id,type:archive?'customer.archive':'customer.restore',customerId:id,outletId:setup.outlet.id},async()=>{await this.customers.put(command.customer);await this.events.add(command.event);});
     });
   }
   async recordCreditSale(input: CreditSaleInput): Promise<Sale> {
@@ -308,37 +310,37 @@ export class MiseDatabase extends LocalStore {
     return this.transaction('rw',this.tables,async () => {
       const context = await this.stockContext(), before = options.id ? context.items.find(item => item.id === options.id) : null;
       if (options.id && !before) throw new Error('Stock item not found.');
-      const change = saveStockItemCommand(input,context,before,options.revision);await this.writeStock(change);return change.items[0];
+      const change = saveStockItemCommand(input,context,before,options.revision);return withOutboxIntent(this,stockSaveIntent(change,before??null),async()=>{await this.writeStock(change);return change.items[0];});
     });
   }
   async adjustStock(input:StockAdjustment):Promise<StockItem> {
-    return this.transaction('rw',this.tables,async () => {const change = adjustStockCommand(input,await this.stockContext());await this.writeStock(change);return change.items[0];});
+    return this.transaction('rw',this.tables,async () => {const change = adjustStockCommand(input,await this.stockContext());return withOutboxIntent(this,stockAdjustmentIntent(change),async()=>{await this.writeStock(change);return change.items[0];});});
   }
   async applyStockBatch(inputs:StockAdjustment[],count = false):Promise<StockItem[]> {
-    return this.transaction('rw',this.tables,async () => {const change = stockBatchCommand(inputs,await this.stockContext(),Date.now(),count);await this.writeStock(change);return change.items;});
+    return this.transaction('rw',this.tables,async () => {const change = stockBatchCommand(inputs,await this.stockContext(),Date.now(),count);return withOutboxIntent(this,stockBatchIntent(change,count),async()=>{await this.writeStock(change);return change.items;});});
   }
   async undoStockMove(id:string,revision:number):Promise<StockItem> {
     return this.transaction('rw',this.tables,async () => {
       const context = await this.stockContext(),record = context.moves.find(move => move.id === id);if (!record) throw new Error('Stock movement not found.');
-      const change = undoStockMoveCommand(record,revision,context);await this.writeStock(change);return change.items[0];
+      const change = undoStockMoveCommand(record,revision,context);return withOutboxIntent(this,{id:change.events[0].id,type:'stock.undo',outletId:record.outletId,occurredAt:change.events[0].at,stockItemId:record.stockItemId,revision,undoMoveId:record.id,moveId:change.moves[0].id},async()=>{await this.writeStock(change);return change.items[0];});
     });
   }
   async archiveStockItem(id:string,archive:boolean,revision:number):Promise<StockItem> {
     return this.transaction('rw',this.tables,async () => {
       const context = await this.stockContext(),before = context.items.find(item => item.id === id);if (!before) throw new Error('Stock item not found.');
-      const change = archiveStockItemCommand(before,archive,revision,context);await this.writeStock(change);return change.items[0];
+      const change = archiveStockItemCommand(before,archive,revision,context);return withOutboxIntent(this,{id:change.events[0].id,type:archive?'stock.archive':'stock.restore',outletId:before.outletId,occurredAt:change.events[0].at,stockItemId:id,revision},async()=>{await this.writeStock(change);return change.items[0];});
     });
   }
   async saveSupplier(input:SupplierInput,options:{id?:string;revision?:number} = {}):Promise<Supplier> {
     return this.transaction('rw',this.tables,async () => {
       const setup = await this.setup();if (!setup) throw new Error('Set up your shop first.');const before = options.id ? await this.suppliers.get(options.id) : null;if (options.id && !before) throw new Error('Supplier not found.');
-      const change = saveSupplierCommand(input,setup,before,options.revision);await this.suppliers.put(change.supplier);await this.events.add(change.event);return change.supplier;
+      const change = saveSupplierCommand(input,setup,before,options.revision);return withOutboxIntent(this,supplierSaveIntent(change.supplier,change.event,before??null),async()=>{await this.suppliers.put(change.supplier);await this.events.add(change.event);return change.supplier;});
     });
   }
   async archiveSupplier(id:string,archive:boolean,revision:number):Promise<Supplier> {
     return this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(),before = await this.suppliers.get(id);if (!setup || !before) throw new Error('Supplier not found.');
-      const change = archiveSupplierCommand(before,archive,revision,setup);await this.suppliers.put(change.supplier);await this.events.add(change.event);return change.supplier;
+      const change = archiveSupplierCommand(before,archive,revision,setup);return withOutboxIntent(this,{id:change.event.id,type:archive?'supplier.archive':'supplier.restore',outletId:before.outletId,occurredAt:change.event.at,supplierId:id,revision},async()=>{await this.suppliers.put(change.supplier);await this.events.add(change.event);return change.supplier;});
     });
   }
   async recordSupplierMessage(input:SupplierMessageInput):Promise<SupplierMessage> {
@@ -375,14 +377,14 @@ export class MiseDatabase extends LocalStore {
         return before;
       }
       const change = closeDayCommand(input,context);
-      await this.dayClosings.add(change.closing);if (change.sale) await this.sales.add(change.sale);await this.events.bulkAdd(change.events);return change.closing;
+      return withOutboxIntent(this,closingIntent(change),async()=>{await this.dayClosings.add(change.closing);if(change.sale)await this.sales.add(change.sale);await this.events.bulkAdd(change.events);return change.closing;});
     });
   }
   async undoDayClosing(id:string):Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(), before = await this.dayClosings.get(id);if (!setup || !before) throw new Error('Day closing not found.');
       const sale = before.addedSaleId ? await this.sales.get(before.addedSaleId) : undefined, change = undoClosingCommand(before,setup,sale);
-      await this.dayClosings.put(change.closing);if (change.sale) await this.sales.put(change.sale);await this.events.bulkAdd(change.events);
+      await withOutboxIntent(this,closingIntent(change,true),async()=>{await this.dayClosings.put(change.closing);if(change.sale)await this.sales.put(change.sale);await this.events.bulkAdd(change.events);});
     });
   }
   async readBackup():Promise<MiseBackup> {

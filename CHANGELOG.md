@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 local command adapters: customer profiles and khata settings, stock changes and physical-count batches, suppliers, full invoices and day closing now retain executable intents alongside their original local records and audits. Closing undo keeps its own companion audit IDs. Failed queue writes roll back the complete action. Catalogue, order, hand-off and Inbox adapters, reconciliation and the complete upload interface remain unfinished; cloud setup stays gated.
+
 - M30 upload boundary: a same-database local queue retains every later shop write, including the share worker and narrow transactions, while an immutable reviewed snapshot uploads. Counter, credit, payment and manual communication intents retain their original record IDs and durable receipts. Unsupported writes remain local for review and stop ordered delivery. Confirmed staging cancellation preserves recovery history. Sync metadata stays out of JSON backups; full upload controls, remaining adapters and canonical reconciliation are still gated.
 
 - M30 phone sign-in (behind `cloudSetup`): device-only runtime connection settings, official phone OTP/session refresh, verified-user checks, cross-tab sign-out and a saved local record-count review. Connection values and Auth tokens are excluded from shop backups and static builds. The production phone provider, initial upload activation and outbox remain unfinished; no SMS or cloud write starts automatically.

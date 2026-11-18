@@ -91,3 +91,9 @@ The nine Git/Node process integration fixtures have an explicit thirty-second te
 budget. Their assertions still verify history detection, redaction and rejected
 real commits/pushes; they do not benchmark filesystem or process-start latency.
 Application and transfer deadlines are separate.
+
+The [local domain adapter verification](m30-domain-adapters-local.json) repeats the
+nine-value source/index/history/build-output audit with no credentials, current
+deployment references or coverage gaps. All 16 guard tests also pass in its full
+1,615-test unit run. New profile/khata intents project only editable fields from
+saved models; storage metadata and unrelated values stay outside the wire command.

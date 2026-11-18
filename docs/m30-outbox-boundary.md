@@ -46,6 +46,12 @@ publishable key and the original verified caller JWT; it pins the endpoint, bloc
 redirects, uses no-store responses and preserves the reviewed large-body admission
 headers. Errors do not expose backend details.
 
+The [local domain adapter increment](m30-domain-adapters.md) also attaches customer
+profiles/khata settings, stock/count batches, supplier/invoice and closing commands
+to their original transactions. Its verification covers the actual queued wire
+values through the existing server mutation builders. The counts below describe
+this boundary's original verification; the adapter notes record the newer pass.
+
 Delivery preserves order and saves each accepted intent receipt before proceeding.
 A new queue ID is insert-only; later checkpoints update only that transaction's
 entry. Delivery refuses an incomplete sequence instead of skipping missing work.
@@ -78,7 +84,8 @@ Auth user, SMS or owner JWT is created. No visual layout changed. The previous
 M30 Auth visual report remains the layout evidence; no new visual run or CI artifact
 is claimed.
 
-Remaining: all nonfinancial command adapters, canonical receipt/pull reconciliation,
+Remaining: catalogue, order, hand-off and Inbox command adapters, other currently
+unsupported local writes, canonical receipt/pull reconciliation,
 full upload/outbox controls, real production OTP and positive signed-owner HTTP
 proof, plus the other open M30 resources and acceptance gates. The default-off
 `cloudSetup` interface still offers sign-in and a local count review only. All

@@ -1,0 +1,182 @@
+{
+  "checkedAt": "2026-11-18T08:08:21.8124005Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Original local customer/khata, stock/count, supplier/invoice and closing command adapters; upload/sync controls remain gated",
+  "newIntentKinds": [
+    "customer.create",
+    "customer.update",
+    "customer.archive",
+    "customer.restore",
+    "khata.settings",
+    "stock.create",
+    "stock.update",
+    "stock.adjust",
+    "stock.batch",
+    "stock.undo",
+    "stock.archive",
+    "stock.restore",
+    "supplier.create",
+    "supplier.update",
+    "supplier.archive",
+    "supplier.restore",
+    "purchase.record",
+    "purchase.undo",
+    "closing.record",
+    "closing.undo"
+  ],
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "623120817c64ac92dca3969a8679a0ea3b33732e69c60fb33d4e9a5be2bd5052"
+    },
+    "typecheck": {
+      "astroFiles": 97,
+      "errors": 0,
+      "hints": 0,
+      "passed": true,
+      "warnings": 0,
+      "logSha256": "7990e667a2dc2485a90338cec2a17cd049314a213577ea6c86170634f672d9bd"
+    },
+    "units": {
+      "passed": 1615,
+      "reportSha256": "4bf6833f567bf651e3f30f3d6d157aafdc60f429eb275cf9ae90a3d72affafc1",
+      "files": 91,
+      "newAdapterTests": 14,
+      "durationSeconds": 108.617905
+    },
+    "browser": {
+      "durationSeconds": 297.926399,
+      "base": "/mise/",
+      "flaky": 0,
+      "globalErrors": 0,
+      "failed": 0,
+      "retries": 0,
+      "skipped": 0,
+      "passed": 317,
+      "reportSha256": "33ebd171f3d255800100a44b052ade707514277566aafd7c036307b3683b3ee1"
+    },
+    "rootSmoke": {
+      "durationSeconds": 10.455234,
+      "base": "/",
+      "flaky": 0,
+      "globalErrors": 0,
+      "failed": 0,
+      "retries": 0,
+      "skipped": 0,
+      "passed": 8,
+      "reportSha256": "3eac2b21a89f65dd68e92835b621f1789e301f237bc9112f01a63c99a007e1c3"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "htmlSha256": "e539729832e8bb6aeeec79e366b7bf75c12d8c5ede3a088ff95d477975a5fad5",
+        "passed": true,
+        "logSha256": "14205b296f5f7513ecfd761ad896fb8932a91a620f316f872da33f0c87c98e40"
+      },
+      {
+        "htmlSha256": "82c367a7dc5b35240cdda16a02f712bc02d297d30256077e4d63969b71a41310",
+        "base": "/mise/",
+        "logSha256": "12bb3834ae7d7acd191dea29d1accb5ae8c3cd4f4580206bb0046fd49dce027c",
+        "passed": true
+      }
+    ],
+    "nativeBoundary": {
+      "sharedSourceRemainsRetained": true,
+      "newCases": 3,
+      "offlineForms": true,
+      "totalCases": 6,
+      "backupIsolation": true,
+      "nativeIndexedDb": true,
+      "inlineCreditToggle": true
+    },
+    "exports": {
+      "passed": true,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16",
+      "present": 270
+    },
+    "visual": {
+      "previousEvidence": "docs/m30-auth-local.json",
+      "newCiArtifact": false,
+      "previousComparisons": 15,
+      "layoutChanged": false,
+      "newVisualRun": false
+    }
+  },
+  "serverMutationReplay": {
+    "canonicalTimeReconciliationProven": false,
+    "positiveActualOwnerHttpProven": false,
+    "equalClocksForIdentityAndDomainComparison": true,
+    "actualSerializedQueuedCommands": true,
+    "existingServerBuilders": true
+  },
+  "invariants": {
+    "absolutePhysicalCountsIncludingZero": true,
+    "sharedCountBatchIdentity": true,
+    "closingFingerprintRetained": true,
+    "closingUndoUsesNewAudits": true,
+    "staleReviewsLeaveNoPartialWrites": true,
+    "customerAndAccountStorageFieldsExcluded": true,
+    "invoiceDoesNotReceiveStockOrRecordMoney": true,
+    "relativeStockDeltas": true,
+    "invoiceLines": 200,
+    "metadataOnlyStockCreatesNoMove": true,
+    "fiveFamilyQueueFailuresRollBack": true,
+    "repeatedClosingSaveQueuesOnce": true,
+    "originalRecordAndAuditIds": true,
+    "rawRecoveryRowsNeverSent": true
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "coverageGaps": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historyRewritten": false
+  },
+  "hosted": {
+    "actualOwnerHttpProven": false,
+    "changed": false,
+    "newAuthUsers": 0,
+    "smsRequests": 0,
+    "newEdgeDeployments": 0,
+    "newMigrations": 0
+  },
+  "publication": {
+    "newCiRun": false,
+    "workflowsRemainDisabled": true,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "verificationNotes": [
+    {
+      "issue": "Existing profile editor and inline credit toggles pass saved models with storage metadata.",
+      "change": "Project editable profile and credit fields from the validated local mutation before strict wire parsing; retain the original paid-order regression and add account-model/inline-toggle coverage.",
+      "resolved": true
+    },
+    {
+      "issue": "The corner-shop count link differs from the restaurant label, and inline switch state updates after the database save.",
+      "change": "Use the actual Count stock label and a click followed by retrying persisted-state assertions; preserve the original exact quantity, queue and ID checks.",
+      "resolved": true
+    }
+  ],
+  "remaining": [
+    "catalogue, order, hand-off and Inbox adapters",
+    "unsupported setup/template/export/shop-link writes",
+    "canonical receipt/pull reconciliation",
+    "full upload/outbox controls",
+    "real phone OTP and signed-owner HTTP acceptance",
+    "other open M30 resources and acceptance",
+    "later handover milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/db.ts": "8fce2bce52a5ac2a819e75aa7af905caaa9719591d87323be1ca4296642c3007",
+    "apps/web/src/data/purchases.ts": "3a51cda5e76077648db2d10aa3112c1e3530abb4f45433bea27f491082668604",
+    "apps/web/src/data/outbox-intents.ts": "7cf8130779b79321ab70ac61d5503ab07239764ef6f10b68a479bcde9ca67390",
+    "packages/core/customer-intent.ts": "f05283f7f36504dc0a54c93207ca204db91330ddca811efcd603656d70e79cd9",
+    "apps/web/src/data/outbox-capture.ts": "6d5bbf91144149bd472fef69c911ec78d249d92815ddde8a45ea8f82e8ea10a9",
+    "apps/web/src/data/local-outbox.ts": "6789fae1a165ac8fdc3f423d4b29feeab990ae6450045b2d617577f58cb72e23",
+    "tests/domain-outbox-adapters.test.ts": "758ddc89dad127fb27b11361c28d8e7fd01de78465e27d69d1798c21b0551faa",
+    "tests/e2e/outbox-boundary.spec.ts": "5a8ea03478a8c6ab885a70130801ec6d52972920e26005663938719c7725f766"
+  }
+}
