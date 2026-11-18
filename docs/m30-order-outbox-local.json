@@ -1,0 +1,163 @@
+{
+  "checkedAt": "2026-11-18T08:40:09.8395080Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "All eleven existing order command kinds join the original local transaction; upload controls remain default-off",
+  "intentKinds": [
+    "order.create",
+    "order.update",
+    "order.status",
+    "order.status-undo",
+    "order.note",
+    "order.communication",
+    "order.payment",
+    "order.payment-undo",
+    "order.refund",
+    "order.refund-undo",
+    "order.warning-settings"
+  ],
+  "checks": {
+    "typecheck": {
+      "errors": 0,
+      "passed": true,
+      "checkedFiles": 98,
+      "hints": 0,
+      "logSha256": "2a4a8d3c59502cb06f918e62e89470dc7fd7efd416990df16382aeb3acff59fe",
+      "warnings": 0
+    },
+    "visual": {
+      "layoutChanged": false,
+      "previousEvidence": "docs/m30-auth-local.json",
+      "previousComparisons": 15,
+      "newVisualRun": false,
+      "newCiArtifact": false
+    },
+    "browser": {
+      "skipped": 0,
+      "globalErrors": 0,
+      "passed": 321,
+      "retries": 0,
+      "reportSha256": "2339481d771fdb5504460d84e0bcb5e8e5f37a0aaa9df3677ac88243843600f0",
+      "flaky": 0,
+      "base": "/mise/",
+      "durationSeconds": 436.688599,
+      "failed": 0
+    },
+    "units": {
+      "files": 92,
+      "newAdapterTests": 29,
+      "reportSha256": "0150112cf0f905c09aa29a0f490bd007d7ee50f10cc97ebc72d9694596884493",
+      "passed": 1644,
+      "durationSeconds": 210.472795
+    },
+    "builds": [
+      {
+        "logSha256": "3e75678b58c5062a6eea16dc4deadd4285d1d3ca91eda20ae10fd706d66e5611",
+        "passed": true,
+        "htmlSha256": "eb68beb1c586d41ab8cf40770a06bdafb2fe8fb0bb285dac074cb39631e9adbd",
+        "base": "/"
+      },
+      {
+        "passed": true,
+        "htmlSha256": "aeecb14931daac9b71926f6ce69b77c91635412e8bf3aff0c7c3b2be11d839e2",
+        "base": "/mise/",
+        "logSha256": "730c3a85b31e7acd3745a61186959415b8de6e8bb48222cd7cce41111ece98cb"
+      }
+    ],
+    "nativeOrder": {
+      "originalIdsAndReload": true,
+      "refundAndCorrection": true,
+      "nativeQueueConstraintRollback": true,
+      "newCases": 4,
+      "offlineCashAndCreditCompounds": true,
+      "notesStatusAndUndo": true
+    },
+    "rootSmoke": {
+      "skipped": 0,
+      "globalErrors": 0,
+      "passed": 12,
+      "retries": 0,
+      "reportSha256": "ebcb9ee9878e820a243997a73bf81c9f6197a0f021099877285345744ebff9f6",
+      "flaky": 0,
+      "base": "/",
+      "durationSeconds": 22.676805,
+      "failed": 0
+    },
+    "exports": {
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16",
+      "present": 270,
+      "passed": true
+    },
+    "lint": {
+      "passed": true,
+      "logSha256": "a3a2f45745f6e02b1ba7360f3c47f26deef53b24e0c60d92405bb662864c0b4d"
+    }
+  },
+  "invariants": {
+    "unusedFinancialIdsDistinctFromSources": true,
+    "intermediateAndMoneyAuditsAtomic": true,
+    "compoundOneCommandAndOccurrenceTime": true,
+    "all200LinesAnd12000SourceCharacters": true,
+    "oldReceiptCannotUndoNewPayment": true,
+    "queueFailureRollsBack": true,
+    "newLinesAllocatedOnce": true,
+    "noInferredRemotePaymentTime": true,
+    "exactOverLimitConfirmation": true,
+    "unpricedAndFreeOrders": true,
+    "staleReviewNoPartialWrite": true,
+    "fourBusinessFlows": true,
+    "cashAndCreditCancellationRefundUndo": true,
+    "legacyMissingPaymentTimeRetained": true,
+    "legacyLocalUndoRemainsUsable": true,
+    "editableFieldsOnly": true,
+    "lostAcceptanceKeepsIds": true,
+    "lineNoteCharacters": 500,
+    "originalDeviceIds": true
+  },
+  "serverMutationReplay": {
+    "existingServerBuilder": true,
+    "equalClockIdentityAndDomainComparison": true,
+    "positiveActualOwnerHttpProven": false,
+    "actualSerializedQueueValues": true,
+    "canonicalSequenceAndTimeConvergenceProven": false
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "historicalNonsecretIdentifierFindings": 22,
+    "currentDeploymentFindings": 0,
+    "coverageGaps": 0,
+    "credentialFindings": 0,
+    "historyRewritten": false
+  },
+  "hosted": {
+    "smsRequests": 0,
+    "newEdgeDeployments": 0,
+    "changed": false,
+    "newMigrations": 0,
+    "newAuthUsers": 0
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "newPagesDeployment": false,
+    "newCiRun": false
+  },
+  "remaining": [
+    "catalogue, hand-off and original Inbox adapters",
+    "unsupported setup/template/export/shop-link writes",
+    "legacy payment occurrence review",
+    "canonical receipt and cursor-pull reconciliation",
+    "full upload/outbox controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "other M30 resources and remaining roadmap milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/db.ts": "5d8d931bf91145d359e2f05af4225e63f4e6db07888f4ffb738eb92da29a1c40",
+    "packages/core/order-intent.ts": "658075a33e2c27b07d48121a15ce3618c92e205b3bb0c1d0bbd45ae7262ee257",
+    "packages/core/order-commands.ts": "19dde3104a1a4a9015ef989d9316d96cd6887cfc696390b42c22f4dedd25268e",
+    "supabase/functions/_shared/order-write.ts": "a8bac8c6849e7d6450ca88cf8db2f3bd52cad1bd996b5c877f0accd9d65c5e4c",
+    "apps/web/src/data/outbox-capture.ts": "6d5bbf91144149bd472fef69c911ec78d249d92815ddde8a45ea8f82e8ea10a9",
+    "tests/order-outbox-adapters.test.ts": "22dc971b056d11a3e0a416a7e4c4273d3a38a3f18859070e558b44d14bdbc236",
+    "tests/e2e/order-outbox.spec.ts": "766cc7562714337dabd03cf9b250b4c286167acfb395de98f5403b472f662dd9"
+  }
+}

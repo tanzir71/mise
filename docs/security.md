@@ -97,3 +97,7 @@ nine-value source/index/history/build-output audit with no credentials, current
 deployment references or coverage gaps. All 16 guard tests also pass in its full
 1,615-test unit run. New profile/khata intents project only editable fields from
 saved models; storage metadata and unrelated values stay outside the wire command.
+
+The [order adapter verification](m30-order-outbox-local.json) repeats that scan and
+all 16 guard tests within its 1,644-test unit run. Order/line/payment requests also
+project only editable fields; full saved models are not serialized as commands.

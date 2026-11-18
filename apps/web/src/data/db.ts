@@ -8,6 +8,7 @@ import { LocalStore } from './local-store';
 import {withOutboxIntent} from './outbox-capture';
 import {stockSaveIntent,stockAdjustmentIntent,stockBatchIntent,supplierSaveIntent,closingIntent} from './outbox-intents';
 import {customerSaveIntent,creditTermsIntent} from '@mise/core/customer-intent';
+import {reserveOrderFinance,orderIntentBase,orderSaveIntent,orderSettlementInput,orderRefundInput} from '@mise/core/order-intent';
 import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
@@ -18,7 +19,7 @@ import type {CustomerSaveOptions} from '@mise/core/customer-mutation';
 import { creditBalance, recordCreditPaymentCommand, undoCreditEntryCommand, recordCommunicationCommand, type CreditTermsInput, type LedgerContext } from '@mise/core/khata';
 import { recordCreditSaleCommand, undoCreditSaleCommand, type CreditSaleInput } from '@mise/core/credit-sales';
 import { saveCreditMessagingCommand } from '@mise/core/khata-messages';
-import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOrderCancellationCommand, refundOrderCommand, undoOrderRefundCommand, type OrderMoneyChange, type OrderMoneyContext, type OrderSettlementInput, type OrderRefundInput } from '@mise/core/order-payments';
+import { settleOrderCommand, undoOrderPaymentCommand, cancelOrderCommand, undoOrderCancellationCommand, refundOrderCommand, undoOrderRefundCommand, type OrderMoneyChange, type OrderMoneyContext, type OrderMoneyIds, type OrderSettlementInput, type OrderRefundInput } from '@mise/core/order-payments';
 import { saveOrderCommand, changeOrderStatusCommand, undoOrderStatusCommand, addOrderNoteCommand, recordOrderCommunicationCommand, saveOrderWarningCommand, type OrderInput } from '@mise/core/orders';
 import { saveStockItemCommand, adjustStockCommand, stockBatchCommand, undoStockMoveCommand, archiveStockItemCommand, saveSupplierCommand, archiveSupplierCommand, type StockInput, type StockContext, type StockChange, type StockAdjustment, type SupplierInput } from '@mise/core/stock';
 import { recordSupplierMessageCommand, sameSupplierMessage, undoSupplierMessageCommand, type SupplierMessageInput } from '@mise/core/supplier-drafts';
@@ -109,13 +110,11 @@ export class MiseDatabase extends LocalStore {
       const [sale, setup] = await Promise.all([this.sales.get(id), this.setup()]);
       if (!sale || !setup || sale.outletId !== setup.outlet.id) throw new Error('Sale not found.');
       if (sale.orderId) {
-        const {order} = await this.orderContext(sale.orderId), context = await this.orderMoneyContext(order,setup);
-        let change: OrderMoneyChange;
-        if (sale.voidReason === 'order-cancel') {
-          const event = await this.events.get(order.statusEventId); if (!event) throw new Error('Cancellation history not found.');
-          change = undoOrderCancellationCommand(order,event,sale,context,order.revision);
-        } else change = undoOrderPaymentCommand(order,sale,context,order.revision);
-        await this.writeOrderMoney(change); return;
+        const {order} = await this.orderContext(sale.orderId);
+        if(order.payment.saleId!==sale.id)throw new Error('The payment does not match this order.');
+        if(sale.voidReason==='order-cancel')await this.undoOrderStatus(order.id,order.revision);
+        else await this.undoOrderPayment(order.id,order.revision);
+        return;
       }
       if (sale.method === 'credit') {
         const context = await this.ledgerContext(sale.creditAccountId || '');
@@ -208,8 +207,10 @@ export class MiseDatabase extends LocalStore {
       if (options.id && !before) throw new Error('Order not found.');
       const last = before || await this.orders.where('[outletId+sequence]').between([setup.outlet.id,Dexie.minKey],[setup.outlet.id,Dexie.maxKey]).last();
       const command = saveOrderCommand(input,{setup,items:await this.items.where('outletId').equals(setup.outlet.id).toArray(),customer:input.customerId ? await this.customers.get(input.customerId) : undefined,sequence:before?.sequence || (last?.sequence || 0)+1},before,options.revision);
-      await this.orders.put(command.order); await this.events.add(command.event);
-      return options.settlement ? this.settleOrder(command.order.id,options.settlement,command.order.revision) : command.order;
+      const plan=options.settlement?reserveOrderFinance(command.event.at):null;
+      const payment=options.settlement&&plan?await this.prepareOrderPayment(command.order,options.settlement,setup,command.order.revision,command.event.at,plan.newId):null;
+      const intent=orderSaveIntent(command,input,before??null,payment&&plan?{id:plan.id,ids:plan.ids,input:payment.input}:null);
+      return withOutboxIntent(this,intent,async()=>{await this.orders.put(command.order);await this.events.add(command.event);if(payment)await this.writeOrderMoney(payment.change);return payment?.change.order??command.order;});
     });
   }
   private async orderContext(id: string) {
@@ -220,42 +221,46 @@ export class MiseDatabase extends LocalStore {
   async changeOrderStatus(id: string, status: OrderStatus, revision: number): Promise<Order> {
     return this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id);
+      const plan=reserveOrderFinance();
       if (status === 'cancelled') {
         const sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
-        const change = cancelOrderCommand(order,sale,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.order;
+        const change = cancelOrderCommand(order,sale,await this.orderMoneyContext(order,setup),revision,Date.now(),plan.newId);
+        return withOutboxIntent(this,{...orderIntentBase(order,change.events[0]),type:'order.status',status,sourceSaleId:order.payment.saleId??null,ids:plan.ids},async()=>{await this.writeOrderMoney(change);return change.order;});
       }
-      const command = changeOrderStatusCommand(order,status,setup,revision);
-      await this.orders.put(command.order); await this.events.add(command.event); return command.order;
+      const command = changeOrderStatusCommand(order,status,setup,revision,Date.now(),()=>plan.id);
+      return withOutboxIntent(this,{...orderIntentBase(order,command.event),type:'order.status',status,sourceSaleId:order.payment.saleId??null,ids:plan.ids},async()=>{await this.orders.put(command.order);await this.events.add(command.event);return command.order;});
     });
   }
   async undoOrderStatus(id: string, revision: number): Promise<Order> {
     return this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id), event = await this.events.get(order.statusEventId);
       if (!event) throw new Error('Status history not found.');
+      const plan=reserveOrderFinance();
       if (order.status === 'cancelled') {
         const sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
-        const change = undoOrderCancellationCommand(order,event,sale,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.order;
+        const change = undoOrderCancellationCommand(order,event,sale,await this.orderMoneyContext(order,setup),revision,Date.now(),plan.newId);
+        return withOutboxIntent(this,{...orderIntentBase(order,change.events[0]),type:'order.status-undo',sourceSaleId:order.payment.saleId??null,ids:plan.ids},async()=>{await this.writeOrderMoney(change);return change.order;});
       }
-      const command = undoOrderStatusCommand(order,event,setup,revision);
-      await this.orders.put(command.order); await this.events.add(command.event); return command.order;
+      const command = undoOrderStatusCommand(order,event,setup,revision,Date.now(),()=>plan.id);
+      return withOutboxIntent(this,{...orderIntentBase(order,command.event),type:'order.status-undo',sourceSaleId:order.payment.saleId??null,ids:plan.ids},async()=>{await this.orders.put(command.order);await this.events.add(command.event);return command.order;});
     });
   }
   async addOrderNote(id: string, text: string, revision: number): Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id), command = addOrderNoteCommand(order,text,setup,revision);
-      await this.orders.put(command.order); await this.orderNotes.add(command.note); await this.events.add(command.event);
+      await withOutboxIntent(this,{...orderIntentBase(order,command.event),type:'order.note',noteId:command.note.id,text:command.note.text},async()=>{await this.orders.put(command.order);await this.orderNotes.add(command.note);await this.events.add(command.event);});
     });
   }
   async recordOrderCommunication(id: string, input: Pick<OrderCommunication,'purpose'|'channel'|'text'>, revision: number): Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id), command = recordOrderCommunicationCommand(order,input,setup,revision);
-      await this.orders.put(command.order); await this.orderCommunications.add(command.communication); await this.events.add(command.event);
+      await withOutboxIntent(this,{...orderIntentBase(order,command.event),type:'order.communication',communicationId:command.communication.id,input:{purpose:command.communication.purpose,channel:command.communication.channel,text:command.communication.text}},async()=>{await this.orders.put(command.order);await this.orderCommunications.add(command.communication);await this.events.add(command.event);});
     });
   }
   async saveOrderWarning(minutes: number): Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const setup = await this.setup(); if (!setup) throw new Error('Set up your shop first.');
-      const command = saveOrderWarningCommand(minutes,setup); await this.outlets.put(command.outlet); await this.events.add(command.event);
+      const command = saveOrderWarningCommand(minutes,setup);await withOutboxIntent(this,{id:command.event.id,type:'order.warning-settings',outletId:setup.outlet.id,occurredAt:command.event.at,minutes},async()=>{await this.outlets.put(command.outlet);await this.events.add(command.event);});
     });
   }
 
@@ -271,32 +276,42 @@ export class MiseDatabase extends LocalStore {
     if (change.refunds.length) await this.orderRefunds.bulkPut(change.refunds);
     await this.events.bulkAdd(change.events);
   }
+  private async prepareOrderPayment(order:Order,input:OrderSettlementInput,setup:SetupSnapshot,revision:number,at:number,newId:OrderMoneyIds){
+    const account=input.method==='credit'&&!input.accountId&&order.customer.id?await this.creditAccounts.where('[outletId+customerId+currency]').equals([order.outletId,order.customer.id,order.currency]).first():undefined;
+    const context=await this.orderMoneyContext(order,setup,input.method==='credit'?input.accountId||account?.id:undefined),resolved={...input,accountId:input.accountId||account?.id};
+    return {change:settleOrderCommand(order,resolved,context,revision,at,newId),input:orderSettlementInput(resolved)};
+  }
   async settleOrder(id: string, input: OrderSettlementInput, revision: number): Promise<Order> {
     return this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id);
-      const account = input.method === 'credit' && !input.accountId && order.customer.id ? await this.creditAccounts.where('[outletId+customerId+currency]').equals([order.outletId,order.customer.id,order.currency]).first() : undefined;
-      const context = await this.orderMoneyContext(order,setup,input.method === 'credit' ? input.accountId || account?.id : undefined);
-      const change = settleOrderCommand(order,{...input,accountId:input.accountId || account?.id},context,revision); await this.writeOrderMoney(change); return change.order;
+      const plan=reserveOrderFinance(),payment=await this.prepareOrderPayment(order,input,setup,revision,Date.now(),plan.newId);
+      return withOutboxIntent(this,{...orderIntentBase(order,payment.change.events[0]),type:'order.payment',input:payment.input,ids:plan.ids},async()=>{await this.writeOrderMoney(payment.change);return payment.change.order;});
     });
   }
   async undoOrderPayment(id: string, revision: number): Promise<Order> {
     return this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id), sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
-      const change = undoOrderPaymentCommand(order,sale,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.order;
+      const plan=reserveOrderFinance(),change=undoOrderPaymentCommand(order,sale,await this.orderMoneyContext(order,setup),revision,Date.now(),plan.newId);
+      // Older portable records may omit this optional field. Keep their local undo
+      // usable, retaining it for review rather than inventing a remote source time.
+      if(order.payment.at===undefined){await this.writeOrderMoney(change);return change.order;}
+      return withOutboxIntent(this,{...orderIntentBase(order,change.events[0]),type:'order.payment-undo',sourceSaleId:order.payment.saleId??null,sourcePaymentAt:order.payment.at,ids:plan.ids},async()=>{await this.writeOrderMoney(change);return change.order;});
     });
   }
   async refundOrder(id: string, input: OrderRefundInput, revision: number): Promise<OrderRefund> {
     return this.transaction('rw',this.tables,async () => {
       const {setup,order} = await this.orderContext(id), sale = order.payment.saleId ? await this.sales.get(order.payment.saleId) : undefined;
       if (!sale) throw new Error('The original receipt is missing.');
-      const change = refundOrderCommand(order,sale,input,await this.orderMoneyContext(order,setup),revision); await this.writeOrderMoney(change); return change.refunds[0];
+      const plan=reserveOrderFinance(),change=refundOrderCommand(order,sale,input,await this.orderMoneyContext(order,setup),revision,Date.now(),plan.newId);
+      return withOutboxIntent(this,{...orderIntentBase(order,change.events[0]),type:'order.refund',sourceSaleId:sale.id,input:orderRefundInput(input),ids:plan.ids},async()=>{await this.writeOrderMoney(change);return change.refunds[0];});
     });
   }
   async undoOrderRefund(id: string, revision?:number): Promise<void> {
     await this.transaction('rw',this.tables,async () => {
       const refund = await this.orderRefunds.get(id); if (!refund) throw new Error('Refund not found.');
       const {setup,order} = await this.orderContext(refund.orderId);
-      const change = undoOrderRefundCommand(order,refund,await this.orderMoneyContext(order,setup),revision ?? order.revision); await this.writeOrderMoney(change);
+      const plan=reserveOrderFinance(),change=undoOrderRefundCommand(order,refund,await this.orderMoneyContext(order,setup),revision??order.revision,Date.now(),plan.newId);
+      await withOutboxIntent(this,{...orderIntentBase(order,change.events[0]),type:'order.refund-undo',refundId:refund.id,ids:plan.ids},()=>this.writeOrderMoney(change));
     });
   }
   private async stockContext():Promise<StockContext> {

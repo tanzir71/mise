@@ -92,3 +92,8 @@ remain open. Product cloud controls stay unavailable. No new layout, visual
 comparison or live Pages publication is claimed; workflows remain disabled.
 Actual deployment references, credentials and private operational paths stay out
 of the repository and public evidence.
+
+The subsequent [local order queue](m30-order-outbox.md) connects these command kinds
+to their original local transactions, including compound save-and-pay and complete
+financial undo. Its notes record the newer regression pass. The full upload/sync
+interface and canonical reconciliation remain unfinished.
