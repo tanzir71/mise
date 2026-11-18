@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- Credential guards now inspect Windows UTF-16 files in both byte orders, with or without a byte-order mark, including ZIP downloads. All 23 security tests pass, including a real rejected commit of a PowerShell credential file. Existing commit, push and build guards remain enabled; GitHub Actions remain stopped.
+
 - M30 downloads now retain their original request, immutable pages and verified records in the shop's IndexedDB. Schema 12 preserves existing images, upload receipts and queued actions; portable backups remain unchanged. Cross-page fragments, complete hashes, exact retries and integrity seals support empty devices, offline reload, concurrent tabs and storage recovery without applying records or advancing an accepted cursor. Cloud controls remain gated.
 
 - M30 durable download captures original scoped changes and tombstones in their source transactions. Fixed PostgreSQL snapshot windows, hashed fragments, bounded gzip responses and signed cursors retain large records and exact retries. Owner/manager access is checked before body reading and again on cached pages. The runtime transport remains separate from shop writes; canonical application and sync activation stay gated.

@@ -16,11 +16,22 @@ const rules=[
   ['supabase-deployment-reference','deployment',/"(?:project|project_ref|organization|organization_id)"\s*:\s*"[a-z]{20}"/],
 ];
 function location(path,known){let safe=path;for(const [, ,pattern] of rules)safe=safe.replace(new RegExp(pattern.source,'g'),'[redacted]');for(const {value} of known)if(value.length>=16)safe=safe.replaceAll(value,'[redacted]');return safe;}
+// Windows PowerShell commonly writes UTF-16. Inspect both byte orders, including
+// files without a BOM, so null bytes cannot hide an otherwise recognizable key.
+function decodedTexts(data){
+  const raw=data.toString('latin1'),texts=[raw];
+  const bom=data.length>=2&&((data[0]===255&&data[1]===254)||(data[0]===254&&data[1]===255));
+  if(bom||/(?:[\x09\x0a\x0d\x20-\x7e]\x00){8}|(?:\x00[\x09\x0a\x0d\x20-\x7e]){8}/.test(raw)){
+    texts.push(data.toString('utf16le'));
+    const swapped=Buffer.from(data.subarray(0,data.length-data.length%2));swapped.swap16();texts.push(swapped.toString('utf16le'));
+  }
+  return texts;
+}
 /** Findings contain locations and rule names only, never matched values. */
 export function inspectSecretBytes(bytes,path,known=[],depth=0){
-  const data=Buffer.from(bytes),text=data.toString('latin1'),findings=[],safePath=location(path,known);
-  for(const [rule,kind,pattern] of rules)if(pattern.test(text)||pattern.test(path))findings.push({path:safePath,rule,kind});
-  for(const item of known)if(item.value.length>=16&&(data.includes(Buffer.from(item.value))||path.includes(item.value)))findings.push({path:safePath,rule:item.rule,kind:item.kind});
+  const data=Buffer.from(bytes),texts=decodedTexts(data),findings=[],safePath=location(path,known);
+  for(const [rule,kind,pattern] of rules)if(texts.some(text=>pattern.test(text))||pattern.test(path))findings.push({path:safePath,rule,kind});
+  for(const item of known)if(item.value.length>=16&&(data.includes(Buffer.from(item.value))||texts.some(text=>text.includes(item.value))||path.includes(item.value)))findings.push({path:safePath,rule:item.rule,kind:item.kind});
   if(data[0]===80&&data[1]===75&&data[2]===3&&data[3]===4){
     if(depth>=2)return [...findings,{path:safePath,rule:'nested-archive-limit',kind:'coverage'}];
     let total=0;

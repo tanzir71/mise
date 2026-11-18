@@ -27,7 +27,8 @@ pnpm check:secrets --history --artifacts
 ```
 
 The guard checks credential patterns, filenames, commit/tag messages and ZIP
-contents. Clone-local Git configuration `mise.secretScanDirectory` automatically
+contents. It also checks Windows UTF-16 files in either byte order, with or without
+a byte-order mark, including files inside ZIP downloads. Clone-local Git configuration `mise.secretScanDirectory` automatically
 loads private key/pepper/cursor-signing values for every scan; `mise.privateDeploymentRef` is
 repeatable and checks plain project/organization IDs too. The configured directory
 stays outside the repository; its path and all values remain in `.git/config` and
@@ -36,10 +37,19 @@ Values are compared in memory. Findings contain rule names and redacted location
 never matched values. Hooks depend on Node and installed dependencies; a missing
 dependency, unreadable configured input or incomplete scan blocks the operation.
 
-ZIP extraction is bounded; incomplete archive coverage fails the scan. Seventeen
+ZIP extraction is bounded; incomplete archive coverage fails the scan. Twenty-three
 guard tests cover redaction, ZIP contents, ignored configuration, staged/history
 leaks, filename-only leaks, commit/tag messages, automatic clone-local comparisons,
-unavailable private input and real blocked commit/push attempts.
+unavailable private input and real blocked commit/push attempts. The Windows cases
+include a real rejected commit of a PowerShell UTF-16 credential file.
+
+The [19 November 2026 privacy check](security-audit.json) repeats the full audit
+using the UTF-16 guard and ten private comparison values. It finds zero credentials,
+zero current deployment references and zero coverage gaps. The 22 historical
+nonsecret identifier findings remain documented below. All 23 security tests and
+the changed source/test lint checks pass; no app build or deployment is claimed
+for this security-only change. GitHub protection remains enabled independently of
+the three stopped workflows.
 
 The 18 November 2026 audit found **zero credentials** in current files, the index,
 reachable history and built output. Current files and output also contain no actual

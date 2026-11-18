@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-11-18T19:04:27.862Z",
+  "scope": "Repository credential protection, including Windows UTF-16 files; no application or hosted schema changes in this increment",
+  "audit": {
+    "historyFetched": true,
+    "sourceAndIndex": true,
+    "reachableHistory": true,
+    "existingBuildOutput": true,
+    "knownPrivateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentReferenceFindings": 0,
+    "historicalNonsecretReferenceFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "checks": {
+    "securityTests": 23,
+    "securityTestsPassed": true,
+    "changedJavaScriptAndTestsLintPassed": true,
+    "guardSha256": "b80ddff11e810eb090791c2832e2dd6dc4c5856aa0fa92254ff5021e0c4dfe4d"
+  },
+  "protections": {
+    "hooks": ".githooks",
+    "gitHubSecretScanning": "enabled",
+    "gitHubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "runtimeConnectionConfiguration": true,
+    "credentialsInPublicBuildVariables": false
+  },
+  "liveReadOnlyChecks": {
+    "applicationTables": 56,
+    "forcedRlsTables": 56,
+    "anonymousTableGrants": 0,
+    "publicSecurityDefinerFunctions": 0,
+    "publicStorageBuckets": 0,
+    "securityAdvisorWarnings": 0,
+    "securityAdvisorErrors": 0
+  },
+  "publication": {
+    "disabledWorkflows": 3,
+    "activeRuns": 0,
+    "pagesHeld": true,
+    "applicationDeployed": false
+  }
+}

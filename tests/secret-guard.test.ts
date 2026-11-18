@@ -7,6 +7,20 @@ import {spawnSync} from 'node:child_process';
 // @ts-expect-error The repository guard is a standalone Node script.
 import {inspectSecretBytes} from '../scripts/check-secrets.mjs';
 const key='sb_secret_'+'x'.repeat(32);
+function utf16(text:string,bigEndian:boolean,bom:boolean){const body=Buffer.from(text,'utf16le');if(bigEndian)body.swap16();return bom?Buffer.concat([Buffer.from(bigEndian?[254,255]:[255,254]),body]):body;}
+it.each([[false,false],[false,true],[true,false],[true,true]])('detects UTF-16 credentials (big endian: %s, BOM: %s) without exposing their values',(bigEndian,bom)=>{
+  const pepper='f17c'.repeat(16),bytes=utf16('KEY='+key+'\nPEPPER='+pepper,bigEndian,bom);
+  const result=inspectSecretBytes(bytes,'windows.txt',[{value:pepper,rule:'known-edge-secret',kind:'credential'}]);
+  expect(result).toContainEqual({path:'windows.txt',rule:'supabase-api-key',kind:'credential'});
+  expect(result).toContainEqual({path:'windows.txt',rule:'known-edge-secret',kind:'credential'});
+  expect(JSON.stringify(result)).not.toContain(key);expect(JSON.stringify(result)).not.toContain(pepper);
+});
+it('detects a UTF-16 deployment reference inside a ZIP download',()=>{
+  const project='z'.repeat(20),bytes=utf16('https://'+project+'.supabase.co',true,true);
+  const result=inspectSecretBytes(zipSync({'windows.txt':bytes}),'download.zip');
+  expect(result).toContainEqual({path:'download.zip!windows.txt',rule:'supabase-deployment-url',kind:'deployment'});
+  expect(JSON.stringify(result)).not.toContain(project);
+});
 it('detects a privileged Supabase key without returning any credential value',()=>{const result=inspectSecretBytes(Buffer.from('const key="'+key+'"'),'sample.js');expect(result).toContainEqual({path:'sample.js',rule:'supabase-api-key',kind:'credential'});expect(JSON.stringify(result)).not.toContain(key);});
 it('checks exact private values including a pepper that has no recognizable prefix',()=>{const value='a19f'.repeat(16);const known=inspectSecretBytes(Buffer.from('PEPPER='+value),'config',[{value,rule:'known-edge-secret',kind:'credential'}]);expect(known[0].rule).toBe('known-edge-secret');expect(JSON.stringify(known)).not.toContain(value);});
 it('checks keys hidden inside a published ZIP archive',()=>{const archive=zipSync({'bundle.js':strToU8('const credential="'+key+'"')});expect(inspectSecretBytes(archive,'download.zip')).toContainEqual({path:'download.zip!bundle.js',rule:'supabase-api-key',kind:'credential'});});
@@ -58,6 +72,12 @@ it('blocks a real commit with a staged secret through the installed hook',()=>wi
   const result=spawnSync('git',['-c','user.name=Secret guard fixture','-c','user.email=fixture@example.invalid','commit','--quiet','-m','must be blocked'],{cwd:directory,encoding:'utf8',windowsHide:true});
   expect(result.status).not.toBe(0);expect(result.stdout+result.stderr).not.toContain(key);expect(result.stdout+result.stderr).toContain('supabase-api-key');
   writeFileSync(join(directory,'config.txt'),'placeholder');git('add','config.txt');git('commit','--quiet','-m','safe commit');
+}),gitFixtureTimeout);
+it('blocks a real commit containing a PowerShell UTF-16 secret',()=>withRepository((directory,git)=>{
+  installHook(directory,git,'pre-commit');writeFileSync(join(directory,'windows.txt'),utf16(key,false,true));git('add','windows.txt');
+  const result=spawnSync('git',['-c','user.name=Secret guard fixture','-c','user.email=fixture@example.invalid','commit','--quiet','-m','must be blocked'],{cwd:directory,encoding:'utf8',windowsHide:true});
+  expect(result.status).not.toBe(0);expect(result.stdout+result.stderr).not.toContain(key);expect(result.stdout+result.stderr).toContain('supabase-api-key');
+  expect(spawnSync('git',['rev-parse','--verify','HEAD'],{cwd:directory,encoding:'utf8',windowsHide:true}).status).not.toBe(0);
 }),gitFixtureTimeout);
 it('blocks a real push when a credential remains only in history',()=>withRepository((directory,git)=>{
   installHook(directory,git,'pre-push');writeFileSync(join(directory,'.gitignore'),'remote.git/\n');writeFileSync(join(directory,'config.txt'),key);git('add','.gitignore','config.txt');
