@@ -1,0 +1,273 @@
+{
+  "checkedAt": "2026-11-18T18:31:57.918Z",
+  "milestone": "M30/M31",
+  "complete": false,
+  "scope": "Durable original requests, immutable pages and complete verified record staging in the shop database; no canonical application or UI activation",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "85456c2821a35bff42e176946498ffd28d6a2611fdf46ea29b2eff422caaa0d5"
+    },
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 109,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "f969bcd378a4a88ad7b5300c4a3f81d2414c35534733fb431594da143cb33574"
+    },
+    "units": {
+      "passed": 2016,
+      "files": 107,
+      "newJournalCases": 25,
+      "newSqlHttpJournalCases": 1,
+      "secretGuardCases": 17,
+      "reportSha256": "efb18511a51b30e6235edc76f72d9828b5db87ba2dd1616679e375f2c8149067"
+    },
+    "browser": {
+      "passed": 371,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "e18a738dfd87ee6aff5978dcd8d16d76060adaca637562aea0db7f8d45c9c21b"
+    },
+    "rootSmoke": {
+      "passed": 14,
+      "failed": 0,
+      "retries": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "globalErrors": 0,
+      "reportSha256": "620032df648f83feb81b0acd7d194258bfafd51cab302dafde759549e4257ef3"
+    },
+    "newNativeBrowserCases": 5,
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "62995649349b49503a53ddcfb2b6c750c3a8809671bcdbae142b785b65f6cfbe",
+        "htmlSha256": "5faf9cd72ea1438ea9d178e1b429562c4b04998b58c2ffbe13d23da2b95e61d4"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "190eb12670efa63a4dd6d1c7f8c939328d0d77fee65ce032b3383b2cf3fe06c7",
+        "htmlSha256": "a26df780e95b08b851de8ef2616a0627797d5805d5d153199fdad803166761cb"
+      }
+    ],
+    "exports": {
+      "passed": true,
+      "present": 270,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "visual": {
+      "comparisons": 45,
+      "changedProductScreens": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "report": "qa/report.html",
+      "reportSha256": "0764e6d0165f6e0abc6f6eb11ee38b1a667db479abacc88e5f2357c1da5857a3",
+      "resultsSha256": "b84266d506eead2b1c2fa9040c5a59b6a7cefe6b4764dcd26519c9fe953d8587",
+      "threeCapturesInspected": true,
+      "keyScreens": {
+        "qa/screens/m30-link-screen-360.png": "c6b2918174030a5949ee2fb9dbeda330adc6845245b0bd2c5d4825ffc14dd02d",
+        "qa/screens/m30-link-screen-390.png": "ed343a86c6ead8c54a0df1f1c6dd31ec31edbdccd46563d1f19e3628067bfab5",
+        "qa/screens/m30-link-screen-1440.png": "7758df25fcf0186c98cf1a57515e580ebad4bc4e1d485f01cb99c5d22c710653"
+      },
+      "exactFrameMatchClaimed": false,
+      "newCiArtifact": false
+    }
+  },
+  "invariants": {
+    "physicalSchema": 12,
+    "physicalStores": 26,
+    "durabilityTestBudgetMs": 15000,
+    "largeFunctionalTestBudgetMs": 60000,
+    "applicationDeadlinesUnchanged": true,
+    "newInternalStores": [
+      "syncReads",
+      "syncPages",
+      "syncRecords"
+    ],
+    "portableBackupSchema": 10,
+    "portableBackupTables": 21,
+    "oldImagesUploadsOutboxPreserved": true,
+    "workerSharesSchema": true,
+    "outgoingCaptureLockSetUnchanged": true,
+    "emptySecondDevicesSupported": true,
+    "explicitAccountActorRoleOutletTarget": true,
+    "originalRequestBeforeNetwork": true,
+    "sourceBindingHashExcludesOnlyMutableQueueSequence": true,
+    "originalCursorSourceRetained": true,
+    "immutablePageReplay": true,
+    "pageAndProgressAtomic": true,
+    "crossPageFragmentOrderChecked": true,
+    "full64BitOrdinalsPreserved": true,
+    "fullRecordSha256CheckedBeforeDecode": true,
+    "explicitProjectionAndScopeChecked": true,
+    "largeRowsNotSkipped": true,
+    "literalNulAndLoneSurrogatesPreserved": true,
+    "immutableVerifiedRecordPrefix": true,
+    "partialVerificationResumable": true,
+    "quotaFailureRetainsOriginalPages": true,
+    "fullPageAndRecordEvidenceRechecked": true,
+    "receivedCursorIsOnlyCandidate": true,
+    "sealIsNotAuthorityOrConvergence": true,
+    "noDomainMutation": true,
+    "noLocalEchoOrSyntheticEvent": true,
+    "noOutboxIntentReceiptMutation": true,
+    "noAcceptedCursorAdvance": true,
+    "canonicalApplicationImplemented": false,
+    "pendingIntentReconciliationImplemented": false,
+    "cloudSetup": false
+  },
+  "nativeEvidence": {
+    "offlineReloadWithOriginalCashIntent": true,
+    "downloadedPortableBackupExcludesStaging": true,
+    "twoTabsSameSealNoDuplicateRecords": true,
+    "nativeProgressFailureRollsBackInsertedPage": true,
+    "emptyDeviceKeepsOnboardingAndNoInventedUpload": true,
+    "schema11UpgradePreservesOriginalImageCashIntentAndUploadReceipt": true,
+    "productionTestInterfaces": false
+  },
+  "functionalDownload": {
+    "sourcePortableRecords": 5000,
+    "completed": true,
+    "originalIdentitiesBeyondSafeIntegerOrdinals": true,
+    "realOwnerJwt": false,
+    "threeGThrottle": false,
+    "m30UploadBenchmarkProven": false
+  },
+  "hosted": {
+    "checkedAt": "2026-11-18T18:00:26.523Z",
+    "counts": [
+      {
+        "migrations": 31,
+        "application_tables": 56,
+        "forced_rls_tables": 56,
+        "auth_users": 0,
+        "public_buckets": 0,
+        "private_buckets": 1,
+        "anonymous_table_grants": 0
+      }
+    ],
+    "functions": [
+      {
+        "name": "device-pin",
+        "version": 2,
+        "verifyJwt": false,
+        "active": true,
+        "codeUnchanged": true
+      },
+      {
+        "name": "sync-read",
+        "version": 1,
+        "verifyJwt": true,
+        "active": true,
+        "codeUnchanged": true
+      },
+      {
+        "name": "staff-pin",
+        "version": 2,
+        "verifyJwt": true,
+        "active": true,
+        "codeUnchanged": true
+      },
+      {
+        "name": "commands",
+        "version": 18,
+        "verifyJwt": true,
+        "active": true,
+        "codeUnchanged": true
+      },
+      {
+        "name": "device-orders",
+        "version": 2,
+        "verifyJwt": false,
+        "active": true,
+        "codeUnchanged": true
+      },
+      {
+        "name": "inbox-image",
+        "version": 2,
+        "verifyJwt": true,
+        "active": true,
+        "codeUnchanged": true
+      },
+      {
+        "name": "migration-upload",
+        "version": 2,
+        "verifyJwt": true,
+        "active": true,
+        "codeUnchanged": true
+      }
+    ],
+    "changed": false,
+    "newSecrets": 0,
+    "newAuthUsers": 0,
+    "newMessages": 0,
+    "apiDns": "ENOTFOUND; no hosted HTTP acceptance claimed",
+    "actualOwnerSignedHttpProven": false,
+    "newFunctionDeployments": 0,
+    "newMigrations": 0
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "projectAndCredentialValuesPublished": false,
+    "testFixtureMarkersInStaticOutput": 0
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "explicit active operator/outlet selection",
+    "immutable remote coverage journal for canonical writes",
+    "trusted atomic no-echo application and accepted cursor",
+    "pending original intent overlay and conflict reconciliation",
+    "image-byte delivery and complete cloud controls",
+    "hosted HTTP admission after API DNS resolution",
+    "real OTP, genuine signed-owner HTTP and5000-record3G acceptance",
+    "remaining milestones"
+  ],
+  "sourceHashes": {
+    "apps/web/src/data/backup.ts": "f9c6b7bcd706d53cd3892b3aced5d8071d4d4df89a1d7971e9805328376519a9",
+    "apps/web/src/data/cloud-sync-journal.ts": "bb4ba270417763f5b6a63663fd021556047342063e1f3f4645abfbaf86296f83",
+    "apps/web/src/data/local-store.ts": "da2b4f28e975d05cc66fc72d97ffc9a69dd55cfccf95e46249379a5750baa8af",
+    "packages/core/local-outbox.ts": "a1247a75ecd336959c4429256f9f228624d40ee462ceeeafafdf89557ce528e2",
+    "packages/core/sync-download.ts": "a5c6ee4a6b9f37f088141f4530378fba4bc68b15481fc068eb04a161edd9c987",
+    "tests/backup-db.test.ts": "c93c6acba4385084b5eac5830c6c301b19254a7a9465e5b0f66948d2ed036d7b",
+    "tests/closing-db.test.ts": "a05823b89b24cbc2deda7a90911057b45356876cab6b4446b1a32455af48f85d",
+    "tests/closing-hosted-fixture.ts": "240fad26dba5885270ea85a27a6468b9a9b003c5c223f8c0a2f38d9e58aa2085",
+    "tests/cloud-upload-db.test.ts": "806d82595955c0671df672547e1e079cf371c23ff39dc0b17db96ec5cb6bb453",
+    "tests/e2e/exports.spec.ts": "ac4f7072b23edd044febf78bf172bd23d95ce2d2043e210980fdbb0af7636d18",
+    "tests/e2e/sync-download.spec.ts": "2b23c31b2a2884944e28d30522e0f5056a32ba0ab15344dc93438984d08f83a3",
+    "tests/fixtures/install-sync-stage.mjs": "6aa374de4fa4b5989ee1f94f24fce461da47a51bd02917c8197fac3d4a561bf8",
+    "tests/fixtures/sync-download-browser.ts": "66b7086e827c820e2099816b259b118de3df6bb8539f0fb67ba9919a1504e11a",
+    "tests/handoff-db.test.ts": "6bd98cd6dbd003735d8cdc84318fa29a6d80aa8c36edc56b48329e6a2f178b7c",
+    "tests/inbox-db.test.ts": "0f17bdca013883f2247b7353c516c81c84a8301d66af12ae725513d5e95fdcf0",
+    "tests/local-outbox-db.test.ts": "94a12229b792a108150b346d4e021042cf2918c1aacaf1d64f8710ed845d971b",
+    "tests/order-db.test.ts": "105163e3a14dbf3d8a0512831390f9f79ffd00eb5681b537aa20f734c6ece4be",
+    "tests/order-money-db.test.ts": "3c1ff231064ddcf000a72c6168af6a9bdf8087b7c7cb99078c359bd890b2634a",
+    "tests/shop-links-db.test.ts": "cb3757ed87675e9f7fc49ecb823c4c54931724394417d789a3294abc6715a155",
+    "tests/stock-db.test.ts": "19c4fec2b1f5e54a11c671dc3a4322efaa3d72c10ced88d7b218940b2e45f3bc",
+    "tests/sync-download-db.test.ts": "050e447ab269f19ffd76aea8b21f1e7f37aed00d8494670969b4bd892007ca36",
+    "tests/sync-download-fixture.ts": "b9856e7dd201de4aac3047afbc50f1350fbdbcc0655bed7b3427b4dc39639612",
+    "tests/sync-feed.test.ts": "dde623cd1f1d35a49dd0d7224db46763ef2188db10c078c2bf484b8cb9ff7213"
+  }
+}

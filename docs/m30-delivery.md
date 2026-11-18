@@ -373,3 +373,12 @@ Independent hosted connections prove that a late commit with an earlier ordinal
 arrives in the next window. Canonical application, active-operator selection,
 image delivery and complete cloud controls remain open. The latest evidence also
 records 1,990 unit tests, 366 browser checks and the ten-value credential audit.
+
+## Durable local download staging
+
+The [same-database download journal](m30-sync-staging.md) persists original requests,
+immutable pages and fully verified records on empty or existing devices. Schema 12
+retains shop data, image Blobs, upload receipts and original outbox entries while
+portable backups stay at 21 tables/schema 10. Downloads preserve local financial
+writes and exact recovery across offline reload, concurrent tabs and quota failure.
+No domain apply, accepted-cursor advance or sync control is enabled by this step.

@@ -92,6 +92,7 @@ Spec: `phases/phase-3-backend-sync.md`
   - [Canonical cursor groundwork](../../docs/m30-sync-snapshot.md) retains PostgreSQL snapshot visibility and full 64-bit precision through late commits. The cursor primitive is verified; feed delivery, active-member selection and no-echo canonical application remain open.
   - [Durable scoped download](../../docs/m30-sync-feed.md) adds atomic projected change capture, fixed snapshot windows, hashed byte fragments, cached-page revocation checks and signed runtime cursors. Canonical application, active-member selection, image delivery and full cloud controls remain open.
 - [ ] **M31** Sync engine: local-first outbox, realtime pull, conflict rules · L · T2
+  - [Durable local download staging](../../docs/m30-sync-staging.md) preserves the exact request, pages and verified records across offline reload, concurrent tabs and storage failure. Same-database schema 12 retains original uploads/outbox/images; portable backups remain unchanged. Active-operator selection, trusted canonical application and convergence remain open.
 - [ ] **M32** Kitchen / pack / counter screen on a second device; Got it / Ready; 2-minute unacknowledged alarm · M · T2
 - [ ] **M33** Order link writes real orders (no WhatsApp step needed); live tracking page for customers · M · T2
 - [ ] **M34** Staff: members, staff links ("My shift", "I'm here"), on-duty board, manual check-in · M · T2

@@ -4,10 +4,11 @@ import type { MiseDatabase } from './db';
 import type { SetupSnapshot } from '@mise/core/models';
 import { backupTableNames, emptyBackupTables, type MiseBackup } from '@mise/core/backup-tables';
 import {localSchemaVersion,localSyncTableNames,parseLocalCloudState} from '@mise/core/local-outbox';
+import {localDownloadTableNames} from '@mise/core/sync-download';
 import { createBackup, parseBackup, previewBackup, restoreBackupCommand, type BackupPreview, type RestoreReview } from '@mise/core/backup';
 
 async function snapshot(db:MiseDatabase):Promise<MiseBackup> {
-  const expected=[...backupTableNames,...localSyncTableNames];
+  const expected=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames];
   if (db.verno !== localSchemaVersion || db.tables.length !== expected.length || db.tables.some(table => !(expected as readonly string[]).includes(table.name))) throw new Error('This app’s backup schema does not match its database. Reload the latest Mise version.');
   const data = emptyBackupTables();
   await Promise.all(backupTableNames.filter(name=>name!=='inboxItems').map(async name => {Object.assign(data,{[name]:await db.table(name).toArray()});}));

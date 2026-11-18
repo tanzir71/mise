@@ -1,4 +1,7 @@
+import 'fake-indexeddb/auto';
 import {createServer} from 'node:http';
+import {MiseDatabase} from '../apps/web/src/data/db';
+import {prepareSyncDownload,runSyncDownload} from '../apps/web/src/data/cloud-sync-journal';
 import {once} from 'node:events';
 import {createSyncReadHandler,createSyncReadStore} from '../supabase/functions/_shared/sync-read-handler';
 import {createCloudSyncRemote,CloudSyncReadError} from '../apps/web/src/data/cloud-sync-remote';
@@ -55,6 +58,15 @@ function httpHandler(){return createSyncReadHandler({origins:new Set(['https://s
  try{const result=await asRole<{data:unknown}>(n,'authenticated',`select public.${name}(${parameters[name].map((_,i)=>'$'+(i+1)).join(',')}) data`,parameters[name].map(k=>k==='p_previous'&&body[k]!==null?JSON.stringify(body[k]):body[k]));return new Response(JSON.stringify(result[0].data));}catch(error){const e=error as {code:string;message:string};return new Response(JSON.stringify({code:e.code,message:e.message,details:'Backend diagnostics stay private'}),{status:e.code==='42501'?403:['PT409','23505'].includes(e.code)?409:e.code==='PT429'?429:['22023','22P02'].includes(e.code)?400:500});}
  })});}
 async function fixtureFetch(n=1,handler=httpHandler()){const send:typeof fetch=async(url,init)=>handler(new Request(url,init));return createCloudSyncRemote({apiUrl:'https://api.test',publishableKey:'sb_publishable_test_only'},async()=>`user.${n}.signature`,send);}
+it('SQL and both HTTP transports stage literal rows on an empty device without changing its shop or outbox',async()=>{
+ const remote=await fixtureFetch(2),id=newInboxId(),window=await remote.begin({type:'begin',id,outletId:setup.snapshot.outlet.id,cursor:null}),device=new MiseDatabase('mise-sync-stage-sql-'+newInboxId());
+ try {
+  const target={targetHash:'e'.repeat(64),businessId:window.businessId,outletId:window.outletId,actorId:window.actorId,accountHash:window.accountHash,role:window.role};
+  await prepareSyncDownload(device,{id,target,previousCursor:null});const staged=await runSyncDownload(device,id,target,remote);
+  expect(staged.seal).toBeTruthy();expect((await device.syncRecords.toArray()).some(r=>r.meta.table==='customers'&&r.row?.name==='Customer\0\ud800')).toBe(true);
+  expect(await device.businesses.count()).toBe(0);expect(await device.outbox.count()).toBe(0);expect(await device.cloudState.count()).toBe(0);
+ }finally{await device.delete();}
+});
 async function receive(remote:Awaited<ReturnType<typeof fixtureFetch>>,window:SyncReadWindow){const records:Row[]=[],pending=new Map<string,{bytes:Buffer;offset:number}>();let index=0,last:SyncReadPage;while(true){last=await remote.page(window,index++);for(const part of last.parts){const row=pending.get(part.changeId)??{bytes:Buffer.alloc(part.totalBytes),offset:0};expect(part.offset).toBe(row.offset);const bytes=Buffer.from(part.data,'base64');bytes.copy(row.bytes,row.offset);row.offset+=bytes.length;pending.set(part.changeId,row);if(row.offset===row.bytes.length){records.push({table:part.table,id:part.id,operation:part.operation,row:await decodeSyncRecord(part,row.bytes,window)});pending.delete(part.changeId);}}if(last.done){expect(pending.size).toBe(0);return {records,cursor:last.cursor!};}if(index>1000)throw Error('Unbounded HTTP fixture');}}
 it('a real HTTP request crosses both transports and SQL, including compressed fragments and a stable next cursor',async()=>{
  const handler=httpHandler(),server=createServer(async(req,res)=>{try{const chunks:Buffer[]=[];for await(const p of req)chunks.push(Buffer.from(p));const response=await handler(new Request('https://api.test'+req.url,{method:req.method,headers:new Headers(req.headers as Record<string,string>),body:Buffer.concat(chunks)}));res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()));}catch{res.statusCode=500;res.end('Fixture failed');}});server.listen(0,'127.0.0.1');await once(server,'listening');

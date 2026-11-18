@@ -4,14 +4,17 @@ import type {BackupTable} from '../packages/core/backup-tables';
 import type {Business,DayClosing,Outlet} from '../packages/core/models';
 import type {NamedShopSetup} from '../packages/core/shop-access';
 import {recordSaleCommand} from '../packages/core/sales';
-import {closingPreview,type TodayContext} from '../packages/core/today';
+import {closingPreview,dayKey,type TodayContext} from '../packages/core/today';
 import {closingWritePlan,type ClosingCommand} from '../packages/core/closing-commands';
 import {closingFingerprint,closingWriteFields} from '../supabase/functions/_shared/closing-write';
 import {newInboxId} from '../packages/core/inbox';
 /** Five actual SQL-role transactions, rolled back with their fictional identities. */
 export async function closingHostedProofSql(){
  const f=await customerHostedFixture(),occurred=Date.now(),clockBase=occurred+100000,literal='সমাপনী\0'+String.fromCharCode(0xd800);
- const base=f.baseRecords.map(r=>['businesses','outlets','members'].includes(r.table)?{...r,values:{...r.values,name:JSON.stringify(literal)}}:r),records:CloudRecord[]=[...base];
+ // Keep the synthetic admission clock on the same day, including around midnight.
+ // Production closing/undo clock rules are unchanged.
+ const timezone=['Asia/Dhaka','UTC'].find(zone=>dayKey(occurred,zone)===dayKey(clockBase+10000,zone))!;
+ const base=f.baseRecords.map(r=>['businesses','outlets','members'].includes(r.table)?{...r,values:{...r.values,name:JSON.stringify(literal),...(r.table==='outlets'?{timezone}:{})}}:r),records:CloudRecord[]=[...base];
  const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
  const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMaps[table].table).map(r=>raw(table,r));
  const business=decodeCommandRecord('businesses',rows('businesses')[0]) as unknown as Business,outlet=decodeCommandRecord('outlets',rows('outlets')[0]) as unknown as Outlet,setup:NamedShopSetup={business,outlet,owner:{id:f.actorId,name:literal,businessId:f.businessId,active:true,outletIds:[outlet.id]}};

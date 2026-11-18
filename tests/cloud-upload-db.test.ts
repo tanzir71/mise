@@ -5,6 +5,7 @@ import {MiseDatabase} from '../apps/web/src/data/db';
 import {CloudUploadJournal,uploadDatabaseSnapshot} from '../apps/web/src/data/cloud-upload';
 import {backupToken} from '../packages/core/backup';
 import {backupTableNames} from '../packages/core/backup-tables';
+import {localDownloadTableNames} from '../packages/core/sync-download';
 import {readCloudUpload} from '../packages/core/cloud-upload';
 import {cloudUploadFixture,MemoryCloudUpload,uploadId} from './cloud-upload-fixture';
 const databases:(MiseDatabase|CloudUploadJournal)[]=[];
@@ -13,7 +14,7 @@ async function boot(){const db=new MiseDatabase('mise-upload-shop-test-'+randomU
 function journal(name='mise-upload-journal-test-'+randomUUID()){const db=new CloudUploadJournal(name);databases.push(db);return db;}
 it('keeps immutable chunks across close/reopen while keeping sync metadata out of its JSON backup',async()=>{
   const db=await boot(),before=await db.readBackup(),cache=journal(),saved=await cache.prepare(db,uploadId()),name=cache.name;cache.close();const reopened=journal(name),loaded=await reopened.readSnapshot(uploadId());
-  expect(loaded.manifestHash).toBe(saved.manifestHash);expect(loaded.chunks[0]).toBeInstanceOf(Blob);expect(backupToken(await readCloudUpload(loaded))).toBe(backupToken(before));expect(backupToken(await db.readBackup())).toBe(backupToken(before));expect(db.tables.map(t=>t.name).sort()).toEqual([...backupTableNames,'cloudState','outbox'].sort());expect(db.verno).toBe(11);expect(JSON.stringify(loaded)).not.toMatch(/api_key|access_token|refresh_token|authorization/i);
+  expect(loaded.manifestHash).toBe(saved.manifestHash);expect(loaded.chunks[0]).toBeInstanceOf(Blob);expect(backupToken(await readCloudUpload(loaded))).toBe(backupToken(before));expect(backupToken(await db.readBackup())).toBe(backupToken(before));expect(db.tables.map(t=>t.name).sort()).toEqual([...backupTableNames,'cloudState','outbox',...localDownloadTableNames].sort());expect(db.verno).toBe(12);expect(JSON.stringify(loaded)).not.toMatch(/api_key|access_token|refresh_token|authorization/i);
 });
 it('uses remote ACKs after restart, retains the accepted receipt and does not resend an accepted chunk',async()=>{
   const db=await boot(),cache=journal(),snapshot=await cache.prepare(db,uploadId()),remote=new MemoryCloudUpload();remote.losePartReply=0;

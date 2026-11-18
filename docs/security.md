@@ -75,6 +75,13 @@ fixture was explicitly cleaned up; no persistent account or test data remains.
 Hosted HTTP acceptance is still pending because the API hostname did not resolve
 from this machine during that verification run.
 
+The [same-database staging journal](m30-sync-staging.md) stores only connection and
+account hashes alongside explicit actor/outlet identities. Project URLs, API keys,
+Auth UUIDs and sessions stay outside the three internal download stores and the
+unchanged portable backup. Read sources and pages are immutable on retry; complete
+record hashes and explicit projections are checked before a local integrity seal.
+A received cursor is not an accepted cursor or authority to apply shop changes.
+
 The runtime phone sign-in interface accepts only a publishable key. Device
 connection settings stay separate from the SDK session, which is scoped to the
 project, key, base path and shop. Neither enters shop tables, JSON backups or build
