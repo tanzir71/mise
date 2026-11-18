@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { compareImages } from './visual-diff.mjs';
 import { writeVisualReport } from './visual-report.mjs';
 import LZString from 'lz-string';
+import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
 
 const configPaths = process.argv[2] ? [process.argv[2]] : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
@@ -43,6 +44,7 @@ try {
   browser = await chromium.launch();
   for (const target of targets) for (const width of target.widths) {
     const page = await browser.newPage({ viewport: { width, height: target.heights?.[width] || 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+    if (target.phoneAuthFixture) await installPhoneAuthFixture(page);
     let clockInstalled = false;
     if ((target.actions || []).some(action => action.type === 'advance-time')) { await page.clock.install(); clockInstalled = true; }
     const targetUrl = new URL(target.path, origin);

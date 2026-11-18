@@ -58,7 +58,7 @@ GitHub workflows are disabled at the owner’s request, so `main` can be ahead o
 
 ## Run locally
 
-Use **Node 20.19+** and **pnpm 10**; the repository pins its pnpm version.
+Use **Node 22.12+** and **pnpm 10**; the repository pins its pnpm version.
 
 ```sh
 git clone https://github.com/tanzir71/mise.git

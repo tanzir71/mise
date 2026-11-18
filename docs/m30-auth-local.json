@@ -1,0 +1,171 @@
+{
+  "checkedAt": "2026-11-18T06:08:19.867Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Default-off runtime phone sign-in and saved local record-count review; no upload activation",
+  "runtime": {
+    "node": "24.22.2",
+    "minimumNode": "22.12.0",
+    "pnpm": "10.33.2",
+    "supabaseJs": "2.119.0"
+  },
+  "checks": {
+    "lint": {
+      "passed": true
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 96,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "units": {
+      "passed": 1564,
+      "files": 88,
+      "durationSeconds": 136.48
+    },
+    "browser": {
+      "base": "/mise/",
+      "passed": 311,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "globalErrors": 0,
+      "durationSeconds": 447.715579,
+      "reportSha256": "310ef0648d78ec8622a51d6801a724ae9f976cca6d49450090e3d5d8e212daff"
+    },
+    "rootBrowser": {
+      "passed": 2,
+      "retries": 0,
+      "checks": [
+        "runtime OTP, reload and local sign-out",
+        "downloaded shop backup excludes connection and session"
+      ],
+      "reportSha256": "ca8c42a576e3bcc8bfae7ccc266b0b660e47226b2a7b430cffcb5302d32acfba"
+    },
+    "exports": {
+      "present": 270
+    },
+    "visual": {
+      "comparisons": 15,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "states": [
+        "connection",
+        "code",
+        "verified-review"
+      ],
+      "axeViolations": 0,
+      "overflow": false,
+      "exactAuthFrameAvailable": false,
+      "referenceFrames": [
+        "M27 More",
+        "Desktop 14 Business data"
+      ],
+      "reportSha256": "a9263365315e7eaf962067b9dc3974e6a77090ee8403ff4c2b281381abade68b",
+      "inspectedScreens": [
+        "qa/screens/m30-auth-connection-phone-screen-390.png",
+        "qa/screens/m30-auth-code-desktop-screen-1440.png",
+        "qa/screens/m30-auth-verified-review-phone-screen-390.png"
+      ]
+    },
+    "builds": [
+      {
+        "base": "/",
+        "htmlSha256": "60722acb205da599334f60435ee358af4906451439d5a200ce2692851e145864",
+        "buildLogSha256": "dff638d1dde5b4e0f7814ca062c1104936e57cb0c8fce9fb8fcd9e553d5ac76a",
+        "passed": true
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "htmlSha256": "091343911ab53e8c3cafffede906393d4e8003d011596a4915d1ee6c16622cd2",
+        "buildLogSha256": "9a4c38e750b69f9e14c610aab675424ec86c800a13b883914ba3844a920bcfcb"
+      }
+    ]
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "commitPushHooksEnabled": true,
+    "githubSecretScanning": "enabled",
+    "githubPushProtection": "enabled",
+    "openGithubSecretAlerts": 0,
+    "connectionValuesInBuild": false,
+    "credentialsInShopBackup": false
+  },
+  "hostedReadOnly": {
+    "applicationTables": 47,
+    "forcedRlsTables": 47,
+    "effectiveAnonymousTableAccess": 0,
+    "effectiveDirectClientWrites": 0,
+    "publicSecurityDefiners": 0,
+    "publicBuckets": 0,
+    "securityAdvisorWarnings": 0,
+    "securityAdvisorErrors": 0,
+    "auth": {
+      "checkedAt": "2026-11-18T05:43:42.801Z",
+      "readOnly": true,
+      "requests": 1,
+      "phoneEnabled": false,
+      "phoneAutoconfirm": false,
+      "emailEnabled": false,
+      "anonymousEnabled": false,
+      "signupDisabled": true,
+      "smsRequests": 0
+    },
+    "newUsers": 0,
+    "newSms": 0,
+    "settingsChanged": false,
+    "newMigrations": 0,
+    "edgeDeployments": 0
+  },
+  "browserAuthProof": {
+    "synthetic": true,
+    "host": "https://cloud.test",
+    "realHostedOtpProven": false,
+    "positiveHostedOwnerHttpProven": false,
+    "resendRetainsRequestedPhoneAfterReload": true,
+    "initialClockFixtureFailure": {
+      "tests": 1,
+      "resolved": true,
+      "reason": "Install the test clock before client creation so its captured Date.now uses the same clock as the UI.",
+      "reportSha256": "ad4b13e1c1f88920f791fbaac7b5622ce2d0745fbde2cce5078f53ed9e36bb8b"
+    }
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "Production phone provider commissioning and real owner/manager OTP",
+    "Positive signed-owner HTTP upload and write proof",
+    "Complete reviewed upload activation and outbox boundary",
+    "Remaining staff/agent interfaces and full M30 acceptance"
+  ],
+  "sourceHashes": {
+    "apps/web/src/CloudSetup.tsx": "b5ec1330f612b24023defeedd1c79a7ea6ae7cbbfcd4659b21d037a42e54be91",
+    "apps/web/src/data/phone-auth.ts": "165496e87c0e735aacd6a9584c2e683738b87b6d50fe0cb827c5977a8a612b3a",
+    "apps/web/src/data/cloud-upload.ts": "3941a8692ca24c80d7ba32b331fc7dc454be0c9781d128d45849f9b282bba944",
+    "packages/core/cloud-connection.ts": "01e6f89ef589a5e642aaa835568afc04410bee244cdb99b28ea553e95f55f7e4",
+    "scripts/harden.mjs": "c68ccb4a789dd0445c10c296745d7339b402d0e1b10eb2db8234a0a2e43cd65f",
+    "tests/phone-auth.test.ts": "7cc516352c8e86c2f6bcdef71ca6b4087e8484656de5444988d1c154fa20574c",
+    "tests/cloud-csp.test.ts": "cbea0cd0e3ac342064428efcd6f0a1cb8bbd56d8bc7d74c833ebef6a483f2ef3",
+    "tests/e2e/cloud-auth.spec.ts": "ef52959a3f2c87c3e957d4b966efac5213de460d6f8fc017359ed3d186b34f45",
+    "tests/fixtures/phone-auth-browser.mjs": "1c9b7817b047c431fc34c768ac519afdfc6cb567d25107b136159401276c9c21",
+    "qa/configs/m30-auth.json": "8d0bac9c258600d15cdfcda14329427879da765646e90223351ae1a7bd92b35e"
+  }
+}

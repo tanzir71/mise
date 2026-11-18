@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 phone sign-in (behind `cloudSetup`): device-only runtime connection settings, official phone OTP/session refresh, verified-user checks, cross-tab sign-out and a saved local record-count review. Connection values and Auth tokens are excluded from shop backups and static builds. The production phone provider, initial upload activation and outbox remain unfinished; no SMS or cloud write starts automatically.
+
 - M30 Inbox transactions: original source text, creation times and image metadata keep their device identities. Manual classification, archive and reopen retain complete history and reject stale reviews. Unchanged choices retain the source revision and an original-actor replay receipt. Capturing metadata leaves image bytes pending private upload and never records orders, money or stock. Cloud controls remain unavailable.
 
 - M30 manual messages: preparation, Open/Copy/failure, explicit Sent and undo retain complete attempt history. Sent commits its credit, order or supplier communication together; supplier resends reuse the original confirmation and never receive stock or change debt. Cloud controls remain unavailable.
@@ -25,6 +27,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 - M21: paste English/Bangla customer requests into editable order drafts, with explicit count/unit suggestions, unsaved counter pricing, clipboard/manual fallbacks and owner-confirmed creation. Complete original requests survive order saves and JSON backup/restore; payment preferences never record money.
 
 ### Fixed
+
+- Supabase client compatibility: pin the official SDK and require Node 22.12+. Only owner-app pages allow runtime HTTPS API connections; public shop and marketing policies retain their restricted connections. Workflow templates are updated while GitHub Actions stays disabled.
 
 - Supabase privacy: local commit, push, lint and production checks automatically compare private deployment values from clone-local Git configuration. Plain project/organization IDs and prefix-free PIN peppers are checked without committing configuration or printing values. An unavailable private input blocks the scan.
 

@@ -51,10 +51,14 @@ current deployment references and zero coverage gaps; the 22 historical findings
 were nonsecret deployment references. Commit/push hooks remain enabled. The
 [Inbox evidence](m30-inbox-hosted.json) records the redacted counts.
 
+GitHub's repository secret scanning and push protection are also enabled. The
+latest owner-authenticated, read-only API check returned zero open secret alerts.
+These protections remain enabled independently of the stopped Actions workflows.
+
 The same day's live read-only verification found all **47 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
-reported no warnings or errors. Eighteen informational private-table notices describe
+reported no warnings or errors. Informational private-table notices describe
 the intentional absence of direct-access policies. No hosted authentication or
 storage configuration was changed by this audit.
 
@@ -62,6 +66,18 @@ Local checks reduce accidental disclosure; they do not replace row-level securit
 or review of future authentication changes. If a credential ever reaches a public
 location, rotate it and remove the exposed value; deleting the latest file alone
 does not remove Git history.
+
+The runtime phone sign-in interface accepts only a publishable key. Device
+connection settings stay separate from the SDK session, which is scoped to the
+project, key, base path and shop. Neither enters shop tables, JSON backups or build
+variables. Private server keys are rejected
+before any Auth request. Auth errors use fixed messages, and the client pins every
+request to its configured HTTPS Auth origin. Sign-out aborts in-flight work and
+verifies removal of saved credentials; a failed removal remains retryable. Browser
+checks include cross-tab logout and a real downloaded backup after synthetic phone
+verification. The [Auth/privacy evidence](m30-auth-local.json) records the latest
+redacted audit and live read-only access checks. The older identifiers described
+above remain historical; no history rewrite or credential rotation is claimed.
 
 The nine Git/Node process integration fixtures have an explicit thirty-second test
 budget. Their assertions still verify history detection, redaction and rejected

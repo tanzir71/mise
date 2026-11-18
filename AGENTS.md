@@ -15,7 +15,7 @@ Every merged milestone must leave `main` deployable and useful.
 
 ## Stack (do not change without writing the reason in `handover/DECISIONS.md`)
 
-- **Monorepo:** pnpm workspaces. Node 20 LTS. TypeScript everywhere (strict).
+- **Monorepo:** pnpm workspaces. Node 22.12+ (the supported Supabase client requires Node 22; see `handover/DECISIONS.md`). TypeScript everywhere (strict).
 - **`apps/landing`:** Astro, static output, almost no client JS. Tailwind CSS mapped to `tokens.css`.
 - **`apps/web`:** the Mise app.
   - Vite, React 18, TypeScript, React Router

@@ -11,6 +11,7 @@
     "@fontsource/hind": "5.3.0",
     "@mise/core": "workspace:*",
     "@mise/ui": "workspace:*",
+    "@supabase/supabase-js": "2.119.0",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
     "fflate": "0.8.3",

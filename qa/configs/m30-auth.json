@@ -1,0 +1,246 @@
+{
+  "pages": [
+    {
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "setup",
+        "sync"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-auth-connection-phone",
+      "note": "M30 has no dedicated Auth or Sync setup export. Adapt the supplied M27 More and Desktop 14 Business data shell, original icons, tokens, cards and 44px controls. Synthetic local Auth fixture only; no real SMS or upload. Differences are informational and do not claim an exact Auth-frame match.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+          "id": "screen"
+        }
+      ]
+    },
+    {
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "setup",
+        "sync"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-auth-connection-desktop",
+      "note": "M30 has no dedicated Auth or Sync setup export. Adapt the supplied M27 More and Desktop 14 Business data shell, original icons, tokens, cards and 44px controls. Synthetic local Auth fixture only; no real SMS or upload. Differences are informational and do not claim an exact Auth-frame match.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+          "id": "screen"
+        }
+      ]
+    },
+    {
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "setup",
+        "sync",
+        "connection"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-auth-code-phone",
+      "note": "M30 has no dedicated Auth or Sync setup export. Adapt the supplied M27 More and Desktop 14 Business data shell, original icons, tokens, cards and 44px controls. Synthetic local Auth fixture only; no real SMS or upload. Differences are informational and do not claim an exact Auth-frame match.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+          "id": "screen"
+        }
+      ]
+    },
+    {
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "setup",
+        "sync",
+        "connection"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-auth-code-desktop",
+      "note": "M30 has no dedicated Auth or Sync setup export. Adapt the supplied M27 More and Desktop 14 Business data shell, original icons, tokens, cards and 44px controls. Synthetic local Auth fixture only; no real SMS or upload. Differences are informational and do not claim an exact Auth-frame match.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+          "id": "screen"
+        }
+      ]
+    },
+    {
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "setup",
+        "sync",
+        "connection",
+        "verify"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-auth-verified-review-phone",
+      "note": "M30 has no dedicated Auth or Sync setup export. Adapt the supplied M27 More and Desktop 14 Business data shell, original icons, tokens, cards and 44px controls. Synthetic local Auth fixture only; no real SMS or upload. Differences are informational and do not claim an exact Auth-frame match.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+          "id": "screen"
+        }
+      ]
+    },
+    {
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "setup",
+        "sync",
+        "connection",
+        "verify"
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}",
+      "phoneAuthFixture": true,
+      "path": "app/?flags=cloudSetup",
+      "id": "m30-auth-verified-review-desktop",
+      "note": "M30 has no dedicated Auth or Sync setup export. Adapt the supplied M27 More and Desktop 14 Business data shell, original icons, tokens, cards and 44px controls. Synthetic local Auth fixture only; no real SMS or upload. Differences are informational and do not claim an exact Auth-frame match.",
+      "sections": [
+        {
+          "selector": ".app-shell",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+          "id": "screen"
+        }
+      ]
+    }
+  ],
+  "actionSets": {
+    "setup": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      }
+    ],
+    "connection": [
+      {
+        "selector": "input[type=url]",
+        "type": "fill",
+        "value": "https://cloud.test"
+      },
+      {
+        "selector": "input[type=password]",
+        "type": "fill",
+        "value": "sb_publishable_test_only"
+      },
+      {
+        "selector": "button:text-is(\"Save connection\")",
+        "type": "click"
+      },
+      {
+        "selector": "button:text-is(\"Send verification code\")",
+        "type": "click"
+      },
+      {
+        "selector": "input[autocomplete=one-time-code]",
+        "type": "wait"
+      }
+    ],
+    "sync": [
+      {
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible",
+        "type": "click"
+      },
+      {
+        "selector": "main a[href$=\"/settings/sync\"]",
+        "type": "click"
+      },
+      {
+        "selector": ".cloud-setup",
+        "type": "wait"
+      }
+    ],
+    "verify": [
+      {
+        "selector": "input[autocomplete=one-time-code]",
+        "type": "fill",
+        "value": "123456"
+      },
+      {
+        "selector": "button:text-is(\"Verify phone\")",
+        "type": "click"
+      },
+      {
+        "selector": ".cloud-verified",
+        "type": "wait"
+      },
+      {
+        "selector": "button:text-is(\"Prepare local review\")",
+        "type": "click"
+      },
+      {
+        "selector": "button:text-is(\"Review the latest records\")",
+        "type": "wait"
+      }
+    ]
+  },
+  "title": "M30 Runtime phone sign-in and local upload review"
+}

@@ -26,6 +26,7 @@ export class CloudUploadJournal extends Dexie {
     if(stored.progress)stored.progress=parseCloudUploadProgress(stored.progress,manifest,stored.manifestHash);
     return {...stored,manifest,chunks:[...stored.chunks]};
   }
+  async latest(businessId:string,outletId:string):Promise<StoredCloudUpload|null>{const rows=(await this.uploads.where('businessId').equals(businessId).toArray()).filter(row=>row.manifest.outletId===outletId).sort((a,b)=>b.manifest.exportedAt-a.manifest.exportedAt||b.id.localeCompare(a.id));return rows.length?this.readSnapshot(rows[0].id):null;}
   async acknowledge(id:string,value:CloudUploadProgress):Promise<void>{
     const source=await this.readSnapshot(id),progress=parseCloudUploadProgress(value,source.manifest,source.manifestHash);
     await this.transaction('rw',this.uploads,async()=>{

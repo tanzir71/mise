@@ -11,7 +11,7 @@ You are deploying the Mise web app (landing page + app) from the owner's GitHub 
 - the project name (default `mise-<shopname>`)
 - whether they want a custom domain
 
-1. **Check tools.** `git`, Node 20+ and `pnpm` are needed. If `pnpm` is missing: `corepack enable && corepack prepare pnpm@latest --activate`.
+1. **Check tools.** `git`, Node 22.12+ and `pnpm` are needed. If `pnpm` is missing: `corepack enable && corepack prepare pnpm@latest --activate`.
 2. **Get the code.** `git clone <fork> && cd mise`.
 3. **Build locally first.** Run `pnpm install --frozen-lockfile`, then `BASE_PATH=/ PUBLIC_APP_URL=/app/ pnpm build`. Confirm `site/index.html` and `site/app/index.html` exist. If the build fails, stop and show the error.
 4. **Vercel CLI.**

@@ -1,6 +1,6 @@
 # M30 · Supabase foundation
 
-Status: **in progress**. Mise now has a dedicated Supabase project with 25 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database, with no sign-in, sync, shared-screen, cloud-image or cloud-command interface enabled. Phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/UI integration remain incomplete. M30 and Phase 3 remain unticked.
+Status: **in progress**. Mise now has a dedicated Supabase project with 25 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database. Runtime phone sign-in and local count review are now available only behind the default-off `cloudSetup` flag; no sync, shared-screen, cloud-image or cloud-command interface is enabled. Production phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/outbox integration remain incomplete. M30 and Phase 3 remain unticked.
 
 ## Tenant schema
 
@@ -265,3 +265,20 @@ or errors. See [implementation and verification](m30-inbox-commands.md) and
 [redacted evidence](m30-inbox-hosted.json). Phone OTP, positive signed-owner HTTP,
 staff/agent resources and remaining app/upload/outbox gates stay open. GitHub
 workflows remain disabled and private deployment values stay outside the repo.
+
+## Runtime phone sign-in and private configuration
+
+The default-off `cloudSetup` route adds device-entered project settings, phone OTP,
+fresh verified-user checks, SDK session refresh and local sign-out, plus a durable
+count review of all 21 local tables. Real deployment values never enter source,
+build variables, static artifacts or JSON shop backups. A privileged key is rejected
+before a request. Auth sessions are scoped to the project, publishable key, base
+path and shop, and stale in-flight verification cannot restore a forgotten session.
+Public shop/marketing connection policies remain restricted. See the
+[implementation and verification notes](m30-auth-interface.md).
+
+The production provider remains uncommissioned and Auth signups disabled. Browser
+proof uses intercepted synthetic responses on a reserved `.test` host, with no SMS
+or hosted user creation. The count review sends no shop data and does not enable
+sync. Actual OTP, the positive owner HTTP path, complete upload activation and the
+outbox remain required. GitHub workflows and Pages publication remain stopped.
