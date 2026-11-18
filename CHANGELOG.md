@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 profile settings now join the local queue with their original audit identities. Saves retain owner outlet assignments, preserve timestamps through backwards device clocks and leave historical money/catalogue records intact. Hosted owner-only updates keep shop contact and Auth login phones separate. Cloud activation remains gated.
+
 - M30 reminder wording and export preparation now join the local change queue with their original audit identities. A prepared JSON backup stays downloadable if its history cannot be saved. Importing another shop after a cancelled upload preserves previous recovery data and allows a new review. Cloud activation remains gated.
 
 - M30 upload review recovery: refreshing counts preserves every original snapshot, and an active upload keeps its exact source through reload, concurrent tabs and lost acknowledgements. A durable selection survives backwards clocks; missing or damaged evidence offers read-only recovery. Stale chunk acknowledgements retain verified progress. Cloud controls remain gated.

@@ -12,6 +12,7 @@ import {catalogueSaveIntent,catalogueAvailabilityIntent,catalogueDeleteIntent} f
 import {reserveOrderFinance,orderIntentBase,orderSaveIntent,orderSettlementInput,orderRefundInput} from '@mise/core/order-intent';
 import type { Item, Sale, Customer, CreditAccount, CreditEntry, CreditMessaging, PaymentMethod, AuditEvent, SetupSnapshot, SetupInput, Order, OrderCommunication, OrderStatus, OrderRefund, StockItem, Supplier, SupplierMessage } from '@mise/core/models';
 import { setupCommand } from '@mise/core/setup';
+import {profileIntent} from '@mise/core/profile-commands';
 import { removeSampleCommand, saveItemCommand, itemAvailabilityCommand, deleteItemCommand, type ItemInput } from '@mise/core/catalogue';
 import { recordSaleCommand, undoSaleCommand, type SaleInput } from '@mise/core/sales';
 import { marketPacks } from '@mise/core/packs';
@@ -45,8 +46,11 @@ export class MiseDatabase extends LocalStore {
     return this.transaction('rw', this.tables, async () => {
       const command = setupCommand(input, await this.setup());
       const { business, outlet, owner } = command.snapshot;
+      const write=async()=>{
       await this.businesses.put(business); await this.outlets.put(outlet); await this.members.put(owner);
       await this.categories.bulkPut(command.categories); await this.items.bulkPut(command.items); await this.events.add(command.event);
+      };
+      if(command.event.command==='setup.update')await withOutboxIntent(this,profileIntent(command),write);else await write();
       await claimDatabaseInbox(this);
       return command.snapshot;
     });

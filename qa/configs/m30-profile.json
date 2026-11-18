@@ -1,0 +1,82 @@
+{
+  "title": "M30 owner profile settings after local save",
+  "widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "heights": {
+    "390": 844,
+    "1440": 1000
+  },
+  "pages": [
+    {
+      "id": "m30-profile",
+      "path": "app/",
+      "note": "Owner profile settings retain the established form and show the saved local result. M33 supplies the onboarding type/card reference; no dedicated settings frame or exact pixel match is claimed. No hosted connection is enabled.",
+      "actions": [
+        {
+          "type": "click",
+          "selector": "input[name=\"business\"][value=\"restaurant\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "click",
+          "selector": "input[name=\"market\"][value=\"BD\"]"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"shopName\"]",
+          "value": "Shorshe Kitchen"
+        },
+        {
+          "type": "fill",
+          "selector": "input[name=\"phone\"]",
+          "value": "01712345482"
+        },
+        {
+          "type": "click",
+          "selector": "button[type=\"submit\"]"
+        },
+        {
+          "type": "wait",
+          "selector": ".app-shell"
+        },
+        {
+          "type": "click",
+          "selector": ".app-sidebar .sidebar-bottom a[href$=\"/settings/business\"]:visible,.phone-app-header a[href$=\"/settings/business\"]:visible"
+        },
+        {
+          "type": "fill",
+          "selector": ".settings-form label:has-text(\"Shop name\") input",
+          "value": "Shorshe Kitchen updated"
+        },
+        {
+          "type": "click",
+          "selector": ".settings-form button[type=submit]"
+        },
+        {
+          "type": "wait",
+          "selector": ".settings-form [role=status]"
+        }
+      ],
+      "sections": [
+        {
+          "id": "form",
+          "selector": ".app-shell",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ],
+      "captureStyle": ".app-shell{position:relative}.app-bottom-nav{position:absolute}.app-skip{visibility:hidden}"
+    }
+  ]
+}

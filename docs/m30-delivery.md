@@ -1,6 +1,6 @@
 # M30 · Supabase foundation
 
-Status: **in progress**. Mise now has a dedicated Supabase project with 27 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database. Runtime phone sign-in and local count review are now available only behind the default-off `cloudSetup` flag; no sync, shared-screen, cloud-image or cloud-command interface is enabled. Production phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/outbox integration remain incomplete. M30 and Phase 3 remain unticked.
+Status: **in progress**. Mise now has a dedicated Supabase project with 28 source migrations, six Edge Functions and a private image bucket. Transactional catalogue commands support create, edit, delete, availability and guarded availability undo. Customer profiles, credit terms and optional opening balances now save together through the shared local/server mutation. Audited counter receipts, credit sales, khata payments, manual communication records, atomic stock saves/counts/movements, supplier saves/status, full priced invoices, complete order and day-closing transactions, confirmed manual hand-offs, original Inbox captures/manual sorting and guarded undo are also deployed. Authenticated initial-upload staging/promotion is deployed with durable progress and original-file validation. Device/PIN, order reads and Storage byte-integrity checks pass. The app still uses its offline database. Runtime phone sign-in and local count review are now available only behind the default-off `cloudSetup` flag; no sync, shared-screen, cloud-image or cloud-command interface is enabled. Production phone OTP, positive signed-owner HTTP upload, remaining staff/agent resources and reviewed upload/outbox integration remain incomplete. M30 and Phase 3 remain unticked.
 
 ## Tenant schema
 
@@ -335,5 +335,16 @@ live scoped identity, canonical audit/receipt metadata and atomic writes protect
 both families. Prepared JSON backups retain a manual download when history cannot
 be written. A cancelled connection no longer blocks a fresh review after importing
 another shop. See [implementation and verification](m30-settings-commands.md).
-Business/profile settings, shop links, legacy supplier writes and remaining M30
+Shop links, legacy supplier writes and remaining M30
 gates stay open; no full sync interface is enabled.
+
+## Owner profile and market settings
+
+Original `setup.update` saves now have typed local intents and an owner-only hosted
+transaction. Full portable before/after history accompanies allowlisted updates to
+the business, selected outlet and owner's contact. Existing assignments, other
+outlets/members, permissions, Auth login phones, outlet preferences and historical
+financial/catalogue records remain intact. Local and hosted metadata stays
+monotonic, and write failures leave the form available for retry. See
+[implementation and verification](m30-profile-commands.md). Initial setup remains
+part of reviewed upload admission; no sync interface or Auth provider is enabled.

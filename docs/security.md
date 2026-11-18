@@ -55,7 +55,7 @@ GitHub's repository secret scanning and push protection are also enabled. The
 latest owner-authenticated, read-only API check returned zero open secret alerts.
 These protections remain enabled independently of the stopped Actions workflows.
 
-The same day's latest live verification found all **48 public/private application
+The same day's latest live verification found all **49 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
 reported no warnings or errors. Informational private-table notices describe
@@ -137,3 +137,10 @@ identity; service completion cannot replace those fields. A backup download afte
 an audit failure reads the already prepared file and performs no second database
 write or fabricated audit. Old recovery evidence remains separate from portable
 shop backups when a cancelled connection is replaced.
+
+The [profile verification](m30-profile-local.json) repeats the credential audit.
+Profile commands project only editable shop/contact/market fields. A contact edit
+cannot change the Auth login phone, roles, permissions or assignments. Live owner
+checks and complete normalized plans bind preparation, completion and historical
+receipt replay. No runtime connection settings, credentials or Auth session enter
+the shop records, audit command, queue, portable backup or static build.

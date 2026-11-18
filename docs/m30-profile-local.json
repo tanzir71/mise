@@ -1,0 +1,278 @@
+{
+  "checkedAt": "2026-11-18T13:42:46.751Z",
+  "milestone": "M30",
+  "complete": false,
+  "scope": "Owner-only profile/market command with original local intent, separate shop contact/Auth login, atomic audit and preservation of assignments/other outlets",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "ffd349254d5f48698b235719fd88006d6da58d0b2304eb47748d7c735cdd94af"
+    },
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 103,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "1c9552adb392127be153ba61d1dd2d6bec98d6122401e27cb5fc05af2901a3d4"
+    },
+    "units": {
+      "passed": 1839,
+      "files": 100,
+      "newCommandCases": 41,
+      "newAdapterCases": 8,
+      "reportSha256": "e910e0cfa9b42c83c64c35b69e28e8272b28a793de2a701a3ee5f19b089bfc10"
+    },
+    "browser": {
+      "base": "/mise/",
+      "passed": 360,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "globalErrors": 0,
+      "durationSeconds": 483.886434,
+      "reportSha256": "bec9125d7ac941618b1235e602a8553a4a27491fc5637b1f404ef9a35820bb51"
+    },
+    "rootSmoke": {
+      "base": "/",
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "globalErrors": 0,
+      "durationSeconds": 32.85049099999999,
+      "reportSha256": "d33b003307d19fe622f14fd61ce5054530eac7920fa62e53c554d45175d1e87b"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "logSha256": "6fb3d2682918b03efa378077b20203b87ede486e66579720910e0e90e2aaae6b",
+        "htmlSha256": "2759297eb5c4b013afd9ae4c74cbd564048e793a725a2a47525b9af1266814c3"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "logSha256": "c303e396fca5e4c5727f7a1a5f33ebaa2a0de2c86b7c7b41703d3679c946e675",
+        "htmlSha256": "8fe39d913d275361778c0afda55de1ec9a7970803358d22a4a4b1cde2c01e625"
+      }
+    ],
+    "exports": {
+      "present": 270,
+      "passed": true,
+      "logSha256": "18ef80372398ad8879d0a7a87015388143e8e03e042c1a51e7fec15758ea2d16"
+    },
+    "native": {
+      "newCases": 6,
+      "offlineSaveAndReload": true,
+      "nativeQueueConstraintRollback": true,
+      "fieldsRetainedForRetry": true,
+      "axeViolations": 0,
+      "axeWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    "visual": {
+      "comparisons": 40,
+      "newProfileComparisons": 5,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "report": "qa/report.html",
+      "reportSha256": "5e561a797b684b13338080b4e823339183c7af7d3f285d2721b79c95b37c89ae",
+      "resultsSha256": "ba1dc938dced8d91cdc47b835a5ce3c3430a845add2de02b58f21dbb6150a40a",
+      "references": [
+        "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+        "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+        "screens/mobile/M29 · Manager — Export (sheet).png",
+        "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+        "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+      ],
+      "dedicatedSettingsFrameExists": false,
+      "exactFrameMatchClaimed": false,
+      "pixelDifferencesInformational": true,
+      "threeCapturesInspected": true,
+      "keyScreens": {
+        "qa/screens/m30-profile-form-360.png": "5ee7d8fb4988ee362c649cda6556c776533beac704156bb9ba61bf78b141247c",
+        "qa/screens/m30-profile-form-390.png": "5e024f9c1cd9d86d324611ac09c72a698a119d281fb647e9ff7af997b4dabc98",
+        "qa/screens/m30-profile-form-1440.png": "2c5b0d560e1e4d2558b24b0d2998bfe6967ab7aa1a8da9eed64161d3ddcb12de"
+      },
+      "newCiArtifact": false
+    }
+  },
+  "invariants": {
+    "journalSchema": 2,
+    "shopSchema": 11,
+    "backupSchema": 10,
+    "backupTables": 21,
+    "commandKinds": [
+      "setup.update"
+    ],
+    "initialSetupRemainsInUpload": true,
+    "noSampleReseeding": true,
+    "originalIdsAndPhysicalOccurrence": true,
+    "editableFieldsOnly": true,
+    "atomicLocalThreeRecordsAuditAndQueue": true,
+    "unclassifiedInboxClaimStillRetained": true,
+    "unknownCompoundWritesStopFifo": true,
+    "ownerOnly": true,
+    "originalActorLiveReplayOnly": true,
+    "sqlConstructedMutationAndAudit": true,
+    "normalizedIntentBound": true,
+    "isolatedLiteralJsonTokens": true,
+    "serviceCannotSubstituteFields": true,
+    "monotonicMetadata": true,
+    "otherOutletsAndMembersRetained": true,
+    "permissionsAndAssignmentsRetained": true,
+    "contactDoesNotChangeAuthLogin": true,
+    "noHistoricalMoneyOrCatalogueRewrite": true,
+    "privateHelpersEmptySearchPath": true,
+    "profileLocksUseNoWait": true,
+    "boundedTaggedRetry": 3,
+    "cloudSetup": false
+  },
+  "privacy": {
+    "knownPrivateValuesChecked": 9,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "runtimeConnectionOutsideShopBackupAndJournal": true,
+    "testInterfacesShipped": false,
+    "testFixtureMarkersInStaticOutput": 0
+  },
+  "hosted": {
+    "changed": true,
+    "newMigrations": 1,
+    "newEdgeDeployments": 1,
+    "migrations": 28,
+    "functions": 6,
+    "commandsVersion": 15,
+    "commandsVerifyJwt": true,
+    "bundle": {
+      "bytes": 387847,
+      "sha256": "1e505980b6eafc6d2c73fbbade33821fc296ad62dc25107a5acaa91c9bf33b9a",
+      "sourceFiles": 62
+    },
+    "roleFixture": {
+      "bytes": 17347,
+      "sqlSha256": "1469b6d55dbc84ad6397c212054c402c7903a6b34017f0b58d3ef1e6de92d733",
+      "sameLocallyVerifiedSql": true,
+      "proof": {
+        "audits": 3,
+        "commands": 3,
+        "receipts": 3,
+        "managerDenied": true,
+        "pendingTickets": 0,
+        "privateReadsDenied": true,
+        "normalizedPlanBound": true,
+        "otherOutletRetained": true,
+        "clientCompletionDenied": true,
+        "literalProfileRetained": true,
+        "noFinancialSideEffects": true,
+        "otherOwnerContactDenied": true,
+        "authLoginPhonesUnchanged": true,
+        "ownerAssignmentsRetained": true,
+        "secondOwnerActorRetained": true,
+        "firstOwnerContactRetained": true,
+        "normalizedCompletionBound": true,
+        "originalOccurrenceRetained": true,
+        "otherOwnerPermissionsRetained": true
+      },
+      "auth_rows": 0,
+      "business_rows": 0,
+      "ticket_rows": 0
+    },
+    "access": {
+      "application_tables": 49,
+      "forced_rls_tables": 49,
+      "anonymous_table_access": 0,
+      "authenticated_direct_writes": 0,
+      "profile_ticket_direct_grants": 0,
+      "prepare_authenticated": true,
+      "prepare_anon": false,
+      "prepare_service": false,
+      "finish_authenticated": false,
+      "finish_anon": false,
+      "finish_service": true,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "auth_users": 0,
+      "migrations": 28,
+      "profile_migration": 1
+    },
+    "securityAdvisors": {
+      "info": 1,
+      "warnings": 0,
+      "errors": 0,
+      "intentionallyPolicyFreePrivateTables": 20
+    },
+    "httpGuards": [
+      {
+        "name": "preflight",
+        "status": 204,
+        "allowOrigin": "https://tanzir71.github.io",
+        "noStore": true
+      },
+      {
+        "name": "missing-jwt",
+        "status": 401,
+        "allowOrigin": "*",
+        "noStore": false
+      },
+      {
+        "name": "invalid-jwt",
+        "status": 401,
+        "allowOrigin": "*",
+        "noStore": false
+      }
+    ],
+    "newPersistentAuthUsers": 0,
+    "smsRequests": 0,
+    "realMessagesSent": 0,
+    "authConfigurationChanged": false,
+    "vaultUnchanged": true,
+    "actualOwnerSignedHttpProven": false
+  },
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newPagesDeployment": false,
+    "lastPublishedPagesCommit": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "shop-link generation and undo adapters",
+    "legacy direct supplier writes and missing payment occurrence review",
+    "canonical receipt/cursor-pull reconciliation",
+    "full upload/outbox/image-delivery controls",
+    "real OTP and signed-owner HTTP acceptance",
+    "5000-record 3G upload acceptance",
+    "remaining M30 resources and later roadmap milestones"
+  ],
+  "sourceHashes": {
+    "packages/core/setup.ts": "55c3c134fa01867db81e04dd736ee5254ae12f66f185980992f7169a6bae0f18",
+    "packages/core/profile-commands.ts": "72a87686bfb2dd9f0d511ec4a8677ab861c50f3e7a3d652d0eaa1d6724017e00",
+    "packages/core/shop-commands.ts": "8b9139e805f8f4e01060dddddba1f6e3012eda34eb7cbca54938811d07781888",
+    "apps/web/src/data/db.ts": "533492d3c6ae6ab6d042d47ab3ccd4cc58f13a11aee3a069f942831eb77ab392",
+    "supabase/functions/_shared/profile-write.ts": "3b9932914c87abfb6044d8b6fbbec1e9a1c2deb9dbb2a953c4e12e95196dd8e4",
+    "supabase/functions/_shared/commands-handler.ts": "490111f223b826963be99b158e2216f8a11f497f34ef19d0f00324301b15ff30",
+    "supabase/migrations/20261118130956_profile_settings_commands.sql": "744d60013f1f27b5e8be1a9c42a7ecbf77a84a8c612a17dbd649fb3e4f9146c7",
+    "tests/profile-commands.test.ts": "d7fbfaec2a2bb7f780c0783bc446fc1800dad8757b090ffde7e4cd67cf2faab8",
+    "tests/profile-outbox-adapters.test.ts": "0f871c34e64fcc6ac221c9cc02c43d230d717226ce6794099de674cb99f9fd0d",
+    "tests/profile-hosted-fixture.ts": "e244202b75cc480c8d460f52657eac2872c79d12b40f2cfbab86a075fe301194",
+    "tests/e2e/profile-outbox.spec.ts": "6b6d43becff650b7524d8714e7a85045113e58e852d98d64b612a05aef6be3b3",
+    "qa/configs/m30-profile.json": "ed8069f95b7a299d5e47012c9e50faf7f85734ad4f7512b69e15f506476b43e4"
+  }
+}

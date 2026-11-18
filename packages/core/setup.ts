@@ -3,7 +3,7 @@ import { businessPacks, marketPacks } from './packs';
 import { normalisePhone } from './phone';
 import type { SetupInput, SetupSnapshot, SetupCommand, Item } from './models';
 
-export function setupCommand(input: SetupInput, before: SetupSnapshot | null = null, at = Date.now(), id: () => string = () => ulid(at)): SetupCommand {
+export function normaliseSetupInput(input:SetupInput):Required<SetupInput> {
   if (!Object.hasOwn(businessPacks, input.businessType) || !Object.hasOwn(marketPacks, input.marketCode)) throw new Error('Choose a business and market.');
   const name = input.name.trim();
   if (!name || name.length > 80) throw new Error('Use a shop name between 1 and 80 characters.');
@@ -15,10 +15,15 @@ export function setupCommand(input: SetupInput, before: SetupSnapshot | null = n
   try { new Intl.DateTimeFormat('en', { timeZone: timezone }); new Intl.NumberFormat('en', { style: 'currency', currency }); } catch { throw new Error('Choose a valid timezone and currency.'); }
   if (input.language && !['en', 'bn', 'both'].includes(input.language)) throw new Error('Choose a message language.');
   const language = input.language || (input.marketCode === 'BD' ? 'both' : 'en');
+  return {businessType:input.businessType,marketCode:input.marketCode,name,phone,outletName:input.outletName?.trim()||name,address:input.address?.trim()||'',language,timezone,currency};
+}
+export function setupCommand(value: SetupInput, before: SetupSnapshot | null = null, at = Date.now(), id: () => string = () => ulid(at)): SetupCommand {
+  const input=normaliseSetupInput(value),{name,phone,timezone,currency,language}=input,pack=marketPacks[input.marketCode];
   const languages: SetupSnapshot['business']['languages'] = language === 'both' ? ['en', 'bn'] : [language];
-  const business = { id: before?.business.id || id(), name, businessType: input.businessType, marketCode: input.marketCode, languages, createdAt: before?.business.createdAt ?? at, updatedAt: at } satisfies SetupSnapshot['business'];
-  const outlet = { id: before?.outlet.id || id(), businessId: business.id, name: input.outletName?.trim() || name, address: input.address?.trim() || '', timezone, currency, shopLink: before?.outlet.shopLink, creditMessaging:before?.outlet.creditMessaging, orderWarningMinutes:before?.outlet.orderWarningMinutes, createdAt: before?.outlet.createdAt ?? at, updatedAt: at };
-  const owner = { id: before?.owner.id || id(), businessId: business.id, outletIds: [outlet.id], name: before?.owner.name || 'Owner', phone, role: 'owner', active: true, createdAt: before?.owner.createdAt ?? at, updatedAt: at } satisfies SetupSnapshot['owner'];
+  const updated=(entity?:{createdAt:number;updatedAt:number})=>Math.max(at,entity?.createdAt??at,entity?.updatedAt??at);
+  const business = { id: before?.business.id || id(), name, businessType: input.businessType, marketCode: input.marketCode, languages, createdAt: before?.business.createdAt ?? at, updatedAt: updated(before?.business) } satisfies SetupSnapshot['business'];
+  const outlet = { id: before?.outlet.id || id(), businessId: business.id, name: input.outletName,address:input.address, timezone, currency, shopLink: before?.outlet.shopLink, creditMessaging:before?.outlet.creditMessaging, orderWarningMinutes:before?.outlet.orderWarningMinutes, createdAt: before?.outlet.createdAt ?? at, updatedAt: updated(before?.outlet) };
+  const owner = { id: before?.owner.id || id(), businessId: business.id, outletIds: before?[...before.owner.outletIds]:[outlet.id], name: before?.owner.name || 'Owner', phone, role: 'owner', active: true, createdAt: before?.owner.createdAt ?? at, updatedAt: updated(before?.owner) } satisfies SetupSnapshot['owner'];
   const snapshot = { business, outlet, owner };
   const category = { id: id(), outletId: outlet.id, name: 'Samples', sort: 0, createdAt: at, updatedAt: at };
   const food = input.businessType === 'restaurant' || input.businessType === 'food_stall';
