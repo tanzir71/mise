@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30/M31 can now join an existing outlet on an empty device through the internal sync engine. A complete canonical snapshot, original images, accepted cursor, actual operator and distinct join fence commit atomically without an upload receipt or outbox echo. Historical member references preserve owner-authored financial records without exposing unassigned staff contact details. Schema 16 retains existing uploads and queues; pending-work reconciliation and full cloud controls remain gated.
+
 - Sync groundwork now preserves original saved actions, attachments and recovery evidence while checking which changes are already present online. Interrupted replies, offline reloads and conflicting receipts retain the original work. Full cloud sync remains in development and unavailable by default.
 
 - M30 image downloads now retain fully verified original bytes beside their sealed metadata. Schema 14 adds an immutable internal image cache with exact per-image retries, offline verification and native transaction guards; existing shop data, operator selection, upload receipts and queued cash remain intact. The image boundary rejects anonymous phone accounts. Canonical application and full cloud controls remain gated.

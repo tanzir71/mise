@@ -16,6 +16,11 @@ import {emptyBackupTables} from '../packages/core/backup-tables';
 import {prepareCloudMigration,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import {saveCustomerCommand} from '../packages/core/customers';
 import {newInboxId} from '../packages/core/inbox';
+import {reconstructCanonicalSnapshot} from '../packages/core/sync-canonical';
+import {joinCanonicalDevice} from '../apps/web/src/data/cloud-sync-join';
+import {selectCloudOperator} from '../apps/web/src/data/operator-state';
+import {recordSaleCommand} from '../packages/core/sales';
+import type {OperatorContext} from '../packages/core/operators';
 type Row=Record<string,unknown>;
 let db:PGlite,setup:ReturnType<typeof setupCommand>,seed:CloudRecord[],branchId:string,customerId:string,itemId:string;
 const actors:Record<number,{id:string;role:string;outlet:string}>={},uid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
@@ -44,6 +49,38 @@ beforeEach(async()=>{
 });
 afterAll(async()=>{await db?.close();});
 it.each([1,2])('operator%s downloads only the outlet projection with literal JSON and no Auth identity',async n=>{const w=await begin(n),{changes}=await download(w,n),rows=projected(changes);expect(rows.get('items\0'+itemId)?.price).toBe(setup.items[0].price);expect(rows.get('customers\0'+customerId)).toMatchObject({name:'Customer\0\ud800',notes:'Keep\0\udfff literal'});expect(rows.has('outlets\0'+branchId)).toBe(false);expect(rows.has('members\0'+actors[3].id)).toBe(false);expect(JSON.stringify(changes)).not.toContain('auth_user_id');for(const n of [1,2,3,5,6])expect(JSON.stringify(changes)).not.toContain(uid(n));expect(w.actorId).toBe(actors[n].id);});
+it('an empty manager reconstructs owner-authored history without an owner assignment or contact data',async()=>{
+ await db.query('delete from public.member_outlets where member_id=$1',[actors[1].id]);
+ const cash=recordSaleCommand({expression:'43',method:'cash'},{setup:setup.snapshot,items:setup.items,wallets:[]});await insert([encodeCommandRecord('sales',cash.sale,setup.snapshot.business.id),encodeCommandRecord('events',cash.event,setup.snapshot.business.id)]);
+ const remote=await fixtureFetch(2),id=newInboxId(),window=await remote.begin({type:'begin',id,outletId:setup.snapshot.outlet.id,cursor:null}),device=new MiseDatabase('manager-canonical-'+id);
+ try{const target={targetHash:'e'.repeat(64),businessId:window.businessId,outletId:window.outletId,actorId:window.actorId,accountHash:window.accountHash,role:window.role};await prepareSyncDownload(device,{id,target,previousCursor:null});const state=await runSyncDownload(device,id,target,remote),snapshot=await reconstructCanonicalSnapshot(state,await device.syncRecords.toArray(),[]);
+  expect(snapshot.backup.tables.events.some(e=>e.actor.id===actors[1].id)).toBe(true);expect(snapshot.backup.tables.members.find(m=>m.id===actors[1].id)).toMatchObject({active:false,outletIds:[]});expect(snapshot.backup.tables.members.find(m=>m.id===actors[1].id)?.phone).toBeUndefined();expect(snapshot.backup.tables.members.some(m=>m.id===actors[3].id)).toBe(false);
+  const refresh=async()=>(await asRole<{data:OperatorContext}>(2,'authenticated','select public.operator_context($1,$2,$3) data',[target.businessId,target.outletId,target.actorId]))[0].data,authKey='mise.cloud.auth.'+'c'.repeat(64),operator=await selectCloudOperator(device,await refresh(),{authKey,targetHash:target.targetHash},null,refresh);
+  await joinCanonicalDevice(device,{readId:id,target,authKey,expectedOperatorRevision:operator.revision},refresh);expect((await device.setup())?.owner.role).toBe('manager');expect((await device.sales.get(cash.sale.id))?.amount).toBe(4300);expect((await device.cloudState.get('binding'))?.receipt).toBeNull();expect(await device.outbox.count()).toBe(0);
+ }finally{await device.delete();}
+});
+it('historical profile updates keep literal names and roles without adding contact or active authority',async()=>{
+ await db.query('delete from public.member_outlets where member_id=$1',[actors[1].id]);const first=await begin(2);await download(first,2);await db.query('update public.members set name=$1::json,phone=$2 where id=$3',[JSON.stringify('Historical\0\ud800 owner'),'+14155550999',actors[1].id]);const rows=projected((await download(await begin(2,cursor(first)),2)).changes),profile=rows.get('member_refs\0'+actors[1].id);expect(profile).toMatchObject({name:'Historical\0\ud800 owner',role:'owner'});expect(Object.keys(profile!).sort()).toEqual(['business_id','created_at','id','name','role','updated_at']);expect(rows.has('members\0'+actors[1].id)).toBe(false);
+});
+it('deferred historical capture preserves a legal child-before-member transaction without an assignment',async()=>{
+ const actor=newInboxId(),event=encodeCommandRecord('events',{id:newInboxId(),outletId:setup.snapshot.outlet.id,actor:{type:'member',id:actor},command:'local.reference-proof',before:null,after:null,at:1},setup.snapshot.business.id);
+ await db.transaction(async sql=>{const keys=Object.keys(event.values);await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(event.values));await sql.query("insert into public.members(id,business_id,name,phone,role,created_at,updated_at) values($1,$2,$3,'+14155550998','kitchen',1,1)",[actor,setup.snapshot.business.id,JSON.stringify('Historical kitchen')]);});
+ const rows=projected((await download(await begin(2),2)).changes);expect(rows.get('member_refs\0'+actor)).toMatchObject({name:'Historical kitchen',role:'kitchen'});expect(rows.has('members\0'+actor)).toBe(false);expect(rows.has('member_outlets\0'+actor)).toBe(false);
+});
+it('removing the last historical reference emits a real tombstone rather than retaining an unrelated person',async()=>{
+ await db.query('delete from public.member_outlets where member_id=$1',[actors[1].id]);const first=await begin(2);expect(projected((await download(first,2)).changes).has('member_refs\0'+actors[1].id)).toBe(true);await db.query('delete from public.events where actor_member_id=$1',[actors[1].id]);const next=await download(await begin(2,cursor(first)),2);expect(next.changes.some(c=>c.table==='member_refs'&&c.id===actors[1].id&&c.operation==='delete')).toBe(true);expect(projected((await download(await begin(2),2)).changes).has('member_refs\0'+actors[1].id)).toBe(false);
+});
+it('privileged history truncation invalidates old cursors and removes obsolete historical profiles',async()=>{
+ await db.query('delete from public.member_outlets where member_id=$1',[actors[1].id]);const first=await begin(2);await download(first,2);await db.exec('truncate public.events cascade');await expect(begin(2,cursor(first))).rejects.toMatchObject({code:'PT409'});expect(projected((await download(await begin(2),2)).changes).has('member_refs\0'+actors[1].id)).toBe(false);
+});
+it('a large transaction coalesces historical dependencies privately and drains its queue before commit',async()=>{
+ await db.transaction(async sql=>{
+  await sql.query('update public.members set name=$1::json where id=$2',[JSON.stringify('One canonical profile'),actors[1].id]);
+  for(let n=0;n<25;n++){const r=encodeCommandRecord('events',{id:newInboxId(),outletId:setup.snapshot.outlet.id,actor:{type:'member',id:actors[1].id},command:'local.batch-reference',before:null,after:null,at:1},setup.snapshot.business.id),keys=Object.keys(r.values);await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(r.values));}
+  expect((await sql.query<{n:number}>('select count(*)::int n from private.sync_member_pending where transaction_id=pg_current_xact_id()')).rows[0].n).toBe(1);await sql.exec('set constraints all immediate');expect((await sql.query<{n:number}>('select count(*)::int n from private.sync_member_pending')).rows[0].n).toBe(0);expect((await sql.query<{n:number}>("select count(*)::int n from private.sync_changes where transaction_id=pg_current_xact_id() and table_name='member_refs'")).rows[0].n).toBe(1);
+ });
+ for(const role of ['anon','authenticated','service_role'])expect((await db.query<{allowed:boolean}>("select has_table_privilege($1,'private.sync_member_pending','SELECT,INSERT,UPDATE,DELETE') allowed",[role])).rows[0].allowed).toBe(false);
+});
 it('a fixed window excludes later writes, which appear in the next snapshot even after reload',async()=>{const w=await begin();await db.query('update public.items set price=price+10 where id=$1',[itemId]);expect(projected((await download(w)).changes).get('items\0'+itemId)?.price).toBe(setup.items[0].price);const next=await begin(1,cursor(w));expect(projected((await download(next)).changes).get('items\0'+itemId)?.price).toBe(setup.items[0].price+10);expect((await download(await begin(1,cursor(next)))).changes).toEqual([]);});
 it('large legacy rows split across exact hashed fragments and replay the same cached page',async()=>{const text='Large\0\ud800 literal '.repeat(30000);await db.query('update public.customers set notes=$1::json where id=$2',[JSON.stringify(text),customerId]);const w=await begin(),p=await page(w,0);expect(await page(w,0)).toEqual(p);expect((p.parts as Row[]).some(r=>(r.totalBytes as number)>196608)).toBe(true);const result=await download(w);expect(result.pages).toBeGreaterThan(1);expect(projected(result.changes).get('customers\0'+customerId)?.notes).toBe(text);});
 it.each([3,5,6])('unassigned, staff or agent operator%s cannot prepare another outlet',async n=>{await expect(begin(n)).rejects.toMatchObject({code:'42501'});});

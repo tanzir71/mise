@@ -8,6 +8,7 @@ import {parseCloudUploadProgress,type CloudUploadReceipt} from '@mise/core/cloud
 import type {MiseDatabase} from './db';
 import {portableInboxItems,type StoredInboxItem} from './inbox';
 import {readDatabaseBackup} from './backup';
+import {parseLocalOperatorState} from '@mise/core/operators';
 
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const same=(v:unknown):unknown=>Array.isArray(v)?v.map(same):object(v)?Object.fromEntries(Object.keys(v).sort().map(key=>[key,same(v[key])])):v;
@@ -20,13 +21,17 @@ function entry(value:LocalOutboxEntry,state:LocalCloudState):LocalOutboxEntry {
  return {...value,commands,receipts};
 }
 function bound(state:LocalCloudState,id:string,targetHash:string,manifestHash:string,scope?:Pick<LocalCloudState,'businessId'|'outletId'|'ownerId'>){if(state.uploadId!==id||state.targetHash!==targetHash||state.manifestHash!==manifestHash||scope&&(state.businessId!==scope.businessId||state.outletId!==scope.outletId||state.ownerId!==scope.ownerId))throw new Error('Use the original account, connection and upload for this local queue.');}
+async function joinedOperator(db:MiseDatabase,binding:LocalCloudState){
+ if(binding.version!==2)return;const state=parseLocalOperatorState(await db.operatorState.get('active')),join=binding.join;
+ if(!join||state.phase!=='active'||state.businessId!==binding.businessId||state.outletId!==binding.outletId||state.actorId!==binding.ownerId||state.role!==join.role||state.connection?.targetHash!==binding.targetHash||state.connection.accountHash!==join.accountHash||state.connection.epoch!==join.epoch||state.connection.scopeVersion!==join.scopeVersion)throw new Error('Verify the original joined operator before sending local changes.');
+}
 
 /** Hold the shop transaction while checking the exact reviewed source and arming its fence. */
 export async function beginLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targetHash:string):Promise<LocalCloudState>{
  if(!/^[a-f0-9]{64}$/.test(targetHash))throw new Error('Use a private connection fingerprint.');
  const manifest=plan.manifest,manifestHash=await cloudUploadManifestHash(manifest);
  return db.transaction('rw',db.tables,async()=>{
-  const saved=await db.cloudState.get('binding');if(saved){const state=parseLocalCloudState(saved);if(state.phase!=='cancelled'){bound(state,manifest.id,targetHash,manifestHash,manifest);return state;}if(state.uploadId===manifest.id)throw new Error('Prepare a fresh review after cancelling this upload.');}
+  const saved=await db.cloudState.get('binding');if(saved){const state=parseLocalCloudState(saved);if(state.version!==1)throw new Error('This device joined an existing outlet. Keep its original sync admission.');if(state.phase!=='cancelled'){bound(state,manifest.id,targetHash,manifestHash,manifest);return state;}if(state.uploadId===manifest.id)throw new Error('Prepare a fresh review after cancelling this upload.');}
   await Dexie.waitFor(assertCloudUploadCurrent(manifest,await readDatabaseBackup(db)));
   const state:LocalCloudState={id:'binding',version:1,uploadId:manifest.id,businessId:manifest.businessId,outletId:manifest.outletId,ownerId:manifest.ownerId,targetHash,manifestHash,phase:'uploading',sequence:0,receipt:null};
   await db.cloudState.put(state);return state;
@@ -38,7 +43,7 @@ async function portable(table:BackupTable,row:unknown):Promise<unknown>{if(row==
 export async function assertLocalUploadCoverage(db:MiseDatabase,plan:CloudUploadPlan,targetHash:string):Promise<LocalCloudState>{
  const original=await readCloudUpload(plan),manifestHash=await cloudUploadManifestHash(plan.manifest);
  return db.transaction('r',db.tables,async()=>{
-  const state=parseLocalCloudState(await db.cloudState.get('binding'));bound(state,plan.manifest.id,targetHash,manifestHash,plan.manifest);
+  const state=parseLocalCloudState(await db.cloudState.get('binding'));if(state.version!==1)throw new Error('Use the original owner upload.');bound(state,plan.manifest.id,targetHash,manifestHash,plan.manifest);
   if(state.phase==='cancelled')throw new Error('This upload was cancelled. Prepare a fresh review.');
   const queue=(await db.outbox.where('uploadId').equals(state.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
   if(queue.length!==state.sequence)throw new Error('A local change is missing from the upload queue. Keep a backup.');
@@ -72,7 +77,8 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
 export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand)=>Promise<ShopCommandReceipt>):Promise<{accepted:number;retained:number;pending:number}>{
- const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||initial.phase!=='ready'||!initial.receipt)throw new Error('Finish the original upload with this account before sending local changes.');
+ const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||initial.phase!=='ready'||(initial.version===1?!initial.receipt:!initial.join))throw new Error('Finish the original upload or device join before sending local changes.');
+ await joinedOperator(db,initial);
  const rows=(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('A local change is missing from the delivery queue. Keep a backup.');
  for(const row of rows){
@@ -80,6 +86,7 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
   for(let index=saved.receipts.length;index<saved.commands.length;index++){
    if(index<saved.receipts.length)continue;
    const active=parseLocalCloudState(await db.cloudState.get('binding'));bound(active,initial.uploadId,targetHash,initial.manifestHash);if(active.phase!=='ready')throw new Error('The original upload is not ready.');
+   await joinedOperator(db,active);
    const command=saved.commands[index],receipt=parseShopCommandReceipt(await send(command),command);
    saved=await db.transaction('rw',db.cloudState,db.outbox,async()=>{
     const state=parseLocalCloudState(await db.cloudState.get('binding'));bound(state,initial.uploadId,targetHash,initial.manifestHash);if(state.phase!=='ready')throw new Error('The original upload is not ready.');

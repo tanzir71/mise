@@ -1,0 +1,333 @@
+{
+  "checkedAt": "2026-11-19T00:09:41.320Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Canonical reconstruction and atomic existing-outlet join on an empty owner/manager device; original pending overlay application and convergence remain open",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "94bd2b97d4fa6607cfd582200a3f4296397251237d92041c43950b34b208503f"
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 114,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "4655b79690757835e0d8ef676370554acf116dc2c86e3545d37ba595fe9f1823"
+    },
+    "units": {
+      "passed": 2232,
+      "files": 118,
+      "failed": 0,
+      "pending": 0,
+      "reportSha256": "f1a3efc5fd7759e8cd32ca4538c994801c0285dfbc939f3f55f534f342c74878"
+    },
+    "browser": {
+      "passed": 400,
+      "workers": 2,
+      "retries": 0,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "ad06ee07b67a92a8b50ff77bd58ade21d757adef1a1b86eb8fc354bf425e5271"
+    },
+    "rootBrowser": {
+      "passed": 43,
+      "workers": 2,
+      "retries": 0,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "990067f01fb5553ed150c46028f330c4d18cdcc673e2149609ca69da34af6301"
+    },
+    "visual": {
+      "comparisons": 50,
+      "overflow": 0,
+      "layoutChanged": false,
+      "reportSha256": "0925c808ccf8d6622af1d84a8a9f54975af2622cb855e1c92031baa846f8738d"
+    },
+    "exports": 270,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testApisInShippedAssets": false,
+    "regression": {
+      "missingHistoricalParentBeforeFix": true,
+      "beforeFixSha256": "c0950041dc93d15196c100427ab11cb4b96cbbf5197847a00dcdfbebced6178f",
+      "afterFixSha256": "29276713321bd9a1106245f3d976094bdb20826830f5284b217dccec6c90c7a3",
+      "initialUnitFixtureFailure": "The legacy receipt test assumed its migration was last; locate the receipt migration, seed a genuine earlier receipt, then apply it and subsequent migrations.",
+      "initialUnitReportSha256": "3b3aaa9d10852db05e2657560f62b13704bcea2ac7edf5a381125a94509dcb12",
+      "finalLegacyReceiptUnknownPreserved": true,
+      "beforeBatchFix": {
+        "passed": 2227,
+        "failed": 3,
+        "reportSha256": "f172ff9968b3c07b7acc326b277211cef777b23a352d18adae50fad9007c83fd"
+      },
+      "afterBatchFix": {
+        "targetedPassed": 169,
+        "fullSuitePassed": 2232,
+        "originalPerformanceLimitsPreserved": true,
+        "privateQueueCoalescingAndDrainProved": true,
+        "reportSha256": "402384c281728dfa840e047911e3ee34b1c716ebacac0d1ce97bb182f9657a53"
+      }
+    }
+  },
+  "schema": {
+    "local": 16,
+    "stores": 30,
+    "portable": 10,
+    "portableTables": 21,
+    "canonicalStore": "syncCanonical",
+    "joinFenceVersion": 2,
+    "originalUploadFenceVersion": 1
+  },
+  "invariants": {
+    "historicalReferencesWithoutPhoneAuthIdentityActiveStatusOrInventedAssignment": true,
+    "fullMemberRlsUnchanged": true,
+    "realOutletScopedFkSources": true,
+    "deferredChildBeforeParentPreserved": true,
+    "literalNulAndLoneSurrogateRetained": true,
+    "actualBigIntOrderAndTombstones": true,
+    "completePortableModelValidated": true,
+    "originalImagesFullyVerified": true,
+    "incrementalReconstructionRetainsUnchangedImages": true,
+    "freshAccountActorRoleEpochScopeBeforeJoin": true,
+    "allDomainStoresLockedWithOutbox": true,
+    "domainBaseCursorOperatorAndFenceAtomic": true,
+    "noGenericCaptureBypass": true,
+    "noUploadReceiptInvented": true,
+    "noJoinOutboxEcho": true,
+    "offlineFinancialWritesRetainOriginalIntents": true,
+    "lostJoinReplyNeverOverwritesLaterCash": true,
+    "quotaFailureRetainsStaging": true,
+    "unassignedSharesPreserved": true,
+    "existingLocalShopAndQueueNeverReplaced": true,
+    "lockedOperatorCannotReplayOrStartDelivery": true,
+    "schema15UpgradePreservesStaging": true,
+    "originalPendingOverlaysNotRewritten": true,
+    "fullCloudControlsDefaultOff": true
+  },
+  "hosted": {
+    "verified": true,
+    "checkedAt": "2026-11-19T00:09:35.284Z",
+    "before": {
+      "migrations": 34,
+      "auth_users": 0,
+      "application_tables": 57,
+      "forced_rls_tables": 57,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1
+    },
+    "after": {
+      "migrations": 35,
+      "auth_users": 0,
+      "application_tables": 58,
+      "forced_rls_tables": 58,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1
+    },
+    "functionsBefore": [
+      {
+        "name": "commands",
+        "version": 18,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "device-orders",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "device-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "inbox-image",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "migration-upload",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "staff-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "sync-read",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      }
+    ],
+    "functionsAfter": [
+      {
+        "name": "commands",
+        "version": 18,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "device-orders",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "device-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": false
+      },
+      {
+        "name": "inbox-image",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "migration-upload",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "staff-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      },
+      {
+        "name": "sync-read",
+        "version": 3,
+        "status": "ACTIVE",
+        "verifyJwt": true
+      }
+    ],
+    "onlyFunctionDeployed": "sync-read",
+    "functionDeployments": 1,
+    "otherFunctionVersionsUnchanged": true,
+    "jwtVerificationRetained": true,
+    "securityAdvisors": {
+      "warnings": 0,
+      "errors": 0,
+      "information": 1
+    },
+    "performanceAdvisors": {
+      "warnings": 0,
+      "errors": 0,
+      "information": 1
+    },
+    "proof": {
+      "proof": {
+        "anonDenied": true,
+        "pendingQueueDrained": true,
+        "pendingQueuePrivate": true,
+        "serviceHelperDenied": true,
+        "referenceFieldsExact": true,
+        "unrelatedStaffHidden": true,
+        "directMemberRlsUnchanged": true,
+        "historicalParentCaptured": true,
+        "privateHelpersNotGranted": true,
+        "authenticatedHelperDenied": true,
+        "ownerContactProfileHidden": true,
+        "ownerAssignmentNotInvented": true,
+        "revocationBeforeCachedReply": true,
+        "ownUncommittedChangesExcluded": true,
+        "literalNullAndSurrogatePreserved": true
+      },
+      "auth_rows": 0,
+      "business_rows": 0
+    },
+    "privatePendingRows": 0,
+    "exactMigrationRecorded": true,
+    "authConfigurationChanged": false,
+    "newSecrets": 0,
+    "exactRolledBackRoleChecks": 15,
+    "roleSqlSha256": "1fafb060eb9078171931cc6733327f6438637493a6503cea7e81d382ec74237b",
+    "committedPositiveSqlHttpJoin": "local",
+    "genuineHostedPhoneJwtHttp": false,
+    "realOtp": false,
+    "throttled5000RecordAcceptance": false
+  },
+  "privacy": {
+    "knownValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "publication": {
+    "workflowsDisabled": 3,
+    "activeWorkflowRuns": 0,
+    "githubSecretScanning": "enabled",
+    "githubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "pagesHeld": true,
+    "newPagesDeploy": false,
+    "ciArtifactUploaded": false
+  },
+  "remaining": [
+    "Canonical atomic application over original pending local overlays",
+    "Intent-based rebasing without overwriting remote money or retained unsupported work",
+    "Realtime/reconnect orchestration and header sync state",
+    "Two actual browser databases converging after offline edits without loss or echo",
+    "Genuine phone OTP and hosted owner/image HTTP",
+    "5000-record upload under 60 seconds on 3G",
+    "Remaining M30/M31 requirements and every subsequent handover milestone"
+  ],
+  "sourceSha256": {
+    "CHANGELOG.md": "bac1d91915d27a3c334e286e3276ad94bee6848712f140ffdf476824a610f6b7",
+    "README.md": "6e72a4c48420e2cf906e9ad9b7df812528dd106403f5832dc57e24556bf5da8e",
+    "apps/web/src/data/cloud-sync-join.ts": "9587ead6d7c9a8baec635154af53274ca5a2c79b02a0126c1d32d858afd37f4d",
+    "apps/web/src/data/inbox.ts": "32ef15e9b05148587a8befbb765510a8bd40d61a5a5beba09c7a0e994ce0963c",
+    "apps/web/src/data/local-outbox.ts": "0cedc9a2235e8447b8167e78be8f85fc41df9795c6739ef3fb9c7dd7dc4e2a1d",
+    "apps/web/src/data/local-store.ts": "e2bf332354c1727db8db7a3eb8030bfcf697ddc0cf9f69812344c55bf531fccd",
+    "docs/m31-canonical-join.md": "6f57977d7a461cea80c6ad366fa1dacce56156a9ed4b72e6a3ee4e23a8dfcb50",
+    "docs/security.md": "1d4a385deba7e606c300427a35c16e80be9c5037141a0a95ed2a42ea0e5b43be",
+    "handover/DECISIONS.md": "d8c4ec9fa70c39ad366c53aeef7a5f08a7aa2aa6f07d0353a409cb2a969c1281",
+    "handover/docs/03-roadmap.md": "8faaddeacac18e859785c252151f1fe543146b480e3b918fc1db0cfb619e2a11",
+    "packages/core/local-outbox.ts": "f2e7c8e381b1ce89da4f0b623ad11a3f8bb8a7312dde4b81163ad269111dd7f7",
+    "packages/core/local-schema.ts": "798a3e4b654b1b03cbd9a86015d67ceff3f9313f1f16c7297befc85d3b12bab6",
+    "packages/core/sync-canonical.ts": "b9772b23597289bd3e7715303d1ce5df9c66448195a50107cc4c1ea5a4b32be2",
+    "packages/core/sync-read.ts": "95cde74bc9aee950f2aa1a43573c5ceedba5a068d821baea18d7822455805f45",
+    "supabase/migrations/20261118231831_sync_member_references.sql": "936d90d3116f81867ec5aa3e7825b369c857273993ae2ecd5396299c4a76c3e4",
+    "tests/canonical-hosted-fixture.ts": "bb7460512d1916f6974142a6038c652afaee458a34691ee02fd46346d0e11f0b",
+    "tests/e2e/sync-coverage.spec.ts": "2b546959f01f38c1092df0d029df9a3f573aa3d76ea56852bc92670ad5f6b9fd",
+    "tests/e2e/sync-join.spec.ts": "bf220fdfaac9d91d659cca93376d50180c7b378a61a3654386d833d0ec5169ad",
+    "tests/fixtures/install-sync-join.mjs": "7e1cefcf7b55aef7a2a1fad4211207d1072f78587802320bf4b692d063305a2c",
+    "tests/fixtures/sync-coverage-browser.ts": "e93262e0c47844fa80f4d3680f3d440562852c96ed9682d6b821f73a0cd82563",
+    "tests/fixtures/sync-download-browser.ts": "eaab1af16716ff8f6f3807fc62513fd5d346b8fb5e1fd8b268ec4f8c91430ec2",
+    "tests/fixtures/sync-images-browser.ts": "40a04abcfe1720180aa541bd057efd54240dd5b1e817279a399e0ebf31362abf",
+    "tests/fixtures/sync-join-browser.ts": "cc5cdc274226c2dbb2d73db700ed20b9eebda31c6b456cbbfd148da40899af4b",
+    "tests/operators-db.test.ts": "a2493a438bb0783528353f8fb942c66d0d679a577b4220bf940c8b54a2b5bb16",
+    "tests/sync-canonical.test.ts": "cccb00a3087e7b9dfafbf23c110343b36c86ba82139ff5f923e87dae43cea6f4",
+    "tests/sync-coverage-db.test.ts": "36061d04fa3a7700ed4eea37f97fb8d6726ea7da35ceabab724db6d3dc038356",
+    "tests/sync-coverage-sql.test.ts": "822a65095444770b6b5a03dc10e01723f8e86bf974fdad3c07e06134c2647e71",
+    "tests/sync-download-db.test.ts": "df09c9d2d3c2e490adee55d196456bf0e2e5014bc778ccf50669900b3e6a3542",
+    "tests/sync-feed.test.ts": "2f91d7a4f1162045783eac52fa5ff09d52bab038b4453c6dff57fc236227a911",
+    "tests/sync-images-db.test.ts": "cae7593ba9c4ad064b6041cb02e29d9b60aaab7fba6fcd428378f99d7927a770",
+    "tests/sync-join-db.test.ts": "f064115e54f0c743362de0fa173fdddb276e8db6ec9b25735d072e30de7cb0a3",
+    "tests/sync-join-fixture.ts": "39d67b3b2be7897610bf914583c52101d7f736ef993df891bc392a4f1e92253c"
+  }
+}

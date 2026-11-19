@@ -26,7 +26,9 @@ async function captureImageHashes(images:readonly StoredInboxImage[]):Promise<st
 export async function captureDatabaseInbox(db:LocalStore,input:SharedInboxInput):Promise<StoredInboxItem> {
   const content=await prepareInboxContent(input),hashes=await captureImageHashes(content.images);
   return db.transaction('rw',db.inboxItems,db.businesses,db.outlets,db.members,db.events,async()=>{
-    const command=captureInboxCommand(content,await db.setup());
+    // A pending cloud selection on an empty device grants no shop authority.
+    // Keep incoming shares unassigned while its canonical join is in flight.
+    const command=captureInboxCommand(content,await db.businesses.count()?await db.setup():null);
     const write=async()=>{await db.inboxItems.add(command.item);if(command.event)await db.events.add(command.event);return command.item;};
     return command.event&&hashes!==null?withOutboxIntent(db,inboxCaptureIntent(command.item,command.event,hashes),write):write();
   });

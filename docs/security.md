@@ -6,6 +6,13 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [canonical join boundary](m31-canonical-join.md) retains real historical member
+references without phones, Auth identities, active authority or invented outlet
+assignments. Existing direct member RLS is unchanged. Fresh account/operator/scope
+metadata is required before atomic activation; cached join proof cannot unlock a
+revoked operator. The internal canonical base and admission contain fingerprints
+and opaque sync cursors, with no actual connection settings or server secrets.
+
 This includes legacy service-role keys, database passwords and personal access
 tokens. Do not import them into browser code or write them to logs. Publishable
 keys are designed for clients, but this repository still keeps actual deployment

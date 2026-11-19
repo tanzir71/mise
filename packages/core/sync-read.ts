@@ -2,9 +2,10 @@ import {cloudRecordMaps,decodeCommandRecord} from './cloud-records';
 import type {BackupTable} from './backup-tables';
 import {parseSyncSnapshot} from './sync-snapshot';
 export const syncReadHeader='X-Mise-Sync-Outlet',syncReadBodyLimit=256000,syncPartBudget=196608,syncPageLimit=524288,syncWireLimit=786432;
-export type SyncTable=typeof cloudRecordMaps[BackupTable]['table']|'member_outlets'|'customer_outlets'|'inbox_images';
+export type SyncTable=typeof cloudRecordMaps[BackupTable]['table']|'member_outlets'|'customer_outlets'|'inbox_images'|'member_refs';
 export const syncRecordColumns:Readonly<Record<SyncTable,readonly string[]>>=Object.freeze({
  ...Object.fromEntries(Object.entries(cloudRecordMaps).map(([key,map])=>[map.table,Object.freeze([...new Set([...Object.keys(map.fields),...(key==='businesses'?[]:['business_id'])])])])),
+ member_refs:Object.freeze(['id','business_id','created_at','updated_at','name','role']),
  member_outlets:Object.freeze(['business_id','member_id','outlet_id']),customer_outlets:Object.freeze(['business_id','outlet_id','customer_id']),inbox_images:Object.freeze(['id','business_id','outlet_id','inbox_item_id','position','name','type','size','sha256','created_at','updated_at','uploaded_at'])
 }) as Readonly<Record<SyncTable,readonly string[]>>;
 export interface SyncScope {businessId:string;outletId:string;actorId:string;accountHash:string;role:'owner'|'manager';epoch:string;scopeVersion:string}
