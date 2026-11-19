@@ -644,6 +644,8 @@ const api = {
       applications: await db.syncApplications.toArray(),
       admissions: await db.syncAdmissions.toArray(),
       operator: await db.operatorState.get('active'),
+      recoveries: await db.scopeRecoveries.toArray(),
+      syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>
           item.images.map(

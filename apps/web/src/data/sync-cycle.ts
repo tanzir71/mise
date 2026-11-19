@@ -24,6 +24,7 @@ import { newInboxId } from '@mise/core/inbox';
 import { SyncImageError } from '@mise/core/sync-images';
 import { SyncCoverageError } from '@mise/core/sync-coverage';
 import { UploadAdmissionError } from '@mise/core/sync-upload-admission';
+import { ScopeRecoveryError } from '@mise/core/scope-recovery';
 import type { MiseDatabase } from './db';
 import type { PhoneAuth } from './phone-auth';
 import type { CommandAccount, CommandAuthorization } from './command-request';
@@ -136,7 +137,8 @@ function problem(error: unknown): SyncProblem {
     error instanceof CloudSyncReadError ||
     error instanceof SyncImageError ||
     error instanceof SyncCoverageError ||
-    error instanceof UploadAdmissionError
+    error instanceof UploadAdmissionError ||
+    error instanceof ScopeRecoveryError
   )
     return error.kind === 'integrity' ? 'review' : error.kind;
   if (error instanceof OperatorContextError) return error.kind;

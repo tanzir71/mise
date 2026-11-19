@@ -2,13 +2,22 @@
 
 Run `pnpm build`, then `pnpm qa:visual`. The command starts a production preview if one is not running. Set `BASE_PATH=/mise/` for a Pages build or `PREVIEW_URL` to use an existing preview at its complete base URL. A supplied preview URL must end in `/`.
 
-Open `qa/report.html`. The current suite has 89 comparisons: 64 landing/setup, seven M10 shell, six M11 catalogue, six M12 counter/receipt/log and six M13 khata/list/profile/sheet captures. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. CI uploads them as `visual-qa` and links the artifact in the run summary.
+Open `qa/report.html`. The current suite has 217 comparisons across landing/setup and implemented app views, including five existing-outlet recovery reviews. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. Workflows remain disabled at the owner's request; local reports and three committed key screenshots document each UI delivery.
 
 References come from `sectionReferences` in `handover/exports/landing-assets.json`. Desktop setup has one full-frame export, so its individual comparisons use explicitly listed reference regions in `qa/configs/landing.json`. The full frame is included too. Phone landing sections have desktop references; their responsive reflow is intentionally different. The setup phone reference includes browser/OS UI supplied by the real device, not by the webpage.
 
 Pixelmatch differences are informational. Reference views keep their aspect ratio and scale to the implementation capture's width. Both images are padded white to the taller height; extra content is counted rather than cropped away. The report shows original/reference/implementation dimensions and any reference region. Threshold is 0.1 and antialiasing is excluded. Missing references, unavailable pages and page overflow fail the command. A low percentage alone does not establish a visual match.
 
 For every UI delivery, link its Actions artifact and commit three key captures under `docs/screenshots/` in the milestone notes. The owner now requests direct commits to main without PRs. Keep reference exports unchanged.
+
+The M31 recovery config sets `scopeRecoveryFixture` to create a fresh original
+owner shop, turn on flagged sync, add offline work and review a changed epoch
+through actual app controls and isolated scoped SQL/HTTP. Auth, Realtime and
+object Storage use explicit local test adapters. Its service bundle is generated
+under ignored `.private/`, is closed after the run and never enters site output.
+No private deployment configuration is read. M31 has no dedicated recovery frame;
+the config names the existing M27 and Desktop 14 references and labels the visual
+differences informational.
 
 ## App milestones
 

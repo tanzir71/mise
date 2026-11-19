@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
-import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Button, Card, StatusWord } from '@mise/ui/primitives.tsx';
 import { MiseIcon } from '@mise/ui/MiseIcon.tsx';
@@ -20,6 +20,7 @@ const ShopLinkSettings = lazy(() => import('./ShopLinkSettings').then(module => 
 const RestorePage = lazy(() => import('./BackupTools').then(module => ({default:module.RestorePage})));
 const CloudSyncStatus=lazy(()=>import('./CloudSync').then(module=>({default:module.CloudSyncStatus})));
 const CloudJoin=lazy(()=>import('./CloudJoin').then(module=>({default:module.CloudJoin})));
+const CloudRecovery=lazy(()=>import('./CloudRecovery').then(module=>({default:module.CloudRecovery})));
 const CloudSetup=lazy(()=>import('./CloudSetup').then(module=>({default:module.CloudSetup})));
 const Inbox=lazy(()=>import('./Inbox').then(module=>({default:module.Inbox})));
 const Stock = lazy(() => import('./Stock').then(module => ({default:module.Stock})));
@@ -28,6 +29,7 @@ const ClosingPrint = lazy(() => import('./ClosingSummary').then(module => ({defa
 import { useAppUpdate } from './app-update';
 import {readLocalWorkspace} from './data/operator-state';
 import {reviewStoredOperatorAuth,watchOperatorAuth} from './data/operator-auth';
+import {parseScopeRecoverySession} from '@mise/core/scope-recovery';
 const OperatorPicker=lazy(()=>import('./OperatorPicker').then(module=>({default:module.OperatorPicker})));
 import './app.css';
 
@@ -39,16 +41,28 @@ class StorageBoundary extends Component<{ children: ReactNode }, { error: boolea
 function ShopWorkspace({ counterEnabled, khataEnabled, ordersEnabled, stockEnabled, todayEnabled, exportsEnabled,pwaEnabled,shopLinksEnabled,pasteOrdersEnabled,qrPostersEnabled,shareTargetEnabled,cloudSetupEnabled,cloudSyncEnabled }: { counterEnabled: boolean; khataEnabled: boolean; ordersEnabled: boolean; stockEnabled: boolean; todayEnabled: boolean; exportsEnabled: boolean; pwaEnabled:boolean; shopLinksEnabled:boolean; pasteOrdersEnabled:boolean; qrPostersEnabled:boolean;shareTargetEnabled:boolean;cloudSetupEnabled?:boolean;cloudSyncEnabled?:boolean }) {
   const workspace = useLiveQuery(() => readLocalWorkspace(db)),setup=workspace?.setup;
   const [joinMode,setJoinMode] = useState(false);
-  const join = useLiveQuery(async()=>({session:cloudSyncEnabled?await db.joinSessions.get('active'):undefined}),[cloudSyncEnabled]);
+  const location=useLocation(),navigate=useNavigate();
+  const join = useLiveQuery(async()=>{const raw=cloudSyncEnabled?await db.scopeRecoveries.get('active'):undefined;return {session:cloudSyncEnabled?await db.joinSessions.get('active'):undefined,recovery:raw?parseScopeRecoverySession(raw):null};},[cloudSyncEnabled]);
   const [restoreMode,setRestoreMode] = useState(false),[switching,setSwitching]=useState(false),[guardFailure,setGuardFailure]=useState(false),[reviewed,setReviewed]=useState<number|null>(null);
   const cloudRevision=workspace?.selection?.connection?workspace.selection.revision:null;
+  const recoveryPhase=join?.recovery?.phase,recoveryRevision=join?.recovery?.revision,canRecover=workspace?.canRecover;
+  useEffect(()=>{
+    if(!cloudSyncEnabled||!canRecover||recoveryPhase!=='admitted'||location.pathname==='/settings/recovery')return;
+    let current=true;
+    // The live query may still show admitted after activation commits ready.
+    // Re-read before redirecting so a completed transfer can return to the shop.
+    void db.scopeRecoveries.get('active').then(raw=>{if(current&&raw?.kind==='session'&&raw.phase==='admitted')navigate('/settings/recovery',{replace:true});}).catch(()=>{if(current)setGuardFailure(true);});
+    return()=>{current=false;};
+  },[cloudSyncEnabled,canRecover,recoveryPhase,recoveryRevision,location.pathname,navigate]);
   useEffect(()=>watchOperatorAuth(db,localStorage,()=>setGuardFailure(true)),[]);
   useEffect(()=>{if(cloudRevision===null)return;let current=true;void reviewStoredOperatorAuth(db,localStorage).then(()=>{if(current)setReviewed(cloudRevision);}).catch(()=>{if(current)setGuardFailure(true);});return()=>{current=false;};},[cloudRevision]);
-  if(guardFailure)return <main className="onboarding"><h1>Review this device</h1><p>The saved operator could not be checked. Keep your local records and reload to try again.</p><Button onClick={()=>location.reload()}>Reload Mise</Button></main>;
+  if(guardFailure)return <main className="onboarding"><h1>Review this device</h1><p>The saved operator could not be checked. Keep your local records and reload to try again.</p><Button onClick={()=>window.location.reload()}>Reload Mise</Button></main>;
   if (!workspace) return <main className="onboarding" aria-busy="true"><p>{c.gettingStarted}…</p></main>;
   if(cloudSyncEnabled&&!join)return <main className="onboarding" aria-busy="true"><p>Checking this device…</p></main>;
   if(cloudSyncEnabled&&(joinMode||join?.session&&['pending','paused'].includes(join.session.phase)))return <Suspense fallback={<p aria-busy="true">Opening outlet join…</p>}><CloudJoin onBack={()=>setJoinMode(false)} onJoined={()=>setJoinMode(false)}/></Suspense>;
-  if(workspace.requiresSelection||switching)return <Suspense fallback={<p aria-busy="true">Opening operator selection…</p>}><OperatorPicker workspace={workspace} onChoose={()=>setSwitching(false)} onBack={workspace.requiresSelection?undefined:()=>setSwitching(false)}/></Suspense>;
+  if(cloudSyncEnabled&&workspace.canRecover&&join?.recovery?.phase==='admitted'&&location.pathname!=='/settings/recovery')return <main className="onboarding" aria-busy="true"><p>Checking the reviewed connection…</p></main>;
+  if(cloudSyncEnabled&&workspace.canRecover&&location.pathname==='/settings/recovery')return <main className="onboarding"><Suspense fallback={<p aria-busy="true">Opening outlet recovery…</p>}><CloudRecovery onBack={()=>navigate('/settings/sync')} onRecovered={()=>navigate('/settings/sync')}/></Suspense></main>;
+  if(workspace.requiresSelection||switching)return <Suspense fallback={<p aria-busy="true">Opening operator selection…</p>}><OperatorPicker recoveryEnabled={cloudSyncEnabled} workspace={workspace} onChoose={()=>setSwitching(false)} onBack={workspace.requiresSelection?undefined:()=>setSwitching(false)}/></Suspense>;
   if(cloudRevision!==null&&reviewed!==cloudRevision)return <main className="onboarding" aria-busy="true"><p>Checking this device’s operator…</p></main>;
   return setup ? <Shell key={[setup.business.id,setup.outlet.id,setup.owner.id].join('/')} setup={setup} onSwitchOperator={workspace.choices.length>1||workspace.cloudBound?()=>setSwitching(true):undefined} counterEnabled={counterEnabled} khataEnabled={khataEnabled} ordersEnabled={ordersEnabled} stockEnabled={stockEnabled} todayEnabled={todayEnabled} exportsEnabled={exportsEnabled} pwaEnabled={pwaEnabled} shopLinksEnabled={shopLinksEnabled} pasteOrdersEnabled={pasteOrdersEnabled} qrPostersEnabled={qrPostersEnabled} shareTargetEnabled={shareTargetEnabled} cloudSetupEnabled={cloudSetupEnabled} cloudSyncEnabled={cloudSyncEnabled} /> : exportsEnabled && restoreMode ? <Suspense fallback={<p aria-busy="true">Opening restore…</p>}><RestorePage onBack={() => setRestoreMode(false)} /></Suspense> : <Onboarding onJoin={cloudSyncEnabled?()=>setJoinMode(true):undefined} showInstall={pwaEnabled} onRestore={exportsEnabled ? () => setRestoreMode(true) : undefined} />;
 }

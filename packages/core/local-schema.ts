@@ -9,4 +9,5 @@ import {localApplicationTableNames} from './sync-materialize';
 import {localAdmissionTableNames} from './sync-upload-admission';
 import {localSessionTableNames} from './sync-session';
 import {localJoinTableNames} from './join-session';
-export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames] as const;
+import {localRecoveryTableNames} from './scope-recovery';
+export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames] as const;

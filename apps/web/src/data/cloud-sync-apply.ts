@@ -23,7 +23,7 @@ import {prepareCanonicalWrites,withCanonicalWrites,assertCanonicalTransaction,ty
 
 export interface ApplyCanonicalInput {readId:string;target:SyncDownloadTarget;expectedOperatorRevision:number;authKey:string}
 export interface AppliedCanonical {readId:string;canonicalHash:string;applicationHash:string;covered:number;pending:number;sequence:number}
-interface Source {binding:LocalCloudState;operator:LocalOperatorState;queue:LocalOutboxEntry[];portable:LocalOutboxEntry[];working:MiseBackup;queueToken:string}
+export interface Source {binding:LocalCloudState;operator:LocalOperatorState;queue:LocalOutboxEntry[];portable:LocalOutboxEntry[];working:MiseBackup;queueToken:string}
 interface OwnerBootstrap {binding:LocalCloudState;original:MiseBackup;plan:CloudUploadPlan;source:SyncUploadCoverageSource;proof:SyncUploadCoveragePage}
 type Origin={installed:CanonicalState;owner?:never}|{installed:null;owner:OwnerBootstrap};
 export interface OwnerUploadCoverageRemote {get(source:SyncUploadCoverageSource,signal?:AbortSignal):Promise<SyncUploadCoveragePage>}
@@ -67,6 +67,19 @@ async function assertWorkingCoverage(origin:Origin,s:Source):Promise<void>{
  if(backupToken(createBackup(tables,baseline.exportedAt))!==backupToken(s.working))throw fail('integrity');
 }
 function response(base:LocalCanonicalSnapshot,application:LocalCanonicalApplication):AppliedCanonical{return {readId:base.snapshot.readId,canonicalHash:base.hash,applicationHash:application.hash,covered:application.covered.length,pending:application.pending.length,sequence:application.throughSequence};}
+/** Scope recovery reads original work without activating a cached or newly selected role. */
+export async function readRecoveryWorkingSource(db:MiseDatabase,installed:CanonicalState,expectedRevision:number):Promise<Source>{
+ return db.transaction('r',db.tables,async()=>{
+  await assertCanonicalState(db,installed);
+  const binding=parseLocalCloudState(await db.cloudState.get('binding')),operator=parseLocalOperatorState(await db.operatorState.get('active')),scope=installed.base.snapshot.scope,c=operator.connection;
+  if(operator.revision!==expectedRevision||operator.businessId!==scope.businessId||operator.outletId!==scope.outletId||operator.actorId!==scope.actorId||c?.accountHash!==scope.accountHash||c.targetHash!==binding.targetHash)throw fail();
+  const queue=(await db.outbox.where('uploadId').equals(binding.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
+  if(queue.length!==binding.sequence||queue.some((row,i)=>row.sequence!==i+1)||await db.outbox.count()!==queue.length)throw fail('integrity');
+  const parsed=queue.map(row=>parseLocalOutboxEntry(row,binding)),portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);
+  return {binding,operator,queue,portable,working,queueToken:syncDownloadToken(portable)};
+ });
+}
+export function assertRecoveryWorkingCoverage(installed:CanonicalState,source:Source){return assertWorkingCoverage({installed},source);}
 async function fresh(scope:SyncScope,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal){
  signal?.throwIfAborted();const context=parseOperatorContext(await refresh({...scope,version:1,businessName:null,outletName:null,actorName:null}));signal?.throwIfAborted();if(syncDownloadToken(parseSyncScope(context))!==syncDownloadToken(scope))throw fail();
 }
@@ -90,7 +103,7 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
  const originalTimes=new Map(s.portable.flatMap(row=>row.commands.map(command=>[command.id,row.at] as const)));
  for(const c of commands)if(!covered.has(c.id)){pending.push(c);working=await replayPendingIntent(working,c,s.operator.actorId,state.window.createdAt,s.working,originalTimes.get(c.id));}
  for(const item of s.working.tables.inboxItems.filter(i=>i.outletId===null)){if(working.tables.inboxItems.some(i=>i.id===item.id))throw fail('retained');working.tables.inboxItems.push(structuredClone(item));}
- working=createBackup(working.tables,working.exportedAt);const baseHash=await canonicalSnapshotHash(snapshot),value:CanonicalApplication={id:state.id,version:1,previousApplicationHash:previous?.hash??null,previousBaseHash:previousBase?.hash??null,readSourceHash:state.sourceHash,readSeal:state.seal!,cursor:state.receivedCursor!,baseHash,throughSequence:s.binding.sequence,queueHash:await materializationHash(originalRows(s.portable)),workingHash:await workingSnapshotHash(working),overlay:materializedRows(snapshot.backup,working),covered:[...covered.values()].sort((a,b)=>a.id.localeCompare(b.id)),pending:pending.map(c=>c.id),proofs:proofs.map(p=>({batchHash:p.batchHash,sourceHash:p.sourceHash,resultHash:p.resultHash!}))},application:LocalCanonicalApplication={...value,hash:await applicationHash(value)},base:LocalCanonicalSnapshot={id:'active',version:2,snapshot,hash:baseHash,applicationHash:application.hash};
+ working=createBackup(working.tables,working.exportedAt);const baseHash=await canonicalSnapshotHash(snapshot),value:CanonicalApplication={id:state.id,version:1,previousApplicationHash:previous?.hash??null,previousBaseHash:previousBase?.hash??null,readSourceHash:state.sourceHash,readSeal:state.seal!,cursor:state.receivedCursor!,baseHash,throughSequence:s.binding.sequence,queueHash:await materializationHash(originalRows(s.portable)),workingHash:await workingSnapshotHash(working),overlay:materializedRows(snapshot.backup,working),covered:[...covered.values()].sort((a,b)=>a.id.localeCompare(b.id)),pending:pending.map(c=>c.id),proofs:proofs.map(p=>({batchHash:p.batchHash,sourceHash:p.sourceHash,resultHash:p.resultHash!})),...(previous?.recoveryId?{recoveryId:previous.recoveryId}:{})},application:LocalCanonicalApplication={...value,hash:await applicationHash(value)},base:LocalCanonicalSnapshot={id:'active',version:2,snapshot,hash:baseHash,applicationHash:application.hash};
  const uploadValue=origin.owner?{id:'owner-upload' as const,version:1 as const,plan:origin.owner.plan,source:origin.owner.source,proof:origin.owner.proof,initialBaseHash:baseHash}:null,uploadAdmission:LocalOwnerUploadAdmission|null=uploadValue?{...uploadValue,hash:await ownerUploadAdmissionHash(uploadValue)}:null;
  const stored=storedInboxItems(working.tables.inboxItems),oldStored=storedInboxItems(s.working.tables.inboxItems),changes:LocalRowChange[]=materializedRows(s.working,working).map(change=>change.table!=='inboxItems'?change:{...change,before:oldStored.find(i=>i.id===change.key)??null,after:stored.find(i=>i.id===change.key)??null});
  // Release every changed existing key before inserting replacements. This also

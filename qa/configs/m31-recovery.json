@@ -1,0 +1,21 @@
+{
+  "title": "M31 — Original outlet scope recovery",
+  "pages": [
+    {
+      "id": "m31-recovery-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [360, 390],
+      "scopeRecoveryFixture": true,
+      "note": "M31 specifies no recovery frame. Reuses the supplied M27 More shell, setup forms and existing tokens. Fresh actual app/HTTP/SQL recovery review; Auth, Realtime and object Storage are isolated local fixtures. Differences are informational.",
+      "sections": [{"selector": ".cloud-recovery", "id": "review", "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]
+    },
+    {
+      "id": "m31-recovery-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [768, 1024, 1440],
+      "scopeRecoveryFixture": true,
+      "note": "M31 specifies no recovery frame. Reuses the supplied Desktop 14 Business data shell, setup forms and existing tokens. Fresh actual app/HTTP/SQL recovery review; Auth, Realtime and object Storage are isolated local fixtures. Differences are informational.",
+      "sections": [{"selector": ".cloud-recovery", "id": "review", "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"}]
+    }
+  ]
+}

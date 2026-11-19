@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import { MiseIcon } from '@mise/ui/MiseIcon.tsx';
 import type { SetupSnapshot } from '@mise/core/models';
@@ -33,8 +33,9 @@ function useSyncView() {
         .anyOf('pending', 'retained')
         .count(),
       binding = await db.cloudState.get('binding'),
-      operator = await db.operatorState.get('active');
-    return { state, unsent, binding, operator };
+      operator = await db.operatorState.get('active'),
+      canRecover = await db.syncCanonical.where('id').equals('active').count() > 0;
+    return { state, unsent, binding, operator, canRecover };
   }, []);
 }
 function sameConnection(config: CloudConnection) {
@@ -165,6 +166,7 @@ export function CloudSyncControls({
   auth: PhoneAuth | null;
   online: boolean;
 }) {
+  const navigate=useNavigate();
   const view = useSyncView(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -265,6 +267,7 @@ export function CloudSyncControls({
         </p>
       ) : null}
       <footer>
+        {view?.binding&&view.canRecover&&state?.problem==='review'?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/recovery')}>Review outlet access</Button>:null}
         {!state || state.problem === 'auth' || needsRebind ? (
           <Button
             disabled={busy || !online || !verified || !config}

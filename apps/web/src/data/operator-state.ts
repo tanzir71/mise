@@ -8,13 +8,13 @@ import {syncDownloadToken} from '@mise/core/sync-download';
 import {assertCanonicalState,readCanonicalState} from './cloud-canonical-state';
 import type {JoinSession} from '@mise/core/join-session';
 
-export interface LocalWorkspace {setup:SetupSnapshot|null;selection:LocalOperatorState|null;choices:OperatorChoice[];message:string;requiresSelection:boolean;cloudBound:boolean}
+export interface LocalWorkspace {setup:SetupSnapshot|null;selection:LocalOperatorState|null;choices:OperatorChoice[];message:string;requiresSelection:boolean;cloudBound:boolean;canRecover:boolean}
 export async function readLocalWorkspace(db:LocalStore):Promise<LocalWorkspace> {
- return db.transaction('r',db.businesses,db.outlets,db.members,db.operatorState,db.cloudState,async()=>{
+ return db.transaction('r',[db.businesses,db.outlets,db.members,db.operatorState,db.cloudState,db.syncCanonical],async()=>{
   const [businesses,outlets,members,saved,binding]=await Promise.all([db.businesses.toArray(),db.outlets.toArray(),db.members.toArray(),db.operatorState.get('active'),db.cloudState.get('binding')]);
-  let cloudBound=binding!==undefined&&parseLocalCloudState(binding).phase!=='cancelled';const choices=operatorChoices(businesses,outlets,members);let selection:LocalOperatorState|null=null;
-  try{selection=saved===undefined?null:parseLocalOperatorState(saved);cloudBound=cloudBound||selection?.connection!==null&&selection?.connection!==undefined;return {setup:resolveOperator(businesses,outlets,members,selection),selection,choices,message:'',requiresSelection:false,cloudBound};}
-  catch(error){if(!(error instanceof OperatorContextError))throw error;return {setup:null,selection,choices,message:error.message,requiresSelection:businesses.length>0||saved!==undefined,cloudBound};}
+  let cloudBound=binding!==undefined&&parseLocalCloudState(binding).phase!=='cancelled';const choices=operatorChoices(businesses,outlets,members),canRecover=!!(await db.syncCanonical.where('id').equals('active').count());let selection:LocalOperatorState|null=null;
+  try{selection=saved===undefined?null:parseLocalOperatorState(saved);cloudBound=cloudBound||selection?.connection!==null&&selection?.connection!==undefined;return {setup:resolveOperator(businesses,outlets,members,selection),selection,choices,message:'',requiresSelection:false,cloudBound,canRecover};}
+  catch(error){if(!(error instanceof OperatorContextError))throw error;return {setup:null,selection,choices,message:error.message,requiresSelection:businesses.length>0||saved!==undefined,cloudBound,canRecover};}
  });
 }
 function nextRevision(saved:unknown,expected:number|null){const previous=saved===undefined?null:parseLocalOperatorState(saved);if((previous?.revision??null)!==expected)throw new OperatorContextError('The operator changed in another tab. Review the current selection.');if(previous?.revision===Number.MAX_SAFE_INTEGER)throw new OperatorContextError('Keep a backup before changing this operator.');return (previous?.revision??0)+1;}
@@ -31,7 +31,7 @@ export async function selectCloudOperator(db:LocalStore,input:OperatorContext,co
  const original=parseOperatorContext(input),{targetHash,authKey}=connection;if(!/^[a-f0-9]{64}$/.test(targetHash)||!operatorAuthKey(authKey))throw new OperatorContextError('Keep the original connection fingerprint.');
  const context=parseOperatorContext(await refresh(structuredClone(original)));for(const k of ['businessId','outletId','actorId','accountHash']as const)if(context[k]!==original[k])throw new OperatorContextError('The signed-in account or outlet changed. Review it again.');
  const preliminary=await db.cloudState.get('binding'),candidate=preliminary===undefined?null:parseLocalCloudState(preliminary),same=candidate?.targetHash===targetHash&&candidate.businessId===context.businessId&&candidate.outletId===context.outletId&&candidate.ownerId===context.actorId,hasBase=await db.syncCanonical.get('active'),canonical=same&&(candidate?.version===2||hasBase)?await readCanonicalState(db):null;
- return db.transaction('rw',[db.operatorState,db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.businesses,db.outlets,db.members,...(expectedJoin?[db.joinSessions]:[])],async()=>{
+ return db.transaction('rw',[db.operatorState,db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.scopeRecoveries,db.businesses,db.outlets,db.members,...(expectedJoin?[db.joinSessions]:[])],async()=>{
   const tx=Dexie.currentTransaction,check=()=>{if(!assertActive)return;const result:unknown=assertActive();if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw new OperatorContextError();}if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new OperatorContextError();};check();
   const saved=await db.operatorState.get('active'),revision=nextRevision(saved,expectedRevision),raw=await db.cloudState.get('binding'),binding=raw===undefined?null:parseLocalCloudState(raw);
   if(expectedJoin&&(expectedJoin.phase!=='pending'||syncDownloadToken(await db.joinSessions.get('active'))!==syncDownloadToken(expectedJoin)))throw new OperatorContextError('The saved join changed. Review the current selection.');

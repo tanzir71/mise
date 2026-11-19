@@ -16,6 +16,7 @@ export interface CanonicalApplication {
  id:string;version:1;previousApplicationHash:string|null;previousBaseHash:string|null;readSourceHash:string;readSeal:string;cursor:string;
  baseHash:string;throughSequence:number;queueHash:string;workingHash:string;overlay:MaterializedRow[];
  covered:SyncCoverageIntent[];pending:string[];proofs:{batchHash:string;sourceHash:string;resultHash:string}[];
+ recoveryId?:string;
 }
 export interface LocalCanonicalApplication extends CanonicalApplication {hash:string}
 export const localApplicationTableNames=['syncApplications'] as const;

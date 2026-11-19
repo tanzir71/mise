@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [existing-outlet recovery boundary](m31-scope-recovery.md) pins the original
+connection and phone account through fresh scope review and every native write.
+Retained original shop copies contain portable shop data, not connection settings,
+tokens or deployment credentials. Old local hashes cannot restore authority.
+No hosted configuration or credential changes are required for this increment.
+
 The [concurrent-intent boundary](m31-concurrent-intents.md) preserves original
 command hashes, scoped source snapshots and service-only completion. Allowing an
 observed older revision for additive or nonfinancial actions does not grant new

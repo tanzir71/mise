@@ -65,6 +65,10 @@ async function identity(db: LocalStore, expected: SessionSelection) {
         binding.join.role !== t.role ||
         binding.join.epoch !== expected.epoch ||
         binding.join.scopeVersion !== expected.scopeVersion)) ||
+    (binding.version === 3 &&
+      (!binding.recovery || binding.recovery.scope.accountHash !== t.accountHash ||
+        binding.recovery.scope.role !== t.role || binding.recovery.scope.epoch !== expected.epoch ||
+        binding.recovery.scope.scopeVersion !== expected.scopeVersion)) ||
     operator.phase !== 'active' ||
     operator.revision !== expected.operatorRevision ||
     operator.businessId !== t.businessId ||

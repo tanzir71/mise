@@ -1,0 +1,100 @@
+{
+  "checkedAt": "2026-11-19T17:54:10.031Z",
+  "parentCommit": "900116648ea420a0b16d68334d2dde8d8e0140e3",
+  "scope": "Existing canonical outlet scope recovery; full handover goal and M30/M31 acceptance remain open",
+  "source": {
+    "changedImplementationAndTestFiles": 40,
+    "sha256": "0e08fcd6972931825331e4373777edc654bc0f49f60cccbc9e4c76a6f6c8873d"
+  },
+  "localStorage": {
+    "schema": 21,
+    "stores": 35,
+    "portableSchema": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 129,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "units": {
+      "files": 133,
+      "passed": 2443,
+      "failed": 0
+    },
+    "rootBrowser": {
+      "passed": 17,
+      "failed": 0
+    },
+    "pagesBrowser": {
+      "base": "/mise/",
+      "passed": 437,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 1235501.828
+    },
+    "recoveryBrowserCases": [
+      {
+        "title": "two actual browsers recover a changed epoch with accepted cash, offline actions and complete images intact",
+        "durationMs": 24830
+      },
+      {
+        "title": "a fresh role review resumes an admitted shop after a lost activation response without applying it twice",
+        "durationMs": 10605
+      },
+      {
+        "title": "changing phone accounts after review keeps original money, images and backup and requires fresh original-account review",
+        "durationMs": 13485
+      }
+    ],
+    "visual": {
+      "comparisons": 217,
+      "recoveryComparisons": 5,
+      "horizontalOverflows": 0,
+      "differences": "informational against supplied existing references"
+    },
+    "axe": {
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "serious": 0,
+      "critical": 0
+    },
+    "figmaExports": 270,
+    "builds": [
+      "/",
+      "/mise/"
+    ]
+  },
+  "hosted": {
+    "changed": false,
+    "functionsDerived": 7,
+    "allByteIdenticalToDeployedBaseline": true,
+    "phoneOtpCommissioned": false,
+    "positiveSignedOwnerHostedAcceptance": false
+  },
+  "publication": {
+    "cloudSyncDefault": false,
+    "workflowsDisabled": true,
+    "newCiArtifact": false,
+    "newPagesDeployment": false
+  },
+  "privacy": {
+    "checkedAt": "2026-11-19T17:55:43.516Z",
+    "knownPrivateValuesCompared": 10,
+    "credentials": 0,
+    "currentDeploymentReferences": 0,
+    "historicalNonsecretReferences": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "commitPushBuildGuardsEnabled": true
+  }
+}

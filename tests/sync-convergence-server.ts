@@ -610,6 +610,12 @@ export async function startConvergenceServer(
         managerId,
       ]);
     },
+    async changeEpoch() {
+      await db.exec('update private.sync_epoch set id=gen_random_uuid()');
+    },
+    async promoteManager() {
+      await db.query("update public.members set role='owner' where id=$1", [managerId]);
+    },
     async financialCount(ids: string[]) {
       return (
         await db.query<{ n: number }>(

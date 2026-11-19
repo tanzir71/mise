@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import {backupTableNames,emptyBackupTables,type BackupTable} from '@mise/core/backup-tables';
 import {backupToken,createBackup} from '@mise/core/backup';
-import {parseLocalCloudState,type LocalCloudState,type LocalOutboxEntry} from '@mise/core/local-outbox';
+import {originalCloudAdmission,parseLocalCloudState,type LocalCloudState,type LocalOutboxEntry} from '@mise/core/local-outbox';
 import {parseShopCommand,parseShopCommandReceipt,type ShopCommand,type ShopCommandReceipt} from '@mise/core/shop-commands';
 import {assertCloudUploadCurrent,cloudUploadManifestHash,readCloudUpload,type CloudUploadPlan} from '@mise/core/cloud-upload';
 import {parseCloudUploadProgress,type CloudUploadReceipt} from '@mise/core/cloud-upload-runner';
@@ -30,11 +30,13 @@ export {entry as parseLocalOutboxEntry};
 function bound(state:LocalCloudState,id:string,targetHash:string,manifestHash:string,scope?:Pick<LocalCloudState,'businessId'|'outletId'|'ownerId'>){if(state.uploadId!==id||state.targetHash!==targetHash||state.manifestHash!==manifestHash||scope&&(state.businessId!==scope.businessId||state.outletId!==scope.outletId||state.ownerId!==scope.ownerId))throw new Error('Use the original account, connection and upload for this local queue.');}
 async function joinedOperator(db:MiseDatabase,binding:LocalCloudState){
  const raw=await db.operatorState.get('active');if(!raw&&binding.version===1)return null;const state=parseLocalOperatorState(raw),join=binding.join;
+ if(binding.version===3){const scope=binding.recovery!.scope,c=state.connection;if(state.phase!=='active'||state.businessId!==scope.businessId||state.outletId!==scope.outletId||state.actorId!==scope.actorId||state.role!==scope.role||c?.targetHash!==binding.targetHash||c.accountHash!==scope.accountHash||c.epoch!==scope.epoch||c.scopeVersion!==scope.scopeVersion)throw new Error('Verify the recovered original operator before sending local changes.');return state;}
  if(state.phase!=='active'||state.businessId!==binding.businessId||state.outletId!==binding.outletId||state.actorId!==binding.ownerId||binding.version===1&&(state.role!=='owner'||state.connection&&state.connection.targetHash!==binding.targetHash)||binding.version===2&&(!join||state.role!==join.role||state.connection?.targetHash!==binding.targetHash||state.connection.accountHash!==join.accountHash||state.connection.epoch!==join.epoch||state.connection.scopeVersion!==join.scopeVersion))throw new Error('Verify the original joined operator before sending local changes.');
  return state;
 }
 const deliveryToken=(binding:LocalCloudState,operator:LocalOperatorState|null)=>token({binding:{...binding,sequence:0},operator});
 const originalEntry=(value:LocalOutboxEntry)=>({...value,status:'pending',receipts:[]});
+function hasOriginalAdmission(binding:LocalCloudState){const original=originalCloudAdmission(binding);return binding.phase==='ready'&&(original.version===1?!!original.receipt:!!original.join);}
 
 /** Hold the shop transaction while checking the exact reviewed source and arming its fence. */
 export async function beginLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targetHash:string):Promise<LocalCloudState>{
@@ -87,7 +89,7 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
 export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand)=>Promise<ShopCommandReceipt>):Promise<{accepted:number;retained:number;pending:number}>{
- const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||initial.phase!=='ready'||(initial.version===1?!initial.receipt:!initial.join))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
+ const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
  const originalOperator=deliveryToken(initial,operator);
  async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('A local change is missing from the delivery queue. Keep a backup.');
@@ -112,13 +114,13 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
 /** Image bytes follow their accepted metadata. Retries retain every original queue record. */
 export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,put:(image:SyncImageDescriptor,blob:Blob,signal?:AbortSignal)=>Promise<InboxImageUploadReceipt>,signal?:AbortSignal):Promise<number>{
  const initial=parseLocalCloudState(await db.cloudState.get('binding'));
- if(initial.targetHash!==targetHash||initial.phase!=='ready'||(initial.version===1?!initial.receipt:!initial.join))throw new Error('Use the original image connection.');
+ if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Use the original image connection.');
  const originalScope=deliveryToken(initial,await joinedOperator(db,initial));
  const rows=await db.outbox.where('uploadId').equals(initial.uploadId).sortBy('sequence');
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('Keep the complete original image queue.');
  if(!rows.some(row=>row.commands.some(command=>command.type==='inbox.capture'&&command.input.images.length)))return 0;
  const canonical=await db.syncCanonical.get('active')?await readCanonicalState(db):null;
- if(!canonical&&initial.version===2)throw new Error('Keep the original device admission.');
+ if(!canonical&&initial.version!==1)throw new Error('Keep the original device admission.');
  let delivered=0;
  for(const raw of rows){
   const saved=entry(raw,initial);let sourceHash:string|undefined;
