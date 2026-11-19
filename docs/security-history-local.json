@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-11-19T23:46:21.528Z",
+  "scope": "Git privacy guard, reviewed legacy policy, regression tests and documentation, including bundled release notes",
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "typescript": true,
+      "astroFiles": 131,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "files": 135,
+      "passed": 2476,
+      "guardTests": 35,
+      "durationSeconds": 383.12
+    },
+    "productionBuilds": [
+      "/",
+      "/mise/"
+    ],
+    "ui": {
+      "unchangedAppComponentAndVerificationSources": 682,
+      "releaseNoteDataChanged": true,
+      "siteFiles": 467,
+      "newPagesBrowserRun": {
+        "startTime": "2026-11-19T23:27:25.642Z",
+        "duration": 710161.244,
+        "expected": 443,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "newVisualRun": {
+        "comparisons": 247,
+        "overflow": 0
+      },
+      "siteFingerprint": "f7b00119d9f35b6fedb32b1af1c4365653fa8503c4ad527c4c2e8718a7ed50f8",
+      "reusedUiVerification": false
+    },
+    "bulkValidation": {
+      "stockRows": 1000,
+      "stockRequestGateMs": 45000,
+      "supplierRows": 1000,
+      "supplierCaseTimeoutMs": 30000,
+      "limitsAndPayloadsUnchanged": true,
+      "quietFullSuitePassed": true
+    }
+  },
+  "policy": {
+    "baseline": "7005266a699b6309e53b8bf73a34ce8537343cfe",
+    "reviewedHistoricalNonsecretFindings": 22,
+    "opaqueFingerprints": 21,
+    "credentialExceptions": 0,
+    "newHistoricalIdentifiersBlocked": true,
+    "allHistoricalTreeNamesChecked": true,
+    "refsIncludingUnbornHeadChecked": true,
+    "shallowHistoryFailsClosed": true,
+    "missingPolicyFailsClosed": true
+  },
+  "regressions": {
+    "removedDeploymentFile": true,
+    "newCommitAndTagMessages": true,
+    "sharedEmptyBlobAliases": true,
+    "privateRefNames": true,
+    "legacyOnlyPushPermitted": true,
+    "laterIdentifierPushRejected": true,
+    "remoteUnchangedAfterRejectedPush": true,
+    "credentialExceptionRejected": true,
+    "utf16AndZipChecksRetained": true
+  },
+  "hostedChanges": false,
+  "credentialsChanged": false,
+  "historyRewritten": false,
+  "publication": {
+    "workflowsRemainDisabled": true,
+    "newCiRun": false,
+    "newCiArtifact": false,
+    "newPagesDeployment": false
+  },
+  "fullM30M31Acceptance": false
+}

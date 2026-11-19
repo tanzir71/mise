@@ -60,6 +60,8 @@ Behind the default-off sync flag, [Sync setup](docs/m31-sync-runtime.md) support
 
 Real Supabase settings and credentials stay outside the repository and public build. [Privacy checks](docs/security.md) run before commits, pushes and builds, alongside GitHub secret scanning and push protection.
 
+The [history guard](docs/security-history.md) permits only exact reviewed older nonsecret findings. New identifiers in commits, tags, branch names or historical filenames block the push even after current files have been cleaned.
+
 GitHub workflows are disabled at the owner’s request, so `main` can be ahead of the published Pages site.
 
 ## Run locally

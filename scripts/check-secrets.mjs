@@ -2,6 +2,7 @@ import {readFileSync,readdirSync,lstatSync} from 'node:fs';
 import {resolve,join,relative} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
 import {unzipSync} from 'fflate';
 
 const rules=[
@@ -53,31 +54,53 @@ function knownValues(directory){
   return result;
 }
 function walk(directory){const result=[];for(const entry of readdirSync(directory,{withFileTypes:true})){const path=join(directory,entry.name);if(entry.isSymbolicLink())continue;if(entry.isDirectory())result.push(...walk(path));else if(entry.isFile())result.push(path);}return result;}
+function legacyDeploymentFingerprints(){
+  const policy=JSON.parse(readFileSync(new URL('./legacy-deployment-findings.json',import.meta.url),'utf8'));
+  if(!policy||typeof policy!=='object'||Object.keys(policy).sort().join(',')!=='baseline,fingerprints,version'||policy.version!==1||typeof policy.baseline!=='string'||!/^[a-f0-9]{40}$/.test(policy.baseline)||!Array.isArray(policy.fingerprints)||policy.fingerprints.some(value=>typeof value!=='string'||!/^[a-f0-9]{64}$/.test(value))||new Set(policy.fingerprints).size!==policy.fingerprints.length)throw new Error('The reviewed historical deployment policy cannot be read.');
+  return new Set(policy.fingerprints);
+}
+function gitReferences(){
+  const values=git(['for-each-ref','--format=%(refname)']).split('\n').filter(Boolean),head=spawnSync('git',['symbolic-ref','--quiet','HEAD'],{encoding:'utf8',windowsHide:true});
+  if(head.status===0)values.push(head.stdout.trim());else if(head.status!==1)throw new Error('Git reference audit incomplete.');
+  return [...new Set(values)];
+}
 export function auditRepository({history=false,artifacts=false,knownDirectory}={}){
+  const legacy=legacyDeploymentFingerprints();
+  if(history&&git(['rev-parse','--is-shallow-repository']).trim()!=='false')throw new Error('Fetch complete Git history before auditing it.');
   const directories=knownDirectory===undefined?localConfig('mise.secretScanDirectory'):[knownDirectory];if(directories.length>1)throw new Error('Choose one private audit directory.');
   const known=knownValues(directories[0]),references=localConfig('mise.privateDeploymentRef');
   for(const value of references){if(!/^[a-z]{20}$/.test(value))throw new Error('Invalid private deployment audit reference.');if(!known.some(item=>item.value===value))known.push({value,rule:'known-deployment-reference',kind:'deployment'});}
   const findings=[];let objects=0,files=0,archiveFiles=0;
-  const inspect=(body,path)=>{objects++;if(Buffer.from(body).subarray(0,4).equals(Buffer.from([80,75,3,4])))archiveFiles++;findings.push(...inspectSecretBytes(body,path,known));};
+  const inspect=(body,path,historicalType)=>{objects++;if(Buffer.from(body).subarray(0,4).equals(Buffer.from([80,75,3,4])))archiveFiles++;for(const finding of inspectSecretBytes(body,path,known)){
+    // Exact old object bytes can excuse a deployment identifier, never a credential.
+    if(historicalType&&finding.kind==='deployment'){
+      finding.fingerprint=createHash('sha256').update(historicalType).update('\0').update(body).update('\0').update(finding.rule).digest('hex');
+      finding.legacy=legacy.has(finding.fingerprint);
+    }
+    findings.push(finding);
+  }};
+  for(const ref of gitReferences())inspect(Buffer.alloc(0),'ref:'+ref);
   const tracked=git(['ls-files','--cached','--others','--exclude-standard','-z']).split('\0').filter(Boolean);
   for(const path of new Set(tracked)){if(!lstatSync(path,{throwIfNoEntry:false})?.isFile())continue;files++;inspect(readFileSync(path),'worktree:'+path);}
   // Inspect index blobs too: a clean working copy can hide an earlier staged secret.
   const index=git(['ls-files','--stage','-z']).split('\0').filter(Boolean).map(line=>{const match=line.match(/^\d+ ([a-f0-9]{40}) \d\t([\s\S]+)$/);if(!match)throw new Error('Git index audit incomplete.');return {id:match[1],path:match[2]};});
   function inspectBlobs(blobs,label){for(let at=0;at<blobs.length;at+=8){const group=blobs.slice(at,at+8),output=git(['cat-file','--batch'],group.map(b=>b.id).join('\n')+'\n',true);let offset=0;
-    for(const blob of group){const end=output.indexOf(10,offset),header=output.subarray(offset,end).toString('ascii').split(' '),size=Number(header[2]);if(header[0]!==blob.id||header[1]!== (blob.type??'blob')||!Number.isSafeInteger(size)||end+1+size>output.length)throw new Error('Git object audit incomplete.');const name=blob.type&&blob.type!=='blob'?blob.type+(blob.path?':'+blob.path:''):blob.path;inspect(output.subarray(end+1,end+1+size),label+blob.id.slice(0,12)+':'+name);offset=end+size+2;}
+    for(const blob of group){const end=output.indexOf(10,offset),header=output.subarray(offset,end).toString('ascii').split(' '),size=Number(header[2]);if(header[0]!==blob.id||header[1]!== (blob.type??'blob')||!Number.isSafeInteger(size)||end+1+size>output.length)throw new Error('Git object audit incomplete.');const historical=label==='history:',name=historical?(blob.type==='tag'?'tag'+(blob.path?':'+blob.path:''):blob.type):blob.path;inspect(output.subarray(end+1,end+1+size),label+blob.id.slice(0,12)+':'+name,historical?blob.type:undefined);offset=end+size+2;}
   }}
   inspectBlobs(index,'index:');
   if(artifacts&&lstatSync('site',{throwIfNoEntry:false})?.isDirectory())for(const path of walk('site'))inspect(readFileSync(path),'artifact:'+relative('.',path).replaceAll('\\','/'));
   if(history){
     const entries=git(['rev-list','--objects','--all']).trim().split('\n').filter(Boolean).map(line=>({id:line.slice(0,40),path:line.slice(41)}));
     const metadata=git(['cat-file','--batch-check=%(objectname) %(objecttype) %(objectsize)'],entries.map(e=>e.id).join('\n')+'\n').trim().split('\n');
-    const blobs=metadata.flatMap((line,i)=>{const type=line.split(' ')[1];return ['blob','commit','tag'].includes(type)?[{...entries[i],type}]:[];});
+    // Every distinct tree contains its raw entry names. Checking those bytes finds
+    // old filename-only leaks even when several paths share one empty blob.
+    const blobs=metadata.flatMap((line,i)=>{const type=line.split(' ')[1];return ['blob','tree','commit','tag'].includes(type)?[{...entries[i],type}]:[];});
     inspectBlobs(blobs,'history:');
   }
-  const credentials=findings.filter(f=>f.kind==='credential'),coverage=findings.filter(f=>f.kind==='coverage'),currentDeployment=findings.filter(f=>f.kind==='deployment'&&!f.path.startsWith('history:'));
-  return {ok:credentials.length===0&&coverage.length===0&&currentDeployment.length===0,files,objects,archiveFiles,history,artifacts,knownValuesChecked:known.length,credentialFindings:credentials.length,currentDeploymentFindings:currentDeployment.length,historicalDeploymentFindings:findings.filter(f=>f.kind==='deployment'&&f.path.startsWith('history:')).length,coverageFindings:coverage.length,findings};
+  const credentials=findings.filter(f=>f.kind==='credential'),coverage=findings.filter(f=>f.kind==='coverage'),currentDeployment=findings.filter(f=>f.kind==='deployment'&&!f.path.startsWith('history:')),historicalDeployment=findings.filter(f=>f.kind==='deployment'&&f.path.startsWith('history:')),blockedHistory=historicalDeployment.filter(f=>!f.legacy);
+  return {ok:credentials.length===0&&coverage.length===0&&currentDeployment.length===0&&blockedHistory.length===0,files,objects,archiveFiles,history,artifacts,knownValuesChecked:known.length,credentialFindings:credentials.length,currentDeploymentFindings:currentDeployment.length,historicalDeploymentFindings:historicalDeployment.length,legacyDeploymentFindings:historicalDeployment.length-blockedHistory.length,blockedHistoricalDeploymentFindings:blockedHistory.length,coverageFindings:coverage.length,findings};
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   try{const args=process.argv.slice(2),knownAt=args.indexOf('--known-directory'),report=auditRepository({history:args.includes('--history'),artifacts:args.includes('--artifacts'),knownDirectory:knownAt<0?undefined:args[knownAt+1]});console.log(JSON.stringify(report,null,2));process.exitCode=report.ok?0:1;}
-  catch{console.error(JSON.stringify({ok:false,error:'Secret audit could not complete. Check Git access and private input files.'}));process.exitCode=1;}
+  catch{console.error(JSON.stringify({ok:false,error:'Secret audit could not complete. Check full Git history, the reviewed policy and private input files.'}));process.exitCode=1;}
 }

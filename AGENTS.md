@@ -91,6 +91,7 @@ pnpm lint && pnpm typecheck
 - **Never commit secrets.** Keep `.env.example` up to date.
 - **Local credential protection:** run `pnpm security:install-hooks` once per clone. Keep the commit/push guards enabled; production builds also check generated output. Before pushing, run `pnpm check:secrets --history --artifacts`. Actual Supabase project/organization details and all credential values stay in ignored private files or the server secret manager.
   - Clone-local `mise.secretScanDirectory` and repeatable `mise.privateDeploymentRef` Git configuration enable automatic private-value comparisons. Keep their values in `.git/config`, outside tracked documentation. A configured but unreadable private input blocks the check.
+  - Keep `scripts/legacy-deployment-findings.json` fixed to its reviewed older nonsecret findings. Remove new identifiers instead of adding exceptions; credentials are never exempt. Full history scans require a complete checkout (`git fetch --unshallow --tags` if shallow).
 - **Keep the build portable:** it must work under `BASE_PATH=/<repo>/` (GitHub Pages) and `BASE_PATH=/` (Vercel and custom domains). Owners can self-host on their own Vercel with their AI agent (see `handover/docs/08-distribution.md`).
 - **Do not add a backend, paid service or native app before its phase in the roadmap.**
 

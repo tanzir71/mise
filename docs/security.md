@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [Git history privacy policy](security-history.md) restricts old identifier
+exceptions to exact reviewed object fingerprints. New deployment references in
+history, branch/tag names and old filename aliases now block the scan. Every raw
+Git tree is checked; shallow history and an unavailable policy fail closed.
+Credential findings always block, including findings in old objects.
+
 The [share-before-join check](m31-join-share.md) uses two empty devices and local
 synthetic phone verification. The setup/join notice exposes only a saved count;
 source text and bytes stay unassigned until explicit outlet review. The join does
@@ -156,7 +162,7 @@ Values are compared in memory. Findings contain rule names and redacted location
 never matched values. Hooks depend on Node and installed dependencies; a missing
 dependency, unreadable configured input or incomplete scan blocks the operation.
 
-ZIP extraction is bounded; incomplete archive coverage fails the scan. Twenty-three
+ZIP extraction is bounded; incomplete archive coverage fails the scan. Thirty-five
 guard tests cover redaction, ZIP contents, ignored configuration, staged/history
 leaks, filename-only leaks, commit/tag messages, automatic clone-local comparisons,
 unavailable private input and real blocked commit/push attempts. The Windows cases
@@ -167,7 +173,7 @@ and tags, then scanned the working tree, index, reachable history and existing
 built site against ten private comparison values. It finds zero credentials,
 zero current deployment references and zero coverage gaps. The 22 historical
 nonsecret identifier findings remain documented below; published history was not
-rewritten. All 23 credential-guard tests pass, including real blocked commit and
+rewritten. All 35 credential-guard tests pass, including real blocked commit and
 push attempts. GitHub secret scanning and push protection are enabled, with zero
 open alerts. All three workflows remain disabled. This recheck changes no hosted
 configuration or credentials and does not claim a new application deployment.

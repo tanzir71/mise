@@ -6,7 +6,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
-- Rechecked source, staged files, fetched Git history and existing site output against private Supabase values: no credentials or current deployment details found. All 23 credential-guard tests pass; commit/push/build guards and GitHub secret scanning/push protection remain enabled. Older nonsecret project identifiers remain disclosed in the audit; GitHub workflows remain stopped.
+- Git privacy checks now reject newly introduced deployment identifiers in reachable history, branch/tag names and historical filename aliases. Exact opaque fingerprints retain only the 22 documented old nonsecret findings; credentials always fail. Missing policy and shallow history fail closed. All 35 guard tests pass, including a permitted legacy-only push and a blocked later identifier.
+
+- Rechecked source, staged files, fetched Git history and existing site output against private Supabase values: no credentials or current deployment details found. All 35 credential-guard tests pass; commit/push/build guards and GitHub secret scanning/push protection remain enabled. Older nonsecret project identifiers remain disclosed in the audit; GitHub workflows remain stopped.
 
 ### Added
 

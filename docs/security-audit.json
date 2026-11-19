@@ -1,24 +1,32 @@
 {
-  "checkedAt": "2026-11-19T22:41:05.952Z",
-  "scope": "Current source, index, fetched reachable history and generated static output; private values compared in memory",
+  "checkedAt": "2026-11-19T23:49:16.519Z",
+  "scope": "Current source, index, local refs, fetched complete reachable Git blobs/trees/commits/tags and generated static output; private values compared in memory",
   "audit": {
     "historyFetched": true,
     "sourceAndIndex": true,
+    "gitReferenceNames": true,
     "reachableHistory": true,
+    "historicalTreeNames": true,
+    "completeHistoryRequired": true,
     "existingBuildOutput": true,
-    "files": 1435,
-    "objects": 6241,
+    "files": 1438,
+    "objects": 7817,
     "knownPrivateValuesCompared": 10,
     "credentialFindings": 0,
     "currentDeploymentReferenceFindings": 0,
     "historicalNonsecretReferenceFindings": 22,
+    "reviewedLegacyFindings": 22,
+    "newBlockedHistoricalFindings": 0,
+    "opaqueLegacyFingerprints": 21,
+    "credentialExceptions": 0,
     "coverageGaps": 0,
     "historyRewritten": false
   },
   "checks": {
-    "securityTests": 23,
+    "securityTests": 35,
     "securityTestsPassed": true,
-    "guardSha256": "b80ddff11e810eb090791c2832e2dd6dc4c5856aa0fa92254ff5021e0c4dfe4d"
+    "guardSha256": "ca14c6b2b8d7787fec1e59e6651034c81be1e8253f8b8571204c7afa479edc86",
+    "policySha256": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb"
   },
   "protections": {
     "hooks": ".githooks",
@@ -27,7 +35,7 @@
     "openSecretAlerts": 0,
     "runtimeConnectionConfiguration": true,
     "credentialsInPublicBuildVariables": false,
-    "gitHubCheckedAt": "2026-11-19T22:39:49.143Z"
+    "gitHubCheckedAt": "2026-11-19T23:48:29.982Z"
   },
   "publication": {
     "disabledWorkflows": 3,

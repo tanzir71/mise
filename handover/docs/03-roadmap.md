@@ -73,6 +73,7 @@ Spec: `phases/phase-2-links-no-backend.md`
 Spec: `phases/phase-3-backend-sync.md`
 
 - [ ] **M30** Supabase project, schema, row-level security, phone OTP + device PIN, outlet/roles · L · T2
+  - [Git history privacy](../../docs/security-history.md) blocks new identifiers in commits, tags, refs and old filename aliases. Exact reviewed nonsecret exceptions preserve published history; credentials always block. Hosted and remaining M30 acceptance stay open.
   - [Original-owner connection recovery](../../docs/m30-owner-resume.md) restores the original verified sign-in after accepted upload and before first download, preserving the source, receipt, queue and complete images. Native selection/activation and interrupted completion are guarded; full M30 acceptance remains open.
   - [Implementation notes](../../docs/m30-delivery.md) (dedicated project, 38 migrations, PIN/screen/image services, private bucket, catalogue/customer/khata saves with device-generated related IDs, audited counter/credit/payment/undo, atomic stock, supplier/invoice, order, closing, complete manual hand-off and original Inbox capture/sorting commands deployed; local snapshot/recovery and authenticated hosted upload staging/promotion prepared. Phone OTP, positive signed-owner HTTP upload/writes, app/outbox interfaces and staff/agent resources remain open).
   - [Complete order transactions](../../docs/m30-order-commands.md) retain shared lifecycle and linked financial identities; no sync controls are enabled.
