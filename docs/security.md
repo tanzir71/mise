@@ -98,13 +98,15 @@ leaks, filename-only leaks, commit/tag messages, automatic clone-local compariso
 unavailable private input and real blocked commit/push attempts. The Windows cases
 include a real rejected commit of a PowerShell UTF-16 credential file.
 
-The [19 November 2026 privacy check](security-audit.json) repeats the full audit
-using the UTF-16 guard and ten private comparison values. It finds zero credentials,
+The [19 November 2026 privacy recheck](security-audit.json) fetched remote branches
+and tags, then scanned the working tree, index, reachable history and existing
+built site against ten private comparison values. It finds zero credentials,
 zero current deployment references and zero coverage gaps. The 22 historical
-nonsecret identifier findings remain documented below. All 23 security tests and
-the changed source/test lint checks pass; no app build or deployment is claimed
-for this security-only change. GitHub protection remains enabled independently of
-the three stopped workflows.
+nonsecret identifier findings remain documented below; published history was not
+rewritten. All 23 credential-guard tests pass, including real blocked commit and
+push attempts. GitHub secret scanning and push protection are enabled, with zero
+open alerts. All three workflows remain disabled. This recheck changes no hosted
+configuration or credentials and does not claim a new application deployment.
 
 The 18 November 2026 audit found **zero credentials** in current files, the index,
 reachable history and built output. Current files and output also contain no actual

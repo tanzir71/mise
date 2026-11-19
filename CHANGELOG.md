@@ -4,6 +4,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
+### Security
+
+- Rechecked source, staged files, fetched Git history and existing site output against private Supabase values: no credentials or current deployment details found. All 23 credential-guard tests pass; commit/push/build guards and GitHub secret scanning/push protection remain enabled. Older nonsecret project identifiers remain disclosed in the audit; GitHub workflows remain stopped.
+
 ### Added
 
 - M31 command delivery now stays bound to the original verified phone account and connection across HTTP and native receipt acceptance. Bounded Auth/response work, ephemeral session checks and original operator/source guards retain pending actions through account switches or transaction expiry; exact retries preserve cash without duplicates. Native convergence uses the actual phone client with an explicit local test verifier. Cloud controls and remaining M30/M31 acceptance stay gated.
