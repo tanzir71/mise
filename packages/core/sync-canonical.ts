@@ -10,7 +10,7 @@ export interface CanonicalRecord {table:SyncTable;id:string;changeId:string;oper
 export interface CanonicalSnapshot {backup:MiseBackup;records:CanonicalRecord[];cursor:string;readId:string;seal:string;scope:SyncScope;targetHash:string}
 export const localCanonicalTableNames=['syncCanonical'] as const;
 export type LocalCanonicalSnapshot =
- |{id:'active'|`join:${string}`;version:1;snapshot:CanonicalSnapshot;hash:string}
+ |{id:'active'|`join:${string}`|`upload:${string}`;version:1;snapshot:CanonicalSnapshot;hash:string}
  |{id:'active';version:2;snapshot:CanonicalSnapshot;hash:string;applicationHash:string};
 const fail=()=>new Error('The canonical snapshot is incomplete or changed. Keep local work and the original download.');
 const digest=(v:unknown)=>syncHash(new TextEncoder().encode(syncDownloadToken(v)));

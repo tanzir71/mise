@@ -6,6 +6,21 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [original-owner admission](m31-owner-upload-adoption.md) retains verified
+compressed source and the actual receipt without storing connection values or
+sessions. Its read transport pins the account before and after HTTP; the scoped
+RPC exposes no Auth UUID, lease, token or transaction identity. Only proof that
+the actual promotion is visible in the completed snapshot permits application.
+No historical identity is backfilled, and no join or upload receipt is invented.
+Every native store mutation is checked against a finite plan, including complete
+Blob bytes. A closed transaction refuses writes before an independent writer can
+start; damaged evidence preserves the working copy and its manual backup path.
+Hosted verification leaves all 58 application tables under forced RLS, no
+anonymous table grants, no public security-definer helpers and no public bucket.
+The read function requires JWT verification. Its exact rollback-only role proof
+leaves no synthetic accounts or shop records. No Auth configuration or secret
+manager value changes in this increment.
+
 The [canonical application boundary](m31-canonical-apply.md) stores only scoped
 domain data, hashes and opaque sync cursors. Its journal and working projections
 contain no actual connection settings, server keys or sessions. The native

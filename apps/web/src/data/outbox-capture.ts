@@ -50,7 +50,7 @@ export function installOutboxCapture(db:Dexie):void {
    if(stores.some(name=>['businesses','outlets','members'].includes(name)))names=[...new Set([...names,...localOperatorTableNames.filter(name=>down.schema.tables.some(t=>t.name===name))])];
    return down.transaction(names,mode,options);
   },table(name){
-   const table=down.table(name);if(!(backupTableNames as readonly string[]).includes(name))return table;
+   const table=down.table(name),captured=(backupTableNames as readonly string[]).includes(name);
    return {...table,mutate(request){
     const intent=currentIntent();
     const canonical=canonicalWritesFor(request.trans);
@@ -62,6 +62,7 @@ export function installOutboxCapture(db:Dexie):void {
      for(let n=0;n<source.keys.length;n++){const expected=canonical.writes.get(name+'\0'+source.keys[n])!,step=expected.steps[expected.used];if(!step||await Dexie.waitFor(nativeRowHash(after[n]??null))!==step.after)throw new ReconciliationError('integrity');expected.used++;}
      return response;
     })()).catch(error=>{try{request.trans.abort();}catch{/* Keep every reconciliation write atomic. */}throw error;});
+    if(!captured)return table.mutate(request);
     // DBCore callbacks must retain Dexie's transaction zone across every continuation.
     return keep(context(request.trans)).then(capture=>{
      if(!capture)return table.mutate(request);

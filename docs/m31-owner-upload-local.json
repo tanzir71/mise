@@ -1,0 +1,287 @@
+{
+  "checkedAt": "2026-11-19T06:51:15.947Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Original uploaded-owner adoption into canonical application, with preserved original receipt/source/queue and native offline owner/manager convergence",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "97c273909a6dfaf4fd0f98fc29a840ef87c83caf1400d20a0aa46a7cb9dc7671"
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 118,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "4c4d0df6ab8b93525c8f15259c2687c3d2981e38bce261a787b75b10a4aa7cea"
+    },
+    "units": {
+      "passed": 2293,
+      "files": 122,
+      "failed": 0,
+      "pending": 0,
+      "reportSha256": "8cd4ba680c16d7844a77925fd430adba20a84ecdc6ee07374d037626a16f931e"
+    },
+    "browser": {
+      "passed": 407,
+      "workers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "8f27ccd3c5d484bd7bd25c6461ac9dbc4c881b77d80dcee4e1a28894e1832de4"
+    },
+    "rootBrowser": {
+      "passed": 50,
+      "workers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "69cab015459844d30c614c246b4631a437bb29c21bfbf994c589330335f34857"
+    },
+    "visual": {
+      "comparisons": 50,
+      "overflow": 0,
+      "layoutChanged": false,
+      "reportSha256": "83a013dad000f091cdf07b67bc1c7e7d68d4eddd0f1517a75dbfcd5eb8852946"
+    },
+    "exports": 270,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "rootBuildLogSha256": "773b40108d831e19a646d8eb269ff5bb661d203d1e92e81c2f361577e16b975f",
+    "pagesBuildLogSha256": "b4169e6612602b404f65cf7ea522868ca665799fc99e5d3ea9d14be36a422261",
+    "testApisInShippedAssets": false,
+    "focusedOwnerApplication": {
+      "passed": 10,
+      "reportSha256": "12f0b8e47f7fc63df93d303b4597e3ec7989c1bf3d156e9f9532e1595db8d4e4"
+    },
+    "nativeOwnerIntegration": {
+      "passed": 3,
+      "reportSha256": "51cf0c040f49256294a242cdf2a42124cd11d74606915374024f716d7686892e"
+    },
+    "lostNativeContextRegression": {
+      "beforeFailed": 1,
+      "beforeReportSha256": "d94cb4f1c020b52932a2f720791de973b519af036b59a6909493f7a06015b8b6",
+      "beforeGuardPresentFalse": true,
+      "guardDiagnosticSha256": "c2627b668204444db5f9aaf0c43a94b5d02d85523def041f9d1272bd15ecd87e",
+      "fixedByDexiePromiseScopeAndNativeWriterGuard": true,
+      "expiredWriterAndUnexpectedStagingRollbackVerified": true
+    }
+  },
+  "schema": {
+    "local": 18,
+    "stores": 32,
+    "portable": 10,
+    "portableTables": 21,
+    "newStore": "syncAdmissions",
+    "originalUploadFenceVersion": 1,
+    "joinedFenceVersion": 2,
+    "currentCanonicalBaseVersion": 2,
+    "hostedMigrations": 36
+  },
+  "invariants": {
+    "originalUploadFenceReceiptSnapshotAndQueuePreserved": true,
+    "initialCanonicalAdmissionImmutable": true,
+    "actualVisiblePromotionProofRequired": true,
+    "noLegacyTransactionIdentityBackfill": true,
+    "noJoinOrUploadReceiptInvented": true,
+    "liveOriginalOwnerAccountRequired": true,
+    "actualConnectionAndAccountPinnedBeforeAndAfterCoverageHttp": true,
+    "completeCompressedChunksAndOriginalImageHashesRechecked": true,
+    "allNativeStoresCoveredByFiniteWritePlan": true,
+    "writerRefusesLostOrExpiredNativeTransaction": true,
+    "noGlobalCaptureBypass": true,
+    "noOutgoingEcho": true,
+    "domainSourceAdmissionApplicationBaseAndCursorAtomic": true,
+    "originalPendingMoneyAndStockReplayed": true,
+    "unsupportedUnknownAndConflictingWorkRetained": true,
+    "lostReplyRetryPreservesLaterCash": true,
+    "quotaAndRevocationPreserveOriginalWorkingCopy": true,
+    "historicalUploadRetryReadsOriginalReceiptWithoutReplay": true,
+    "schema17UpgradePreservesOriginalUpload": true,
+    "lockedOperatorCannotUnlockFromDamagedCachedEvidence": true,
+    "portableBackupExcludesConnectionAndSession": true,
+    "fullCloudControlsDefaultOff": true
+  },
+  "integration": {
+    "http": "actual local TCP",
+    "sql": "all 36 migrations with real authenticated/service role execution and original upload promotion receipts",
+    "accounts": "explicit synthetic test verifier",
+    "objects": "explicit in-memory test adapter",
+    "browserDatabases": "original uploaded owner and joined manager in separate native IndexedDB contexts",
+    "offlineCashAndAdditiveStockConverge": true,
+    "originalIntentDeliveryAfterLocalRebase": true,
+    "lostAdoptionReplyAndOfflineReloadPreserveLaterCash": true,
+    "nativeQuotaAndPostProofRevocationRetainOriginalCopy": true,
+    "genuineHostedPhoneJwtHttp": false,
+    "realOtp": false,
+    "hostedStoragePositive": false
+  },
+  "hosted": {
+    "verification": {
+      "verifiedAt": "2026-11-19T06:46:00.120Z",
+      "verified": true,
+      "before": {
+        "migrations": 35,
+        "application_tables": 58,
+        "forced_rls_tables": 58,
+        "anonymous_table_grants": 0,
+        "public_security_definers": 0,
+        "public_buckets": 0,
+        "private_buckets": 1,
+        "auth_users": 0,
+        "businesses": 0,
+        "uploads": 0
+      },
+      "after": {
+        "migrations": 36,
+        "application_tables": 58,
+        "forced_rls_tables": 58,
+        "anonymous_table_grants": 0,
+        "public_security_definers": 0,
+        "public_buckets": 0,
+        "private_buckets": 1,
+        "auth_users": 0,
+        "businesses": 0,
+        "uploads": 0,
+        "pending_references": 0
+      },
+      "functions": {
+        "count": 7,
+        "readBefore": 3,
+        "readAfter": 4,
+        "readStatus": "ACTIVE",
+        "jwtRequired": true,
+        "otherSixUnchanged": true
+      },
+      "advisors": {
+        "security": {
+          "warnings": 0,
+          "errors": 0,
+          "informational": 1
+        },
+        "performance": {
+          "warnings": 0,
+          "errors": 0,
+          "informational": 1
+        }
+      },
+      "source": {
+        "matchesReviewedBundle": true,
+        "bytes": 37323,
+        "sha256": "ac9314776f105a46ee6c73261f21364ce048f696d934d74cf57158b046bc5938",
+        "sourceFiles": 13
+      },
+      "roleProof": {
+        "checkedAt": "2026-11-19T06:42:55.720Z",
+        "checks": 12,
+        "sqlSha256": "046b26fef437e52d73ff82945b921a643c29a55049f1184d24ecf41b8cc1443b",
+        "rollback": true
+      },
+      "authConfigurationChanged": false,
+      "newSecrets": 0,
+      "genuinePhoneJwtHttp": false
+    },
+    "httpHealth": {
+      "checkedAt": "2026-11-19T06:43:36.905Z",
+      "authSettings": {
+        "status": 200,
+        "phone": false,
+        "email": false,
+        "phoneAutoConfirm": false,
+        "signupsDisabled": true
+      },
+      "cors": {
+        "status": 204,
+        "expectedOrigin": true,
+        "outletHeaderAllowed": true
+      },
+      "serviceWithoutJwt": 401,
+      "uploadCoverageRpcWithoutJwt": 401,
+      "genuineOwnerHttp": false,
+      "authConfigurationChanged": false
+    },
+    "migrationsThisIncrement": 1,
+    "functionsDeployedThisIncrement": 1,
+    "exactRollbackRoleChecksLocal": 12,
+    "exactRollbackRoleChecksHosted": 12,
+    "ownUncommittedPromotionVisibility": "later",
+    "genuineHostedPositiveOwnerHttp": false,
+    "authChanges": 0,
+    "newSecrets": 0
+  },
+  "privacy": {
+    "knownValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "sourceIndexHistoryAndArtifactsChecked": true,
+    "historyRewritten": false
+  },
+  "publication": {
+    "workflowsDisabled": 3,
+    "activeWorkflowRuns": 0,
+    "githubSecretScanning": "enabled",
+    "githubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "pagesHeld": true,
+    "newPagesDeploy": false,
+    "ciArtifactUploaded": false
+  },
+  "remaining": [
+    "Live Auth-account-pinned command delivery",
+    "Other unconfirmed command families and explicit conflict recovery",
+    "Changed scope/epoch bootstrap",
+    "Reconnect/realtime orchestration and header sync state",
+    "Genuine phone OTP and hosted owner/image HTTP",
+    "5000-record upload under 60 seconds on 3G",
+    "Remaining M30/M31 requirements and subsequent handover milestones"
+  ],
+  "sourceSha256": {
+    "CHANGELOG.md": "0bf37d541196681efb3d6e330bd51680a448531e48a3e78409371b0fea14a5ba",
+    "apps/web/src/data/canonical-writes.ts": "f3697f771ab3203b0da55d83a21217e70af1d1ca9a52a99ed0df6fc0124bb05b",
+    "apps/web/src/data/cloud-canonical-state.ts": "a2e0f777cbce914c59874fb503b3acb81978cf5a7471282f9fc3d42169001d18",
+    "apps/web/src/data/cloud-sync-apply.ts": "424f129cadcdff0753c44282dc5cace7171ab54b89b82729d8de419b5bd08d0c",
+    "apps/web/src/data/cloud-sync-join.ts": "d9e313baab66f34cd2056fa36bee4d6fb77c33bfd3b45c6206f4e1112c48c0b3",
+    "apps/web/src/data/cloud-upload.ts": "b4816d261ff5ebeedaedfd78c29de2bf7855cf12e49e58356787f1412b8289b5",
+    "apps/web/src/data/local-store.ts": "4cd1fcd256963a7d52321e96f58642a2868804b33ea377b4d8f270fd5e953e73",
+    "apps/web/src/data/operator-state.ts": "8b6bca65d9209fe08ca1a2a5be8fbc16a0667553ee548785a3f6e7844e39eb6b",
+    "apps/web/src/data/outbox-capture.ts": "5847a84158133006d4ac96cb4a6fa8869ae48fffc7cb57f01ba33129ab7a80a3",
+    "docs/security.md": "b1177e7976f34d7b7aa162bc95b537e5fbe2c5e00abc6d344bd4966c9f5accff",
+    "handover/DECISIONS.md": "089f0cbf064c306ec10898793818a07039bb0ec42e2a5b07fe01d9b2a8585de3",
+    "handover/docs/03-roadmap.md": "f4db67217ce9d2e81a4e629dc54ea18898f38c2820e3fa2009baf54956ea0d86",
+    "packages/core/local-outbox.ts": "b061f60d461ad1ddfc434da8b4fe384d656287587a1a621040253acd095b2f45",
+    "packages/core/local-schema.ts": "7be043626e5475f81e4afdd0447f62f67162c9820d65fcf0737d88ce99913108",
+    "packages/core/sync-canonical.ts": "889150ed2dea9f7d2c7c0b2c0a33be5632812855db59c0dd64ae8d2a0ebde015",
+    "packages/core/sync-materialize.ts": "bacb9add4de856ccc014e2faaffe6708469496a68425f568f51bd6cf90625c21",
+    "supabase/functions/_shared/sync-read-handler.ts": "78cb9a029b9b69033ef7087c9cbaae8cb7496f0715ba30a1ba542f7ec60357f9",
+    "tests/e2e/sync-coverage.spec.ts": "20bf5c517936ef94bbe7088b4f5b9a9cd2fa4e2db218c43c430ad4fd38d34c01",
+    "tests/fixtures/sync-apply-browser.ts": "2d86cdab584e38fb1ed1f8f234711a7a32a07f69180b7044b0477a4a73786cf3",
+    "tests/fixtures/sync-coverage-browser.ts": "5806342b0f0358899d27817bd2743cbee7e03ab6f762fcbd10fc67ba32a9a9d3",
+    "tests/fixtures/sync-download-browser.ts": "b6f10039386cd7f1a578abea54732e83ad9383a982f9be5676c6662258afcbb0",
+    "tests/fixtures/sync-images-browser.ts": "d8c13d8de94468c09335d724c71b17096bdfc476093c15cbc57bb6962748229c",
+    "tests/operators-db.test.ts": "fe575ffbda3674744d3364c5f7c617b217707c8c9364f511894dc3d2f428ef3a",
+    "tests/sync-apply-db.test.ts": "1a4cef940a1ebb1c4fe3b3ef9eb6fa41e83a6f596181ba22d49df8c61c2e83b4",
+    "tests/sync-convergence-server.ts": "668ed28e4e3f6ac90fdd6c81d2ae19957ea67bcbcbcbfd2501cc8ceba744c0fe",
+    "tests/sync-coverage-db.test.ts": "dcc028231bbed700a9ddcecac734d760ba062f87326480591dd324f6b2ce8ecf",
+    "tests/sync-download-db.test.ts": "ed470dcaebfd9faf70ef57b17ca6dfc2c5a9b5a231ea37f8fdc5899c891b5394",
+    "tests/sync-images-db.test.ts": "bffe5a880bb9404211f3b5faa5867672086fb5bfe23e939992703ac9e2ce2aaa",
+    "tests/sync-join-db.test.ts": "9c93fe12dffaf66c934a520cbaffafeb285c7e7e60d257769bcf4e9b25b2b237",
+    "apps/web/src/data/cloud-upload-coverage-remote.ts": "77c914d555643458974224e251bcb0511e22725671f2470470ecd6943196f123",
+    "docs/m31-owner-upload-adoption.md": "a831f5a6023b9b93bbddb99faef6529a489231f0a5bcb571fe3d2078cd403d48",
+    "packages/core/sync-upload-admission.ts": "9899d9d3838aa3d7c8911d9b29751b46037d0be5c1dc452866f0c5aa2f891c9b",
+    "supabase/migrations/20261119052104_sync_owner_upload_admission.sql": "425ba2ffcd2737f2e9c6be52ff3354411572a98ed5dd9166a5ea8147242f0856",
+    "tests/e2e/owner-upload-adoption.spec.ts": "75a74d602f98592779dba682b79da1133bd5ff377c37c8e97db1801b4b295e36",
+    "tests/owner-apply-db.test.ts": "60cc48d11cd93c620c1915ac1c83124a4531feffbeffa662650194e0e79015b8",
+    "tests/owner-apply-fixture.ts": "a6501ec281d2c14437c226d8e7c2ec83beca98d75aec0b31a4b485f5eab5a6a7",
+    "tests/owner-upload-coverage-sql.test.ts": "74e376b5e3ff136082f044c870094ae2dd7061d8551479498d419ad898e9ab8c",
+    "tests/owner-upload-sql-fixture.ts": "dbdb21c73a9088165640252c6376715f32bf413ac5a49bd137a65b53ce359c9c",
+    "tests/owner-upload-transport.test.ts": "a2f6ea6c19f32c2a11bf8076a4e9842d1adbaf5b6c2041a5b5aa78b3f36338e9"
+  }
+}

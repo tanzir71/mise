@@ -5,6 +5,9 @@ import {parseLocalCloudState} from '@mise/core/local-outbox';
 import type {MiseDatabase} from './db';
 import {readDatabaseBackup} from './backup';
 import {beginLocalUpload,assertLocalUploadCoverage,acceptLocalUpload} from './local-outbox';
+import {readCanonicalState,assertCanonicalState} from './cloud-canonical-state';
+import {parseLocalOperatorState} from '@mise/core/operators';
+import {syncDownloadToken} from '@mise/core/sync-download';
 
 interface StoredCloudUpload extends CloudUploadPlan {id:string;businessId:string;manifestHash:string;progress:CloudUploadProgress|null}
 interface SelectedReview {id:string;uploadId:string}
@@ -105,7 +108,16 @@ export async function uploadDatabaseSnapshot(db:MiseDatabase,journal:CloudUpload
 }
 /** Initial upload with a same-database fence; every later local write is retained atomically. */
 export async function uploadWithLocalOutbox(db:MiseDatabase,journal:CloudUploadJournal,id:string,targetHash:string,remote:CloudUploadRemote,options:{signal?:AbortSignal}={}){
- const snapshot=await journal.readSnapshot(id);await beginLocalUpload(db,snapshot,targetHash);
+ const snapshot=await journal.readSnapshot(id);
+ // An adopted upload is immutable history. Reading its real receipt never
+ // reconstructs the working copy from pre-rebase row changes or sends chunks.
+ if(await db.syncCanonical.get('active')){
+  const installed=await readCanonicalState(db),binding=installed.binding,operator=parseLocalOperatorState(await db.operatorState.get('active'));
+  if(binding.version!==1||!installed.upload||binding.uploadId!==id||binding.targetHash!==targetHash||binding.manifestHash!==snapshot.manifestHash||!binding.receipt||operator.phase!=='active'||operator.businessId!==binding.businessId||operator.outletId!==binding.outletId||operator.actorId!==binding.ownerId||operator.connection?.targetHash!==targetHash||operator.connection.accountHash!==installed.base.snapshot.scope.accountHash)throw reviewError();
+  options.signal?.throwIfAborted();const progress=parseCloudUploadProgress(await remote.begin(snapshot.manifest,snapshot.manifestHash,options.signal),snapshot.manifest,snapshot.manifestHash);options.signal?.throwIfAborted();if(!progress.receipt||syncDownloadToken(progress.receipt)!==syncDownloadToken(binding.receipt))throw reviewError();
+  await db.transaction('r',db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.operatorState,async()=>{await assertCanonicalState(db,installed);if(syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(operator))throw reviewError();});await journal.acknowledge(id,progress);return progress.receipt;
+ }
+ await beginLocalUpload(db,snapshot,targetHash);
  await assertLocalUploadCoverage(db,snapshot,targetHash);
  const receipt=await runCloudUpload(snapshot,remote,{signal:options.signal,progress:value=>journal.acknowledge(id,value),beforeCommit:async()=>{await assertLocalUploadCoverage(db,snapshot,targetHash);}});
  await acceptLocalUpload(db,snapshot,targetHash,receipt);return receipt;

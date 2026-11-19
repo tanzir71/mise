@@ -37,7 +37,7 @@ async function existing(db:MiseDatabase,input:JoinCanonicalInput,refresh:(contex
  if(binding.targetHash!==input.target.targetHash||binding.businessId!==input.target.businessId||binding.outletId!==input.target.outletId||binding.ownerId!==input.target.actorId||binding.join.accountHash!==input.target.accountHash||binding.join.role!==input.target.role||binding.join.epoch!==base.snapshot.scope.epoch||binding.join.scopeVersion!==base.snapshot.scope.scopeVersion)throw fail();
  const operator=selected(saved.operator,input,true);if(operator.revision<input.expectedOperatorRevision+1||operator.connection?.epoch!==base.snapshot.scope.epoch||operator.connection.scopeVersion!==base.snapshot.scope.scopeVersion)throw fail();
  await fresh({...base.snapshot.scope,version:1,businessName:null,outletName:null,actorName:null},refresh,signal);
- return db.transaction('r',db.cloudState,db.syncCanonical,db.syncApplications,db.operatorState,async()=>{
+ return db.transaction('r',db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.operatorState,async()=>{
   signal?.throwIfAborted();await assertJoinedCanonicalState(db,installed);if(syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(saved.operator))throw fail();
   return result(base,operator);
  });
@@ -60,8 +60,8 @@ export async function joinCanonicalDevice(db:MiseDatabase,input:JoinCanonicalInp
  const pages=await db.syncPages.where('readId').equals(input.readId).sortBy('index');
  await fresh({...parseSyncScope(state.window),version:1,businessName:null,outletName:null,actorName:null},refresh,signal);
  return db.transaction('rw',db.tables,async()=>{
-  signal?.throwIfAborted();if(await db.cloudState.count()||await db.syncCanonical.count()||await db.outbox.count())throw fail();
-  const current=await assertSyncDownloadContext(db,verified.context);if(syncDownloadToken(current)!==syncDownloadToken(state)||syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(operator)||syncDownloadToken(await db.syncRecords.where('readId').equals(input.readId).sortBy('changeId'))!==syncDownloadToken([...verified.records].sort((a,b)=>a.changeId.localeCompare(b.changeId)))||syncDownloadToken(await db.syncPages.where('readId').equals(input.readId).sortBy('index'))!==syncDownloadToken(pages))throw fail();
+  signal?.throwIfAborted();if(await db.cloudState.count()||await db.syncCanonical.count()||await db.syncApplications.count()||await db.syncAdmissions.count()||await db.outbox.count())throw fail();
+  const current=await Dexie.waitFor(assertSyncDownloadContext(db,verified.context));if(syncDownloadToken(current)!==syncDownloadToken(state)||syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(operator)||syncDownloadToken(await db.syncRecords.where('readId').equals(input.readId).sortBy('changeId'))!==syncDownloadToken([...verified.records].sort((a,b)=>a.changeId.localeCompare(b.changeId)))||syncDownloadToken(await db.syncPages.where('readId').equals(input.readId).sortBy('index'))!==syncDownloadToken(pages))throw fail();
   for(const name of backupTableNames)if(name!=='inboxItems'&&await db.table(name).count())throw fail();
   const unassigned=await db.inboxItems.toArray();if(unassigned.some(item=>item.outletId!==null||stored.some(i=>i.id===item.id)))throw fail();
   for(const image of images.images){const row=await db.syncImages.get([input.readId,image.imageId]);if(!row||syncDownloadToken({...row,blob:undefined})!==syncDownloadToken({...image,blob:undefined}))throw fail();await Dexie.waitFor(verifySyncImageBlob(row.source,row.blob));}
@@ -73,7 +73,7 @@ export async function joinCanonicalDevice(db:MiseDatabase,input:JoinCanonicalInp
   // writer still excludes other tabs. Unexpected local work aborts the join;
   // an absent pre-join fence is never a generic capture bypass.
   const expected=structuredClone(snapshot.backup.tables);expected.inboxItems.push(...await Dexie.waitFor(portableInboxItems(unassigned)));
-  if(backupToken(await readDatabaseBackup(db))!==backupToken(createBackup(expected,snapshot.backup.exportedAt))||await db.outbox.count()||syncDownloadToken(await db.cloudState.get('binding'))!==syncDownloadToken(binding)||syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(active)||syncDownloadToken(await db.syncCanonical.get('active'))!==syncDownloadToken(base))throw fail();
+  if(backupToken(await readDatabaseBackup(db))!==backupToken(createBackup(expected,snapshot.backup.exportedAt))||await db.outbox.count()||await db.syncApplications.count()||await db.syncAdmissions.count()||syncDownloadToken(await db.cloudState.get('binding'))!==syncDownloadToken(binding)||syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(active)||syncDownloadToken(await db.syncCanonical.get('active'))!==syncDownloadToken(base))throw fail();
   signal?.throwIfAborted();return result(base,active);
  });
 }

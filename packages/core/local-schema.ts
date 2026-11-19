@@ -6,4 +6,5 @@ import {localImageTableNames} from './sync-images';
 import {localCoverageTableNames} from './sync-coverage';
 import {localCanonicalTableNames} from './sync-canonical';
 import {localApplicationTableNames} from './sync-materialize';
-export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames] as const;
+import {localAdmissionTableNames} from './sync-upload-admission';
+export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames] as const;

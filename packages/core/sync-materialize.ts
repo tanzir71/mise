@@ -11,7 +11,7 @@ import type {SyncCoverageIntent} from './sync-coverage';
 
 export interface MaterializedRow {table:BackupTable;key:string;before:unknown|null;after:unknown|null}
 export interface CanonicalApplication {
- id:string;version:1;previousApplicationHash:string|null;previousBaseHash:string;readSourceHash:string;readSeal:string;cursor:string;
+ id:string;version:1;previousApplicationHash:string|null;previousBaseHash:string|null;readSourceHash:string;readSeal:string;cursor:string;
  baseHash:string;throughSequence:number;queueHash:string;workingHash:string;overlay:MaterializedRow[];
  covered:SyncCoverageIntent[];pending:string[];proofs:{batchHash:string;sourceHash:string;resultHash:string}[];
 }
