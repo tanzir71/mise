@@ -5,6 +5,9 @@ import {localSyncTableNames,parseLocalCloudState,type LocalCloudState,type Local
 import {newInboxId} from '@mise/core/inbox';
 import {parseShopCommand,type ShopCommand} from '@mise/core/shop-commands';
 import {localOperatorTableNames} from '@mise/core/operators';
+import {canonicalWritesFor,hasCanonicalWrites,nativeRowHash} from './canonical-writes';
+import {syncDownloadToken} from '@mise/core/sync-download';
+import {ReconciliationError} from '@mise/core/sync-materialize';
 
 interface Capture {state:LocalCloudState;entry:LocalOutboxEntry;changes:Map<string,LocalOutboxEntry['changes'][number]>;persist:Promise<void>;inserted?:boolean}
 const intents=new WeakMap<Transaction,readonly ShopCommand[]>();
@@ -15,6 +18,7 @@ export async function withOutboxIntent<T>(db:Dexie,input:ShopCommand,write:()=>P
 /** One atomic local group, with durable delivery progress for each original intent. */
 export async function withOutboxIntents<T>(db:Dexie,inputs:readonly ShopCommand[],write:()=>Promise<T>):Promise<T>{
  const tx=Dexie.currentTransaction;if(!tx||tx.db!==db||tx.mode!=='readwrite')throw new Error('Queue the command in its local write transaction.');
+ if(hasCanonicalWrites(tx))throw new ReconciliationError('integrity');
  const previous=intents.get(tx),commands=inputs.map(parseShopCommand);if(!commands.length||commands.length>1000||new Set(commands.map(command=>command.id)).size!==commands.length)throw new Error('Keep between one and 1,000 distinct original commands.');intents.set(tx,commands);
  try{return await write();}catch(error){try{tx.abort();}catch{/* A failed financial command stays atomic even if its caller catches it. */}throw error;}finally{if(previous)intents.set(tx,previous);else intents.delete(tx);}
 }
@@ -49,6 +53,15 @@ export function installOutboxCapture(db:Dexie):void {
    const table=down.table(name);if(!(backupTableNames as readonly string[]).includes(name))return table;
    return {...table,mutate(request){
     const intent=currentIntent();
+    const canonical=canonicalWritesFor(request.trans);
+    if(canonical)return keep((async()=>{
+     if(intent||request.type==='deleteRange'||syncDownloadToken(await states.get({trans:request.trans,key:'binding'}))!==canonical.bindingToken)throw new ReconciliationError('integrity');
+     const source=await rows(table,request);if(new Set(source.keys).size!==source.keys.length)throw new ReconciliationError('integrity');
+     for(let n=0;n<source.keys.length;n++){const expected=canonical.writes.get(name+'\0'+source.keys[n]),step=expected?.steps[expected.used];if(!expected||!step||await Dexie.waitFor(nativeRowHash(source.before[n]??null))!==step.before)throw new ReconciliationError('integrity');}
+     const response=await table.mutate(request);if(response.numFailures)throw new ReconciliationError('integrity');const after=await table.getMany({trans:request.trans,keys:source.keys});
+     for(let n=0;n<source.keys.length;n++){const expected=canonical.writes.get(name+'\0'+source.keys[n])!,step=expected.steps[expected.used];if(!step||await Dexie.waitFor(nativeRowHash(after[n]??null))!==step.after)throw new ReconciliationError('integrity');expected.used++;}
+     return response;
+    })()).catch(error=>{try{request.trans.abort();}catch{/* Keep every reconciliation write atomic. */}throw error;});
     // DBCore callbacks must retain Dexie's transaction zone across every continuation.
     return keep(context(request.trans)).then(capture=>{
      if(!capture)return table.mutate(request);

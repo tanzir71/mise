@@ -20,6 +20,7 @@ function entry(value:LocalOutboxEntry,state:LocalCloudState):LocalOutboxEntry {
  for(const change of value.changes)if(!change||!(backupTableNames as readonly string[]).includes(change.table)||typeof change.key!=='string'||!change.key||![change.before,change.after].every(row=>row===null||object(row)&&row.id===change.key))throw new Error('Keep each original local record change.');
  return {...value,commands,receipts};
 }
+export {entry as parseLocalOutboxEntry};
 function bound(state:LocalCloudState,id:string,targetHash:string,manifestHash:string,scope?:Pick<LocalCloudState,'businessId'|'outletId'|'ownerId'>){if(state.uploadId!==id||state.targetHash!==targetHash||state.manifestHash!==manifestHash||scope&&(state.businessId!==scope.businessId||state.outletId!==scope.outletId||state.ownerId!==scope.ownerId))throw new Error('Use the original account, connection and upload for this local queue.');}
 async function joinedOperator(db:MiseDatabase,binding:LocalCloudState){
  if(binding.version!==2)return;const state=parseLocalOperatorState(await db.operatorState.get('active')),join=binding.join;

@@ -15,7 +15,7 @@ Every merged milestone must leave `main` deployable and useful.
 
 ## Stack (do not change without writing the reason in `handover/DECISIONS.md`)
 
-- **Monorepo:** pnpm workspaces. Node 20 LTS. TypeScript everywhere (strict).
+- **Monorepo:** pnpm workspaces. Node 22.12+ (the supported Supabase client requires Node 22; see `handover/DECISIONS.md`). TypeScript everywhere (strict).
 - **`apps/landing`:** Astro, static output, almost no client JS. Tailwind CSS mapped to `tokens.css`.
 - **`apps/web`:** the Mise app.
   - Vite, React 18, TypeScript, React Router
@@ -80,14 +80,17 @@ pnpm lint && pnpm typecheck
 
 ## Working style
 
-- **One milestone = one branch = one PR**, using the PR template. Small PRs beat big ones. Split a milestone into several PRs if it touches more than ~800 lines.
+- **Owner delivery override (15 Nov 2026): commit and push directly to `main`; do not create PRs or request sign-off.** Keep increments small and run the required checks before each push. Confirm CI and Pages deployment afterward.
 - **Feature flags:** put unfinished user-facing work behind a flag in `packages/core/flags.ts`, default off.
+- **Local preview ownership:** browser tests and visual QA share port 4321. Run them sequentially unless a separately owned preview is kept alive for both; either tool may stop the temporary server it started when it finishes.
 - **Documentation per milestone:**
   - Update `CHANGELOG.md` (Keep a Changelog style).
   - Tick the milestone in `handover/docs/03-roadmap.md`.
   - Add any decision to `handover/DECISIONS.md`.
 - **When unsure:** write the question in `handover/QUESTIONS.md`, pick the most reasonable option, note it, and keep going. Do not stop for questions that can be decided later.
 - **Never commit secrets.** Keep `.env.example` up to date.
+- **Local credential protection:** run `pnpm security:install-hooks` once per clone. Keep the commit/push guards enabled; production builds also check generated output. Before pushing, run `pnpm check:secrets --history --artifacts`. Actual Supabase project/organization details and all credential values stay in ignored private files or the server secret manager.
+  - Clone-local `mise.secretScanDirectory` and repeatable `mise.privateDeploymentRef` Git configuration enable automatic private-value comparisons. Keep their values in `.git/config`, outside tracked documentation. A configured but unreadable private input blocks the check.
 - **Keep the build portable:** it must work under `BASE_PATH=/<repo>/` (GitHub Pages) and `BASE_PATH=/` (Vercel and custom domains). Owners can self-host on their own Vercel with their AI agent (see `handover/docs/08-distribution.md`).
 - **Do not add a backend, paid service or native app before its phase in the roadmap.**
 
@@ -98,6 +101,6 @@ pnpm lint && pnpm typecheck
 - [ ] No critical axe violations on changed pages
 - [ ] Works offline where the phase requires it
 - [ ] Responsive at 360–1440 px, and visually matches the Figma frame(s) named in the spec
-- [ ] Visual QA report (`pnpm qa:visual` → `qa/report.html`) attached to the PR, comparing your screens with the exports named in the spec
-- [ ] Deployed to GitHub Pages from `main`, with the live URL in the PR description
+- [ ] Visual QA report (`pnpm qa:visual` → `qa/report.html`) uploaded as a CI artifact, comparing your screens with the exports named in the spec; link the run and three key screenshots in the milestone notes
+- [ ] Deployed to GitHub Pages from `main`, with the live URL in the milestone notes
 - [ ] CHANGELOG, roadmap checkbox and docs updated

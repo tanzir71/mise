@@ -9,7 +9,9 @@ import {parseSyncScope,syncHash,syncRecordColumns,type SyncScope,type SyncTable}
 export interface CanonicalRecord {table:SyncTable;id:string;changeId:string;operation:'upsert'|'delete';row:Record<string,unknown>|null;rowHash:string}
 export interface CanonicalSnapshot {backup:MiseBackup;records:CanonicalRecord[];cursor:string;readId:string;seal:string;scope:SyncScope;targetHash:string}
 export const localCanonicalTableNames=['syncCanonical'] as const;
-export interface LocalCanonicalSnapshot {id:'active';version:1;snapshot:CanonicalSnapshot;hash:string}
+export type LocalCanonicalSnapshot =
+ |{id:'active'|`join:${string}`;version:1;snapshot:CanonicalSnapshot;hash:string}
+ |{id:'active';version:2;snapshot:CanonicalSnapshot;hash:string;applicationHash:string};
 const fail=()=>new Error('The canonical snapshot is incomplete or changed. Keep local work and the original download.');
 const digest=(v:unknown)=>syncHash(new TextEncoder().encode(syncDownloadToken(v)));
 const ordinal=(v:string)=>{if(!/^[1-9][0-9]{0,18}$/.test(v)||BigInt(v)>9223372036854775807n)throw fail();return BigInt(v);};

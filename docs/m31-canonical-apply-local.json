@@ -1,0 +1,211 @@
+{
+  "checkedAt": "2026-11-19T05:12:42.029Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Atomic canonical application for version-2 joined devices with original pending money/stock intents; native SQL-backed HTTP offline convergence",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "0ee875f3af5dd9e9ceca9d1a49810a0a9e908831e9bb9906225ddb6328c89a9c"
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 117,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "dc4c0b3755606cb71ebfd570c345a5c4f145f141ad6f650cada883f3c11a4d41"
+    },
+    "units": {
+      "passed": 2249,
+      "files": 119,
+      "failed": 0,
+      "pending": 0,
+      "reportSha256": "a13e2f2aac24d6362e1d47a2a66314aa9700c65758656713d47bd7b3381cd01f"
+    },
+    "browser": {
+      "passed": 404,
+      "workers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "5821e833585b3c51448dc881f6df3fbb07704329e15217d9ec6a02f3fdc52239"
+    },
+    "rootBrowser": {
+      "passed": 47,
+      "workers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "39ae795604ffa2c3d980e32c8d985b253366faf101c449b1d7864d98dfdbd3f9"
+    },
+    "visual": {
+      "comparisons": 50,
+      "overflow": 0,
+      "layoutChanged": false,
+      "reportSha256": "0fcc7aa5ec0b66f8008a5860ec17d0114b68887d4d54e8b819a969e17c1f58e1"
+    },
+    "exports": 270,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testApisInShippedAssets": false,
+    "focusedApplication": {
+      "passed": 17,
+      "reportSha256": "5d838152db593117198bdf33d52ab24a8231aabea1b963eda57086153a815897"
+    },
+    "nativeIntegration": {
+      "passed": 4,
+      "reportSha256": "e87ece971642c869f0a74c706b2946f565bbc7db5ee60ce93fac03a1a7c8d9c2",
+      "beforeUniqueIndexFix": {
+        "failed": 1,
+        "reportSha256": "add39ecdd0f807d1c1cb44134dd12b55c390261919ce8eff70fca116bc292d44"
+      },
+      "twoPhaseNativeWriteRegressionPreserved": true
+    }
+  },
+  "schema": {
+    "local": 17,
+    "stores": 31,
+    "portable": 10,
+    "portableTables": 21,
+    "newStore": "syncApplications",
+    "originalJoinAdmissionImmutable": true,
+    "currentCanonicalBaseVersion": 2,
+    "hostedMigrationsUnchanged": 35
+  },
+  "invariants": {
+    "completeWorkingCoverageBeforeApplication": true,
+    "originalOutboxIdsTimesChangesIntentsAndReceiptsUnchanged": true,
+    "onlyGenuineFixedSnapshotCoverageCoversCommands": true,
+    "matchingAuditAloneNotInclusion": true,
+    "noUploadReceiptInvented": true,
+    "noOutgoingEcho": true,
+    "sharedPureMoneyAndStockDomainRules": true,
+    "creditLimitBalanceAndSequenceRechecked": true,
+    "interveningPhysicalCountRequiresReview": true,
+    "unknownConflictingAndUnsupportedPendingWorkRetained": true,
+    "fullOriginalImageBytesPreserved": true,
+    "unassignedSharesRemainUnassigned": true,
+    "freshAccountOperatorRoleEpochScopeRequired": true,
+    "exactFinitePlanBoundToNativeTransaction": true,
+    "noGlobalCaptureBypass": true,
+    "twoPhaseUniqueIndexReplacement": true,
+    "allDomainBaseApplicationCursorWritesAtomic": true,
+    "lostRepliesRetainLaterCash": true,
+    "quotaRollsBackDomainBaseAndCursor": true,
+    "schema16UpgradePreservesOriginalData": true,
+    "lockedOperatorCannotUnlockFromCachedBase": true,
+    "fullCloudControlsDefaultOff": true
+  },
+  "integration": {
+    "http": "actual local TCP",
+    "sql": "all committed migrations with authenticated/service roles",
+    "browserDatabases": "separate native IndexedDB contexts for the same outlet",
+    "accounts": "explicit synthetic test verifier",
+    "objects": "explicit in-memory test adapter",
+    "sameOutletOfflineCashAndAdditiveStockConverge": true,
+    "originalIntentDeliveryAfterLocalRebase": true,
+    "committedCommandTruncatedReplyNoDuplicate": true,
+    "fixedPageRetryRetainsLaterCash": true,
+    "liveManagerRevocationPreservesPriorCursor": true,
+    "implicitOwnerOtherBranchAllowed": true,
+    "unassignedManagerOtherBranchDenied": true,
+    "genuineHostedPhoneJwtHttp": false,
+    "realOtp": false,
+    "hostedStoragePositive": false
+  },
+  "hosted": {
+    "readOnlyAudit": {
+      "checkedAt": "2026-11-19T01:15:54.078Z",
+      "application_tables": 58,
+      "forced_rls_tables": 58,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1,
+      "auth_users": 0,
+      "advisors": {
+        "warnings": 0,
+        "errors": 0,
+        "informational": 1
+      },
+      "readOnly": true
+    },
+    "deploymentsThisIncrement": 0,
+    "migrationsThisIncrement": 0,
+    "authChanges": 0,
+    "newSecrets": 0
+  },
+  "privacy": {
+    "knownValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "publication": {
+    "workflowsDisabled": 3,
+    "activeWorkflowRuns": 0,
+    "githubSecretScanning": "enabled",
+    "githubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "pagesHeld": true,
+    "newPagesDeploy": false,
+    "ciArtifactUploaded": false
+  },
+  "remaining": [
+    "Version-1 original owner upload adoption into canonical application",
+    "Other unconfirmed command families and explicit conflict recovery",
+    "Changed scope/epoch bootstrap",
+    "Live Auth-account-pinned command delivery",
+    "Reconnect/realtime orchestration and header sync state",
+    "Genuine phone OTP and hosted owner/image HTTP",
+    "5000-record upload under 60 seconds on 3G",
+    "Remaining M30/M31 requirements and subsequent handover milestones"
+  ],
+  "sourceSha256": {
+    "CHANGELOG.md": "d7f20ecf87b88df58c58198fd773fcbc484e54f9f994d432ce9ee40c732443f1",
+    "apps/web/src/data/canonical-writes.ts": "73f3649a5186de75f26794c186374f5ea43392dd00282304f9643d8b8a32ef1b",
+    "apps/web/src/data/cloud-canonical-state.ts": "dff84c03d53af20ab648c03d228ccad6ab6f13621855163294c656c633aa59d0",
+    "apps/web/src/data/cloud-sync-apply.ts": "fbf92d61be4b7b14cbbd08addb3a762eafd75b0fbdf94c305571c608e016d26f",
+    "apps/web/src/data/cloud-sync-join.ts": "c4fb830c2c8a7f119fe1fc6af94b76cdd1b3daff119b71426a0222802846ca3f",
+    "apps/web/src/data/local-outbox.ts": "da66349314cc7a51714cddf08767b8fddac22925a7a75f789a3aee92247536fb",
+    "apps/web/src/data/local-store.ts": "60a03590b16eddf375772b51ee97403e019cacd053d5a43a4e7ff5fdbc5501f6",
+    "apps/web/src/data/operator-state.ts": "1f1b7fe059e083e2b4aca2d6f2f0cc3285a874f39f553d04631530bcfa1191c1",
+    "apps/web/src/data/outbox-capture.ts": "a69ff1a6b40d0375bbf8a5055423682cecd87e3c9b695bf95455257335dfd60f",
+    "docs/m31-canonical-apply.md": "7383f91d5071e87798a4a5da6740c4e3645d9ce6d7dd2906004f00c0f17974bf",
+    "docs/security.md": "69742ead1216197080869e4cb72bc2b3d822aca61a7764829c67c928d5726d22",
+    "handover/AGENTS.md": "b63c13490f29dbee312599d8d4cbb82d983b9cec98a546589e05010df7d21838",
+    "handover/DECISIONS.md": "4ad7c1bb34aa13f1926b209b90c7e549170bd5b4f48761c8fc343989bdd04afa",
+    "handover/docs/03-roadmap.md": "1fd31c34f4f593e7f5cbb4218cf15de32c7b89007bfa70a7a0260b37ccd78825",
+    "packages/core/local-outbox.ts": "a11f0a488dbdd6c87255ffe149fde41fb6bb338cf033850d5a2acfcc1e2679b2",
+    "packages/core/local-schema.ts": "8592a83f39112bad525bceb98fd0c6d38645ff4ada2c27c73e57683753d2dcb7",
+    "packages/core/money-replay.ts": "9835b14f4d5ba64d72ecadcdc41631f8fff4fde5d6fe89b7d9eb6e44a8d0af16",
+    "packages/core/stock-replay.ts": "1a813a1f6f3a375827053c1c7a88104782d9b375c05a107f7877266c1ceea43c",
+    "packages/core/sync-canonical.ts": "7b4029b8b9d715315fcf0f9b8b59ffc228695e3b88d00d05aede6db01aecee41",
+    "packages/core/sync-materialize.ts": "8b1fc579d3ac2ebffb34ebe3a7ca8d6658c9ce367e8161c512670b0423cafec8",
+    "supabase/functions/_shared/money-write.ts": "979548688f74f78a25428a625cfbe4b22c2561535cd55cccf4b9b850ac6a6753",
+    "supabase/functions/_shared/stock-write.ts": "5d7b9ef80d351a47eb110ef8871c4f75d7303eb0f3949b7d408546d5111cc790",
+    "tests/e2e/sync-apply.spec.ts": "b2be82b9813596bb6e9cfd745d4c2c20e0ac1194fd03fdd577c6972e866dc015",
+    "tests/e2e/sync-coverage.spec.ts": "b9da42576fa23d0b0db37cf46f06728bf9a73a3084effc3be094204b01f6eb6b",
+    "tests/fixtures/install-sync-apply.mjs": "fdd5b04f63ff9bc12793615e7fa2fc19d2d66fbbf473fca4c85025feec8782ac",
+    "tests/fixtures/sync-apply-browser.ts": "161f84b5db65384da4ca0bd1ded0043c4735b61756838bd1a096a875ea732b47",
+    "tests/fixtures/sync-coverage-browser.ts": "040d7c3378155cc9033167fcebbaad2f25d2d70891d75c272595c42b9f07a729",
+    "tests/fixtures/sync-download-browser.ts": "761bab7b7b4b6abb8c95f4d36240f106f245208870ef89382f6dac2d9a4b02b1",
+    "tests/fixtures/sync-images-browser.ts": "858495c74357d8f523a71d25116e6fab40f413acc0817b71e1e96c5671291e84",
+    "tests/operators-db.test.ts": "201da8e051fa0a8a1d94e8065b6191ffb25701ed08abafe87ef00fc2b11aaa39",
+    "tests/sync-apply-db.test.ts": "c7aa5f13e60250b7773be294f92db78d295f81ebcefb84dea3bb886b64f8b590",
+    "tests/sync-apply-fixture.ts": "0b233bf39fa3999138ea695fc5aaaa44224e48cdc881b093c13cefeceee93ef7",
+    "tests/sync-convergence-server.ts": "3c0faebeb30e4167fb4cfc3ae46dc083e6f15b3ebb9b76edbcc2ea200074d653",
+    "tests/sync-coverage-db.test.ts": "b91fe8c7c7b54104b8988d65c8205b7a3784cbb88eb6b2bdcb65c21d14eac202",
+    "tests/sync-download-db.test.ts": "db06df571ca23913c963073792c3c26b74a2d022b8cbddd7dd14361bbbd7c959",
+    "tests/sync-images-db.test.ts": "69ff3a49ecfdc0728113e196e6d152d8d1f916cc249a2c1d641f72ed4b6e1501",
+    "tests/sync-join-db.test.ts": "71f91c222c0d7bded3ff33c3f2fc9b2733116800c2236d6e5523750a65dcc72c"
+  }
+}

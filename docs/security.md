@@ -6,6 +6,17 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [canonical application boundary](m31-canonical-apply.md) stores only scoped
+domain data, hashes and opaque sync cursors. Its journal and working projections
+contain no actual connection settings, server keys or sessions. The native
+convergence service uses explicit synthetic account and object-storage fixtures;
+it never imports private deployment configuration. The accompanying redacted
+verification repeats source, index, reachable-history and built-output checks.
+The accompanying read-only live audit found all 58 application tables enforcing
+row-level security, no anonymous table grants or public security-definer helpers,
+one private image bucket and no public buckets. Security advisors returned no
+warnings or errors. No hosted setting or credential was changed.
+
 The [canonical join boundary](m31-canonical-join.md) retains real historical member
 references without phones, Auth identities, active authority or invented outlet
 assignments. Existing direct member RLS is unchanged. Fresh account/operator/scope
@@ -84,7 +95,7 @@ GitHub's repository secret scanning and push protection are also enabled. The
 latest owner-authenticated, read-only API check returned zero open secret alerts.
 These protections remain enabled independently of the stopped Actions workflows.
 
-The same day's latest live verification found all **56 public/private application
+The 18 November live verification found all **56 public/private application
 tables** enforcing row-level security, zero anonymous table grants, zero public
 security-definer functions and a private image bucket. Supabase security advisors
 reported no warnings or errors. Informational private-table notices describe

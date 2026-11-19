@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 joined devices can now apply canonical downloads while retaining original offline cash, credit and stock intents. Exact native transactions preserve original queues and images, separate immutable join admission from the current base, and roll back on quota, stale scope or unexplained writes. Two native browsers converge through the SQL-backed HTTP services without duplicate money, stock or outgoing echoes. Schema 17 adds an internal application journal; original-upload adoption, other pending families, realtime and full cloud controls remain gated.
+
 - M30/M31 can now join an existing outlet on an empty device through the internal sync engine. A complete canonical snapshot, original images, accepted cursor, actual operator and distinct join fence commit atomically without an upload receipt or outbox echo. Historical member references preserve owner-authored financial records without exposing unassigned staff contact details. Schema 16 retains existing uploads and queues; pending-work reconciliation and full cloud controls remain gated.
 
 - Sync groundwork now preserves original saved actions, attachments and recovery evidence while checking which changes are already present online. Interrupted replies, offline reloads and conflicting receipts retain the original work. Full cloud sync remains in development and unavailable by default.

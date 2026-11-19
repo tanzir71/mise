@@ -12,6 +12,7 @@ import {portableInboxItems,storedInboxItems} from './inbox';
 import {readDatabaseBackup} from './backup';
 import {assertSyncDownloadContext,readVerifiedSyncRecords} from './cloud-sync-journal';
 import {readVerifiedSyncImages} from './cloud-sync-images';
+import {assertJoinedCanonicalState,readJoinedCanonicalState} from './cloud-canonical-state';
 
 export interface JoinCanonicalInput {readId:string;target:SyncDownloadTarget;authKey:string;expectedOperatorRevision:number}
 export interface JoinedDevice {readId:string;canonicalHash:string;operatorRevision:number;records:number;images:number}
@@ -30,16 +31,14 @@ function result(base:LocalCanonicalSnapshot,operator:LocalOperatorState):JoinedD
 }
 /** A retry after a lost local response verifies the original admission, never reapplies rows. */
 async function existing(db:MiseDatabase,input:JoinCanonicalInput,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal):Promise<JoinedDevice|null>{
- const saved=await db.transaction('r',db.cloudState,db.syncCanonical,db.operatorState,async()=>({binding:await db.cloudState.get('binding'),base:await db.syncCanonical.get('active'),operator:await db.operatorState.get('active')}));
- if(!saved.binding)return null;const binding=parseLocalCloudState(saved.binding),base=saved.base;
- if(binding.version!==2||binding.join?.readId!==input.readId||!base||base.id!=='active'||base.version!==1||base.hash!==binding.manifestHash||await canonicalSnapshotHash(base.snapshot)!==base.hash||base.snapshot.readId!==input.readId||base.snapshot.cursor!==binding.join.cursor||base.snapshot.seal!==binding.join.readSeal||base.snapshot.targetHash!==input.target.targetHash||syncDownloadToken(base.snapshot.scope)!==syncDownloadToken({...parseSyncScope(base.snapshot.scope),businessId:input.target.businessId,outletId:input.target.outletId,actorId:input.target.actorId,accountHash:input.target.accountHash,role:input.target.role}))throw fail();
+ if(await db.cloudState.get('binding')===undefined)return null;
+ const installed=await readJoinedCanonicalState(db),binding=installed.binding,base=installed.admission,saved={operator:await db.operatorState.get('active')};
+ if(binding.join?.readId!==input.readId||base.snapshot.targetHash!==input.target.targetHash||syncDownloadToken(base.snapshot.scope)!==syncDownloadToken({...parseSyncScope(base.snapshot.scope),businessId:input.target.businessId,outletId:input.target.outletId,actorId:input.target.actorId,accountHash:input.target.accountHash,role:input.target.role}))throw fail();
  if(binding.targetHash!==input.target.targetHash||binding.businessId!==input.target.businessId||binding.outletId!==input.target.outletId||binding.ownerId!==input.target.actorId||binding.join.accountHash!==input.target.accountHash||binding.join.role!==input.target.role||binding.join.epoch!==base.snapshot.scope.epoch||binding.join.scopeVersion!==base.snapshot.scope.scopeVersion)throw fail();
  const operator=selected(saved.operator,input,true);if(operator.revision<input.expectedOperatorRevision+1||operator.connection?.epoch!==base.snapshot.scope.epoch||operator.connection.scopeVersion!==base.snapshot.scope.scopeVersion)throw fail();
  await fresh({...base.snapshot.scope,version:1,businessName:null,outletName:null,actorName:null},refresh,signal);
- return db.transaction('r',db.cloudState,db.syncCanonical,db.operatorState,async()=>{
-  signal?.throwIfAborted();const [current,latest,raw]=await Promise.all([db.cloudState.get('binding'),db.syncCanonical.get('active'),db.operatorState.get('active')]);
-  // Sequence may advance with genuine offline edits; admission and base stay fixed.
-  if(!current||syncDownloadToken({...current,sequence:0})!==syncDownloadToken({...binding,sequence:0})||syncDownloadToken(latest)!==syncDownloadToken(base)||syncDownloadToken(raw)!==syncDownloadToken(saved.operator))throw fail();
+ return db.transaction('r',db.cloudState,db.syncCanonical,db.syncApplications,db.operatorState,async()=>{
+  signal?.throwIfAborted();await assertJoinedCanonicalState(db,installed);if(syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(saved.operator))throw fail();
   return result(base,operator);
  });
 }

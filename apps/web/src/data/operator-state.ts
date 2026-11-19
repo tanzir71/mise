@@ -2,6 +2,9 @@ import {operatorChoices,operatorAuthKey,parseLocalOperatorState,parseOperatorCon
 import {parseLocalCloudState} from '@mise/core/local-outbox';
 import type {LocalStore} from './local-store';
 import type {SetupSnapshot} from '@mise/core/models';
+import {parseSyncScope} from '@mise/core/sync-read';
+import {syncDownloadToken} from '@mise/core/sync-download';
+import {assertJoinedCanonicalState,readJoinedCanonicalState} from './cloud-canonical-state';
 
 export interface LocalWorkspace {setup:SetupSnapshot|null;selection:LocalOperatorState|null;choices:OperatorChoice[];message:string;requiresSelection:boolean;cloudBound:boolean}
 export async function readLocalWorkspace(db:LocalStore):Promise<LocalWorkspace> {
@@ -25,10 +28,12 @@ export async function selectLocalOperator(db:LocalStore,choice:Pick<OperatorChoi
 export async function selectCloudOperator(db:LocalStore,input:OperatorContext,connection:{targetHash:string;authKey:string},expectedRevision:number|null,refresh:(context:OperatorContext)=>Promise<OperatorContext>):Promise<LocalOperatorState> {
  const original=parseOperatorContext(input),{targetHash,authKey}=connection;if(!/^[a-f0-9]{64}$/.test(targetHash)||!operatorAuthKey(authKey))throw new OperatorContextError('Keep the original connection fingerprint.');
  const context=parseOperatorContext(await refresh(structuredClone(original)));for(const k of ['businessId','outletId','actorId','accountHash']as const)if(context[k]!==original[k])throw new OperatorContextError('The signed-in account or outlet changed. Review it again.');
- return db.transaction('rw',db.operatorState,db.cloudState,db.businesses,db.outlets,db.members,async()=>{
+ const preliminary=await db.cloudState.get('binding'),candidate=preliminary===undefined?null:parseLocalCloudState(preliminary),joined=candidate?.version===2&&candidate.targetHash===targetHash&&candidate.businessId===context.businessId&&candidate.outletId===context.outletId&&candidate.ownerId===context.actorId?await readJoinedCanonicalState(db):null;
+ return db.transaction('rw',[db.operatorState,db.cloudState,db.syncCanonical,db.syncApplications,db.businesses,db.outlets,db.members],async()=>{
   const saved=await db.operatorState.get('active'),revision=nextRevision(saved,expectedRevision),raw=await db.cloudState.get('binding'),binding=raw===undefined?null:parseLocalCloudState(raw);
   let phase:LocalOperatorState['phase']='pending';
   if(binding?.phase==='ready'&&binding.receipt&&binding.targetHash===targetHash&&binding.businessId===context.businessId&&binding.outletId===context.outletId&&binding.ownerId===context.actorId)phase='active';
+  if(joined){await assertJoinedCanonicalState(db,joined);if(syncDownloadToken(joined.base.snapshot.scope)===syncDownloadToken(parseSyncScope(context)))phase='active';}
   const state:LocalOperatorState={id:'active',version:1,revision,phase,businessId:context.businessId,outletId:context.outletId,actorId:context.actorId,role:context.role,connection:{targetHash,authKey,accountHash:context.accountHash,epoch:context.epoch,scopeVersion:context.scopeVersion}};
   if(phase==='active'){const [businesses,outlets,members]=await Promise.all([db.businesses.toArray(),db.outlets.toArray(),db.members.toArray()]);resolveOperator(businesses,outlets,members,state);}
   await db.operatorState.put(state);return state;
