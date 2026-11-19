@@ -1,5 +1,6 @@
 import { liveQuery } from 'dexie';
 import { newInboxId } from '@mise/core/inbox';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import { parseSyncSession } from '@mise/core/sync-session';
 import {
   activeSyncSession,
@@ -186,7 +187,7 @@ export function createSyncRuntime(
     const binding = await db.cloudState.get('binding');
     return [
       binding?.sequence ?? 0,
-      await db.outbox.where('status').anyOf('pending', 'retained').count(),
+      (await db.outbox.where('status').anyOf('pending', 'retained').toArray()).filter(row=>!isLocalInboxRetention(row)).length,
     ] as const;
   }).subscribe({
     next([sequence, unsent]) {

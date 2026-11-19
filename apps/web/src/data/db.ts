@@ -39,6 +39,7 @@ import type { ShopLinkInput,ShopLinkReview } from '@mise/core/shop-links';
 
 export class MiseDatabase extends LocalStore {
   async captureInbox(input:SharedInboxInput):Promise<StoredInboxItem> {return (await import('./inbox')).captureDatabaseInbox(this,input);}
+  async claimInbox(id:string,destination:{businessId:string;outletId:string;actorId:string}):Promise<StoredInboxItem> {return (await import('./inbox')).claimDatabaseInboxItem(this,id,destination);}
   async changeInbox(id:string,revision:number,change:{kind:InboxKind}|{archived:boolean}):Promise<StoredInboxItem> {return (await import('./inbox')).changeDatabaseInbox(this,id,revision,change);}
   async prepareHandoff(input:HandoffDraft,fresh=false):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,fresh);}
   async resumeHandoff(input:HandoffDraft):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,false,true);}
@@ -53,7 +54,7 @@ export class MiseDatabase extends LocalStore {
       await this.categories.bulkPut(command.categories); await this.items.bulkPut(command.items); await this.events.add(command.event);
       };
       if(command.event.command==='setup.update')await withOutboxIntent(this,profileIntent(command),write);else await write();
-      await claimDatabaseInbox(this);
+      if(command.event.command==='setup.create')await claimDatabaseInbox(this);
       return command.snapshot;
     });
   }

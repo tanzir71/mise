@@ -13,6 +13,7 @@ import {nativeRowHash} from './canonical-writes';
 import {assertCommandReceipt} from './command-request';
 import {readCanonicalState} from './cloud-canonical-state';
 import {syncHash} from '@mise/core/sync-read';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import type {SyncImageDescriptor} from '@mise/core/sync-images';
 import type {InboxImageUploadReceipt} from './cloud-inbox-upload';
 
@@ -94,7 +95,9 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
  async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('A local change is missing from the delivery queue. Keep a backup.');
  for(const row of rows){
-  let saved=entry(row,initial);if(saved.status==='accepted')continue;if(saved.status==='retained')break;
+  let saved=entry(row,initial);if(saved.status==='accepted')continue;
+  if(isLocalInboxRetention(saved)){const original=await nativeRowHash(saved);await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{await currentOperator();if(await Dexie.waitFor(nativeRowHash(entry((await db.outbox.get(saved.id))!,initial)))!==original)throw new Error('The original saved share changed. Keep its source.');});continue;}
+  if(saved.status==='retained')break;
   for(let index=saved.receipts.length;index<saved.commands.length;index++){
    if(index<saved.receipts.length)continue;
    const sourceHash=await nativeRowHash(originalEntry(saved));await db.transaction('r',db.cloudState,db.operatorState,currentOperator);
@@ -109,7 +112,7 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
    });
   }
  }
- const latest=await db.outbox.where('uploadId').equals(initial.uploadId).toArray();return {accepted:latest.filter(r=>r.status==='accepted').length,retained:latest.filter(r=>r.status==='retained').length,pending:latest.filter(r=>r.status==='pending').length};
+ const latest=await db.outbox.where('uploadId').equals(initial.uploadId).toArray();return {accepted:latest.filter(r=>r.status==='accepted').length,retained:latest.filter(r=>r.status==='retained'&&!isLocalInboxRetention(r)).length,pending:latest.filter(r=>r.status==='pending').length};
 }
 /** Image bytes follow their accepted metadata. Retries retain every original queue record. */
 export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,put:(image:SyncImageDescriptor,blob:Blob,signal?:AbortSignal)=>Promise<InboxImageUploadReceipt>,signal?:AbortSignal):Promise<number>{

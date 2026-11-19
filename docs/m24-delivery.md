@@ -2,6 +2,11 @@
 
 Status: **in progress**, behind the default-off `shareTarget` flag. The ordinary manifest does not advertise sharing; the opt-in manifest is available when `?flags=shareTarget` is enabled. The roadmap checkbox and `v0.3.0` release remain open.
 
+[Unassigned source recovery](m24-local-inbox.md) now preserves shares received while
+an existing operator is locked. A person reviews the current outlet before adding
+them; original device-only records remain intact and do not block unrelated typed
+sync. Physical Android acceptance and publication remain open.
+
 The storage foundation retains exact source text, title, URL and image bytes locally. It does not fetch links, read screenshots, execute customer instructions or create an order/payment/stock movement. Manual sorting records metadata-only events; image bytes are not duplicated in audit history. Classification can be changed, and archived sources can be reopened. Stale tabs cannot overwrite newer choices, and a failed audit write rolls back the source/action.
 
 Database schema 10 adds the twenty-first table, `inboxItems`, and indexed Inbox audit revisions. Existing records upgrade without rewriting them. Images are native IndexedDB Blobs. JSON backup encodes their bytes as canonical base64, validates image metadata/signatures and restores native Blobs before committing replacement. Full source and sorting history must agree. Schema-7/8/9 backups import with an empty Inbox; the existing 50 MB backup-file limit remains. A source captured before onboarding has no shop audit event until setup claims it atomically.

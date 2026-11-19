@@ -18,6 +18,7 @@ import {nativeRowHash,prepareCanonicalWrites,withCanonicalWrites,assertCanonical
 import {storedInboxItems} from './inbox';
 import {readDatabaseBackup} from './backup';
 import type {MiseDatabase} from './db';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 
 export interface ScopeRecoveryReview {
  operationId:string;readId:string;before:Record<string,number>;after:Record<string,number>;pending:number;covered:number;
@@ -43,7 +44,7 @@ export async function prepareScopeRecoveryReview(db:MiseDatabase,value:ScopeReco
  const session=parseScopeRecoverySession(structuredClone(value));if(session.id!=='active'||session.phase!=='pending')throw new ScopeRecoveryError();
  active(access);await originalSession(db,session);const origin=await readCanonicalState(db),source=await readRecoveryWorkingSource(db,origin,session.expectedOperatorRevision);
  if(origin.base.hash!==session.originalBaseHash||!equal(origin.base.snapshot.scope,session.originalScope)||await nativeRowHash({...source.binding,sequence:0})!==session.originalBindingHash||source.operator.connection?.authKey!==session.authKey)throw new ScopeRecoveryError();
- await assertRecoveryWorkingCoverage(origin,source);if(source.portable.some(row=>row.status==='retained'))throw new ScopeRecoveryError();
+ await assertRecoveryWorkingCoverage(origin,source);if(source.portable.some(row=>row.status==='retained'&&!isLocalInboxRetention(row)))throw new ScopeRecoveryError();
  const verified=await readVerifiedSyncRecords(db,session.readId,session.target,access.signal),state=verified.context.state;
  if(state.source.previousCursor!==null||!state.window||!state.seal||!state.receivedCursor||!sameRecoveryIdentity(session.originalScope,parseSyncScope(state.window))||!equal(parseSyncScope(state.window),parseSyncScope(context(session))))throw new ScopeRecoveryError('integrity');
  await fresh(session,access);

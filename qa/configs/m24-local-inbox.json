@@ -1,0 +1,25 @@
+{
+  "title": "M24 — Review a device-only share before assigning its outlet",
+  "pages": [{
+    "id": "m24-local-inbox",
+    "path": "app/?flags=shareTarget",
+    "widths": [360, 390, 768, 1024, 1440],
+    "localInboxFixture": true,
+    "note": "Original local source, full images and freshly restored outlet through actual app controls and isolated scoped SQL/HTTP. Auth, Realtime and object Storage are explicit synthetic adapters. M24 supplies the existing M25 source/review frame; no dedicated unassigned-source frame. Differences are informational.",
+    "sections": [{"selector": ".inbox-claim", "id": "review", "reference": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png"}]
+  }, {
+    "id": "m24-local-inbox-list",
+    "path": "app/?flags=shareTarget",
+    "widths": [360, 390, 768, 1024, 1440],
+    "localInboxFixture": "list",
+    "note": "Actual saved, unassigned source after fresh outlet recovery. Reuses existing Inbox rows and cards; compares with supplied M20 Inbox reference. Auth, Realtime and object Storage are explicit synthetic adapters. Differences are informational.",
+    "sections": [{"selector": ".inbox-list", "id": "list", "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"}]
+  }, {
+    "id": "m24-local-inbox-locked",
+    "path": "app/?flags=shareTarget",
+    "widths": [360, 390, 768, 1024, 1440],
+    "localInboxFixture": "locked",
+    "note": "Actual locked operator after an unassigned capture. The saved count contains no source text or connection settings. Reuses the existing operator recovery card and supplied M27 hierarchy; no dedicated locked-share frame. Differences are informational.",
+    "sections": [{"selector": ".operator-picker", "id": "notice", "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]
+  }]
+}

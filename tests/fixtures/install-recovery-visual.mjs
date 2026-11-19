@@ -3,6 +3,7 @@ import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {installSyncApplyFixture} from './install-sync-apply.mjs';
+import AxeBuilder from '@axe-core/playwright';
 
 let service;
 async function start(){
@@ -30,5 +31,18 @@ export async function captureOwnerResumeReview(page){
  const base=new URL('.',page.url());await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review cloud access',exact:true}).click();
  await page.getByRole('heading',{name:'Restore the original connection',exact:true}).waitFor();await page.getByRole('button',{name:'Restore original connection',exact:true}).waitFor();
  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.cloud-owner-resume button')).some(button=>button.textContent?.trim()==='Restore original connection'&&!button.disabled));
+}
+async function checkLocalInboxAccess(page){await page.evaluate(()=>document.fonts.ready);const result=await new AxeBuilder({page}).analyze();if(result.violations.some(v=>v.impact==='serious'||v.impact==='critical'))throw Error('The current Inbox view has serious or critical accessibility violations.');}
+export async function captureLocalInboxReview(page,mode='review'){
+ service??=start();const {server,installRealtimeFixture}=await service,config=server.config(1);
+ await page.evaluate(()=>localStorage.setItem('mise.flags',JSON.stringify({cloudSync:true,shareTarget:true})));
+ await installRealtimeFixture(page,config.jwt);await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),config);
+ const base=new URL('.',page.url());await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Turn on sync',exact:true}).click();await page.getByRole('link',{name:'Sync: Synced',exact:true}).waitFor({timeout:30000});await installSyncApplyFixture(page);
+ const id=await page.evaluate(async()=>{await window.miseSyncApplyTest.lock();return (await window.miseSyncApplyTest.captureImage()).id;});
+ await page.goto(new URL('settings/sync?flags=cloudSync',base).href);
+ if(mode==='locked'){await page.getByRole('heading',{name:'Choose an outlet and member',exact:true}).waitFor();await page.getByRole('status').filter({hasText:'saved on this device'}).waitFor();await checkLocalInboxAccess(page);return;}
+ await page.getByRole('button',{name:'Review cloud access',exact:true}).click();await page.getByRole('button',{name:'Check current access',exact:true}).click();await page.getByRole('button',{name:'Apply reviewed changes',exact:true}).click();await page.getByRole('link',{name:'Sync: Synced',exact:true}).waitFor({timeout:30000});
+ if(mode==='list'){await page.goto(new URL('inbox?flags=shareTarget',base).href);await page.getByRole('heading',{name:'Saved on this device',exact:true}).waitFor();await checkLocalInboxAccess(page);return;}
+ await page.goto(new URL('inbox/'+id+'?flags=shareTarget',base).href);await page.getByRole('heading',{name:'Saved share',exact:true}).waitFor();await checkLocalInboxAccess(page);
 }
 export async function closeRecoveryVisual(){const previous=service;service=undefined;if(previous){let value;try{value=await previous;}catch{return;}await value.server.close();}}

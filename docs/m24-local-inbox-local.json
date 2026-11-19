@@ -1,0 +1,130 @@
+{
+  "checkedAt": "2026-11-19T20:50:39.430Z",
+  "parentCommit": "4904464b39783264ee7553cb809f71ae80c8c2a0",
+  "scope": "Original device-only Inbox shares, explicit outlet review and typed claim; full handover and M24/M30/M31 acceptance remain open",
+  "source": {
+    "changedImplementationAndTestFiles": 20,
+    "sha256": "9d66ddf96969b3b9acec8994f94c424a6db0271c3485682710a2ba0ca49390df"
+  },
+  "localStorage": {
+    "schema": 21,
+    "stores": 35,
+    "portableSchema": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 131,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "units": {
+      "files": 135,
+      "passed": 2463,
+      "failed": 0
+    },
+    "rootBrowser": {
+      "passed": 22,
+      "failed": 0
+    },
+    "pagesBrowser": {
+      "base": "/mise/",
+      "passed": 442,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 1344766.909
+    },
+    "localInboxBrowserCases": [
+      {
+        "title": "the actual offline share worker retains a signed-out source; unrelated cash syncs before explicit claim, then both browsers receive its original images",
+        "durationMs": 22266
+      },
+      {
+        "title": "a native claim-audit quota failure keeps the full unassigned source and original fence through reload, then retries once",
+        "durationMs": 9335
+      }
+    ],
+    "originalUploadPerformance": {
+      "records": 5000,
+      "uploadMs": 23918,
+      "latencyMs": 400,
+      "bytesPerSecond": 50000,
+      "syntheticAuthAndStorage": true,
+      "genuineHostedOtp": false
+    },
+    "visual": {
+      "comparisons": 237,
+      "localInboxComparisons": 15,
+      "horizontalOverflows": 0,
+      "differences": "informational against supplied M25 source, M20 Inbox and M27 operator references",
+      "captures": [
+        {
+          "view": "review",
+          "width": 360,
+          "path": "docs/screenshots/m24-local-inbox-360.png",
+          "sha256": "abdbc6f2816b2b8a2823f8b787d75428adc38ac6464c15006a796de038e32604",
+          "reference": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png"
+        },
+        {
+          "view": "locked",
+          "width": 768,
+          "path": "docs/screenshots/m24-local-inbox-768.png",
+          "sha256": "f398350cd7eeb2043de5d03fe1ab58b17401eb6712ec9eb3ec19883c9a35e364",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        },
+        {
+          "view": "list",
+          "width": 1440,
+          "path": "docs/screenshots/m24-local-inbox-1440.png",
+          "sha256": "01b773ff28a7decc1aa42ed882ce44856860be15c170adc4eaf1addef1c0e0e7",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    "axe": {
+      "views": [
+        "claim",
+        "saved-list",
+        "locked-notice"
+      ],
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "serious": 0,
+      "critical": 0
+    },
+    "figmaExports": 270,
+    "builds": [
+      "/",
+      "/mise/"
+    ]
+  },
+  "hosted": {
+    "changed": false,
+    "functionsDerived": 7,
+    "allByteIdenticalToDeployedBaseline": true,
+    "phoneOtpCommissioned": false,
+    "positiveSignedOwnerHostedAcceptance": false,
+    "installedAndroidAcceptance": false
+  },
+  "publication": {
+    "cloudSyncDefault": false,
+    "shareTargetDefault": false,
+    "workflowsDisabled": true,
+    "newCiArtifact": false,
+    "newPagesDeployment": false
+  },
+  "safety": {
+    "testedSourceUnchanged": true,
+    "siteFiles": 467,
+    "fixtureMarkers": 0,
+    "regionalFooterCredits": true
+  }
+}

@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [unassigned share boundary](m24-local-inbox.md) keeps signed-out captures on
+the device without cached outlet attribution, server commands or receipts. An
+explicit claim checks the current destination and complete original source under
+native locks. Retention exemptions cannot include mixed or scoped writes. No
+connection value, Auth token or deployment detail enters a shop command or backup.
+
 The [original-owner connection recovery](m30-owner-resume.md) verifies the saved
 upload and actual status receipt before fresh owner authorization. Its durable
 record contains only control fingerprints and identifiers. Native selection and

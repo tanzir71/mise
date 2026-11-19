@@ -4,6 +4,7 @@
 .inbox-source .inbox-caption,.inbox-source figcaption{color:var(--text-700)}
 
 .inbox-source .inbox-source-title,.inbox-source .inbox-source-text{color:var(--text)}
+.inbox-saved{margin:16px 0}.inbox-saved>h2{margin-top:0}.inbox-saved>p{color:var(--text-secondary);font-size:14px;line-height:1.5}.inbox-claim .button{max-width:100%;white-space:normal;overflow-wrap:anywhere}.inbox-claim .inbox-review>h2{overflow-wrap:anywhere}
 
 .inbox-action-bar>.button-ghost{border-color:transparent;background:transparent;box-shadow:none;color:var(--text-700)}
 @media(min-width:768px){.inbox-detail{min-height:calc(100dvh - 96px)}}

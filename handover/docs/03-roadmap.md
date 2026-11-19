@@ -66,6 +66,7 @@ Spec: `phases/phase-2-links-no-backend.md`
 - [ ] **M23** Hand-off pattern everywhere: deep link + Copy + "I sent it" for reminders, receipts, win-back · S · T1
   - [Implementation notes](../../docs/m23-delivery.md) (source enabled by default; all local checks pass, with default-on Pages publication stopped by owner).
 - [ ] **M24** Share target (Android PWA): share text/images into Mise → inbox to sort manually · S · T1
+  - [Unassigned source recovery and explicit outlet review](../../docs/m24-local-inbox.md) keep signed-out shares local, preserve original bytes and allow unrelated work to sync before assignment. Installed Android acceptance and publication remain open.
   - [Implementation notes](../../docs/m24-delivery.md) (receiver, local Inbox, manual forms and image backups implemented behind `shareTarget`; installed Android acceptance and publication pending).
 
 ## Phase 3 — Backend and sync (T2) → tag `v0.4.0` = v1

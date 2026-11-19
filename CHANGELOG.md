@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M24 shares received with a locked operator stay unassigned on the device until an explicit outlet review. Original text, images and capture identities survive recovery, reload, competing claims and audit failure; unrelated typed work can sync without acknowledging or uploading the unassigned source. Default flags and remaining acceptance gates stay unchanged.
+
 - M30 original owners can restore a lost phone sign-in after upload and before first download, without uploading again or replacing the working shop. Durable resumption preserves original receipts, queued cash and complete images; live account checks cover native selection and activation. Default cloud flags remain off and full M30/M31 acceptance stays open.
 
 - M31 existing outlets can review changed server scope or role through the original phone account, with resumable full downloads, fresh command coverage, complete images and a retained original shop backup. Atomic admission preserves the original upload/join and queue; lost activation resumes without applying twice. The feature remains default off and full cloud acceptance stays open.

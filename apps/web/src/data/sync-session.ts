@@ -1,4 +1,5 @@
 import Dexie, { type Transaction } from 'dexie';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import {
   parseLocalCloudState,
   type LocalCloudState,
@@ -348,7 +349,7 @@ export async function finishSyncSession(
       )
         throw new SyncSessionError();
       const unsent = await db.outbox
-          .filter((r) => r.status !== 'accepted')
+          .filter((r) => r.status !== 'accepted'&&!isLocalInboxRetention(r))
           .count(),
         next = parseSyncSession({
           ...state,

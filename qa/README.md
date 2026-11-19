@@ -2,11 +2,16 @@
 
 Run `pnpm build`, then `pnpm qa:visual`. The command starts a production preview if one is not running. Set `BASE_PATH=/mise/` for a Pages build or `PREVIEW_URL` to use an existing preview at its complete base URL. A supplied preview URL must end in `/`.
 
-Open `qa/report.html`. The current suite has 222 comparisons across landing/setup and implemented app views, including five existing-outlet recovery reviews and five original-owner resume views. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. Workflows remain disabled at the owner's request; local reports and three committed key screenshots document each UI delivery.
+Open `qa/report.html`. The current suite has 237 comparisons across landing/setup and implemented app views, including five existing-outlet recovery reviews, five original-owner resume views and fifteen unassigned-share reviews, lists and locked notices. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. Workflows remain disabled at the owner's request; local reports and three committed key screenshots document each UI delivery.
 
 References come from `sectionReferences` in `handover/exports/landing-assets.json`. Desktop setup has one full-frame export, so its individual comparisons use explicitly listed reference regions in `qa/configs/landing.json`. The full frame is included too. Phone landing sections have desktop references; their responsive reflow is intentionally different. The setup phone reference includes browser/OS UI supplied by the real device, not by the webpage.
 
 Pixelmatch differences are informational. Reference views keep their aspect ratio and scale to the implementation capture's width. Both images are padded white to the taller height; extra content is counted rather than cropped away. The report shows original/reference/implementation dimensions and any reference region. Threshold is 0.1 and antialiasing is excluded. Missing references, unavailable pages and page overflow fail the command. A low percentage alone does not establish a visual match.
+
+Each capture uses an explicit browser context, allowing axe to open its auxiliary
+page during accessibility checks. The context closes after capture. The unassigned
+Inbox fixture checks serious/critical axe violations on the claim, saved list and
+locked operator views at all five configured widths.
 
 For every UI delivery, link its Actions artifact and commit three key captures under `docs/screenshots/` in the milestone notes. The owner now requests direct commits to main without PRs. Keep reference exports unchanged.
 

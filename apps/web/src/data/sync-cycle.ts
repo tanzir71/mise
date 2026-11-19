@@ -25,6 +25,7 @@ import { SyncImageError } from '@mise/core/sync-images';
 import { SyncCoverageError } from '@mise/core/sync-coverage';
 import { UploadAdmissionError } from '@mise/core/sync-upload-admission';
 import { ScopeRecoveryError } from '@mise/core/scope-recovery';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import type { MiseDatabase } from './db';
 import type { PhoneAuth } from './phone-auth';
 import type { CommandAccount, CommandAuthorization } from './command-request';
@@ -306,7 +307,7 @@ export async function runSyncCycle(
     if (
       error instanceof ReconciliationError &&
       error.kind === 'retained' &&
-      !(await db.outbox.where('status').equals('retained').count()) &&
+      !(await db.outbox.where('status').equals('retained').filter(row=>!isLocalInboxRetention(row)).count()) &&
       (await db.outbox.where('status').equals('pending').count())
     )
       kind = 'retry';

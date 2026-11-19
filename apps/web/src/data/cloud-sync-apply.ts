@@ -20,6 +20,7 @@ import {readVerifiedSyncImages} from './cloud-sync-images';
 import {downloadSyncCoverage,type SyncCoverageRemote} from './cloud-sync-coverage';
 import {parseLocalOutboxEntry,assertLocalUploadCoverage} from './local-outbox';
 import {prepareCanonicalWrites,withCanonicalWrites,assertCanonicalTransaction,type CanonicalRowChange} from './canonical-writes';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 
 export interface ApplyCanonicalInput {readId:string;target:SyncDownloadTarget;expectedOperatorRevision:number;authKey:string}
 export interface AppliedCanonical {readId:string;canonicalHash:string;applicationHash:string;covered:number;pending:number;sequence:number}
@@ -94,7 +95,7 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
  if(previousBase?.snapshot.readId===input.readId&&previous){await fresh(originScope(origin),refresh,signal);return db.transaction('r',db.tables,async()=>{await assertOrigin(db,origin);const latest=await source(db,origin,input);if(latest.queueToken!==s.queueToken||backupToken(latest.working)!==backupToken(s.working))throw fail();active(signal,assertActive);return response(previousBase,previous);});}
  const verified=await readVerifiedSyncRecords(db,input.readId,input.target,signal),state=verified.context.state;if(state.source.previousCursor!==(previousBase?.snapshot.cursor??null)||!state.window||syncDownloadToken(parseSyncScope(state.window))!==syncDownloadToken(originScope(origin)))throw fail();
  if(origin.owner&&(state.sourceHash!==origin.owner.source.readSourceHash||state.seal!==origin.owner.source.readSeal||state.receivedCursor!==origin.owner.source.cursor))throw fail('integrity');
- if(s.portable.some(r=>r.status==='retained'))throw fail('retained');
+ if(s.portable.some(r=>r.status==='retained'&&!isLocalInboxRetention(r)))throw fail('retained');
  const commands=s.portable.flatMap(r=>r.commands),identities=new Map<string,SyncCoverageIntent>();for(const c of commands){if(identities.has(c.id))throw fail('integrity');identities.set(c.id,{id:c.id,type:c.type,requestHash:await shopCommandFingerprint(c)});}
  const covered=new Map<string,SyncCoverageIntent>();for(const c of previous?.covered??[]){if(syncDownloadToken(identities.get(c.id))!==syncDownloadToken(c))throw fail('integrity');covered.set(c.id,c);}
  const needed=commands.filter(c=>!covered.has(c.id)),proofs:LocalSyncCoverage[]=[],unknown=new Set<string>(),conflicts=new Set<string>();

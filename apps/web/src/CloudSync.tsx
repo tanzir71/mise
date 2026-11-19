@@ -22,6 +22,7 @@ import {
   freshSyncDownload,
 } from './data/sync-session';
 import { newInboxId } from '@mise/core/inbox';
+import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import './cloud-sync.css';
 
 function useSyncView() {
@@ -31,6 +32,7 @@ function useSyncView() {
       unsent = await db.outbox
         .where('status')
         .anyOf('pending', 'retained')
+        .filter(row=>!isLocalInboxRetention(row))
         .count(),
       binding = await db.cloudState.get('binding'),
       operator = await db.operatorState.get('active'),

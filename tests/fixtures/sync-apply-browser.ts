@@ -369,6 +369,15 @@ const api = {
     };
   },
   ownerFaultTriggered:()=>ownerFaultTriggered,
+  armInboxClaimLoss:(itemId:string)=>{
+    ownerFaultTriggered=false;const add=IDBObjectStore.prototype.add;
+    IDBObjectStore.prototype.add=function(value,key){
+      if(this.name==='events'&&value?.inboxId===itemId&&value?.command==='inbox.capture'){
+        IDBObjectStore.prototype.add=add;ownerFaultTriggered=true;throw new DOMException('Claim audit full','QuotaExceededError');
+      }
+      return key===undefined?add.call(this,value):add.call(this,value,key);
+    };
+  },
   initializeLocal: (config: Config) =>
     use(async (db, receiver) => {
       if (!config.localBackup) throw Error('No original local shop');
