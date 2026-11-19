@@ -1,0 +1,281 @@
+{
+  "checkedAt": "2026-11-19T15:41:33.462Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Concurrent original nonfinancial domain intents and deterministic later-action projection over old frozen reads",
+  "checks": {
+    "unitTests": 2429,
+    "unitFiles": 132,
+    "browserCases": 434,
+    "browserWorkers": 1,
+    "rootCases": 14,
+    "visualCaptures": 212,
+    "horizontalOverflows": 0,
+    "exports": 270,
+    "astroFiles": 128,
+    "lint": true,
+    "typecheck": true,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testFixturesInShippedAssets": false,
+    "landingCredit": "tanziro.com"
+  },
+  "storage": {
+    "localSchema": 20,
+    "localStores": 34,
+    "portableSchema": 10,
+    "portableTables": 21,
+    "credentialsInShopData": false
+  },
+  "acceptance": {
+    "concurrentOriginalNotesAndCommunications": true,
+    "serverAdmissionOrderWithOlderDeviceClock": true,
+    "actualLosingValuesAudited": true,
+    "duplicateStatusPreservesRealTransition": true,
+    "duplicateArchivePreservesOriginalArchiveTime": true,
+    "independentInboxFieldsAndOriginalImages": true,
+    "genuineIdenticalInboxNoop": true,
+    "explicitSentOriginalCompanions": true,
+    "originalQueueCommandsIdsAndReceiptsPreserved": true,
+    "futureRevisionsRejected": true,
+    "financialAndSourceReviewsRemainStrict": true,
+    "actualServerClockAndUndoRemainStrict": true,
+    "oldFrozenWindowRetainsLaterActionsWithoutServerReceipt": true,
+    "nativeTwoBrowserPendingProjectionAndConvergence": true,
+    "automaticBuiltAppTwoBrowserConvergence": true,
+    "syntheticLocalAuthStorageAndRealtime": true,
+    "genuineHostedSignedUserAcceptance": false
+  },
+  "hosted": {
+    "checkedAt": "2026-11-19T15:40:53.080Z",
+    "functions": [
+      {
+        "name": "commands",
+        "version": 20,
+        "status": "ACTIVE",
+        "jwtVerified": true,
+        "exactReviewedSource": true,
+        "sha256": "290cbf2a87d6db17e79a00586455d7fd18c9276a760afef766252dba7daa2047",
+        "bytes": 425415,
+        "sourceFiles": 79
+      }
+    ],
+    "unchangedFunctions": [
+      {
+        "name": "device-orders",
+        "version": 2,
+        "status": "ACTIVE",
+        "jwtVerified": false
+      },
+      {
+        "name": "staff-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "jwtVerified": true
+      },
+      {
+        "name": "sync-read",
+        "version": 4,
+        "status": "ACTIVE",
+        "jwtVerified": true
+      },
+      {
+        "name": "device-pin",
+        "version": 2,
+        "status": "ACTIVE",
+        "jwtVerified": false
+      },
+      {
+        "name": "inbox-image",
+        "version": 2,
+        "status": "ACTIVE",
+        "jwtVerified": true
+      },
+      {
+        "name": "migration-upload",
+        "version": 3,
+        "status": "ACTIVE",
+        "jwtVerified": true
+      }
+    ],
+    "privateFunctionBodiesAndGrantsVerified": 7,
+    "preflight": {
+      "migrations": 37,
+      "application_tables": 58,
+      "forced_rls_tables": 58,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1
+    },
+    "postflight": {
+      "migrations": 38,
+      "application_tables": 58,
+      "forced_rls_tables": 58,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1
+    },
+    "advisors": {
+      "warnings": 0,
+      "errors": 0,
+      "informational": 1
+    },
+    "migrationApplied": true,
+    "exactLocalSqlProof": true,
+    "syntheticRoleProof": {
+      "notes": 1,
+      "audits": 23,
+      "commands": 13,
+      "receipts": 13,
+      "replayExact": true,
+      "refundVoided": true,
+      "communications": 1,
+      "creditReversed": true,
+      "pendingTickets": 0,
+      "walletRestored": true,
+      "privateReadsDenied": true,
+      "otherIdentityDenied": true,
+      "orderHistoryRetained": true,
+      "literalUnicodeRetained": true,
+      "ordinaryCompletionDenied": true,
+      "deviceIdsAndClocksRetained": true,
+      "otherLargeBodyAdmissionDenied": true
+    },
+    "syntheticAuthRowsRemaining": 0,
+    "syntheticBusinessRowsRemaining": 0,
+    "syntheticTicketRowsRemaining": 0,
+    "authProvidersChanged": false,
+    "secretsChanged": false,
+    "bucketSettingsChanged": false,
+    "genuineSignedUserHttp": false,
+    "unauthenticatedHttp": [
+      {
+        "name": "anonymous-table",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "commands",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "migration-upload",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "inbox-image",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "sync-read",
+        "status": 401,
+        "denied": true
+      }
+    ]
+  },
+  "privacy": {
+    "sourceAndIndex": true,
+    "reachableHistory": true,
+    "buildOutput": true,
+    "privateValuesCompared": 10,
+    "credentials": 0,
+    "currentDeploymentReferences": 0,
+    "historicalNonsecretReferences": 22,
+    "coverageGaps": 0,
+    "hooks": ".githooks"
+  },
+  "publication": {
+    "disabledWorkflows": 3,
+    "newCiArtifact": false,
+    "newPagesDeployment": false,
+    "historyRewritten": false
+  },
+  "sourceReview": [
+    {
+      "path": "apps/web/src/data/cloud-sync-apply.ts",
+      "sha256": "4fd0335a3d7bfcfc456d0fb930258192408ffa41e0b5726e3b73f5332614879c"
+    },
+    {
+      "path": "packages/core/handoff-commands.ts",
+      "sha256": "e7655e6a48f2ea95e7c5f93ab6d2c3bbb4c209e3b40e1f8c97018c6bcee56646"
+    },
+    {
+      "path": "packages/core/handoff-completion.ts",
+      "sha256": "39a8f9d1a9dc27cf1c8099565638d00c1746f0d0e1137df6837f8344afb37676"
+    },
+    {
+      "path": "packages/core/handoff-replay.ts",
+      "sha256": "a6a1c24724fefe0cb1dea69eef6323d5fe263309374af9f194784e707ee299c7"
+    },
+    {
+      "path": "packages/core/inbox-commands.ts",
+      "sha256": "07656f0008a8c1ce02c7abb805a9b415a72ec344c79eea84d7cd62015c816b8a"
+    },
+    {
+      "path": "packages/core/inbox-replay.ts",
+      "sha256": "e56192cc3a5fc103c285d926a196bfa0ceeef32a15a598a3affdbf226e254bfb"
+    },
+    {
+      "path": "packages/core/order-commands.ts",
+      "sha256": "4c4b061b4cccc783f0d149ed3c612c6dd95f3c8bc7d571e40c4ddd75a23ecc93"
+    },
+    {
+      "path": "packages/core/order-replay.ts",
+      "sha256": "4b053f5233f45417e5a0be17cb114ecb9257c9cde2ad945eeb1337e50e9fcd41"
+    },
+    {
+      "path": "packages/core/purchase-commands.ts",
+      "sha256": "59ac8e45e8e1296800c1a234fc6d8fba5909bf9673a31075d6d37204f51a741f"
+    },
+    {
+      "path": "packages/core/purchase-replay.ts",
+      "sha256": "10dc71842312337ea1ee645f64a896a9d73b96ff9838c4a119150447db7dd22f"
+    },
+    {
+      "path": "packages/core/sync-materialize.ts",
+      "sha256": "50965dae0eb7bdd912b2e9043cec856582d380bacc9b8c03e9916fdac26d149e"
+    },
+    {
+      "path": "tests/fixtures/sync-apply-browser.ts",
+      "sha256": "41d95a62975fcd718c268461bf5dc1b41ac998d7d9f67b720d2a597ad473c8c1"
+    },
+    {
+      "path": "tests/handoff-commands.test.ts",
+      "sha256": "96c1631fa17f6b354645427f5ab67ee7a9576393ccaa721a203b84618bbb14f6"
+    },
+    {
+      "path": "tests/inbox-commands.test.ts",
+      "sha256": "1076862a69cc3c255617b478e03b4509d088df26da0018d9b068b9a26fc16a84"
+    },
+    {
+      "path": "tests/order-commands.test.ts",
+      "sha256": "39433aad44d71a9a66380ee9cf4027938c87845e013be4c1abaadfadcf784a49"
+    },
+    {
+      "path": "tests/pending-replay-db.test.ts",
+      "sha256": "e9e9b82dea988a16666d3525a1b77a32cba00de48883e237c19e107e49ee4bcb"
+    },
+    {
+      "path": "tests/purchase-commands.test.ts",
+      "sha256": "b109d1f1a98e188a772a5cb6ad76572aa5b9511ceb646cb22d94faa6ed025305"
+    },
+    {
+      "path": "supabase/migrations/20261119143009_concurrent_domain_intents.sql",
+      "sha256": "9912ae27750c89603abb1dba14c1e5e1e3c86d750c99ac55eea7604a792fc816"
+    },
+    {
+      "path": "tests/e2e/sync-concurrent-intents.spec.ts",
+      "sha256": "7bda4d74604314652f4997c073a52bce1cd4b98edc57bb9ce93f46a18faf8cd9"
+    }
+  ]
+}

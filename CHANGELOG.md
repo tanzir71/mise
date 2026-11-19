@@ -10,6 +10,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 original concurrent notes and confirmed order communications now append against the current order, with server admission ordering for supplier and nonfinancial order edits. Inbox classification and archive changes preserve each other and original image bytes. Financial, source, undo and reviewed-closing guards remain strict; full cloud acceptance stays open.
+- M31 tentative replay retains actions made more than five minutes after a frozen download, without inventing server admission times or changing commands and receipts. Actual server clock and expiry checks remain enforced.
+
 - M31 fixed downloads now retain every currently typed pending action family through shared domain replay, including complete order/refund companions, reviewed closings, manual messages, original Inbox images and frozen shop links. Original commands and receipts stay intact; remaining concurrent revision merges and full cloud acceptance stay open.
 - M31 automatic sync now uploads complete original Inbox image bytes after metadata acceptance, with original-account and source guards, idempotent lost-reply recovery and verified canonical upload checks. Portable backups retain and validate image-upload audits without changing manual sorting revisions.
 

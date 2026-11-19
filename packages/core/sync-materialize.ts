@@ -41,14 +41,19 @@ function applyRecords(backup:MiseBackup,records:readonly CloudRecord[]):MiseBack
  * original outbox records, IDs and receipts are never edited or manufactured.
  * A tentative projection never substitutes for genuine receipt coverage.
  */
-export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input):Promise<MiseBackup> {
+export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at):Promise<MiseBackup> {
  const backup=parseBackup(input),c=parseShopCommand(value),t=backup.tables,business=t.businesses[0],outlet=t.outlets[0],actor=t.members.find(m=>m.id===actorId);
  if(!business||!outlet||!actor?.active||!['owner','manager'].includes(actor.role)||actor.businessId!==business.id||outlet.businessId!==business.id||'outletId'in c&&c.outletId!==outlet.id||actor.role==='manager'&&!actor.outletIds.includes(outlet.id))throw new ReconciliationError('review',c.id);
  // A matching row/audit never proves receipt inclusion. Without actual coverage
  // it is a conflict, rather than permission to discard or overwrite the action.
  if(t.events.some(e=>e.id===c.id))throw new ReconciliationError('conflict',c.id);
  const row=<K extends BackupTable>(table:K,value:unknown|null)=>value===null?null:sqlRow(table,value,business.id),rows=<K extends BackupTable>(table:K,values:unknown[])=>values.map(v=>row(table,v));
- const context:Record<string,unknown>={businessId:business.id,outletId:outlet.id,actorId,at};let raw:Record<string,unknown>,records:CloudRecord[];
+ // This is a deterministic tentative projection time, never a server admission
+ // or receipt. A frozen read may predate an action by hours. Live server callers
+ // still supply their real clock to the shared calculations and expiry checks.
+ const projectionAt=Math.max(at,originalActionAt,'occurredAt'in c?c.occurredAt:0,c.type==='inbox.capture'?c.createdAt:0);
+ if(!Number.isSafeInteger(projectionAt)||projectionAt<0||projectionAt>8640000000000000)throw new ReconciliationError('integrity',c.id);
+ const context:Record<string,unknown>={businessId:business.id,outletId:outlet.id,actorId,at:projectionAt};let raw:Record<string,unknown>,records:CloudRecord[];
  try{
   if(isMoneyCommand(c)){
    const sale=c.type==='sale.undo'?t.sales.find(s=>s.id===c.saleId)??null:null;
@@ -62,7 +67,7 @@ export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,act
    const plan=stockWritePlan(c),ids=new Set(plan.rows.map(r=>r.itemId));
    raw={business:row('businesses',business),outlet:row('outlets',outlet),items:rows('stockItems',t.stockItems.filter(i=>ids.has(i.id))),moves:rows('stockMoves',t.stockMoves.filter(m=>ids.has(m.stockItemId))),suppliers:rows('suppliers',t.suppliers)};
    records=replayStockRecords({...context,contextJson:JSON.stringify(raw)},c);
-  }else return await applyReplayProjection(backup,await replayOtherPending(backup,c,actor,at),parseBackup(original));
+  }else return await applyReplayProjection(backup,await replayOtherPending(backup,c,actor,projectionAt),parseBackup(original));
   return applyRecords(backup,records);
  }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
 }

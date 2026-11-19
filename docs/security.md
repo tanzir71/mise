@@ -1,7 +1,15 @@
 # Deployment credentials
 
-Actual Supabase credentials, project/organization references and private operational
-records stay outside Git. Environment templates contain names and blank values.
+The [concurrent-intent boundary](m31-concurrent-intents.md) preserves original
+command hashes, scoped source snapshots and service-only completion. Allowing an
+observed older revision for additive or nonfinancial actions does not grant new
+table access. Financial reviews, source receipts and actual server clock/undo
+checks remain enforced. Tentative local replay carries no permission or receipt.
+
+Actual Supabase credentials and private operational records stay outside Git.
+Current source and build output exclude actual project/organization references;
+earlier nonsecret identifiers remain disclosed in the history audit below.
+Environment templates contain names and blank values.
 `.env*`, `.private/`, `.secrets/`, key exports and Supabase CLI temporary files are
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.

@@ -1,6 +1,6 @@
 import {decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
 import {inboxCommandMutation,parseInboxCommand,type InboxCommand} from './inbox-commands';
-import {validateInboxItem,type InboxItem,type InboxImage} from './inbox';
+import {validateInboxItem,changeInboxCommand,type InboxItem,type InboxImage} from './inbox';
 import {inboxSnapshotToken,validateInboxSnapshot} from './inbox-history';
 import type {AuditEvent,Business,Outlet} from './models';
 import type {ShopSetup} from './shop-access';
@@ -26,11 +26,11 @@ export function replayInboxRecords(value:unknown,command:InboxCommand):CloudReco
   if(c.occurredAt>value.at+300000||c.type==='inbox.capture'&&c.createdAt>value.at+300000)throw new InboxMutationConflict('Check the device clock and retain the original source.');
   if(c.type==='inbox.change'){
    if(!before)throw new Error('Keep the original shared source.');validateInboxItem(before);
-   if(before.revision!==c.revision)throw new InboxMutationConflict('Review the latest Inbox state before sorting.');
+   if(before.revision<c.revision)throw new InboxMutationConflict('Review the latest Inbox state before sorting.');
    if(!raw.latest)throw new Error('The source history is missing.');const latest=decodeCommandRecord('events',raw.latest as Record<string,unknown>) as unknown as AuditEvent;
    if(latest.inboxId!==c.itemId||latest.outletId!==outlet.id||latest.inboxRevision!==before.revision||latest.at!==before.updatedAt||latest.actor.type!=='member'||!['inbox.capture','inbox.classify','inbox.archive','inbox.reopen'].includes(latest.command)||inboxSnapshotToken(validateInboxSnapshot(latest.after))!==inboxSnapshotToken(before))throw new Error('Keep the complete original source history.');
   }else if(before||raw.latest||images.length)throw new InboxMutationConflict('This Inbox source identity already exists.');
-  result=inboxCommandMutation(c,setup,before);
+  result=c.type==='inbox.change'?changeInboxCommand(before!,setup,before!.revision,c.change,c.occurredAt,()=>c.id)??{item:before!}:inboxCommandMutation(c,setup,before);
  }catch(error){if(error instanceof InboxMutationConflict)throw error;throw new InboxMutationInvalid('Review the exact original source, image metadata and manual sorting action.');}
  const records:CloudRecord[]=[];
  if(result.event){

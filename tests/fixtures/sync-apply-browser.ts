@@ -580,6 +580,19 @@ const api = {
   freezePull: () => use(async (db, receiver) => {
     const {w}=await preparePull(db,receiver);return w.pendingRead;
   }),
+  seedConcurrentSupplier: () => use(db=>db.saveSupplier({name:'Shared original supplier',phone:'',note:'Original supplier note'})),
+  editConcurrentSources: (label:'Owner'|'Manager') => use(async db=>{
+    const order=(await db.orders.toArray())[0],supplier=(await db.suppliers.toArray())[0],inbox=(await db.inboxItems.toArray())[0];
+    await db.addOrderNote(order.id,label+' original note · বাংলা',order.revision);
+    await db.saveSupplier({name:label+' supplier',phone:'',note:label+' literal note'},{id:supplier.id,revision:supplier.revision});
+    await db.changeInbox(inbox.id,inbox.revision,label==='Owner'?{kind:'order'}:{archived:true});
+    let handoffId:string|null=null;
+    if(label==='Manager'){
+      const current=(await db.orders.get(order.id))!,message=await db.prepareHandoff({source:{kind:'order',id:order.id},purpose:'quote',target:'copy',text:'Original manager quote · বাংলা',part:1,parts:1});
+      await db.changeHandoff(message.id,1,{type:'sent'},undefined,{kind:'order',revision:current.revision});handoffId=message.id;
+    }
+    return {orderId:order.id,supplierId:supplier.id,inboxId:inbox.id,handoffId};
+  }),
   editPendingFamilies: (label:string) => use(async db=>{
     const setup=(await db.setup())!;
     const item=await db.saveItem({name:label,nameLocal:'বাংলা',price:3700,unit:'pc',category:label,available:true,oftenBought:false});

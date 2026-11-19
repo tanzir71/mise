@@ -63,10 +63,10 @@ Fresh live unauthenticated probes returned 401 for table access and the commands
 migration-upload, image and sync-read endpoints. These denial checks create no
 account or SMS and do not substitute for signed-user acceptance.
 
-M30 and M31 remain unchecked. General concurrent order/supplier/Inbox revision
-merges and the architecture's complete additive/server-time conflict policy still
-need implementation. Existing strict review and financial guards retain those
-actions instead of claiming a completed merge. Existing-shop changed-scope
+M30 and M31 remain unchecked. The later [concurrent-intent increment](m31-concurrent-intents.md)
+adds current-revision notes, Sent companions, nonfinancial order/supplier sets and
+independent Inbox fields. Strict financial and review guards still retain actions
+that require a fresh decision. Existing-shop changed-scope
 recovery and the remaining genuine hosted acceptance are also open. `cloudSync`
 remains default off. GitHub Actions and Pages publication remain stopped by the
 owner; no new CI artifact or public site deployment is claimed.

@@ -52,7 +52,7 @@ export function replayHandoffRecords(value:unknown,command:HandoffCommand):Cloud
      const account=source as unknown as CreditAccount,customer=raw.customer?decodeCommandRecord('customers',raw.customer as Record<string,unknown>) as unknown as Customer:undefined,entries=raw.entries.map(e=>decodeCommandRecord('creditEntries',e) as unknown as CreditEntry);
      if(!customer||customer.businessId!==business.id||account.customerId!==customer.id||entries.some(e=>e.outletId!==outlet.id||e.accountId!==account.id||e.customerId!==customer.id))throw new Error('The message khata changed.');context.ledger={setup,account,customer,entries};
     }
-    if(sourceKind==='order'){context.order=source as unknown as Order;if(c.completion?.kind==='order'&&context.order.revision!==c.completion.revision)throw new HandoffMutationConflict('Review the latest order before confirming its exact message.');}
+    if(sourceKind==='order'){context.order=source as unknown as Order;context.currentOrderRevision=true;if(c.completion?.kind==='order'&&context.order.revision<c.completion.revision)throw new HandoffMutationConflict('Review the latest order before confirming its exact message.');}
     if((sourceKind==='supplier'||sourceKind==='shop')&&draft.purpose==='supplier-order'){
      context.items=raw.items.map(i=>decodeCommandRecord('stockItems',i) as unknown as StockItem);if(context.items.some(i=>i.outletId!==outlet.id))throw new Error('Choose stock items from this outlet.');
      context.suppliers=sourceKind==='supplier'?[source as unknown as Supplier]:[];context.message=message;
@@ -62,7 +62,7 @@ export function replayHandoffRecords(value:unknown,command:HandoffCommand):Cloud
   }
  }catch(error){if(error instanceof HandoffMutationConflict)throw error;throw new HandoffMutationInvalid('Review the exact message source, progress, completion, original sent record or device time.');}
  const normalize=(row:{createdAt:number;updatedAt:number})=>{row.updatedAt=Math.max(value.at as number,c.occurredAt,row.createdAt,row.updatedAt);};
- if(undone)normalize(undone);if(completion.order)normalize(completion.order);if(completion.communication)normalize(completion.communication);if(completion.message)normalize(completion.message);for(const e of completion.entries)normalize(e);
+ if(undone)normalize(undone);if(completion.order){normalize(completion.order);if(object(raw.source)&&typeof raw.source.updated_at==='number')completion.order.updatedAt=Math.max(completion.order.updatedAt,raw.source.updated_at);}if(completion.communication)normalize(completion.communication);if(completion.message)normalize(completion.message);for(const e of completion.entries)normalize(e);
  for(const e of completion.events)e.at=value.at;
  // Hand-off history requires event.at === progress.updatedAt. Admission time is in the receipt.
  if(c.type==='supplier-message.undo')event.at=value.at;

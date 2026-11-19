@@ -6,7 +6,7 @@ import {recordSupplierMessageCommand,sameSupplierMessage,type SupplierMessageInp
 import {validateShop,type ShopSetup} from './shop-access';
 import {publicRecord} from './public-shop';
 import type {AuditEvent,CreditEntry,Order,OrderCommunication,StockItem,Supplier,SupplierMessage} from './models';
-export interface HandoffCompletionContext {setup:ShopSetup;ledger?:CustomerLedgerContext;order?:Order;suppliers?:Supplier[];items?:StockItem[];message?:SupplierMessage}
+export interface HandoffCompletionContext {setup:ShopSetup;ledger?:CustomerLedgerContext;order?:Order;suppliers?:Supplier[];items?:StockItem[];message?:SupplierMessage;currentOrderRevision?:boolean}
 export type HandoffCompletionIds=(kind:'record'|'event')=>string;
 export interface HandoffCompletionChange {entries:CreditEntry[];order?:Order;communication?:OrderCommunication;message?:SupplierMessage;reusedMessage?:SupplierMessage;events:AuditEvent[]}
 /** The complete business side effect joins the caller's Sent transaction. It sends nothing. */
@@ -20,7 +20,8 @@ export function completeHandoffCommand(state:HandoffSession,value:HandoffComplet
   const c=recordCommunicationCommand(context.ledger,purpose as 'reminder'|'receipt'|'call',text,purpose==='call'?'call':channel,at,kind=>newId(kind==='entry'?'record':'event'));result.entries.push(c.entry);result.events.push(c.event);
  }else if(source.kind==='order'){
   const input=publicRecord(value,['kind','revision']);if(input.kind!=='order'||!Number.isSafeInteger(input.revision)||(input.revision as number)<1||!context.order||context.order.id!==source.id)throw new Error('Review the order before marking its message sent.');
-  const c=recordOrderCommunicationCommand(context.order,{purpose:purpose as 'quote'|'call',text,channel:purpose==='call'?'call':channel},context.setup,input.revision as number,at,kind=>newId(kind==='communication'?'record':'event'));
+  if(context.currentOrderRevision&&(input.revision as number)>context.order.revision)throw new Error('Keep a real observed order revision.');
+  const c=recordOrderCommunicationCommand(context.order,{purpose:purpose as 'quote'|'call',text,channel:purpose==='call'?'call':channel},context.setup,context.currentOrderRevision?context.order.revision:input.revision as number,at,kind=>newId(kind==='communication'?'record':'event'));
   result.order=c.order;result.communication=c.communication;result.events.push(c.event);
  }else if((source.kind==='supplier'||source.kind==='shop')&&purpose==='supplier-order'){
   const input=publicRecord(value,['kind','supplierName','stockItemIds']);if(input.kind!=='supplier'||typeof input.supplierName!=='string'||!Array.isArray(input.stockItemIds)||input.stockItemIds.some(id=>typeof id!=='string'))throw new Error('Review the supplier draft before marking it sent.');

@@ -42,6 +42,6 @@ export function parseInboxCommandReceipt(v:unknown,c:InboxCommand):InboxCommandR
  if(!object(v)||!exact(v,'id,type,itemId,outletId,occurredAt,at,createdAt,updatedAt,revision,kind,archived,imageCount,imageBytes,eventId,changed')||v.id!==c.id||v.type!==c.type||v.itemId!==c.itemId||v.outletId!==c.outletId||v.occurredAt!==c.occurredAt||!time(v.at)||!time(v.createdAt)||!time(v.updatedAt)||v.updatedAt<v.createdAt||!integer(v.revision,1)||!inboxKinds.includes(v.kind as InboxKind)||typeof v.archived!=='boolean'||!integer(v.imageCount,0,4)||!integer(v.imageBytes,0,10485760)||(v.imageCount===0)!==(v.imageBytes===0)||typeof v.changed!=='boolean'||v.eventId!==(v.changed?c.id:null))throw new Error('Invalid Inbox receipt.');
  if(c.type==='inbox.capture'){
   if(!v.changed||v.revision!==1||v.createdAt!==c.createdAt||v.updatedAt!==Math.max(c.createdAt,c.occurredAt)||v.kind!=='unclassified'||v.archived||v.imageCount!==c.input.images.length||v.imageBytes!==c.input.images.reduce((n,i)=>n+i.size,0))throw new Error('The original capture is unconfirmed.');
- }else if(v.revision!==c.revision+(v.changed?1:0)||v.changed&&v.updatedAt<c.occurredAt||('kind' in c.change?v.kind!==c.change.kind:v.archived!==c.change.archived))throw new Error('The reviewed Inbox action is unconfirmed.');
+ }else if(v.revision<c.revision+(v.changed?1:0)||v.changed&&v.updatedAt<c.occurredAt||('kind' in c.change?v.kind!==c.change.kind:v.archived!==c.change.archived))throw new Error('The reviewed Inbox action is unconfirmed.');
  return {...v} as unknown as InboxCommandReceipt;
 }
