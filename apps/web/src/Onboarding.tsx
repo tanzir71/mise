@@ -4,6 +4,7 @@ import { Button, Card } from '@mise/ui/primitives.tsx';
 import { businessPacks, marketPacks, defaultMarket, type BusinessType, type MarketCode } from '@mise/core/packs';
 import c from '../../../handover/copy/app.en.json';
 import { db } from './data/db';
+import {SavedShareNotice} from './SavedShareNotice';
 
 export function Onboarding({onRestore,onJoin,showInstall=false}:{onRestore?:()=>void;onJoin?:()=>void;showInstall?:boolean}) {
   const [step, setStep] = useState(0);
@@ -24,6 +25,7 @@ export function Onboarding({onRestore,onJoin,showInstall=false}:{onRestore?:()=>
   return <main id="main" className="onboarding">
     <a className="app-wordmark" href={import.meta.env.BASE_URL}><img src={`${import.meta.env.BASE_URL}mise-mark.svg`} width="24" height="24" alt="" />mise</a>
     <header><h1>{c.gettingStarted}</h1><p>{c.step} {step + 1} {c.of} 3 · {c.minute}</p></header>
+    <SavedShareNotice purpose="setup"/>
     <progress max="3" value={step + 1} aria-label={`${c.step} ${step + 1} ${c.of} 3`} />
     <form onSubmit={submit} aria-label={c.gettingStarted}>
       <Card className="onboarding-card"><h2 tabIndex={-1} key={step}>{c.onboarding[step].title}</h2><p>{c.onboarding[step].lead}</p>

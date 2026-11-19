@@ -1,0 +1,105 @@
+{
+  "checkedAt": "2026-11-19T22:39:21.289Z",
+  "scope": "Original offline share on an empty device, one manager phone verification, explicit claim and cash before the first ordinary canonical application, then two-browser convergence",
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "typescript": true,
+      "astroFiles": 131,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "files": 135,
+      "passed": 2464,
+      "durationSeconds": 462.45
+    },
+    "rootBrowser": {
+      "startTime": "2026-11-19T22:15:00.798Z",
+      "duration": 197171.962,
+      "expected": 23,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "pagesBrowser": {
+      "startTime": "2026-11-19T22:18:51.832Z",
+      "duration": 714445.023,
+      "expected": 443,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "suppliedExports": 270,
+    "visual": {
+      "comparisons": 247,
+      "overflow": 0,
+      "newNoticeComparisons": 10,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "seriousOrCriticalAxeViolationsOnNewNotices": 0,
+      "sourceReviewAxeWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "dedicatedPendingShareReference": false,
+      "reference": "M33 Getting started",
+      "differences": "informational"
+    },
+    "verifiedSourceFiles": 765,
+    "sourceFingerprint": "af4a9ffbc61277c793f5fd0d0d13fb9f30f006f1d500802c4c2c9305399e8303"
+  },
+  "boundaries": {
+    "sql": "direct",
+    "http": "direct",
+    "indexedDB": "native",
+    "shareCapture": "installed Chromium service worker, real offline multipart form",
+    "appControls": "direct",
+    "auth": "explicit synthetic local verifier",
+    "realtime": "explicit synthetic gateway",
+    "storage": "explicit synthetic local object service",
+    "managerOtpRequests": 1,
+    "managerVerifications": 1,
+    "migrationUploads": 0,
+    "pendingTypedGroups": 2,
+    "financialCopies": 1,
+    "originalImageBytesPreserved": true,
+    "originalSourceIdsAndTimesPreserved": true,
+    "originalCommandsPreserved": true,
+    "operator": "freshly admitted manager",
+    "noSeededDeviceAuthority": true,
+    "noSourceOnOtherDeviceBeforeExplicitClaim": true
+  },
+  "changes": {
+    "schema": false,
+    "backend": false,
+    "hostedConfiguration": false,
+    "credentials": false,
+    "featureFlagDefaults": false
+  },
+  "publication": {
+    "workflowsDisabled": true,
+    "newCiRun": false,
+    "newCiArtifact": false,
+    "newPagesDeployment": false
+  },
+  "remaining": [
+    "M24 installed Android acceptance and publication",
+    "M30 genuine phone/account and hosted acceptance, remaining role resources",
+    "M31 financial/review conflict families and full acceptance",
+    "Later roadmap milestones"
+  ]
+}

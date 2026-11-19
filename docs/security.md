@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [share-before-join check](m31-join-share.md) uses two empty devices and local
+synthetic phone verification. The setup/join notice exposes only a saved count;
+source text and bytes stay unassigned until explicit outlet review. The join does
+not copy connection settings or Auth credentials into source records or commands.
+Its verification gateway reads no private deployment configuration.
+
 The [unassigned share boundary](m24-local-inbox.md) keeps signed-out captures on
 the device without cached outlet attribution, server commands or receipts. An
 explicit claim checks the current destination and complete original source under

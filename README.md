@@ -56,6 +56,8 @@ Accounts, sync, kitchen/staff screens, automatic capture and AI operators are on
 
 Behind the default-off sync flag, [Sync setup](docs/m31-sync-runtime.md) supports reviewed local uploads and [joining an existing outlet on a new device](docs/m31-join-runtime.md) through one phone verification. [Pending domain actions and complete image delivery](docs/m31-pending-intents.md) preserve original commands, bytes and receipts through fixed downloads and retries. [Concurrent intents](docs/m31-concurrent-intents.md) merge original notes, supplier edits, manual messages and independent Inbox fields across offline devices. [Existing-outlet recovery](docs/m31-scope-recovery.md) retains the original shop and pending work while reviewing changed access. Original owners can [restore a lost sign-in before the first download](docs/m30-owner-resume.md) without uploading again. [Shares received while signed out](docs/m24-local-inbox.md) stay on the device until their outlet is explicitly reviewed; unrelated typed work can sync before they are assigned. Financial/review conflicts and genuine hosted authentication checks are still open.
 
+[A share received before setup](docs/m31-join-share.md) stays visible through joining an outlet and can be claimed offline afterwards. Its original text and images survive the join; a native two-browser check verifies delivery alongside cash without duplicate records.
+
 Real Supabase settings and credentials stay outside the repository and public build. [Privacy checks](docs/security.md) run before commits, pushes and builds, alongside GitHub secret scanning and push protection.
 
 GitHub workflows are disabled at the owner’s request, so `main` can be ahead of the published Pages site.

@@ -2,7 +2,7 @@
 
 Run `pnpm build`, then `pnpm qa:visual`. The command starts a production preview if one is not running. Set `BASE_PATH=/mise/` for a Pages build or `PREVIEW_URL` to use an existing preview at its complete base URL. A supplied preview URL must end in `/`.
 
-Open `qa/report.html`. The current suite has 237 comparisons across landing/setup and implemented app views, including five existing-outlet recovery reviews, five original-owner resume views and fifteen unassigned-share reviews, lists and locked notices. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. Workflows remain disabled at the owner's request; local reports and three committed key screenshots document each UI delivery.
+Open `qa/report.html`. The current suite has 247 comparisons across landing/setup and implemented app views, including five existing-outlet recovery reviews, five original-owner resume views and fifteen unassigned-share reviews, lists and locked notices, and ten empty-device setup/join notices. M11 replaces the old M10 sample-only capture. Filter by page/viewport, open images or switch to actual pixels. Captures are in `qa/screens/`; reference views and difference images travel with the report. Generated files are ignored by Git. Workflows remain disabled at the owner's request; local reports and three committed key screenshots document each UI delivery.
 
 References come from `sectionReferences` in `handover/exports/landing-assets.json`. Desktop setup has one full-frame export, so its individual comparisons use explicitly listed reference regions in `qa/configs/landing.json`. The full frame is included too. Phone landing sections have desktop references; their responsive reflow is intentionally different. The setup phone reference includes browser/OS UI supplied by the real device, not by the webpage.
 
@@ -23,6 +23,12 @@ under ignored `.private/`, is closed after the run and never enters site output.
 No private deployment configuration is read. M31 has no dedicated recovery frame;
 the config names the existing M27 and Desktop 14 references and labels the visual
 differences informational.
+
+The M31 join-share config uses `pendingJoinShareFixture` with `setup` or `join`.
+It captures a real original image on an empty database, opens the actual setup or
+connection form and runs axe at all five widths. It seeds no business, member,
+cloud connection or Auth session and sends no hosted request. Supplied M33 guides
+the hierarchy and tokens; there is no dedicated pending-share frame.
 
 ## App milestones
 

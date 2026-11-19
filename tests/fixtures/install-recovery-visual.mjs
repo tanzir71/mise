@@ -45,4 +45,15 @@ export async function captureLocalInboxReview(page,mode='review'){
  if(mode==='list'){await page.goto(new URL('inbox?flags=shareTarget',base).href);await page.getByRole('heading',{name:'Saved on this device',exact:true}).waitFor();await checkLocalInboxAccess(page);return;}
  await page.goto(new URL('inbox/'+id+'?flags=shareTarget',base).href);await page.getByRole('heading',{name:'Saved share',exact:true}).waitFor();await checkLocalInboxAccess(page);
 }
+/** An empty device with a real local capture, without any seeded account or outlet. */
+export async function capturePendingJoinShare(page,mode){
+ if(!['setup','join'].includes(mode))throw Error('Choose a setup or join share notice.');
+ await installSyncApplyFixture(page);
+ await page.evaluate(async mode=>{localStorage.setItem('mise.flags',JSON.stringify({cloudSync:mode==='join',shareTarget:true}));await window.miseSyncApplyTest.captureImage();},mode);
+ await page.reload();
+ if(mode==='join')await page.getByRole('button',{name:'Join an existing outlet',exact:true}).click();
+ else if(await page.getByRole('button',{name:'Join an existing outlet',exact:true}).count())throw Error('The default-off join action must not be advertised during local setup.');
+ await page.getByRole('status').filter({hasText:'1 shared item is saved on this device.'}).waitFor();
+ await checkLocalInboxAccess(page);
+}
 export async function closeRecoveryVisual(){const previous=service;service=undefined;if(previous){let value;try{value=await previous;}catch{return;}await value.server.close();}}

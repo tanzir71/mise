@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 setup and outlet joining now show the count of shares already saved on an empty device. A real offline service-worker capture survives one phone verification and manager admission, then can be explicitly claimed before the first canonical application; original images and offline cash converge without duplicate money or another upload. Cloud and share-target flags remain default off.
+
 - M24 shares received with a locked operator stay unassigned on the device until an explicit outlet review. Original text, images and capture identities survive recovery, reload, competing claims and audit failure; unrelated typed work can sync without acknowledging or uploading the unassigned source. Default flags and remaining acceptance gates stay unchanged.
 
 - M30 original owners can restore a lost phone sign-in after upload and before first download, without uploading again or replacing the working shop. Durable resumption preserves original receipts, queued cash and complete images; live account checks cover native selection and activation. Default cloud flags remain off and full M30/M31 acceptance stays open.

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import {SavedShareNotice} from './SavedShareNotice';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import { defaultMarket } from '@mise/core/packs';
 import {
@@ -299,6 +300,7 @@ export function CloudJoin({
           device.
         </p>
       </header>
+      <SavedShareNotice purpose="join"/>
       {!online ? (
         <p className="cloud-preview-note" role="status">
           You’re offline. Connect to resume the saved download.

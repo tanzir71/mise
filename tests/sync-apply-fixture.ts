@@ -12,8 +12,10 @@ import type {SyncCoverageSource,SyncCoveragePage} from '../packages/core/sync-co
 import type {OperatorContext} from '../packages/core/operators';
 
 /** Synthetic network facts for focused local tests; native SQL HTTP is separate. */
-export async function joinedApplyFixture(manager=false){
- const f=await syncJoinFixture(manager),db=new MiseDatabase('mise-apply-'+newInboxId()),authKey='mise.cloud.auth.'+'c'.repeat(64),context:OperatorContext={...parseSyncScope(f.window),version:1,businessName:null,outletName:null,actorName:null},refresh=async()=>structuredClone(context),operator=await selectCloudOperator(db,context,{authKey,targetHash:f.target.targetHash},null,refresh);
+export async function joinedApplyFixture(manager=false,beforeJoin?:(db:MiseDatabase)=>Promise<void>){
+ const f=await syncJoinFixture(manager),db=new MiseDatabase('mise-apply-'+newInboxId()),authKey='mise.cloud.auth.'+'c'.repeat(64),context:OperatorContext={...parseSyncScope(f.window),version:1,businessName:null,outletName:null,actorName:null},refresh=async()=>structuredClone(context);
+ if(beforeJoin)await beforeJoin(db);
+ const operator=await selectCloudOperator(db,context,{authKey,targetHash:f.target.targetHash},null,refresh);
  await prepareSyncDownload(db,{id:f.window.id,target:f.target,previousCursor:null});await runSyncDownload(db,f.window.id,f.target,{begin:async()=>f.window,page:async(_w,i)=>f.pages[i]});await downloadSyncImages(db,f.window.id,f.target,{get:async source=>new Blob([new Uint8Array(f.imageBytes).buffer],{type:source.image.type})});const joinInput={readId:f.window.id,target:f.target,authKey,expectedOperatorRevision:operator.revision};const joined=await joinCanonicalDevice(db,joinInput,refresh);
  async function stage(updates:{table:BackupTable;row:Record<string,unknown>|unknown;operation?:'upsert'|'delete'}[]=[]){
   const base=(await db.syncCanonical.get('active'))!,id=newInboxId(),target={...f.target,role:base.snapshot.scope.role},window={...f.window,...base.snapshot.scope,id,createdAt:Date.now(),expiresAt:Date.now()+86400000};let ordinal=base.snapshot.records.reduce((n,r)=>BigInt(r.changeId)>n?BigInt(r.changeId):n,0n);const parts:SyncReadPart[]=[];

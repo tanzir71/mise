@@ -1,0 +1,18 @@
+{
+  "title": "M31 — Keep an original share visible before outlet setup or join",
+  "pages": [{
+    "id": "m31-join-share-setup",
+    "path": "app/?flags=shareTarget",
+    "widths": [360, 390, 768, 1024, 1440],
+    "pendingJoinShareFixture": "setup",
+    "note": "An original local image capture on an otherwise empty device. No outlet, member, Auth session or cloud binding is seeded. Count-only setup feedback follows supplied M33 hierarchy and tokens; no dedicated pending-share setup frame exists. Differences are informational. Each width also runs axe.",
+    "sections": [{"selector": ".onboarding", "id": "setup", "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"}]
+  }, {
+    "id": "m31-join-share-connection",
+    "path": "app/?flags=cloudSync,shareTarget",
+    "widths": [360, 390, 768, 1024, 1440],
+    "pendingJoinShareFixture": "join",
+    "note": "An original local source remains on the empty device while the actual join connection form is open. No connection or account is seeded and no hosted request is sent. Count-only feedback follows supplied M33 hierarchy and tokens; no dedicated join-share frame exists. Differences are informational. Each width also runs axe.",
+    "sections": [{"selector": ".cloud-join", "id": "connection", "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"}]
+  }]
+}
