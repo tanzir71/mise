@@ -61,10 +61,12 @@ export interface SyncCycleOptions {
 }
 /** Live identity checks remain ephemeral, including the connection check at native receipt write. */
 export function cycleAccount(
-  options: Pick<
-    SyncCycleOptions,
-    'config' | 'scope' | 'auth' | 'connectionCurrent'
-  >,
+  options: Pick<SyncCycleOptions, 'config' | 'scope' | 'connectionCurrent'> & {
+    auth: Pick<
+      PhoneAuth,
+      'key' | 'commandAuthorization' | 'assertCommandAuthorization'
+    >;
+  },
   state: Pick<SyncSession, 'target' | 'authKey'>,
 ): CommandAccount {
   const config = parseCloudConnection(options.config);

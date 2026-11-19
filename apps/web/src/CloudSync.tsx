@@ -11,6 +11,7 @@ import {
 import { parseSyncSession, syncSessionLabel } from '@mise/core/sync-session';
 import { db } from './data/db';
 import { getPhoneAuth, type PhoneAuth } from './data/phone-auth';
+import { resolveCloudAuthScope } from './data/cloud-auth-scope';
 import { CloudUploadJournal } from './data/cloud-upload';
 import { createSyncRuntime } from './data/sync-runtime';
 import { watchSyncRealtime } from './data/sync-realtime';
@@ -76,7 +77,13 @@ export function CloudSyncStatus({
     void (async () => {
       const config = readCloudConnection(localStorage);
       if (!config) return;
-      const auth = await getPhoneAuth(config, scope);
+      const authScope = await resolveCloudAuthScope(
+        config,
+        import.meta.env.BASE_URL,
+        setup.business.id,
+        state!.authKey,
+      );
+      const auth = await getPhoneAuth(config, authScope);
       if (!current) return;
       const journal = new CloudUploadJournal(
           'mise-cloud-uploads:' + import.meta.env.BASE_URL,

@@ -5,7 +5,7 @@ import { businessPacks, marketPacks, defaultMarket, type BusinessType, type Mark
 import c from '../../../handover/copy/app.en.json';
 import { db } from './data/db';
 
-export function Onboarding({onRestore,showInstall=false}:{onRestore?:()=>void;showInstall?:boolean}) {
+export function Onboarding({onRestore,onJoin,showInstall=false}:{onRestore?:()=>void;onJoin?:()=>void;showInstall?:boolean}) {
   const [step, setStep] = useState(0);
   const [business, setBusiness] = useState<BusinessType>('corner_shop');
   const [market, setMarket] = useState<MarketCode>(() => defaultMarket(Intl.DateTimeFormat().resolvedOptions().timeZone));
@@ -34,6 +34,7 @@ export function Onboarding({onRestore,showInstall=false}:{onRestore?:()=>void;sh
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       <div className="onboarding-actions">{step > 0 ? <Button kind="secondary" type="button" onClick={() => { setStep(value => value - 1); setError(''); }} disabled={saving}>{c.back}</Button> : null}<Button type="submit" disabled={saving}>{saving ? c.saving : step === 2 ? c.open : c.next}</Button></div>
     </form>
+    {onJoin ? <Button type="button" kind="secondary" onClick={onJoin}>Join an existing outlet</Button> : null}
     {onRestore ? <Button type="button" kind="ghost" onClick={onRestore}>Restore a backup</Button> : null}
     {showInstall ? <InstallHint/> : null}
   </main>;

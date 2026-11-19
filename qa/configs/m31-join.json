@@ -1,0 +1,190 @@
+{
+  "title": "M31 new-device join",
+  "actionSets": {
+    "open": [
+      {
+        "type": "click",
+        "selector": "button:has-text(\"Join an existing outlet\")"
+      },
+      {
+        "type": "wait",
+        "selector": ".cloud-join"
+      }
+    ],
+    "connection": [
+      {
+        "type": "fill",
+        "selector": "input[type=url]",
+        "value": "https://cloud.test"
+      },
+      {
+        "type": "fill",
+        "selector": "input[type=password]",
+        "value": "sb_publishable_test_only"
+      },
+      {
+        "type": "click",
+        "selector": "button:has-text(\"Save connection\")"
+      },
+      {
+        "type": "fill",
+        "selector": "input[type=tel]",
+        "value": "+8801712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button:has-text(\"Send verification code\")"
+      },
+      {
+        "type": "wait",
+        "selector": "input[autocomplete=one-time-code]"
+      }
+    ],
+    "verify": [
+      {
+        "type": "fill",
+        "selector": "input[autocomplete=one-time-code]",
+        "value": "123456"
+      },
+      {
+        "type": "click",
+        "selector": "button:has-text(\"Verify phone\")"
+      },
+      {
+        "type": "wait",
+        "selector": ".cloud-verified"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "m31-join-connection-phone",
+      "path": "app/?flags=cloudSync",
+      "phoneAuthFixture": true,
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "open"
+      ],
+      "note": "No dedicated join frame is named in Phase 3. M33 Getting started and Desktop 14 Business data guide the original tokens, calm cards, hierarchy and 44px controls. Differences are informational. These captures use a synthetic local Auth gateway; real SQL-backed outlet/recovery browser captures are recorded separately. No hosted OTP acceptance is claimed.",
+      "sections": [
+        {
+          "id": "join",
+          "selector": ".cloud-join",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ]
+    },
+    {
+      "id": "m31-join-connection-desktop",
+      "path": "app/?flags=cloudSync",
+      "phoneAuthFixture": true,
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "open"
+      ],
+      "note": "No dedicated join frame is named in Phase 3. M33 Getting started and Desktop 14 Business data guide the original tokens, calm cards, hierarchy and 44px controls. Differences are informational. These captures use a synthetic local Auth gateway; real SQL-backed outlet/recovery browser captures are recorded separately. No hosted OTP acceptance is claimed.",
+      "sections": [
+        {
+          "id": "join",
+          "selector": ".cloud-join",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    },
+    {
+      "id": "m31-join-code-phone",
+      "path": "app/?flags=cloudSync",
+      "phoneAuthFixture": true,
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "open",
+        "connection"
+      ],
+      "note": "No dedicated join frame is named in Phase 3. M33 Getting started and Desktop 14 Business data guide the original tokens, calm cards, hierarchy and 44px controls. Differences are informational. These captures use a synthetic local Auth gateway; real SQL-backed outlet/recovery browser captures are recorded separately. No hosted OTP acceptance is claimed.",
+      "sections": [
+        {
+          "id": "join",
+          "selector": ".cloud-join",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ]
+    },
+    {
+      "id": "m31-join-code-desktop",
+      "path": "app/?flags=cloudSync",
+      "phoneAuthFixture": true,
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "open",
+        "connection"
+      ],
+      "note": "No dedicated join frame is named in Phase 3. M33 Getting started and Desktop 14 Business data guide the original tokens, calm cards, hierarchy and 44px controls. Differences are informational. These captures use a synthetic local Auth gateway; real SQL-backed outlet/recovery browser captures are recorded separately. No hosted OTP acceptance is claimed.",
+      "sections": [
+        {
+          "id": "join",
+          "selector": ".cloud-join",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    },
+    {
+      "id": "m31-join-verified-phone",
+      "path": "app/?flags=cloudSync",
+      "phoneAuthFixture": true,
+      "widths": [
+        360,
+        390
+      ],
+      "actionSets": [
+        "open",
+        "connection",
+        "verify"
+      ],
+      "note": "No dedicated join frame is named in Phase 3. M33 Getting started and Desktop 14 Business data guide the original tokens, calm cards, hierarchy and 44px controls. Differences are informational. These captures use a synthetic local Auth gateway; real SQL-backed outlet/recovery browser captures are recorded separately. No hosted OTP acceptance is claimed.",
+      "sections": [
+        {
+          "id": "join",
+          "selector": ".cloud-join",
+          "reference": "screens/mobile/M33 · Owner — Getting started (onboarding on a phone).png"
+        }
+      ]
+    },
+    {
+      "id": "m31-join-verified-desktop",
+      "path": "app/?flags=cloudSync",
+      "phoneAuthFixture": true,
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "actionSets": [
+        "open",
+        "connection",
+        "verify"
+      ],
+      "note": "No dedicated join frame is named in Phase 3. M33 Getting started and Desktop 14 Business data guide the original tokens, calm cards, hierarchy and 44px controls. Differences are informational. These captures use a synthetic local Auth gateway; real SQL-backed outlet/recovery browser captures are recorded separately. No hosted OTP acceptance is claimed.",
+      "sections": [
+        {
+          "id": "join",
+          "selector": ".cloud-join",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    }
+  ]
+}

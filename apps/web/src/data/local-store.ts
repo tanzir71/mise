@@ -11,9 +11,11 @@ import type {LocalCanonicalSnapshot} from '@mise/core/sync-canonical';
 import type {LocalCanonicalApplication} from '@mise/core/sync-materialize';
 import type {LocalOwnerUploadAdmission} from '@mise/core/sync-upload-admission';
 import type {SyncSession} from '@mise/core/sync-session';
+import type {JoinSession} from '@mise/core/join-session';
 
 /** Shared schema and read-only setup lookup; safe to import in the receiving worker. */
 export class LocalStore extends Dexie {
+  joinSessions!:EntityTable<JoinSession,'id'>;
   syncSessions!:EntityTable<SyncSession,'id'>;
   syncAdmissions!:EntityTable<LocalOwnerUploadAdmission,'id'>;
   syncApplications!:EntityTable<LocalCanonicalApplication,'id'>;
@@ -68,6 +70,7 @@ export class LocalStore extends Dexie {
     this.version(17).stores({syncApplications:'id'});
     this.version(18).stores({syncAdmissions:'id'});
     this.version(19).stores({syncSessions:'id,target.targetHash'});
+    this.version(20).stores({joinSessions:'id,target.targetHash'});
     // Expand the public transaction scope before Dexie validates nested reads.
     // DBCore expansion alone cannot make a store visible to a parent wrapper.
     // Identity reads and operator changes share the same native transaction lock.

@@ -1,0 +1,199 @@
+{
+  "checkedAt": "2026-11-19T12:47:44.655Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Explicit new-device outlet discovery, one phone sign-in, durable original read, resumable verified images, native admission and automatic sync",
+  "checks": {
+    "unitTests": 2372,
+    "unitFiles": 128,
+    "browserCases": 428,
+    "rootCases": 25,
+    "finalPagesRuntimeCases": 3,
+    "visualCaptures": 212,
+    "finalJoinVisualCaptures": 15,
+    "nativeRuntimeComparisons": 10,
+    "horizontalOverflows": 0,
+    "exports": 270,
+    "astroFiles": 120,
+    "lint": true,
+    "typecheck": true,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testFixturesInShippedAssets": false
+  },
+  "storage": {
+    "localSchema": 20,
+    "localStores": 34,
+    "portableSchema": 10,
+    "portableTables": 21,
+    "credentialsInShopData": false
+  },
+  "acceptance": {
+    "oneOtpWithoutHandoffLogout": true,
+    "explicitServerOutletChoice": true,
+    "managerScopeFromSql": true,
+    "truncatedPageOriginalReadResume": true,
+    "twoNativeTabsOneOriginalJoin": true,
+    "offlineCashConvergence": true,
+    "backupContainsNoConnectionOrAuth": true,
+    "fiveWidthSeriousCriticalAxe": 0,
+    "syntheticLocalAuthStorageAndRealtime": true,
+    "genuineHostedAcceptance": false
+  },
+  "privacy": {
+    "sourceAndIndex": true,
+    "reachableHistory": true,
+    "buildOutput": true,
+    "privateValuesCompared": 10,
+    "credentials": 0,
+    "currentDeploymentReferences": 0,
+    "historicalNonsecretReferences": 22,
+    "coverageGaps": 0,
+    "hooks": ".githooks",
+    "gitHubSecretScanning": "enabled",
+    "gitHubPushProtection": "enabled",
+    "openSecretAlerts": 0
+  },
+  "publication": {
+    "disabledWorkflows": 3,
+    "activeRuns": 0,
+    "newCiArtifact": false,
+    "newPagesDeployment": false,
+    "historyRewritten": false
+  },
+  "sourceReview": [
+    {
+      "path": "apps/web/src/CloudAuthForms.tsx",
+      "sha256": "643f6c542ec8d51c419f28eb36a7395b0796b9aeb23aea0fd9bb0de68fed6977"
+    },
+    {
+      "path": "apps/web/src/CloudJoin.tsx",
+      "sha256": "3ae4bef7a5446a37ffb7948e5df5cf0f5aa9e71fd67fc9ac54a2a7b0af2c7726"
+    },
+    {
+      "path": "apps/web/src/CloudSetup.tsx",
+      "sha256": "03d88a410b21743fac450b3dc4d788fc95a915f3fe9bf7355650f49bddbead0f"
+    },
+    {
+      "path": "apps/web/src/CloudSync.tsx",
+      "sha256": "9763d1ef89b87d125b793530830714036741ef8e6bbdc79515cdc11c980afcd3"
+    },
+    {
+      "path": "apps/web/src/LocalApp.tsx",
+      "sha256": "f5ac6cf19e806be82b4feb05a49f2ae5e032c1b47fbcae5e7c33a29e1aeb219f"
+    },
+    {
+      "path": "apps/web/src/Onboarding.tsx",
+      "sha256": "55192bfaf59dcd1cf8469f933597affd0787c4e1409bfd1fd01f4f989fef2adb"
+    },
+    {
+      "path": "apps/web/src/cloud-setup.css",
+      "sha256": "7d1898f80abfe26f89a213e868f56b115dbe5f818cd2c423cfe3ea5f8a07f7bf"
+    },
+    {
+      "path": "apps/web/src/data/cloud-auth-scope.ts",
+      "sha256": "437a81f5475eeef86f11ade20ceb307a81f211c599994679038416c97c4e4626"
+    },
+    {
+      "path": "apps/web/src/data/cloud-join.ts",
+      "sha256": "d3d3588d42a11acd09dbc080a7f9ab0815a2bdb229f72767b0bbb8699422056c"
+    },
+    {
+      "path": "apps/web/src/data/cloud-sync-join.ts",
+      "sha256": "99b4c01ed10275759331684ee68a6da374b4dc37d3297926e8f9c498f55d18d5"
+    },
+    {
+      "path": "apps/web/src/data/local-store.ts",
+      "sha256": "7099ce58a86c05e4134a8ed1a9931fd25d210ab1d3f4cc20cc40902a53cace55"
+    },
+    {
+      "path": "apps/web/src/data/operator-state.ts",
+      "sha256": "073c393327367d391867c9fafa1dbf5b958454234c4bc27775978abba8baf59c"
+    },
+    {
+      "path": "apps/web/src/data/sync-cycle.ts",
+      "sha256": "2a3665e1e49e0bc79f2efe9f42c199df97fd1aa9d924b39279b61cf6af8ed353"
+    },
+    {
+      "path": "packages/core/join-session.ts",
+      "sha256": "9ae59f7c320b786787330f745729c769933600aad7b9e87eb4c0ba812a2134b1"
+    },
+    {
+      "path": "packages/core/local-outbox.ts",
+      "sha256": "0ecaae28979147a1c6814a372366138afb581c6c9cadc186b8fdfe8b9910dbb6"
+    },
+    {
+      "path": "packages/core/local-schema.ts",
+      "sha256": "cb8bee3eb94e020d3c93eac522e388dbb689b367125f971d0c63c93c8d0c3724"
+    },
+    {
+      "path": "qa/configs/m31-join.json",
+      "sha256": "051a0802ee098283a5f58ce548bd4ef3735c29ed115caa1c4db49e568c8becaa"
+    },
+    {
+      "path": "tests/cloud-join.test.ts",
+      "sha256": "df6e61bcd5eae89491048d8456f121a16caab226c9ed7f2d5c4f1a0e70192101"
+    },
+    {
+      "path": "tests/e2e/cloud-join.spec.ts",
+      "sha256": "2cd7dd56a2537cbe825e7cd9c22c9f03a7809c618edbbe423c540e258affa35e"
+    },
+    {
+      "path": "tests/e2e/sync-coverage.spec.ts",
+      "sha256": "05a329a78940962983bdf3be955fe692b18f792fdd93f2a7e8613be7a377380a"
+    },
+    {
+      "path": "tests/fixtures/sync-coverage-browser.ts",
+      "sha256": "71e83524ae029903f541225e316c1d2e9b6caab09466c83f56278dd235f10363"
+    },
+    {
+      "path": "tests/fixtures/sync-download-browser.ts",
+      "sha256": "d3178fc3407858a2d1cd2a6b69c80ea8d6ee4f6bc2dc34935f57ed9c4f6ef04e"
+    },
+    {
+      "path": "tests/fixtures/sync-images-browser.ts",
+      "sha256": "10d45d89a58e20314bbd266936cb4c481e7d3b52b4e97be55aceaa076df693fe"
+    },
+    {
+      "path": "tests/operators-db.test.ts",
+      "sha256": "024d713a90500900529eb2267defe1798468437579cd4350dd7367084766028b"
+    },
+    {
+      "path": "tests/owner-apply-db.test.ts",
+      "sha256": "63e7fc10b087a42c260d5a2adcbce2f175f2cb4085e50fa393ca0e3b7e2da564"
+    },
+    {
+      "path": "tests/sync-apply-db.test.ts",
+      "sha256": "a5b752aa5f08a6e6da3a54d0b02b7d8d6eec4a27ebabbf7100cb455fe022be1f"
+    },
+    {
+      "path": "tests/sync-convergence-server.ts",
+      "sha256": "d42b7938162033a69fbcc6c77ece43b1d3fa82645a585a6822b6bab5f4125b3f"
+    },
+    {
+      "path": "tests/sync-coverage-db.test.ts",
+      "sha256": "781faae32f57a53aa416ef8025a82be95fcb3adf824e75130d4560163dc41a22"
+    },
+    {
+      "path": "tests/sync-download-db.test.ts",
+      "sha256": "62adeaba6110c70fd69999a03f7d6de09f525d8a213ae750e2667effe84a7827"
+    },
+    {
+      "path": "tests/sync-images-db.test.ts",
+      "sha256": "590bde4e14498d74ce7dfe281f5cec07cae63763f03d4b85072fd0487bd4cb20"
+    },
+    {
+      "path": "tests/sync-join-db.test.ts",
+      "sha256": "89774cb9e4e5d0e5f82d56b0890a105f651ca5d8f3834b627751c86c6cb738ba"
+    },
+    {
+      "path": "tests/sync-session.test.ts",
+      "sha256": "95ad93330442ec255f9fcebe2a0b4b12b98616c7d90d3e4285ec822297b5d8aa"
+    }
+  ]
+}

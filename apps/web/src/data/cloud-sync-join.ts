@@ -1,46 +1,231 @@
-import Dexie from 'dexie';
-import {backupTableNames} from '@mise/core/backup-tables';
-import {backupToken,createBackup} from '@mise/core/backup';
-import {parseLocalCloudState,type LocalCloudState} from '@mise/core/local-outbox';
-import {parseLocalOperatorState,parseOperatorContext,OperatorContextError,type LocalOperatorState,type OperatorContext} from '@mise/core/operators';
-import {canonicalSnapshotHash,reconstructCanonicalSnapshot,type LocalCanonicalSnapshot} from '@mise/core/sync-canonical';
-import {parseSyncDownloadTarget,syncDownloadToken,type SyncDownloadTarget} from '@mise/core/sync-download';
-import {parseSyncScope} from '@mise/core/sync-read';
-import {verifySyncImageBlob} from '@mise/core/sync-images';
-import type {MiseDatabase} from './db';
-import {portableInboxItems,storedInboxItems} from './inbox';
-import {readDatabaseBackup} from './backup';
-import {assertSyncDownloadContext,readVerifiedSyncRecords} from './cloud-sync-journal';
-import {readVerifiedSyncImages} from './cloud-sync-images';
-import {assertJoinedCanonicalState,readJoinedCanonicalState} from './cloud-canonical-state';
+import Dexie, { type Transaction } from 'dexie';
+import { backupTableNames } from '@mise/core/backup-tables';
+import { backupToken, createBackup } from '@mise/core/backup';
+import {
+  parseLocalCloudState,
+  type LocalCloudState,
+} from '@mise/core/local-outbox';
+import {
+  parseLocalOperatorState,
+  parseOperatorContext,
+  OperatorContextError,
+  type LocalOperatorState,
+  type OperatorContext,
+} from '@mise/core/operators';
+import {
+  canonicalSnapshotHash,
+  reconstructCanonicalSnapshot,
+  type LocalCanonicalSnapshot,
+} from '@mise/core/sync-canonical';
+import {
+  parseSyncDownloadTarget,
+  syncDownloadToken,
+  type SyncDownloadTarget,
+} from '@mise/core/sync-download';
+import { parseSyncScope } from '@mise/core/sync-read';
+import { verifySyncImageBlob } from '@mise/core/sync-images';
+import { parseJoinSession, type JoinSession } from '@mise/core/join-session';
+import type { MiseDatabase } from './db';
+import { portableInboxItems, storedInboxItems } from './inbox';
+import { readDatabaseBackup } from './backup';
+import {
+  assertSyncDownloadContext,
+  readVerifiedSyncRecords,
+} from './cloud-sync-journal';
+import { readVerifiedSyncImages } from './cloud-sync-images';
+import {
+  assertJoinedCanonicalState,
+  readJoinedCanonicalState,
+} from './cloud-canonical-state';
 
-export interface JoinCanonicalInput {readId:string;target:SyncDownloadTarget;authKey:string;expectedOperatorRevision:number}
-export interface JoinedDevice {readId:string;canonicalHash:string;operatorRevision:number;records:number;images:number}
-const fail=()=>new OperatorContextError('Keep this device’s local work. Review the original outlet and download before joining.');
-function selected(value:unknown,input:JoinCanonicalInput,active:boolean):LocalOperatorState {
- const state=parseLocalOperatorState(value),connection=state.connection;
- if(state.phase!==(active?'active':'pending')||!connection||connection.authKey!==input.authKey||connection.targetHash!==input.target.targetHash||connection.accountHash!==input.target.accountHash||state.businessId!==input.target.businessId||state.outletId!==input.target.outletId||state.actorId!==input.target.actorId||state.role!==input.target.role||(!active&&state.revision!==input.expectedOperatorRevision))throw fail();
- return state;
+export interface JoinCanonicalInput {
+  readId: string;
+  target: SyncDownloadTarget;
+  authKey: string;
+  expectedOperatorRevision: number;
+  session?: JoinSession;
 }
-async function fresh(context:OperatorContext,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal){
- signal?.throwIfAborted();const value=parseOperatorContext(await refresh(structuredClone(context)));signal?.throwIfAborted();
- if(syncDownloadToken(parseSyncScope(value))!==syncDownloadToken(parseSyncScope(context)))throw fail();return value;
+export interface JoinedDevice {
+  readId: string;
+  canonicalHash: string;
+  operatorRevision: number;
+  records: number;
+  images: number;
 }
-function result(base:LocalCanonicalSnapshot,operator:LocalOperatorState):JoinedDevice {
- return {readId:base.snapshot.readId,canonicalHash:base.hash,operatorRevision:operator.revision,records:base.snapshot.records.length,images:base.snapshot.backup.tables.inboxItems.reduce((n,i)=>n+i.images.length,0)};
+const fail = () =>
+  new OperatorContextError(
+    'Keep this device’s local work. Review the original outlet and download before joining.',
+  );
+function live(signal?: AbortSignal, assertActive?: () => void) {
+  signal?.throwIfAborted();
+  if (assertActive) {
+    const result: unknown = assertActive();
+    if (result !== undefined) {
+      void Promise.resolve(result).catch(() => {});
+      throw fail();
+    }
+  }
+}
+function native(
+  db: MiseDatabase,
+  tx: Transaction | undefined,
+  mode: 'readonly' | 'readwrite',
+  signal?: AbortSignal,
+  assertActive?: () => void,
+) {
+  live(signal, assertActive);
+  if (
+    !tx ||
+    Dexie.currentTransaction !== tx ||
+    tx.db !== db ||
+    !tx.active ||
+    tx.mode !== mode
+  )
+    throw fail();
+}
+async function pinnedSession(db: MiseDatabase, input: JoinCanonicalInput) {
+  if (
+    input.session &&
+    syncDownloadToken(await db.joinSessions.get('active')) !==
+      syncDownloadToken(input.session)
+  )
+    throw fail();
+}
+function selected(
+  value: unknown,
+  input: JoinCanonicalInput,
+  active: boolean,
+): LocalOperatorState {
+  const state = parseLocalOperatorState(value),
+    connection = state.connection;
+  if (
+    state.phase !== (active ? 'active' : 'pending') ||
+    !connection ||
+    connection.authKey !== input.authKey ||
+    connection.targetHash !== input.target.targetHash ||
+    connection.accountHash !== input.target.accountHash ||
+    (input.session &&
+      (connection.epoch !== input.session.epoch ||
+        connection.scopeVersion !== input.session.scopeVersion)) ||
+    state.businessId !== input.target.businessId ||
+    state.outletId !== input.target.outletId ||
+    state.actorId !== input.target.actorId ||
+    state.role !== input.target.role ||
+    (!active && state.revision !== input.expectedOperatorRevision)
+  )
+    throw fail();
+  return state;
+}
+async function fresh(
+  context: OperatorContext,
+  refresh: (context: OperatorContext) => Promise<OperatorContext>,
+  signal?: AbortSignal,
+) {
+  signal?.throwIfAborted();
+  const value = parseOperatorContext(await refresh(structuredClone(context)));
+  signal?.throwIfAborted();
+  if (
+    syncDownloadToken(parseSyncScope(value)) !==
+    syncDownloadToken(parseSyncScope(context))
+  )
+    throw fail();
+  return value;
+}
+function result(
+  base: LocalCanonicalSnapshot,
+  operator: LocalOperatorState,
+): JoinedDevice {
+  return {
+    readId: base.snapshot.readId,
+    canonicalHash: base.hash,
+    operatorRevision: operator.revision,
+    records: base.snapshot.records.length,
+    images: base.snapshot.backup.tables.inboxItems.reduce(
+      (n, i) => n + i.images.length,
+      0,
+    ),
+  };
 }
 /** A retry after a lost local response verifies the original admission, never reapplies rows. */
-async function existing(db:MiseDatabase,input:JoinCanonicalInput,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal):Promise<JoinedDevice|null>{
- if(await db.cloudState.get('binding')===undefined)return null;
- const installed=await readJoinedCanonicalState(db),binding=installed.binding,base=installed.admission,saved={operator:await db.operatorState.get('active')};
- if(binding.join?.readId!==input.readId||base.snapshot.targetHash!==input.target.targetHash||syncDownloadToken(base.snapshot.scope)!==syncDownloadToken({...parseSyncScope(base.snapshot.scope),businessId:input.target.businessId,outletId:input.target.outletId,actorId:input.target.actorId,accountHash:input.target.accountHash,role:input.target.role}))throw fail();
- if(binding.targetHash!==input.target.targetHash||binding.businessId!==input.target.businessId||binding.outletId!==input.target.outletId||binding.ownerId!==input.target.actorId||binding.join.accountHash!==input.target.accountHash||binding.join.role!==input.target.role||binding.join.epoch!==base.snapshot.scope.epoch||binding.join.scopeVersion!==base.snapshot.scope.scopeVersion)throw fail();
- const operator=selected(saved.operator,input,true);if(operator.revision<input.expectedOperatorRevision+1||operator.connection?.epoch!==base.snapshot.scope.epoch||operator.connection.scopeVersion!==base.snapshot.scope.scopeVersion)throw fail();
- await fresh({...base.snapshot.scope,version:1,businessName:null,outletName:null,actorName:null},refresh,signal);
- return db.transaction('r',db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.operatorState,async()=>{
-  signal?.throwIfAborted();await assertJoinedCanonicalState(db,installed);if(syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(saved.operator))throw fail();
-  return result(base,operator);
- });
+async function existing(
+  db: MiseDatabase,
+  input: JoinCanonicalInput,
+  refresh: (context: OperatorContext) => Promise<OperatorContext>,
+  signal?: AbortSignal,
+  assertActive?: () => void,
+): Promise<JoinedDevice | null> {
+  if ((await db.cloudState.get('binding')) === undefined) return null;
+  const installed = await readJoinedCanonicalState(db),
+    binding = installed.binding,
+    base = installed.admission,
+    saved = { operator: await db.operatorState.get('active') };
+  if (
+    binding.join?.readId !== input.readId ||
+    base.snapshot.targetHash !== input.target.targetHash ||
+    syncDownloadToken(base.snapshot.scope) !==
+      syncDownloadToken({
+        ...parseSyncScope(base.snapshot.scope),
+        businessId: input.target.businessId,
+        outletId: input.target.outletId,
+        actorId: input.target.actorId,
+        accountHash: input.target.accountHash,
+        role: input.target.role,
+      })
+  )
+    throw fail();
+  if (
+    binding.targetHash !== input.target.targetHash ||
+    binding.businessId !== input.target.businessId ||
+    binding.outletId !== input.target.outletId ||
+    binding.ownerId !== input.target.actorId ||
+    binding.join.accountHash !== input.target.accountHash ||
+    binding.join.role !== input.target.role ||
+    binding.join.epoch !== base.snapshot.scope.epoch ||
+    binding.join.scopeVersion !== base.snapshot.scope.scopeVersion
+  )
+    throw fail();
+  const operator = selected(saved.operator, input, true);
+  if (
+    operator.revision < input.expectedOperatorRevision + 1 ||
+    operator.connection?.epoch !== base.snapshot.scope.epoch ||
+    operator.connection.scopeVersion !== base.snapshot.scope.scopeVersion
+  )
+    throw fail();
+  await fresh(
+    {
+      ...base.snapshot.scope,
+      version: 1,
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    },
+    refresh,
+    signal,
+  );
+  return db.transaction(
+    'r',
+    [
+      db.cloudState,
+      db.syncCanonical,
+      db.syncApplications,
+      db.syncAdmissions,
+      db.operatorState,
+      db.joinSessions,
+    ],
+    async () => {
+      const tx = Dexie.currentTransaction;
+      native(db, tx, 'readonly', signal, assertActive);
+      await pinnedSession(db, input);
+      await assertJoinedCanonicalState(db, installed);
+      if (
+        syncDownloadToken(await db.operatorState.get('active')) !==
+        syncDownloadToken(saved.operator)
+      )
+        throw fail();
+      native(db, tx, 'readonly', signal, assertActive);
+      return result(base, operator);
+    },
+  );
 }
 
 /** Join an existing outlet on a device without a local shop. Domain rows, base,
@@ -48,32 +233,204 @@ async function existing(db:MiseDatabase,input:JoinCanonicalInput,refresh:(contex
  * Capture stays enabled: the fence is installed only after exact empty-device
  * checks and canonical writes, with all domain/outbox stores held by this writer.
  */
-export async function joinCanonicalDevice(db:MiseDatabase,input:JoinCanonicalInput,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal):Promise<JoinedDevice> {
- input=structuredClone(input);input.target=parseSyncDownloadTarget(input.target);
- if(!Number.isSafeInteger(input.expectedOperatorRevision)||input.expectedOperatorRevision<1||input.expectedOperatorRevision>=Number.MAX_SAFE_INTEGER)throw fail();
- const replay=await existing(db,input,refresh,signal);if(replay)return replay;
- const verified=await readVerifiedSyncRecords(db,input.readId,input.target,signal),state=verified.context.state;
- if(state.source.previousCursor!==null||!state.window)throw fail();
- const operator=selected(await db.operatorState.get('active'),input,false);
- if(operator.connection?.epoch!==state.window.epoch||operator.connection.scopeVersion!==state.window.scopeVersion)throw fail();
- const images=await readVerifiedSyncImages(db,input.readId,input.target,signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images),base:LocalCanonicalSnapshot={id:'active',version:1,snapshot,hash:await canonicalSnapshotHash(snapshot)},stored=storedInboxItems(snapshot.backup.tables.inboxItems);
- const pages=await db.syncPages.where('readId').equals(input.readId).sortBy('index');
- await fresh({...parseSyncScope(state.window),version:1,businessName:null,outletName:null,actorName:null},refresh,signal);
- return db.transaction('rw',db.tables,async()=>{
-  signal?.throwIfAborted();if(await db.cloudState.count()||await db.syncCanonical.count()||await db.syncApplications.count()||await db.syncAdmissions.count()||await db.outbox.count())throw fail();
-  const current=await Dexie.waitFor(assertSyncDownloadContext(db,verified.context));if(syncDownloadToken(current)!==syncDownloadToken(state)||syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(operator)||syncDownloadToken(await db.syncRecords.where('readId').equals(input.readId).sortBy('changeId'))!==syncDownloadToken([...verified.records].sort((a,b)=>a.changeId.localeCompare(b.changeId)))||syncDownloadToken(await db.syncPages.where('readId').equals(input.readId).sortBy('index'))!==syncDownloadToken(pages))throw fail();
-  for(const name of backupTableNames)if(name!=='inboxItems'&&await db.table(name).count())throw fail();
-  const unassigned=await db.inboxItems.toArray();if(unassigned.some(item=>item.outletId!==null||stored.some(i=>i.id===item.id)))throw fail();
-  for(const image of images.images){const row=await db.syncImages.get([input.readId,image.imageId]);if(!row||syncDownloadToken({...row,blob:undefined})!==syncDownloadToken({...image,blob:undefined}))throw fail();await Dexie.waitFor(verifySyncImageBlob(row.source,row.blob));}
-  const active:LocalOperatorState={...operator,revision:operator.revision+1,phase:'active'},binding:LocalCloudState={id:'binding',version:2,uploadId:state.id,businessId:input.target.businessId,outletId:input.target.outletId,ownerId:input.target.actorId,targetHash:input.target.targetHash,manifestHash:base.hash,phase:'ready',sequence:0,receipt:null,join:{kind:'join',readId:state.id,readSeal:state.seal!,cursor:state.receivedCursor!,accountHash:input.target.accountHash,role:input.target.role,epoch:state.window!.epoch,scopeVersion:state.window!.scopeVersion}};
-  parseLocalCloudState(binding);
-  for(const name of backupTableNames)await db.table(name).bulkAdd(name==='inboxItems'?stored:snapshot.backup.tables[name]);
-  await db.syncCanonical.add(base);await db.operatorState.put(active);await db.cloudState.add(binding);
-  // Validate the exact postcondition after every write/hook, while the native
-  // writer still excludes other tabs. Unexpected local work aborts the join;
-  // an absent pre-join fence is never a generic capture bypass.
-  const expected=structuredClone(snapshot.backup.tables);expected.inboxItems.push(...await Dexie.waitFor(portableInboxItems(unassigned)));
-  if(backupToken(await readDatabaseBackup(db))!==backupToken(createBackup(expected,snapshot.backup.exportedAt))||await db.outbox.count()||await db.syncApplications.count()||await db.syncAdmissions.count()||syncDownloadToken(await db.cloudState.get('binding'))!==syncDownloadToken(binding)||syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(active)||syncDownloadToken(await db.syncCanonical.get('active'))!==syncDownloadToken(base))throw fail();
-  signal?.throwIfAborted();return result(base,active);
- });
+export async function joinCanonicalDevice(
+  db: MiseDatabase,
+  input: JoinCanonicalInput,
+  refresh: (context: OperatorContext) => Promise<OperatorContext>,
+  signal?: AbortSignal,
+  assertActive?: () => void,
+): Promise<JoinedDevice> {
+  input = structuredClone(input);
+  input.target = parseSyncDownloadTarget(input.target);
+  if (input.session) {
+    input.session = parseJoinSession(input.session);
+    const s = input.session;
+    if (
+      s.id !== 'active' ||
+      s.phase !== 'pending' ||
+      s.readId !== input.readId ||
+      s.authKey !== input.authKey ||
+      s.operatorRevision !== input.expectedOperatorRevision ||
+      syncDownloadToken(s.target) !== syncDownloadToken(input.target)
+    )
+      throw fail();
+  }
+  live(signal, assertActive);
+  if (
+    !Number.isSafeInteger(input.expectedOperatorRevision) ||
+    input.expectedOperatorRevision < 1 ||
+    input.expectedOperatorRevision >= Number.MAX_SAFE_INTEGER
+  )
+    throw fail();
+  const replay = await existing(db, input, refresh, signal, assertActive);
+  if (replay) return replay;
+  const verified = await readVerifiedSyncRecords(
+      db,
+      input.readId,
+      input.target,
+      signal,
+    ),
+    state = verified.context.state;
+  if (state.source.previousCursor !== null || !state.window) throw fail();
+  const operator = selected(await db.operatorState.get('active'), input, false);
+  if (
+    operator.connection?.epoch !== state.window.epoch ||
+    operator.connection.scopeVersion !== state.window.scopeVersion
+  )
+    throw fail();
+  const images = await readVerifiedSyncImages(
+      db,
+      input.readId,
+      input.target,
+      signal,
+    ),
+    snapshot = await reconstructCanonicalSnapshot(
+      state,
+      verified.records,
+      images.images,
+    ),
+    base: LocalCanonicalSnapshot = {
+      id: 'active',
+      version: 1,
+      snapshot,
+      hash: await canonicalSnapshotHash(snapshot),
+    },
+    stored = storedInboxItems(snapshot.backup.tables.inboxItems);
+  const pages = await db.syncPages
+    .where('readId')
+    .equals(input.readId)
+    .sortBy('index');
+  await fresh(
+    {
+      ...parseSyncScope(state.window),
+      version: 1,
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    },
+    refresh,
+    signal,
+  );
+  return db.transaction('rw', db.tables, async () => {
+    const tx = Dexie.currentTransaction;
+    const check = () => native(db, tx, 'readwrite', signal, assertActive);
+    check();
+    await pinnedSession(db, input);
+    if (
+      (await db.cloudState.count()) ||
+      (await db.syncCanonical.count()) ||
+      (await db.syncApplications.count()) ||
+      (await db.syncAdmissions.count()) ||
+      (await db.outbox.count())
+    )
+      throw fail();
+    const current = await Dexie.waitFor(
+      assertSyncDownloadContext(db, verified.context),
+    );
+    if (
+      syncDownloadToken(current) !== syncDownloadToken(state) ||
+      syncDownloadToken(await db.operatorState.get('active')) !==
+        syncDownloadToken(operator) ||
+      syncDownloadToken(
+        await db.syncRecords
+          .where('readId')
+          .equals(input.readId)
+          .sortBy('changeId'),
+      ) !==
+        syncDownloadToken(
+          [...verified.records].sort((a, b) =>
+            a.changeId.localeCompare(b.changeId),
+          ),
+        ) ||
+      syncDownloadToken(
+        await db.syncPages.where('readId').equals(input.readId).sortBy('index'),
+      ) !== syncDownloadToken(pages)
+    )
+      throw fail();
+    for (const name of backupTableNames)
+      if (name !== 'inboxItems' && (await db.table(name).count())) throw fail();
+    const unassigned = await db.inboxItems.toArray();
+    if (
+      unassigned.some(
+        (item) =>
+          item.outletId !== null || stored.some((i) => i.id === item.id),
+      )
+    )
+      throw fail();
+    for (const image of images.images) {
+      const row = await db.syncImages.get([input.readId, image.imageId]);
+      if (
+        !row ||
+        syncDownloadToken({ ...row, blob: undefined }) !==
+          syncDownloadToken({ ...image, blob: undefined })
+      )
+        throw fail();
+      await Dexie.waitFor(verifySyncImageBlob(row.source, row.blob));
+    }
+    const active: LocalOperatorState = {
+        ...operator,
+        revision: operator.revision + 1,
+        phase: 'active',
+      },
+      binding: LocalCloudState = {
+        id: 'binding',
+        version: 2,
+        uploadId: state.id,
+        businessId: input.target.businessId,
+        outletId: input.target.outletId,
+        ownerId: input.target.actorId,
+        targetHash: input.target.targetHash,
+        manifestHash: base.hash,
+        phase: 'ready',
+        sequence: 0,
+        receipt: null,
+        join: {
+          kind: 'join',
+          readId: state.id,
+          readSeal: state.seal!,
+          cursor: state.receivedCursor!,
+          accountHash: input.target.accountHash,
+          role: input.target.role,
+          epoch: state.window!.epoch,
+          scopeVersion: state.window!.scopeVersion,
+        },
+      };
+    parseLocalCloudState(binding);
+    for (const name of backupTableNames) {
+      check();
+      await db
+        .table(name)
+        .bulkAdd(name === 'inboxItems' ? stored : snapshot.backup.tables[name]);
+    }
+    check();
+    await db.syncCanonical.add(base);
+    check();
+    await db.operatorState.put(active);
+    check();
+    await db.cloudState.add(binding);
+    // Validate the exact postcondition after every write/hook, while the native
+    // writer still excludes other tabs. Unexpected local work aborts the join;
+    // an absent pre-join fence is never a generic capture bypass.
+    const expected = structuredClone(snapshot.backup.tables);
+    expected.inboxItems.push(
+      ...(await Dexie.waitFor(portableInboxItems(unassigned))),
+    );
+    if (
+      backupToken(await readDatabaseBackup(db)) !==
+        backupToken(createBackup(expected, snapshot.backup.exportedAt)) ||
+      (await db.outbox.count()) ||
+      (await db.syncApplications.count()) ||
+      (await db.syncAdmissions.count()) ||
+      syncDownloadToken(await db.cloudState.get('binding')) !==
+        syncDownloadToken(binding) ||
+      syncDownloadToken(await db.operatorState.get('active')) !==
+        syncDownloadToken(active) ||
+      syncDownloadToken(await db.syncCanonical.get('active')) !==
+        syncDownloadToken(base)
+    )
+      throw fail();
+    await pinnedSession(db, input);
+    check();
+    return result(base, active);
+  });
 }

@@ -2,7 +2,7 @@ import type {BackupTable} from './backup-tables';
 import type {ShopCommand,ShopCommandReceipt} from './shop-commands';
 import type {CloudUploadReceipt} from './cloud-upload-runner';
 
-export const localSchemaVersion=19;
+export const localSchemaVersion=20;
 export const localSyncTableNames=['cloudState','outbox'] as const;
 export interface LocalCloudState {
  /** uploadId/ownerId are legacy names for the fence identity and selected actor. */

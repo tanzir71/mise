@@ -6,6 +6,16 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [new-device join interface](m31-join-runtime.md) reuses the original discovery
+Auth session without copying tokens into shop data or requesting another OTP.
+The operation target independently pins the original business and verified
+account. Internal join records contain fingerprints, scope versions and a fixed
+download identity only. Native selection, admission and final-status writers
+check original live identity; a second tab, changed connection or saved selection
+cannot authorize an old transfer. Portable backups retain their existing explicit
+21-table allowlist. The local OTP gateway is an isolated test fixture and does not
+activate a hosted phone provider.
+
 The [automatic sync boundary](m31-sync-runtime.md) stores only scoped fingerprints,
 retry metadata and download pointers. Runtime phone identity is checked before
 HTTP, canonical writes and final status confirmation. Realtime payloads only wake
@@ -171,7 +181,8 @@ no SMS or account was created. Genuine signed-owner HTTP acceptance remains open
 
 The runtime phone sign-in interface accepts only a publishable key. Device
 connection settings stay separate from the SDK session, which is scoped to the
-project, key, base path and shop. Neither enters shop tables, JSON backups or build
+project, key and installation namespace. The operation target separately pins the
+shop and live account. Neither enters shop tables, JSON backups or build
 variables. Private server keys are rejected
 before any Auth request. Auth errors use fixed messages, and the client pins every
 request to its configured HTTPS Auth origin. Sign-out aborts in-flight work and

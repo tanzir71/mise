@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 new devices can explicitly join an allowed outlet through one phone verification. A durable original selection, resumable snapshot/images, guarded atomic admission and automatic sync preserve existing records, original downloads and receipts. Fresh access checks and cancellation retain manual recovery and JSON backups; cloud sync remains opt-in.
+
 - M31 opt-in sync now connects the saved local upload, original queued actions, verified downloads and header status. Durable retries, pause/resume, original-account checks and insert-only outlet event hints preserve offline work through lost replies and reloads. Full cloud acceptance and remaining conflict families stay gated.
 
 - M31 command delivery now stays bound to the original verified phone account and connection across HTTP and native receipt acceptance. Bounded Auth/response work, ephemeral session checks and original operator/source guards retain pending actions through account switches or transaction expiry; exact retries preserve cash without duplicates. Native convergence uses the actual phone client with an explicit local test verifier. Cloud controls and remaining M30/M31 acceptance stay gated.

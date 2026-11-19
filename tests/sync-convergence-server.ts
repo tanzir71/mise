@@ -339,7 +339,29 @@ export async function startConvergenceServer(
     authUsers: 0,
     uploads: 0,
     uploadFinishes: 0,
+    otp: 0,
+    verifications: 0,
+    logouts: 0,
   };
+  async function authUser(n: number) {
+    const user = (
+      await db.query<{ phone: string; phone_confirmed_at: string | null }>(
+        'select phone,phone_confirmed_at from auth.users where id=$1',
+        [uid(n)],
+      )
+    ).rows[0];
+    return {
+      id: uid(n),
+      aud: 'authenticated',
+      role: 'authenticated',
+      phone: user.phone,
+      phone_confirmed_at: user.phone_confirmed_at,
+      created_at: '2026-11-01T00:00:00Z',
+      is_anonymous: false,
+      app_metadata: { provider: 'phone' },
+      user_metadata: { role: 'owner' },
+    };
+  }
   const server = createServer(async (req, res) => {
     try {
       const chunks: Buffer[] = [];
@@ -421,28 +443,58 @@ export async function startConvergenceServer(
       } else if (path === '/functions/v1/inbox-image') {
         calls.images++;
         response = await images(request);
+      } else if (path === '/auth/v1/settings') {
+        // Test-owned OTP gateway only. No hosted provider is activated.
+        response = Response.json({
+          external: { phone: true },
+          phone_autoconfirm: false,
+        });
+      } else if (path === '/auth/v1/otp') {
+        calls.otp++;
+        const phone = JSON.parse(body.toString()).phone;
+        response = ['+14155550101', '+14155550102'].includes(phone)
+          ? Response.json({})
+          : Response.json(
+              { message: 'Unknown fixture phone' },
+              { status: 400 },
+            );
+      } else if (path === '/auth/v1/verify' || path === '/auth/v1/token') {
+        const input = JSON.parse(body.toString());
+        const n = path.endsWith('/verify')
+          ? ['+14155550101', '+14155550102'].indexOf(input.phone) + 1
+          : ['synthetic-refresh-1', 'synthetic-refresh-2'].indexOf(
+              input.refresh_token,
+            ) + 1;
+        if (
+          !n ||
+          (path.endsWith('/verify') &&
+            (input.token !== '123456' || input.type !== 'sms'))
+        ) {
+          response = Response.json(
+            { message: 'Unverified fixture phone' },
+            { status: 400 },
+          );
+        } else {
+          if (path.endsWith('/verify')) calls.verifications++;
+          response = Response.json({
+            access_token: tokens[n - 1],
+            refresh_token: 'synthetic-refresh-' + n,
+            token_type: 'bearer',
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            user: await authUser(n),
+          });
+        }
+      } else if (path === '/auth/v1/logout') {
+        calls.logouts++;
+        response = new Response(null, { status: 204 });
       } else if (path === '/auth/v1/user') {
         calls.authUsers++;
         const n = identity(headers.get('Authorization')?.slice(7) ?? ''),
-          user = (
-            await db.query<{
-              phone: string;
-              phone_confirmed_at: string | null;
-            }>('select phone,phone_confirmed_at from auth.users where id=$1', [
-              uid(n),
-            ])
-          ).rows[0];
+          user = await authUser(n);
         response = new Response(
           JSON.stringify({
-            id: uid(n),
-            aud: 'authenticated',
-            role: 'authenticated',
-            phone: user.phone,
-            phone_confirmed_at: user.phone_confirmed_at,
-            created_at: '2026-11-01T00:00:00Z',
-            is_anonymous: false,
-            app_metadata: { provider: 'phone' },
-            user_metadata: { role: 'owner' },
+            ...user,
           }),
           { headers: { 'Content-Type': 'application/json' } },
         );

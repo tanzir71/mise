@@ -54,7 +54,7 @@ The landing pages and the app for one device are implemented, along with public 
 
 Accounts, sync, kitchen/staff screens, automatic capture and AI operators are on the [milestone roadmap](handover/docs/03-roadmap.md). The [changelog](CHANGELOG.md) and delivery notes record the implementation and its verification.
 
-The internal sync engine now supports [joining an existing outlet on an empty device](docs/m31-canonical-join.md), including original images and historical financial references. Full cloud controls remain disabled while pending-work reconciliation, convergence and hosted authentication checks are completed.
+Behind the default-off sync flag, [Sync setup](docs/m31-sync-runtime.md) now supports reviewed local uploads and [joining an existing outlet on a new device](docs/m31-join-runtime.md) through one phone verification. Original downloads, images, queued actions and receipts survive interruption and offline recovery. Remaining conflict rules and genuine hosted authentication checks are still open.
 
 GitHub workflows are disabled at the owner’s request, so `main` can be ahead of the published Pages site.
 

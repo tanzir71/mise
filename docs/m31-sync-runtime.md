@@ -1,5 +1,9 @@
 # M31 — Automatic send, download and status
 
+The subsequent [new-device join interface](m31-join-runtime.md) adds explicit
+outlet choice and one-sign-in bootstrap to the runtime described here. Its notes
+record the current verification and remaining acceptance work.
+
 The opt-in Sync setup connects the saved upload review, original-account command
 delivery and canonical reader into one background cycle. Local changes remain
 available offline. Reconnecting sends their original queued actions, downloads

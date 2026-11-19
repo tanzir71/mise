@@ -1,3 +1,4 @@
+import Dexie from 'dexie';
 import {operatorChoices,operatorAuthKey,parseLocalOperatorState,parseOperatorContext,resolveOperator,OperatorContextError,type LocalOperatorState,type OperatorContext,type OperatorChoice} from '@mise/core/operators';
 import {parseLocalCloudState} from '@mise/core/local-outbox';
 import type {LocalStore} from './local-store';
@@ -5,6 +6,7 @@ import type {SetupSnapshot} from '@mise/core/models';
 import {parseSyncScope} from '@mise/core/sync-read';
 import {syncDownloadToken} from '@mise/core/sync-download';
 import {assertCanonicalState,readCanonicalState} from './cloud-canonical-state';
+import type {JoinSession} from '@mise/core/join-session';
 
 export interface LocalWorkspace {setup:SetupSnapshot|null;selection:LocalOperatorState|null;choices:OperatorChoice[];message:string;requiresSelection:boolean;cloudBound:boolean}
 export async function readLocalWorkspace(db:LocalStore):Promise<LocalWorkspace> {
@@ -25,18 +27,20 @@ export async function selectLocalOperator(db:LocalStore,choice:Pick<OperatorChoi
  });
 }
 /** Fresh server selection establishes identity; a real write fence is still required to activate it. */
-export async function selectCloudOperator(db:LocalStore,input:OperatorContext,connection:{targetHash:string;authKey:string},expectedRevision:number|null,refresh:(context:OperatorContext)=>Promise<OperatorContext>):Promise<LocalOperatorState> {
+export async function selectCloudOperator(db:LocalStore,input:OperatorContext,connection:{targetHash:string;authKey:string},expectedRevision:number|null,refresh:(context:OperatorContext)=>Promise<OperatorContext>,assertActive?:()=>void,expectedJoin?:JoinSession):Promise<LocalOperatorState> {
  const original=parseOperatorContext(input),{targetHash,authKey}=connection;if(!/^[a-f0-9]{64}$/.test(targetHash)||!operatorAuthKey(authKey))throw new OperatorContextError('Keep the original connection fingerprint.');
  const context=parseOperatorContext(await refresh(structuredClone(original)));for(const k of ['businessId','outletId','actorId','accountHash']as const)if(context[k]!==original[k])throw new OperatorContextError('The signed-in account or outlet changed. Review it again.');
  const preliminary=await db.cloudState.get('binding'),candidate=preliminary===undefined?null:parseLocalCloudState(preliminary),same=candidate?.targetHash===targetHash&&candidate.businessId===context.businessId&&candidate.outletId===context.outletId&&candidate.ownerId===context.actorId,hasBase=await db.syncCanonical.get('active'),canonical=same&&(candidate?.version===2||hasBase)?await readCanonicalState(db):null;
- return db.transaction('rw',[db.operatorState,db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.businesses,db.outlets,db.members],async()=>{
+ return db.transaction('rw',[db.operatorState,db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.businesses,db.outlets,db.members,...(expectedJoin?[db.joinSessions]:[])],async()=>{
+  const tx=Dexie.currentTransaction,check=()=>{if(!assertActive)return;const result:unknown=assertActive();if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw new OperatorContextError();}if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new OperatorContextError();};check();
   const saved=await db.operatorState.get('active'),revision=nextRevision(saved,expectedRevision),raw=await db.cloudState.get('binding'),binding=raw===undefined?null:parseLocalCloudState(raw);
+  if(expectedJoin&&(expectedJoin.phase!=='pending'||syncDownloadToken(await db.joinSessions.get('active'))!==syncDownloadToken(expectedJoin)))throw new OperatorContextError('The saved join changed. Review the current selection.');
   let phase:LocalOperatorState['phase']='pending';
   if(!canonical&&!hasBase&&binding?.phase==='ready'&&binding.receipt&&binding.targetHash===targetHash&&binding.businessId===context.businessId&&binding.outletId===context.outletId&&binding.ownerId===context.actorId)phase='active';
   if(canonical){await assertCanonicalState(db,canonical);if(syncDownloadToken(canonical.base.snapshot.scope)===syncDownloadToken(parseSyncScope(context)))phase='active';}
   const state:LocalOperatorState={id:'active',version:1,revision,phase,businessId:context.businessId,outletId:context.outletId,actorId:context.actorId,role:context.role,connection:{targetHash,authKey,accountHash:context.accountHash,epoch:context.epoch,scopeVersion:context.scopeVersion}};
   if(phase==='active'){const [businesses,outlets,members]=await Promise.all([db.businesses.toArray(),db.outlets.toArray(),db.members.toArray()]);resolveOperator(businesses,outlets,members,state);}
-  await db.operatorState.put(state);return state;
+  check();await db.operatorState.put(state);check();if(syncDownloadToken(await db.operatorState.get('active'))!==syncDownloadToken(state)||expectedJoin&&syncDownloadToken(await db.joinSessions.get('active'))!==syncDownloadToken(expectedJoin))throw new OperatorContextError();return state;
  });
 }
 /** Locking retains scope evidence and never falls back to the first cached owner. */
