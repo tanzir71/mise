@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 opt-in sync now connects the saved local upload, original queued actions, verified downloads and header status. Durable retries, pause/resume, original-account checks and insert-only outlet event hints preserve offline work through lost replies and reloads. Full cloud acceptance and remaining conflict families stay gated.
+
 - M31 command delivery now stays bound to the original verified phone account and connection across HTTP and native receipt acceptance. Bounded Auth/response work, ephemeral session checks and original operator/source guards retain pending actions through account switches or transaction expiry; exact retries preserve cash without duplicates. Native convergence uses the actual phone client with an explicit local test verifier. Cloud controls and remaining M30/M31 acceptance stay gated.
 
 - M31 original owner uploads can now enter canonical reconciliation without replacing their receipt or original source. Fixed-snapshot promotion proof, schema-18 source admissions, account-pinned reads and exact native write plans preserve pending cash/stock, later offline edits and images through retries, quota failure and revocation. An original owner and joined manager converge in native browser checks. Full cloud controls and remaining M30/M31 acceptance stay gated.

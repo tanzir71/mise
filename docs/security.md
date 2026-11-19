@@ -6,6 +6,14 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [automatic sync boundary](m31-sync-runtime.md) stores only scoped fingerprints,
+retry metadata and download pointers. Runtime phone identity is checked before
+HTTP, canonical writes and final status confirmation. Realtime payloads only wake
+a verified cursor pull. The publication contains event INSERTs alone and retains
+the existing authenticated outlet policy, forced RLS and anonymous-access denial.
+Only owner app/fallback documents gain runtime WebSocket CSP permission. No actual
+deployment value enters source, portable backups or public build variables.
+
 The [original-account command boundary](m31-command-account.md) requires live
 phone identity and original account/connection fingerprints on both transports.
 Fresh Auth verification and ephemeral receipt guards reject account changes

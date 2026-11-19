@@ -17,7 +17,7 @@ const exact=(v:Record<string,unknown>,keys:string)=>Object.keys(v).sort().join('
 export const operatorId=(v:unknown):v is string=>typeof v==='string'&&/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v);
 export const operatorAuthKey=(v:unknown):v is string=>typeof v==='string'&&/^mise\.cloud\.auth\.[a-f0-9]{64}$/.test(v);
 const hash=(v:unknown):v is string=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
-export class OperatorContextError extends Error {constructor(message='Choose an active owner or manager for this outlet.'){super(message);}}
+export class OperatorContextError extends Error {constructor(message='Choose an active owner or manager for this outlet.',readonly kind:'auth'|'review'|'retry'='review'){super(message);}}
 export function parseOperatorPosition(v:unknown):OperatorPosition|null {
  if(v===null)return null;if(!object(v)||!exact(v,'businessId,outletId')||!operatorId(v.businessId)||!operatorId(v.outletId))throw new OperatorContextError('Keep the original outlet list position.');return {businessId:v.businessId,outletId:v.outletId};
 }

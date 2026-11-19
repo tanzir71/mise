@@ -68,10 +68,10 @@ export async function assertLocalUploadCoverage(db:MiseDatabase,plan:CloudUpload
   return state;
  });
 }
-export async function acceptLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targetHash:string,receipt:CloudUploadReceipt):Promise<LocalCloudState>{
+export async function acceptLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targetHash:string,receipt:CloudUploadReceipt,assertCurrent?:()=>void):Promise<LocalCloudState>{
  const hash=await cloudUploadManifestHash(plan.manifest),confirmed=parseCloudUploadProgress({id:plan.manifest.id,manifestHash:hash,received:plan.manifest.chunks.map(p=>p.index),receipt},plan.manifest,hash).receipt!;
  await assertLocalUploadCoverage(db,plan,targetHash);
- return db.transaction('rw',db.cloudState,async()=>{const state=parseLocalCloudState(await db.cloudState.get('binding'));bound(state,plan.manifest.id,targetHash,hash,plan.manifest);if(state.receipt&&token(state.receipt)!==token(confirmed))throw new Error('Keep the original accepted upload receipt.');const next={...state,phase:'ready' as const,receipt:confirmed};await db.cloudState.put(next);return next;});
+ return db.transaction('rw',db.cloudState,async()=>{const state=parseLocalCloudState(await db.cloudState.get('binding'));bound(state,plan.manifest.id,targetHash,hash,plan.manifest);if(state.receipt&&token(state.receipt)!==token(confirmed))throw new Error('Keep the original accepted upload receipt.');const next={...state,phase:'ready' as const,receipt:confirmed};assertCurrent?.();await db.cloudState.put(next);assertCurrent?.();return next;});
 }
 /** Stop capture only after the server confirms that this unaccepted staging upload is cancelled. */
 export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHash:string,remote:{cancel(id:string,signal?:AbortSignal):Promise<{id:string;canceled:true}>},signal?:AbortSignal):Promise<void>{

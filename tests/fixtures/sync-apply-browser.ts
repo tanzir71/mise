@@ -1,58 +1,635 @@
 import Dexie from 'dexie';
-import {MiseDatabase} from '../../apps/web/src/data/db';
-import {createOperatorRemote} from '../../apps/web/src/data/operator-remote';
-import {selectCloudOperator} from '../../apps/web/src/data/operator-state';
-import {joinCanonicalDevice} from '../../apps/web/src/data/cloud-sync-join';
-import {applyCanonicalDownload,adoptOwnerUpload} from '../../apps/web/src/data/cloud-sync-apply';
-import {prepareSyncDownload,runSyncDownload} from '../../apps/web/src/data/cloud-sync-journal';
-import {downloadSyncImages} from '../../apps/web/src/data/cloud-sync-images';
-import {createCloudSyncRemote} from '../../apps/web/src/data/cloud-sync-remote';
-import {createCloudImageRemote} from '../../apps/web/src/data/cloud-image-remote';
-import {createCloudCoverageRemote} from '../../apps/web/src/data/cloud-coverage-remote';
-import {createCloudUploadCoverageRemote} from '../../apps/web/src/data/cloud-upload-coverage-remote';
-import {CloudUploadJournal} from '../../apps/web/src/data/cloud-upload';
-import {storedInboxItems} from '../../apps/web/src/data/inbox';
-import {createShopCommandRemote} from '../../apps/web/src/data/shop-command-remote';
-import {createPhoneAuth,type PhoneAuth} from '../../apps/web/src/data/phone-auth';
-import {watchOperatorAuth} from '../../apps/web/src/data/operator-auth';
-import {lockLocalOperator} from '../../apps/web/src/data/operator-state';
-import {deliverLocalOutbox,beginLocalUpload,acceptLocalUpload} from '../../apps/web/src/data/local-outbox';
-import {backupTableNames,type MiseBackup} from '../../packages/core/backup-tables';
-import type {CloudUploadManifest} from '../../packages/core/cloud-upload';
-import type {CloudUploadReceipt} from '../../packages/core/cloud-upload-runner';
-import {cloudConnectionTarget,cloudAuthStorageKey} from '../../packages/core/cloud-connection';
-import {operatorAccountHash} from '../../packages/core/operators';
-import {newInboxId} from '../../packages/core/inbox';
-interface Config {apiUrl:string;publishableKey:string;userId:string;jwt:string;businessId:string;outletId:string;actorId:string;stockId:string;original?:{backup:MiseBackup;manifest:CloudUploadManifest;chunks:string[];receipt:CloudUploadReceipt}}
-interface Wire {id:'wire';config:Config;scope:string;target:Awaited<ReturnType<typeof target>>;authKey:string;joinId:string;pendingRead:string|null}
-class Receiver extends Dexie {wire!:Dexie.Table<Wire,string>;constructor(name:string){super(name);this.version(1).stores({wire:'id'});}}
-const connection=(config:Config)=>({apiUrl:config.apiUrl,publishableKey:config.publishableKey});
-async function target(config:Config,scope:string,role:'owner'|'manager'){return {businessId:config.businessId,outletId:config.outletId,actorId:config.actorId,accountHash:await operatorAccountHash(config.userId),targetHash:await cloudConnectionTarget(connection(config),scope,config.userId),role};}
-async function use<T>(run:(db:MiseDatabase,receiver:Receiver)=>Promise<T>){const base=location.pathname.replace(/\/app\/.*$/,'/app/'),db=new MiseDatabase('mise-local:'+base),receiver=new Receiver('mise-native-sync:'+base);try{return await run(db,receiver);}finally{db.close();receiver.close();}}
-function clients(w:Wire){const auth=async()=>({jwt:w.config.jwt,userId:w.config.userId}),c=connection(w.config);return {operator:createOperatorRemote(c,auth),read:createCloudSyncRemote(c,async()=>w.config.jwt),images:createCloudImageRemote(c,w.scope,auth),coverage:createCloudCoverageRemote(c,w.scope,auth),uploadCoverage:createCloudUploadCoverageRemote(c,w.scope,auth)};}
-const phoneClients=new Map<string,Promise<PhoneAuth>>();
-async function commandClient(w:Wire){let promise=phoneClients.get(w.authKey);if(!promise){promise=createPhoneAuth(connection(w.config),w.scope,{storage:localStorage});phoneClients.set(w.authKey,promise);}const auth=await promise;await auth.check();return {auth,remote:createShopCommandRemote(w.config.apiUrl,w.config.publishableKey,{scope:w.scope,accountHash:w.target.accountHash,targetHash:w.target.targetHash,getAuth:()=>auth.commandAuthorization(),assertCurrent:value=>auth.assertCommandAuthorization(value)})};}
-function session(config:Config){return {access_token:config.jwt,refresh_token:'synthetic-native-refresh',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user:{id:config.userId,aud:'authenticated',role:'authenticated',phone:config.userId.endsWith('1')?'14155550101':'14155550102',phone_confirmed_at:'2026-11-01T00:00:00Z',created_at:'2026-11-01T00:00:00Z',is_anonymous:false,app_metadata:{provider:'phone'},user_metadata:{role:'owner'}}};}
-function switchSession(w:Wire,config:Config){const oldValue=localStorage.getItem(w.authKey),newValue=JSON.stringify(session(config));localStorage.setItem(w.authKey,newValue);window.dispatchEvent(new StorageEvent('storage',{key:w.authKey,oldValue,newValue,storageArea:localStorage}));}
-async function deliverCommands(db:MiseDatabase,w:Wire,switchOnReceipt?:Config){const c=await commandClient(w),unwatch=watchOperatorAuth(db,localStorage,()=>{});let switched=false;const reading=(row:unknown)=>{if(switchOnReceipt&&!switched&&Dexie.currentTransaction?.mode==='readwrite'){switched=true;switchSession(w,switchOnReceipt);}return row;};if(switchOnReceipt)db.outbox.hook('reading',reading);try{return await deliverLocalOutbox(db,w.target.targetHash,command=>c.remote.apply(command));}finally{unwatch();if(switchOnReceipt)db.outbox.hook('reading').unsubscribe(reading);}}
-async function wire(receiver:Receiver){const w=await receiver.wire.get('wire');if(!w)throw Error('Initialize native sync first');return w;}
-function ownerJournal(w:Wire){return new CloudUploadJournal('mise-native-owner:'+w.scope);}
-async function ownerPlan(w:Wire){if(!w.config.original)throw Error('No original owner upload');const journal=ownerJournal(w);try{const row=await journal.readSnapshot(w.config.original.manifest.id);return {manifest:row.manifest,chunks:row.chunks};}finally{journal.close();}}
-async function preparePull(db:MiseDatabase,receiver:Receiver){const w=await wire(receiver),c=clients(w);if(!w.pendingRead){const base=await db.syncCanonical.get('active');w.pendingRead=base?newInboxId():w.joinId;await prepareSyncDownload(db,{id:w.pendingRead,target:w.target,previousCursor:base?.snapshot.cursor??null});await receiver.wire.put(w);}await runSyncDownload(db,w.pendingRead,w.target,c.read);await downloadSyncImages(db,w.pendingRead,w.target,c.images);return {w,c};}
-async function finishPull(db:MiseDatabase,receiver:Receiver,prepared:Awaited<ReturnType<typeof preparePull>>,lostReply=false){const {w,c}=prepared,selected=(await db.operatorState.get('active'))!,input={readId:w.pendingRead!,target:w.target,authKey:w.authKey,expectedOperatorRevision:selected.revision},base=await db.syncCanonical.get('active'),admission=await db.syncAdmissions.get('owner-upload');const result=w.config.original&&(!base||admission?.source.readId===w.pendingRead)?await adoptOwnerUpload(db,input,await ownerPlan(w),c.uploadCoverage,c.coverage,context=>c.operator.select(context)):await applyCanonicalDownload(db,input,c.coverage,context=>c.operator.select(context));if(lostReply)throw Error('The local adoption reply was lost.');await receiver.wire.put({...w,pendingRead:null});return result;}
-const api={
- initialize:(config:Config)=>use(async(db,receiver)=>{const scope=location.pathname.replace(/\/app\/.*$/,'/app/')+config.businessId,operator=createOperatorRemote(connection(config),async()=>({jwt:config.jwt,userId:config.userId})),page=await operator.list(),context=page.contexts.find(c=>c.businessId===config.businessId&&c.outletId===config.outletId&&c.actorId===config.actorId);if(!context)throw Error('No actual permitted outlet');const t=await target(config,scope,context.role),authKey=await cloudAuthStorageKey(connection(config),scope);localStorage.setItem(authKey,JSON.stringify(session(config)));const w:Wire={id:'wire',config,scope,target:t,authKey,joinId:newInboxId(),pendingRead:null};if(config.original){await db.transaction('rw',db.tables,async()=>{if(await db.businesses.count()||await db.cloudState.count()||await db.outbox.count())throw Error('Keep existing local work');for(const table of backupTableNames)await db.table(table).bulkPut(table==='inboxItems'?storedInboxItems(config.original!.backup.tables.inboxItems):config.original!.backup.tables[table]);});const journal=ownerJournal(w);try{const plan={manifest:config.original.manifest,chunks:config.original.chunks.map(value=>new Blob([Uint8Array.from(atob(value),c=>c.charCodeAt(0))],{type:'application/gzip'}))},stored=await journal.addSnapshot(plan);await beginLocalUpload(db,plan,t.targetHash);await journal.acknowledge(stored.id,{id:stored.id,manifestHash:stored.manifestHash,received:stored.manifest.chunks.map(p=>p.index),receipt:config.original.receipt});await acceptLocalUpload(db,plan,t.targetHash,config.original.receipt);}finally{journal.close();}}const selected=await selectCloudOperator(db,context,{authKey,targetHash:t.targetHash},null,c=>operator.select(c));await receiver.wire.put(w);if(config.original)return {originalUploadId:config.original.manifest.id,operatorRevision:selected.revision};const c=clients(w);await prepareSyncDownload(db,{id:w.joinId,target:t,previousCursor:null});await runSyncDownload(db,w.joinId,t,c.read);await downloadSyncImages(db,w.joinId,t,c.images);return joinCanonicalDevice(db,{readId:w.joinId,target:t,authKey,expectedOperatorRevision:selected.revision},context=>operator.select(context));}),
- deliver:()=>use(async(db,receiver)=>deliverCommands(db,await wire(receiver))),
- deliverWithReceiptSwitch:(config:Config)=>use(async(db,receiver)=>deliverCommands(db,await wire(receiver),config)),
- switchAccount:(config:Config)=>use(async(_db,receiver)=>{const w=await wire(receiver);switchSession(w,config);const current=phoneClients.get(w.authKey);if(current)await(await current).check();}),
- reselect:()=>use(async(db,receiver)=>{const w=await wire(receiver),{auth}=await commandClient(w),remote=createOperatorRemote(connection(w.config),()=>auth.commandAuthorization()),page=await remote.list(),context=page.contexts.find(c=>c.businessId===w.target.businessId&&c.outletId===w.target.outletId&&c.actorId===w.target.actorId);if(!context)throw Error('No actual original operator');const selected=await db.operatorState.get('active');return selectCloudOperator(db,context,{authKey:w.authKey,targetHash:w.target.targetHash},selected?.revision??null,c=>remote.select(c));}),
- lock:()=>use(async db=>{const selected=(await db.operatorState.get('active'))!;return lockLocalOperator(db,selected.revision);}),
- pull:()=>use(async(db,receiver)=>finishPull(db,receiver,await preparePull(db,receiver))),
- adoptWithoutReply:()=>use(async(db,receiver)=>finishPull(db,receiver,await preparePull(db,receiver),true)),
- stock:(reason:'used'|'received',quantity:number)=>use(async(db,receiver)=>{const w=await wire(receiver),item=(await db.stockItems.get(w.config.stockId))!;return db.adjustStock({id:item.id,revision:item.revision,reason,quantity});}),
- cash:(expression:string)=>use(db=>db.recordSale({expression,method:'cash'})),
- inspect:()=>use(async db=>({backup:await db.readBackup(),queue:await db.outbox.toArray(),binding:await db.cloudState.get('binding'),base:await db.syncCanonical.get('active'),applications:await db.syncApplications.toArray(),admissions:await db.syncAdmissions.toArray(),operator:await db.operatorState.get('active'),imageSizes:await Promise.all((await db.inboxItems.toArray()).flatMap(item=>item.images.map(async image=>(await image.blob.arrayBuffer()).byteLength)))})),
- quota:()=>use(async(db,receiver)=>{const prepared=await preparePull(db,receiver),table=prepared.w.config.original&&!await db.syncAdmissions.count()?db.syncAdmissions:db.syncApplications,fail=()=>{throw new DOMException('Storage full','QuotaExceededError');};table.hook('creating',fail);try{await finishPull(db,receiver,prepared);return {rejected:false};}catch{return {rejected:true,applications:await db.syncApplications.count(),queue:await db.outbox.count(),base:await db.syncCanonical.get('active')};}finally{table.hook('creating').unsubscribe(fail);}}),
+import { MiseDatabase } from '../../apps/web/src/data/db';
+import { createOperatorRemote } from '../../apps/web/src/data/operator-remote';
+import { selectCloudOperator } from '../../apps/web/src/data/operator-state';
+import { joinCanonicalDevice } from '../../apps/web/src/data/cloud-sync-join';
+import {
+  applyCanonicalDownload,
+  adoptOwnerUpload,
+} from '../../apps/web/src/data/cloud-sync-apply';
+import {
+  prepareSyncDownload,
+  runSyncDownload,
+} from '../../apps/web/src/data/cloud-sync-journal';
+import { downloadSyncImages } from '../../apps/web/src/data/cloud-sync-images';
+import { createCloudSyncRemote } from '../../apps/web/src/data/cloud-sync-remote';
+import { createCloudImageRemote } from '../../apps/web/src/data/cloud-image-remote';
+import { createCloudCoverageRemote } from '../../apps/web/src/data/cloud-coverage-remote';
+import { createCloudUploadCoverageRemote } from '../../apps/web/src/data/cloud-upload-coverage-remote';
+import { CloudUploadJournal } from '../../apps/web/src/data/cloud-upload';
+import { storedInboxItems } from '../../apps/web/src/data/inbox';
+import { runSyncCycle } from '../../apps/web/src/data/sync-cycle';
+import {
+  ensureSyncSession,
+  requestSync,
+} from '../../apps/web/src/data/sync-session';
+import { createShopCommandRemote } from '../../apps/web/src/data/shop-command-remote';
+import {
+  createPhoneAuth,
+  type PhoneAuth,
+} from '../../apps/web/src/data/phone-auth';
+import { watchOperatorAuth } from '../../apps/web/src/data/operator-auth';
+import { lockLocalOperator } from '../../apps/web/src/data/operator-state';
+import {
+  deliverLocalOutbox,
+  beginLocalUpload,
+  acceptLocalUpload,
+} from '../../apps/web/src/data/local-outbox';
+import {
+  backupTableNames,
+  type MiseBackup,
+} from '../../packages/core/backup-tables';
+import type { CloudUploadManifest } from '../../packages/core/cloud-upload';
+import type { CloudUploadReceipt } from '../../packages/core/cloud-upload-runner';
+import {
+  cloudConnectionTarget,
+  cloudAuthStorageKey,
+  saveCloudConnection,
+} from '../../packages/core/cloud-connection';
+import { operatorAccountHash } from '../../packages/core/operators';
+import { newInboxId } from '../../packages/core/inbox';
+interface Config {
+  apiUrl: string;
+  publishableKey: string;
+  userId: string;
+  jwt: string;
+  businessId: string;
+  outletId: string;
+  actorId: string;
+  stockId: string;
+  localBackup?: MiseBackup;
+  original?: {
+    backup: MiseBackup;
+    manifest: CloudUploadManifest;
+    chunks: string[];
+    receipt: CloudUploadReceipt;
+  };
+}
+interface Wire {
+  id: 'wire';
+  config: Config;
+  scope: string;
+  target: Awaited<ReturnType<typeof target>>;
+  authKey: string;
+  joinId: string;
+  pendingRead: string | null;
+}
+class Receiver extends Dexie {
+  wire!: Dexie.Table<Wire, string>;
+  constructor(name: string) {
+    super(name);
+    this.version(1).stores({ wire: 'id' });
+  }
+}
+const connection = (config: Config) => ({
+  apiUrl: config.apiUrl,
+  publishableKey: config.publishableKey,
+});
+async function target(
+  config: Config,
+  scope: string,
+  role: 'owner' | 'manager',
+) {
+  return {
+    businessId: config.businessId,
+    outletId: config.outletId,
+    actorId: config.actorId,
+    accountHash: await operatorAccountHash(config.userId),
+    targetHash: await cloudConnectionTarget(
+      connection(config),
+      scope,
+      config.userId,
+    ),
+    role,
+  };
+}
+async function use<T>(
+  run: (db: MiseDatabase, receiver: Receiver) => Promise<T>,
+) {
+  const base = location.pathname.replace(/\/app\/.*$/, '/app/'),
+    db = new MiseDatabase('mise-local:' + base),
+    receiver = new Receiver('mise-native-sync:' + base);
+  try {
+    return await run(db, receiver);
+  } finally {
+    db.close();
+    receiver.close();
+  }
+}
+function clients(w: Wire) {
+  const auth = async () => ({ jwt: w.config.jwt, userId: w.config.userId }),
+    c = connection(w.config);
+  return {
+    operator: createOperatorRemote(c, auth),
+    read: createCloudSyncRemote(c, async () => w.config.jwt),
+    images: createCloudImageRemote(c, w.scope, auth),
+    coverage: createCloudCoverageRemote(c, w.scope, auth),
+    uploadCoverage: createCloudUploadCoverageRemote(c, w.scope, auth),
+  };
+}
+const phoneClients = new Map<string, Promise<PhoneAuth>>();
+async function commandClient(w: Wire) {
+  let promise = phoneClients.get(w.authKey);
+  if (!promise) {
+    promise = createPhoneAuth(connection(w.config), w.scope, {
+      storage: localStorage,
+    });
+    phoneClients.set(w.authKey, promise);
+  }
+  const auth = await promise;
+  await auth.check();
+  return {
+    auth,
+    remote: createShopCommandRemote(w.config.apiUrl, w.config.publishableKey, {
+      scope: w.scope,
+      accountHash: w.target.accountHash,
+      targetHash: w.target.targetHash,
+      getAuth: () => auth.commandAuthorization(),
+      assertCurrent: (value) => auth.assertCommandAuthorization(value),
+    }),
+  };
+}
+function session(config: Config) {
+  return {
+    access_token: config.jwt,
+    refresh_token: 'synthetic-native-refresh',
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    expires_in: 3600,
+    token_type: 'bearer',
+    user: {
+      id: config.userId,
+      aud: 'authenticated',
+      role: 'authenticated',
+      phone: config.userId.endsWith('1') ? '14155550101' : '14155550102',
+      phone_confirmed_at: '2026-11-01T00:00:00Z',
+      created_at: '2026-11-01T00:00:00Z',
+      is_anonymous: false,
+      app_metadata: { provider: 'phone' },
+      user_metadata: { role: 'owner' },
+    },
+  };
+}
+function switchSession(w: Wire, config: Config) {
+  const oldValue = localStorage.getItem(w.authKey),
+    newValue = JSON.stringify(session(config));
+  localStorage.setItem(w.authKey, newValue);
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: w.authKey,
+      oldValue,
+      newValue,
+      storageArea: localStorage,
+    }),
+  );
+}
+async function deliverCommands(
+  db: MiseDatabase,
+  w: Wire,
+  switchOnReceipt?: Config,
+) {
+  const c = await commandClient(w),
+    unwatch = watchOperatorAuth(db, localStorage, () => {});
+  let switched = false;
+  const reading = (row: unknown) => {
+    if (
+      switchOnReceipt &&
+      !switched &&
+      Dexie.currentTransaction?.mode === 'readwrite'
+    ) {
+      switched = true;
+      switchSession(w, switchOnReceipt);
+    }
+    return row;
+  };
+  if (switchOnReceipt) db.outbox.hook('reading', reading);
+  try {
+    return await deliverLocalOutbox(db, w.target.targetHash, (command) =>
+      c.remote.apply(command),
+    );
+  } finally {
+    unwatch();
+    if (switchOnReceipt) db.outbox.hook('reading').unsubscribe(reading);
+  }
+}
+async function wire(receiver: Receiver) {
+  const w = await receiver.wire.get('wire');
+  if (!w) throw Error('Initialize native sync first');
+  return w;
+}
+function ownerJournal(w: Wire) {
+  return new CloudUploadJournal(
+    'mise-cloud-uploads:' + w.scope.slice(0, -w.config.businessId.length),
+  );
+}
+async function ownerPlan(w: Wire) {
+  if (!w.config.original) throw Error('No original owner upload');
+  const journal = ownerJournal(w);
+  try {
+    const row = await journal.readSnapshot(w.config.original.manifest.id);
+    return { manifest: row.manifest, chunks: row.chunks };
+  } finally {
+    journal.close();
+  }
+}
+async function preparePull(db: MiseDatabase, receiver: Receiver) {
+  const w = await wire(receiver),
+    c = clients(w);
+  if (!w.pendingRead) {
+    const base = await db.syncCanonical.get('active');
+    w.pendingRead = base ? newInboxId() : w.joinId;
+    await prepareSyncDownload(db, {
+      id: w.pendingRead,
+      target: w.target,
+      previousCursor: base?.snapshot.cursor ?? null,
+    });
+    await receiver.wire.put(w);
+  }
+  await runSyncDownload(db, w.pendingRead, w.target, c.read);
+  await downloadSyncImages(db, w.pendingRead, w.target, c.images);
+  return { w, c };
+}
+async function finishPull(
+  db: MiseDatabase,
+  receiver: Receiver,
+  prepared: Awaited<ReturnType<typeof preparePull>>,
+  lostReply = false,
+) {
+  const { w, c } = prepared,
+    selected = (await db.operatorState.get('active'))!,
+    input = {
+      readId: w.pendingRead!,
+      target: w.target,
+      authKey: w.authKey,
+      expectedOperatorRevision: selected.revision,
+    },
+    base = await db.syncCanonical.get('active'),
+    admission = await db.syncAdmissions.get('owner-upload');
+  const result =
+    w.config.original && (!base || admission?.source.readId === w.pendingRead)
+      ? await adoptOwnerUpload(
+          db,
+          input,
+          await ownerPlan(w),
+          c.uploadCoverage,
+          c.coverage,
+          (context) => c.operator.select(context),
+        )
+      : await applyCanonicalDownload(db, input, c.coverage, (context) =>
+          c.operator.select(context),
+        );
+  if (lostReply) throw Error('The local adoption reply was lost.');
+  await receiver.wire.put({ ...w, pendingRead: null });
+  return result;
+}
+async function cycleOnce(
+  db: MiseDatabase,
+  w: Wire,
+  loseFinish = false,
+  switchOnFinish?: Config,
+) {
+  const { auth } = await commandClient(w),
+    operator = (await db.operatorState.get('active'))!;
+  if (!operator.connection) throw Error('Select actual cloud operator');
+  await ensureSyncSession(
+    db,
+    {
+      target: w.target,
+      authKey: w.authKey,
+      operatorRevision: operator.revision,
+      epoch: operator.connection.epoch,
+      scopeVersion: operator.connection.scopeVersion,
+    },
+    newInboxId(),
+  );
+  await requestSync(db, true);
+  const journal = ownerJournal(w),
+    unwatch = watchOperatorAuth(db, localStorage, () => {});
+  let failed = false;
+  const finish = (changes: object) => {
+    if (
+      (loseFinish || switchOnFinish) &&
+      !failed &&
+      'lastConfirmedAt' in changes &&
+      changes.lastConfirmedAt != null
+    ) {
+      failed = true;
+      if (switchOnFinish) {
+        switchSession(w, switchOnFinish);
+        return;
+      }
+      throw new DOMException(
+        'Local completion write failed',
+        'QuotaExceededError',
+      );
+    }
+  };
+  if (loseFinish || switchOnFinish) db.syncSessions.hook('updating', finish);
+  try {
+    return await runSyncCycle(db, {
+      config: connection(w.config),
+      scope: w.scope,
+      auth,
+      journal,
+      random: () => 0,
+    });
+  } finally {
+    unwatch();
+    if (loseFinish || switchOnFinish)
+      db.syncSessions.hook('updating').unsubscribe(finish);
+    journal.close();
+  }
+}
+const api = {
+  initializeLocal: (config: Config) =>
+    use(async (db, receiver) => {
+      if (!config.localBackup) throw Error('No original local shop');
+      const scope =
+          location.pathname.replace(/\/app\/.*$/, '/app/') + config.businessId,
+        authKey = await cloudAuthStorageKey(connection(config), scope),
+        t = await target(config, scope, 'owner');
+      await db.transaction('rw', db.tables, async () => {
+        if ((await db.businesses.count()) || (await db.cloudState.count()))
+          throw Error('Keep existing shop');
+        for (const table of backupTableNames)
+          await db
+            .table(table)
+            .bulkPut(
+              table === 'inboxItems'
+                ? storedInboxItems(config.localBackup!.tables.inboxItems)
+                : config.localBackup!.tables[table],
+            );
+      });
+      localStorage.setItem(authKey, JSON.stringify(session(config)));
+      saveCloudConnection(localStorage, connection(config));
+      await receiver.wire.put({
+        id: 'wire',
+        config,
+        scope,
+        target: t,
+        authKey,
+        joinId: newInboxId(),
+        pendingRead: null,
+      });
+    }),
+  review: () =>
+    use(async (db, receiver) => {
+      const journal = ownerJournal(await wire(receiver));
+      try {
+        return await journal.review(db);
+      } finally {
+        journal.close();
+      }
+    }),
+  initialize: (config: Config) =>
+    use(async (db, receiver) => {
+      const scope =
+          location.pathname.replace(/\/app\/.*$/, '/app/') + config.businessId,
+        operator = createOperatorRemote(connection(config), async () => ({
+          jwt: config.jwt,
+          userId: config.userId,
+        })),
+        page = await operator.list(),
+        context = page.contexts.find(
+          (c) =>
+            c.businessId === config.businessId &&
+            c.outletId === config.outletId &&
+            c.actorId === config.actorId,
+        );
+      if (!context) throw Error('No actual permitted outlet');
+      const t = await target(config, scope, context.role),
+        authKey = await cloudAuthStorageKey(connection(config), scope);
+      localStorage.setItem(authKey, JSON.stringify(session(config)));
+      saveCloudConnection(localStorage, connection(config));
+      const w: Wire = {
+        id: 'wire',
+        config,
+        scope,
+        target: t,
+        authKey,
+        joinId: newInboxId(),
+        pendingRead: null,
+      };
+      if (config.original) {
+        await db.transaction('rw', db.tables, async () => {
+          if (
+            (await db.businesses.count()) ||
+            (await db.cloudState.count()) ||
+            (await db.outbox.count())
+          )
+            throw Error('Keep existing local work');
+          for (const table of backupTableNames)
+            await db
+              .table(table)
+              .bulkPut(
+                table === 'inboxItems'
+                  ? storedInboxItems(config.original!.backup.tables.inboxItems)
+                  : config.original!.backup.tables[table],
+              );
+        });
+        const journal = ownerJournal(w);
+        try {
+          const plan = {
+              manifest: config.original.manifest,
+              chunks: config.original.chunks.map(
+                (value) =>
+                  new Blob(
+                    [Uint8Array.from(atob(value), (c) => c.charCodeAt(0))],
+                    { type: 'application/gzip' },
+                  ),
+              ),
+            },
+            stored = await journal.addSnapshot(plan);
+          await beginLocalUpload(db, plan, t.targetHash);
+          await journal.acknowledge(stored.id, {
+            id: stored.id,
+            manifestHash: stored.manifestHash,
+            received: stored.manifest.chunks.map((p) => p.index),
+            receipt: config.original.receipt,
+          });
+          await acceptLocalUpload(
+            db,
+            plan,
+            t.targetHash,
+            config.original.receipt,
+          );
+        } finally {
+          journal.close();
+        }
+      }
+      const selected = await selectCloudOperator(
+        db,
+        context,
+        { authKey, targetHash: t.targetHash },
+        null,
+        (c) => operator.select(c),
+      );
+      await receiver.wire.put(w);
+      if (config.original)
+        return {
+          originalUploadId: config.original.manifest.id,
+          operatorRevision: selected.revision,
+        };
+      const c = clients(w);
+      await prepareSyncDownload(db, {
+        id: w.joinId,
+        target: t,
+        previousCursor: null,
+      });
+      await runSyncDownload(db, w.joinId, t, c.read);
+      await downloadSyncImages(db, w.joinId, t, c.images);
+      return joinCanonicalDevice(
+        db,
+        {
+          readId: w.joinId,
+          target: t,
+          authKey,
+          expectedOperatorRevision: selected.revision,
+        },
+        (context) => operator.select(context),
+      );
+    }),
+  cycle: () => use(async (db, receiver) => cycleOnce(db, await wire(receiver))),
+  cycleWithLostFinish: () =>
+    use(async (db, receiver) => cycleOnce(db, await wire(receiver), true)),
+  cycleWithFinishSwitch: (config: Config) =>
+    use(async (db, receiver) =>
+      cycleOnce(db, await wire(receiver), false, config),
+    ),
+  cycleInspect: () =>
+    use(async (db) => ({
+      state: await db.syncSessions.get('active'),
+      reads: await db.syncReads.toArray(),
+    })),
+  leaveExpiredPausedLease: () =>
+    use(async (db) => {
+      const state = await db.syncSessions.get('active');
+      if (!state?.paused)
+        throw Error('Pause before simulating an interrupted runner');
+      await db.syncSessions.put({
+        ...state,
+        lease: { id: newInboxId(), until: Date.now() - 1 },
+      });
+    }),
+  customer: (name: string) =>
+    use((db) =>
+      db.saveCustomer({
+        name,
+        nickname: '',
+        phone: '',
+        address: '',
+        notes: '',
+        tags: [],
+      }),
+    ),
+  deliver: () =>
+    use(async (db, receiver) => deliverCommands(db, await wire(receiver))),
+  deliverWithReceiptSwitch: (config: Config) =>
+    use(async (db, receiver) =>
+      deliverCommands(db, await wire(receiver), config),
+    ),
+  switchAccount: (config: Config) =>
+    use(async (_db, receiver) => {
+      const w = await wire(receiver);
+      switchSession(w, config);
+      const current = phoneClients.get(w.authKey);
+      if (current) await (await current).check();
+    }),
+  reselect: () =>
+    use(async (db, receiver) => {
+      const w = await wire(receiver),
+        { auth } = await commandClient(w),
+        remote = createOperatorRemote(connection(w.config), () =>
+          auth.commandAuthorization(),
+        ),
+        page = await remote.list(),
+        context = page.contexts.find(
+          (c) =>
+            c.businessId === w.target.businessId &&
+            c.outletId === w.target.outletId &&
+            c.actorId === w.target.actorId,
+        );
+      if (!context) throw Error('No actual original operator');
+      const selected = await db.operatorState.get('active');
+      return selectCloudOperator(
+        db,
+        context,
+        { authKey: w.authKey, targetHash: w.target.targetHash },
+        selected?.revision ?? null,
+        (c) => remote.select(c),
+      );
+    }),
+  lock: () =>
+    use(async (db) => {
+      const selected = (await db.operatorState.get('active'))!;
+      return lockLocalOperator(db, selected.revision);
+    }),
+  pull: () =>
+    use(async (db, receiver) =>
+      finishPull(db, receiver, await preparePull(db, receiver)),
+    ),
+  adoptWithoutReply: () =>
+    use(async (db, receiver) =>
+      finishPull(db, receiver, await preparePull(db, receiver), true),
+    ),
+  stock: (reason: 'used' | 'received', quantity: number) =>
+    use(async (db, receiver) => {
+      const w = await wire(receiver),
+        item = (await db.stockItems.get(w.config.stockId))!;
+      return db.adjustStock({
+        id: item.id,
+        revision: item.revision,
+        reason,
+        quantity,
+      });
+    }),
+  cash: (expression: string) =>
+    use((db) => db.recordSale({ expression, method: 'cash' })),
+  inspect: () =>
+    use(async (db) => ({
+      backup: await db.readBackup(),
+      queue: await db.outbox.toArray(),
+      binding: await db.cloudState.get('binding'),
+      base: await db.syncCanonical.get('active'),
+      applications: await db.syncApplications.toArray(),
+      admissions: await db.syncAdmissions.toArray(),
+      operator: await db.operatorState.get('active'),
+      imageSizes: await Promise.all(
+        (await db.inboxItems.toArray()).flatMap((item) =>
+          item.images.map(
+            async (image) => (await image.blob.arrayBuffer()).byteLength,
+          ),
+        ),
+      ),
+    })),
+  quota: () =>
+    use(async (db, receiver) => {
+      const prepared = await preparePull(db, receiver),
+        table =
+          prepared.w.config.original && !(await db.syncAdmissions.count())
+            ? db.syncAdmissions
+            : db.syncApplications,
+        fail = () => {
+          throw new DOMException('Storage full', 'QuotaExceededError');
+        };
+      table.hook('creating', fail);
+      try {
+        await finishPull(db, receiver, prepared);
+        return { rejected: false };
+      } catch {
+        return {
+          rejected: true,
+          applications: await db.syncApplications.count(),
+          queue: await db.outbox.count(),
+          base: await db.syncCanonical.get('active'),
+        };
+      } finally {
+        table.hook('creating').unsubscribe(fail);
+      }
+    }),
 };
-declare global {interface Window {miseSyncApplyTest:typeof api}}
-window.miseSyncApplyTest=api;
+declare global {
+  interface Window {
+    miseSyncApplyTest: typeof api;
+  }
+}
+window.miseSyncApplyTest = api;

@@ -1,6 +1,6 @@
 import {expect,it,vi} from 'vitest';
 import {createInitialUploadHandler,type InitialUploadStore,UploadHttpError} from '../supabase/functions/_shared/upload-handler';
-import {createCloudUploadRemote} from '../apps/web/src/data/cloud-upload-remote';
+import {testCloudUploadRemote as createCloudUploadRemote} from './command-account-fixture';
 import {cloudUploadFixture,uploadId} from './cloud-upload-fixture';
 import {cloudUploadManifestHash,prepareCloudUpload} from '../packages/core/cloud-upload';
 const origin='https://shop.test',jwt='user.1.signature',subject='00000000-0000-4000-8000-000000000001';

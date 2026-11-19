@@ -14,9 +14,9 @@ export function bindCommandReceipt<T extends object>(receipt:T,guard:()=>void):T
 /** Network receipts carry an ephemeral check; no session field is added to the record. */
 export function assertCommandReceipt(receipt:object):void {receiptGuards.get(receipt)?.();}
 /** Runtime identity only. The account, connection and generation never enter a command. */
-export function createCommandRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+export function createAccountJsonRequest(config:CloudConnection,input:CommandAccount,route:'commands'|'migration-upload',send:typeof fetch){
  if(!input||typeof input.scope!=='string'||!input.scope||input.scope.length>2048||!['accountHash','targetHash'].every(k=>typeof input[k as 'accountHash'|'targetHash']==='string'&&/^[a-f0-9]{64}$/.test(input[k as 'accountHash'|'targetHash']))||typeof input.getAuth!=='function'||typeof input.assertCurrent!=='function')throw new CommandRequestError('auth');
- const {scope,accountHash,targetHash,getAuth,assertCurrent}=input,endpoint=new URL('functions/v1/commands',config.apiUrl+'/');
+ const {scope,accountHash,targetHash,getAuth,assertCurrent}=input,endpoint=new URL('functions/v1/'+route,config.apiUrl+'/');
  const current=(value:CommandAuthorization)=>{try{const result:unknown=assertCurrent(value);if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw Error();}}catch{throw new CommandRequestError('auth');}};
  return async(body:string,headers:Record<string,string>,deadline:number,signal?:AbortSignal):Promise<{value:unknown;guard:()=>void}>=>{
   const controller=new AbortController(),lifetime=signal?AbortSignal.any([signal,controller.signal]):controller.signal;let response:Response|undefined;
@@ -27,7 +27,7 @@ export function createCommandRequest(config:CloudConnection,input:CommandAccount
    promise.then(value=>{lifetime.removeEventListener('abort',stop);resolve(value);},error=>{lifetime.removeEventListener('abort',stop);reject(error);});
   });
   async function auth(){
-   let value:CommandAuthorization;try{value=await abortable(getAuth());}catch{throw new CommandRequestError(lifetime.aborted?'retry':'auth');}
+   let value:CommandAuthorization;try{value=await abortable(getAuth());}catch(error){throw new CommandRequestError(lifetime.aborted||error&&typeof error==='object'&&'kind'in error&&error.kind==='retry'?'retry':'auth');}
    if(!value||typeof value.jwt!=='string'||value.jwt.length>8192||!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value.jwt)||!Number.isSafeInteger(value.generation)||value.generation<0)throw new CommandRequestError('auth');
    const captured={jwt:value.jwt,userId:value.userId,generation:value.generation};
    try{const [account,target]=await abortable(Promise.all([operatorAccountHash(captured.userId),cloudConnectionTarget(config,scope,captured.userId)]));if(account!==accountHash||target!==targetHash)throw Error();}catch{throw new CommandRequestError(lifetime.aborted?'retry':'auth');}
@@ -46,3 +46,4 @@ export function createCommandRequest(config:CloudConnection,input:CommandAccount
   finally{clearTimeout(timer);controller.abort();}
  };
 }
+export function createCommandRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){return createAccountJsonRequest(config,input,'commands',send);}

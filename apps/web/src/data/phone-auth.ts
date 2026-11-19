@@ -9,7 +9,7 @@ const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==n
 const phone=(v:unknown):v is string=>typeof v==='string'&&/^\+[1-9]\d{6,14}$/.test(v);
 const token=(v:unknown):v is string=>typeof v==='string'&&v.length<=8192&&/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(v);
 const authMessage=(error:unknown,fallback:string)=>object(error)&&error.status===429?'Too many requests. Wait a minute before trying again.':fallback;
-class PhoneAuthProblem extends Error {}
+class PhoneAuthProblem extends Error {constructor(message='',readonly kind:'auth'|'retry'='auth'){super(message);}}
 /** One project/shop scoped client. Session values never enter shop tables or backups. */
 export async function createPhoneAuth(input:CloudConnection,scope:string,options:{storage:KeyStorage;send?:typeof fetch;now?:()=>number}){
  const config=parseCloudConnection(input),key=await cloudAuthStorageKey(config,scope),send=options.send??fetch,now=options.now??Date.now;
@@ -56,14 +56,16 @@ export async function createPhoneAuth(input:CloudConnection,scope:string,options
   async jwt(){ensure();const result=await client.auth.getSession();ensure();const session:Session|null=result.data.session;if(result.error||!session||!token(session.access_token))throw new PhoneAuthProblem('Sign in again to continue.');if(verifiedToken!==session.access_token)await check();ensure();if(state.phase!=='signed-in'||verifiedToken!==session.access_token)throw new PhoneAuthProblem('Verify your phone sign-in before continuing.');return session.access_token;},
   async commandAuthorization():Promise<CommandAuthorization>{
    try{
-   ensure();await check();ensure();if(state.phase!=='signed-in'||!state.userId)throw new PhoneAuthProblem('Verify your phone sign-in before continuing.');
+   ensure();await check();ensure();if(state.phase!=='signed-in'||!state.userId)throw new PhoneAuthProblem('Verify your phone sign-in before continuing.',state.phase==='offline'?'retry':'auth');
    const generation=authorizationGeneration,originalUser=state.userId,result=await client.auth.getSession();ensure();const session=result.data.session;
-   if(result.error||!session||!token(session.access_token)||session.user.id!==originalUser)throw new PhoneAuthProblem('Sign in again with the original account.');
+   if(result.error)throw new PhoneAuthProblem('Phone sign-in is unconfirmed. Keep your local action.',result.error.status===401||result.error.status===403?'auth':'retry');
+   if(!session||!token(session.access_token)||session.user.id!==originalUser)throw new PhoneAuthProblem('Sign in again with the original account.');
    const verified=await client.auth.getUser(session.access_token);ensure();const user=verified.data.user,p=typeof user?.phone==='string'?'+'+user.phone.replace(/^\+/,''):null;
-   if(verified.error||!user||user.id!==originalUser||!phone(p)||!user.phone_confirmed_at||user.is_anonymous===true)throw new PhoneAuthProblem('Verify your phone sign-in before continuing.');
+   if(verified.error)throw new PhoneAuthProblem('Phone sign-in is unconfirmed. Keep your local action.',verified.error.status===401||verified.error.status===403?'auth':'retry');
+   if(!user||user.id!==originalUser||!phone(p)||!user.phone_confirmed_at||user.is_anonymous===true)throw new PhoneAuthProblem('Verify your phone sign-in before continuing.');
    const current=await client.auth.getSession();ensure();if(current.error||current.data.session?.access_token!==session.access_token||current.data.session.user.id!==originalUser||state.phase!=='signed-in'||state.userId!==originalUser||generation!==authorizationGeneration)throw new PhoneAuthProblem('The signed-in account changed. Keep the local action and retry.');
    return {jwt:session.access_token,userId:user.id,generation};
-   }catch(error){throw error instanceof PhoneAuthProblem?error:new PhoneAuthProblem('Phone sign-in could not be verified. Keep the original local action.');}
+   }catch(error){throw error instanceof PhoneAuthProblem?error:new PhoneAuthProblem('Phone sign-in could not be verified. Keep the original local action.','retry');}
   },
   assertCommandAuthorization(value:CommandAuthorization):void {
    ensure();if(state.phase!=='signed-in'||state.userId!==value.userId||authorizationGeneration!==value.generation)throw new PhoneAuthProblem('The signed-in account changed. Keep the local action unconfirmed.');

@@ -7,7 +7,7 @@ import {readCloudUpload} from '../packages/core/cloud-upload';
 import {cloudRecordMaps,prepareCloudMigration,type CloudRecord} from '../packages/core/cloud-records';
 import {createInitialUploadHandler} from '../supabase/functions/_shared/upload-handler';
 import {createInitialUploadStore} from '../supabase/functions/_shared/upload-store';
-import {createCloudUploadRemote} from '../apps/web/src/data/cloud-upload-remote';
+import {testCloudUploadRemote as createCloudUploadRemote} from './command-account-fixture';
 import {runCloudUpload} from '../packages/core/cloud-upload-runner';
 let db:PGlite,plan:CloudUploadPlan,hash:string,body:string;
 const uid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;

@@ -1,17 +1,13 @@
 import type {CloudUploadRemote} from '@mise/core/cloud-upload-runner';
 import {CLOUD_UPLOAD_MAX_CHUNK_BYTES} from '@mise/core/cloud-upload';
 import {inboxImageBase64} from '@mise/core/inbox';
-export interface CloudUploadTransport extends CloudUploadRemote {
-  status(id:string,signal?:AbortSignal):Promise<unknown>;
-  cancel(id:string,signal?:AbortSignal):Promise<{id:string;canceled:true}>;
-}
-/** Public-key transport only. Authentication is supplied per request and never persisted here. */
-export function createCloudUploadRemote(apiUrl:string,publishableKey:string,getJwt:()=>Promise<string>,send:typeof fetch=fetch):CloudUploadTransport {
-  const root=new URL(apiUrl);if(root.username||root.password||root.search||root.hash||root.pathname!=='/'||(root.protocol!=='https:'&&!(root.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(root.hostname)))||!/^sb_publishable_[A-Za-z0-9_-]+$/.test(publishableKey))throw new Error('Cloud uploads are not configured.');
-  async function request(body:unknown,signal?:AbortSignal){
-    const jwt=await getJwt();if(jwt.length>8192||!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(jwt))throw new Error('Sign in again to upload your shop.');
-    const timeout=AbortSignal.timeout(120000),response=await send(new URL('functions/v1/migration-upload',root),{method:'POST',redirect:'error',signal:signal?AbortSignal.any([timeout,signal]):timeout,headers:{apikey:publishableKey,Authorization:'Bearer '+jwt,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!response.ok)throw new Error(response.status===401?'Sign in again to upload your shop.':response.status===403?'This upload is unavailable for this account.':'Upload is unavailable. Keep the local copy and resume with the same upload ID.');return response.json();
-  }
-  return {begin:(manifest,manifestHash,signal)=>request({action:'begin',manifest,manifestHash},signal),put:async(id,index,data,signal)=>{if(data.size>CLOUD_UPLOAD_MAX_CHUNK_BYTES)throw new Error('Use a prepared upload chunk.');return request({action:'put',id,index,data:inboxImageBase64(new Uint8Array(await data.arrayBuffer()))},signal);},finish:(id,manifestHash,signal)=>request({action:'finish',id,manifestHash},signal),status:(id,signal)=>request({action:'status',id},signal),cancel:async(id,signal)=>{const value=await request({action:'cancel',id},signal);if(!value||typeof value!=='object'||value.id!==id||value.canceled!==true)throw new Error('Upload cancellation is unconfirmed. Keep the local snapshot.');return {id,canceled:true};}};
+import {parseCloudConnection} from '@mise/core/cloud-connection';
+import {createAccountJsonRequest,CommandRequestError,type CommandAccount} from './command-request';
+export interface CloudUploadTransport extends CloudUploadRemote {assertCurrent():void;status(id:string,signal?:AbortSignal):Promise<unknown>;cancel(id:string,signal?:AbortSignal):Promise<{id:string;canceled:true}>}
+export class CloudUploadError extends Error {constructor(readonly kind:'auth'|'review'|'retry'){super(kind==='auth'?'Sign in with the original account to resume this upload.':'Upload is unconfirmed. Keep your local records and the original saved review.');}}
+/** The original account/connection is pinned across every snapshot request and reply. */
+export function createCloudUploadRemote(apiUrl:string,publishableKey:string,account:CommandAccount,send:typeof fetch=fetch):CloudUploadTransport {
+ let config;try{config=parseCloudConnection({apiUrl,publishableKey});}catch{throw new Error('Cloud uploads are not configured.');}const call=createAccountJsonRequest(config,account,'migration-upload',send);let guard:(()=>void)|undefined;
+ async function request(body:unknown,signal?:AbortSignal){const frozen=JSON.stringify(body);try{const result=await call(frozen,{'Content-Type':'application/json'},120000,signal);guard=result.guard;return result.value;}catch(error){throw new CloudUploadError(error instanceof CommandRequestError?error.kind:'retry');}}
+ return {assertCurrent(){if(!guard)throw new CloudUploadError('auth');guard();},begin:(manifest,manifestHash,signal)=>request({action:'begin',manifest,manifestHash},signal),put:async(id,index,data,signal)=>{if(data.size>CLOUD_UPLOAD_MAX_CHUNK_BYTES)throw new Error('Use a prepared upload chunk.');return request({action:'put',id,index,data:inboxImageBase64(new Uint8Array(await data.arrayBuffer()))},signal);},finish:(id,manifestHash,signal)=>request({action:'finish',id,manifestHash},signal),status:(id,signal)=>request({action:'status',id},signal),cancel:async(id,signal)=>{const value=await request({action:'cancel',id},signal);if(!value||typeof value!=='object'||!('id'in value)||value.id!==id||!('canceled'in value)||value.canceled!==true)throw new CloudUploadError('review');return {id,canceled:true};}};
 }

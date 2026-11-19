@@ -1,0 +1,348 @@
+{
+  "checkedAt": "2026-11-19T11:18:43.329Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Opt-in original upload, automatic send/pull/apply, durable retry, original-account status and event-insert hints",
+  "checks": {
+    "unitTests": 2354,
+    "unitFiles": 127,
+    "browserCases": 419,
+    "rootCases": 62,
+    "finalPagesRuntimeCases": 3,
+    "visualCaptures": 197,
+    "finalSyncVisualCaptures": 5,
+    "horizontalOverflows": 0,
+    "exports": 270,
+    "astroFiles": 119,
+    "lint": true,
+    "typecheck": true,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testFixturesInShippedAssets": false
+  },
+  "largeShopLocalAcceptance": {
+    "records": 5000,
+    "uploadMs": 25839,
+    "network": {
+      "latencyMs": 400,
+      "downloadBytesPerSecond": 50000,
+      "uploadBytesPerSecond": 50000
+    },
+    "syntheticAuthAndStorage": true,
+    "genuineHostedAcceptance": false
+  },
+  "storage": {
+    "localSchema": 19,
+    "localStores": 33,
+    "portableSchema": 10,
+    "portableTables": 21,
+    "credentialsInShopData": false
+  },
+  "hosted": {
+    "checkedAt": "2026-11-19T10:25:20.353Z",
+    "tables": [
+      {
+        "tablename": "events",
+        "schemaname": "public"
+      }
+    ],
+    "migrations": 37,
+    "publication": {
+      "pubdelete": false,
+      "pubinsert": true,
+      "pubupdate": false,
+      "pubtruncate": false,
+      "puballtables": false
+    },
+    "publicBuckets": 0,
+    "privateBuckets": 1,
+    "forcedRlsTables": 58,
+    "applicationTables": 58,
+    "anonymousTableGrants": 0,
+    "publicSecurityDefinerFunctions": 0,
+    "migrationVersion": "20261119101245",
+    "migrationName": "sync_event_insert_hints",
+    "exactSource": true,
+    "securityAdvisorWarnings": 0,
+    "securityAdvisorErrors": 0,
+    "informationalPrivatePolicyNotices": 29,
+    "genuinePhoneRealtimeAcceptance": false
+  },
+  "privacy": {
+    "knownPrivateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentReferenceFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "publication": {
+    "disabledWorkflows": 3,
+    "activeRuns": 0,
+    "headRuns": 0,
+    "pagesHeld": true,
+    "applicationDeployed": false
+  },
+  "visualReferences": {
+    "note": "No dedicated Sync export; adapt supplied M27 More and Desktop14 Business data. Auth/Storage/gateway native fixtures are synthetic; no genuine hosted OTP/JWT/Storage/Realtime claim.",
+    "captures": [
+      {
+        "id": "m31-sync-controls-phone-screen-360",
+        "screen": "screens/m31-sync-controls-phone-screen-360.png"
+      },
+      {
+        "id": "m31-sync-controls-phone-screen-390",
+        "screen": "screens/m31-sync-controls-phone-screen-390.png"
+      },
+      {
+        "id": "m31-sync-controls-desktop-screen-768",
+        "screen": "screens/m31-sync-controls-desktop-screen-768.png"
+      },
+      {
+        "id": "m31-sync-controls-desktop-screen-1024",
+        "screen": "screens/m31-sync-controls-desktop-screen-1024.png"
+      },
+      {
+        "id": "m31-sync-controls-desktop-screen-1440",
+        "screen": "screens/m31-sync-controls-desktop-screen-1440.png"
+      }
+    ]
+  },
+  "remaining": [
+    "Other pending-intent conflict families",
+    "Changed-scope bootstrap and new-device join UI",
+    "Staff/agent resources and genuine hosted acceptance",
+    "All later handover milestones"
+  ],
+  "verifiedFiles": [
+    {
+      "path": "apps/web/src/CloudSetup.tsx",
+      "sha256": "d226bd1bc60e05caec55eb58f9577e8191d504a3eae02c14309795703c0d6f94"
+    },
+    {
+      "path": "apps/web/src/CloudSync.tsx",
+      "sha256": "1932c91ff74758deb41668c4e87f46fb87b2b48082476c7bd3167592358a1967"
+    },
+    {
+      "path": "apps/web/src/LocalApp.tsx",
+      "sha256": "e9dd3df235b71657ee64ea074509df285972e5ea487e062b1c0c56463a705e45"
+    },
+    {
+      "path": "apps/web/src/cloud-sync.css",
+      "sha256": "67365f83422d98bbeddf4b3fa06f1520565fde31a9220402de2866db98080019"
+    },
+    {
+      "path": "apps/web/src/data/canonical-writes.ts",
+      "sha256": "f1a4bb573501df1805d806f580a0be69577ebefea3d2f04b91cf1a7bb93f574a"
+    },
+    {
+      "path": "apps/web/src/data/cloud-coverage-remote.ts",
+      "sha256": "a6f7482f9de5219caef3ea58f9213e764c7eb92d5de4fada7bed32cb5d79c495"
+    },
+    {
+      "path": "apps/web/src/data/cloud-image-remote.ts",
+      "sha256": "4d475e3e53ce8e7c2f088d5450a8bcc14f444d993108e9fdc36e8a5e9fec46c4"
+    },
+    {
+      "path": "apps/web/src/data/cloud-sync-apply.ts",
+      "sha256": "cac3bc106af2834dbc1bf0152b0dd76f9104c758052535265c3464d9013cbac3"
+    },
+    {
+      "path": "apps/web/src/data/cloud-upload-coverage-remote.ts",
+      "sha256": "288a3abed9a012d6426e6a6604af9bd670682effc7e3253011f5115edc68d991"
+    },
+    {
+      "path": "apps/web/src/data/cloud-upload-remote.ts",
+      "sha256": "8387a573d83513261bf698ef29f9196fff7e47c1758fc26ca11f5517c85e0dc5"
+    },
+    {
+      "path": "apps/web/src/data/cloud-upload.ts",
+      "sha256": "e5dbe03fb2f8176952425b3b7699eea941aeff0140d2299724d8d0d7299f1d74"
+    },
+    {
+      "path": "apps/web/src/data/command-request.ts",
+      "sha256": "d72813eaffc60e354d9d8d36a963db9a6b77ab1e4b6b72ed04696c75493b41ea"
+    },
+    {
+      "path": "apps/web/src/data/local-outbox.ts",
+      "sha256": "daafb71376f4090d08fd141bbbec88427593cad028c0ed9ade153d2e917dabcd"
+    },
+    {
+      "path": "apps/web/src/data/local-store.ts",
+      "sha256": "d92442b237018fe502618bf0e12219cc4e432e5f15d14ff4fb538951f0a4c8ab"
+    },
+    {
+      "path": "apps/web/src/data/operator-remote.ts",
+      "sha256": "16a336dcbbe5270cef98725da28de7e32fa813c58f6228cf331fc3ae2d95b242"
+    },
+    {
+      "path": "apps/web/src/data/phone-auth.ts",
+      "sha256": "b8b019764d78b4687383668a271fc04aabd7c8cea87b801db2796ec89f9822a0"
+    },
+    {
+      "path": "apps/web/src/data/sync-cycle.ts",
+      "sha256": "34fe5bfaff293731d034ac4dacd1a5dc2da367acd1e0d661291b0d25d95d74d5"
+    },
+    {
+      "path": "apps/web/src/data/sync-enable.ts",
+      "sha256": "94bf9e79d14f7fe3997052b43f7ce9ef2c269e4ef710615e5c9251d92fb079b8"
+    },
+    {
+      "path": "apps/web/src/data/sync-realtime.ts",
+      "sha256": "981abcf1f958a6b4b8a413b26c83490d89d8ea3d773dd1476851677c5e8dffe4"
+    },
+    {
+      "path": "apps/web/src/data/sync-runtime.ts",
+      "sha256": "7fcaa0feab58b68943440ebd9a523ba765da2361e2f1e3269f1565c8afd54571"
+    },
+    {
+      "path": "apps/web/src/data/sync-session.ts",
+      "sha256": "e5077bf09c7c2c107f4a239845cf3a83e25adec0b77f9973139a44f924d45aaa"
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sha256": "7b6490b250ba22002b59a57b60e8da5f057f1dd3f938f979bc3f9ea6565a04dc"
+    },
+    {
+      "path": "packages/core/flags.ts",
+      "sha256": "04a60250c61a36b1a390b348d14dd7a4b6c4dcccceadccdf98e07e2daa916537"
+    },
+    {
+      "path": "packages/core/local-outbox.ts",
+      "sha256": "b38e3cd3a8790d5d9f1741425b1fe628afe1670a5adbebe68be41fbdd979feb2"
+    },
+    {
+      "path": "packages/core/local-schema.ts",
+      "sha256": "4082cac4d71c3f5ef2c921bad172c1ae5a8340806c8e1e28e63be0f0250d3dbc"
+    },
+    {
+      "path": "packages/core/operators.ts",
+      "sha256": "c389fe2198400cf0e0f4f250ee1ce26e8a5b7107310da4d349199b8152be490d"
+    },
+    {
+      "path": "packages/core/sync-session.ts",
+      "sha256": "f99567370e867629dc3255d814fc69f450af35544067c12b9f318af037342ae0"
+    },
+    {
+      "path": "qa/configs/m31-sync.json",
+      "sha256": "ea3054171756ca542cb3577b8b4b4957e4865922d7f159cae85e15889628fe41"
+    },
+    {
+      "path": "scripts/harden.mjs",
+      "sha256": "17f951e9e8144f3ea624cd18c69e41ad03bf1b45f2895665ae2cc8fe10c1f293"
+    },
+    {
+      "path": "supabase/migrations/20261119101245_sync_event_insert_hints.sql",
+      "sha256": "3481e920497d1178c272675255a12073eb79d25d2a656c85f1919ee5aef67686"
+    },
+    {
+      "path": "tests/canonical-hash.test.ts",
+      "sha256": "0442d659c74949f3bfe043eaed19a82e77e657ca2fc48b9e4c988338ad1a4e5e"
+    },
+    {
+      "path": "tests/cloud-csp.test.ts",
+      "sha256": "4f60545392f7983a3b6e3b1bfd37bbdda2cddcabad6a1cb5eee4f69a3341d71f"
+    },
+    {
+      "path": "tests/command-account-fixture.ts",
+      "sha256": "a4c726cab3f5cf043b363915a38afed1883e2dd385164f8e81adbe59eace09e4"
+    },
+    {
+      "path": "tests/e2e/sync-coverage.spec.ts",
+      "sha256": "a2d289a2b3533cd51784d53f77fdf42535fabbe7394723f98f362c698381f7a3"
+    },
+    {
+      "path": "tests/e2e/sync-cycle.spec.ts",
+      "sha256": "c1544075ca9ea02a65007215f7e5e1586c0229f59f4091281c49139f30921858"
+    },
+    {
+      "path": "tests/e2e/sync-first-upload.spec.ts",
+      "sha256": "f569efc3d18e5a7dbcba636f85848b3d93cca76cd2b8c9b3c00e4d937a24d1b9"
+    },
+    {
+      "path": "tests/e2e/sync-runtime.spec.ts",
+      "sha256": "1ac9518aecf9f239073847dece5200fa3c0e4f8e974e9d90baa7051b8e012fe0"
+    },
+    {
+      "path": "tests/fixtures/sync-apply-browser.ts",
+      "sha256": "3e39c7f9da2446ed4638cc11b8746f321c5471009990535b5111742b4466d1af"
+    },
+    {
+      "path": "tests/fixtures/sync-coverage-browser.ts",
+      "sha256": "5baf1b79edb37d74531fe9e8cad745b4eb233b0bfde8b7c24ab29c120821f3bc"
+    },
+    {
+      "path": "tests/fixtures/sync-download-browser.ts",
+      "sha256": "72dd02d5a0783ca4faf731cf64feab433ad7818d049eed1784cc90c2477000ce"
+    },
+    {
+      "path": "tests/fixtures/sync-images-browser.ts",
+      "sha256": "526a24213d5d974e64561eef906b14bbe9f903a32e936a73023bcf6bda8739e9"
+    },
+    {
+      "path": "tests/operators-db.test.ts",
+      "sha256": "d5b26acb4ea7a37fd2c91f92839a87cbd6fa937b3090d712eefd09960a830277"
+    },
+    {
+      "path": "tests/owner-apply-db.test.ts",
+      "sha256": "615db124b3b287f6dae2f027e871e29431f656ecf71a128e752218d407476223"
+    },
+    {
+      "path": "tests/phone-auth.test.ts",
+      "sha256": "4c352ab8ef3b585658ed7757c0bf8da1f941cfc7106559e0295362bcac90e4a0"
+    },
+    {
+      "path": "tests/realtime-browser-fixture.ts",
+      "sha256": "f77e97a0b68c58a809f5b473d7d678ed7f4d5b7c15c4740d8b4f4c72c0ccdaf9"
+    },
+    {
+      "path": "tests/sync-apply-db.test.ts",
+      "sha256": "e9abd07a4a9d6999136ee17f6464fd456979960d17f5db98633ff30242b7e8ae"
+    },
+    {
+      "path": "tests/sync-convergence-server.ts",
+      "sha256": "7f732b0b37f18d118a9ff3ea8c903291b8231a1ddf6f30e423d3549a3457df04"
+    },
+    {
+      "path": "tests/sync-coverage-db.test.ts",
+      "sha256": "edcf3460c437b928ab02608b802dc21ed741ba91e0ec8dfef7e406f43de730d8"
+    },
+    {
+      "path": "tests/sync-download-db.test.ts",
+      "sha256": "9c515d9581e4a0365aa9b41853390190c2c0b1fc9e280f3f6c7c5ebaeac9773e"
+    },
+    {
+      "path": "tests/sync-images-db.test.ts",
+      "sha256": "b34c857531220d2aecd22dd2f83e0abfa2f68df7d23fa958e76e1bfeee3a9947"
+    },
+    {
+      "path": "tests/sync-join-db.test.ts",
+      "sha256": "d6e35fc436d0488cc49d403db25466b607796e9def01f235adbcc5abee1970e1"
+    },
+    {
+      "path": "tests/sync-publication.test.ts",
+      "sha256": "36760cf7a4359e0e8b396e3e2046722519b00e858aa90a21aaa97224261b90cf"
+    },
+    {
+      "path": "tests/sync-realtime.test.ts",
+      "sha256": "712c7b2699ecb2c107366be49b7db2792d08142bb20bf8a2170b3457eef6c1d0"
+    },
+    {
+      "path": "tests/sync-session.test.ts",
+      "sha256": "bc54e4287bb35aae5ac23364a604477574e14c975ca9def46942d5e6768ddd29"
+    },
+    {
+      "path": "tests/upload-handler.test.ts",
+      "sha256": "5455c6e96d8a866ac7d8b2b4e4984d3927751be6c98a7871cea29b7a466b1f6e"
+    },
+    {
+      "path": "tests/upload-staging.test.ts",
+      "sha256": "dd357618076879ff8602d0b33003f632ce1de654c6a6c9bcfd81355d72366a2f"
+    }
+  ]
+}

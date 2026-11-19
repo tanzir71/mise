@@ -107,7 +107,7 @@ export async function uploadDatabaseSnapshot(db:MiseDatabase,journal:CloudUpload
   }});
 }
 /** Initial upload with a same-database fence; every later local write is retained atomically. */
-export async function uploadWithLocalOutbox(db:MiseDatabase,journal:CloudUploadJournal,id:string,targetHash:string,remote:CloudUploadRemote,options:{signal?:AbortSignal}={}){
+export async function uploadWithLocalOutbox(db:MiseDatabase,journal:CloudUploadJournal,id:string,targetHash:string,remote:CloudUploadRemote,options:{signal?:AbortSignal;assertCurrent?:()=>void}={}){
  const snapshot=await journal.readSnapshot(id);
  // An adopted upload is immutable history. Reading its real receipt never
  // reconstructs the working copy from pre-rebase row changes or sends chunks.
@@ -120,5 +120,5 @@ export async function uploadWithLocalOutbox(db:MiseDatabase,journal:CloudUploadJ
  await beginLocalUpload(db,snapshot,targetHash);
  await assertLocalUploadCoverage(db,snapshot,targetHash);
  const receipt=await runCloudUpload(snapshot,remote,{signal:options.signal,progress:value=>journal.acknowledge(id,value),beforeCommit:async()=>{await assertLocalUploadCoverage(db,snapshot,targetHash);}});
- await acceptLocalUpload(db,snapshot,targetHash,receipt);return receipt;
+ await acceptLocalUpload(db,snapshot,targetHash,receipt,options.assertCurrent);return receipt;
 }

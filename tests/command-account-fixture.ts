@@ -3,6 +3,7 @@ import type {CloudConnection} from '../packages/core/cloud-connection';
 import type {CommandAccount} from '../apps/web/src/data/command-request';
 import {createCloudCommandRemote} from '../apps/web/src/data/cloud-command-remote';
 import {createShopCommandRemote} from '../apps/web/src/data/shop-command-remote';
+import {createCloudUploadRemote} from '../apps/web/src/data/cloud-upload-remote';
 const userId='00000000-0000-4000-8000-000000000001',scope='/test/app/shop';
 /** Explicit synthetic account for the existing literal-command transport fixtures. */
 export function testCommandAccount(config:CloudConnection,getJwt:()=>Promise<string>):CommandAccount {
@@ -11,3 +12,4 @@ export function testCommandAccount(config:CloudConnection,getJwt:()=>Promise<str
 }
 export function testCloudCommandRemote(config:CloudConnection,getJwt:()=>Promise<string>,send:typeof fetch=fetch){return createCloudCommandRemote(config,testCommandAccount(config,getJwt),send);}
 export function testShopCommandRemote(apiUrl:string,publishableKey:string,getJwt:()=>Promise<string>,send:typeof fetch=fetch){return createShopCommandRemote(apiUrl,publishableKey,testCommandAccount({apiUrl,publishableKey},getJwt),send);}
+export function testCloudUploadRemote(apiUrl:string,publishableKey:string,getJwt:()=>Promise<string>,send:typeof fetch=fetch){return createCloudUploadRemote(apiUrl,publishableKey,testCommandAccount({apiUrl,publishableKey},getJwt),send);}

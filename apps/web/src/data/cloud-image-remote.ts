@@ -17,9 +17,9 @@ export function createCloudImageRemote(input:CloudConnection,scope:string,getAut
   try{
    const source=parseSyncImageSource(input);if(lifetime.aborted)throw new SyncImageError('retry');timer=setTimeout(()=>controller.abort(),timeoutMs);
    async function auth(){
-    let value:ImageAuth;try{value=await abortable(getAuth());}catch{throw new SyncImageError(lifetime.aborted?'retry':'auth');}
+    let value:ImageAuth;try{value=await abortable(getAuth());}catch(error){throw new SyncImageError(lifetime.aborted||error&&typeof error==='object'&&'kind'in error&&error.kind==='retry'?'retry':'auth');}
     if(!value||typeof value.jwt!=='string'||value.jwt.length>8192||!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value.jwt))throw new SyncImageError('auth');
-    let accountHash:string,targetHash:string;try{[accountHash,targetHash]=await abortable(Promise.all([operatorAccountHash(value.userId),cloudConnectionTarget(config,scope,value.userId)]));}catch{throw new SyncImageError(lifetime.aborted?'retry':'auth');}
+    let accountHash:string,targetHash:string;try{[accountHash,targetHash]=await abortable(Promise.all([operatorAccountHash(value.userId),cloudConnectionTarget(config,scope,value.userId)]));}catch(error){throw new SyncImageError(lifetime.aborted||error&&typeof error==='object'&&'kind'in error&&error.kind==='retry'?'retry':'auth');}
     if(accountHash!==source.target.accountHash||targetHash!==source.target.targetHash)throw new SyncImageError('auth');return value;
    }
    const original=await auth(),url=new URL('functions/v1/inbox-image',root);url.searchParams.set('image',source.image.id);
