@@ -1,0 +1,124 @@
+{
+  "checkedAt": "2026-11-19T19:19:23.633Z",
+  "parentCommit": "3791e78aa7fc28e77546278bc54ce8277e72b336",
+  "scope": "Original owner sign-in recovery before first canonical download; full handover goal and M30/M31 acceptance remain open",
+  "source": {
+    "changedImplementationAndTestFiles": 18,
+    "sha256": "4e6ba14e473946e9e6b4dac0d9f3cf1defbedaf162ab6d7d961e630e2488c9fe"
+  },
+  "localStorage": {
+    "schema": 21,
+    "stores": 35,
+    "portableSchema": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 130,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "units": {
+      "files": 134,
+      "passed": 2452,
+      "failed": 0
+    },
+    "rootBrowser": {
+      "passed": 20,
+      "failed": 0
+    },
+    "pagesBrowser": {
+      "base": "/mise/",
+      "passed": 440,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 970413.587
+    },
+    "ownerBrowserCases": [
+      {
+        "title": "the actual 5000-record upload survives lost sign-in before first download and restores with the original OTP account, cash and images",
+        "durationMs": 63713
+      },
+      {
+        "title": "wrong accounts and a native account change cannot restore the original owner or alter original queued work",
+        "durationMs": 3014
+      },
+      {
+        "title": "a lost final activation write resumes the same original owner operation after reload without another promotion",
+        "durationMs": 5054
+      }
+    ],
+    "upload": {
+      "records": 5000,
+      "uploadMs": 28870,
+      "latencyMs": 400,
+      "bytesPerSecond": 50000,
+      "syntheticAuthAndStorage": true,
+      "genuineHostedOtp": false
+    },
+    "visual": {
+      "comparisons": 222,
+      "ownerComparisons": 5,
+      "horizontalOverflows": 0,
+      "differences": "informational against supplied existing references",
+      "captures": [
+        {
+          "width": 360,
+          "path": "docs/screenshots/m30-owner-resume-360.png",
+          "sha256": "ec233c777cba027d524d5f814e40cb429c754048f7bcae22372ec497a2cae024",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        },
+        {
+          "width": 768,
+          "path": "docs/screenshots/m30-owner-resume-768.png",
+          "sha256": "69cecae4b6c7f1eb8a55073bb96ba968b1f6c7e57ed47db925e03cce7e988551",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        },
+        {
+          "width": 1440,
+          "path": "docs/screenshots/m30-owner-resume-1440.png",
+          "sha256": "bf36b506734715ca4210af488f63aa1c83e12f3192ceba9ec95590bec8a67dd7",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    },
+    "axe": {
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "serious": 0,
+      "critical": 0
+    },
+    "figmaExports": 270,
+    "builds": [
+      "/",
+      "/mise/"
+    ]
+  },
+  "hosted": {
+    "changed": false,
+    "functionsDerived": 7,
+    "allByteIdenticalToDeployedBaseline": true,
+    "phoneOtpCommissioned": false,
+    "positiveSignedOwnerHostedAcceptance": false
+  },
+  "publication": {
+    "cloudSyncDefault": false,
+    "workflowsDisabled": true,
+    "newCiArtifact": false,
+    "newPagesDeployment": false
+  },
+  "safety": {
+    "testedSourceUnchanged": true,
+    "siteFiles": 467,
+    "fixtureMarkers": 0,
+    "regionalFooterCredits": true
+  }
+}

@@ -29,10 +29,11 @@ export async function enableSync(
     setup: SetupSnapshot;
     config: CloudConnection;
     scope: string;
-    auth: PhoneAuth;
+    auth: Pick<PhoneAuth,'key'|'commandAuthorization'|'assertCommandAuthorization'>;
     journal: CloudUploadJournal;
     send?: typeof fetch;
     connectionCurrent?: () => boolean;
+    expectedOperatorRevision?: number | null;
   },
   signal?: AbortSignal,
 ) {
@@ -98,6 +99,8 @@ export async function enableSync(
     throw new SyncSessionError('auth');
   let selected = await db.operatorState.get('active'),
     context;
+  if ('expectedOperatorRevision' in input && (selected?.revision ?? null) !== input.expectedOperatorRevision)
+    throw new SyncSessionError('review');
   if (selected?.connection) {
     const state = parseLocalOperatorState(selected);
     context = await metadata.select(
@@ -132,6 +135,9 @@ export async function enableSync(
   }
   if (
     !context ||
+    context.businessId !== target.businessId ||
+    context.outletId !== target.outletId ||
+    context.actorId !== target.actorId ||
     context.accountHash !== target.accountHash ||
     context.role !== target.role
   )
@@ -161,6 +167,7 @@ export async function enableSync(
         check();
         return result;
       },
+      check,
     );
   check();
   const operator = parseLocalOperatorState(selected);
@@ -174,6 +181,9 @@ export async function enableSync(
       scopeVersion: context.scopeVersion,
     },
     newInboxId(),
+    check,
   );
   await requestSync(db, true);
+  check();
+  return {target,operator};
 }

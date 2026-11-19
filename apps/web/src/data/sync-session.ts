@@ -102,6 +102,7 @@ export async function ensureSyncSession(
   db: LocalStore,
   input: SessionSelection,
   sessionId: string,
+  assertActive?: () => void,
 ): Promise<SyncSession> {
   input = structuredClone(input);
   return db.transaction(
@@ -121,6 +122,8 @@ export async function ensureSyncSession(
         old.epoch === input.epoch &&
         old.scopeVersion === input.scopeVersion &&
         old.bindingHash === bindingHash;
+      const guard=()=>{native(db,tx);const result:unknown=assertActive?.();if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw new SyncSessionError('auth');}};
+      guard();
       if (same && old.operatorRevision === input.operatorRevision) return old;
       if (old?.generation === Number.MAX_SAFE_INTEGER)
         throw new SyncSessionError();
@@ -142,14 +145,16 @@ export async function ensureSyncSession(
         requested: 1,
         confirmed: 0,
       });
-      native(db, tx);
+      guard();
       if (old)
         await db.syncSessions.put({
           ...old,
           id: 'saved:' + old.sessionId,
           lease: null,
         });
+      guard();
       await db.syncSessions.put(next);
+      guard();
       return next;
     },
   );

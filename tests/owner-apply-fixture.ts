@@ -20,10 +20,10 @@ import {ownerUploadDatabase,promoteOwnerUpload,ownerUploadRole,ownerUploadRpc,ow
 /** SQL and handlers are real; account verification and object bytes are explicit
  * local fixtures. No hosted phone login or Storage acceptance is claimed.
  */
-export async function ownerApplyFixture(cash='7',legacy=false){
+export async function ownerApplyFixture(cash='7',legacy=false,base?:string){
  const sql=await ownerUploadDatabase(legacy),db=new MiseDatabase('owner-apply-'+newInboxId());
  try{
-  const upload=await promoteOwnerUpload(sql),config={apiUrl:'https://database.test',publishableKey:'sb_publishable_test_only'},scope='owner-original',origin='https://shop.test',auth=async()=>({userId:ownerUploadUid(),jwt:'owner.1.signature'});
+  const upload=await promoteOwnerUpload(sql),config={apiUrl:'https://database.test',publishableKey:'sb_publishable_test_only'},scope=base===undefined?'owner-original':base+upload.plan.manifest.businessId,origin='https://shop.test',auth=async()=>({userId:ownerUploadUid(),jwt:'owner.1.signature'});
   if(legacy)await installOwnerAdmissionMigration(sql);
   const allowed=new Set(['admit_sync_read','prepare_sync_read','read_sync_page','read_sync_coverage','read_sync_upload_coverage','operator_context','operator_contexts']);
   const bridge:typeof fetch=async(url,init)=>{const name=new URL(String(url)).pathname.split('/').at(-1)!;if(!allowed.has(name))throw Error('Unexpected fixture RPC');try{const args=JSON.parse(init?.body as string) as Record<string,unknown>;if(Object.keys(args).some(k=>!/^p_[a-z_]+$/.test(k)))throw Error('Invalid fixture fields');const entries=Object.entries(args),data=await ownerUploadRole(sql,1,'authenticated',`select public.${name}(${entries.map(([k],i)=>k+'=>$'+(i+1)).join(',')}) data`,entries.map(([,v])=>v!==null&&typeof v==='object'?JSON.stringify(v):v));return new Response(JSON.stringify(data),{headers:{'Content-Type':'application/json'}});}catch(error){const code=(error as {code?:string}).code;return new Response(JSON.stringify({code}),{status:code==='42501'?403:code==='PT409'?409:code==='22023'?400:503});}};

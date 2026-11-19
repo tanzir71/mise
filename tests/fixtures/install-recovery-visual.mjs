@@ -24,4 +24,11 @@ export async function captureRecoveryReview(page){
  await page.getByRole('button',{name:'Review outlet access',exact:true}).waitFor({timeout:30000});await page.getByRole('button',{name:'Review outlet access',exact:true}).click();
  await page.getByRole('button',{name:'Check current access',exact:true}).click();await page.getByRole('button',{name:'Apply reviewed changes',exact:true}).waitFor({timeout:30000});
 }
+export async function captureOwnerResumeReview(page){
+ service??=start();const {server,installRealtimeFixture}=await service,config=server.config(1);
+ await installRealtimeFixture(page,config.jwt);await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),config);await page.evaluate(()=>window.miseSyncApplyTest.lock());
+ const base=new URL('.',page.url());await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review cloud access',exact:true}).click();
+ await page.getByRole('heading',{name:'Restore the original connection',exact:true}).waitFor();await page.getByRole('button',{name:'Restore original connection',exact:true}).waitFor();
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll('.cloud-owner-resume button')).some(button=>button.textContent?.trim()==='Restore original connection'&&!button.disabled));
+}
 export async function closeRecoveryVisual(){const previous=service;service=undefined;if(previous){let value;try{value=await previous;}catch{return;}await value.server.close();}}

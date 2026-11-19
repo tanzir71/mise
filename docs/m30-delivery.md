@@ -2,7 +2,7 @@
 
 Status: **in progress**. The dedicated Supabase project has 38 source migrations, seven Edge Functions, 58 application tables under forced RLS and one private image bucket. Audited domain commands, durable upload staging/promotion, scoped snapshot and image reads, original command coverage and outlet event feeds are deployed. Actual project details and credentials remain outside Git.
 
-Behind the default-off cloud flags, the app now supports [reviewed owner upload and automatic sync](m31-sync-runtime.md), [new-device outlet join](m31-join-runtime.md), [pending actions and complete original images](m31-pending-intents.md), [concurrent original intents](m31-concurrent-intents.md) and [existing-outlet scope recovery](m31-scope-recovery.md). The normal app remains local-first. Genuine hosted phone OTP and positive signed-owner HTTP acceptance, initial owner recovery before canonical admission, financial/manual conflict resolution and remaining staff/agent resources stay open. M30/M31 remain unchecked; GitHub workflows and Pages publication remain stopped.
+Behind the default-off cloud flags, the app now supports [reviewed owner upload and automatic sync](m31-sync-runtime.md), [new-device outlet join](m31-join-runtime.md), [pending actions and complete original images](m31-pending-intents.md), [concurrent original intents](m31-concurrent-intents.md) and [existing-outlet scope recovery](m31-scope-recovery.md) and [original-owner sign-in recovery](m30-owner-resume.md). The normal app remains local-first. Genuine hosted phone OTP and positive signed-owner HTTP acceptance, financial/manual conflict resolution and remaining staff/agent resources stay open. M30/M31 remain unchecked; GitHub workflows and Pages publication remain stopped.
 
 ## Tenant schema
 

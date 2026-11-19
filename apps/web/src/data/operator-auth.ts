@@ -1,5 +1,6 @@
 import {operatorAccountHash,parseLocalOperatorState,OperatorContextError} from '@mise/core/operators';
 import {cloudConnectionStorageKey,type KeyStorage} from '@mise/core/cloud-connection';
+import Dexie from 'dexie';
 import type {LocalStore} from './local-store';
 
 const eventName='mise:operator-auth';
@@ -31,20 +32,22 @@ export async function reviewStoredOperatorAuth(db:LocalStore,storage:KeyStorage)
 }
 export function watchOperatorAuth(db:LocalStore,storage:KeyStorage,onFailure:()=>void){
  let closed=false,configGeneration=0;const generations=new Map<string,number>();
- const run=(task:Promise<unknown>)=>{void task.catch(()=>{if(!closed)onFailure();});};
- const identity=(event:Event)=>{const notice=(event as CustomEvent<Notice>).detail;if(notice&&current.get(notice.key)===notice){generations.set(notice.key,(generations.get(notice.key)??0)+1);run(reconcileOperatorAuth(db,notice.key,notice.accountHash,()=>!closed&&current.get(notice.key)===notice));}};
+ // Identity changes may arrive inside a writer that must now roll back. Revocation
+ // owns its next transaction, so that rollback cannot poison the Auth observer.
+ const run=(work:()=>Promise<unknown>)=>{void Dexie.ignoreTransaction(work).catch(()=>{if(!closed)onFailure();});};
+ const identity=(event:Event)=>{const notice=(event as CustomEvent<Notice>).detail;if(notice&&current.get(notice.key)===notice){generations.set(notice.key,(generations.get(notice.key)??0)+1);run(()=>reconcileOperatorAuth(db,notice.key,notice.accountHash,()=>!closed&&current.get(notice.key)===notice));}};
  const changed=(event:StorageEvent)=>{
   if(event.key!==null&&event.key!==cloudConnectionStorageKey&&!event.key.startsWith('mise.cloud.auth.'))return;
   const sessionKey=event.key?.startsWith('mise.cloud.auth.')?event.key:null;
   if(sessionKey){current.delete(sessionKey);generations.set(sessionKey,(generations.get(sessionKey)??0)+1);}else{configGeneration++;current.clear();}
   const ticket=sessionKey?generations.get(sessionKey):null,configTicket=configGeneration,stillCurrent=()=>!closed&&configTicket===configGeneration&&(!sessionKey||generations.get(sessionKey)===ticket);
-  run((async()=>{
+  run(async()=>{
    const raw=await db.operatorState.get('active');if(!raw||!stillCurrent())return;const state=parseLocalOperatorState(raw),connection=state.connection;if(!connection)return;
    if(event.key!==null&&event.key!==cloudConnectionStorageKey&&event.key!==connection.authKey)return;
    let accountHash:string|null=null;
    if(event.key===connection.authKey&&event.newValue!==null)try{if(event.newValue.length<=32768)accountHash=await operatorAccountHash(JSON.parse(event.newValue)?.user?.id);}catch{/* Damaged or changed identities require a new review. */}
    await reconcileOperatorAuth(db,connection.authKey,accountHash,stillCurrent);
-  })());
+  });
  };
  if(typeof window!=='undefined'){window.addEventListener(eventName,identity);window.addEventListener('storage',changed);}
  return ()=>{closed=true;if(typeof window!=='undefined'){window.removeEventListener(eventName,identity);window.removeEventListener('storage',changed);}};

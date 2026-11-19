@@ -8,7 +8,7 @@ import LZString from 'lz-string';
 import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
 import { installUploadReviewFixture } from '../tests/fixtures/install-upload-review.mjs';
 import { installOperatorsFixture } from '../tests/fixtures/install-operators.mjs';
-import {captureRecoveryReview,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
+import {captureRecoveryReview,captureOwnerResumeReview,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
 
 const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
@@ -54,6 +54,7 @@ try {
     if (target.publicShop) targetUrl.hash = Buffer.from(LZString.compressToUint8Array(JSON.stringify(target.publicShop))).toString('base64url');
     await page.goto(targetUrl.href);
     if(target.scopeRecoveryFixture)await captureRecoveryReview(page);
+    if(target.ownerResumeFixture)await captureOwnerResumeReview(page);
     await page.evaluate(() => document.fonts.ready);
     for (const action of target.actions || []) {
       const locator = page.locator(action.selector || 'body');

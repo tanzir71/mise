@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-11-19T17:55:43.516Z",
+  "checkedAt": "2026-11-19T19:20:39.462Z",
   "scope": "Current source, index, fetched reachable history and generated static output; private values compared in memory",
   "audit": {
     "historyFetched": true,
     "sourceAndIndex": true,
     "reachableHistory": true,
     "existingBuildOutput": true,
-    "files": 1407,
-    "objects": 6100,
+    "files": 1418,
+    "objects": 6131,
     "knownPrivateValuesCompared": 10,
     "credentialFindings": 0,
     "currentDeploymentReferenceFindings": 0,
@@ -27,7 +27,7 @@
     "openSecretAlerts": 0,
     "runtimeConnectionConfiguration": true,
     "credentialsInPublicBuildVariables": false,
-    "gitHubCheckedAt": "2026-11-19T17:38:47.712Z"
+    "gitHubCheckedAt": "2026-11-19T19:20:11.934Z"
   },
   "publication": {
     "disabledWorkflows": 3,

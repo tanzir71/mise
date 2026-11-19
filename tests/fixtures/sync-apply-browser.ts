@@ -348,7 +348,27 @@ async function cycleOnce(
     journal.close();
   }
 }
+let ownerFaultTriggered=false;
 const api = {
+  armOwnerSelectionSwitch: (config:Config) => use(async(_db,receiver)=>{
+    const w=await wire(receiver),put=IDBObjectStore.prototype.put;ownerFaultTriggered=false;
+    IDBObjectStore.prototype.put=function(value:unknown,key?:IDBValidKey){
+      if(this.name==='operatorState'&&value&&typeof value==='object'&&'phase'in value&&value.phase==='active'){
+        IDBObjectStore.prototype.put=put;ownerFaultTriggered=true;switchSession(w,config);
+      }
+      return key===undefined?put.call(this,value):put.call(this,value,key);
+    };
+  }),
+  armOwnerReadyLoss: () => {
+    const put=IDBObjectStore.prototype.put;ownerFaultTriggered=false;
+    IDBObjectStore.prototype.put=function(value:unknown,key?:IDBValidKey){
+      if(this.name==='scopeRecoveries'&&value&&typeof value==='object'&&'id'in value&&value.id==='owner:active'&&'phase'in value&&value.phase==='ready'){
+        IDBObjectStore.prototype.put=put;ownerFaultTriggered=true;throw new DOMException('Lost completion','QuotaExceededError');
+      }
+      return key===undefined?put.call(this,value):put.call(this,value,key);
+    };
+  },
+  ownerFaultTriggered:()=>ownerFaultTriggered,
   initializeLocal: (config: Config) =>
     use(async (db, receiver) => {
       if (!config.localBackup) throw Error('No original local shop');

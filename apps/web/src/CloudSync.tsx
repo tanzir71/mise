@@ -268,6 +268,7 @@ export function CloudSyncControls({
       ) : null}
       <footer>
         {view?.binding&&view.canRecover&&state?.problem==='review'?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/recovery')}>Review outlet access</Button>:null}
+        {view?.binding?.version===1&&view.binding.phase==='ready'&&!view.canRecover&&(state?.problem==='review'||state?.problem==='auth'||needsRebind)?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/owner-recovery')}>Review original connection</Button>:null}
         {!state || state.problem === 'auth' || needsRebind ? (
           <Button
             disabled={busy || !online || !verified || !config}

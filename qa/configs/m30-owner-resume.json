@@ -1,0 +1,21 @@
+{
+  "title": "M30 — Original owner connection recovery",
+  "pages": [
+    {
+      "id": "m30-owner-resume-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [360, 390],
+      "ownerResumeFixture": true,
+      "note": "M30 specifies no dedicated owner-resume frame. Reuses existing setup controls, M27 More hierarchy and tokens. Fresh actual app and scoped SQL/HTTP; Auth, Realtime and object Storage are isolated synthetic adapters. Differences are informational.",
+      "sections": [{"selector": ".cloud-owner-resume", "id": "screen", "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]
+    },
+    {
+      "id": "m30-owner-resume-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [768, 1024, 1440],
+      "ownerResumeFixture": true,
+      "note": "M30 specifies no dedicated owner-resume frame. Reuses existing setup controls, Desktop 14 Business data hierarchy and tokens. Fresh actual app and scoped SQL/HTTP; Auth, Realtime and object Storage are isolated synthetic adapters. Differences are informational.",
+      "sections": [{"selector": ".cloud-owner-resume", "id": "screen", "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"}]
+    }
+  ]
+}

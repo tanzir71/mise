@@ -1,5 +1,12 @@
 # Deployment credentials
 
+The [original-owner connection recovery](m30-owner-resume.md) verifies the saved
+upload and actual status receipt before fresh owner authorization. Its durable
+record contains only control fingerprints and identifiers. Native selection and
+activation recheck the live account; independent revocation observers retain
+their generation guards through an aborted writer. No deployment settings,
+tokens or Auth UUIDs enter the journal, shop records or portable backups.
+
 The [existing-outlet recovery boundary](m31-scope-recovery.md) pins the original
 connection and phone account through fresh scope review and every native write.
 Retained original shop copies contain portable shop data, not connection settings,
@@ -143,7 +150,7 @@ leaks, filename-only leaks, commit/tag messages, automatic clone-local compariso
 unavailable private input and real blocked commit/push attempts. The Windows cases
 include a real rejected commit of a PowerShell UTF-16 credential file.
 
-The [19 November 2026 privacy recheck](security-audit.json) fetched remote branches
+The [20 November 2026 privacy recheck](security-audit.json) fetched remote branches
 and tags, then scanned the working tree, index, reachable history and existing
 built site against ten private comparison values. It finds zero credentials,
 zero current deployment references and zero coverage gaps. The 22 historical

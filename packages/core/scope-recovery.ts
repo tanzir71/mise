@@ -5,6 +5,7 @@ import {operatorAuthKey,operatorId,parseLocalOperatorState,type LocalOperatorSta
 import {parseSyncScope,type SyncScope} from './sync-read';
 import {parseSyncDownloadTarget,type SyncDownloadTarget} from './sync-download';
 import {materializationHash,workingSnapshotHash} from './sync-materialize';
+import type {OwnerResumeSession} from './owner-resume';
 
 export const localRecoveryTableNames=['scopeRecoveries'] as const;
 export type RecoveryProblem='auth'|'retry'|'review'|'integrity';
@@ -26,7 +27,7 @@ export interface ScopeRecoveryAdmission {
  target:{scope:SyncScope;targetHash:string;readId:string;readSourceHash:string;readSeal:string;cursor:string;canonicalHash:string;applicationHash:string};
  previousRecoveryHash:string|null;hash:string;
 }
-export type ScopeRecoveryRecord=ScopeRecoverySession|ScopeRecoveryAdmission;
+export type ScopeRecoveryRecord=ScopeRecoverySession|ScopeRecoveryAdmission|OwnerResumeSession;
 const object=(v:unknown):v is Record<string,unknown>=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const exact=(v:Record<string,unknown>,fields:string)=>Object.keys(v).sort().join(',')===fields.split(',').sort().join(',');
 const hash=(v:unknown):v is string=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);

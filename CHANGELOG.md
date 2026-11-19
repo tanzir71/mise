@@ -10,6 +10,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M30 original owners can restore a lost phone sign-in after upload and before first download, without uploading again or replacing the working shop. Durable resumption preserves original receipts, queued cash and complete images; live account checks cover native selection and activation. Default cloud flags remain off and full M30/M31 acceptance stays open.
+
 - M31 existing outlets can review changed server scope or role through the original phone account, with resumable full downloads, fresh command coverage, complete images and a retained original shop backup. Atomic admission preserves the original upload/join and queue; lost activation resumes without applying twice. The feature remains default off and full cloud acceptance stays open.
 
 - M31 original concurrent notes and confirmed order communications now append against the current order, with server admission ordering for supplier and nonfinancial order edits. Inbox classification and archive changes preserve each other and original image bytes. Financial, source, undo and reviewed-closing guards remain strict; full cloud acceptance stays open.

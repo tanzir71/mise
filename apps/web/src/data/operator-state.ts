@@ -8,13 +8,13 @@ import {syncDownloadToken} from '@mise/core/sync-download';
 import {assertCanonicalState,readCanonicalState} from './cloud-canonical-state';
 import type {JoinSession} from '@mise/core/join-session';
 
-export interface LocalWorkspace {setup:SetupSnapshot|null;selection:LocalOperatorState|null;choices:OperatorChoice[];message:string;requiresSelection:boolean;cloudBound:boolean;canRecover:boolean}
+export interface LocalWorkspace {setup:SetupSnapshot|null;selection:LocalOperatorState|null;choices:OperatorChoice[];message:string;requiresSelection:boolean;cloudBound:boolean;canRecover:boolean;ownerUpload:boolean;canResumeUpload:boolean}
 export async function readLocalWorkspace(db:LocalStore):Promise<LocalWorkspace> {
  return db.transaction('r',[db.businesses,db.outlets,db.members,db.operatorState,db.cloudState,db.syncCanonical],async()=>{
   const [businesses,outlets,members,saved,binding]=await Promise.all([db.businesses.toArray(),db.outlets.toArray(),db.members.toArray(),db.operatorState.get('active'),db.cloudState.get('binding')]);
-  let cloudBound=binding!==undefined&&parseLocalCloudState(binding).phase!=='cancelled';const choices=operatorChoices(businesses,outlets,members),canRecover=!!(await db.syncCanonical.where('id').equals('active').count());let selection:LocalOperatorState|null=null;
-  try{selection=saved===undefined?null:parseLocalOperatorState(saved);cloudBound=cloudBound||selection?.connection!==null&&selection?.connection!==undefined;return {setup:resolveOperator(businesses,outlets,members,selection),selection,choices,message:'',requiresSelection:false,cloudBound,canRecover};}
-  catch(error){if(!(error instanceof OperatorContextError))throw error;return {setup:null,selection,choices,message:error.message,requiresSelection:businesses.length>0||saved!==undefined,cloudBound,canRecover};}
+  let cloudBound=binding!==undefined&&parseLocalCloudState(binding).phase!=='cancelled';const choices=operatorChoices(businesses,outlets,members),canRecover=!!(await db.syncCanonical.where('id').equals('active').count()),ownerUpload=!!binding&&binding.version===1&&binding.phase==='ready'&&!!binding.receipt,canResumeUpload=ownerUpload&&!canRecover;let selection:LocalOperatorState|null=null;
+  try{selection=saved===undefined?null:parseLocalOperatorState(saved);cloudBound=cloudBound||selection?.connection!==null&&selection?.connection!==undefined;return {setup:resolveOperator(businesses,outlets,members,selection),selection,choices,message:'',requiresSelection:false,cloudBound,canRecover,ownerUpload,canResumeUpload};}
+  catch(error){if(!(error instanceof OperatorContextError))throw error;return {setup:null,selection,choices,message:error.message,requiresSelection:businesses.length>0||saved!==undefined,cloudBound,canRecover,ownerUpload,canResumeUpload};}
  });
 }
 function nextRevision(saved:unknown,expected:number|null){const previous=saved===undefined?null:parseLocalOperatorState(saved);if((previous?.revision??null)!==expected)throw new OperatorContextError('The operator changed in another tab. Review the current selection.');if(previous?.revision===Number.MAX_SAFE_INTEGER)throw new OperatorContextError('Keep a backup before changing this operator.');return (previous?.revision??0)+1;}

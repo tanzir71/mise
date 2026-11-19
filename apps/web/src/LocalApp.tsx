@@ -21,6 +21,7 @@ const RestorePage = lazy(() => import('./BackupTools').then(module => ({default:
 const CloudSyncStatus=lazy(()=>import('./CloudSync').then(module=>({default:module.CloudSyncStatus})));
 const CloudJoin=lazy(()=>import('./CloudJoin').then(module=>({default:module.CloudJoin})));
 const CloudRecovery=lazy(()=>import('./CloudRecovery').then(module=>({default:module.CloudRecovery})));
+const OwnerResume=lazy(()=>import('./OwnerResume').then(module=>({default:module.OwnerResume})));
 const CloudSetup=lazy(()=>import('./CloudSetup').then(module=>({default:module.CloudSetup})));
 const Inbox=lazy(()=>import('./Inbox').then(module=>({default:module.Inbox})));
 const Stock = lazy(() => import('./Stock').then(module => ({default:module.Stock})));
@@ -30,6 +31,7 @@ import { useAppUpdate } from './app-update';
 import {readLocalWorkspace} from './data/operator-state';
 import {reviewStoredOperatorAuth,watchOperatorAuth} from './data/operator-auth';
 import {parseScopeRecoverySession} from '@mise/core/scope-recovery';
+import {parseOwnerResumeSession} from '@mise/core/owner-resume';
 const OperatorPicker=lazy(()=>import('./OperatorPicker').then(module=>({default:module.OperatorPicker})));
 import './app.css';
 
@@ -42,10 +44,15 @@ function ShopWorkspace({ counterEnabled, khataEnabled, ordersEnabled, stockEnabl
   const workspace = useLiveQuery(() => readLocalWorkspace(db)),setup=workspace?.setup;
   const [joinMode,setJoinMode] = useState(false);
   const location=useLocation(),navigate=useNavigate();
-  const join = useLiveQuery(async()=>{const raw=cloudSyncEnabled?await db.scopeRecoveries.get('active'):undefined;return {session:cloudSyncEnabled?await db.joinSessions.get('active'):undefined,recovery:raw?parseScopeRecoverySession(raw):null};},[cloudSyncEnabled]);
+  const join = useLiveQuery(async()=>{const raw=cloudSyncEnabled?await db.scopeRecoveries.get('active'):undefined,owner=cloudSyncEnabled?await db.scopeRecoveries.get('owner:active'):undefined;return {session:cloudSyncEnabled?await db.joinSessions.get('active'):undefined,recovery:raw?parseScopeRecoverySession(raw):null,owner:owner?parseOwnerResumeSession(owner):null};},[cloudSyncEnabled]);
   const [restoreMode,setRestoreMode] = useState(false),[switching,setSwitching]=useState(false),[guardFailure,setGuardFailure]=useState(false),[reviewed,setReviewed]=useState<number|null>(null);
   const cloudRevision=workspace?.selection?.connection?workspace.selection.revision:null;
   const recoveryPhase=join?.recovery?.phase,recoveryRevision=join?.recovery?.revision,canRecover=workspace?.canRecover;
+  const ownerPhase=join?.owner?.phase,ownerRevision=join?.owner?.revision,ownerUpload=workspace?.ownerUpload;
+  useEffect(()=>{
+    if(!cloudSyncEnabled||!ownerUpload||ownerPhase!=='pending'||location.pathname==='/settings/owner-recovery')return;
+    let current=true;void db.scopeRecoveries.get('owner:active').then(raw=>{if(current&&raw?.kind==='owner-session'&&raw.phase==='pending')navigate('/settings/owner-recovery',{replace:true});}).catch(()=>{if(current)setGuardFailure(true);});return()=>{current=false;};
+  },[cloudSyncEnabled,ownerUpload,ownerPhase,ownerRevision,location.pathname,navigate]);
   useEffect(()=>{
     if(!cloudSyncEnabled||!canRecover||recoveryPhase!=='admitted'||location.pathname==='/settings/recovery')return;
     let current=true;
@@ -60,6 +67,8 @@ function ShopWorkspace({ counterEnabled, khataEnabled, ordersEnabled, stockEnabl
   if (!workspace) return <main className="onboarding" aria-busy="true"><p>{c.gettingStarted}…</p></main>;
   if(cloudSyncEnabled&&!join)return <main className="onboarding" aria-busy="true"><p>Checking this device…</p></main>;
   if(cloudSyncEnabled&&(joinMode||join?.session&&['pending','paused'].includes(join.session.phase)))return <Suspense fallback={<p aria-busy="true">Opening outlet join…</p>}><CloudJoin onBack={()=>setJoinMode(false)} onJoined={()=>setJoinMode(false)}/></Suspense>;
+  if(cloudSyncEnabled&&workspace.ownerUpload&&join?.owner?.phase==='pending'&&location.pathname!=='/settings/owner-recovery')return <main className="onboarding" aria-busy="true"><p>Checking the original connection…</p></main>;
+  if(cloudSyncEnabled&&workspace.ownerUpload&&location.pathname==='/settings/owner-recovery')return <main className="onboarding"><Suspense fallback={<p aria-busy="true">Opening original connection…</p>}><OwnerResume onBack={()=>navigate('/settings/sync')} onRestored={()=>navigate('/settings/sync')}/></Suspense></main>;
   if(cloudSyncEnabled&&workspace.canRecover&&join?.recovery?.phase==='admitted'&&location.pathname!=='/settings/recovery')return <main className="onboarding" aria-busy="true"><p>Checking the reviewed connection…</p></main>;
   if(cloudSyncEnabled&&workspace.canRecover&&location.pathname==='/settings/recovery')return <main className="onboarding"><Suspense fallback={<p aria-busy="true">Opening outlet recovery…</p>}><CloudRecovery onBack={()=>navigate('/settings/sync')} onRecovered={()=>navigate('/settings/sync')}/></Suspense></main>;
   if(workspace.requiresSelection||switching)return <Suspense fallback={<p aria-busy="true">Opening operator selection…</p>}><OperatorPicker recoveryEnabled={cloudSyncEnabled} workspace={workspace} onChoose={()=>setSwitching(false)} onBack={workspace.requiresSelection?undefined:()=>setSwitching(false)}/></Suspense>;
