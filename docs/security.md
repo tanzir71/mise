@@ -6,6 +6,19 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [pending-intent and image boundary](m31-pending-intents.md) uses shared pure
+domain calculations without a server ticket, token or receipt. Original complete
+image Blobs follow their accepted metadata through the private PUT endpoint.
+Runtime identity and connection are pinned across HTTP; native checks revalidate
+the original operator and source. Command receipts remain unchanged. Upload
+audits contain only original image IDs and completion times, and are validated
+separately from manual sorting revisions. No deployment value enters public
+build variables, shop data or portable backups.
+The updated commands and migration-upload bundles retain JWT verification and
+match their reviewed source exactly. Fresh live unauthenticated table, command,
+upload, image and sync-read requests all returned 401. No SMS, account, Auth
+configuration or secret-manager value was changed by these checks.
+
 The [new-device join interface](m31-join-runtime.md) reuses the original discovery
 Auth session without copying tokens into shop data or requesting another OTP.
 The operation target independently pins the original business and verified

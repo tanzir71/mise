@@ -161,6 +161,18 @@ test('pausing stops automatic delivery and an explicit resume drains the origina
       .status,
   ).toBe('accepted');
 });
+test('automatic sync uploads a complete offline Inbox image and another browser receives identical original bytes',async({page,browser})=>{
+ test.setTimeout(90000);await initialize(page,1);const other=await browser.newContext({baseURL:test.info().project.use.baseURL}),manager=await other.newPage();
+ try{
+  const socket=await initialize(manager,2);await installSyncApplyFixture(manager);await installSyncApplyFixture(page);const puts=server.calls.imagePuts;
+  await page.context().setOffline(true);const item=await page.evaluate(()=>window.miseSyncApplyTest.captureImage()),original=await page.evaluate(()=>window.miseSyncApplyTest.inspect());
+  await expect(page.getByRole('link',{name:/^Sync: Offline/})).toBeVisible();await page.context().setOffline(false);
+  await expect(page.getByRole('link',{name:'Sync: Synced',exact:true})).toBeVisible({timeout:20000});
+  expect(server.calls.imagePuts).toBe(puts+1);socket.notify();await expect.poll(async()=>{const state=await manager.evaluate(()=>window.miseSyncApplyTest.inspect());return state.backup.tables.inboxItems.find(row=>row.id===item.id)?.images.length;},{timeout:20000}).toBe(1);
+  const received=await manager.evaluate(()=>window.miseSyncApplyTest.inspect()),source=original.backup.tables.inboxItems.find(row=>row.id===item.id)!;expect(received.backup.tables.inboxItems.find(row=>row.id===item.id)).toEqual(source);
+  const owner=await page.evaluate(()=>window.miseSyncApplyTest.inspect());expect(owner.queue.at(-1)?.commands).toEqual(original.queue.at(-1)?.commands);expect(owner.queue.at(-1)?.status).toBe('accepted');expect(owner.backup.tables.events.filter(event=>event.command==='inbox.image.upload'&&event.inboxId===item.id)).toHaveLength(1);
+ }finally{await page.context().setOffline(false);await other.close();}
+});
 test('the flagged sync controls remain accessible at phone and desktop widths', async ({
   page,
 }) => {

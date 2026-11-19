@@ -11,6 +11,10 @@ import {readDatabaseBackup} from './backup';
 import {parseLocalOperatorState,type LocalOperatorState} from '@mise/core/operators';
 import {nativeRowHash} from './canonical-writes';
 import {assertCommandReceipt} from './command-request';
+import {readCanonicalState} from './cloud-canonical-state';
+import {syncHash} from '@mise/core/sync-read';
+import type {SyncImageDescriptor} from '@mise/core/sync-images';
+import type {InboxImageUploadReceipt} from './cloud-inbox-upload';
 
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const same=(v:unknown):unknown=>Array.isArray(v)?v.map(same):object(v)?Object.fromEntries(Object.keys(v).sort().map(key=>[key,same(v[key])])):v;
@@ -104,4 +108,45 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
   }
  }
  const latest=await db.outbox.where('uploadId').equals(initial.uploadId).toArray();return {accepted:latest.filter(r=>r.status==='accepted').length,retained:latest.filter(r=>r.status==='retained').length,pending:latest.filter(r=>r.status==='pending').length};
+}
+/** Image bytes follow their accepted metadata. Retries retain every original queue record. */
+export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,put:(image:SyncImageDescriptor,blob:Blob,signal?:AbortSignal)=>Promise<InboxImageUploadReceipt>,signal?:AbortSignal):Promise<number>{
+ const initial=parseLocalCloudState(await db.cloudState.get('binding'));
+ if(initial.targetHash!==targetHash||initial.phase!=='ready'||(initial.version===1?!initial.receipt:!initial.join))throw new Error('Use the original image connection.');
+ const originalScope=deliveryToken(initial,await joinedOperator(db,initial));
+ const rows=await db.outbox.where('uploadId').equals(initial.uploadId).sortBy('sequence');
+ if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('Keep the complete original image queue.');
+ if(!rows.some(row=>row.commands.some(command=>command.type==='inbox.capture'&&command.input.images.length)))return 0;
+ const canonical=await db.syncCanonical.get('active')?await readCanonicalState(db):null;
+ if(!canonical&&initial.version===2)throw new Error('Keep the original device admission.');
+ let delivered=0;
+ for(const raw of rows){
+  const saved=entry(raw,initial);let sourceHash:string|undefined;
+  for(const [index,command] of saved.commands.entries()){
+   if(command.type!=='inbox.capture'||!command.input.images.length)continue;
+   if(!saved.receipts[index])throw new Error('Confirm the original image metadata before sending its bytes.');
+   const source=saved.changes.find(change=>change.table==='inboxItems'&&change.key===command.itemId)?.after as StoredInboxItem|undefined;
+   if(!source||source.outletId!==initial.outletId||source.id!==command.itemId||source.images.length!==command.input.images.length)throw new Error('Keep the complete original image source.');
+   async function current(){
+    signal?.throwIfAborted();
+    return db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{
+     const state=parseLocalCloudState(await db.cloudState.get('binding'));
+     if(deliveryToken(state,await joinedOperator(db,state))!==originalScope)throw new Error('The original image operator changed.');
+     const row=entry((await db.outbox.get(saved.id))!,state);
+     if(await Dexie.waitFor(nativeRowHash(originalEntry(row)))!==sourceHash||!row.receipts[index])throw new Error('Keep the original image action and receipt.');
+    });
+   }
+   for(const [position,image] of command.input.images.entries()){
+    const confirmed=canonical?.base.snapshot.records.find(row=>row.table==='inbox_images'&&row.id===image.id&&row.operation==='upsert')?.row;
+    if(confirmed&&confirmed.business_id===initial.businessId&&confirmed.outlet_id===initial.outletId&&confirmed.inbox_item_id===command.itemId&&confirmed.position===position&&confirmed.sha256===image.sha256&&confirmed.size===image.size&&confirmed.type===image.type&&typeof confirmed.uploaded_at==='number')continue;
+    sourceHash??=await nativeRowHash(originalEntry(saved));
+    await current();const stored=source.images[position];
+    if(!stored||stored.id!==image.id||stored.name!==image.name||stored.size!==image.size||stored.type!==image.type||!(stored.blob instanceof Blob)||stored.blob.size!==image.size||stored.blob.type!==image.type||await syncHash(new Uint8Array(await stored.blob.arrayBuffer()))!==image.sha256)throw new Error('Keep the complete original image bytes.');
+    const receipt=await put({id:image.id,businessId:initial.businessId,outletId:initial.outletId,inboxId:command.itemId,type:image.type,size:image.size,sha256:image.sha256},stored.blob,signal);
+    if(receipt.id!==image.id||!Number.isSafeInteger(receipt.uploadedAt)||receipt.uploadedAt<0)throw new Error('The original image upload is unconfirmed.');
+    await current();assertCommandReceipt(receipt);delivered++;
+   }
+  }
+ }
+ return delivered;
 }

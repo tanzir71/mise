@@ -1,0 +1,262 @@
+{
+  "checkedAt": "2026-11-19T14:18:09.088Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "All currently typed pending intent projections and complete original image delivery; general concurrent revision merges and genuine hosted acceptance remain open",
+  "checks": {
+    "unitTests": 2416,
+    "unitFiles": 132,
+    "browserCases": 432,
+    "browserWorkers": 1,
+    "rootCases": 12,
+    "visualCaptures": 212,
+    "horizontalOverflows": 0,
+    "exports": 270,
+    "astroFiles": 128,
+    "lint": true,
+    "typecheck": true,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "testFixturesInShippedAssets": false,
+    "landingCredit": "tanziro.com"
+  },
+  "browserInvestigation": {
+    "firstRunWorkers": 2,
+    "firstRunPassed": 431,
+    "firstRunFailed": 1,
+    "failure": "Lazy Today route was still loading at the existing five-second setup assertion before the receipt-coverage scenario began",
+    "isolatedCoverageCasesPassed": 7,
+    "assertionOrTimeoutChanged": false,
+    "finalCompleteRunWorkers": 1,
+    "concurrentTabsAndBrowsersStillExercised": true
+  },
+  "storage": {
+    "localSchema": 20,
+    "localStores": 34,
+    "portableSchema": 10,
+    "portableTables": 21,
+    "credentialsInShopData": false
+  },
+  "acceptance": {
+    "frozenSqlWindowAllTypedFamilies": true,
+    "originalQueueAndReceiptsPreserved": true,
+    "postWindowReceiptsRemainPending": true,
+    "cashCreditCancellationRefundCompanions": true,
+    "completeOriginalImages": true,
+    "lostCommittedImageReplyOneUploadAudit": true,
+    "automaticTwoBrowserImageDelivery": true,
+    "syntheticLocalAuthStorageAndRealtime": true,
+    "genuineHostedAcceptance": false,
+    "generalConcurrentRevisionMergesComplete": false
+  },
+  "hosted": {
+    "functions": [
+      {
+        "name": "commands",
+        "version": 19,
+        "status": "ACTIVE",
+        "jwtVerified": true,
+        "fileCount": 1,
+        "exactReviewedSource": true,
+        "sha256": "52579242eebf470920fd4e1107cfc1bee34b7d4ed18ae712ec5927c65d963904"
+      },
+      {
+        "name": "migration-upload",
+        "version": 3,
+        "status": "ACTIVE",
+        "jwtVerified": true,
+        "fileCount": 1,
+        "exactReviewedSource": true,
+        "sha256": "0eeb3f141de74313573efb75766c4a46878c21d36eae099c0740265cc3a2a9fa"
+      }
+    ],
+    "postflight": {
+      "application_tables": 58,
+      "forced_rls_tables": 58,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "private_buckets": 1,
+      "migrations": 37
+    },
+    "unauthenticatedHttp": [
+      {
+        "name": "anonymous-table",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "commands",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "migration-upload",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "inbox-image",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "sync-read",
+        "status": 401,
+        "denied": true
+      }
+    ],
+    "advisors": {
+      "warnings": 0,
+      "errors": 0,
+      "informational": 1
+    },
+    "migrationApplied": false,
+    "authProvidersChanged": false,
+    "secretsChanged": false
+  },
+  "privacy": {
+    "sourceAndIndex": true,
+    "reachableHistory": true,
+    "buildOutput": true,
+    "privateValuesCompared": 10,
+    "credentials": 0,
+    "currentDeploymentReferences": 0,
+    "historicalNonsecretReferences": 22,
+    "coverageGaps": 0,
+    "hooks": ".githooks"
+  },
+  "publication": {
+    "disabledWorkflows": 3,
+    "newCiArtifact": false,
+    "newPagesDeployment": false,
+    "historyRewritten": false
+  },
+  "sourceReview": [
+    {
+      "path": "apps/web/src/data/cloud-inbox-upload.ts",
+      "sha256": "157765744225a08b72d6d164daa94dcae135d188d5d5e9316ccfba82d61d546d"
+    },
+    {
+      "path": "apps/web/src/data/cloud-sync-apply.ts",
+      "sha256": "08ec129905a67db861daf035506c62a3f4c671f699d965f5dd9796ebd15ef7df"
+    },
+    {
+      "path": "apps/web/src/data/command-request.ts",
+      "sha256": "34612c91738b9f33d5cfe53cbf2c2370229ec43144d26c25639555f824f1573b"
+    },
+    {
+      "path": "apps/web/src/data/local-outbox.ts",
+      "sha256": "973d55f5236268c349b9a18a0fed42cce586b200a036e726a693c7fd9c23d5b1"
+    },
+    {
+      "path": "apps/web/src/data/sync-cycle.ts",
+      "sha256": "0c277e3f7e4406ea86a03167f1d3f7ac5e51ef916c8b801ff513747c90fbd011"
+    },
+    {
+      "path": "packages/core/closing-replay.ts",
+      "sha256": "0871809df56bf0a9b473fc5f85fcee2324ec1225d984777d2d1042c37b639865"
+    },
+    {
+      "path": "packages/core/customer-replay.ts",
+      "sha256": "c7555af668a9cc64dc34e776b1dc6ed716bdfad729992c2c1b842b4660b414d8"
+    },
+    {
+      "path": "packages/core/handoff-replay.ts",
+      "sha256": "b52146b6667d64bf772335c193698e02ed5b844e0a0466b0d95392677b018de9"
+    },
+    {
+      "path": "packages/core/inbox-history.ts",
+      "sha256": "4b4a4b1ea07f0366313205579e8a920cd227bfa965149749c7a2221f0723880b"
+    },
+    {
+      "path": "packages/core/inbox-replay.ts",
+      "sha256": "1e6e564fda8b3d9d4ad0c88ba37a2405c2ce0620cdd4d4c48de4805f3fb255ad"
+    },
+    {
+      "path": "packages/core/order-replay.ts",
+      "sha256": "b4194f78b5d15464faa86bc0db65544a39fedccf6e39188aa2554d1b5eb85823"
+    },
+    {
+      "path": "packages/core/pending-replay.ts",
+      "sha256": "fc9cdc2c81470fcb4b34b48f6ca35e84a5988296ce74ca728cd42ed7b737a6e0"
+    },
+    {
+      "path": "packages/core/purchase-replay.ts",
+      "sha256": "32affcf387a925db98f0f6aca717037858fbf16087170873aba2a4a5df656c28"
+    },
+    {
+      "path": "packages/core/replay-records.ts",
+      "sha256": "82717a5f2876ef71d8e2528f5190a12fea32040120fe8cb1ab256f0ada6289cf"
+    },
+    {
+      "path": "packages/core/sync-materialize.ts",
+      "sha256": "d17a4ce66cc09e926a0296cb2151408a5dd56cd208882fbea53a81c796777520"
+    },
+    {
+      "path": "supabase/functions/_shared/closing-write.ts",
+      "sha256": "306f2884da3bfad14f2127ede8bb1baa0561fe57ee858449f71dc5555493bde6"
+    },
+    {
+      "path": "supabase/functions/_shared/customer-write.ts",
+      "sha256": "913a1f24b8aba60abd62c66b45f4629e71233affd9234b54bcda4e15ec055ae6"
+    },
+    {
+      "path": "supabase/functions/_shared/handoff-write.ts",
+      "sha256": "d15874868815b5163319895030f92fde614cd2f8cd2bb1c31f0d6bee0a516753"
+    },
+    {
+      "path": "supabase/functions/_shared/inbox-write.ts",
+      "sha256": "feb78009d82768c6a2c693cd3286d842be1e25a95573500f48062643dfd24056"
+    },
+    {
+      "path": "supabase/functions/_shared/order-write.ts",
+      "sha256": "2e3d96e213fefc22700ff0f6ea4c60852cafe92092b568747c9ebd4b3ea7ca07"
+    },
+    {
+      "path": "supabase/functions/_shared/purchase-write.ts",
+      "sha256": "e900b781d8a252259d6defd24ca6db91fef7aea8a8ded0753819233278b2648a"
+    },
+    {
+      "path": "tests/cloud-inbox-upload.test.ts",
+      "sha256": "c467f68dcf8fc9409fb25fc53d79f2faf6800ddd618c96348ede03f684511342"
+    },
+    {
+      "path": "tests/e2e/sync-pending-families.spec.ts",
+      "sha256": "ab2bf7e6902317a84b0ebdc3d850d997399dcfed9b4217ca19cc4742883cce18"
+    },
+    {
+      "path": "tests/e2e/sync-runtime.spec.ts",
+      "sha256": "e5addc274c323377d04a6ed2478f7f4bc72bead6eb8cc583b3cdf07bcb8b4af2"
+    },
+    {
+      "path": "tests/fixtures/sync-apply-browser.ts",
+      "sha256": "928cc4c109ec813434237b8271b771acb3bf8eae2d03e049bd9494a75926b475"
+    },
+    {
+      "path": "tests/inbox-image-delivery.test.ts",
+      "sha256": "00cb46f4880e503a35f7f74b82268c0dbf2db6f02e17237e16c7950209b599f6"
+    },
+    {
+      "path": "tests/inbox-image-history.test.ts",
+      "sha256": "f21000b08ab95ef018c559a2c3842fdbfeddb67f116e0fa8f0b2889248b87081"
+    },
+    {
+      "path": "tests/pending-replay-db.test.ts",
+      "sha256": "78504b446f7e9b53e0d414c103cb10d7c4bc8335058ab83cf08ee418a6978b31"
+    },
+    {
+      "path": "tests/sync-apply-db.test.ts",
+      "sha256": "97e05fa60064f676181e333e83b886255319e76b692f3e62f033ba1dc6289103"
+    },
+    {
+      "path": "tests/sync-convergence-server.ts",
+      "sha256": "461635fd3e5842747ec462b03c9a8135be254749984e98ddc55696487062bbc5"
+    }
+  ]
+}

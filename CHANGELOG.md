@@ -10,6 +10,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 fixed downloads now retain every currently typed pending action family through shared domain replay, including complete order/refund companions, reviewed closings, manual messages, original Inbox images and frozen shop links. Original commands and receipts stay intact; remaining concurrent revision merges and full cloud acceptance stay open.
+- M31 automatic sync now uploads complete original Inbox image bytes after metadata acceptance, with original-account and source guards, idempotent lost-reply recovery and verified canonical upload checks. Portable backups retain and validate image-upload audits without changing manual sorting revisions.
+
 - M31 new devices can explicitly join an allowed outlet through one phone verification. A durable original selection, resumable snapshot/images, guarded atomic admission and automatic sync preserve existing records, original downloads and receipts. Fresh access checks and cancellation retain manual recovery and JSON backups; cloud sync remains opt-in.
 
 - M31 opt-in sync now connects the saved local upload, original queued actions, verified downloads and header status. Durable retries, pause/resume, original-account checks and insert-only outlet event hints preserve offline work through lost replies and reloads. Full cloud acceptance and remaining conflict families stay gated.

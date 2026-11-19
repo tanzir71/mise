@@ -37,7 +37,8 @@ import { createCloudUploadCoverageRemote } from './cloud-upload-coverage-remote'
 import { prepareSyncDownload, runSyncDownload } from './cloud-sync-journal';
 import { downloadSyncImages } from './cloud-sync-images';
 import { applyCanonicalDownload, adoptOwnerUpload } from './cloud-sync-apply';
-import { deliverLocalOutbox } from './local-outbox';
+import { deliverLocalOutbox,deliverLocalInboxImages } from './local-outbox';
+import {createCloudInboxImageUploader} from './cloud-inbox-upload';
 import { CloudUploadJournal } from './cloud-upload';
 import {
   claimSyncSession,
@@ -209,6 +210,7 @@ export async function runSyncCycle(
         (command) => commands(command, lifetime),
       );
     if (delivery.retained) throw new SyncSessionError('review');
+    await deliverLocalInboxImages(db,claimed.target.targetHash,createCloudInboxImageUploader(options.config,account,send),lifetime);
     lifetime.throwIfAborted();
     const queue = await db.outbox.orderBy('[uploadId+sequence]').toArray(),
       queueHash = await materializationHash(

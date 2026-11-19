@@ -8,6 +8,8 @@ import {stockWritePlan} from './stock-commands';
 import {syncDownloadToken} from './sync-download';
 import {syncHash} from './sync-read';
 import type {SyncCoverageIntent} from './sync-coverage';
+import {replayOtherPending} from './pending-replay';
+import {applyReplayProjection,PendingReplayError} from './replay-records';
 
 export interface MaterializedRow {table:BackupTable;key:string;before:unknown|null;after:unknown|null}
 export interface CanonicalApplication {
@@ -37,9 +39,9 @@ function applyRecords(backup:MiseBackup,records:readonly CloudRecord[]):MiseBack
 }
 /** Re-evaluate an original intent on the current canonical values. The command,
  * original outbox records, IDs and receipts are never edited or manufactured.
- * Other families remain retained until delivered and genuinely covered.
+ * A tentative projection never substitutes for genuine receipt coverage.
  */
-export function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number):MiseBackup {
+export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input):Promise<MiseBackup> {
  const backup=parseBackup(input),c=parseShopCommand(value),t=backup.tables,business=t.businesses[0],outlet=t.outlets[0],actor=t.members.find(m=>m.id===actorId);
  if(!business||!outlet||!actor?.active||!['owner','manager'].includes(actor.role)||actor.businessId!==business.id||outlet.businessId!==business.id||'outletId'in c&&c.outletId!==outlet.id||actor.role==='manager'&&!actor.outletIds.includes(outlet.id))throw new ReconciliationError('review',c.id);
  // A matching row/audit never proves receipt inclusion. Without actual coverage
@@ -60,9 +62,9 @@ export function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:s
    const plan=stockWritePlan(c),ids=new Set(plan.rows.map(r=>r.itemId));
    raw={business:row('businesses',business),outlet:row('outlets',outlet),items:rows('stockItems',t.stockItems.filter(i=>ids.has(i.id))),moves:rows('stockMoves',t.stockMoves.filter(m=>ids.has(m.stockItemId))),suppliers:rows('suppliers',t.suppliers)};
    records=replayStockRecords({...context,contextJson:JSON.stringify(raw)},c);
-  }else throw new ReconciliationError('retained',c.id);
+  }else return await applyReplayProjection(backup,await replayOtherPending(backup,c,actor,at),parseBackup(original));
   return applyRecords(backup,records);
- }catch(error){if(error instanceof ReconciliationError)throw error;throw new ReconciliationError('conflict',c.id);}
+ }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
 }
 export function materializedRows(base:MiseBackup,working:MiseBackup):MaterializedRow[]{
  parseBackup(base);parseBackup(working);const result:MaterializedRow[]=[];

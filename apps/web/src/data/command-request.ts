@@ -15,10 +15,18 @@ export function bindCommandReceipt<T extends object>(receipt:T,guard:()=>void):T
 export function assertCommandReceipt(receipt:object):void {receiptGuards.get(receipt)?.();}
 /** Runtime identity only. The account, connection and generation never enter a command. */
 export function createAccountJsonRequest(config:CloudConnection,input:CommandAccount,route:'commands'|'migration-upload',send:typeof fetch){
+ return accountRequest(config,input,new URL('functions/v1/'+route,config.apiUrl+'/'),'POST',send);
+}
+export function createAccountImageRequest(config:CloudConnection,input:CommandAccount,imageId:string,send:typeof fetch){
+ if(!/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(imageId))throw new CommandRequestError('review');
+ const endpoint=new URL('functions/v1/inbox-image',config.apiUrl+'/');endpoint.searchParams.set('image',imageId);
+ return accountRequest(config,input,endpoint,'PUT',send);
+}
+function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL,method:'POST'|'PUT',send:typeof fetch){
  if(!input||typeof input.scope!=='string'||!input.scope||input.scope.length>2048||!['accountHash','targetHash'].every(k=>typeof input[k as 'accountHash'|'targetHash']==='string'&&/^[a-f0-9]{64}$/.test(input[k as 'accountHash'|'targetHash']))||typeof input.getAuth!=='function'||typeof input.assertCurrent!=='function')throw new CommandRequestError('auth');
- const {scope,accountHash,targetHash,getAuth,assertCurrent}=input,endpoint=new URL('functions/v1/'+route,config.apiUrl+'/');
+ const {scope,accountHash,targetHash,getAuth,assertCurrent}=input;
  const current=(value:CommandAuthorization)=>{try{const result:unknown=assertCurrent(value);if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw Error();}}catch{throw new CommandRequestError('auth');}};
- return async(body:string,headers:Record<string,string>,deadline:number,signal?:AbortSignal):Promise<{value:unknown;guard:()=>void}>=>{
+ return async(body:string|Blob,headers:Record<string,string>,deadline:number,signal?:AbortSignal):Promise<{value:unknown;guard:()=>void}>=>{
   const controller=new AbortController(),lifetime=signal?AbortSignal.any([signal,controller.signal]):controller.signal;let response:Response|undefined;
   const timer=setTimeout(()=>controller.abort(),deadline);
   const abortable=<T>(promise:Promise<T>)=>new Promise<T>((resolve,reject)=>{
@@ -35,7 +43,7 @@ export function createAccountJsonRequest(config:CloudConnection,input:CommandAcc
   }
   try{
    if(lifetime.aborted)throw new CommandRequestError('retry');const original=await auth();current(original);
-   response=await abortable(send(endpoint,{method:'POST',body,headers:{...headers,apikey:config.publishableKey,Authorization:'Bearer '+original.jwt},redirect:'error',cache:'no-store',credentials:'omit',signal:lifetime}));
+   response=await abortable(send(endpoint,{method,body,headers:{...headers,apikey:config.publishableKey,Authorization:'Bearer '+original.jwt},redirect:'error',cache:'no-store',credentials:'omit',signal:lifetime}));
    if([401,403].includes(response.status))throw new CommandRequestError('auth');if([400,409,413,415].includes(response.status))throw new CommandRequestError('review');if(!response.ok)throw new CommandRequestError('retry');
    const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>responseLimit))throw new CommandRequestError('retry');
    const reader=response.body?.getReader();if(!reader)throw new CommandRequestError('retry');let size=0;const parts:Uint8Array[]=[];

@@ -13,8 +13,13 @@ export function validateInboxSnapshot(value:unknown):InboxItem {
 }
 /** Restore must preserve a complete, linear manual sorting history. */
 export function validateInboxHistory(items:readonly InboxItem[],events:readonly AuditEvent[]):void {
-  const grouped=new Map<string,AuditEvent[]>(),ids=new Set(items.map(i=>i.id));
+  const grouped=new Map<string,AuditEvent[]>(),ids=new Set(items.map(i=>i.id)),uploaded=new Set<string>();
   for(const event of events){
+    if(event.command==='inbox.image.upload'){
+      const item=items.find(item=>item.id===event.inboxId),before=event.before as Record<string,unknown>|null,after=event.after as Record<string,unknown>|null;
+      if(!item||item.outletId===null||item.outletId!==event.outletId||event.inboxRevision!==undefined||event.actor.type!=='member'||!before||!after||Object.keys(before).sort().join(',')!=='imageId,uploadedAt'||Object.keys(after).sort().join(',')!=='imageId,uploadedAt'||typeof after.imageId!=='string'||before.imageId!==after.imageId||before.uploadedAt!==null||after.uploadedAt!==event.at||!item.images.some(image=>image.id===after.imageId)||uploaded.has(after.imageId))throw new Error('Invalid original image upload history.');
+      uploaded.add(after.imageId);continue;
+    }
     if(!event.command.startsWith('inbox.')&&event.inboxId===undefined&&event.inboxRevision===undefined)continue;
     if(!event.inboxId||!ids.has(event.inboxId)||!Number.isSafeInteger(event.inboxRevision)||!event.command.startsWith('inbox.'))throw new Error('Invalid Inbox audit reference.');
     const group=grouped.get(event.inboxId)??[];group.push(event);grouped.set(event.inboxId,group);

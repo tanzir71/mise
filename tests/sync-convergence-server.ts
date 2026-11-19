@@ -130,8 +130,34 @@ export async function startConvergenceServer(
     'finish_stock_write',
     'admit_stock_batch',
     'inbox_image_context',
+    'complete_inbox_image',
     'prepare_customer_intent',
     'finish_customer_write',
+    'prepare_catalogue_intent',
+    'finish_catalogue_intent',
+    'apply_catalogue_intent',
+    'prepare_purchase_write',
+    'finish_purchase_write',
+    'admit_order_write',
+    'prepare_order_write',
+    'finish_order_write',
+    'prepare_closing_write',
+    'finish_closing_write',
+    'prepare_settings_write',
+    'finish_settings_write',
+    'prepare_profile_write',
+    'finish_profile_write',
+    'admit_shop_link_write',
+    'prepare_shop_link_write',
+    'finish_shop_link_write',
+    'admit_handoff_write',
+    'prepare_handoff_write',
+    'finish_handoff_write',
+    'admit_inbox_write',
+    'prepare_inbox_write',
+    'finish_inbox_write',
+    'prepare_supplier_message_write',
+    'finish_supplier_message_write',
     'initial_upload_identity',
     'begin_initial_upload',
     'initial_upload_info',
@@ -141,7 +167,8 @@ export async function startConvergenceServer(
     'finish_initial_upload',
     'release_initial_upload',
     'cancel_initial_upload',
-  ]);
+    'admit_purchase_record',
+]);
   const tokens = [1, 2].map((n) =>
     [
       Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
@@ -317,15 +344,19 @@ export async function startConvergenceServer(
           if (options.emptyCloud) throw Error('Missing original object');
           return new Uint8Array(f.imageBytes);
         },
-        put: async () => false,
-        complete: async () => {
-          throw Error('No upload in this fixture');
+        put: async (meta,bytes) => {
+          if(objects.has(meta.path))return false;
+          objects.set(meta.path,new Uint8Array(bytes));
+          await db.query('insert into storage.objects(bucket_id,name,metadata,user_metadata) values($1,$2,$3,$4)', ['mise-inbox',meta.path,JSON.stringify({size:bytes.length,mimetype:meta.type}),JSON.stringify({sha256:meta.sha256})]);
+          return true;
         },
+        complete: async (jwt,id,eventId) => rpc('complete_inbox_image',{p_image_id:id,p_event_id:eventId},jwt),
       },
     });
   let apiUrl = '',
     loseCommand = false,
     losePage = false,
+    loseImage = false,
     loseUploadFinish = false,
     revokeAfterProof = false,
     holdCommand = false,
@@ -334,6 +365,7 @@ export async function startConvergenceServer(
     commands: 0,
     pages: 0,
     images: 0,
+    imagePuts: 0,
     uploadProofs: 0,
     heldCommands: 0,
     authUsers: 0,
@@ -442,7 +474,9 @@ export async function startConvergenceServer(
         }
       } else if (path === '/functions/v1/inbox-image') {
         calls.images++;
+        if(request.method==='PUT')calls.imagePuts++;
         response = await images(request);
+        if(request.method==='PUT'&&loseImage&&response.ok){loseImage=false;await truncate(response);return;}
       } else if (path === '/auth/v1/settings') {
         // Test-owned OTP gateway only. No hosted provider is activated.
         response = Response.json({
@@ -567,6 +601,7 @@ export async function startConvergenceServer(
     loseNextPage() {
       losePage = true;
     },
+    loseNextImageReply() {loseImage=true;},
     revokeOwnerAfterProof() {
       revokeAfterProof = true;
     },

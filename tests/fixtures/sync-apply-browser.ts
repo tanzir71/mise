@@ -48,6 +48,13 @@ import {
 } from '../../packages/core/cloud-connection';
 import { operatorAccountHash } from '../../packages/core/operators';
 import { newInboxId } from '../../packages/core/inbox';
+import { defaultCreditMessaging } from '../../packages/core/khata-messages';
+import { defaultCreditTerms } from '../../packages/core/khata';
+import { reviewShopLink } from '../../packages/core/shop-links';
+import { closingPreview } from '../../packages/core/today';
+import { inboxPng } from '../inbox-fixture';
+import {createCloudInboxImageUploader} from '../../apps/web/src/data/cloud-inbox-upload';
+import {deliverLocalInboxImages} from '../../apps/web/src/data/local-outbox';
 interface Config {
   apiUrl: string;
   publishableKey: string;
@@ -203,9 +210,11 @@ async function deliverCommands(
   };
   if (switchOnReceipt) db.outbox.hook('reading', reading);
   try {
-    return await deliverLocalOutbox(db, w.target.targetHash, (command) =>
+    const result=await deliverLocalOutbox(db, w.target.targetHash, (command) =>
       c.remote.apply(command),
     );
+    await deliverLocalInboxImages(db,w.target.targetHash,createCloudInboxImageUploader(connection(w.config),{scope:w.scope,accountHash:w.target.accountHash,targetHash:w.target.targetHash,getAuth:()=>c.auth.commandAuthorization(),assertCurrent:value=>c.auth.assertCommandAuthorization(value)}));
+    return result;
   } finally {
     unwatch();
     if (switchOnReceipt) db.outbox.hook('reading').unsubscribe(reading);
@@ -521,6 +530,7 @@ const api = {
         tags: [],
       }),
     ),
+  captureImage: () => use(db=>db.captureInbox({title:'Original offline capture',text:'Literal\0\ud800',files:[new File([new Uint8Array(inboxPng)],'তালিকা.png',{type:'image/png'})]})),
   deliver: () =>
     use(async (db, receiver) => deliverCommands(db, await wire(receiver))),
   deliverWithReceiptSwitch: (config: Config) =>
@@ -567,6 +577,34 @@ const api = {
     use(async (db, receiver) =>
       finishPull(db, receiver, await preparePull(db, receiver)),
     ),
+  freezePull: () => use(async (db, receiver) => {
+    const {w}=await preparePull(db,receiver);return w.pendingRead;
+  }),
+  editPendingFamilies: (label:string) => use(async db=>{
+    const setup=(await db.setup())!;
+    const item=await db.saveItem({name:label,nameLocal:'বাংলা',price:3700,unit:'pc',category:label,available:true,oftenBought:false});
+    await db.setItemAvailable(item.id,false);
+    const customer=await db.saveCustomer({name:label,nickname:'',phone:'',address:'',notes:'Literal\0\ud800',tags:[]},{credit:{...defaultCreditTerms,allowed:true,limit:100000}});
+    const account=(await db.creditAccounts.where('customerId').equals(customer.id).toArray())[0];
+    const supplier=await db.saveSupplier({name:label,phone:'',note:'Original supplier note'});
+    const purchase=await db.recordPurchase({supplierId:supplier.id,supplierName:label,reference:label,lines:[{name:'Chicken',unit:'kg',qty:1.5,unitPrice:12001}],paid:'due',note:'Keep invoice'});
+    const order=await db.saveOrder({source:'phone',sourceText:'Literal\0\ud800',customerId:customer.id,name:label,phone:'',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:2,unitPrice:750}],deliveryFee:0,discount:0,payment:{method:'credit'}},{settlement:{method:'credit',accountId:account.id}});
+    await db.addOrderNote(order.id,'Keep the original note',order.revision);
+    await db.saveCreditMessaging({...defaultCreditMessaging,paymentNote:label});
+    await db.recordPreparedExport({outletId:setup.outlet.id,actorId:setup.owner.id,format:'json',datasets:[],rows:3,filename:'mise-backup.json',capturedAt:Date.now(),from:null,to:null,includePhones:true});
+    const message=await db.prepareHandoff({source:{kind:'credit',id:account.id},purpose:'reminder',target:'copy',text:'Please pay at the counter.',part:1,parts:1});
+    await db.changeHandoff(message.id,1,{type:'sent'},undefined,{kind:'credit'});
+    const inbox=await db.captureInbox({title:label,text:'Literal\0\ud800',url:'',files:[new File([new Uint8Array(inboxPng)],'তালিকা.png',{type:'image/png'})]});
+    await db.changeInbox(inbox.id,inbox.revision,{kind:'order'});
+    const confirmation=newInboxId();await db.recordSupplierMessage({id:confirmation,supplierId:supplier.id,supplierName:label,text:'Original supplier confirmation\0\ud800',channel:'manual',stockItemIds:[(await db.stockItems.toArray())[0].id],part:1,parts:1});
+    if(setup.owner.role==='owner'){
+      await db.saveSetup({name:label,phone:setup.owner.phone??'01712345482',businessType:setup.business.businessType,marketCode:setup.business.marketCode,outletName:label,address:'Road 13'});
+      const current=(await db.setup())!,items=await db.items.toArray(),review=reviewShopLink({setup:current,items,categories:await db.categories.toArray()},items.map(item=>item.id));
+      await db.generateShopLink({phone:current.owner.phone!,hours:'9–5',deliveryNote:'',mode:'menu',itemIds:items.map(item=>item.id)},review,'https://shop.test/app/');
+    }
+    const preview=closingPreview(await db.readToday()),closing=await db.closeDay({id:newInboxId(),day:preview.summary.day,fingerprint:preview.fingerprint,countedCash:preview.summary.expectedCash,note:'',addDifference:false});
+    return {itemId:item.id,customerId:customer.id,accountId:account.id,supplierId:supplier.id,purchaseId:purchase.id,orderId:order.id,handoffId:message.id,inboxId:inbox.id,confirmationId:confirmation,closingId:closing.id};
+  }),
   adoptWithoutReply: () =>
     use(async (db, receiver) =>
       finishPull(db, receiver, await preparePull(db, receiver), true),
