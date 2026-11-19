@@ -1,6 +1,5 @@
 import {supplierMessageHostedProofSql} from './supplier-message-hosted-fixture';
-import {createShopCommandRemote} from '../apps/web/src/data/shop-command-remote';
-import {createCloudCommandRemote} from '../apps/web/src/data/cloud-command-remote';
+import {testShopCommandRemote as createShopCommandRemote,testCloudCommandRemote as createCloudCommandRemote} from './command-account-fixture';
 import {parseSupplierMessageCommand,parseSupplierMessageCommandReceipt,supplierMessageWritePlan,type SupplierMessageCommand} from '../packages/core/supplier-message-commands';
 import {supplierMessageFingerprint,supplierMessageWriteFields} from '../supabase/functions/_shared/supplier-message-write';
 import {readFileSync,readdirSync} from 'node:fs';

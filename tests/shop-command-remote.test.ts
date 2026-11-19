@@ -1,5 +1,5 @@
 import {expect,it,vi} from 'vitest';
-import {createShopCommandRemote} from '../apps/web/src/data/shop-command-remote';
+import {testShopCommandRemote as createShopCommandRemote} from './command-account-fixture';
 import type {CustomerCommand} from '../packages/core/shop-commands';
 import type {MoneyCommand} from '../packages/core/money-commands';
 import {stockBatchHeader,type StockCommand} from '../packages/core/stock-commands';

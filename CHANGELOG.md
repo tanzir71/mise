@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 command delivery now stays bound to the original verified phone account and connection across HTTP and native receipt acceptance. Bounded Auth/response work, ephemeral session checks and original operator/source guards retain pending actions through account switches or transaction expiry; exact retries preserve cash without duplicates. Native convergence uses the actual phone client with an explicit local test verifier. Cloud controls and remaining M30/M31 acceptance stay gated.
+
 - M31 original owner uploads can now enter canonical reconciliation without replacing their receipt or original source. Fixed-snapshot promotion proof, schema-18 source admissions, account-pinned reads and exact native write plans preserve pending cash/stock, later offline edits and images through retries, quota failure and revocation. An original owner and joined manager converge in native browser checks. Full cloud controls and remaining M30/M31 acceptance stay gated.
 
 - M31 joined devices can now apply canonical downloads while retaining original offline cash, credit and stock intents. Exact native transactions preserve original queues and images, separate immutable join admission from the current base, and roll back on quota, stale scope or unexplained writes. Two native browsers converge through the SQL-backed HTTP services without duplicate money, stock or outgoing echoes. Schema 17 adds an internal application journal; original-upload adoption, other pending families, realtime and full cloud controls remain gated.

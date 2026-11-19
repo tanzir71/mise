@@ -6,6 +6,16 @@ records stay outside Git. Environment templates contain names and blank values.
 ignored. Server API keys, PIN peppers, cursor-signing keys and access tokens belong in the server secret
 manager; they must never use a public build-variable prefix.
 
+The [original-account command boundary](m31-command-account.md) requires live
+phone identity and original account/connection fingerprints on both transports.
+Fresh Auth verification and ephemeral receipt guards reject account changes
+before HTTP, after its bounded body and immediately before the native receipt
+write. Tokens and Auth UUIDs remain in runtime memory/scoped session storage;
+no identity field is added to a domain command, receipt, queue or portable backup.
+Receipt transactions also recheck the original operator revision, binding and
+complete queued source, including original image bytes. No hosted configuration
+or credential changes in this increment.
+
 The [original-owner admission](m31-owner-upload-adoption.md) retains verified
 compressed source and the actual receipt without storing connection values or
 sessions. Its read transport pins the account before and after HTTP; the scoped

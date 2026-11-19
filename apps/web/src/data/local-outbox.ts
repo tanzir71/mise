@@ -8,14 +8,16 @@ import {parseCloudUploadProgress,type CloudUploadReceipt} from '@mise/core/cloud
 import type {MiseDatabase} from './db';
 import {portableInboxItems,type StoredInboxItem} from './inbox';
 import {readDatabaseBackup} from './backup';
-import {parseLocalOperatorState} from '@mise/core/operators';
+import {parseLocalOperatorState,type LocalOperatorState} from '@mise/core/operators';
+import {nativeRowHash} from './canonical-writes';
+import {assertCommandReceipt} from './command-request';
 
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const same=(v:unknown):unknown=>Array.isArray(v)?v.map(same):object(v)?Object.fromEntries(Object.keys(v).sort().map(key=>[key,same(v[key])])):v;
 const token=(v:unknown)=>JSON.stringify(same(v));
 function entry(value:LocalOutboxEntry,state:LocalCloudState):LocalOutboxEntry {
  if(!value||value.version!==1||value.uploadId!==state.uploadId||value.businessId!==state.businessId||value.outletId!==state.outletId||typeof value.id!=='string'||!/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(value.id)||!Number.isSafeInteger(value.sequence)||value.sequence<1||!Number.isSafeInteger(value.at)||value.at<0||!['retained','pending','accepted'].includes(value.status)||!Array.isArray(value.commands)||!Array.isArray(value.receipts)||!Array.isArray(value.changes)||!value.changes.length||value.receipts.length>value.commands.length)throw new Error('The saved local change queue changed. Keep a backup.');
- const commands=value.commands.map(parseShopCommand);if(new Set(commands.map(c=>c.id)).size!==commands.length||value.status==='retained'&&value.receipts.length||value.status!=='retained'&&!commands.length||value.status==='accepted'&&commands.length!==value.receipts.length)throw new Error('Keep the complete queued actions and receipts.');
+ const commands=value.commands.map(parseShopCommand);if(commands.some(c=>c.outletId!==state.outletId)||new Set(commands.map(c=>c.id)).size!==commands.length||value.status==='retained'&&value.receipts.length||value.status!=='retained'&&!commands.length||value.status==='accepted'&&commands.length!==value.receipts.length)throw new Error('Keep the complete queued actions and receipts.');
  const receipts=value.receipts.map((receipt,index)=>parseShopCommandReceipt(receipt,commands[index]));
  for(const change of value.changes)if(!change||!(backupTableNames as readonly string[]).includes(change.table)||typeof change.key!=='string'||!change.key||![change.before,change.after].every(row=>row===null||object(row)&&row.id===change.key))throw new Error('Keep each original local record change.');
  return {...value,commands,receipts};
@@ -23,9 +25,12 @@ function entry(value:LocalOutboxEntry,state:LocalCloudState):LocalOutboxEntry {
 export {entry as parseLocalOutboxEntry};
 function bound(state:LocalCloudState,id:string,targetHash:string,manifestHash:string,scope?:Pick<LocalCloudState,'businessId'|'outletId'|'ownerId'>){if(state.uploadId!==id||state.targetHash!==targetHash||state.manifestHash!==manifestHash||scope&&(state.businessId!==scope.businessId||state.outletId!==scope.outletId||state.ownerId!==scope.ownerId))throw new Error('Use the original account, connection and upload for this local queue.');}
 async function joinedOperator(db:MiseDatabase,binding:LocalCloudState){
- if(binding.version!==2)return;const state=parseLocalOperatorState(await db.operatorState.get('active')),join=binding.join;
- if(!join||state.phase!=='active'||state.businessId!==binding.businessId||state.outletId!==binding.outletId||state.actorId!==binding.ownerId||state.role!==join.role||state.connection?.targetHash!==binding.targetHash||state.connection.accountHash!==join.accountHash||state.connection.epoch!==join.epoch||state.connection.scopeVersion!==join.scopeVersion)throw new Error('Verify the original joined operator before sending local changes.');
+ const raw=await db.operatorState.get('active');if(!raw&&binding.version===1)return null;const state=parseLocalOperatorState(raw),join=binding.join;
+ if(state.phase!=='active'||state.businessId!==binding.businessId||state.outletId!==binding.outletId||state.actorId!==binding.ownerId||binding.version===1&&(state.role!=='owner'||state.connection&&state.connection.targetHash!==binding.targetHash)||binding.version===2&&(!join||state.role!==join.role||state.connection?.targetHash!==binding.targetHash||state.connection.accountHash!==join.accountHash||state.connection.epoch!==join.epoch||state.connection.scopeVersion!==join.scopeVersion))throw new Error('Verify the original joined operator before sending local changes.');
+ return state;
 }
+const deliveryToken=(binding:LocalCloudState,operator:LocalOperatorState|null)=>token({binding:{...binding,sequence:0},operator});
+const originalEntry=(value:LocalOutboxEntry)=>({...value,status:'pending',receipts:[]});
 
 /** Hold the shop transaction while checking the exact reviewed source and arming its fence. */
 export async function beginLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targetHash:string):Promise<LocalCloudState>{
@@ -78,23 +83,23 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
 export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand)=>Promise<ShopCommandReceipt>):Promise<{accepted:number;retained:number;pending:number}>{
- const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||initial.phase!=='ready'||(initial.version===1?!initial.receipt:!initial.join))throw new Error('Finish the original upload or device join before sending local changes.');
- await joinedOperator(db,initial);
- const rows=(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
+ const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||initial.phase!=='ready'||(initial.version===1?!initial.receipt:!initial.join))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
+ const originalOperator=deliveryToken(initial,operator);
+ async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('A local change is missing from the delivery queue. Keep a backup.');
  for(const row of rows){
   let saved=entry(row,initial);if(saved.status==='accepted')continue;if(saved.status==='retained')break;
   for(let index=saved.receipts.length;index<saved.commands.length;index++){
    if(index<saved.receipts.length)continue;
-   const active=parseLocalCloudState(await db.cloudState.get('binding'));bound(active,initial.uploadId,targetHash,initial.manifestHash);if(active.phase!=='ready')throw new Error('The original upload is not ready.');
-   await joinedOperator(db,active);
-   const command=saved.commands[index],receipt=parseShopCommandReceipt(await send(command),command);
-   saved=await db.transaction('rw',db.cloudState,db.outbox,async()=>{
-    const state=parseLocalCloudState(await db.cloudState.get('binding'));bound(state,initial.uploadId,targetHash,initial.manifestHash);if(state.phase!=='ready')throw new Error('The original upload is not ready.');
-    const current=entry((await db.outbox.get(row.id))!,state);if(token(current.commands)!==token(saved.commands))throw new Error('A queued action changed. Keep its server receipt.');
+   const sourceHash=await nativeRowHash(originalEntry(saved));await db.transaction('r',db.cloudState,db.operatorState,currentOperator);
+   const command=parseShopCommand(JSON.parse(JSON.stringify(saved.commands[index]))),confirmed=await send(command),receipt=parseShopCommandReceipt(confirmed,saved.commands[index]);assertCommandReceipt(confirmed);
+   saved=await db.transaction('rw',db.cloudState,db.operatorState,db.outbox,async()=>{
+    const tx=Dexie.currentTransaction;
+    const state=await currentOperator();
+    const current=entry((await db.outbox.get(row.id))!,state);if(await Dexie.waitFor(nativeRowHash(originalEntry(current)))!==sourceHash)throw new Error('A queued action changed. Keep its server receipt.');
     if(current.receipts[index]){if(token(current.receipts[index])!==token(receipt))throw new Error('Keep the original action receipt.');return current;}
     if(current.receipts.length!==index)throw new Error('Keep action receipts in their original order.');
-    const receipts=[...current.receipts,receipt],next={...current,receipts,status:receipts.length===current.commands.length?'accepted' as const:'pending' as const};await db.outbox.put(next);return next;
+    const receipts=[...current.receipts,receipt],next={...current,receipts,status:receipts.length===current.commands.length?'accepted' as const:'pending' as const};assertCommandReceipt(confirmed);if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new Error('The receipt transaction changed. Keep the original action unconfirmed.');await db.outbox.put(next);return next;
    });
   }
  }

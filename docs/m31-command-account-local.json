@@ -1,0 +1,177 @@
+{
+  "checkedAt": "2026-11-19T07:40:00.417Z",
+  "milestones": [
+    "M30",
+    "M31"
+  ],
+  "complete": false,
+  "scope": "Original live account and connection continuity across both command transports and native outbox receipt acceptance",
+  "checks": {
+    "lint": {
+      "passed": true,
+      "logSha256": "77aab81b7f502e7bfe5a74dbfa86021dcdde149bcdfef10f1ec6a3ed7b5de15c"
+    },
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 118,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "logSha256": "86ff6acdf1eb3534be7b56cdc7d4302e48cc61dcbd5256fe9cb5b0893cdf5a7d"
+    },
+    "units": {
+      "passed": 2329,
+      "files": 123,
+      "failed": 0,
+      "pending": 0,
+      "reportSha256": "6204155df42615a1cfcf20327490f71528d66f9918fc0a32804a74ec20f8ec8a"
+    },
+    "browser": {
+      "passed": 410,
+      "workers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "11e5d6c0568dd15fca69e9155c1931768499fa5bf81b47639e71da7f98d08754"
+    },
+    "rootBrowser": {
+      "passed": 53,
+      "workers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "reportSha256": "c1bd0cba139d41b204907123faf9ac6176f1f01dad2c4044f2c34a1234685de1"
+    },
+    "visual": {
+      "comparisons": 50,
+      "overflow": 0,
+      "layoutChanged": false,
+      "reportSha256": "f021577da41be980688fccf55367618474d408dfb3e091515bb844bbc114b00e"
+    },
+    "exports": 270,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "rootBuildLogSha256": "85dc195d40ef5dc416d362d9213af7d8bde020d4d3ca28210ad93dfad94986f5",
+    "pagesBuildLogSha256": "3845226b31f30830b461f2eabfefea9804242f2871834be6490b9b6b6512dfd5",
+    "testApisInShippedAssets": false,
+    "focusedSourceFreeze": {
+      "passed": 77,
+      "files": 3,
+      "reportSha256": "a1b7c909b5e0470a995d6703b6d55d972e19085e64c9d4dd28f19f05423cae71"
+    },
+    "transportAccountRegressions": 28,
+    "nativeAccountRegressions": 3,
+    "sourceFreezeVerified": true
+  },
+  "schema": {
+    "local": 18,
+    "stores": 32,
+    "portable": 10,
+    "portableTables": 21,
+    "changed": false
+  },
+  "invariants": {
+    "jwtAloneCannotConstructEitherCommandTransport": true,
+    "originalAccountConnectionAndScopeRequired": true,
+    "freshConfirmedNonAnonymousPhoneUserVerification": true,
+    "sessionRecheckedAfterAuthVerification": true,
+    "accountCheckedBeforeFetchAfterBodyAndBeforeNativeReceiptWrite": true,
+    "changedAwayAndBackGenerationRejected": true,
+    "sameUninterruptedAccountTokenRefreshAllowed": true,
+    "originalCommandFrozenBeforeAuth": true,
+    "wholeRequestDeadlineIncludesAuthAndStreamingBody": true,
+    "receiptLimitBytes": 2097152,
+    "strictUtf8Json": true,
+    "uncooperativeCallbacksDoNotBlockCancellation": true,
+    "cookiesRedirectsAndCachingExcluded": true,
+    "fixedErrorsContainNoBackendSessionOrConnectionValues": true,
+    "receiptContinuityGuardEphemeralNotSerialized": true,
+    "synchronousGuardRequired": true,
+    "originalOperatorRevisionBindingAndCompleteQueueSourceRechecked": true,
+    "originalImageBytesIncludedInQueueSourceProof": true,
+    "operatorBindingAndQueueStoresLockedTogether": true,
+    "expiredReceiptTransactionCannotOpenIndependentWriter": true,
+    "concurrentLocalCashPreserved": true,
+    "originalCommandIdsAndQueueFieldsUnchanged": true,
+    "fullCloudControlsDefaultOff": true
+  },
+  "integration": {
+    "http": "actual local TCP",
+    "sql": "all 36 migrations with authenticated/service roles and original command tickets/receipts",
+    "phoneClient": "actual installed Supabase client and PhoneAuth adapter",
+    "accountVerifier": "explicit synthetic local HTTP Auth service",
+    "objects": "explicit in-memory test adapter",
+    "switchAfterRealSqlCommitRetainsPendingReceipt": true,
+    "operatorLockWithSameAuthAccountRetainsPendingReceipt": true,
+    "storageChangeInsideLockedNativeReceiptTransactionRetainsPendingReceipt": true,
+    "freshOriginalAccountRetryAcceptsSameReceiptWithoutDuplicateCash": true,
+    "originalUploadedOwnerAndJoinedManagerOfflineConvergencePreserved": true,
+    "genuineHostedPhoneJwtHttp": false,
+    "realOtp": false,
+    "hostedStoragePositive": false
+  },
+  "hosted": {
+    "migrationsThisIncrement": 0,
+    "functionsDeployedThisIncrement": 0,
+    "authChanges": 0,
+    "newSecrets": 0,
+    "priorVerifiedAt": "2026-11-19T06:46:00.120Z",
+    "priorVerifiedMigrations": 36,
+    "priorVerifiedForcedRlsTables": 58,
+    "priorVerifiedReadFunctionVersion": 4,
+    "priorEvidence": "m31-owner-upload-local.json",
+    "freshHostedPositiveAcceptanceClaimed": false
+  },
+  "privacy": {
+    "sourceIndexHistoryAndArtifactsChecked": true,
+    "knownValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretIdentifierFindings": 22,
+    "coverageGaps": 0,
+    "historyRewritten": false
+  },
+  "publication": {
+    "workflowsDisabled": 3,
+    "activeWorkflowRuns": 0,
+    "githubSecretScanning": "enabled",
+    "githubPushProtection": "enabled",
+    "openSecretAlerts": 0,
+    "pagesHeld": true,
+    "newPagesDeploy": false,
+    "ciArtifactUploaded": false
+  },
+  "remaining": [
+    "Other unconfirmed command families and explicit conflict recovery",
+    "Changed scope/epoch bootstrap",
+    "Reconnect/backoff/realtime orchestration and header sync state",
+    "Genuine phone OTP and hosted owner/image HTTP",
+    "5000-record upload under 60 seconds on 3G",
+    "Remaining M30/M31 requirements and all subsequent handover milestones"
+  ],
+  "sourceSha256": {
+    "CHANGELOG.md": "eb92acf560e00407043ed4d0f9a922ddb3195a456563ebd053f2b5f0ef4733a9",
+    "apps/web/src/data/cloud-command-remote.ts": "ebb8e49154856774ebedd53a4e8a17dc46a9e21d6361521c2611f4d1b2622341",
+    "apps/web/src/data/local-outbox.ts": "10b84f0fc742bd7a8bd5bb345ead1b7e5d574fa36a7094f969e6bd3d44b11686",
+    "apps/web/src/data/phone-auth.ts": "232a456e6c6a04335fafbbe08d40ff6ce24349592046d7a82ba6aab29fdd2584",
+    "apps/web/src/data/shop-command-remote.ts": "4ccdf1ef45b1169358a6094df64863f3608a9c1c21e4d9f399fcab92a6d77e2d",
+    "docs/security.md": "f89273632d51b5d4a53f9d31330e7e0443a61ab3f92174bd946237bf3bd01121",
+    "handover/DECISIONS.md": "ee7d0a30c45a2ad1f618673600bd79cbcf3d35f09fcee369b558eb6f6c8aef22",
+    "handover/docs/03-roadmap.md": "b8fd9e49ef1f01af9c00d633cd7a7fd6b3f698ff642153e4afe237cb4d815852",
+    "tests/cloud-command-remote.test.ts": "1df45b9896698751600f8efb9ec78fc0eaff1be43dcb7288cb335970b3b89535",
+    "tests/fixtures/sync-apply-browser.ts": "fd81c12bfc244c8131bee1f5374e890db80a62a1e97920d14d0fe59964b7ce70",
+    "tests/handoff-commands.test.ts": "27142e328171b9edb2fa35036bd70fc5e7e4f997fca6e07a9007f075536f56ce",
+    "tests/link-commands.test.ts": "d812c488ba7e3f34564f557b73d64e771d50242e83679f58c06a0bbd75fd50a7",
+    "tests/local-outbox-db.test.ts": "ab59f1c44f3d208a6023c138e0e503d6026010324cb547e885d27930620b9643",
+    "tests/phone-auth.test.ts": "354b6589c17ec7b2ff60a164c9b46f4b5aa619a9c8d1126da51ba9334c8f04b7",
+    "tests/shop-command-remote.test.ts": "fc47d47b323b2530a75851b796471aa9c18cecdc90511a189f395b49443dae14",
+    "tests/sync-convergence-server.ts": "84da2c9ea893e397cbb38e25a415e45d58a5ca07f97bb2728d0253f202997320",
+    "apps/web/src/data/command-request.ts": "edacb8e48be79c7656e35fa59c5a08351c7f0a5a9a0544d1164edf65ff17d55f",
+    "docs/m31-command-account.md": "4949c43ff2e14a48c0f468f24f2de9c2fdc2ef04f1bc432418eb994a4c828400",
+    "tests/command-account-fixture.ts": "4e10a6ce13980c3b893e4ef1fbdaedcf51764c34139d7a4850fd8e61453cb8e0",
+    "tests/command-account.test.ts": "0eca810b5dd7c55f2b98b83225e22afd903ab06fb67383ab6b6a4871aec8f088",
+    "tests/e2e/command-account.spec.ts": "e3a20e4f431c28a91e5decf12e2a48b04bd2996001d8b50820e29f12436c01a9"
+  }
+}

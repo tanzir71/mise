@@ -1,5 +1,6 @@
 import {expect,it,vi} from 'vitest';
-import {createCloudCommandRemote,CloudCommandError} from '../apps/web/src/data/cloud-command-remote';
+import {CloudCommandError} from '../apps/web/src/data/cloud-command-remote';
+import {testCloudCommandRemote as createCloudCommandRemote} from './command-account-fixture';
 import type {ShopCommand} from '../packages/core/shop-commands';
 import {uploadId} from './cloud-upload-fixture';
 const config={apiUrl:'https://cloud.test',publishableKey:'sb_publishable_test_only'};
