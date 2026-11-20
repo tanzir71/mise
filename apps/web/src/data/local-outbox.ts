@@ -90,12 +90,12 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 }
 
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
-export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand)=>Promise<ShopCommandReceipt>):Promise<{accepted:number;retained:number;pending:number}>{
+export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand)=>Promise<ShopCommandReceipt>,throughCommandId?:string):Promise<{accepted:number;retained:number;pending:number}>{
  const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
  const originalOperator=deliveryToken(initial,operator);let deliveryIdentityHash:Promise<string>|null=null;
  async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('A local change is missing from the delivery queue. Keep a backup.');
- for(const row of rows){
+ delivery: for(const row of rows){
   let saved=entry(row,initial);if(saved.status==='accepted')continue;
   if(isLocalInboxRetention(saved)){const original=await nativeRowHash(saved);await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{await currentOperator();if(await Dexie.waitFor(nativeRowHash(entry((await db.outbox.get(saved.id))!,initial)))!==original)throw new Error('The original saved share changed. Keep its source.');});continue;}
   if(saved.status==='retained')break;
@@ -141,12 +141,19 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
     const writable=()=>{assertCommandReceipt(confirmed);if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new Error('The receipt transaction changed. Keep the original action unconfirmed.');};
     writable();if(confirmedReview){await db.syncActionReviews.put(confirmedReview);writable();}if(!alreadyConfirmed){await db.outbox.put(next);writable();}return next;
    });
+   if(command.id===throughCommandId)break delivery;
   }
  }
  const latest=await db.outbox.where('uploadId').equals(initial.uploadId).toArray();return {accepted:latest.filter(r=>r.status==='accepted').length,retained:latest.filter(r=>r.status==='retained'&&!isLocalInboxRetention(r)).length,pending:latest.filter(r=>r.status==='pending').length};
 }
 /** Read the actual retained source, offline, for this original active operator.
  * Observations and local hashes never authorize replacement or disposal. */
+export async function localReviewIdentity(db:MiseDatabase){
+ const binding=parseLocalCloudState(await db.cloudState.get('binding'));
+ if(!hasOriginalAdmission(binding))throw new Error('Use the original admitted outlet to review saved actions.');
+ const operator=await joinedOperator(db,binding),identityHash=await Dexie.waitFor(syncHash(new TextEncoder().encode(deliveryToken(binding,operator))));
+ return {binding,identityHash};
+}
 export async function readLocalActionReviews(db:MiseDatabase):Promise<{review:SyncActionReview;entry:LocalOutboxEntry;command:ShopCommand}[]> {
  return db.transaction('r',db.cloudState,db.operatorState,db.outbox,db.syncActionReviews,async()=>{
   const binding=parseLocalCloudState(await db.cloudState.get('binding'));

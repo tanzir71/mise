@@ -66,7 +66,9 @@ decision, and converge all domain records and images with later counter cash.
 These fixtures use explicit synthetic Auth; genuine hosted OTP acceptance is
 still required. Validation is recorded in [the local record](m31-order-resolution-local.json).
 
-The operator interface and other financial command families are unfinished.
+The [operator interface](m31-order-review-interface.md) now exposes the order
+review, explicit decisions and lost-outcome recovery. Other financial command
+families and normal admission across a changed outlet currency remain unfinished.
 Cloud flags remain off, M30/M31 remain unchecked, and all GitHub workflows and
 Pages publication remain held. Actual deployment details and credential values
 stay outside Git and static build variables.

@@ -14,3 +14,5 @@
 - Resolved M30 customer/account identity: strict device-generated companion-ID plans now retain the exact account/opening/audit IDs from the local mutation. Conflicting current-account creation returns retained-intent review. M31 still needs ordered delivery and conflict resolution; the outbox remains unavailable.
 
 - Resolved M30 operator-picker reference: M30 names no dedicated frame. Reuse the existing onboarding/card primitives, with M38's outlet hierarchy as a visual reference, and verify all five required widths. Differences are informational; do not claim an exact match or request owner sign-off.
+
+- M31 follow-up: normal queued order admission needs proof of the saved monetary currency before enabling cloud sync. The explicit review interface refuses a changed currency, but an original create/payment must not silently reinterpret minor units after outlet settings change. Preserve original queue hashes; add a source-bound admission assertion rather than rewriting old commands. This remains implementation work, not an owner question.

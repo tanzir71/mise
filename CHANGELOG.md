@@ -12,7 +12,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- M31 order conflicts now have a current-value review protocol and distinct server-authorized withdrawal or replacement receipts. Replacement retains the original financial IDs and physical time; lost replies recover the actual outcome, and canonical audit proof is required before retiring the original projection. Native two-browser checks preserve later cash, full sources and images. The review interface and other financial families remain unfinished; cloud sync stays off by default.
+- M31 saved order actions now have an opt-in comparison and explicit apply/withdraw controls. The token-free review journal survives offline reload and lost replies, checks the actual server outcome before retrying, and shows current currency, customer, khata and payment/refund effects. Changed values require a fresh choice; original sources and financial identities remain intact. The sync header's visible queue count and accessible label now match; financial previews decode literal method labels once. Other financial families and hosted acceptance remain open.
+
+- M31 order conflicts now have a current-value review protocol and distinct server-authorized withdrawal or replacement receipts. Replacement retains the original financial IDs and physical time; lost replies recover the actual outcome, and canonical audit proof is required before retiring the original projection. Native two-browser checks preserve later cash, full sources and images. Other financial families remain unfinished; cloud sync stays off by default.
 
 - Sync now retains an account-bound observation of an exact rejected action, its original queue source and accepted receipt prefix. Reviews survive offline reload without changing money, source images or commands. A genuine later receipt confirms the observation atomically; the financial review interface remains unfinished, and cloud sync stays off by default.
 

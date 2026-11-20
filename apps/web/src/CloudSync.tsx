@@ -24,6 +24,7 @@ import {
 import { newInboxId } from '@mise/core/inbox';
 import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import './cloud-sync.css';
+import {OrderActionReview} from './OrderActionReview';
 
 function useSyncView() {
   return useLiveQuery(async () => {
@@ -36,8 +37,9 @@ function useSyncView() {
         .count(),
       binding = await db.cloudState.get('binding'),
       operator = await db.operatorState.get('active'),
+      hasOrderReview = binding ? await db.orderReviews.where('uploadId').equals(binding.uploadId).count() > 0 : false,
       canRecover = await db.syncCanonical.where('id').equals('active').count() > 0;
-    return { state, unsent, binding, operator, canRecover };
+    return { state, unsent, binding, operator, canRecover, hasOrderReview };
   }, []);
 }
 function sameConnection(config: CloudConnection) {
@@ -148,7 +150,7 @@ export function CloudSyncStatus({
       to="/settings/sync"
       aria-label={`Sync: ${label}${view?.unsent ? `, ${view.unsent} unsent` : ''}`}
     >
-      <span role="status">{label}</span>
+      <span role="status">{label}{view?.unsent ? ', ' : ''}</span>
       {view?.unsent ? (
         <span className="sync-unsent" aria-hidden="true">
           {view.unsent}
@@ -269,6 +271,7 @@ export function CloudSyncControls({
         </p>
       ) : null}
       <footer>
+        {state&&(state.problem==='review'||view?.hasOrderReview)?<OrderActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {view?.binding&&view.canRecover&&state?.problem==='review'?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/recovery')}>Review outlet access</Button>:null}
         {view?.binding?.version===1&&view.binding.phase==='ready'&&!view.canRecover&&(state?.problem==='review'||state?.problem==='auth'||needsRebind)?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/owner-recovery')}>Review original connection</Button>:null}
         {!state || state.problem === 'auth' || needsRebind ? (

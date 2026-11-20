@@ -1,5 +1,12 @@
 # Deployment credentials
 
+The [saved order review journal](m31-order-review-interface.md) retains only the
+original action, token-free comparison, choices and genuine receipts. Review
+tokens remain ephemeral; neither credentials nor connection configuration enter
+the new store or portable backups. Native account, connection and complete-source
+checks surround every saved choice. Actual project/organization values stay in
+ignored private inputs and are compared in memory by the credential guard.
+
 The [Git history privacy policy](security-history.md) restricts old identifier
 exceptions to exact reviewed object fingerprints. New deployment references in
 history, branch/tag names and old filename aliases now block the scan. Every raw

@@ -1,0 +1,145 @@
+{
+  "checkedAt": "2026-11-20T05:51:26.109Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Opt-in saved order review interface and durable decisions; other financial families and hosted acceptance remain open",
+  "schemas": {
+    "local": 23,
+    "localStores": 37,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": true,
+    "unit": {
+      "passed": 2553,
+      "files": 137,
+      "seconds": 475.83,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "limitsChanged": false
+    },
+    "focused": {
+      "passed": 144,
+      "nativeJournalCases": 8
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "fullRun": {
+        "startTime": "2026-11-20T04:59:41.995Z",
+        "duration": 740307.4670000001,
+        "expected": 447,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0,
+        "errors": 0
+      },
+      "schemaUpgradeFollowup": {
+        "startTime": "2026-11-20T05:12:56.292Z",
+        "duration": 10836.749,
+        "expected": 7,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0,
+        "errors": 0,
+        "note": "The only full-run failure expected the old schema/store count. Corrected the legacy fixture to exclude orderReviews and verify the new store starts empty. All seven coverage cases then passed; production assets were unchanged."
+      },
+      "validatedDistinctCases": 448,
+      "unresolvedFailures": 0,
+      "actualUi": true,
+      "sqlHttp": true,
+      "lostActualCompletionReply": true,
+      "offlineReload": true,
+      "changedPriceRequiresNewChoice": true,
+      "originalCommandsAndSourcePreserved": true,
+      "laterCashConverged": true,
+      "syntheticAuthStorageRealtime": true,
+      "finalNativeFollowup": {
+        "startTime": "2026-11-20T05:40:07.548Z",
+        "duration": 66327.931,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0,
+        "errors": 0,
+        "note": "Final header-label correction rebuilt both bases. Native sync, order review and coverage files were rerun with the new whole-page serious/critical accessibility assertion; full unit verification includes the corrected proposed financial-label decoder."
+      }
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T05:50:24.005Z",
+      "comparisons": 254,
+      "overflow": 0,
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "screenshots": [
+        "qa/screens/m31-order-review-phone-review-390.png",
+        "qa/screens/m31-order-review-desktop-review-1440.png",
+        "qa/screens/m31-order-unconfirmed-phone-review-390.png"
+      ]
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T05:32:07.858Z",
+      "version": 23,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sourceMatches": true,
+      "bundleBytes": 441425,
+      "bundleSha256": "93921f46d0d6dd228d49b61543c51d5ea5cf5980c1ad13e5f89f2dc735bbd6d9",
+      "sourceFiles": 84,
+      "functions": 7,
+      "applicationTables": 60,
+      "forcedRlsTables": 60,
+      "securityWarnings": 0,
+      "securityErrors": 0,
+      "actualDeploymentValuesInPublicReport": false,
+      "genuineHostedOtpAcceptance": false,
+      "unauthenticatedChecks": [
+        {
+          "kind": "commands",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=read",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=resolve",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-outcome",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-completion",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "privateValuesCompared": 10,
+      "credentials": 0,
+      "currentDeploymentReferences": 0,
+      "olderNonsecretFindings": 22,
+      "newHistoricalReferences": 0,
+      "coverageGaps": 0,
+      "historyPolicyUnchanged": true
+    }
+  },
+  "publication": {
+    "workflows": "disabled",
+    "pages": "held by owner",
+    "ciRun": null,
+    "ciArtifact": null
+  },
+  "remaining": [
+    "Other financial action families",
+    "Original monetary currency assertion on normal admission",
+    "Genuine hosted phone OTP and physical device acceptance",
+    "Remaining M30/M31 acceptance and later handover milestones"
+  ]
+}

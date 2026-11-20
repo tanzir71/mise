@@ -368,6 +368,7 @@ export async function startConvergenceServer(
     });
   let apiUrl = '',
     loseCommand = false,
+    loseResolution = false,
     losePage = false,
     loseImage = false,
     loseUploadFinish = false,
@@ -463,8 +464,9 @@ export async function startConvergenceServer(
           });
           releaseCommand = null;
         }
-        if (loseCommand && response.ok) {
+        if ((loseCommand||loseResolution&&new URL(request.url).searchParams.get('review')==='resolve') && response.ok) {
           loseCommand = false;
+          loseResolution = false;
           await truncate(response);
           return;
         }
@@ -611,6 +613,7 @@ export async function startConvergenceServer(
     loseNextCommand() {
       loseCommand = true;
     },
+    loseNextResolution() {loseResolution=true;},
     loseNextPage() {
       losePage = true;
     },

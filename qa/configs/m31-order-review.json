@@ -1,0 +1,76 @@
+{
+  "title": "M31 — Saved order financial review",
+  "pages": [
+    {
+      "id": "m31-order-review-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "orderActionReviewFixture": "review",
+      "note": "M31 supplies no financial-review frame. Reuses M27 More tokens, card rhythm and controls. Actual two-device review through local SQL/HTTP; Auth, Realtime and Storage are synthetic. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".order-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}"
+    },
+    {
+      "id": "m31-order-review-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "orderActionReviewFixture": "review",
+      "note": "M31 supplies no financial-review frame. Reuses Desktop 14 Business data tokens, cards and controls. Actual two-device review through local SQL/HTTP; Auth, Realtime and Storage are synthetic. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".order-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}"
+    },
+    {
+      "id": "m31-order-unconfirmed-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        390
+      ],
+      "orderActionReviewFixture": "unconfirmed",
+      "note": "An actual lost SQL resolution reply retains the chosen values and original action. M27 More supplies tokens; no dedicated M31 frame exists. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".order-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}"
+    },
+    {
+      "id": "m31-order-unconfirmed-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        1440
+      ],
+      "orderActionReviewFixture": "unconfirmed",
+      "note": "An actual lost SQL resolution reply retains the chosen values and original action. Desktop 14 supplies tokens; no dedicated M31 frame exists. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".order-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}"
+    }
+  ]
+}

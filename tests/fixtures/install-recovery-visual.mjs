@@ -32,7 +32,7 @@ export async function captureOwnerResumeReview(page){
  await page.getByRole('heading',{name:'Restore the original connection',exact:true}).waitFor();await page.getByRole('button',{name:'Restore original connection',exact:true}).waitFor();
  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.cloud-owner-resume button')).some(button=>button.textContent?.trim()==='Restore original connection'&&!button.disabled));
 }
-async function checkLocalInboxAccess(page){await page.evaluate(()=>document.fonts.ready);const result=await new AxeBuilder({page}).analyze();if(result.violations.some(v=>v.impact==='serious'||v.impact==='critical'))throw Error('The current Inbox view has serious or critical accessibility violations.');}
+async function checkLocalInboxAccess(page){await page.evaluate(()=>document.fonts.ready);const result=await new AxeBuilder({page}).analyze();if(result.violations.some(v=>v.impact==='serious'||v.impact==='critical')){writeFileSync('.private/order-review-visual-axe.json',JSON.stringify(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),null,2));throw Error('The current view has serious or critical accessibility violations; local rule/selector details are retained privately.');}}
 export async function captureLocalInboxReview(page,mode='review'){
  service??=start();const {server,installRealtimeFixture}=await service,config=server.config(1);
  await page.evaluate(()=>localStorage.setItem('mise.flags',JSON.stringify({cloudSync:true,shareTarget:true})));
@@ -55,5 +55,29 @@ export async function capturePendingJoinShare(page,mode){
  else if(await page.getByRole('button',{name:'Join an existing outlet',exact:true}).count())throw Error('The default-off join action must not be advertised during local setup.');
  await page.getByRole('status').filter({hasText:'1 shared item is saved on this device.'}).waitFor();
  await checkLocalInboxAccess(page);
+}
+/** The actual order-review controls backed by two devices and local SQL/HTTP. */
+export async function captureOrderActionReview(page,mode='review'){
+ if(!['review','unconfirmed'].includes(mode))throw Error('Choose a saved order review state.');
+ // Each capture owns its SQL state: a prior withdrawal deliberately leaves a
+ // financial fence, which must not become another viewport's starting context.
+ const {server,installRealtimeFixture}=await start();
+ const base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));
+  await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));
+  await page.evaluate(async()=>{await window.miseSyncApplyTest.concurrentOrder('payment');await window.miseSyncApplyTest.cash('5');});
+  await owner.evaluate(()=>window.miseSyncApplyTest.concurrentOrder('price'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  await page.evaluate(()=>window.miseSyncApplyTest.cycle());await installRealtimeFixture(page,server.config(2).jwt);
+  await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review saved order action',exact:true}).click();
+  const panel=page.getByRole('region',{name:'Saved order review'});
+  await panel.getByRole('button',{name:'Check current values',exact:true}).click();await panel.getByRole('button',{name:'Apply reviewed action',exact:true}).waitFor();
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.order-action-review button')).some(b=>b.textContent?.trim()==='Apply reviewed action'&&!b.disabled));
+  if(mode==='unconfirmed'){
+   server.loseNextResolution();await panel.getByRole('button',{name:'Withdraw saved action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();
+  }
+  await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
 export async function closeRecoveryVisual(){const previous=service;service=undefined;if(previous){let value;try{value=await previous;}catch{return;}await value.server.close();}}

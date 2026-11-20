@@ -695,6 +695,7 @@ const api = {
       operator: await db.operatorState.get('active'),
       recoveries: await db.scopeRecoveries.toArray(),
       actionReviews: await db.syncActionReviews.toArray(),
+      orderReviews: await db.orderReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

@@ -4,9 +4,9 @@ import {afterAll,beforeAll,beforeEach,expect,it} from 'vitest';
 import {setupCommand} from '../packages/core/setup';
 import {emptyBackupTables} from '../packages/core/backup-tables';
 import {createBackup} from '../packages/core/backup';
-import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,prepareCloudMigration,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMaps,decodeCommandRecord,decodeProposedCommandRecord,encodeCommandRecord,prepareCloudMigration,type CloudRecord} from '../packages/core/cloud-records';
 import {saveCustomerCommand} from '../packages/core/customers';
-import {chargeCreditCommand,defaultCreditTerms,saveCreditTermsCommand} from '../packages/core/khata';
+import {chargeCreditCommand,defaultCreditTerms,saveCreditTermsCommand,recordCreditPaymentCommand,creditBalance} from '../packages/core/khata';
 import {saveOrderCommand,type OrderInput} from '../packages/core/orders';
 import {nextOrderStatuses,isOrderFinished} from '../packages/core/orders';
 import {newInboxId} from '../packages/core/inbox';
@@ -14,7 +14,7 @@ import {orderBodyHeader,orderBodyLimit,orderWritePlan,parseOrderCommand,parseOrd
 import {orderFingerprint,orderWriteFields} from '../supabase/functions/_shared/order-write';
 import {createCommandStore,createCommandsHandler} from '../supabase/functions/_shared/commands-handler';
 import type {ShopCommand} from '../packages/core/shop-commands';
-import type {CreditAccount,Customer,Order,OrderRefund,Sale,SetupCommand} from '../packages/core/models';
+import type {CreditAccount,CreditEntry,Customer,Order,OrderRefund,Sale,SetupCommand} from '../packages/core/models';
 import {orderHostedProofSql} from './order-hosted-fixture';
 import {parseCommandResolutionReceipt,reviewedOrderProposal} from '../packages/core/command-resolution';
 import {commandReviewHeader} from '../packages/core/command-resolution';
@@ -79,7 +79,7 @@ beforeAll(async()=>{
 },30000);
 beforeEach(async()=>{lastError='';await db.exec("truncate public.customers,public.orders,public.sales,public.credit_entries,public.events cascade;delete from private.shop_command_receipts;delete from private.order_write_tickets;delete from private.money_write_tickets;update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null;update public.members set active=true");for(const a of actors){await db.query('update public.members set role=$1,auth_user_id=$2 where id=$3',[a.role,uid(a.n),a.id]);await db.query('delete from public.member_outlets where member_id=$1',[a.id]);await db.query('insert into public.member_outlets values($1,$2,$3)',[a.n===4?foreign.snapshot.business.id:source.snapshot.business.id,a.id,a.outlet]);}await insert(initial);});
 afterAll(async()=>{await db?.close();});
-beforeEach(async()=>{await db.exec('delete from private.order_command_resolutions;delete from private.order_review_tickets');});
+beforeEach(async()=>{await db.exec('delete from private.order_command_resolutions;delete from private.order_review_tickets');for(const s of [source,branch,foreign])await db.query('update public.outlets set currency=$1 where id=$2',[s.snapshot.outlet.currency,s.snapshot.outlet.id]);});
 it('the production account-bound review transport carries the exact typed view and genuine financial resolution through SQL-backed HTTP',async()=>{
  const config={apiUrl:'https://api.test',publishableKey:'sb_publishable_test_only'},handler=createOrderReviewHandler({origins:new Set([origin]),store:createOrderReviewStore('https://database.test',config.publishableKey,'sb_secret_test_only',commandTransport())}),send:typeof fetch=async(url,init)=>{const headers=new Headers(init?.headers);headers.set('Origin',origin);return handler(new Request(url,{...init,headers}));},remote=createCloudOrderReviewRemote(config,testCommandAccount(config,async()=>'user.1.signature'),{businessId:source.snapshot.business.id,outletId:source.snapshot.outlet.id,actorId:source.snapshot.owner.id},send),packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:pay(),sourceHash:'a'.repeat(64),sourceJson:JSON.stringify({source:literal,total:2500})};
  const prepared=await remote.prepare(packet);expect(prepared.done).toBe(false);if(prepared.done)throw Error('Expected review');expect(prepared.review.proposal).toMatchObject({enabled:true,total:2500});assertCommandReceipt(prepared.review);
@@ -127,6 +127,33 @@ it('a lost resolution reply is read through the actual original outcome without 
 });
 it.each([3,4,5,6])('operator %s cannot inspect or prepare another outlet financial review',async n=>{await expect(openReview(pay(),n)).rejects.toMatchObject({code:'42501'});expect((await db.query('select * from private.order_review_tickets')).rows).toHaveLength(0);});
 it('membership revoked after review blocks the privileged decision and retains the pending source',async()=>{const r=await openReview(pay()),before=await counts();await db.query('update public.members set active=false where id=$1',[source.snapshot.owner.id]);await expect(finishReview(r)).rejects.toMatchObject({code:'42501'});expect(await counts()).toEqual(before);});
+it('the reviewed cancellation exposes the actual remaining khata and refund due after a later customer payment',async()=>{
+ await accepted(pay(order,true));const c=status(await readOrder(),'cancelled');await accepted(note(await readOrder(),'A concurrent note'));
+ const readEntries=async()=>(await db.query<{data:Record<string,unknown>}>('select row_to_json(e) data from public.credit_entries e where account_id=$1',[account.id])).rows.map(r=>decodeCommandRecord('creditEntries',r.data) as unknown as CreditEntry);
+ const collected=recordCreditPaymentCommand(1000,'cash',undefined,{setup:source.snapshot,customer,account,entries:await readEntries()},[],'Paid before the cancellation review',Date.now()-500,()=>newInboxId());await insert([encodeCommandRecord('creditEntries',collected.entry,source.snapshot.business.id),encodeCommandRecord('events',collected.event,source.snapshot.business.id)]);
+ const packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:'{}'},response=await reviewHttp(packet);expect(response.status).toBe(200);const result=await response.json() as {review:PreparedOrderReview};expect(result.review.current.balance).toBe(1500);expect(result.review.proposal).toMatchObject({enabled:true,creditBalance:0,refundDue:1000,currency:'BDT'});
+ expect((await reviewHttp({...packet,token:result.review.token,outcome:'replaced'})).status).toBe(200);expect(creditBalance(account,await readEntries())).toBe(0);expect((await readOrder()).payment.cancellation?.refundDue).toBe(1000);
+});
+it('a new-order review states the actual proposed currency even when no current order exists',async()=>{
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',source.snapshot.outlet.id]);const c=create(),packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:'{}'};
+ const response=await reviewHttp(packet);expect(response.status).toBe(200);const result=await response.json();expect(result).toMatchObject({done:false,review:{current:{order:null},proposal:{enabled:true,currency:'USD',total:2500}}});
+});
+it('reviewed financial effects show the literal Cash method without transport JSON quotes',async()=>{
+ const c=pay(),packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:'{}'};
+ const response=await reviewHttp(packet);expect(response.status).toBe(200);const result=await response.json();expect(result.review.proposal.effects).toMatchObject([{kind:'payment',method:'cash',methodName:'Cash'}]);
+});
+it('proposed financial record decoding preserves literal quotes and Unicode exactly once',()=>{
+ for(const table of ['sales','orderRefunds','creditEntries'] as const)for(const methodName of ['Cash','"Cash"','A\0বাংলা\ud800']){
+  const original={id:newInboxId(),outletId:source.snapshot.outlet.id,methodName},record=encodeCommandRecord(table,original,source.snapshot.business.id);
+  expect(decodeProposedCommandRecord(table,record)).toEqual(original);
+  expect(()=>decodeProposedCommandRecord(table,{...record,table:'unrelated'})).toThrow('proposed record table');
+ }
+});
+it('a review labels credit balance currency separately from an existing historical order currency',async()=>{
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',source.snapshot.outlet.id]);
+ await db.query('update public.credit_accounts set currency=$1 where id=$2',['USD',account.id]);const c=pay(order,true),packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:'{}'};
+ const response=await reviewHttp(packet);expect(response.status).toBe(200);const body=await response.json();expect(body).toMatchObject({done:false,review:{current:{order:{currency:'BDT'},creditCurrency:'USD',balance:0}}});if(body.review.proposal.enabled)expect(body.review.proposal.currency).toBe('BDT');
+});
 it('a withdrawn edit cannot authorize a later offline payment through a coincidentally matching revision or intervening note',async()=>{
  const edit={...create(),type:'order.update' as const,orderId:order.id,revision:order.revision};edit.input.lines[0].unitPrice=1500;const review=await openReview(edit);await finishReview(review,'withdrawn');
  await accepted(note({...order,revision:order.revision+1},'Original later offline note'));

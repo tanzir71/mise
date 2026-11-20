@@ -18,10 +18,19 @@ import {
   type CommandAuthorization,
 } from '../apps/web/src/data/command-request';
 import { nativeRowHash } from '../apps/web/src/data/canonical-writes';
-import {assertResolutionSources,assertCanonicalResolutions} from '../apps/web/src/data/command-resolution';
-import {prepareOrderReviewSource} from '../apps/web/src/data/order-review-source';
-import type {CommandResolutionReceipt} from '../packages/core/command-resolution';
-import type {AuditEvent} from '../packages/core/models';
+import {
+  assertResolutionSources,
+  assertCanonicalResolutions,
+} from '../apps/web/src/data/command-resolution';
+import { prepareOrderReviewSource } from '../apps/web/src/data/order-review-source';
+import type { CommandResolutionReceipt } from '../packages/core/command-resolution';
+import type { AuditEvent } from '../packages/core/models';
+import {
+  readOrderReviewWorkspace,
+  prepareSavedOrderReview,
+  decideSavedOrderReview,
+} from '../apps/web/src/data/order-review-session';
+import type { Order } from '../packages/core/models';
 import { backupToken } from '../packages/core/backup';
 import { parseSyncActionReview } from '../packages/core/sync-action-review';
 import {
@@ -41,7 +50,8 @@ const config = {
   publishableKey: 'sb_publishable_test_only',
 };
 const databases: Dexie[] = [];
-const reviewId='00000000000000000000000091',replacementId='00000000000000000000000092';
+const reviewId = '00000000000000000000000091',
+  replacementId = '00000000000000000000000092';
 afterEach(async () => {
   vi.restoreAllMocks();
   await Promise.all(databases.splice(0).map((db) => db.delete()));
@@ -452,7 +462,9 @@ it('schema 21 upgrades with every original source, image and queue intact and th
     legacy = new Dexie('mise-action-review-upgrade-' + randomUUID()),
     stores: Record<string, string> = {};
   databases.push(legacy);
-  for (const table of f.db.tables.filter((t) => t.name !== 'syncActionReviews'))
+  for (const table of f.db.tables.filter(
+    (t) => !['syncActionReviews', 'orderReviews'].includes(t.name),
+  ))
     stores[table.name] = [
       table.schema.primKey.src,
       ...table.schema.indexes.map((index) => index.src),
@@ -463,9 +475,10 @@ it('schema 21 upgrades with every original source, image and queue intact and th
   legacy.close();
   const upgraded = new MiseDatabase(legacy.name);
   databases.push(upgraded);
-  expect(upgraded.verno).toBe(22);
-  expect(upgraded.tables).toHaveLength(36);
+  expect(upgraded.verno).toBe(23);
+  expect(upgraded.tables).toHaveLength(37);
   expect(await upgraded.syncActionReviews.count()).toBe(0);
+  expect(await upgraded.orderReviews.count()).toBe(0);
   expect(await upgraded.outbox.toArray()).toEqual(f.original);
   expect(backupToken(await upgraded.readBackup())).toBe(f.backup);
   expect(await upgraded.cloudState.toArray()).toEqual(
@@ -474,29 +487,399 @@ it('schema 21 upgrades with every original source, image and queue intact and th
 });
 
 async function resolvedOriginal() {
- const x=await boot(),row=structuredClone(x.original[0]);row.commands=row.commands.map(parseShopCommand);
- const packet=await prepareOrderReviewSource(row,0,reviewId,replacementId),command=packet.command;
- const receipt:CommandResolutionReceipt={id:reviewId,type:'command.resolved',commandId:command.id,commandType:command.type,outletId:command.outletId,occurredAt:command.occurredAt,commandHash:await syncHash(new TextEncoder().encode(JSON.stringify(command))),sourceHash:packet.sourceHash,at:Date.now(),outcome:'withdrawn',replacement:null};
- return {...x,row,packet,receipt};
+  const x = await boot(),
+    row = structuredClone(x.original[0]);
+  row.commands = row.commands.map(parseShopCommand);
+  const packet = await prepareOrderReviewSource(
+      row,
+      0,
+      reviewId,
+      replacementId,
+    ),
+    command = packet.command;
+  const receipt: CommandResolutionReceipt = {
+    id: reviewId,
+    type: 'command.resolved',
+    commandId: command.id,
+    commandType: command.type,
+    outletId: command.outletId,
+    occurredAt: command.occurredAt,
+    commandHash: await syncHash(
+      new TextEncoder().encode(JSON.stringify(command)),
+    ),
+    sourceHash: packet.sourceHash,
+    at: Date.now(),
+    outcome: 'withdrawn',
+    replacement: null,
+  };
+  return { ...x, row, packet, receipt };
 }
-it('a genuine resolution stays bound to the complete original queued source and command',async()=>{
- const {row,receipt}=await resolvedOriginal();row.receipts=[receipt];row.status='accepted';await expect(assertResolutionSources(row)).resolves.toBeUndefined();
- const changed=structuredClone(row);changed.at++;await expect(assertResolutionSources(changed)).rejects.toThrow('original resolved action');
- const forged=structuredClone(row);forged.receipts=[{...receipt,commandHash:'f'.repeat(64)}];await expect(assertResolutionSources(forged)).rejects.toThrow('original resolved action');
+it('a genuine resolution stays bound to the complete original queued source and command', async () => {
+  const { row, receipt } = await resolvedOriginal();
+  row.receipts = [receipt];
+  row.status = 'accepted';
+  await expect(assertResolutionSources(row)).resolves.toBeUndefined();
+  const changed = structuredClone(row);
+  changed.at++;
+  await expect(assertResolutionSources(changed)).rejects.toThrow(
+    'original resolved action',
+  );
+  const forged = structuredClone(row);
+  forged.receipts = [{ ...receipt, commandHash: 'f'.repeat(64) }];
+  await expect(assertResolutionSources(forged)).rejects.toThrow(
+    'original resolved action',
+  );
 });
-it('fixed-snapshot coverage requires the exact canonical resolution audit before retiring an original action',async()=>{
- const {row,receipt}=await resolvedOriginal();row.receipts=[receipt];row.status='accepted';const covered=new Set([receipt.commandId]);
- const event:AuditEvent={id:receipt.commandId,outletId:receipt.outletId,actor:{type:'member',id:replacementId},command:'sync.resolve',before:{resolutionId:receipt.id,commandHash:receipt.commandHash,sourceHash:receipt.sourceHash},after:{receipt},at:receipt.at};
- expect(()=>assertCanonicalResolutions([row],[event],covered)).not.toThrow();
- for(const events of [[],[{...event,command:'order.payment'}],[{...event,after:{receipt:{...receipt,sourceHash:'e'.repeat(64)}}}],[{...event,at:receipt.at+1}]])expect(()=>assertCanonicalResolutions([row],events,covered)).toThrow('canonical resolution audit');
- expect(()=>assertCanonicalResolutions([row],[],new Set())).not.toThrow();
+it('fixed-snapshot coverage requires the exact canonical resolution audit before retiring an original action', async () => {
+  const { row, receipt } = await resolvedOriginal();
+  row.receipts = [receipt];
+  row.status = 'accepted';
+  const covered = new Set([receipt.commandId]);
+  const event: AuditEvent = {
+    id: receipt.commandId,
+    outletId: receipt.outletId,
+    actor: { type: 'member', id: replacementId },
+    command: 'sync.resolve',
+    before: {
+      resolutionId: receipt.id,
+      commandHash: receipt.commandHash,
+      sourceHash: receipt.sourceHash,
+    },
+    after: { receipt },
+    at: receipt.at,
+  };
+  expect(() =>
+    assertCanonicalResolutions([row], [event], covered),
+  ).not.toThrow();
+  for (const events of [
+    [],
+    [{ ...event, command: 'order.payment' }],
+    [
+      {
+        ...event,
+        after: { receipt: { ...receipt, sourceHash: 'e'.repeat(64) } },
+      },
+    ],
+    [{ ...event, at: receipt.at + 1 }],
+  ])
+    expect(() => assertCanonicalResolutions([row], events, covered)).toThrow(
+      'canonical resolution audit',
+    );
+  expect(() => assertCanonicalResolutions([row], [], new Set())).not.toThrow();
 });
-it('large literal order sources remain exact locally while their reviewed financial capsule stays bounded',async()=>{
- const {row,packet}=await resolvedOriginal(),changed=structuredClone(row),large='original literal '.repeat(160000);
- for(const change of changed.changes)if(change.table==='orders')for(const side of ['before','after'] as const){const order=change[side];if(order&&typeof order==='object')change[side]={...order,sourceText:large};}
- const original=structuredClone(changed),review=await prepareOrderReviewSource(changed,0,reviewId,replacementId);expect(review.sourceJson.length).toBeLessThan(10000);expect(review.sourceJson).not.toContain(large);expect(review.sourceHash).not.toBe(packet.sourceHash);expect(changed).toEqual(original);expect(review.command).toEqual(packet.command);
+it('large literal order sources remain exact locally while their reviewed financial capsule stays bounded', async () => {
+  const { row, packet } = await resolvedOriginal(),
+    changed = structuredClone(row),
+    large = 'original literal '.repeat(160000);
+  for (const change of changed.changes)
+    if (change.table === 'orders')
+      for (const side of ['before', 'after'] as const) {
+        const order = change[side];
+        if (order && typeof order === 'object')
+          change[side] = { ...order, sourceText: large };
+      }
+  const original = structuredClone(changed),
+    review = await prepareOrderReviewSource(
+      changed,
+      0,
+      reviewId,
+      replacementId,
+    );
+  expect(review.sourceJson.length).toBeLessThan(10000);
+  expect(review.sourceJson).not.toContain(large);
+  expect(review.sourceHash).not.toBe(packet.sourceHash);
+  expect(changed).toEqual(original);
+  expect(review.command).toEqual(packet.command);
 });
-it('a source-substituted resolution cannot acknowledge or rewrite the original outbox action',async()=>{
- const {db,account,original,receipt}=await resolvedOriginal(),remote=createCloudCommandRemote(config,account,async()=>new Response(JSON.stringify({...receipt,sourceHash:'d'.repeat(64)}),{headers:{'Content-Type':'application/json'}}));
- await expect(deliverLocalOutbox(db,account.targetHash,remote)).rejects.toThrow('original');expect(await db.outbox.toArray()).toEqual(original);
+it('a source-substituted resolution cannot acknowledge or rewrite the original outbox action', async () => {
+  const { db, account, original, receipt } = await resolvedOriginal(),
+    remote = createCloudCommandRemote(
+      config,
+      account,
+      async () =>
+        new Response(
+          JSON.stringify({ ...receipt, sourceHash: 'd'.repeat(64) }),
+          { headers: { 'Content-Type': 'application/json' } },
+        ),
+    );
+  await expect(
+    deliverLocalOutbox(db, account.targetHash, remote),
+  ).rejects.toThrow('original');
+  expect(await db.outbox.toArray()).toEqual(original);
+});
+
+async function journalFixture() {
+  const f = await boot();
+  await reject(f);
+  const workspace = await readOrderReviewWorkspace(f.db);
+  if (!workspace) throw Error('Expected rejected order');
+  const before = f.original[0].changes.find((c) => c.table === 'orders')!
+    .before as Order;
+  let receipt: unknown = null,
+    lost = false,
+    resolveCalls = 0,
+    priceDelta = 0;
+  let onRead: (() => Promise<void>) | null = null;
+  const send: typeof fetch = async (url, init) => {
+    const body = JSON.parse(String(init?.body)),
+      mode = new URL(String(url)).searchParams.get('review');
+    if (mode === 'resolve') {
+      resolveCalls++;
+      receipt = {
+        id: body.id,
+        type: 'command.resolved',
+        commandId: body.command.id,
+        commandType: body.command.type,
+        outletId: body.command.outletId,
+        occurredAt: body.command.occurredAt,
+        commandHash: workspace.source.review.commandHash,
+        sourceHash: body.sourceHash,
+        at: Date.now(),
+        outcome: body.outcome,
+        replacement: null,
+      };
+      if (lost) {
+        lost = false;
+        throw Error('Lost actual resolution reply');
+      }
+      return new Response(JSON.stringify(receipt), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (receipt)
+      return new Response(JSON.stringify({ done: true, receipt }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    const current = Object.fromEntries(
+      [
+        'id',
+        'number',
+        'revision',
+        'status',
+        'currency',
+        'customer',
+        'lines',
+        'subtotal',
+        'deliveryFee',
+        'discount',
+        'total',
+        'payment',
+      ].map((key) => [key, before[key as keyof Order]]),
+    );
+    current.revision = before.revision + 1;
+    current.total = (before.total ?? 0) + priceDelta;
+    current.subtotal = before.subtotal + priceDelta;
+    const at = Date.now(),
+      r = workspace.source.review;
+    const review = {
+      v: 1,
+      id: body.id,
+      replacementId: body.replacementId,
+      commandId: body.command.id,
+      commandHash: r.commandHash,
+      sourceHash: body.sourceHash,
+      businessId: r.businessId,
+      outletId: r.outletId,
+      actorId: r.actorId,
+      token: 'x'.repeat(43),
+      at,
+      expiresAt: at + 900000,
+      current: {
+        order: current,
+        balance: null,
+        limit: null,
+        creditCurrency: null,
+        creditCustomer: null,
+      },
+      proposal: {
+        enabled: true,
+        revision: current.revision,
+        total: current.total,
+        currency: before.currency,
+        status: before.status,
+        method: 'cash',
+        creditBalance: null,
+        refundDue: 0,
+        effects: [],
+      },
+    };
+    await onRead?.();
+    return new Response(JSON.stringify({ done: false, review }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+  return {
+    ...f,
+    id: workspace.source.review.id,
+    options: { config, account: f.account, send },
+    lost: () => {
+      lost = true;
+    },
+    calls: () => resolveCalls,
+    changePrice: () => {
+      priceDelta = 100;
+    },
+    onRead: (f: (() => Promise<void>) | null) => {
+      onRead = f;
+    },
+  };
+}
+it('the production journal and decision path acknowledge a real typed resolution while retaining every original source and quote without a token', async () => {
+  const f = await journalFixture(),
+    review = await prepareSavedOrderReview(f.db, f.id, null, f.options);
+  expect(review.phase).toBe('review');
+  expect(JSON.stringify(review)).not.toContain('"token"');
+  const result = await decideSavedOrderReview(
+    f.db,
+    f.id,
+    review.revision,
+    'withdrawn',
+    f.options,
+  );
+  expect(result.record.phase).toBe('confirmed');
+  expect(f.calls()).toBe(1);
+  expect((await f.db.outbox.toArray()).map((r) => r.commands)).toEqual(
+    f.original.map((r) => r.commands),
+  );
+  expect(backupToken(await f.db.readBackup())).toBe(f.backup);
+  expect(result.record.attempts).toHaveLength(1);
+});
+it('a durable unconfirmed decision survives database reopen and checks its actual server outcome without submitting money twice', async () => {
+  const f = await journalFixture(),
+    review = await prepareSavedOrderReview(f.db, f.id, null, f.options);
+  f.lost();
+  await expect(
+    decideSavedOrderReview(f.db, f.id, review.revision, 'withdrawn', f.options),
+  ).rejects.toThrow();
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+  const name = f.db.name;
+  f.db.close();
+  const reopened = new MiseDatabase(name);
+  databases.push(reopened);
+  const saved = await readOrderReviewWorkspace(reopened, f.id);
+  expect(saved?.record).toMatchObject({
+    phase: 'unconfirmed',
+    choice: 'withdrawn',
+  });
+  expect(saved!.record!.attempts).toHaveLength(1);
+  const result = await prepareSavedOrderReview(
+    reopened,
+    f.id,
+    saved!.record!.revision,
+    f.options,
+  );
+  expect(result.phase).toBe('confirmed');
+  expect(f.calls()).toBe(1);
+  expect(result.receipt).toMatchObject({
+    type: 'command.resolved',
+    outcome: 'withdrawn',
+  });
+  expect(JSON.stringify(result)).not.toContain('"token"');
+});
+it('changed checked values require another deliberate choice and cannot silently apply the earlier decision', async () => {
+  const f = await journalFixture(),
+    review = await prepareSavedOrderReview(f.db, f.id, null, f.options);
+  f.changePrice();
+  const result = await decideSavedOrderReview(
+    f.db,
+    f.id,
+    review.revision,
+    'withdrawn',
+    f.options,
+  );
+  expect(result.changed).toBe(true);
+  expect(result.record.phase).toBe('review');
+  expect(result.record.choice).toBeNull();
+  expect(result.record.attempts).toHaveLength(1);
+  expect(f.calls()).toBe(0);
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+});
+it('a superseded native choice cannot submit after a newer review while its server check was in flight', async () => {
+  const f = await journalFixture(),
+    review = await prepareSavedOrderReview(f.db, f.id, null, f.options);
+  f.onRead(async () => {
+    const r = (await f.db.orderReviews.get(f.id))!;
+    await f.db.orderReviews.put({
+      ...r,
+      revision: r.revision + 1,
+      phase: 'preparing',
+    });
+  });
+  await expect(
+    decideSavedOrderReview(f.db, f.id, review.revision, 'withdrawn', f.options),
+  ).rejects.toThrow('review changed');
+  expect(f.calls()).toBe(0);
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+});
+it('the original account cannot change inside the native review write and leave a forged saved selection', async () => {
+  const f = await journalFixture();
+  f.db.orderReviews.hook('creating', () => {
+    f.setAuth({ generation: 2 });
+  });
+  await expect(
+    prepareSavedOrderReview(f.db, f.id, null, f.options),
+  ).rejects.toThrow('ACCOUNT CHANGE');
+  expect(await f.db.orderReviews.count()).toBe(0);
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+});
+
+it('a saved monetary currency cannot be reinterpreted by the decision path even when the server proposal uses another currency', async () => {
+  const f = await journalFixture(),
+    originalSend = f.options.send;
+  f.options.send = async (url, init) => {
+    const response = await originalSend(url, init),
+      body = await response.json();
+    if (body.done === false) {
+      body.review.current.order.currency = 'USD';
+      body.review.proposal.currency = 'USD';
+    }
+    return new Response(JSON.stringify(body), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+  const review = await prepareSavedOrderReview(f.db, f.id, null, f.options);
+  await expect(
+    decideSavedOrderReview(f.db, f.id, review.revision, 'replaced', f.options),
+  ).rejects.toThrow('original monetary currency');
+  expect(f.calls()).toBe(0);
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+  expect((await f.db.orderReviews.get(f.id))?.choice).toBeNull();
+});
+
+it('an original connection change inside the native journal write rolls back the entire review', async () => {
+  const f = await journalFixture(),
+    binding = await f.db.cloudState.get('binding');
+  const change = () => {
+    void f.db.cloudState.update('binding', { targetHash: 'a'.repeat(64) });
+  };
+  f.db.orderReviews.hook('creating', change);
+  try {
+    await expect(
+      prepareSavedOrderReview(f.db, f.id, null, f.options),
+    ).rejects.toThrow(/original|connection/);
+  } finally {
+    f.db.orderReviews.hook('creating').unsubscribe(change);
+  }
+  expect(await f.db.cloudState.get('binding')).toEqual(binding);
+  expect(await f.db.orderReviews.count()).toBe(0);
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+  expect(f.calls()).toBe(0);
+});
+it('an original source change inside the native journal write rolls back without submitting money', async () => {
+  const f = await journalFixture(),
+    entry = f.original[0];
+  const change = () => {
+    void f.db.outbox.update(entry.id, { at: entry.at + 1 });
+  };
+  f.db.orderReviews.hook('creating', change);
+  try {
+    await expect(
+      prepareSavedOrderReview(f.db, f.id, null, f.options),
+    ).rejects.toThrow('original');
+  } finally {
+    f.db.orderReviews.hook('creating').unsubscribe(change);
+  }
+  expect(await f.db.orderReviews.count()).toBe(0);
+  expect(await f.db.outbox.toArray()).toEqual(f.original);
+  expect(f.calls()).toBe(0);
 });

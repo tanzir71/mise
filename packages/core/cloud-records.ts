@@ -79,6 +79,12 @@ function decodeFields(values:Record<string,CloudValue>,fields:FieldMap,table:Bac
 export function encodeCommandRecord(table:BackupTable,row:unknown,businessId:string):CloudRecord {
   const map=cloudRecordMaps[table];return {table:map.table,values:{...encodeFields(row,map.fields),business_id:businessId}};
 }
+/** Proposed transport values already contain serialized JSON; decode it once. */
+export function decodeProposedCommandRecord(table:BackupTable,record:CloudRecord):Record<string,unknown>{
+  const map=cloudRecordMaps[table];
+  if(record.table!==map.table)throw new Error('Keep the proposed record table.');
+  return decodeFields(record.values,map.fields,table);
+}
 /** SQL row_to_json retains literal JSON; convert it through the same field map. */
 export function decodeCommandRecord(table:BackupTable,row:Record<string,unknown>):Record<string,unknown>{
   const map=cloudRecordMaps[table],values:Record<string,CloudValue>={};
