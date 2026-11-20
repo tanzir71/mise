@@ -34,6 +34,7 @@ import {
   deliverLocalOutbox,
   beginLocalUpload,
   acceptLocalUpload,
+  readLocalActionReviews,
 } from '../../apps/web/src/data/local-outbox';
 import {
   backupTableNames,
@@ -610,6 +611,12 @@ const api = {
     const {w}=await preparePull(db,receiver);return w.pendingRead;
   }),
   seedConcurrentSupplier: () => use(db=>db.saveSupplier({name:'Shared original supplier',phone:'',note:'Original supplier note'})),
+  concurrentOrder: (action:'price'|'payment') => use(async db=>{
+    const order=(await db.orders.toArray())[0];
+    if(action==='payment')return db.settleOrder(order.id,{method:'cash'},order.revision);
+    return db.saveOrder({source:order.source,sourceText:order.sourceText,customerId:order.customer.id,name:order.customer.name,phone:order.customer.phone??'',type:order.type,address:order.address,table:order.table,scheduledFor:order.scheduledFor,lines:order.lines.map(line=>({...line,unitPrice:(line.unitPrice??0)+100})),deliveryFee:order.deliveryFee,discount:order.discount,payment:{method:order.payment.method,wallet:order.payment.wallet}},{id:order.id,revision:order.revision});
+  }),
+  actionReviews: () => use(async db=>(await readLocalActionReviews(db)).map(({review,command,entry})=>({review,command,entryId:entry.id,changes:entry.changes,receipts:entry.receipts}))),
   editConcurrentSources: (label:'Owner'|'Manager') => use(async db=>{
     const order=(await db.orders.toArray())[0],supplier=(await db.suppliers.toArray())[0],inbox=(await db.inboxItems.toArray())[0];
     await db.addOrderNote(order.id,label+' original note · বাংলা',order.revision);
@@ -674,6 +681,7 @@ const api = {
       admissions: await db.syncAdmissions.toArray(),
       operator: await db.operatorState.get('active'),
       recoveries: await db.scopeRecoveries.toArray(),
+      actionReviews: await db.syncActionReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

@@ -46,6 +46,19 @@ test('original concurrent notes, supplier sets, Inbox fields and explicit Sent m
   const exact=syncDownloadToken(b.backup.tables);await manager.evaluate(()=>window.miseSyncApplyTest.deliver());await manager.evaluate(()=>window.miseSyncApplyTest.pull());expect(syncDownloadToken((await manager.evaluate(()=>window.miseSyncApplyTest.inspect())).backup.tables)).toBe(exact);expect(server.diagnostics).toEqual([]);
  }finally{await page.context().setOffline(false);await other.close();}
 });
+test('a real financial conflict retains its exact rejected action, images and later cash across native reload and retry',async({page,browser})=>{
+ test.setTimeout(120000);await initialize(page,1);const other=await browser.newContext({baseURL:test.info().project.use.baseURL}),manager=await other.newPage();
+ try{
+  await initialize(manager,2);await page.context().setOffline(true);await other.setOffline(true);
+  const paid=await manager.evaluate(()=>window.miseSyncApplyTest.concurrentOrder('payment'));await manager.evaluate(()=>window.miseSyncApplyTest.cash('5'));const original=await manager.evaluate(()=>window.miseSyncApplyTest.inspect()),payment=original.queue[0].commands[0],laterCash=original.queue[1].commands[0];expect(payment.type).toBe('order.payment');if(laterCash.type!=='sale.record')throw Error('Expected original later cash');const unsentSaleIds=[paid.payment.saleId!,laterCash.saleId];
+  await page.evaluate(()=>window.miseSyncApplyTest.concurrentOrder('price'));await page.context().setOffline(false);await page.evaluate(()=>window.miseSyncApplyTest.deliver());await page.evaluate(()=>window.miseSyncApplyTest.pull());
+  await other.setOffline(false);await manager.evaluate(()=>window.miseSyncApplyTest.cycle());const stopped=await manager.evaluate(()=>window.miseSyncApplyTest.inspect());
+  expect(stopped.syncSession?.problem).toBe('review');expect(stopped.queue).toEqual(original.queue);expect(stopped.backup.tables).toEqual(original.backup.tables);expect(stopped.actionReviews).toHaveLength(1);const review=stopped.actionReviews[0];expect(review).toMatchObject({commandId:payment.id,entryId:original.queue[0].id,status:409,commandIndex:0,observations:1,confirmedAt:null,receiptHash:null});expect(await server.financialCount(unsentSaleIds)).toBe(0);
+  await other.setOffline(true);await manager.reload();await installSyncApplyFixture(manager);const retained=await manager.evaluate(()=>window.miseSyncApplyTest.actionReviews());expect(retained[0].review).toEqual(review);expect(retained[0].command).toEqual(payment);expect(retained[0].changes).toEqual(original.queue[0].changes);expect((await manager.evaluate(()=>window.miseSyncApplyTest.inspect())).backup.tables).toEqual(original.backup.tables);
+  await other.setOffline(false);await manager.evaluate(()=>window.miseSyncApplyTest.cycle());const retried=await manager.evaluate(()=>window.miseSyncApplyTest.inspect());expect(retried.actionReviews).toHaveLength(1);expect(retried.actionReviews[0]).toMatchObject({...review,lastObservedAt:expect.any(Number),observations:2});expect(retried.queue).toEqual(original.queue);expect(await server.financialCount(unsentSaleIds)).toBe(0);expect(server.diagnostics).toEqual(Array(2).fill({name:'prepare_order_write',code:'PT409',message:'Review the latest order revision.'}));
+ }finally{await page.context().setOffline(false);await other.close();}
+});
+
 test('the built app automatically admits original offline conflicts and refreshes the other browser without manual delivery calls',async({page,browser})=>{
  test.setTimeout(120000);const ownerSocket=await installRealtimeFixture(page,server.config(1).jwt);await initialize(page,1);await page.evaluate(()=>window.miseSyncApplyTest.seedConcurrentSupplier());await page.evaluate(()=>window.miseSyncApplyTest.deliver());await page.evaluate(()=>window.miseSyncApplyTest.pull());
  const other=await browser.newContext({baseURL:test.info().project.use.baseURL}),manager=await other.newPage();

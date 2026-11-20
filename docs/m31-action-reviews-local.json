@@ -1,0 +1,106 @@
+{
+  "checkedAt": "2026-11-20T01:35:48.916Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Durable original rejected-action evidence; explicit financial resolution and its interface remain unfinished",
+  "schemas": {
+    "local": 22,
+    "localStores": 36,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 132,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "passed": 2504,
+      "files": 136,
+      "seconds": 300.13,
+      "newReviewTests": 24,
+      "accountTests": 32,
+      "secretGuardTests": 35,
+      "bulkLimitsChanged": false
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "nativeFinancialConflict": {
+      "twoBrowsers": true,
+      "sqlBackedHttp": true,
+      "realHttpConflict": true,
+      "offlineReopen": true,
+      "exactRetry": true,
+      "originalImagesAndQueueRetained": true,
+      "laterCashRetained": true,
+      "noUnconfirmedServerSales": true,
+      "syntheticAuthOnly": true
+    },
+    "browser": {
+      "startTime": "2026-11-20T01:11:30.750Z",
+      "duration": 815173.7200000001,
+      "expected": 444,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T01:33:29.407Z",
+      "comparisons": 247,
+      "overflow": 0,
+      "report": "qa/report.html",
+      "screenshots": [
+        {
+          "id": "m31-sync-controls-phone-screen-390",
+          "screen": "qa/screens/m31-sync-controls-phone-screen-390.png",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        },
+        {
+          "id": "m31-sync-controls-desktop-screen-1440",
+          "screen": "qa/screens/m31-sync-controls-desktop-screen-1440.png",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        },
+        {
+          "id": "m31-recovery-phone-review-390",
+          "screen": "qa/screens/m31-recovery-phone-review-390.png",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ]
+    }
+  },
+  "privacy": {
+    "history": true,
+    "artifacts": true,
+    "files": 1441,
+    "objects": 7842,
+    "knownPrivateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentReferenceFindings": 0,
+    "newHistoricalDeploymentFindings": 0,
+    "coverageGaps": 0,
+    "olderNonsecretFindings": 22
+  },
+  "publication": {
+    "ownerHold": true,
+    "newCiRun": false,
+    "newCiArtifact": false,
+    "newPagesDeployment": false
+  },
+  "remaining": [
+    "Explicit current-value review and server-authorized financial resolution",
+    "Genuine hosted OTP and signed-owner acceptance",
+    "Remaining M30/M31 requirements and later handover milestones"
+  ],
+  "validationNotes": [
+    "The initial full run caught a new Web Crypto fallback regression and two historical-schema fixture mismatches. These were corrected; all 42 focused regression cases pass.",
+    "One subsequent full run reached the unchanged 5000ms deadline in 13 cases across two existing join files. Both files passed all 35 cases unchanged in isolation, followed by the passing final 2504-test full run with the normal two workers. No deadlines, payloads or test configuration were relaxed.",
+    "An initial full browser run passed 443 cases and found one outdated native schema-14 upgrade assertion. The fixture now recreates the historical schema without the new store and verifies schema 22 with its empty review store. The corrected case passes separately and the final full browser suite is rerun. Production, build and unit-test source hashes remain unchanged."
+  ]
+}

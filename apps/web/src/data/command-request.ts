@@ -1,5 +1,6 @@
 import {cloudConnectionTarget,type CloudConnection} from '@mise/core/cloud-connection';
 import {operatorAccountHash} from '@mise/core/operators';
+import {syncHash} from '@mise/core/sync-read';
 
 export interface CommandAuthorization {jwt:string;userId:string;generation:number}
 export interface CommandAccount {scope:string;accountHash:string;targetHash:string;getAuth:()=>Promise<CommandAuthorization>;assertCurrent:(value:CommandAuthorization)=>void}
@@ -10,6 +11,18 @@ export class CommandRequestError extends Error {
 }
 const responseLimit=2*1024*1024;
 const receiptGuards=new WeakMap<object,()=>void>();
+export interface CommandReviewProof {
+ status:400|409|413|415;targetHash:string;accountHash:string;bodyHash:string;
+ assertCurrent:()=>void;
+}
+const reviewGuards=new WeakMap<object,CommandReviewProof>();
+/** Only an actual response verified against the uninterrupted original account
+ * carries this proof. Serializing an error cannot manufacture one. */
+export function commandReviewProof(error:unknown):CommandReviewProof|null {
+ if(!error||typeof error!=='object')return null;
+ const proof=reviewGuards.get(error);if(!proof)return null;
+ proof.assertCurrent();return {...proof};
+}
 export function bindCommandReceipt<T extends object>(receipt:T,guard:()=>void):T {receiptGuards.set(receipt,guard);return receipt;}
 /** Network receipts carry an ephemeral check; no session field is added to the record. */
 export function assertCommandReceipt(receipt:object):void {receiptGuards.get(receipt)?.();}
@@ -44,7 +57,20 @@ function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL
   try{
    if(lifetime.aborted)throw new CommandRequestError('retry');const original=await auth();current(original);
    response=await abortable(send(endpoint,{method,body,headers:{...headers,apikey:config.publishableKey,Authorization:'Bearer '+original.jwt},redirect:'error',cache:'no-store',credentials:'omit',signal:lifetime}));
-   if([401,403].includes(response.status))throw new CommandRequestError('auth');if([400,409,413,415].includes(response.status))throw new CommandRequestError('review');if(!response.ok)throw new CommandRequestError('retry');
+   if([401,403].includes(response.status))throw new CommandRequestError('auth');
+   if([400,409,413,415].includes(response.status)){
+    // A late error from a previous sign-in must not become another account's
+    // saved review. Provider bodies remain unread and never enter local data.
+    const latest=await auth();if(latest.generation!==original.generation)throw new CommandRequestError('auth');current(latest);
+    const error=new CommandRequestError('review');
+    if(routeIsCommand()&&typeof body==='string'){
+     const bodyHash=await abortable(syncHash(new TextEncoder().encode(body)));current(latest);
+     if(lifetime.aborted)throw new CommandRequestError('retry');
+     reviewGuards.set(error,{status:response.status as CommandReviewProof['status'],targetHash,accountHash,bodyHash,assertCurrent:()=>current(latest)});
+    }
+    throw error;
+   }
+   if(!response.ok)throw new CommandRequestError('retry');
    const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>responseLimit))throw new CommandRequestError('retry');
    const reader=response.body?.getReader();if(!reader)throw new CommandRequestError('retry');let size=0;const parts:Uint8Array[]=[];
    try{while(true){const part=await abortable(reader.read());if(part.done)break;size+=part.value.byteLength;if(size>responseLimit)throw new CommandRequestError('retry');parts.push(part.value);}}catch(error){void reader.cancel().catch(()=>{});throw error;}finally{reader.releaseLock();}
@@ -53,5 +79,6 @@ function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL
   }catch(error){void response?.body?.cancel().catch(()=>{});if(error instanceof CommandRequestError)throw error;throw new CommandRequestError('retry');}
   finally{clearTimeout(timer);controller.abort();}
  };
+ function routeIsCommand(){return method==='POST'&&endpoint.pathname.endsWith('/functions/v1/commands');}
 }
 export function createCommandRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){return createAccountJsonRequest(config,input,'commands',send);}

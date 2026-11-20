@@ -10,7 +10,8 @@ import {portableInboxItems,type StoredInboxItem} from './inbox';
 import {readDatabaseBackup} from './backup';
 import {parseLocalOperatorState,type LocalOperatorState} from '@mise/core/operators';
 import {nativeRowHash} from './canonical-writes';
-import {assertCommandReceipt} from './command-request';
+import {assertCommandReceipt,commandReviewProof,CommandRequestError} from './command-request';
+import {parseSyncActionReview,type SyncActionReview} from '@mise/core/sync-action-review';
 import {readCanonicalState} from './cloud-canonical-state';
 import {syncHash} from '@mise/core/sync-read';
 import {isLocalInboxRetention} from '@mise/core/local-inbox';
@@ -91,28 +92,76 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
 export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand)=>Promise<ShopCommandReceipt>):Promise<{accepted:number;retained:number;pending:number}>{
  const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
- const originalOperator=deliveryToken(initial,operator);
+ const originalOperator=deliveryToken(initial,operator);let deliveryIdentityHash:Promise<string>|null=null;
  async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('A local change is missing from the delivery queue. Keep a backup.');
  for(const row of rows){
   let saved=entry(row,initial);if(saved.status==='accepted')continue;
   if(isLocalInboxRetention(saved)){const original=await nativeRowHash(saved);await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{await currentOperator();if(await Dexie.waitFor(nativeRowHash(entry((await db.outbox.get(saved.id))!,initial)))!==original)throw new Error('The original saved share changed. Keep its source.');});continue;}
   if(saved.status==='retained')break;
+  const identityHash=await(deliveryIdentityHash??=syncHash(new TextEncoder().encode(originalOperator)));
   for(let index=saved.receipts.length;index<saved.commands.length;index++){
    if(index<saved.receipts.length)continue;
    const sourceHash=await nativeRowHash(originalEntry(saved));await db.transaction('r',db.cloudState,db.operatorState,currentOperator);
-   const command=parseShopCommand(JSON.parse(JSON.stringify(saved.commands[index]))),confirmed=await send(command),receipt=parseShopCommandReceipt(confirmed,saved.commands[index]);assertCommandReceipt(confirmed);
-   saved=await db.transaction('rw',db.cloudState,db.operatorState,db.outbox,async()=>{
+   const command=parseShopCommand(JSON.parse(JSON.stringify(saved.commands[index]))),reviewId=await syncHash(new TextEncoder().encode(JSON.stringify([initial.uploadId,command.id,identityHash])));
+   let confirmed:ShopCommandReceipt;
+   try{confirmed=await send(command);}
+   catch(error){
+    const proof=commandReviewProof(error);
+    if(proof){
+     const commandHash=await syncHash(new TextEncoder().encode(JSON.stringify(parseShopCommand(saved.commands[index])))),receiptsHash=await nativeRowHash(saved.receipts.slice(0,index));
+     if(proof.targetHash!==initial.targetHash||proof.bodyHash!==commandHash||operator?.connection&&proof.accountHash!==operator.connection.accountHash)throw new CommandRequestError('auth');
+     await db.transaction('rw',db.cloudState,db.operatorState,db.outbox,db.syncActionReviews,async()=>{
+      const tx=Dexie.currentTransaction,state=await currentOperator(),current=entry((await db.outbox.get(row.id))!,state);
+      if(await Dexie.waitFor(nativeRowHash(originalEntry(current)))!==sourceHash||current.receipts.length<index||await Dexie.waitFor(nativeRowHash(current.receipts.slice(0,index)))!==receiptsHash)throw new Error('The rejected action source changed. Keep its original records.');
+      const raw=await db.syncActionReviews.get(reviewId),previous=raw?parseSyncActionReview(raw):null,observedAt=Date.now();
+      const fields={id:reviewId,version:1 as const,uploadId:initial.uploadId,entryId:current.id,commandId:command.id,businessId:initial.businessId,outletId:initial.outletId,actorId:initial.ownerId,targetHash:proof.targetHash,accountHash:proof.accountHash,identityHash,sourceHash,commandHash,receiptsHash,commandIndex:index,sequence:current.sequence};
+      if(previous&&Object.entries(fields).some(([key,value])=>previous[key as keyof typeof previous]!==value))throw new Error('Keep the original rejected action review.');
+      const lastObservedAt=Math.max(observedAt,previous?.lastObservedAt??0),receipt=current.receipts[index],receiptHash=receipt?await Dexie.waitFor(nativeRowHash(receipt)):null;
+      if(previous?.receiptHash&&previous.receiptHash!==receiptHash)throw new Error('Keep the original confirmed action receipt.');
+      const next=parseSyncActionReview({...fields,status:previous?.status??proof.status,firstObservedAt:previous?.firstObservedAt??observedAt,lastObservedAt,observations:(previous?.observations??0)+1,confirmedAt:receipt?Math.max(lastObservedAt,previous?.confirmedAt??0):null,receiptHash});
+      proof.assertCurrent();if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new Error('The action review transaction changed. Keep its source unconfirmed.');
+      await db.syncActionReviews.put(next);proof.assertCurrent();
+     });
+    }
+    throw error;
+   }
+   const receipt=parseShopCommandReceipt(confirmed,saved.commands[index]);assertCommandReceipt(confirmed);
+   saved=await db.transaction('rw',db.cloudState,db.operatorState,db.outbox,db.syncActionReviews,async()=>{
     const tx=Dexie.currentTransaction;
     const state=await currentOperator();
     const current=entry((await db.outbox.get(row.id))!,state);if(await Dexie.waitFor(nativeRowHash(originalEntry(current)))!==sourceHash)throw new Error('A queued action changed. Keep its server receipt.');
-    if(current.receipts[index]){if(token(current.receipts[index])!==token(receipt))throw new Error('Keep the original action receipt.');return current;}
-    if(current.receipts.length!==index)throw new Error('Keep action receipts in their original order.');
-    const receipts=[...current.receipts,receipt],next={...current,receipts,status:receipts.length===current.commands.length?'accepted' as const:'pending' as const};assertCommandReceipt(confirmed);if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new Error('The receipt transaction changed. Keep the original action unconfirmed.');await db.outbox.put(next);return next;
+    if(current.receipts[index]&&token(current.receipts[index])!==token(receipt))throw new Error('Keep the original action receipt.');
+    const review=await db.syncActionReviews.get(reviewId);let confirmedReview:SyncActionReview|undefined;
+    if(review){const original=parseSyncActionReview(review);if(original.entryId!==current.id||original.commandId!==command.id||original.sourceHash!==sourceHash||original.identityHash!==identityHash||original.commandIndex!==index)throw new Error('Keep the original action review source.');const receiptHash=await Dexie.waitFor(nativeRowHash(receipt));if(original.receiptHash&&original.receiptHash!==receiptHash)throw new Error('Keep the original confirmed action review receipt.');confirmedReview=parseSyncActionReview({...original,confirmedAt:original.confirmedAt??Math.max(Date.now(),original.lastObservedAt),receiptHash});}
+    const alreadyConfirmed=!!current.receipts[index];
+    if(!alreadyConfirmed&&current.receipts.length!==index)throw new Error('Keep action receipts in their original order.');
+    const receipts=alreadyConfirmed?current.receipts:[...current.receipts,receipt],next={...current,receipts,status:receipts.length===current.commands.length?'accepted' as const:'pending' as const};
+    const writable=()=>{assertCommandReceipt(confirmed);if(!tx||Dexie.currentTransaction!==tx||!tx.active||tx.db!==db||tx.mode!=='readwrite')throw new Error('The receipt transaction changed. Keep the original action unconfirmed.');};
+    writable();if(confirmedReview){await db.syncActionReviews.put(confirmedReview);writable();}if(!alreadyConfirmed){await db.outbox.put(next);writable();}return next;
    });
   }
  }
  const latest=await db.outbox.where('uploadId').equals(initial.uploadId).toArray();return {accepted:latest.filter(r=>r.status==='accepted').length,retained:latest.filter(r=>r.status==='retained'&&!isLocalInboxRetention(r)).length,pending:latest.filter(r=>r.status==='pending').length};
+}
+/** Read the actual retained source, offline, for this original active operator.
+ * Observations and local hashes never authorize replacement or disposal. */
+export async function readLocalActionReviews(db:MiseDatabase):Promise<{review:SyncActionReview;entry:LocalOutboxEntry;command:ShopCommand}[]> {
+ return db.transaction('r',db.cloudState,db.operatorState,db.outbox,db.syncActionReviews,async()=>{
+  const binding=parseLocalCloudState(await db.cloudState.get('binding'));
+  if(!hasOriginalAdmission(binding))throw new Error('Use the original admitted outlet to review saved actions.');
+  const operator=await joinedOperator(db,binding),identityHash=await Dexie.waitFor(syncHash(new TextEncoder().encode(deliveryToken(binding,operator))));
+  const observations=await db.syncActionReviews.where('uploadId').equals(binding.uploadId).filter(row=>row.identityHash===identityHash).toArray(),result=[];
+  for(const raw of observations){
+   const review=parseSyncActionReview(raw),saved=entry((await db.outbox.get(review.entryId))!,binding),command=saved.commands[review.commandIndex];
+   if(!command||review.commandId!==command.id||review.businessId!==binding.businessId||review.outletId!==binding.outletId||review.actorId!==binding.ownerId||review.targetHash!==binding.targetHash||operator?.connection&&review.accountHash!==operator.connection.accountHash||review.sequence!==saved.sequence||
+    review.id!==await Dexie.waitFor(syncHash(new TextEncoder().encode(JSON.stringify([binding.uploadId,command.id,identityHash]))))||
+    review.sourceHash!==await Dexie.waitFor(nativeRowHash(originalEntry(saved)))||review.commandHash!==await Dexie.waitFor(syncHash(new TextEncoder().encode(JSON.stringify(command))))||review.receiptsHash!==await Dexie.waitFor(nativeRowHash(saved.receipts.slice(0,review.commandIndex)))||
+    review.receiptHash!==null&&(!saved.receipts[review.commandIndex]||review.receiptHash!==await Dexie.waitFor(nativeRowHash(saved.receipts[review.commandIndex]))))throw new Error('Keep the complete original action review, source and receipts.');
+   result.push({review,entry:saved,command});
+  }
+  return result.sort((a,b)=>a.entry.sequence-b.entry.sequence||a.review.commandIndex-b.review.commandIndex);
+ });
 }
 /** Image bytes follow their accepted metadata. Retries retain every original queue record. */
 export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,put:(image:SyncImageDescriptor,blob:Blob,signal?:AbortSignal)=>Promise<InboxImageUploadReceipt>,signal?:AbortSignal):Promise<number>{
