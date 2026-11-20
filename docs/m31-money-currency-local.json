@@ -1,0 +1,139 @@
+{
+  "checkedAt": "2026-11-20T08:05:39.775Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Original counter and khata currency admission; explicit financial resolution and full hosted acceptance remain open",
+  "schemas": {
+    "local": 23,
+    "localStores": 37,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": true,
+    "unit": {
+      "passed": 2595,
+      "files": 137,
+      "seconds": 357.66,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "limitsChanged": false
+    },
+    "focused": {
+      "server": 56,
+      "client": 79,
+      "integrationFixtures": 192,
+      "realRed200InsteadOf409": true
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "startTime": "2026-11-20T07:41:00.803Z",
+      "duration": 882857.978,
+      "expected": 451,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0,
+      "actualUi": true,
+      "realOwnerProfileCommand": true,
+      "originalCurrencyRetained": true,
+      "offlineReload": true,
+      "counterRetainedBeforeAdmission": true,
+      "historicalKhataPaymentAndUndoConverge": true,
+      "orderOnlyControlFiltered": true,
+      "exactMemberPrivacyProjection": true,
+      "sourceImagesAndCommandsPreserved": true,
+      "syntheticAuthStorageRealtime": true
+    },
+    "nativeFocusedProof": {
+      "startTime": "2026-11-20T07:23:44.652Z",
+      "duration": 33475.933000000005,
+      "expected": 5,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T08:04:30.107Z",
+      "comparisons": 264,
+      "overflow": 0,
+      "changedViewsSeriousCriticalAxe": 0,
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "screenshots": [
+        "qa/screens/m31-money-currency-phone-review-360.png",
+        "qa/screens/m31-money-currency-phone-review-390.png",
+        "qa/screens/m31-money-currency-desktop-review-1440.png"
+      ]
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T07:40:36.915Z",
+      "version": 25,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sourceMatches": true,
+      "bundleBytes": 443623,
+      "bundleSha256": "764dd5385d8b797b9506b0a6558cff21215922fa2b52de7faa38eecf1628d1a4",
+      "sourceFiles": 86,
+      "functions": 7,
+      "migrations": 40,
+      "applicationSchemas": [
+        "public",
+        "private"
+      ],
+      "applicationTables": 60,
+      "forcedRlsTables": 60,
+      "securityWarnings": 0,
+      "securityErrors": 0,
+      "actualDeploymentValuesInPublicReport": false,
+      "genuineHostedOtpAcceptance": false,
+      "unauthenticatedChecks": [
+        {
+          "kind": "commands",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=read",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=resolve",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-outcome",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-completion",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "privateValuesCompared": 10,
+      "credentials": 0,
+      "currentDeploymentReferences": 0,
+      "olderNonsecretFindings": 22,
+      "newHistoricalReferences": 0,
+      "coverageGaps": 0,
+      "historyPolicyUnchanged": true
+    }
+  },
+  "publication": {
+    "workflows": "disabled",
+    "pages": "held by owner",
+    "ciRun": null,
+    "ciArtifact": null
+  },
+  "remaining": [
+    "Explicit money review/resolution and stock/purchase/closing boundaries",
+    "Genuine hosted phone OTP and physical device acceptance",
+    "Remaining M30/M31 acceptance and later handover milestones"
+  ]
+}

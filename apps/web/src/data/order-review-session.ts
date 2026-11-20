@@ -125,6 +125,19 @@ export function readOrderReviewWorkspace(
 ): Promise<OrderReviewWorkspace | null> {
   return source(db, id);
 }
+/** Display availability only. Opening a review still verifies its full source,
+ * operator and account independently, including complete original image bytes. */
+export async function hasSavedOrderReview(db: MiseDatabase, uploadId: string): Promise<boolean> {
+  if (await db.orderReviews.where('uploadId').equals(uploadId).count()) return true;
+  const rows = await db.outbox.where('uploadId').equals(uploadId).sortBy('sequence'),
+    first = rows.find(row => row.status !== 'accepted' && !isLocalInboxRetention(row)),
+    command = first?.commands[first.receipts.length];
+  if (!first || first.status !== 'pending' || !command ||
+      !isOrderCommand(command) || command.type === 'order.warning-settings') return false;
+  return (await db.syncActionReviews.where('uploadId').equals(uploadId).toArray())
+    .some(review => review.entryId === first.id && review.commandId === command.id &&
+      review.commandIndex === first.receipts.length && review.confirmedAt === null);
+}
 async function change(
   db: MiseDatabase,
   id: string,

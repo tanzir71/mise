@@ -81,4 +81,18 @@ export async function captureOrderActionReview(page,mode='review'){
   await checkLocalInboxAccess(page);
  }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
+/** A genuine rejected counter command; no order review or resolution is invented. */
+export async function captureMoneyCurrencyReview(page){
+ const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));
+  await page.context().setOffline(true);await page.evaluate(()=>window.miseSyncApplyTest.cash('37'));
+  await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  await page.context().setOffline(false);await page.evaluate(()=>window.miseSyncApplyTest.cycle());await installRealtimeFixture(page,server.config(2).jwt);
+  await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByText('Some saved work needs review. Your local records and downloaded pages are kept.').waitFor();
+  if(await page.getByRole('button',{name:'Review saved order action',exact:true}).count())throw Error('Do not advertise order-only review for a counter action.');
+  await page.getByRole('link',{name:'Download a JSON backup',exact:true}).waitFor();await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
+}
 export async function closeRecoveryVisual(){const previous=service;service=undefined;if(previous){let value;try{value=await previous;}catch{return;}await value.server.close();}}

@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [counter and khata currency boundary](m31-money-currency.md) reads only the
+original financial source and sends a three-letter unit outside unchanged
+commands. It adds no stored credentials, connection configuration, grants or
+server secrets. Actual deployment values remain in ignored private inputs and
+the server secret manager; source/history/artifact guards remain enabled.
+
 The [original order currency boundary](m31-order-currency.md) sends only a
 three-letter monetary unit outside the unchanged command. It derives that value
 from the original saved order, carries no credentials or connection settings and

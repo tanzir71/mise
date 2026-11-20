@@ -26,6 +26,7 @@ import {moneyWritePlan} from '../../../packages/core/money-commands.ts';
 import {moneyFingerprint,moneyWriteFields,MoneyMutationInvalid,MoneyMutationConflict} from './money-write.ts';
 import {authHttp,AuthBodyError,readAuthBody} from './auth-http.ts';
 import {savedCurrencyHeader,validSavedCurrency,proposedOrderCurrencyMatches} from '../../../packages/core/order-currency.ts';
+import {proposedMoneyCurrencyMatches} from '../../../packages/core/money-currency.ts';
 import {isCatalogueWrite,catalogueRecordPlan} from '../../../packages/core/cloud-commands.ts';
 import {catalogueFingerprint,catalogueWriteFields,CatalogueMutationInvalid,CatalogueMutationConflict} from './catalogue-write.ts';
 import {customerFingerprint,customerWriteFields,CustomerMutationInvalid} from './customer-write.ts';
@@ -41,7 +42,7 @@ export function createCommandsHandler(deps:{store:CommandStore;origins:ReadonlyS
     const auth=request.headers.get('authorization')||'',jwt=auth.length<=8192?auth.match(/^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/)?.[1]:undefined;
     if(!jwt)return reply(401,{error:'Sign in again to make this change.'});
     if(!/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type')||''))return reply(415,{error:'Use JSON.'});
-    const currency=request.headers.get(savedCurrencyHeader);if(currency!==null&&!validSavedCurrency(currency))return reply(400,{error:'Keep the saved order currency.'});
+    const currency=request.headers.get(savedCurrencyHeader);if(currency!==null&&!validSavedCurrency(currency))return reply(400,{error:'Keep the saved currency.'});
     const batchOutlet=request.headers.get(stockBatchHeader),purchaseOutlet=request.headers.get(purchaseBodyHeader),orderOutlet=request.headers.get(orderBodyHeader),handoffOutlet=request.headers.get(handoffBodyHeader),inboxOutlet=request.headers.get(inboxBodyHeader),linkOutlet=request.headers.get(linkBodyHeader),admittedOutlet=batchOutlet??purchaseOutlet??orderOutlet??handoffOutlet??inboxOutlet??linkOutlet;
     if([batchOutlet,purchaseOutlet,orderOutlet,handoffOutlet,inboxOutlet,linkOutlet].filter(v=>v!==null).length>1)return reply(400,{error:'Choose one reviewed large command.'});
     if(admittedOutlet!==null){
@@ -56,7 +57,7 @@ export function createCommandsHandler(deps:{store:CommandStore;origins:ReadonlyS
     if(handoffOutlet!==null&&(!['handoff.prepare','supplier-message.record'].includes(command.type)||command.outletId!==handoffOutlet))return reply(400,{error:'Keep the admitted message attempt and outlet.'});
     if(inboxOutlet!==null&&(command.type!=='inbox.capture'||command.outletId!==inboxOutlet))return reply(400,{error:'Keep the admitted Inbox capture and outlet.'});
     if(linkOutlet!==null&&(command.type!=='shopLink.generate'||command.outletId!==linkOutlet))return reply(400,{error:'Keep the admitted frozen link and outlet.'});
-    if(currency!==null&&!isOrderCommand(command))return reply(400,{error:'Keep the saved currency with its original order action.'});
+    if(currency!==null&&!isOrderCommand(command)&&(!isMoneyCommand(command)||command.type==='khata.communication'))return reply(400,{error:'Keep the saved currency with its original financial action.'});
     try{return reply(200,parseShopCommandReceipt(await (currency===null?deps.store.apply(jwt,command):deps.store.apply(jwt,command,currency)),command));}
     catch(error){return error instanceof SupplierMessageMutationInvalid?reply(400,{error:error.message}):error instanceof SupplierMessageMutationConflict?reply(409,{error:error.message}):error instanceof LinkMutationInvalid?reply(400,{error:error.message}):error instanceof LinkMutationConflict?reply(409,{error:error.message}):error instanceof ProfileMutationInvalid?reply(400,{error:error.message}):error instanceof ProfileMutationConflict?reply(409,{error:error.message}):error instanceof SettingsMutationInvalid?reply(400,{error:error.message}):error instanceof SettingsMutationConflict?reply(409,{error:error.message}):error instanceof CatalogueMutationInvalid?reply(400,{error:error.message}):error instanceof CatalogueMutationConflict?reply(409,{error:error.message}):error instanceof CommandDenied?reply(error.status,{error:'This change is unavailable for this account.'}):error instanceof InboxMutationInvalid?reply(400,{error:error.message}):error instanceof InboxMutationConflict?reply(409,{error:error.message}):error instanceof HandoffMutationInvalid?reply(400,{error:error.message}):error instanceof HandoffMutationConflict?reply(409,{error:error.message}):error instanceof ClosingMutationInvalid?reply(400,{error:error.message}):error instanceof ClosingMutationConflict?reply(409,{error:error.message}):error instanceof OrderMutationInvalid?reply(400,{error:error.message}):error instanceof OrderMutationConflict?reply(409,{error:error.message}):error instanceof PurchaseMutationInvalid?reply(400,{error:error.message}):error instanceof PurchaseMutationConflict?reply(409,{error:error.message}):error instanceof MoneyMutationInvalid?reply(400,{error:error.message}):error instanceof MoneyMutationConflict?reply(409,{error:error.message}):error instanceof StockMutationInvalid?reply(400,{error:error.message}):error instanceof StockMutationConflict?reply(409,{error:error.message}):error instanceof CustomerMutationInvalid?reply(400,{error:'Check the customer, credit terms or opening balance. Settle all khata before archiving.'}):error instanceof CommandConflict?reply(409,{error:'This command conflicts with an existing or newer change. Refresh before trying again.'}):reply(503,{error:'Changes are unavailable. Try again with the same command ID.'});}
   };
@@ -201,6 +202,7 @@ export function createCommandStore(apiUrl:string,publishableKey:string,send:type
         const ticket=newId(),prepared=await rpc('prepare_money_write',{p_id:c.id,p_ticket_id:ticket,p_type:c.type,p_outlet_id:c.outletId,p_plan:moneyWritePlan(c),p_hash:hash,p_occurred_at:c.occurredAt},publishableKey,jwt);
         if(prepared?.done===true)return prepared.receipt;
         const fields=moneyWriteFields(prepared,c,ticket);
+        if(!proposedMoneyCurrencyMatches(c,fields.p_records,currency))throw new CommandConflict();
         try{return await rpc('finish_money_write',fields,options.serviceKey,undefined,'money_snapshot_changed');}catch(error){if(!(error instanceof CatalogueSnapshotChanged))throw error;}
       }
       throw new CommandConflict();

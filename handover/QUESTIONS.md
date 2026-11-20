@@ -16,3 +16,5 @@
 - Resolved M30 operator-picker reference: M30 names no dedicated frame. Reuse the existing onboarding/card primitives, with M38's outlet hierarchy as a visual reference, and verify all five required widths. Differences are informational; do not claim an exact match or request owner sign-off.
 
 - Resolved M31 original order currency: normal delivery now derives the saved unit from the immutable original order source and asserts it separately from the unchanged command/hash. Actual completed receipts replay first; mismatched new writes and profile races stay retained. Non-order financial currency/conflict boundaries remain implementation work before enabling cloud sync.
+
+- Resolved M31 ordinary money currency: counter and khata actions now derive their original unit from immutable saved sale/entry images, retaining companion and undo identities. Admission checks every retry after actual outcome lookup; historical account currency remains valid after profile changes. Explicit money review/resolution, stock/purchase/closing boundaries and full hosted acceptance remain open before enabling cloud sync.

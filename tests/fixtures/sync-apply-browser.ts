@@ -686,6 +686,12 @@ const api = {
     }),
   cash: (expression: string) =>
     use((db) => db.recordSale({ expression, method: 'cash' })),
+  payOriginalKhata: (amount: number) => use(async db=>{
+    const account=(await db.creditAccounts.toArray())[0];
+    if(!account)throw Error('Use the original account');
+    return db.recordCreditPayment(account.id,amount,'cash',undefined,'Original BDT payment · বাংলা');
+  }),
+  undoOriginalKhataPayment: (id:string) => use(db=>db.undoCreditEntry(id)),
   inspect: () =>
     use(async (db) => ({
       backup: await db.readBackup(),

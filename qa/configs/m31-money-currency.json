@@ -1,0 +1,23 @@
+{
+  "title": "M31 — Original counter and khata currency",
+  "pages": [
+    {
+      "id": "m31-money-currency-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [360, 390],
+      "moneyCurrencyReviewFixture": true,
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "Actual offline BDT counter action retained after a real owner USD profile command. No financial resolution is fabricated; the original local copy and manual JSON backup remain available. M31 has no dedicated frame, so M27 supplies tokens. Auth/Realtime/Storage are synthetic; comparison differences are informational.",
+      "sections": [{"selector": ".cloud-sync-controls", "id": "review", "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]
+    },
+    {
+      "id": "m31-money-currency-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [768, 1024, 1440],
+      "moneyCurrencyReviewFixture": true,
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "Actual offline BDT counter action retained after a real owner USD profile command. No financial resolution is fabricated; the original local copy and manual JSON backup remain available. M31 has no dedicated frame, so Desktop 14 supplies tokens. Auth/Realtime/Storage are synthetic; comparison differences are informational.",
+      "sections": [{"selector": ".cloud-sync-controls", "id": "review", "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"}]
+    }
+  ]
+}

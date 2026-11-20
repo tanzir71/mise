@@ -16,6 +16,7 @@ import {cloudUploadFixture,MemoryCloudUpload,uploadId} from './cloud-upload-fixt
 import {inboxImageFile,inboxPng} from './inbox-fixture';
 import * as inboxCore from '../packages/core/inbox';
 import {bindCommandReceipt} from '../apps/web/src/data/command-request';
+import {savedMoneyCurrency} from '../packages/core/money-currency';
 
 it('original owner delivery rejects an operator selected while the request was in flight',async()=>{const {db,journal,snapshot}=await boot();await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());await db.recordSale({expression:'5',method:'cash'});const original=await db.outbox.toArray(),binding=(await db.cloudState.get('binding'))!;await expect(deliverLocalOutbox(db,target,async command=>{await db.operatorState.put({id:'active',version:1,revision:1,phase:'active',businessId:binding.businessId,outletId:binding.outletId,actorId:binding.ownerId,role:'owner',connection:null});return cashReceipt(command);})).rejects.toThrow('operator changed');expect(await db.outbox.toArray()).toEqual(original);});
 it('receipt acceptance verifies the entire original queue entry rather than only its commands',async()=>{const {db,journal,snapshot}=await boot();await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());await db.recordSale({expression:'5',method:'cash'});const [original]=await db.outbox.toArray();await expect(deliverLocalOutbox(db,target,async command=>{await db.outbox.update(original.id,{at:original.at+1});return cashReceipt(command);})).rejects.toThrow('queued action changed');expect((await db.outbox.get(original.id))?.receipts).toEqual([]);expect((await db.outbox.get(original.id))?.at).toBe(original.at+1);});
@@ -27,6 +28,61 @@ afterEach(async()=>{await Promise.all(databases.splice(0).map(db=>db.delete()));
 async function boot(){const db=new MiseDatabase('mise-local-outbox-test-'+randomUUID()),journal=new CloudUploadJournal('mise-local-outbox-journal-'+randomUUID());databases.push(db,journal);const backup=cloudUploadFixture();await db.restoreBackup(backup,await db.previewRestore(backup));const snapshot=await journal.prepare(db,uploadId());return {db,journal,snapshot};}
 async function armed(){const value=await boot();await beginLocalUpload(value.db,value.snapshot,target);return value;}
 function cashReceipt(command:ShopCommand):ShopCommandReceipt {if(command.type!=='sale.record')throw Error('Expected cash command');return {id:command.id,type:command.type,outletId:command.outletId,occurredAt:command.occurredAt,saleId:command.saleId,accountId:null,entryId:null,amount:500,at:command.occurredAt+1,saleUpdatedAt:command.occurredAt,entrySequence:null,undoOf:null};}
+
+it('native money delivery keeps the original BDT source even when the current local profile is USD',async()=>{
+ const {db,journal,snapshot}=await armed();await db.recordSale({expression:'5',method:'cash'});
+ await db.saveSetup({businessType:'corner_shop',marketCode:'BD',name:'Original money',phone:'01712345482',currency:'USD'});
+ await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+ const original=await db.outbox.toArray(),before=backupToken(await db.readBackup()),sent:{type:string;currency:string|undefined}[]=[];
+ await expect(deliverLocalOutbox(db,target,async(command,currency)=>{sent.push({type:command.type,currency});throw Error('Stop before HTTP');})).rejects.toThrow('Stop before HTTP');
+ expect(sent).toEqual([{type:'sale.record',currency:'BDT'}]);expect((await db.setup())!.outlet.currency).toBe('USD');
+ expect(await db.outbox.toArray()).toEqual(original);expect(backupToken(await db.readBackup())).toBe(before);
+});
+it.each(['missing','duplicate','invalid-unit','different-id','different-outlet','unexpected-before'])('a %s original counter image cannot borrow a unit or reach HTTP',async kind=>{
+ const {db,journal,snapshot}=await armed();await db.recordSale({expression:'5',method:'cash'});
+ await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+ const [row]=await db.outbox.toArray(),changes=structuredClone(row.changes),index=changes.findIndex(c=>c.table==='sales'),image=changes[index].after as Record<string,unknown>;
+ if(kind==='missing')delete image.currency;
+ else if(kind==='duplicate')changes.push(structuredClone(changes[index]));
+ else if(kind==='invalid-unit')image.currency='BDT,USD';
+ else if(kind==='different-id')image.id=uploadId(91);
+ else if(kind==='different-outlet')image.outletId=uploadId(92);
+ else changes[index].before=structuredClone(image);
+ await db.outbox.update(row.id,{changes});const original=await db.outbox.toArray(),send=vi.fn();
+ const delivery=deliverLocalOutbox(db,target,send);
+ if(kind==='different-id')await expect(delivery).rejects.toThrow('Keep each original local record change.');
+ else await expect(delivery).rejects.toMatchObject({kind:'review'});
+ expect(send).not.toHaveBeenCalled();expect(await db.outbox.toArray()).toEqual(original);
+});
+it('all original counter and khata images retain their unit, including linked undo and payment companions',async()=>{
+ const {db}=await armed(),account=(await db.creditAccounts.toArray())[0];
+ const sale=await db.recordCreditSale({expression:'5',customerId:account.customerId,accountId:account.id});await db.undoSale(sale.id);
+ const payment=await db.recordCreditPayment(account.id,100,'cash');await db.undoCreditEntry(payment.id);
+ await db.recordCommunication(account.id,'reminder','Literal original','manual');
+ const cash=await db.recordSale({expression:'5',method:'cash'});await db.undoSale(cash.id);
+ const rows=await db.outbox.orderBy('[uploadId+sequence]').toArray();
+ expect(rows.map(row=>savedMoneyCurrency(row.commands[0],row.changes))).toEqual(['BDT','BDT','BDT','BDT',undefined,'BDT','BDT']);
+ const credit=rows[0],changes=structuredClone(credit.changes),entry=changes.find(c=>c.table==='creditEntries')!.after as Record<string,unknown>;entry.currency='USD';
+ expect(()=>savedMoneyCurrency(credit.commands[0],changes)).toThrow('original sale or khata currency');
+ const undo=rows[1],undoChanges=structuredClone(undo.changes),originalSale=undoChanges.find(c=>c.table==='sales')!.before as Record<string,unknown>;originalSale.currency='USD';
+ expect(()=>savedMoneyCurrency(undo.commands[0],undoChanges)).toThrow('original sale or khata currency');
+ const reversal=rows[3],reverseChanges=structuredClone(reversal.changes),reverse=reverseChanges.find(c=>c.table==='creditEntries')!.after as Record<string,unknown>;reverse.reversalOf=uploadId(93);
+ expect(()=>savedMoneyCurrency(reversal.commands[0],reverseChanges)).toThrow('financial companion');
+});
+
+it('a grouped original sale and undo can derive one unit only from their real earlier creation intent',async()=>{
+ const {db,journal,snapshot}=await armed();await db.transaction('rw',db.tables,async()=>{const sale=await db.recordSale({expression:'5',method:'cash'});await db.undoSale(sale.id);});
+ await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());const [row]=await db.outbox.toArray();
+ expect(row.commands.map(c=>c.type)).toEqual(['sale.record','sale.undo']);
+ expect(savedMoneyCurrency(row.commands[0],row.changes)).toBe('BDT');
+ expect(()=>savedMoneyCurrency(row.commands[1],row.changes)).toThrow('original sale or khata currency');
+ expect(savedMoneyCurrency(row.commands[1],row.changes,[row.commands[0]])).toBe('BDT');
+ const seen:string[]=[];await deliverLocalOutbox(db,target,async(command,currency)=>{
+  seen.push(currency!);if(command.type==='sale.record')return cashReceipt(command);
+  if(command.type!=='sale.undo')throw Error('Expected original undo');
+  return {id:command.id,type:command.type,outletId:command.outletId,occurredAt:command.occurredAt,saleId:command.saleId,accountId:null,entryId:null,amount:-500,at:command.occurredAt+1,saleUpdatedAt:command.occurredAt,entrySequence:null,undoOf:command.saleId};
+ });expect(seen).toEqual(['BDT','BDT']);expect((await db.outbox.get(row.id))?.status).toBe('accepted');
+});
 
 it('a generated queue ID collision cannot overwrite an earlier action or commit the later sale',async()=>{const {db}=await armed();await db.recordSale({expression:'5',method:'cash'});const [original]=await db.outbox.toArray(),before=backupToken(await db.readBackup()),nonce=vi.spyOn(inboxCore,'newInboxId').mockReturnValue(original.id);try{await expect(db.recordSale({expression:'5',method:'cash'})).rejects.toThrow();expect(backupToken(await db.readBackup())).toBe(before);expect(await db.outbox.toArray()).toEqual([original]);expect((await db.cloudState.get('binding'))!.sequence).toBe(1);}finally{nonce.mockRestore();}});
 

@@ -13,6 +13,7 @@ import {moneyFingerprint,moneyWriteFields} from '../supabase/functions/_shared/m
 import {createCommandStore,createCommandsHandler} from '../supabase/functions/_shared/commands-handler';
 import {newInboxId} from '../packages/core/inbox';
 import {moneyHostedProofSql} from './money-hosted-fixture';
+import {savedCurrencyHeader} from '../packages/core/order-currency';
 import type {CreditAccount,CreditEntry,Customer,Sale,SetupCommand} from '../packages/core/models';
 const uid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,origin='https://shop.test',literal='হিসাব\0'+String.fromCharCode(0xd800);
 let db:PGlite,source:SetupCommand,branch:SetupCommand,foreign:SetupCommand,customer:Customer,account:CreditAccount,otherAccount:CreditAccount;
@@ -26,7 +27,7 @@ function store(beforeFinish?:(args:Record<string,unknown>)=>Promise<void>){retur
  try{const result=await asRole<{data:unknown}>(service?null:Number(headers.get('Authorization')!.split('.')[1]),service?'service_role':'authenticated',`select public.${name}(${parameters[name].map((_,i)=>'$'+(i+1)).join(',')}) as data`,parameters[name].map(k=>['p_records','p_plan'].includes(k)?JSON.stringify(args[k]):args[k]));return new Response(JSON.stringify(result[0].data));}
  catch(error){const {code,message,detail:details}=error as {code:string;message:string;detail?:string};lastError=code+': '+message;return new Response(JSON.stringify({code,details}),{status:code==='42501'?403:['PT409','23505'].includes(code)?409:code==='22023'?400:500});}
  },{serviceKey:'sb_secret_test_only'});}
-async function http(n:number,c:unknown,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>){return createCommandsHandler({origins:new Set([origin]),store:store(beforeFinish)})(new Request('https://api.test/commands',{method:'POST',headers:{Origin:origin,Authorization:`Bearer user.${n}.signature`,'Content-Type':'application/json'},body:JSON.stringify(c)}));}
+async function http(n:number,c:unknown,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>,currency:string|null='BDT'){return createCommandsHandler({origins:new Set([origin]),store:store(beforeFinish)})(new Request('https://api.test/commands',{method:'POST',headers:{Origin:origin,Authorization:`Bearer user.${n}.signature`,'Content-Type':'application/json',...(currency!==null&&(c as MoneyCommand).type!=='khata.communication'?{[savedCurrencyHeader]:currency}:{})},body:JSON.stringify(c)}));}
 function base(){return {id:newInboxId(),outletId:source.snapshot.outlet.id,occurredAt:Date.now()-1000};}
 function cash():Extract<MoneyCommand,{type:'sale.record'}>{return {...base(),type:'sale.record',saleId:newInboxId(),input:{expression:'75 × 2',method:'cash',wallet:null,given:20000,who:literal,items:[{itemId:source.items[0].id,unitPrice:7500,qty:2}]}};}
 function credit():Extract<MoneyCommand,{type:'sale.credit'}>{return {...base(),type:'sale.credit',saleId:newInboxId(),accountId:account.id,entryId:newInboxId(),creditEventId:newInboxId(),input:{expression:'150',items:[],confirmation:null}};}
@@ -56,10 +57,65 @@ beforeAll(async()=>{
 },30_000);
 beforeEach(async()=>{
  lastError='';await db.exec("truncate public.customers,public.events cascade;delete from private.money_write_tickets;update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null;update public.members set active=true;update public.items set available=true");
+ await db.query('update public.outlets set currency=$1 where id=$2',['BDT',source.snapshot.outlet.id]);
  for(const a of actors){await db.query('update public.members set role=$1,auth_user_id=$2 where id=$3',[a.role,uid(a.n),a.id]);await db.query('delete from public.member_outlets where member_id=$1',[a.id]);await db.query('insert into public.member_outlets values($1,$2,$3)',[a.business,a.id,a.outlet]);}
  await insert(initial);await db.query('update public.items set price=7500 where id=$1',[source.items[0].id]);
 });
 afterAll(async()=>{await db?.close();});
+
+it('a new counter sale cannot borrow the current outlet currency without its original saved unit',async()=>{
+ const c=cash();c.input.items=[];
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ expect((await http(1,c,undefined,null)).status).toBe(409);
+ expect(await counts()).toEqual({sales:0,entries:0,events:0,receipts:0});
+});
+
+it('a saved BDT counter sale is not reinterpreted as USD on new admission',async()=>{
+ const c=cash();c.input.items=[];const original=structuredClone(c);
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ expect((await http(1,c)).status).toBe(409);expect(c).toEqual(original);
+ expect(await counts()).toEqual({sales:0,entries:0,events:0,receipts:0});
+});
+it('a genuinely saved USD counter sale can be admitted in USD',async()=>{
+ const c=cash();c.input.items=[];
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ expect((await http(1,c,undefined,'USD')).status).toBe(200);
+ expect(await loadSale(c.saleId)).toMatchObject({currency:'USD',amount:15000});
+});
+it.each(['bdt','BDT,USD','BDTUSD'])('an invalid saved money unit %s is rejected without money or receipts',async currency=>{
+ expect((await http(1,cash(),undefined,currency)).status).toBe(400);
+ expect(await counts()).toEqual({sales:0,entries:0,events:0,receipts:0});
+});
+it('a profile change between money preparation and commit cannot refresh the saved unit on retry',async()=>{
+ const c=cash();c.input.items=[];let finishes=0;
+ const r=await http(1,c,async()=>{finishes++;await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);});
+ expect(r.status).toBe(409);expect(finishes).toBe(1);
+ expect(await counts()).toEqual({sales:0,entries:0,events:0,receipts:0});
+});
+it('an actual completed counter receipt replays before missing or changed currency assertions',async()=>{
+ const c=cash(),receipt=await accepted(c);
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ for(const currency of [null,'USD','BDT']){const r=await http(1,c,undefined,currency);expect(r.status).toBe(200);expect(parseMoneyCommandReceipt(await r.json(),c)).toEqual(receipt);}
+ expect(await loadSale(c.saleId)).toMatchObject({currency:'BDT',amount:15000});
+ expect(await counts()).toEqual({sales:1,entries:0,events:1,receipts:1});
+});
+it('historical BDT counter undo keeps its original unit after the profile changes to USD',async()=>{
+ const c=cash();await accepted(c);
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ expect(await accepted(undoSale(c))).toMatchObject({amount:-15000,undoOf:c.saleId});
+ expect(await loadSale(c.saleId)).toMatchObject({currency:'BDT',voidReason:'undo'});
+});
+it('historical BDT khata payments and reversals retain their account unit after a USD profile change',async()=>{
+ await opening();await db.query('update public.outlets set currency=$1 where id=$2',['USD',source.snapshot.outlet.id]);
+ const c=payment();expect(await accepted(c)).toMatchObject({amount:5000});
+ const undo:MoneyCommand={...base(),type:'khata.undo',entryId:c.entryId,reversalId:newInboxId()};await accepted(undo);
+ expect((await ledger()).every(e=>e.currency==='BDT')).toBe(true);
+ expect(creditBalance(account,await ledger())).toBe(20000);
+});
+it('a contradictory payment unit is rejected while its original BDT ledger remains untouched',async()=>{
+ await opening();const before=await ledger(),c=payment();
+ expect((await http(1,c,undefined,'USD')).status).toBe(409);expect(await ledger()).toEqual(before);
+});
 it('the exact rolled-back hosted role fixture covers every financial family without retaining Auth or shop data',async()=>{const sql=await moneyHostedProofSql(),result=await db.exec(sql),proof=result.at(-1)!.rows[0] as {proof:Record<string,unknown>;auth_rows:number;business_rows:number;ticket_rows:number};expect(proof).toEqual({proof:{commands:7,receipts:7,allClocksRetained:true,replayExact:true,ordinaryCompletionDenied:true,privateReadsDenied:true,otherIdentityDenied:true,salesVoided:2,finalBalance:12345,literalPaymentRetained:true,pendingTickets:0},auth_rows:0,business_rows:0,ticket_rows:0});});
 it.each([1,2])('operator %s saves exact cash, change, catalogue snapshots, actor and offline occurrence time',async n=>{const c=cash();c.occurredAt-=86400000;const r=await accepted(c,n),sale=await loadSale(c.saleId);expect(sale).toMatchObject({id:c.saleId,amount:15000,given:20000,change:5000,createdAt:c.occurredAt,eventId:c.id,createdBy:actors.find(a=>a.n===n)!.id,who:literal});expect(sale.items[0]).toMatchObject({name:'Rice',qty:2,lineTotal:15000});expect(r.at).toBeGreaterThan(c.occurredAt);expect(r.saleUpdatedAt).toBeGreaterThanOrEqual(r.at);expect(await counts()).toEqual({sales:1,entries:0,events:1,receipts:1});});
 it.each(['wallet','card'] as const)('records a %s receipt without cash given/change',async method=>{const c=cash();c.input={...c.input,method,wallet:method==='wallet'?'bKash':null,given:null};await accepted(c);expect(await loadSale(c.saleId)).toMatchObject({method,methodName:method==='wallet'?'bKash':'Card'});expect((await loadSale(c.saleId)).given).toBeUndefined();});

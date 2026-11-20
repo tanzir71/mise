@@ -1,4 +1,5 @@
 import {expect,it} from 'vitest';
+import {savedCurrencyHeader} from '../packages/core/order-currency';
 // @ts-expect-error Deployment packaging is a standalone Node module.
 import {edgeBundle} from '../scripts/edge-bundle.mjs';
 const id=(n:number)=>String(n).padStart(26,'0');
@@ -17,7 +18,7 @@ it('the exact deployment module executes shared counter validation with stable I
    return new Response(JSON.stringify({id:id(4),occurredAt:1000,type:'sale.record',outletId:id(2),saleId:id(5),accountId:null,entryId:null,amount:15000,at:123456,saleUpdatedAt:123456,entrySequence:null,undoOf:null,private:'discard me'}));
   };
   await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64')+'#money');
-  expect(handler).toBeTypeOf('function');const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json'},body:JSON.stringify({id:id(4),occurredAt:1000,type:'sale.record',saleId:id(5),outletId:id(2),input:{expression:'75*2',method:'cash',wallet:null,given:20000,who:'',items:[]}})}));
+  expect(handler).toBeTypeOf('function');const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[savedCurrencyHeader]:'BDT'},body:JSON.stringify({id:id(4),occurredAt:1000,type:'sale.record',saleId:id(5),outletId:id(2),input:{expression:'75*2',method:'cash',wallet:null,given:20000,who:'',items:[]}})}));
   expect(response.status).toBe(200);expect(await response.json()).not.toHaveProperty('private');expect(calls).toEqual(['prepare_money_write','finish_money_write']);
  }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
 },30000);

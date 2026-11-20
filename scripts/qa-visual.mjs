@@ -8,7 +8,7 @@ import LZString from 'lz-string';
 import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
 import { installUploadReviewFixture } from '../tests/fixtures/install-upload-review.mjs';
 import { installOperatorsFixture } from '../tests/fixtures/install-operators.mjs';
-import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
+import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyCurrencyReview,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
 
 const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
@@ -59,6 +59,7 @@ try {
     if(target.localInboxFixture)await captureLocalInboxReview(page,typeof target.localInboxFixture==='string'?target.localInboxFixture:'review');
     if(target.pendingJoinShareFixture)await capturePendingJoinShare(page,target.pendingJoinShareFixture);
     if(target.orderActionReviewFixture)await captureOrderActionReview(page,target.orderActionReviewFixture);
+    if(target.moneyCurrencyReviewFixture)await captureMoneyCurrencyReview(page);
     await page.evaluate(() => document.fonts.ready);
     for (const action of target.actions || []) {
       const locator = page.locator(action.selector || 'body');
