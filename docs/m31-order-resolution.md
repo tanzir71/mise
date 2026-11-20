@@ -68,7 +68,8 @@ still required. Validation is recorded in [the local record](m31-order-resolutio
 
 The [operator interface](m31-order-review-interface.md) now exposes the order
 review, explicit decisions and lost-outcome recovery. Other financial command
-families and normal admission across a changed outlet currency remain unfinished.
+families remain unfinished. [Normal order currency admission](m31-order-currency.md)
+now retains mismatched saved units before a new write.
 Cloud flags remain off, M30/M31 remain unchecked, and all GitHub workflows and
 Pages publication remain held. Actual deployment details and credential values
 stay outside Git and static build variables.

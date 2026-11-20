@@ -58,7 +58,7 @@ export async function capturePendingJoinShare(page,mode){
 }
 /** The actual order-review controls backed by two devices and local SQL/HTTP. */
 export async function captureOrderActionReview(page,mode='review'){
- if(!['review','unconfirmed'].includes(mode))throw Error('Choose a saved order review state.');
+ if(!['review','unconfirmed','currency'].includes(mode))throw Error('Choose a saved order review state.');
  // Each capture owns its SQL state: a prior withdrawal deliberately leaves a
  // financial fence, which must not become another viewport's starting context.
  const {server,installRealtimeFixture}=await start();
@@ -67,13 +67,14 @@ export async function captureOrderActionReview(page,mode='review'){
   await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));
   await owner.evaluate(()=>window.miseSyncApplyTest.pull());
   await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));
-  await page.evaluate(async()=>{await window.miseSyncApplyTest.concurrentOrder('payment');await window.miseSyncApplyTest.cash('5');});
-  await owner.evaluate(()=>window.miseSyncApplyTest.concurrentOrder('price'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  if(mode==='currency'){await page.evaluate(()=>window.miseSyncApplyTest.queueNewOrder());await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));}
+  else{await page.evaluate(async()=>{await window.miseSyncApplyTest.concurrentOrder('payment');await window.miseSyncApplyTest.cash('5');});await owner.evaluate(()=>window.miseSyncApplyTest.concurrentOrder('price'));}
+  await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());
   await page.evaluate(()=>window.miseSyncApplyTest.cycle());await installRealtimeFixture(page,server.config(2).jwt);
   await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review saved order action',exact:true}).click();
   const panel=page.getByRole('region',{name:'Saved order review'});
   await panel.getByRole('button',{name:'Check current values',exact:true}).click();await panel.getByRole('button',{name:'Apply reviewed action',exact:true}).waitFor();
-  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.order-action-review button')).some(b=>b.textContent?.trim()==='Apply reviewed action'&&!b.disabled));
+  await page.waitForFunction(disabled=>{const buttons=Array.from(document.querySelectorAll('.order-action-review button'));return buttons.some(b=>b.textContent?.trim()==='Apply reviewed action'&&b.disabled===disabled)&&buttons.some(b=>b.textContent?.trim()==='Withdraw saved action'&&!b.disabled);},mode==='currency');
   if(mode==='unconfirmed'){
    server.loseNextResolution();await panel.getByRole('button',{name:'Withdraw saved action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();
   }

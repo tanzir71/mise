@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [original order currency boundary](m31-order-currency.md) sends only a
+three-letter monetary unit outside the unchanged command. It derives that value
+from the original saved order, carries no credentials or connection settings and
+provides no additional access. Existing account/source checks and SQL snapshot
+validation remain enforced; actual deployment values stay in private inputs.
+
 The [saved order review journal](m31-order-review-interface.md) retains only the
 original action, token-free comparison, choices and genuine receipts. Review
 tokens remain ephemeral; neither credentials nor connection configuration enter

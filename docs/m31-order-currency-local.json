@@ -1,0 +1,131 @@
+{
+  "checkedAt": "2026-11-20T07:03:07.325Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Original saved currency on normal order admission; other financial families and hosted acceptance remain open",
+  "schemas": {
+    "local": 23,
+    "localStores": 37,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": true,
+    "unit": {
+      "passed": 2573,
+      "files": 137,
+      "seconds": 399.82,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "limitsChanged": false
+    },
+    "focused": {
+      "server": 121,
+      "client": 69,
+      "realRed200InsteadOf409": true
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "startTime": "2026-11-20T06:42:58.408Z",
+      "duration": 710341.6699999999,
+      "expected": 449,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0,
+      "actualUi": true,
+      "realOwnerProfileCommand": true,
+      "originalCurrencyRetained": true,
+      "offlineReload": true,
+      "deliberateWithdrawal": true,
+      "sourceImagesAndCommandsPreserved": true,
+      "syntheticAuthStorageRealtime": true
+    },
+    "nativeInitialProof": {
+      "startTime": "2026-11-20T06:18:04.141Z",
+      "duration": 17107.995,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T07:02:50.099Z",
+      "comparisons": 259,
+      "overflow": 0,
+      "changedViewsSeriousCriticalAxe": 0,
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "screenshots": [
+        "qa/screens/m31-currency-phone-review-360.png",
+        "qa/screens/m31-currency-phone-review-390.png",
+        "qa/screens/m31-currency-desktop-review-1440.png"
+      ]
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T06:44:16.957Z",
+      "version": 24,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sourceMatches": true,
+      "bundleBytes": 442419,
+      "bundleSha256": "55205e4ee11dbc4dd38d701d2678b02f6ecd126c1b3c11baa12d4fa8e4b046e7",
+      "sourceFiles": 85,
+      "functions": 7,
+      "migrations": 40,
+      "applicationTables": 60,
+      "forcedRlsTables": 60,
+      "securityWarnings": 0,
+      "securityErrors": 0,
+      "actualDeploymentValuesInPublicReport": false,
+      "genuineHostedOtpAcceptance": false,
+      "unauthenticatedChecks": [
+        {
+          "kind": "commands",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=read",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=resolve",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-outcome",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-completion",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "privateValuesCompared": 10,
+      "credentials": 0,
+      "currentDeploymentReferences": 0,
+      "olderNonsecretFindings": 22,
+      "newHistoricalReferences": 0,
+      "coverageGaps": 0,
+      "historyPolicyUnchanged": true
+    }
+  },
+  "publication": {
+    "workflows": "disabled",
+    "pages": "held by owner",
+    "ciRun": null,
+    "ciArtifact": null
+  },
+  "remaining": [
+    "Non-order financial currency and conflict/resolution boundaries",
+    "Genuine hosted phone OTP and physical device acceptance",
+    "Remaining M30/M31 acceptance and later handover milestones"
+  ]
+}

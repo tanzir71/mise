@@ -12,6 +12,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 queued orders now carry their original saved currency separately from the unchanged command. A profile change or commit-time race retains mismatched orders for review; historical-currency payments remain valid, and actual completed receipts still replay before new admission checks. No currency is guessed from the device's current profile.
+
 - M31 saved order actions now have an opt-in comparison and explicit apply/withdraw controls. The token-free review journal survives offline reload and lost replies, checks the actual server outcome before retrying, and shows current currency, customer, khata and payment/refund effects. Changed values require a fresh choice; original sources and financial identities remain intact. The sync header's visible queue count and accessible label now match; financial previews decode literal method labels once. Other financial families and hosted acceptance remain open.
 
 - M31 order conflicts now have a current-value review protocol and distinct server-authorized withdrawal or replacement receipts. Replacement retains the original financial IDs and physical time; lost replies recover the actual outcome, and canonical audit proof is required before retiring the original projection. Native two-browser checks preserve later cash, full sources and images. Other financial families remain unfinished; cloud sync stays off by default.

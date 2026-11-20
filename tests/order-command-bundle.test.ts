@@ -18,7 +18,7 @@ it('the deployment module admits the original order operator and executes the wh
   };
   await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64')+'#order');expect(handler).toBeTypeOf('function');
   const c:OrderCommand={id:id(4),outletId:id(2),orderId:id(5),occurredAt:1000,type:'order.create',revision:0,newLineIds:[id(6)],input:{source:'paste',sourceText:'Literal\0',customerId:id(7),name:'Karim',phone:'01712345483',type:'pickup',address:'',table:'',lines:[{name:'চা\0',unit:'cup',qty:0.5,unitPrice:245}],deliveryFee:0,discount:0,payment:{method:'credit'}},settlement:{id:id(9),input:{method:'credit',accountId:id(8)},ids:{saleId:id(10),saleEventId:id(11),entryId:id(12),creditEventId:id(13),refundId:id(14),refundEventId:id(15)}}};
-  const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[orderBodyHeader]:id(2)},body:JSON.stringify(c)}));
+  const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[orderBodyHeader]:id(2),'X-Mise-Saved-Currency':'BDT'},body:JSON.stringify(c)}));
   expect(response.status).toBe(200);const body=await response.text();expect(body).not.toMatch(/sb_secret_|contextJson|ticketId|token/);expect(JSON.parse(body)).toMatchObject({orderId:id(5),revision:2,saleId:id(10),entryId:id(12)});expect(calls).toEqual(['admit_order_write','prepare_order_write','finish_order_write']);
  }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
 },30000);

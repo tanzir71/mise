@@ -69,8 +69,9 @@ clone-local at `qa/report.html`; key captures are
 `qa/screens/m31-order-review-desktop-review-1440.png` and
 `qa/screens/m31-order-unconfirmed-phone-review-390.png`.
 
-M30/M31 remain unchecked and cloud sync defaults off. Other financial families,
-normal admission across changed outlet currency, physical-device and genuine
+M30/M31 remain unchecked and cloud sync defaults off. [Normal order currency
+admission](m31-order-currency.md) now checks the original saved unit. Other
+financial families, physical-device and genuine
 hosted phone verification remain open. All GitHub workflows and Pages publication
 remain held, so there is no new CI artifact or Pages deployment claim. Current
 source and build output exclude private Supabase values; the unchanged historical

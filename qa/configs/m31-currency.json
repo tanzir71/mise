@@ -1,0 +1,35 @@
+{
+  "title": "M31 — Original monetary currency",
+  "pages": [
+    {
+      "id": "m31-currency-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [360, 390],
+      "orderActionReviewFixture": "currency",
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "Actual two-device order admission after the owner changes outlet currency. Original BDT values are retained; replacement is disabled and manual correction stays available. M31 supplies no dedicated frame, so M27 More supplies tokens. Auth/Realtime/Storage are explicit local fixtures; differences are informational.",
+      "sections": [
+        {
+          "selector": ".order-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ]
+    },
+    {
+      "id": "m31-currency-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [768, 1024, 1440],
+      "orderActionReviewFixture": "currency",
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "Actual two-device order admission after the owner changes outlet currency. Original BDT values are retained; replacement is disabled and manual correction stays available. M31 supplies no dedicated frame, so Desktop 14 Business data supplies tokens. Auth/Realtime/Storage are explicit local fixtures; differences are informational.",
+      "sections": [
+        {
+          "selector": ".order-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    }
+  ]
+}

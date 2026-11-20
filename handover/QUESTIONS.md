@@ -15,4 +15,4 @@
 
 - Resolved M30 operator-picker reference: M30 names no dedicated frame. Reuse the existing onboarding/card primitives, with M38's outlet hierarchy as a visual reference, and verify all five required widths. Differences are informational; do not claim an exact match or request owner sign-off.
 
-- M31 follow-up: normal queued order admission needs proof of the saved monetary currency before enabling cloud sync. The explicit review interface refuses a changed currency, but an original create/payment must not silently reinterpret minor units after outlet settings change. Preserve original queue hashes; add a source-bound admission assertion rather than rewriting old commands. This remains implementation work, not an owner question.
+- Resolved M31 original order currency: normal delivery now derives the saved unit from the immutable original order source and asserts it separately from the unchanged command/hash. Actual completed receipts replay first; mismatched new writes and profile races stay retained. Non-order financial currency/conflict boundaries remain implementation work before enabling cloud sync.

@@ -50,10 +50,14 @@ function store(beforeFinish?:(args:Record<string,unknown>)=>Promise<void>){retur
 async function reviewHttp(input:OrderReviewRequest|OrderReviewDecision,n=1,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>){const handler=createOrderReviewHandler({origins:new Set([origin]),store:createOrderReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',commandTransport(beforeFinish))});return handler(new Request('https://api.test/commands?review='+('outcome'in input?'resolve':'read'),{method:'POST',headers:{Origin:origin,Authorization:`Bearer user.${n}.signature`,'Content-Type':'application/json',[commandReviewHeader]:input.command.outletId},body:JSON.stringify(input)}));}
 async function http(n:number,c:ShopCommand,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>,header?:string|null){
  const admitted=header===null?null:header??(c.type==='order.create'||c.type==='order.update'?c.outletId:null);
- const req=new Request('https://api.test/commands',{method:'POST',headers:{Origin:origin,Authorization:`Bearer user.${n}.signature`,'Content-Type':'application/json',...(admitted?{[orderBodyHeader]:admitted}:{})},body:JSON.stringify(c)});
+ const req=new Request('https://api.test/commands',{method:'POST',headers:{Origin:origin,Authorization:`Bearer user.${n}.signature`,'Content-Type':'application/json',...(c.type.startsWith('order.')&&c.type!=='order.warning-settings'?{'X-Mise-Saved-Currency':'BDT'}:{}),...(admitted?{[orderBodyHeader]:admitted}:{})},body:JSON.stringify(c)});
  return createCommandsHandler({origins:new Set([origin]),store:store(beforeFinish)})(req);
 }
 async function accepted(c:OrderCommand,n=1){const r=await http(n,c);expect(r.status,lastError+' '+await r.clone().text()).toBe(200);return parseOrderCommandReceipt(await r.json(),c);}
+async function currencyHttp(c:OrderCommand,currency:string|undefined,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>){
+ const headers:Record<string,string>={Origin:origin,Authorization:'Bearer user.1.signature','Content-Type':'application/json',...(c.type==='order.create'||c.type==='order.update'?{[orderBodyHeader]:c.outletId}:{})};if(currency!==undefined)headers['X-Mise-Saved-Currency']=currency;
+ return createCommandsHandler({origins:new Set([origin]),store:store(beforeFinish)})(new Request('https://api.test/commands',{method:'POST',headers,body:JSON.stringify(c)}));
+}
 async function saved<T>(table:'orders'|'sales'|'orderRefunds'|'orderNotes'|'orderCommunications'|'events',id:string){const data=(await db.query<{data:string}>(`select row_to_json(x)::text data from public.${cloudRecordMaps[table].table} x where id=$1`,[id])).rows[0];if(!data)throw new Error('Missing fixture row.');return decodeCommandRecord(table,JSON.parse(data.data)) as unknown as T;}
 async function readOrder(id=order.id){return saved<Order>('orders',id);}
 async function prepare(c:OrderCommand,n=1){return (await role<{data:Record<string,unknown>}>(n,'authenticated','select public.prepare_order_write($1,$2,$3,$4,$5,$6,$7) data',[c.id,newInboxId(),c.type,c.outletId,JSON.stringify(orderWritePlan(c)),await orderFingerprint(c),c.occurredAt]))[0].data;}
@@ -137,6 +141,42 @@ it('the reviewed cancellation exposes the actual remaining khata and refund due 
 it('a new-order review states the actual proposed currency even when no current order exists',async()=>{
  await db.query('update public.outlets set currency=$1 where id=$2',['USD',source.snapshot.outlet.id]);const c=create(),packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:'{}'};
  const response=await reviewHttp(packet);expect(response.status).toBe(200);const result=await response.json();expect(result).toMatchObject({done:false,review:{current:{order:null},proposal:{enabled:true,currency:'USD',total:2500}}});
+});
+it('normal order admission cannot reinterpret saved BDT prices after the outlet switches to USD',async()=>{
+ const c=create(),original=JSON.stringify(c),before=await counts();
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ const request=new Request('https://api.test/commands',{method:'POST',headers:{Origin:origin,Authorization:'Bearer user.1.signature','Content-Type':'application/json',[orderBodyHeader]:c.outletId,'X-Mise-Saved-Currency':'BDT'},body:JSON.stringify(c)});
+ const response=await createCommandsHandler({origins:new Set([origin]),store:store()})(request);
+ expect(response.status).toBe(409);expect(JSON.stringify(c)).toBe(original);expect(await counts()).toEqual(before);
+ expect((await db.query('select id from public.orders where id=$1',[c.orderId])).rows).toEqual([]);
+});
+it('a matching saved currency admits the original order without adding fields or changing its hash',async()=>{
+ const c=create(),original=JSON.stringify(c),hash=await orderFingerprint(c);await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ const response=await currencyHttp(c,'USD');expect(response.status).toBe(200);expect((await readOrder(c.orderId)).currency).toBe('USD');expect(JSON.stringify(c)).toBe(original);expect(await orderFingerprint(c)).toBe(hash);expect(c).not.toHaveProperty('currency');
+});
+it('new order admission with no saved currency retains the action without creating money or an order',async()=>{
+ const c=create(),before=await counts(),response=await currencyHttp(c,undefined);expect(response.status).toBe(409);expect(await counts()).toEqual(before);expect((await db.query('select id from public.orders where id=$1',[c.orderId])).rows).toEqual([]);
+});
+it('a historical BDT order still accepts its BDT cash payment after the outlet switches to USD',async()=>{
+ const c=pay();await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);const response=await currencyHttp(c,'BDT');expect(response.status).toBe(200);expect((await saved<Sale>('sales',c.ids.saleId)).currency).toBe('BDT');expect((await readOrder()).currency).toBe('BDT');
+});
+it('a different saved payment currency cannot authorize the original BDT amount',async()=>{
+ const c=pay(),before=await counts();expect((await currencyHttp(c,'USD')).status).toBe(409);expect(await counts()).toEqual(before);expect((await readOrder()).payment.status).toBe('pending');
+});
+it('a profile currency change between preparation and commit cannot silently refresh the original currency on retry',async()=>{
+ const c=create(),original=JSON.stringify(c),before=await counts();let finishes=0;
+ const response=await currencyHttp(c,'BDT',async()=>{finishes++;await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);});
+ expect(response.status).toBe(409);expect(finishes).toBe(1);expect(await counts()).toEqual(before);expect(JSON.stringify(c)).toBe(original);
+});
+it('an actual completed compound payment is returned before checking a missing or changed saved currency',async()=>{
+ const c=create();c.settlement={id:newInboxId(),ids:finance(),input:{method:'cash',given:3000}};const first=await currencyHttp(c,'BDT');expect(first.status).toBe(200);const receipt=await first.json(),before=await counts();
+ await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);for(const currency of [undefined,'USD']){const response=await currencyHttp(c,currency);expect(response.status).toBe(200);expect(await response.json()).toEqual(receipt);expect(await counts()).toEqual(before);}expect((await saved<Sale>('sales',c.settlement.ids.saleId)).currency).toBe('BDT');
+});
+it.each(['bdt','BDTX','BDT, USD','12A'])('malformed saved currency %s is rejected before any domain write',async currency=>{
+ const c=create(),before=await counts();expect((await currencyHttp(c,currency)).status).toBe(400);expect(await counts()).toEqual(before);
+});
+it('a changed-currency order that never reached the server can be explicitly withdrawn with its original source retained',async()=>{
+ const c=create(),before=await counts();await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);expect((await currencyHttp(c,'BDT')).status).toBe(409);const selected=await openReview(c),receipt=parseCommandResolutionReceipt(await finishReview(selected),c);expect(receipt).toMatchObject({type:'command.resolved',outcome:'withdrawn'});expect((await db.query('select id from public.orders where id=$1',[c.orderId])).rows).toEqual([]);expect((await counts()).sales).toBe(before.sales);
 });
 it('reviewed financial effects show the literal Cash method without transport JSON quotes',async()=>{
  const c=pay(),packet:OrderReviewRequest={id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:'{}'};

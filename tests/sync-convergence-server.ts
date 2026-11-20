@@ -4,6 +4,7 @@ import { once } from 'node:events';
 import {stockBatchHeader} from '../packages/core/stock-commands';
 import {purchaseBodyHeader} from '../packages/core/purchase-commands';
 import {orderBodyHeader} from '../packages/core/order-commands';
+import {savedCurrencyHeader} from '../packages/core/order-currency';
 import {handoffBodyHeader} from '../packages/core/handoff-commands';
 import {inboxBodyHeader} from '../packages/core/inbox-commands';
 import {linkBodyHeader} from '../packages/core/link-commands';
@@ -421,7 +422,7 @@ export async function startConvergenceServer(
         'Access-Control-Allow-Origin': 'http://127.0.0.1:4321',
         'Access-Control-Allow-Methods': 'POST,GET,PUT,OPTIONS',
         'Access-Control-Allow-Headers':
-          ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader,commandReviewHeader].join(','),
+          ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,savedCurrencyHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader,commandReviewHeader].join(','),
       };
       if (req.method === 'OPTIONS') {
         res.writeHead(204, cors).end();
