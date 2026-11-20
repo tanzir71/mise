@@ -1,5 +1,5 @@
 import {parseCloudConnection,type CloudConnection} from '@mise/core/cloud-connection';
-import {commandReviewHeader,commandReviewBodyLimit,reviewedOrderProposal} from '@mise/core/command-resolution';
+import {commandReviewHeader,commandReviewBodyLimit,reviewedOrderProposal,parseCommandResolutionReceipt} from '@mise/core/command-resolution';
 import {parseOrderReviewRequest,parsePreparedOrderReview,type OrderReviewRequest,type OrderReviewDecision,type PreparedOrderReview} from '@mise/core/order-review';
 import {parseShopCommandReceipt,type ShopCommandReceipt} from '@mise/core/shop-commands';
 import {orderFingerprint} from '@mise/core/order-replay';
@@ -11,7 +11,8 @@ export function createCloudOrderReviewRemote(input:CloudConnection,account:Comma
   const receipt=parseShopCommandReceipt(value,packet.command);
   if(receipt.type==='command.resolved'){
    if(receipt.sourceHash!==packet.sourceHash||receipt.commandHash!==await orderFingerprint(packet.command))throw new CommandRequestError('review');
-   if(receipt.replacement){const proposed=reviewedOrderProposal(packet.command,packet.command.type==='order.create'?null:receipt.replacement.revision,receipt.replacement.id);if(receipt.replacement.commandHash!==await orderFingerprint(proposed))throw new CommandRequestError('review');}
+   const resolved=parseCommandResolutionReceipt(receipt,packet.command);
+   if(resolved.replacement){const proposed=reviewedOrderProposal(packet.command,packet.command.type==='order.create'?null:resolved.replacement.revision,resolved.replacement.id);if(resolved.replacement.commandHash!==await orderFingerprint(proposed))throw new CommandRequestError('review');}
   }
   guard();return bindCommandReceipt(receipt,guard);
  }

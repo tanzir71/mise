@@ -57,6 +57,10 @@
 .order-review-after { display:flex; flex-wrap:wrap; gap:16px; margin:16px 0; }
 .order-review-after dt { color:var(--text-secondary); }
 .order-review-after dd { margin:4px 0 0; }
+.money-review-consent { display:flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; }
+.money-review-consent input { flex-shrink:0; width:20px; height:20px; accent-color:var(--text); }
+.money-action-review > h3 { margin:16px 0 8px; }
+.money-action-review > p { margin:8px 0; }
 @media(max-width:600px) { .order-review-comparison { grid-template-columns:1fr; } .order-review-actions > button { width:100%; } }
 .phone-app-header:has(.sync-chip) {
   flex-wrap: wrap;

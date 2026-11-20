@@ -686,6 +686,11 @@ const api = {
     }),
   cash: (expression: string) =>
     use((db) => db.recordSale({ expression, method: 'cash' })),
+  credit: (expression: string) => use(async db=>{
+    const account=(await db.creditAccounts.toArray())[0];
+    if(!account)throw Error('Use the original customer khata');
+    return db.recordCreditSale({expression,accountId:account.id,customerId:account.customerId});
+  }),
   payOriginalKhata: (amount: number) => use(async db=>{
     const account=(await db.creditAccounts.toArray())[0];
     if(!account)throw Error('Use the original account');
@@ -704,6 +709,7 @@ const api = {
       recoveries: await db.scopeRecoveries.toArray(),
       actionReviews: await db.syncActionReviews.toArray(),
       orderReviews: await db.orderReviews.toArray(),
+      moneyReviews: await db.moneyReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

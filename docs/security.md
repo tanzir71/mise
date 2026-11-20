@@ -1,5 +1,21 @@
 # Deployment credentials
 
+The [counter and khata review](m31-money-review.md) stores the original action,
+token-free comparison, explicit choices and genuine receipts in a private local
+journal. Server tokens stay ephemeral. Neither deployment values nor Auth
+sessions enter that journal, domain commands or the portable backup. Native
+account, operator, connection and complete-source checks surround every write;
+the server independently binds the normalized command, literal source and saved
+currency. A historical review under an older operator generation is restricted
+to confirmation of an already acknowledged receipt, with fresh original-account
+verification. It cannot authorize another financial choice. Local verification
+passes, and the retrieved commands function matches the reviewed source with JWT
+checks enabled. All 62 application tables enforce RLS; anonymous table grants,
+public security-definer functions and public buckets remain absent. Seven actual
+unauthenticated requests return 401 after a valid-key positive control. No Auth
+configuration or secret-manager value was changed. Broader hosted acceptance
+remains open; cloud flags and publication stay held.
+
 The [pending-currency boundary](m31-pending-currency.md) derives only a monetary
 unit from immutable local source images, after actual coverage checks. Canonical
 and recovery plans refuse conflicting financial projections before native domain

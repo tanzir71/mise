@@ -81,6 +81,33 @@ export async function captureOrderActionReview(page,mode='review'){
   await checkLocalInboxAccess(page);
  }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
+/** Current credit consent, currency mismatch or an actual lost SQL outcome.
+ * Accessibility is checked before screenshot-only styles hide fixed navigation. */
+export async function captureMoneyActionReview(page,mode='review'){
+ const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));
+  await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));
+  await page.context().setOffline(true);
+  if(mode==='currency'){await page.evaluate(()=>window.miseSyncApplyTest.cash('37'));await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));}
+  else{await page.evaluate(()=>window.miseSyncApplyTest.credit('800'));await owner.evaluate(()=>window.miseSyncApplyTest.credit('700'));}
+  await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  await page.context().setOffline(false);await page.evaluate(()=>window.miseSyncApplyTest.cycle());await installRealtimeFixture(page,server.config(2).jwt);
+  await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review saved money action',exact:true}).click();
+  const panel=page.getByRole('region',{name:'Saved money review'});
+  await panel.getByRole('button',{name:'Check money values',exact:true}).click();
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.money-action-review button')).some(b=>b.textContent?.trim()==='Withdraw saved money action'&&!b.disabled));
+  if(mode==='currency'){
+   if(await panel.getByRole('button',{name:'Apply reviewed money action',exact:true}).isEnabled())throw Error('Do not convert the original currency.');
+  }else{
+   await panel.getByRole('checkbox',{name:'Allow this credit sale above the checked limit',exact:true}).waitFor();
+   if(mode==='unconfirmed'){
+    await panel.getByRole('checkbox').check();server.loseNextResolution();await panel.getByRole('button',{name:'Apply reviewed money action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();
+   }
+  }
+  await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
+}
 /** A genuine rejected counter command; no order review or resolution is invented. */
 export async function captureMoneyCurrencyReview(page){
  const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();

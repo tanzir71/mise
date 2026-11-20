@@ -12,6 +12,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 opt-in counter and khata review compares the original amount/currency with current sale, customer, balance and limit. Explicit withdrawal or replacement preserves original financial identities and undo clocks; credit above the checked limit needs separate consent. A token-free native journal recovers genuine outcomes after lost replies and offline reload, and changed values require another choice. Confirmed history remains recoverable after the original account is restored, without reviving an old decision. Full milestone and hosted acceptance remain open; cloud sync stays off by default.
+
 - M31 pending counter/khata and order projections now retain their original queue currency during canonical downloads and outlet-access recovery. A changed profile cannot reinterpret saved amounts or advance the accepted cursor; original sources, images and backup remain available. Covered historical money, same-currency replay and historical payments/undo remain valid. Cloud sync stays off by default.
 
 - M31 counter sales and khata payments now assert their original saved currency outside unchanged commands. Missing or conflicting source stays local, new admission and commit-time profile races cannot reinterpret money, and historical account payments/undo plus actual completed receipts remain valid. Counter rejections no longer advertise order-only review. Non-order financial review/resolution remains unfinished; cloud sync stays off by default.

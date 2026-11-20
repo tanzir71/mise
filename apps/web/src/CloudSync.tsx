@@ -26,6 +26,8 @@ import {isLocalInboxRetention} from '@mise/core/local-inbox';
 import './cloud-sync.css';
 import {OrderActionReview} from './OrderActionReview';
 import {hasSavedOrderReview} from './data/order-review-session';
+import {MoneyActionReview} from './MoneyActionReview';
+import {hasSavedMoneyReview} from './data/money-review-session';
 
 function useSyncView() {
   return useLiveQuery(async () => {
@@ -39,8 +41,9 @@ function useSyncView() {
       binding = await db.cloudState.get('binding'),
       operator = await db.operatorState.get('active'),
       hasOrderReview = binding ? await hasSavedOrderReview(db,binding.uploadId) : false,
+      hasMoneyReview = binding ? await hasSavedMoneyReview(db,binding.uploadId) : false,
       canRecover = await db.syncCanonical.where('id').equals('active').count() > 0;
-    return { state, unsent, binding, operator, canRecover, hasOrderReview };
+    return { state, unsent, binding, operator, canRecover, hasOrderReview, hasMoneyReview };
   }, []);
 }
 function sameConnection(config: CloudConnection) {
@@ -273,6 +276,7 @@ export function CloudSyncControls({
       ) : null}
       <footer>
         {state&&view?.hasOrderReview?<OrderActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
+        {state&&view?.hasMoneyReview?<MoneyActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {view?.binding&&view.canRecover&&state?.problem==='review'?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/recovery')}>Review outlet access</Button>:null}
         {view?.binding?.version===1&&view.binding.phase==='ready'&&!view.canRecover&&(state?.problem==='review'||state?.problem==='auth'||needsRebind)?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/owner-recovery')}>Review original connection</Button>:null}
         {!state || state.problem === 'auth' || needsRebind ? (

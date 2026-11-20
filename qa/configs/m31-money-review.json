@@ -1,0 +1,110 @@
+{
+  "title": "M31 — Saved counter and khata financial review",
+  "pages": [
+    {
+      "id": "m31-money-review-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no financial-review frame. Reuses M27 More tokens, card rhythm and controls. Actual two-device review through local SQL/HTTP; Auth, Realtime and Storage are synthetic. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".money-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "moneyActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-money-review-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no financial-review frame. Reuses Desktop 14 Business data tokens, cards and controls. Actual two-device review through local SQL/HTTP; Auth, Realtime and Storage are synthetic. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".money-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "moneyActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-money-unconfirmed-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        390
+      ],
+      "note": "An actual lost SQL resolution reply retains the chosen values and original action. M27 More supplies tokens; no dedicated M31 frame exists. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".money-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "moneyActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-money-unconfirmed-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        1440
+      ],
+      "note": "An actual lost SQL resolution reply retains the chosen values and original action. Desktop 14 supplies tokens; no dedicated M31 frame exists. Differences are informational.",
+      "sections": [
+        {
+          "selector": ".money-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "moneyActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-money-currency-choice-390",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        390
+      ],
+      "note": "Actual original-currency mismatch keeps the BDT amount and offers explicit withdrawal. No dedicated M31 frame exists; inherited More/Business data tokens are compared, with differences informational.",
+      "sections": [
+        {
+          "selector": ".money-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "moneyActionReviewFixture": "currency"
+    },
+    {
+      "id": "m31-money-currency-choice-1440",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        1440
+      ],
+      "note": "Actual original-currency mismatch keeps the BDT amount and offers explicit withdrawal. No dedicated M31 frame exists; inherited More/Business data tokens are compared, with differences informational.",
+      "sections": [
+        {
+          "selector": ".money-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "moneyActionReviewFixture": "currency"
+    }
+  ]
+}

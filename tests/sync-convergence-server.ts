@@ -10,6 +10,7 @@ import {inboxBodyHeader} from '../packages/core/inbox-commands';
 import {linkBodyHeader} from '../packages/core/link-commands';
 import {commandReviewHeader} from '../packages/core/command-resolution';
 import {createOrderReviewHandler,createOrderReviewStore} from '../supabase/functions/_shared/order-review';
+import {createMoneyReviewHandler,createMoneyReviewStore} from '../supabase/functions/_shared/money-review';
 import { resolve, join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -135,6 +136,11 @@ export async function startConvergenceServer(
     'operator_contexts',
     'prepare_money_write',
     'finish_money_write',
+    'admit_money_review',
+    'inspect_money_outcome',
+    'prepare_money_review',
+    'read_money_review',
+    'finish_money_review',
     'prepare_stock_write',
     'finish_stock_write',
     'admit_stock_batch',
@@ -333,6 +339,7 @@ export async function startConvergenceServer(
       ),
     }),
     reviews=createOrderReviewHandler({origins,store:createOrderReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
+    moneyReviews=createMoneyReviewHandler({origins,store:createMoneyReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     upload = createInitialUploadHandler({
       origins,
       store: createInitialUploadStore(
@@ -375,6 +382,7 @@ export async function startConvergenceServer(
     loseUploadFinish = false,
     revokeAfterProof = false,
     holdCommand = false,
+    holdResolution = false,
     releaseCommand: (() => void) | null = null;
   const calls = {
     commands: 0,
@@ -456,16 +464,18 @@ export async function startConvergenceServer(
         }
       } else if (path === '/functions/v1/commands') {
         calls.commands++;
-        response = await (new URL(request.url).searchParams.has('review')?reviews:commands)(request);
-        if (holdCommand && response.ok) {
+        const reviewMode = new URL(request.url).searchParams.get('review');
+        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?reviews:commands)(request);
+        if ((holdCommand || holdResolution && ['resolve','money-resolve'].includes(reviewMode??'')) && response.ok) {
           holdCommand = false;
+          holdResolution = false;
           await new Promise<void>((resolve) => {
             releaseCommand = resolve;
             calls.heldCommands++;
           });
           releaseCommand = null;
         }
-        if ((loseCommand||loseResolution&&new URL(request.url).searchParams.get('review')==='resolve') && response.ok) {
+        if ((loseCommand||loseResolution&&['resolve','money-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
           loseCommand = false;
           loseResolution = false;
           await truncate(response);
@@ -608,6 +618,7 @@ export async function startConvergenceServer(
     holdNextCommandReply() {
       holdCommand = true;
     },
+    holdNextResolutionReply() { holdResolution = true; },
     releaseCommandReply() {
       releaseCommand?.();
     },

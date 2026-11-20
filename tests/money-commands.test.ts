@@ -8,7 +8,11 @@ import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,prepareCloudMigr
 import {saveCustomerCommand} from '../packages/core/customers';
 import {saveCreditTermsCommand,defaultCreditTerms,openingBalanceCommand,creditBalance} from '../packages/core/khata';
 import {moneyWritePlan,parseMoneyCommand,parseMoneyCommandReceipt,type MoneyCommand} from '../packages/core/money-commands';
-import {parseShopCommand} from '../packages/core/shop-commands';
+import {parseShopCommand,parseShopCommandReceipt} from '../packages/core/shop-commands';
+import {parseMoneyResolutionReceipt,reviewedMoneyProposal,type FinancialMoneyCommand} from '../packages/core/money-review';
+import {createMoneyReviewHandler,createMoneyReviewStore} from '../supabase/functions/_shared/money-review';
+import {commandReviewHeader} from '../packages/core/command-resolution';
+import type {MoneyReviewRequest} from '../packages/core/money-review';
 import {moneyFingerprint,moneyWriteFields} from '../supabase/functions/_shared/money-write';
 import {createCommandStore,createCommandsHandler} from '../supabase/functions/_shared/commands-handler';
 import {newInboxId} from '../packages/core/inbox';
@@ -56,7 +60,7 @@ beforeAll(async()=>{
  for(const outlet of [source.snapshot.outlet,branch.snapshot.outlet])initial.push({table:'customer_outlets',values:{business_id:customer.businessId,outlet_id:outlet.id,customer_id:customer.id}});
 },30_000);
 beforeEach(async()=>{
- lastError='';await db.exec("truncate public.customers,public.events cascade;delete from private.money_write_tickets;update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null;update public.members set active=true;update public.items set available=true");
+ lastError='';await db.exec("truncate public.customers,public.events cascade;delete from private.money_write_tickets;delete from private.money_review_tickets;delete from private.money_command_resolutions;update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null;update public.members set active=true;update public.items set available=true");
  await db.query('update public.outlets set currency=$1 where id=$2',['BDT',source.snapshot.outlet.id]);
  for(const a of actors){await db.query('update public.members set role=$1,auth_user_id=$2 where id=$3',[a.role,uid(a.n),a.id]);await db.query('delete from public.member_outlets where member_id=$1',[a.id]);await db.query('insert into public.member_outlets values($1,$2,$3)',[a.business,a.id,a.outlet]);}
  await insert(initial);await db.query('update public.items set price=7500 where id=$1',[source.items[0].id]);
@@ -143,3 +147,117 @@ it('a collision in the companion audit rolls back the earlier sale, charge and p
 it('raw anonymous reads, client writes/private access and non-service completion remain denied',async()=>{const c=cash(),p=await prepare(c),fields=moneyWriteFields(p,c,p.ticketId as string);for(const query of ['select * from public.sales','select * from private.money_write_tickets'])await expect(asRole(null,'anon',query)).rejects.toMatchObject({code:'42501'});await expect(asRole(1,'authenticated','select * from private.money_write_tickets')).rejects.toMatchObject({code:'42501'});await expect(asRole(1,'authenticated','delete from public.sales')).rejects.toMatchObject({code:'42501'});await expect(asRole(1,'authenticated','select public.finish_money_write($1,$2,$3,$4)',[fields.p_ticket_id,fields.p_token,fields.p_occurred_at,JSON.stringify(fields.p_records)])).rejects.toMatchObject({code:'42501'});await expect(asRole(null,'service_role','select public.prepare_money_write($1,$2,$3,$4,$5,$6,$7)',[c.id,newInboxId(),c.type,c.outletId,JSON.stringify(moneyWritePlan(c)),await moneyFingerprint(c),c.occurredAt])).rejects.toMatchObject({code:'42501'});});
 it('the strict money schema rejects tenant/actor fields, floats, duplicate IDs and forged receipts',async()=>{const c=cash();for(const input of [{...c,businessId:customer.businessId},{...c,actorId:source.snapshot.owner.id},{...c,input:{...c.input,given:1.1}},{...c,saleId:c.id},{...c,occurredAt:-1},{...c,input:{...c.input,items:[{...c.input.items[0],qty:1.5}]}}])expect(()=>parseShopCommand(input)).toThrow();const r=await accepted(c);expect(()=>parseMoneyCommandReceipt({...r,occurredAt:c.occurredAt+1},c)).toThrow();expect(()=>parseMoneyCommandReceipt({...r,entryId:newInboxId(),entrySequence:1},c)).toThrow();expect(parseMoneyCommandReceipt({...r,backend:'private'},c)).toEqual(r);expect(parseMoneyCommand(c)).toEqual(c);});
 it('server commit column allowlists remain aligned with the shared codec',async()=>{const src=(await db.query<{prosrc:string}>("select prosrc from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private' and proname='finish_money_write'")).rows[0].prosrc;const specs=JSON.parse(src.match(/specs jsonb:='([^']+)'/)![1]);for(const table of ['sales','creditEntries','events'] as const)expect(specs[cloudRecordMaps[table].table].sort()).toEqual([...Object.keys(cloudRecordMaps[table].fields),'business_id'].sort());});
+
+function reviewSource(c:FinancialMoneyCommand,unit='BDT'){
+ const cashRow={id:'saleId'in c?c.saleId:newInboxId(),outletId:c.outletId,currency:unit,amount:15000,methodName:c.type==='sale.credit'?'Credit':'Cash',who:literal,...(c.type==='sale.credit'?{creditAccountId:c.accountId,customerId:customer.id}:{})};
+ const entry={id:c.type==='khata.undo'?c.reversalId:'entryId'in c?c.entryId:newInboxId(),outletId:c.outletId,accountId:'accountId'in c?c.accountId:account.id,customerId:customer.id,currency:unit,amount:c.type==='khata.payment'?c.input.amount:c.type==='sale.credit'?15000:5000,methodName:'Cash',...(c.type==='sale.credit'?{saleId:c.saleId}:{}),...(c.type==='khata.undo'?{reversalOf:c.entryId}:{})};
+ const money=[...('saleId'in c?[{table:'sales',key:c.saleId,before:c.type==='sale.undo'?cashRow:null,after:cashRow}]:[]),...(c.type==='sale.credit'||c.type==='khata.payment'||c.type==='khata.undo'?[{table:'creditEntries',key:entry.id,before:null,after:entry}]:[])];
+ return JSON.stringify({v:1,entryId:newInboxId(),sequence:1,commandIndex:0,at:c.occurredAt,money,priorCommands:[]});
+}
+async function openMoneyReview(c:FinancialMoneyCommand,n=1,sourceJson=reviewSource(c),selected={id:newInboxId(),replacementId:newInboxId()},sourceHash='a'.repeat(64)){
+ const data=(await asRole<{data:Record<string,unknown>}>(n,'authenticated','select public.prepare_money_review($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) data',[selected.id,selected.replacementId,c.id,c.type,c.outletId,JSON.stringify(moneyWritePlan(c)),await moneyFingerprint(c),c.occurredAt,JSON.stringify(parseMoneyCommand(c)),sourceHash,sourceJson,JSON.parse(sourceJson).money[0].after.currency]))[0].data;
+ return {...data,sourceJson,sourceHash,command:c} as Record<string,unknown>&{command:FinancialMoneyCommand;sourceJson:string;sourceHash:string};
+}
+async function finishMoneyReview(r:Record<string,unknown>,outcome:'withdrawn'|'replaced'='withdrawn',p:Record<string,unknown>|null=null,c:FinancialMoneyCommand|null=null,consent:{balance:number;limit:number}|null=null,confirmCredit=false){
+ const fields=p&&c?moneyWriteFields(p,c,p.ticketId as string):null;
+ return (await asRole<{data:unknown}>(null,'service_role','select public.finish_money_review($1,$2,$3,$4,$5,$6,$7,$8,$9) data',[r.id,r.token,outcome,confirmCredit,JSON.stringify(consent),fields?.p_ticket_id??null,fields?.p_token??null,c?await moneyFingerprint(c):null,fields?JSON.stringify(fields.p_records):null]))[0].data;
+}
+it('a reviewed withdrawal records no cash, preserves literal source and replays its actual outcome under a later currency',async()=>{
+ const c=cash(),saved=reviewSource(c);await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);const before=await counts(),r=await openMoneyReview(c,1,saved),receipt=parseMoneyResolutionReceipt(await finishMoneyReview(r),c),after=await counts();
+ expect(receipt).toMatchObject({type:'command.resolved',commandId:c.id,outcome:'withdrawn',replacement:null});expect(after).toEqual({...before,events:before.events+1,receipts:before.receipts+1});
+ const retained=(await db.query<{original_intent:string;source_json:string}>('select original_intent,source_json from private.money_command_resolutions where command_id=$1',[c.id])).rows[0];expect(retained).toEqual({original_intent:JSON.stringify(parseMoneyCommand(c)),source_json:saved});
+ await db.query('update private.money_review_tickets set expires_at=0 where id=$1',[r.id]);expect(await finishMoneyReview(r)).toEqual(receipt);
+ const retry=await http(1,c);expect(retry.status).toBe(200);expect(parseShopCommandReceipt(await retry.json(),c)).toEqual(receipt);expect(await counts()).toEqual(after);
+});
+it('a prepared ordinary writer cannot revive withdrawn counter money under a different audit identity',async()=>{
+ const c=cash(),alias={...c,id:newInboxId()},prepared=await prepare(alias),r=await openMoneyReview(c);await finishMoneyReview(r);const before=await counts();await expect(finish(prepared,alias)).rejects.toMatchObject({code:'PT409'});expect(await counts()).toEqual(before);expect(before.sales).toBe(0);
+});
+it('reserved financial identities also block other record writers and bulk admission after withdrawal',async()=>{
+ const c=cash(),p=await prepare(c),records=moneyWriteFields(p,c,p.ticketId as string).p_records as CloudRecord[],r=await openMoneyReview(c);await finishMoneyReview(r);const before=await counts();
+ await expect(insert(records.filter(row=>row.table==='sales'))).rejects.toMatchObject({code:'PT409'});expect(await counts()).toEqual(before);
+ await opening(20000);const pay=payment(),prepared=await prepare(pay),entries=moneyWriteFields(prepared,pay,prepared.ticketId as string).p_records as CloudRecord[],review=await openMoneyReview(pay);await finishMoneyReview(review);const beforeEntry=await counts();
+ await expect(insert(entries.filter(row=>row.table==='credit_entries'))).rejects.toMatchObject({code:'PT409'});expect(await counts()).toEqual(beforeEntry);
+});
+it('an explicitly replaced counter action keeps original financial IDs, occurrence time and a genuine receipt without an order revision',async()=>{
+ const c=cash(),before=await counts(),r=await openMoneyReview(c),replacement=reviewedMoneyProposal(c,r.replacementId as string),p=await prepare(replacement),receipt=parseMoneyResolutionReceipt(await finishMoneyReview(r,'replaced',p,replacement),c),after=await counts();
+ expect(receipt.replacement).toMatchObject({id:replacement.id,confirmation:null,receipt:{id:replacement.id,saleId:c.saleId,occurredAt:c.occurredAt,amount:15000}});expect(receipt.replacement).not.toHaveProperty('revision');
+ expect(after).toEqual({sales:before.sales+1,entries:before.entries,events:before.events+2,receipts:before.receipts+2});expect(await loadSale(c.saleId)).toMatchObject({currency:'BDT',amount:15000,createdAt:c.occurredAt});expect(await finishMoneyReview(r,'replaced',p,replacement)).toEqual(receipt);expect(await counts()).toEqual(after);
+});
+it('the SQL completion boundary refuses a USD replacement for original saved BDT cash even when both tickets share the current snapshot',async()=>{
+ const c=cash(),saved=reviewSource(c);await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);const r=await openMoneyReview(c,1,saved),replacement=reviewedMoneyProposal(c,r.replacementId as string),p=await prepare(replacement),before=await counts();
+ await expect(finishMoneyReview(r,'replaced',p,replacement)).rejects.toMatchObject({code:'PT409',message:'Keep the original saved monetary unit.'});expect(await counts()).toEqual(before);expect((await db.query('select * from private.money_review_tickets where id=$1',[r.id])).rows).toHaveLength(1);
+});
+it('a commit-time profile race retains the financial review without recording replacement cash',async()=>{
+ const c=cash(),r=await openMoneyReview(c),replacement=reviewedMoneyProposal(c,r.replacementId as string),p=await prepare(replacement),before=await counts();await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);await expect(finishMoneyReview(r,'replaced',p,replacement)).rejects.toMatchObject({code:'PT409'});expect(await counts()).toEqual(before);
+});
+it('reviewed credit above the actual limit requires separate exact consent and leaves the original command untouched',async()=>{
+ const c=credit(),original=JSON.stringify(c);await opening(40000);const r=await openMoneyReview(c),consent={balance:40000,limit:50000},replacement=reviewedMoneyProposal(c,r.replacementId as string,consent),p=await prepare(replacement),before=await counts();
+ await expect(finishMoneyReview(r,'replaced',p,replacement,consent,false)).rejects.toMatchObject({code:'22023'});expect(await counts()).toEqual(before);
+ const receipt=parseMoneyResolutionReceipt(await finishMoneyReview(r,'replaced',p,replacement,consent,true),c);expect(receipt.replacement?.confirmation).toEqual(consent);expect(creditBalance(account,await ledger())).toBe(55000);expect(JSON.stringify(c)).toBe(original);expect((await loadSale(c.saleId)).currency).toBe('BDT');
+});
+it('a balance change after credit review invalidates the old consent and cannot add a charge',async()=>{
+ const c=credit();await opening(40000);const r=await openMoneyReview(c),consent={balance:40000,limit:50000},replacement=reviewedMoneyProposal(c,r.replacementId as string,consent),p=await prepare(replacement);await accepted(payment());const before=await counts();await expect(finishMoneyReview(r,'replaced',p,replacement,consent,true)).rejects.toMatchObject({code:'PT409'});expect(await counts()).toEqual(before);
+});
+it('financial review is outlet scoped and its source cannot be read with another phone account',async()=>{
+ const c=cash(),r=await openMoneyReview(c);for(const n of [3,4,5,6])await expect(openMoneyReview(c,n)).rejects.toMatchObject({code:'42501'});
+ await expect(asRole(2,'authenticated','select public.read_money_review($1,$2)',[r.id,r.token])).rejects.toMatchObject({code:'42501'});
+ expect((await asRole<{data:boolean}>(2,'authenticated','select public.admit_money_review($1) data',[c.outletId]))[0].data).toBe(true);
+});
+it('revoking the original actor after financial review blocks both read and service completion',async()=>{
+ const c=cash(),r=await openMoneyReview(c),before=await counts();await db.query('update public.members set active=false where id=$1',[source.snapshot.owner.id]);await expect(asRole(1,'authenticated','select public.read_money_review($1,$2)',[r.id,r.token])).rejects.toMatchObject({code:'42501'});await expect(finishMoneyReview(r)).rejects.toMatchObject({code:'42501'});expect(await counts()).toEqual(before);
+});
+it('expired financial comparisons and altered source selections cannot finalize the original cash',async()=>{
+ const c=cash(),r=await openMoneyReview(c),before=await counts();await expect(openMoneyReview(c,1,r.sourceJson,{id:r.id as string,replacementId:r.replacementId as string},'b'.repeat(64))).rejects.toMatchObject({code:'PT409'});
+ await db.query('update private.money_review_tickets set expires_at=0 where id=$1',[r.id]);await expect(finishMoneyReview(r)).rejects.toMatchObject({code:'PT409'});expect(await counts()).toEqual(before);
+});
+it('new financial review tables are private under forced RLS and only the service can finalize a selected outcome',async()=>{
+ const c=cash(),r=await openMoneyReview(c);for(const role of ['anon','authenticated','service_role'] as const)for(const table of ['money_review_tickets','money_command_resolutions'])await expect(asRole(role==='authenticated'?1:null,role,'select * from private.'+table)).rejects.toMatchObject({code:'42501'});
+ await expect(asRole(1,'authenticated','select public.finish_money_review($1,$2,$3,$4,$5,$6,$7,$8,$9)',[r.id,r.token,'withdrawn',false,'null',null,null,null,null])).rejects.toMatchObject({code:'42501'});
+ const policies=await db.query<{relrowsecurity:boolean;relforcerowsecurity:boolean}>("select relrowsecurity,relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and relname in ('money_review_tickets','money_command_resolutions')");expect(policies.rows).toEqual([{relrowsecurity:true,relforcerowsecurity:true},{relrowsecurity:true,relforcerowsecurity:true}]);
+});
+
+function moneyReviewHttp(packet:MoneyReviewRequest|Record<string,unknown>,resolve=false,options:{n?:number;beforeFinish?:()=>Promise<void>;returned?:(name:string,value:unknown)=>unknown}={}){
+ const remote=createMoneyReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',async(url,request)=>{
+  const name=new URL(String(url)).pathname.split('/').at(-1)!,args=JSON.parse(request?.body as string),headers=new Headers(request?.headers),service=headers.get('apikey')==='sb_secret_test_only',
+   parameters:Record<string,string[]>={admit_money_review:['p_outlet_id'],inspect_money_outcome:['p_command_id','p_type','p_outlet_id','p_hash'],prepare_money_review:['p_id','p_replacement_id','p_command_id','p_type','p_outlet_id','p_plan','p_hash','p_occurred_at','p_intent_json','p_source_hash','p_source_json','p_saved_currency'],read_money_review:['p_id','p_token'],prepare_money_write:['p_id','p_ticket_id','p_type','p_outlet_id','p_plan','p_hash','p_occurred_at'],finish_money_review:['p_id','p_token','p_outcome','p_confirm_credit','p_confirmation','p_replacement_ticket','p_replacement_token','p_replacement_hash','p_replacement_records']};
+  expect(parameters[name]).toBeDefined();expect(service).toBe(name==='finish_money_review');if(service){expect(headers.has('Authorization')).toBe(false);await options.beforeFinish?.();}
+  try{
+   const rows=await asRole<{data:unknown}>(service?null:Number(headers.get('Authorization')!.split('.')[1]),service?'service_role':'authenticated',`select public.${name}(${parameters[name].map((_,i)=>'$'+(i+1)).join(',')}) as data`,parameters[name].map(key=>['p_plan','p_confirmation','p_replacement_records'].includes(key)?JSON.stringify(args[key]):args[key]));
+   return new Response(JSON.stringify(options.returned?options.returned(name,rows[0].data):rows[0].data));
+  }catch(error){const {code,message}=error as {code:string;message:string};lastError=code+': '+message;return new Response(JSON.stringify({code}),{status:code==='42501'?403:code==='PT429'?429:['PT409','23505'].includes(code)?409:code==='22023'?400:500});}
+ });
+ const command=packet.command as FinancialMoneyCommand;
+ return createMoneyReviewHandler({store:remote,origins:new Set([origin])})(new Request('https://api.test/commands?review='+(resolve?'money-resolve':'money-read'),{method:'POST',headers:{Origin:origin,Authorization:`Bearer user.${options.n??1}.signature`,'Content-Type':'application/json',[commandReviewHeader]:command.outletId},body:JSON.stringify(packet)}));
+}
+function moneyPacket(c:FinancialMoneyCommand):MoneyReviewRequest{return {id:newInboxId(),replacementId:newInboxId(),command:c,sourceHash:'a'.repeat(64),sourceJson:reviewSource(c)};}
+it('the actual HTTP review retains a saved BDT counter action under USD, returns only its comparison and finalizes withdrawal without cash',async()=>{
+ const c=cash(),packet=moneyPacket(c),before=await counts();await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);
+ const read=await moneyReviewHttp(packet);expect(read.status,lastError+' '+await read.clone().text()).toBe(200);const body=await read.json();expect(body).toMatchObject({done:false,review:{current:{profileCurrency:'USD'},proposal:{enabled:false,reason:'currency'}}});
+ for(const field of ['contextJson','plan','sourceJson','auth_user_id','savedCurrency'])expect(body.review).not.toHaveProperty(field);expect(JSON.stringify(body)).not.toContain('sb_secret_');
+ const result=await moneyReviewHttp({...packet,token:body.review.token,outcome:'withdrawn',confirmCredit:false},true);expect(result.status,lastError+' '+await result.clone().text()).toBe(200);expect(parseMoneyResolutionReceipt(await result.json(),c).outcome).toBe('withdrawn');expect((await counts()).sales).toBe(before.sales);
+ const retry=await moneyReviewHttp(packet);expect(retry.status).toBe(200);expect(await retry.json()).toMatchObject({done:true,receipt:{type:'command.resolved',outcome:'withdrawn'}});
+});
+it('the actual HTTP credit comparison requires fresh explicit limit consent and returns the genuine replacement receipt',async()=>{
+ const c=credit(),packet=moneyPacket(c);await opening(40000);const read=await moneyReviewHttp(packet);expect(read.status,lastError+' '+await read.clone().text()).toBe(200);const body=await read.json();
+ expect(body.review).toMatchObject({current:{balance:40000,limit:50000},proposal:{enabled:true,balance:55000,requiresCreditConfirmation:true,confirmation:{balance:40000,limit:50000}}});
+ const before=await counts(),decision={...packet,token:body.review.token,outcome:'replaced',confirmCredit:false};expect((await moneyReviewHttp(decision,true)).status).toBe(409);expect(await counts()).toEqual(before);
+ const completed=await moneyReviewHttp({...decision,confirmCredit:true},true);expect(completed.status,lastError+' '+await completed.clone().text()).toBe(200);expect(parseMoneyResolutionReceipt(await completed.json(),c).replacement?.confirmation).toEqual({balance:40000,limit:50000});expect(creditBalance(account,await ledger())).toBe(55000);
+});
+it('the HTTP formatter rejects mismatched occurrence and saved-unit bindings before any financial decision',async()=>{
+ for(const patch of [{occurredAt:0},{savedCurrency:'USD'}]){
+  const packet=moneyPacket(cash()),before=await counts(),read=await moneyReviewHttp(packet,false,{returned:(name,value)=>name==='prepare_money_review'?{...(value as object),...patch}:value});expect(read.status).toBe(503);expect(await counts()).toEqual(before);
+ }
+});
+it('the HTTP completion keeps original cash when the profile changes after the selected comparison',async()=>{
+ const c=cash(),packet=moneyPacket(c),read=await moneyReviewHttp(packet);expect(read.status,lastError+' '+await read.clone().text()).toBe(200);const body=await read.json();expect(body.review.proposal.enabled).toBe(true);const before=await counts(),result=await moneyReviewHttp({...packet,token:body.review.token,outcome:'replaced',confirmCredit:false},true,{beforeFinish:async()=>{await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);}});
+ expect(result.status).toBe(409);expect(await counts()).toEqual(before);
+});
+it('the HTTP review recovers an already recorded original before imposing the current shop currency',async()=>{
+ const c=cash(),packet=moneyPacket(c),recorded=await accepted(c),before=await counts();await db.query('update public.outlets set currency=$1 where id=$2',['USD',c.outletId]);const result=await moneyReviewHttp(packet);expect(result.status).toBe(200);expect(await result.json()).toEqual({done:true,receipt:recorded});expect(await counts()).toEqual(before);
+});
+it('a lost HTTP withdrawal reply recovers its genuine source-bound outcome without recording cash twice',async()=>{
+ const c=cash(),packet=moneyPacket(c),read=await moneyReviewHttp(packet),body=await read.json(),decision={...packet,token:body.review.token,outcome:'withdrawn',confirmCredit:false};
+ const lost=await moneyReviewHttp(decision,true,{returned:(name,value)=>{if(name==='finish_money_review')throw Error('Connection closed after SQL commit');return value;}});expect(lost.status).toBe(503);const committed=await counts();expect(committed.sales).toBe(0);
+ const recovered=await moneyReviewHttp(packet);expect(recovered.status).toBe(200);expect(await recovered.json()).toMatchObject({done:true,receipt:{type:'command.resolved',sourceHash:packet.sourceHash,outcome:'withdrawn'}});expect(await counts()).toEqual(committed);
+ expect((await moneyReviewHttp({...packet,sourceHash:'b'.repeat(64)})).status).toBe(409);expect(await counts()).toEqual(committed);
+});
