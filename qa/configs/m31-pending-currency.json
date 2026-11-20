@@ -1,0 +1,23 @@
+{
+  "title": "M31 — Pending currency during canonical and scope recovery",
+  "pages": [
+    {
+      "id": "m31-pending-currency-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [360, 390],
+      "pendingCurrencyRecoveryFixture": true,
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "Actual two-device BDT counter action, owner USD profile command and changed epoch. Recovery retains original money/images and backup instead of admitting a conversion. M31 supplies no dedicated frame, so M27 More supplies tokens. Auth/Realtime/Storage synthetic, scoped SQL/HTTP real; differences informational.",
+      "sections": [{"id": "review", "selector": ".cloud-recovery", "reference": "screens/mobile/M27 · Manager — More (everything else, one tap away).png"}]
+    },
+    {
+      "id": "m31-pending-currency-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [768, 1024, 1440],
+      "pendingCurrencyRecoveryFixture": true,
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "Actual two-device BDT counter action, owner USD profile command and changed epoch. Recovery retains original money/images and backup instead of admitting a conversion. M31 supplies no dedicated frame, so Desktop 14 supplies tokens. Auth/Realtime/Storage synthetic, scoped SQL/HTTP real; differences informational.",
+      "sections": [{"id": "review", "selector": ".cloud-recovery", "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"}]
+    }
+  ]
+}

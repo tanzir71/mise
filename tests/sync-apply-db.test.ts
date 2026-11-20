@@ -17,9 +17,46 @@ import {creditBalance,recordCreditPaymentCommand} from '../packages/core/khata';
 const databases:Dexie[]=[];
 afterEach(async()=>{await Promise.all(databases.splice(0).map(db=>db.delete()));});
 async function boot(manager=false){const f=await joinedApplyFixture(manager);databases.push(f.db);return f;}
+it('a canonical USD profile cannot reinterpret an original pending BDT counter sale',async()=>{
+ const f=await boot(),sale=await f.db.recordSale({expression:'37',method:'cash'});
+ const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),base=await f.db.syncCanonical.toArray(),operator=await f.db.operatorState.toArray();
+ const input=await f.stage([{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]);let failure:unknown;
+ try{await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh);}catch(error){failure=error;}
+ expect((await f.db.sales.get(sale.id))?.currency).toBe('BDT');
+ expect(failure).toMatchObject({kind:'conflict',commandId:queue[0].commands[0].id});
+ expect(backupToken(await f.db.readBackup())).toBe(before);expect(await f.db.outbox.toArray()).toEqual(queue);
+ expect(await f.db.syncCanonical.toArray()).toEqual(base);expect(await f.db.operatorState.toArray()).toEqual(operator);expect(await f.db.syncApplications.count()).toBe(0);
+});
 it('installs remote values with an original pending cash intent, no echo and no invented receipt',async()=>{
  const f=await boot();await f.db.recordSale({expression:'37',method:'cash'});const queue=await f.db.outbox.toArray(),item={...f.backup.tables.items[0],price:f.backup.tables.items[0].price+100},input=await f.stage([{table:'items',row:item}]),result=await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh);
  expect(result.pending).toBe(1);expect((await f.db.items.get(item.id))?.price).toBe(item.price);expect((await f.db.sales.toArray()).some(s=>s.amount===3700)).toBe(true);expect(syncDownloadToken(await f.db.outbox.toArray())).toBe(syncDownloadToken(queue));expect((await f.db.cloudState.get('binding'))?.sequence).toBe(1);expect((await f.db.cloudState.get('binding'))?.receipt).toBeNull();expect(await f.db.syncApplications.count()).toBe(1);expect(await f.db.syncCanonical.count()).toBe(2);expect((await readJoinedCanonicalState(f.db)).application?.pending).toEqual(queue[0].commands.map(c=>c.id));
+});
+it('a new pending BDT order cannot be projected in USD by a canonical download',async()=>{
+ const f=await boot(),order=await f.db.saveOrder({source:'phone',sourceText:'Original BDT order',name:'Rina',phone:'',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:1,unitPrice:3700}],deliveryFee:0,discount:0,payment:{method:'cash'}});
+ const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),base=await f.db.syncCanonical.toArray(),input=await f.stage([{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]);
+ await expect(applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh)).rejects.toMatchObject({kind:'conflict',commandId:queue[0].commands[0].id});
+ expect((await f.db.orders.get(order.id))?.currency).toBe('BDT');expect(backupToken(await f.db.readBackup())).toBe(before);expect(await f.db.outbox.toArray()).toEqual(queue);expect(await f.db.syncCanonical.toArray()).toEqual(base);
+});
+it('covered historical cash stays BDT, and its pending undo and account payment remain valid under a USD canonical profile',async()=>{
+ const f=await boot(),sale=await f.db.recordSale({expression:'37',method:'cash'}),[original]=await f.db.outbox.toArray();
+ const input=await f.stage([...original.changes.filter(c=>c.after!==null).map(c=>({table:c.table,row:c.after})),{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]);
+ await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source,{[original.commands[0].id]:'visible'})},f.refresh);
+ expect((await f.db.setup())?.outlet.currency).toBe('USD');expect((await f.db.sales.get(sale.id))?.currency).toBe('BDT');
+ await f.db.undoSale(sale.id);const account=(await f.db.creditAccounts.toArray())[0],payment=await f.db.recordCreditPayment(account.id,500,'cash');
+ const queue=await f.db.outbox.toArray(),next=await f.stage(),result=await applyCanonicalDownload(f.db,next,{get:async source=>coverageFacts(source)},f.refresh);
+ expect(result.pending).toBe(2);expect((await f.db.sales.get(sale.id))?.currency).toBe('BDT');expect((await f.db.sales.get(sale.id))?.voidReason).toBe('undo');
+ expect((await f.db.creditEntries.get(payment.id))?.currency).toBe('BDT');expect(await f.db.outbox.toArray()).toEqual(queue);expect(queue.every(row=>row.receipts.length===0)).toBe(true);
+});
+it('a grouped pending cash sale and undo keep their original unit during canonical replay',async()=>{
+ const f=await boot();let saleId='';await f.db.transaction('rw',f.db.tables,async()=>{const sale=await f.db.recordSale({expression:'37',method:'cash'});saleId=sale.id;await f.db.undoSale(sale.id);});
+ const queue=await f.db.outbox.toArray(),input=await f.stage(),result=await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh);
+ expect(result.pending).toBe(2);expect((await f.db.sales.get(saleId))).toMatchObject({currency:'BDT',amount:3700,voidReason:'undo'});expect(await f.db.outbox.toArray()).toEqual(queue);
+});
+it('pending notes on a historical BDT order remain valid after a canonical USD profile',async()=>{
+ const f=await boot(),input=await f.stage([{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]);await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh);
+ const order=(await f.db.orders.toArray())[0];await f.db.addOrderNote(order.id,'Keep the original BDT order · বাংলা',order.revision);
+ const queue=await f.db.outbox.toArray(),next=await f.stage(),result=await applyCanonicalDownload(f.db,next,{get:async source=>coverageFacts(source)},f.refresh);
+ expect(result.pending).toBe(1);expect((await f.db.orders.get(order.id))?.currency).toBe('BDT');expect(await f.db.outbox.toArray()).toEqual(queue);
 });
 it('rebases a pending stock delta onto a remote movement without rewriting its original before/after',async()=>{
  const f=await boot(),setup=(await f.db.setup())!,stock=(await f.db.stockItems.toArray())[0];await f.db.adjustStock({id:stock.id,revision:stock.revision,reason:'used',quantity:2});const queue=await f.db.outbox.toArray(),remote=adjustStockCommand({id:stock.id,revision:stock.revision,reason:'received',quantity:5},{setup,items:[stock],moves:await f.db.stockMoves.toArray(),suppliers:[]});remote.moves[0].id='00000000000000000000000001';const updates=[...remote.items.map(row=>({table:'stockItems' as const,row})),...remote.moves.map(row=>({table:'stockMoves' as const,row})),...remote.events.map(row=>({table:'events' as const,row}))],input=await f.stage(updates);

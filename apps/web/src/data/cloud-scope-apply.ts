@@ -20,6 +20,7 @@ import {storedInboxItems} from './inbox';
 import {readDatabaseBackup} from './backup';
 import type {MiseDatabase} from './db';
 import {isLocalInboxRetention} from '@mise/core/local-inbox';
+import {originalCurrencyReader} from '@mise/core/pending-currency';
 
 export interface ScopeRecoveryReview {
  operationId:string;readId:string;before:Record<string,number>;after:Record<string,number>;pending:number;covered:number;
@@ -66,7 +67,8 @@ export async function prepareScopeRecoveryReview(db:MiseDatabase,value:ScopeReco
  const images=await readVerifiedSyncImages(db,state.id,session.target,access.signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,null);
  assertCanonicalResolutions(source.portable,snapshot.backup.tables.events,new Set(covered.keys()));
  let working=structuredClone(snapshot.backup);const times=new Map(source.portable.flatMap(row=>row.commands.map(c=>[c.id,row.at] as const))),pending=commands.filter(c=>!covered.has(c.id));
- for(const command of pending){active(access);working=await replayPendingIntent(working,command,source.operator.actorId,state.window.createdAt,source.working,times.get(command.id));}
+ const currencyFor=originalCurrencyReader(source.portable);
+ for(const command of pending){active(access);let currency:string|undefined;try{currency=currencyFor(command);}catch{throw new ScopeRecoveryError('integrity');}working=await replayPendingIntent(working,command,source.operator.actorId,state.window.createdAt,source.working,times.get(command.id),currency);}
  for(const item of source.working.tables.inboxItems.filter(row=>row.outletId===null)){if(working.tables.inboxItems.some(row=>row.id===item.id))throw new ScopeRecoveryError();working.tables.inboxItems.push(structuredClone(item));}
  working=createBackup(working.tables,working.exportedAt);
  const canonicalHash=await canonicalSnapshotHash(snapshot),queueHash=await materializationHash(originalRows(source.portable)),valueApp:CanonicalApplication={id:state.id,version:1,previousApplicationHash:origin.application?.hash??null,previousBaseHash:origin.base.hash,readSourceHash:state.sourceHash,readSeal:state.seal,cursor:state.receivedCursor,baseHash:canonicalHash,throughSequence:source.binding.sequence,queueHash,workingHash:await workingSnapshotHash(working),overlay:materializedRows(snapshot.backup,working),covered:[...covered.values()].sort((a,b)=>a.id.localeCompare(b.id)),pending:pending.map(c=>c.id),proofs:proofs.map(p=>({batchHash:p.batchHash,sourceHash:p.sourceHash,resultHash:p.resultHash!})),recoveryId:session.operationId};

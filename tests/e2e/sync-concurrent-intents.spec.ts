@@ -13,6 +13,10 @@ test.afterEach(async()=>{await server?.close();});
 async function initialize(page:Page,n:1|2){
  await page.goto('app/');await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(n));
  await page.goto('app/counter');await expect(page.getByLabel('Calculation',{exact:true})).toBeVisible();await installSyncApplyFixture(page);
+ await page.evaluate(async()=>{
+  await navigator.serviceWorker.ready;
+  if(!navigator.serviceWorker.controller)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));
+ });
 }
 test('original concurrent notes, supplier sets, Inbox fields and explicit Sent merge through SQL and pending projection without rewriting commands',async({page,browser})=>{
  test.setTimeout(120000);await initialize(page,1);await page.evaluate(()=>window.miseSyncApplyTest.seedConcurrentSupplier());await page.evaluate(()=>window.miseSyncApplyTest.deliver());await page.evaluate(()=>window.miseSyncApplyTest.pull());

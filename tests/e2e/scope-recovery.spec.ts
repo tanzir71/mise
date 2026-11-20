@@ -12,7 +12,16 @@ let server:Awaited<ReturnType<typeof startConvergenceServer>>;
 test.beforeAll(async()=>{server=await startConvergenceServer({originalOwner:true});});
 test.afterAll(async()=>{await server?.close();});
 async function synced(page:Page){
- try{await expect(page.getByRole('link',{name:'Sync: Synced',exact:true})).toBeVisible({timeout:30000});}
+ try{
+  await installSyncApplyFixture(page);
+  await expect.poll(async()=>{
+   const state=await inspect(page),hash=state.base?.version===2?state.base.applicationHash:null,
+    current=state.applications.find(application=>application.hash===hash),
+    covered=new Set(current?.covered.map(intent=>intent.id));
+   return state.queue.every(row=>row.status==='accepted'&&row.commands.every(command=>covered.has(command.id)))&&
+    await page.getByRole('link',{name:'Sync: Synced',exact:true}).isVisible();
+  },{timeout:30000}).toBe(true);
+ }
  catch(error){await installSyncApplyFixture(page);const value=await inspect(page);console.log(JSON.stringify({path:new URL(page.url()).pathname,session:value.syncSession,operator:value.operator,binding:value.binding,queue:value.queue.map(row=>({id:row.id,status:row.status,commands:row.commands.map(command=>command.type),receipts:row.receipts})),calls:server.calls,diagnostics:server.diagnostics}));throw error;}
 }
 async function initialize(page:Page,n:1|2){

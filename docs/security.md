@@ -1,5 +1,11 @@
 # Deployment credentials
 
+The [pending-currency boundary](m31-pending-currency.md) derives only a monetary
+unit from immutable local source images, after actual coverage checks. Canonical
+and recovery plans refuse conflicting financial projections before native domain
+or cursor writes. No credential, connection value, permission or server setting
+is added; the existing Supabase deployment remains unchanged.
+
 The [counter and khata currency boundary](m31-money-currency.md) reads only the
 original financial source and sends a three-letter unit outside unchanged
 commands. It adds no stored credentials, connection configuration, grants or

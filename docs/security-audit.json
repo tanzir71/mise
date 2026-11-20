@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-20T08:05:39.775Z",
+  "checkedAt": "2026-11-20T10:00:28.057Z",
   "scope": "Current source, index, local refs, fetched complete reachable Git blobs/trees/commits/tags and generated static output; private values compared in memory",
   "audit": {
     "historyFetched": true,
@@ -9,8 +9,8 @@
     "historicalTreeNames": true,
     "completeHistoryRequired": true,
     "existingBuildOutput": true,
-    "files": 1471,
-    "objects": 8080,
+    "files": 1477,
+    "objects": 8169,
     "knownPrivateValuesCompared": 10,
     "credentialFindings": 0,
     "currentDeploymentReferenceFindings": 0,
@@ -35,7 +35,7 @@
     "openSecretAlerts": 0,
     "runtimeConnectionConfiguration": true,
     "credentialsInPublicBuildVariables": false,
-    "gitHubCheckedAt": "2026-11-20T08:05:39.557Z"
+    "gitHubCheckedAt": "2026-11-20T10:00:27.690Z"
   },
   "publication": {
     "disabledWorkflows": 3,

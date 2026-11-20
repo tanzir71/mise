@@ -95,4 +95,18 @@ export async function captureMoneyCurrencyReview(page){
   await page.getByRole('link',{name:'Download a JSON backup',exact:true}).waitFor();await checkLocalInboxAccess(page);
  }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
+/** A real full-scope recovery refuses changed-currency pending money before admission. */
+export async function capturePendingCurrencyRecovery(page){
+ const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));await owner.evaluate(()=>window.miseSyncApplyTest.pull());
+  await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));await installRealtimeFixture(page,server.config(2).jwt);
+  await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Turn on sync',exact:true}).click();await page.getByRole('link',{name:'Sync: Synced',exact:true}).waitFor({timeout:30000});await installSyncApplyFixture(page);
+  await page.context().setOffline(true);await page.evaluate(async()=>{await window.miseSyncApplyTest.cash('37');await window.miseSyncApplyTest.captureImage();});
+  await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());await server.changeEpoch();await page.context().setOffline(false);
+  await page.getByRole('button',{name:'Review outlet access',exact:true}).waitFor({timeout:30000});await page.getByRole('button',{name:'Review outlet access',exact:true}).click();await page.getByRole('button',{name:'Check current access',exact:true}).click();await page.getByRole('alert').waitFor({timeout:30000});
+  if(await page.getByRole('button',{name:'Apply reviewed changes',exact:true}).count())throw Error('Do not admit a recovery that changes the original monetary unit.');
+  await page.getByRole('button',{name:'Download saved shop backup',exact:true}).waitFor();await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
+}
 export async function closeRecoveryVisual(){const previous=service;service=undefined;if(previous){let value;try{value=await previous;}catch{return;}await value.server.close();}}

@@ -12,6 +12,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M31 pending counter/khata and order projections now retain their original queue currency during canonical downloads and outlet-access recovery. A changed profile cannot reinterpret saved amounts or advance the accepted cursor; original sources, images and backup remain available. Covered historical money, same-currency replay and historical payments/undo remain valid. Cloud sync stays off by default.
+
 - M31 counter sales and khata payments now assert their original saved currency outside unchanged commands. Missing or conflicting source stays local, new admission and commit-time profile races cannot reinterpret money, and historical account payments/undo plus actual completed receipts remain valid. Counter rejections no longer advertise order-only review. Non-order financial review/resolution remains unfinished; cloud sync stays off by default.
 
 - M31 queued orders now carry their original saved currency separately from the unchanged command. A profile change or commit-time race retains mismatched orders for review; historical-currency payments remain valid, and actual completed receipts still replay before new admission checks. No currency is guessed from the device's current profile.

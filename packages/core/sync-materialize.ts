@@ -1,7 +1,9 @@
 import {backupToken,createBackup,parseBackup} from './backup';
 import {backupTableNames,type BackupTable,type MiseBackup} from './backup-tables';
 import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
-import {isMoneyCommand,isStockCommand,parseShopCommand,type ShopCommand} from './shop-commands';
+import {isMoneyCommand,isStockCommand,isOrderCommand,parseShopCommand,type ShopCommand} from './shop-commands';
+import {proposedMoneyCurrencyMatches} from './money-currency';
+import {proposedOrderCurrencyMatches} from './order-currency';
 import {replayMoneyRecords} from './money-replay';
 import {replayStockRecords} from './stock-replay';
 import {stockWritePlan} from './stock-commands';
@@ -42,7 +44,7 @@ function applyRecords(backup:MiseBackup,records:readonly CloudRecord[]):MiseBack
  * original outbox records, IDs and receipts are never edited or manufactured.
  * A tentative projection never substitutes for genuine receipt coverage.
  */
-export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at):Promise<MiseBackup> {
+export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at,savedCurrency?:string):Promise<MiseBackup> {
  const backup=parseBackup(input),c=parseShopCommand(value),t=backup.tables,business=t.businesses[0],outlet=t.outlets[0],actor=t.members.find(m=>m.id===actorId);
  if(!business||!outlet||!actor?.active||!['owner','manager'].includes(actor.role)||actor.businessId!==business.id||outlet.businessId!==business.id||'outletId'in c&&c.outletId!==outlet.id||actor.role==='manager'&&!actor.outletIds.includes(outlet.id))throw new ReconciliationError('review',c.id);
  // A matching row/audit never proves receipt inclusion. Without actual coverage
@@ -63,12 +65,17 @@ export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,act
    if(c.type==='sale.record'||c.type==='sale.credit'){if(t.sales.some(s=>s.id===c.saleId))throw new ReconciliationError('conflict',c.id);}
    raw={business:row('businesses',business),outlet:row('outlets',outlet),sale:row('sales',sale),entry:row('creditEntries',entry),account:row('creditAccounts',account),customer:row('customers',customer),entries:rows('creditEntries',t.creditEntries.filter(e=>e.accountId===accountId)),items:rows('items',t.items)};
    records=replayMoneyRecords({...context,contextJson:JSON.stringify(raw)},c);
+   if(!proposedMoneyCurrencyMatches(c,records,savedCurrency))throw new ReconciliationError('conflict',c.id);
   }else if(isStockCommand(c)){
    if(c.type==='stock.create'&&t.stockItems.some(i=>i.id===c.stockItemId))throw new ReconciliationError('conflict',c.id);
    const plan=stockWritePlan(c),ids=new Set(plan.rows.map(r=>r.itemId));
    raw={business:row('businesses',business),outlet:row('outlets',outlet),items:rows('stockItems',t.stockItems.filter(i=>ids.has(i.id))),moves:rows('stockMoves',t.stockMoves.filter(m=>ids.has(m.stockItemId))),suppliers:rows('suppliers',t.suppliers)};
    records=replayStockRecords({...context,contextJson:JSON.stringify(raw)},c);
-  }else return await applyReplayProjection(backup,await replayOtherPending(backup,c,actor,projectionAt),parseBackup(original));
+  }else{
+   const projection=await replayOtherPending(backup,c,actor,projectionAt);
+   if(isOrderCommand(c)&&!proposedOrderCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
+   return await applyReplayProjection(backup,projection,parseBackup(original));
+  }
   return applyRecords(backup,records);
  }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
 }

@@ -10,6 +10,16 @@ import {prepareScopeRecoveryReview,applyScopeRecoveryReview} from '../apps/web/s
 import {readCanonicalState} from '../apps/web/src/data/cloud-canonical-state';
 import {MiseDatabase} from '../apps/web/src/data/db';
 import {newInboxId} from '../packages/core/inbox';
+
+for(const kind of ['counter','order'] as const)it(`scope recovery cannot reinterpret a pending BDT ${kind} action in USD`,async()=>{
+ const f=await boot();
+ if(kind==='counter')await f.db.recordSale({expression:'37',method:'cash'});
+ else await f.db.saveOrder({source:'phone',sourceText:'Original BDT order',name:'Rina',phone:'',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:1,unitPrice:3700}],deliveryFee:0,discount:0,payment:{method:'cash'}});
+ const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),binding=await f.db.cloudState.get('binding'),operator=await f.db.operatorState.toArray(),base=await f.db.syncCanonical.toArray();
+ const staged=await stageScopeRecovery(f,{updates:[{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]});
+ await expect(prepareScopeRecoveryReview(f.db,staged.session,absent,staged.access)).rejects.toMatchObject({kind:'conflict',commandId:queue[0].commands[0].id});
+ expect(backupToken(await f.db.readBackup())).toBe(before);expect(await f.db.outbox.toArray()).toEqual(queue);expect(await f.db.cloudState.get('binding')).toEqual(binding);expect(await f.db.operatorState.toArray()).toEqual(operator);expect(await f.db.syncCanonical.toArray()).toEqual(base);expect(await f.db.scopeRecoveries.where('kind').equals('admission').count()).toBe(0);
+});
 import {applyCanonicalDownload} from '../apps/web/src/data/cloud-sync-apply';
 const databases:MiseDatabase[]=[];
 afterEach(async()=>{for(const db of databases.splice(0))await db.delete();});

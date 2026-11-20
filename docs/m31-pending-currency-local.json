@@ -1,0 +1,146 @@
+{
+  "checkedAt": "2026-11-20T10:00:28.057Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Original currency during canonical and full-scope pending replay; full M31 acceptance remains open",
+  "schemas": {
+    "local": 23,
+    "localStores": 37,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "verificationSequence": "The complete 455-case run covers unchanged production code. The final 13-case native run additionally downloads and parses the original backup after offline reload; only test ordering and verification notes changed after the full run.",
+    "lint": true,
+    "typecheck": true,
+    "unit": {
+      "passed": 2602,
+      "files": 137,
+      "seconds": 378.27,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "limitsChanged": false
+    },
+    "focused": {
+      "nativeDatabase": 38,
+      "files": 2,
+      "realRedUsdInsteadOfBdt": true
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "startTime": "2026-11-20T09:23:23.115Z",
+      "duration": 1070662.327,
+      "expected": 455,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0,
+      "actualUi": true,
+      "actualCanonicalCoverageBeforeOutcomeAssertions": true,
+      "realOwnerProfileCommand": true,
+      "originalCurrencyRetained": true,
+      "offlineReload": true,
+      "canonicalRefusalBeforeDomainAndCursorWrites": true,
+      "scopeRecoveryRefusedBeforeAdmission": true,
+      "historicalKhataPaymentAndUndoConverge": true,
+      "orderOnlyControlFiltered": true,
+      "exactMemberPrivacyProjection": true,
+      "sourceImagesAndCommandsPreserved": true,
+      "syntheticAuthStorageRealtime": true
+    },
+    "nativeFocusedProof": {
+      "startTime": "2026-11-20T09:56:16.896Z",
+      "duration": 141150.738,
+      "expected": 13,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0,
+      "offlineOriginalBackupDownloadedAndParsed": true,
+      "performedAfterOfflineReload": true,
+      "productionCodeUnchangedSinceFullRun": true
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T09:52:14.050Z",
+      "comparisons": 269,
+      "overflow": 0,
+      "changedViewsSeriousCriticalAxe": 0,
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "screenshots": [
+        "qa/screens/m31-pending-currency-phone-review-360.png",
+        "qa/screens/m31-pending-currency-phone-review-390.png",
+        "qa/screens/m31-pending-currency-desktop-review-1440.png"
+      ]
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T08:37:18.723Z",
+      "version": 25,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sourceMatches": true,
+      "deploymentChanged": false,
+      "sourceManifestUnchanged": true,
+      "bundleBytes": 443623,
+      "bundleSha256": "764dd5385d8b797b9506b0a6558cff21215922fa2b52de7faa38eecf1628d1a4",
+      "sourceFiles": 86,
+      "functions": 7,
+      "migrations": 40,
+      "applicationSchemas": [
+        "public",
+        "private"
+      ],
+      "applicationTables": 60,
+      "forcedRlsTables": 60,
+      "securityWarnings": 0,
+      "securityErrors": 0,
+      "actualDeploymentValuesInPublicReport": false,
+      "genuineHostedOtpAcceptance": false,
+      "unauthenticatedChecks": [
+        {
+          "kind": "commands",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=read",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=resolve",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-outcome",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-completion",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "privateValuesCompared": 10,
+      "credentials": 0,
+      "currentDeploymentReferences": 0,
+      "olderNonsecretFindings": 22,
+      "newHistoricalReferences": 0,
+      "coverageGaps": 0,
+      "historyPolicyUnchanged": true
+    }
+  },
+  "publication": {
+    "workflows": "disabled",
+    "pages": "held by owner",
+    "ciRun": null,
+    "ciArtifact": null
+  },
+  "remaining": [
+    "Explicit money review/resolution and stock/purchase/closing boundaries",
+    "Genuine hosted phone OTP and physical device acceptance",
+    "Remaining M30/M31 acceptance and later handover milestones"
+  ]
+}

@@ -129,9 +129,13 @@ test('an offline BDT order stays original after a real owner currency change and
       .poll(
         async () => {
           await installSyncApplyFixture(manager);
-          return (
-            await manager.evaluate(() => window.miseSyncApplyTest.inspect())
-          ).queue.every((row) => row.status === 'accepted');
+          const state = await manager.evaluate(() => window.miseSyncApplyTest.inspect()),
+            applicationHash = state.base?.version === 2 ? state.base.applicationHash : null,
+            current = state.applications.find(application => application.hash === applicationHash);
+          // A receipt can arrive before the original overlay is retired. Wait
+          // for the actual canonical audit/coverage, not just the local ACK.
+          return state.queue.every(row => row.status === 'accepted') &&
+            current?.covered.some(intent => intent.id === original.queue[0].commands[0].id) === true;
         },
         { timeout: 20000 },
       )
