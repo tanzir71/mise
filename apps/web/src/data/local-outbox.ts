@@ -15,6 +15,7 @@ import {parseSyncActionReview,type SyncActionReview} from '@mise/core/sync-actio
 import {savedOrderCurrency} from '@mise/core/order-currency';
 import {savedMoneyCurrency} from '@mise/core/money-currency';
 import {savedPurchaseCurrency} from '@mise/core/purchase-currency';
+import {savedCustomerCurrency} from '@mise/core/customer-currency';
 import {readCanonicalState} from './cloud-canonical-state';
 import {syncHash} from '@mise/core/sync-read';
 import {isLocalInboxRetention} from '@mise/core/local-inbox';
@@ -108,7 +109,7 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
    const sourceHash=await nativeRowHash(originalEntry(saved));await db.transaction('r',db.cloudState,db.operatorState,currentOperator);
    const command=parseShopCommand(JSON.parse(JSON.stringify(saved.commands[index]))),reviewId=await syncHash(new TextEncoder().encode(JSON.stringify([initial.uploadId,command.id,identityHash])));
    let confirmed:ShopCommandReceipt;
-   try{let currency:string|undefined;try{currency=savedOrderCurrency(command,saved.changes)??savedMoneyCurrency(command,saved.changes,saved.commands.slice(0,index))??savedPurchaseCurrency(command,saved.changes,saved.commands.slice(0,index));}catch{throw new CommandRequestError('review');}confirmed=await send(command,currency);}
+   try{let currency:string|undefined;try{currency=savedOrderCurrency(command,saved.changes)??savedMoneyCurrency(command,saved.changes,saved.commands.slice(0,index))??savedPurchaseCurrency(command,saved.changes,saved.commands.slice(0,index))??savedCustomerCurrency(command,saved.changes,saved.commands.slice(0,index));}catch{throw new CommandRequestError('review');}confirmed=await send(command,currency);}
    catch(error){
     const proof=commandReviewProof(error);
     if(proof){

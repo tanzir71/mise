@@ -1,0 +1,194 @@
+{
+  "checkedAt": "2026-11-20T15:27:07.877Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Original customer opening-balance and credit-limit currency during admission and pending replay; broader M30/M31 acceptance remains open",
+  "schemas": {
+    "local": 24,
+    "localStores": 38,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "verificationSequence": "Unchanged production source passes complete unit, both portable builds, complete browser and full visual verification. Only non-runtime redacted evidence and delivery notes were finalized afterward.",
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 142,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "passed": 2689,
+      "files": 139,
+      "seconds": 367.17,
+      "firstCompleteAttemptPassed": true,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "limitsChanged": false
+    },
+    "focused": {
+      "sqlBundleAndNative": 137,
+      "files": 3,
+      "seconds": 27.61,
+      "canonicalAndScope": 44,
+      "projectionFiles": 2,
+      "projectionSeconds": 10.67
+    },
+    "initialRegressionReproduced": true,
+    "fixtureCorrections": [
+      "Two historical USD settings cases now supply their actual saved unit rather than the fixture default BDT header.",
+      "The genuinely covered customer snapshot now explicitly includes its required customer-to-outlet association; production completeness checks stay intact."
+    ],
+    "browser": {
+      "passed": 466,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "normalWorkers": 2,
+      "durationMinutes": 15.7,
+      "focusedPassed": 10,
+      "focusedMinutes": 1,
+      "actualSqlHttp": true,
+      "actualIndexedDb": true,
+      "offlineReload": true,
+      "actualBackupDownloadedAndParsed": true,
+      "allPortableDomainTablesCompared": true,
+      "originalImagesPreserved": true,
+      "originalOpeningAndLimitRetained": true,
+      "mismatchCommitsNoCustomerAccountOrEntry": true,
+      "historicalSettingsConvergeOnceWithoutLedgerChange": true,
+      "canonicalMismatchRefusedBeforeWrites": true,
+      "scopeRecoveryRefusedBeforeAdmission": true,
+      "syntheticAuthStorageRealtime": true
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T15:22:44.568Z",
+      "comparisons": 278,
+      "completeMetrics": true,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "changedViewsSeriousCriticalAxe": 0,
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "dedicatedMilestoneFrame": false,
+      "comparisonDifferencesInformational": true,
+      "screenshots": [
+        "qa/screens/m31-sync-controls-phone-screen-390.png",
+        "qa/screens/m31-recovery-phone-review-390.png",
+        "qa/screens/m31-sync-controls-desktop-screen-1440.png"
+      ]
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T15:25:55.826Z",
+      "version": 28,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "exactSourceMatches": true,
+      "bundleBytes": 466520,
+      "bundleSha256": "68ad50426f970b0fffc6cb2c03add71c732921ed407b47c3cf2097d149bbc3e2",
+      "sourceFiles": 90,
+      "migrations": 41,
+      "functions": 7,
+      "rls": {
+        "application_tables": 62,
+        "forced_rls": 62,
+        "anonymous_table_grants": 0,
+        "public_security_definers": 0,
+        "public_buckets": 0
+      },
+      "security": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      },
+      "performance": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      },
+      "deploymentChanged": true,
+      "schemaChanged": false,
+      "grantsChanged": false,
+      "authConfigurationChanged": false,
+      "serverSecretsChanged": false,
+      "realAccountsCreated": false,
+      "smsSent": false,
+      "genuineHostedOtpAcceptance": false,
+      "actualDeploymentValuesInPublicReport": false,
+      "positiveControl": {
+        "status": 200
+      },
+      "unauthenticatedChecks": [
+        {
+          "name": "tables",
+          "status": 401
+        },
+        {
+          "name": "commands",
+          "status": 401
+        },
+        {
+          "name": "invoice",
+          "status": 401
+        },
+        {
+          "name": "customer",
+          "status": 401
+        },
+        {
+          "name": "money-review",
+          "status": 401
+        },
+        {
+          "name": "upload",
+          "status": 401
+        },
+        {
+          "name": "images",
+          "status": 401
+        },
+        {
+          "name": "sync-read",
+          "status": 401
+        },
+        {
+          "name": "money-admission",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "privateValuesCompared": 10,
+      "credentials": 0,
+      "currentSourceIndexArtifactDeploymentReferences": 0,
+      "olderNonsecretHistoricalFindings": 22,
+      "newHistoricalReferences": 0,
+      "coverageGaps": 0,
+      "historyPolicyUnchanged": true,
+      "hooksEnabled": true,
+      "githubSecretScanning": true,
+      "githubPushProtection": true,
+      "openAlerts": 0
+    }
+  },
+  "publication": {
+    "workflows": "disabled",
+    "pages": "held by owner",
+    "ciRun": null,
+    "ciArtifact": null
+  },
+  "remaining": [
+    "Historical contact-profile/account selection under a changed shop currency",
+    "Explicit financial review/resolution and other conflict families",
+    "Genuine hosted phone OTP and physical-device acceptance",
+    "Remaining M30/M31 acceptance and later handover milestones"
+  ]
+}

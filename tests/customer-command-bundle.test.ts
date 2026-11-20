@@ -3,7 +3,7 @@ import {expect,it} from 'vitest';
 import {edgeBundle} from '../scripts/edge-bundle.mjs';
 const id=(n:number)=>String(n).padStart(26,'0');
 it('the exact deployment module boots and executes the shared customer/khata mutation',async()=>{
-  const bundle=await edgeBundle('commands');expect(bundle.sourceHashes).toHaveProperty('packages/core/customer-mutation.ts');expect(bundle.sourceHashes).toHaveProperty('packages/core/khata.ts');expect(bundle.bytes).toBeLessThan(20*1024*1024);
+  const bundle=await edgeBundle('commands');expect(bundle.sourceHashes).toHaveProperty('packages/core/customer-mutation.ts');expect(bundle.sourceHashes).toHaveProperty('packages/core/khata.ts');expect(bundle.sourceHashes).toHaveProperty('packages/core/customer-currency.ts');expect(bundle.bytes).toBeLessThan(20*1024*1024);
   let handler:((request:Request)=>Promise<Response>)|undefined;const runtime=globalThis as unknown as {Deno?:unknown},previousDeno=runtime.Deno,previousFetch=globalThis.fetch;
   try{
     runtime.Deno={env:{get:(name:string)=>({SUPABASE_URL:'https://api.test',MISE_PUBLISHABLE_API_KEY:'sb_publishable_test_only',MISE_SERVICE_API_KEY:'sb_secret_test_only',MISE_ALLOWED_ORIGINS:'https://shop.test'} as Record<string,string>)[name]},serve:(callback:typeof handler)=>{handler=callback;}};
@@ -22,7 +22,7 @@ it('the exact deployment module boots and executes the shared customer/khata mut
     };
     await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64'));
     expect(handler).toBeTypeOf('function');
-    const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json'},body:JSON.stringify({id:id(4),type:'customer.create',customerId:id(5),outletId:id(2),input:{name:'করিম\0',nickname:'',phone:'01712345482',address:'',notes:'',tags:[]},credit:null,opening:null,ids:{accountId:id(6),accountEventId:id(7),openingEntryId:id(8),openingEventId:id(9)}})}));
+    const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json','X-Mise-Saved-Currency':'BDT'},body:JSON.stringify({id:id(4),type:'customer.create',customerId:id(5),outletId:id(2),input:{name:'করিম\0',nickname:'',phone:'01712345482',address:'',notes:'',tags:[]},credit:null,opening:null,ids:{accountId:id(6),accountEventId:id(7),openingEntryId:id(8),openingEventId:id(9)}})}));
     expect(response.status).toBe(200);expect((await response.json()).customerId).toBe(id(5));expect(calls).toEqual(['prepare_customer_intent','finish_customer_write']);
   }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
 },30000);

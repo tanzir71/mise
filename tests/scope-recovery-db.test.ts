@@ -11,10 +11,11 @@ import {readCanonicalState} from '../apps/web/src/data/cloud-canonical-state';
 import {MiseDatabase} from '../apps/web/src/data/db';
 import {newInboxId} from '../packages/core/inbox';
 
-for(const kind of ['counter','order','purchase'] as const)it(`scope recovery cannot reinterpret a pending BDT ${kind} action in USD`,async()=>{
+for(const kind of ['counter','order','purchase','customer'] as const)it(`scope recovery cannot reinterpret a pending BDT ${kind} action in USD`,async()=>{
  const f=await boot();
  if(kind==='counter')await f.db.recordSale({expression:'37',method:'cash'});
  else if(kind==='purchase')await f.db.recordPurchase({supplierName:'Original supplier',reference:'Original BDT invoice',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due',note:''});
+ else if(kind==='customer')await f.db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Keep original opening',tags:[]},{opening:{amount:12345,occurredAt:1}});
  else await f.db.saveOrder({source:'phone',sourceText:'Original BDT order',name:'Rina',phone:'',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:1,unitPrice:3700}],deliveryFee:0,discount:0,payment:{method:'cash'}});
  const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),binding=await f.db.cloudState.get('binding'),operator=await f.db.operatorState.toArray(),base=await f.db.syncCanonical.toArray();
  const staged=await stageScopeRecovery(f,{updates:[{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]});

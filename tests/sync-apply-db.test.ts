@@ -17,6 +17,20 @@ import {creditBalance,recordCreditPaymentCommand} from '../packages/core/khata';
 const databases:Dexie[]=[];
 afterEach(async()=>{await Promise.all(databases.splice(0).map(db=>db.delete()));});
 async function boot(manager=false){const f=await joinedApplyFixture(manager);databases.push(f.db);return f;}
+it('a canonical USD profile cannot reinterpret an original BDT opening balance or advance its cursor',async()=>{
+ const f=await boot(),customer=await f.db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Keep original opening',tags:[]},{opening:{amount:12345,occurredAt:1}});
+ const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),base=await f.db.syncCanonical.toArray(),operator=await f.db.operatorState.toArray(),binding=await f.db.cloudState.get('binding');
+ const input=await f.stage([{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]);
+ await expect(applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh)).rejects.toMatchObject({kind:'conflict',commandId:queue[0].commands[0].id});
+ expect((await f.db.creditEntries.toArray()).filter(e=>e.customerId===customer.id)).toMatchObject([{currency:'BDT',amount:12345}]);expect(backupToken(await f.db.readBackup())).toBe(before);expect(await f.db.outbox.toArray()).toEqual(queue);
+ expect(await f.db.syncCanonical.toArray()).toEqual(base);expect(await f.db.operatorState.toArray()).toEqual(operator);expect(await f.db.cloudState.get('binding')).toEqual(binding);expect(await f.db.syncApplications.count()).toBe(0);
+});
+it('a genuinely covered BDT opening remains valid under a later canonical USD profile without another account or balance',async()=>{
+ const f=await boot(),customer=await f.db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Keep original opening',tags:[]},{opening:{amount:12345,occurredAt:1}}),queue=await f.db.outbox.toArray(),command=queue[0].commands[0];
+ const input=await f.stage([...queue[0].changes.filter(c=>c.after!==null).map(c=>({table:c.table,row:c.after})),{table:'outlets' as const,row:{...f.backup.tables.outlets[0],currency:'USD'}}],[customer.id]);
+ const result=await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source,{[command.id]:'visible'})},f.refresh);
+ expect(result.pending).toBe(0);expect((await f.db.creditAccounts.toArray()).filter(a=>a.customerId===customer.id)).toHaveLength(1);expect((await f.db.creditEntries.toArray()).filter(e=>e.customerId===customer.id)).toMatchObject([{currency:'BDT',amount:12345}]);expect(await f.db.outbox.toArray()).toEqual(queue);expect((await f.db.setup())!.outlet.currency).toBe('USD');
+});
 it('a canonical USD profile cannot reinterpret an original pending BDT invoice or advance its cursor',async()=>{
  const f=await boot(),invoice=await f.db.recordPurchase({supplierName:'Original supplier',reference:'Original BDT invoice',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due',note:'Keep original source'});
  const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),base=await f.db.syncCanonical.toArray(),operator=await f.db.operatorState.toArray(),binding=await f.db.cloudState.get('binding');

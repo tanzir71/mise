@@ -622,6 +622,11 @@ const api = {
   }),
   queueNewOrder:()=>use(db=>db.saveOrder({source:'phone',sourceText:'Original BDT order · বাংলা',name:'Rina',phone:'01712345483',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:2,unitPrice:1250}],deliveryFee:0,discount:0,payment:{method:'cash'}})),
   queuePurchase:()=>use(db=>db.recordPurchase({supplierName:'Original supplier',reference:'Original BDT invoice · বাংলা',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due',note:'Keep invoice\0\ud800'})),
+  queueCustomerOpening:()=>use(async db=>{
+    const customer=await db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Original opening · বাংলা\0\ud800',tags:[]},{credit:{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}},opening:{amount:12345,occurredAt:1}}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!,entry=(await db.creditEntries.toArray()).find(e=>e.accountId===account.id)!;
+    return {customerId:customer.id,accountId:account.id,entryId:entry.id};
+  }),
+  setOriginalKhataLimit:(accountId:string,limit:number)=>use(async db=>{const account=await db.creditAccounts.get(accountId);if(!account)throw Error('Choose the original account');return db.saveCreditTerms(account.customerId,{allowed:account.allowed,limit,reminder:account.reminder},account.id);}),
   undoOriginalPurchase:(id:string)=>use(db=>db.undoPurchase(id)),
   setCurrency:(currency:string)=>use(async db=>{const setup=await db.setup();if(!setup)throw Error('Choose the original shop');return db.saveSetup({businessType:setup.business.businessType,marketCode:setup.business.marketCode,name:setup.business.name,phone:setup.owner.phone??'',outletName:setup.outlet.name,address:setup.outlet.address,language:setup.business.languages.length===2?'both':setup.business.languages[0],timezone:setup.outlet.timezone,currency});}),
   actionReviews: () => use(async db=>(await readLocalActionReviews(db)).map(({review,command,entry})=>({review,command,entryId:entry.id,changes:entry.changes,receipts:entry.receipts}))),

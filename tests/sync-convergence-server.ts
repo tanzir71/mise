@@ -658,6 +658,12 @@ export async function startConvergenceServer(
         [JSON.stringify(ids)],
       )).rows[0].n;
     },
+    async creditEntryCount(ids:string[]) {
+      return (await db.query<{n:number}>('select count(*)::int n from public.credit_entries where id in (select value::public.ulid from jsonb_array_elements_text($1::jsonb))',[JSON.stringify(ids)])).rows[0].n;
+    },
+    async customerMoneyState(customerId:string) {
+      return (await db.query<{customers:number;accounts:number;entries:number}>('select (select count(*)::int from public.customers where id=$1) customers,(select count(*)::int from public.credit_accounts where customer_id=$1) accounts,(select count(*)::int from public.credit_entries where customer_id=$1) entries',[customerId])).rows[0];
+    },
     async close() {
       releaseCommand?.();
       server.closeAllConnections();

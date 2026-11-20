@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
+- Offline customer opening balances and credit limits keep their original khata currency during delivery, canonical sync and outlet recovery. Existing historical-account settings remain valid; contact-only edits cannot silently create an account in a different unit.
+
 - Offline supplier invoices keep their original currency during delivery, canonical sync and outlet recovery. A changed shop currency cannot reinterpret saved prices; historical invoice undo and genuine completed receipts retain their original unit.
 
 - Git privacy checks now reject newly introduced deployment identifiers in reachable history, branch/tag names and historical filename aliases. Exact opaque fingerprints retain only the 22 documented old nonsecret findings; credentials always fail. Missing policy and shallow history fail closed. All 35 guard tests pass, including a permitted legacy-only push and a blocked later identifier.

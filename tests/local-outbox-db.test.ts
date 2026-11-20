@@ -18,6 +18,43 @@ import * as inboxCore from '../packages/core/inbox';
 import {bindCommandReceipt} from '../apps/web/src/data/command-request';
 import {savedMoneyCurrency} from '../packages/core/money-currency';
 import {savedPurchaseCurrency} from '../packages/core/purchase-currency';
+import {savedCustomerCurrency} from '../packages/core/customer-currency';
+import {defaultCreditTerms} from '../packages/core/khata';
+
+const customerInput=()=>({name:'Original customer',nickname:'',phone:'',address:'',notes:'Original opening · বাংলা',tags:[]});
+const customerCredit=()=>({...defaultCreditTerms,allowed:true,limit:50000});
+it('native customer delivery derives the original opening and limit unit after a USD profile change',async()=>{
+ const {db,journal,snapshot}=await armed();await db.saveCustomer(customerInput(),{credit:customerCredit(),opening:{amount:12345,occurredAt:1}});
+ await db.saveSetup({businessType:'corner_shop',marketCode:'BD',name:'Customer shop',phone:'01712345482',currency:'USD'});await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+ const original=await db.outbox.toArray(),before=backupToken(await db.readBackup()),sent:{type:string;currency:string|undefined}[]=[];
+ await expect(deliverLocalOutbox(db,target,async(command,currency)=>{sent.push({type:command.type,currency});throw Error('Stop before HTTP');})).rejects.toThrow('Stop before HTTP');
+ expect(sent).toEqual([{type:'customer.create',currency:'BDT'}]);expect((await db.setup())!.outlet.currency).toBe('USD');expect(await db.outbox.toArray()).toEqual(original);expect(backupToken(await db.readBackup())).toBe(before);
+});
+it.each(['missing-account','duplicate-account','different-account','different-customer','different-outlet','contradictory-opening','missing-opening','unexpected-before'])('a %s original customer money source cannot borrow a current unit or reach HTTP',async kind=>{
+ const {db,journal,snapshot}=await armed();await db.saveCustomer(customerInput(),{credit:customerCredit(),opening:{amount:12345,occurredAt:1}});await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+ const [row]=await db.outbox.toArray(),changes=structuredClone(row.changes),index=changes.findIndex(c=>c.table==='creditAccounts'),image=changes[index].after as Record<string,unknown>;
+ if(kind==='missing-account')changes.splice(index,1);
+ else if(kind==='duplicate-account')changes.push(structuredClone(changes[index]));
+ else if(kind==='different-account')image.id=uploadId(91);
+ else if(kind==='different-customer')image.customerId=uploadId(92);
+ else if(kind==='different-outlet')image.outletId=uploadId(93);
+ else if(kind==='contradictory-opening')(changes.find(c=>c.table==='creditEntries')!.after as Record<string,unknown>).currency='USD';
+ else if(kind==='missing-opening')changes.splice(changes.findIndex(c=>c.table==='creditEntries'),1);
+ else changes[index].before=structuredClone(image);
+ await db.outbox.update(row.id,{changes});const original=await db.outbox.toArray(),send=vi.fn();await expect(deliverLocalOutbox(db,target,send)).rejects.toThrow();expect(send).not.toHaveBeenCalled();expect(await db.outbox.toArray()).toEqual(original);
+});
+it('customer metadata has no borrowed currency, while historical settings keep the saved account unit',async()=>{
+ const {db}=await armed(),customer=await db.saveCustomer(customerInput(),{credit:customerCredit()}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!;
+ await db.saveCustomer({...customerInput(),name:'Metadata only'},{id:customer.id});let row=(await db.outbox.orderBy('[uploadId+sequence]').toArray()).at(-1)!;
+ expect(row.changes.some(c=>c.table==='creditAccounts')).toBe(false);expect(savedCustomerCurrency(row.commands[0],row.changes)).toBeUndefined();
+ await db.saveCreditTerms(customer.id,{...customerCredit(),limit:75000},account.id);row=(await db.outbox.orderBy('[uploadId+sequence]').toArray()).at(-1)!;
+ expect(savedCustomerCurrency(row.commands[0],row.changes)).toBe('BDT');const changed=structuredClone(row.changes);(changed.find(c=>c.table==='creditAccounts')!.before as Record<string,unknown>).currency='USD';expect(()=>savedCustomerCurrency(row.commands[0],changed)).toThrow('original khata currency');
+});
+it('grouped khata settings need their actual earlier creation and matching original audit',async()=>{
+ const {db}=await armed();await db.transaction('rw',db.tables,async()=>{const customer=await db.saveCustomer(customerInput(),{credit:customerCredit()}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!;await db.saveCreditTerms(customer.id,{...customerCredit(),limit:75000},account.id);});
+ const [row]=await db.outbox.toArray();expect(row.commands.map(c=>c.type)).toEqual(['customer.create','khata.settings']);expect(savedCustomerCurrency(row.commands[0],row.changes)).toBe('BDT');expect(()=>savedCustomerCurrency(row.commands[1],row.changes)).toThrow('original khata currency');expect(savedCustomerCurrency(row.commands[1],row.changes,row.commands.slice(0,1))).toBe('BDT');
+ const broken=row.changes.filter(c=>!(c.table==='events'&&c.after&&typeof c.after==='object'&&'command'in c.after&&c.after.command==='khata.create'));expect(()=>savedCustomerCurrency(row.commands[1],broken,row.commands.slice(0,1))).toThrow('original khata currency');
+});
 
 const invoiceInput=()=>({supplierName:'Original supplier',reference:'Original invoice · বাংলা',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due' as const,note:'Keep original source'});
 it('native invoice delivery derives BDT from the original image rather than the current USD profile',async()=>{

@@ -1,5 +1,15 @@
 # Deployment credentials
 
+The [original customer credit currency boundary](m31-customer-currency.md) reads
+only the unit and scoped identities from original changed khata/opening images.
+It adds no connection values, credentials, grants or stored format. Grouped
+settings require the actual earlier creation and its matching original audit;
+a contact-only source cannot authorize an unexpected new financial account.
+The retrieved function matches the reviewed source with JWT checks enabled.
+All 62 application tables retain forced RLS; nine unauthenticated requests return
+401 after a valid-key positive control. Actual deployment details remain in
+ignored private inputs and the server secret manager, outside public evidence.
+
 The [original invoice currency boundary](m31-purchase-currency.md) derives only
 the monetary unit from immutable source images. It adds no connection values,
 credentials, grants or stored format. Actual deployment details stay in ignored

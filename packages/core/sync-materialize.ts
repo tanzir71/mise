@@ -1,10 +1,11 @@
 import {backupToken,createBackup,parseBackup} from './backup';
 import {backupTableNames,type BackupTable,type MiseBackup} from './backup-tables';
 import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
-import {isMoneyCommand,isStockCommand,isOrderCommand,isPurchaseCommand,parseShopCommand,type ShopCommand} from './shop-commands';
+import {isMoneyCommand,isStockCommand,isOrderCommand,isPurchaseCommand,isCustomerCommand,parseShopCommand,type ShopCommand} from './shop-commands';
 import {proposedMoneyCurrencyMatches} from './money-currency';
 import {proposedOrderCurrencyMatches} from './order-currency';
 import {proposedPurchaseCurrencyMatches} from './purchase-currency';
+import {proposedCustomerCurrencyMatches} from './customer-currency';
 import {replayMoneyRecords} from './money-replay';
 import {replayStockRecords} from './stock-replay';
 import {stockWritePlan} from './stock-commands';
@@ -76,6 +77,7 @@ export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,act
    const projection=await replayOtherPending(backup,c,actor,projectionAt);
    if(isOrderCommand(c)&&!proposedOrderCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
    if(isPurchaseCommand(c)&&!proposedPurchaseCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
+   if(isCustomerCommand(c)&&!proposedCustomerCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
    return await applyReplayProjection(backup,projection,parseBackup(original));
   }
   return applyRecords(backup,records);

@@ -22,12 +22,13 @@ async function initialize(page: Page, server: Server, n: 1 | 2) {
   });
   await installSyncApplyFixture(page);
 }
-async function queueOriginal(page: Page, kind: 'counter' | 'order' | 'purchase') {
+async function queueOriginal(page: Page, kind: 'counter' | 'order' | 'purchase' | 'customer') {
   if (kind === 'counter') {
     await page.getByLabel('Calculation', { exact: true }).fill('37');
     await page.locator('.counter-cash').click();
     await expect(page.getByLabel('Calculation', { exact: true })).toHaveValue('');
   } else if(kind==='purchase')await page.evaluate(() => window.miseSyncApplyTest.queuePurchase());
+  else if(kind==='customer')await page.evaluate(() => window.miseSyncApplyTest.queueCustomerOpening());
   else await page.evaluate(() => window.miseSyncApplyTest.queueNewOrder());
   await page.evaluate(() => window.miseSyncApplyTest.captureImage());
 }
@@ -41,7 +42,7 @@ function expectOriginal(actual: DeviceState, original: DeviceState) {
   expect(actual.imageSizes).toEqual(original.imageSizes);
 }
 
-for (const kind of ['counter', 'order', 'purchase'] as const) {
+for (const kind of ['counter', 'order', 'purchase', 'customer'] as const) {
   test(`a real canonical pull retains an original BDT ${kind} action after an owner USD profile command`, async ({ page, browser }) => {
     test.setTimeout(120000);
     const server = await startConvergenceServer(), context = await browser.newContext({ baseURL: test.info().project.use.baseURL }), manager = await context.newPage();
@@ -58,9 +59,9 @@ for (const kind of ['counter', 'order', 'purchase'] as const) {
       });
       expect(result).toEqual({ refused: true, kind: 'conflict', commandId: command.id });
       expectOriginal(await inspect(manager), original);
-      const ids = original.queue.flatMap(row => row.changes.filter(c => c.table === (kind==='purchase'?'purchases':'sales') && c.after !== null).map(c => c.key));
-      if(kind==='purchase')expect(ids.length).toBeGreaterThan(0);
-      expect(await (kind==='purchase'?server.purchaseCount(ids):server.financialCount(ids))).toBe(0);
+      const ids = original.queue.flatMap(row => row.changes.filter(c => c.table === (kind==='purchase'?'purchases':kind==='customer'?'creditEntries':'sales') && c.after !== null).map(c => c.key));
+      if(kind==='purchase'||kind==='customer')expect(ids.length).toBeGreaterThan(0);
+      expect(await (kind==='purchase'?server.purchaseCount(ids):kind==='customer'?server.creditEntryCount(ids):server.financialCount(ids))).toBe(0);
       await context.setOffline(true); await manager.reload(); await installSyncApplyFixture(manager);
       expectOriginal(await inspect(manager), original);
     } finally { await context.close(); await server.close(); }
