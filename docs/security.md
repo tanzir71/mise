@@ -1,5 +1,14 @@
 # Deployment credentials
 
+The [original invoice currency boundary](m31-purchase-currency.md) derives only
+the monetary unit from immutable source images. It adds no connection values,
+credentials, grants or stored format. Actual deployment details stay in ignored
+private inputs and the server secret manager. The deployed commands source
+matches its reviewed bundle with JWT verification enabled; all 62 application
+tables retain forced RLS, and eight unauthenticated requests return 401 after a
+valid-key positive control. Source, index, history and generated-output guards
+stay enabled; reviewed historical nonsecret findings remain disclosed below.
+
 The [counter and khata review](m31-money-review.md) stores the original action,
 token-free comparison, explicit choices and genuine receipts in a private local
 journal. Server tokens stay ephemeral. Neither deployment values nor Auth

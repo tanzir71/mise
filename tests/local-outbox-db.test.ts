@@ -17,6 +17,41 @@ import {inboxImageFile,inboxPng} from './inbox-fixture';
 import * as inboxCore from '../packages/core/inbox';
 import {bindCommandReceipt} from '../apps/web/src/data/command-request';
 import {savedMoneyCurrency} from '../packages/core/money-currency';
+import {savedPurchaseCurrency} from '../packages/core/purchase-currency';
+
+const invoiceInput=()=>({supplierName:'Original supplier',reference:'Original invoice · বাংলা',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due' as const,note:'Keep original source'});
+it('native invoice delivery derives BDT from the original image rather than the current USD profile',async()=>{
+ const {db,journal,snapshot}=await armed();await db.recordPurchase(invoiceInput());
+ await db.saveSetup({businessType:'corner_shop',marketCode:'BD',name:'Invoice shop',phone:'01712345482',currency:'USD'});
+ await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+ const original=await db.outbox.toArray(),before=backupToken(await db.readBackup()),sent:{type:string;currency:string|undefined}[]=[];
+ await expect(deliverLocalOutbox(db,target,async(command,currency)=>{sent.push({type:command.type,currency});throw Error('Stop before HTTP');})).rejects.toThrow('Stop before HTTP');
+ expect(sent).toEqual([{type:'purchase.record',currency:'BDT'}]);expect((await db.setup())!.outlet.currency).toBe('USD');
+ expect(await db.outbox.toArray()).toEqual(original);expect(backupToken(await db.readBackup())).toBe(before);
+});
+it.each(['missing','duplicate','invalid-unit','different-id','different-outlet','unexpected-before'])('a %s original invoice image cannot borrow the current unit or reach HTTP',async kind=>{
+ const {db,journal,snapshot}=await armed();await db.recordPurchase(invoiceInput());await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());
+ const [row]=await db.outbox.toArray(),changes=structuredClone(row.changes),index=changes.findIndex(c=>c.table==='purchases'),image=changes[index].after as Record<string,unknown>;
+ if(kind==='missing')delete image.currency;
+ else if(kind==='duplicate')changes.push(structuredClone(changes[index]));
+ else if(kind==='invalid-unit')image.currency='BDT,USD';
+ else if(kind==='different-id')image.id=uploadId(91);
+ else if(kind==='different-outlet')image.outletId=uploadId(92);
+ else changes[index].before=structuredClone(image);
+ await db.outbox.update(row.id,{changes});const original=await db.outbox.toArray(),send=vi.fn();
+ await expect(deliverLocalOutbox(db,target,send)).rejects.toThrow();expect(send).not.toHaveBeenCalled();expect(await db.outbox.toArray()).toEqual(original);
+});
+it('grouped invoice undo needs its actual earlier creation, and an existing undo cannot change units',async()=>{
+ const {db,journal,snapshot}=await armed();
+ await db.transaction('rw',db.tables,async()=>{const invoice=await db.recordPurchase(invoiceInput());await db.undoPurchase(invoice.id);});
+ await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());const [row]=await db.outbox.toArray();
+ expect(row.commands.map(c=>c.type)).toEqual(['purchase.record','purchase.undo']);
+ expect(savedPurchaseCurrency(row.commands[0],row.changes)).toBe('BDT');expect(()=>savedPurchaseCurrency(row.commands[1],row.changes)).toThrow('original invoice currency');
+ expect(savedPurchaseCurrency(row.commands[1],row.changes,row.commands.slice(0,1))).toBe('BDT');
+ const invoice=await db.recordPurchase(invoiceInput());await db.undoPurchase(invoice.id);const undo=(await db.outbox.orderBy('[uploadId+sequence]').toArray()).at(-1)!,changes=structuredClone(undo.changes);
+ (changes.find(c=>c.table==='purchases')!.before as Record<string,unknown>).currency='USD';
+ expect(()=>savedPurchaseCurrency(undo.commands[0],changes)).toThrow('original invoice currency');
+});
 
 it('original owner delivery rejects an operator selected while the request was in flight',async()=>{const {db,journal,snapshot}=await boot();await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());await db.recordSale({expression:'5',method:'cash'});const original=await db.outbox.toArray(),binding=(await db.cloudState.get('binding'))!;await expect(deliverLocalOutbox(db,target,async command=>{await db.operatorState.put({id:'active',version:1,revision:1,phase:'active',businessId:binding.businessId,outletId:binding.outletId,actorId:binding.ownerId,role:'owner',connection:null});return cashReceipt(command);})).rejects.toThrow('operator changed');expect(await db.outbox.toArray()).toEqual(original);});
 it('receipt acceptance verifies the entire original queue entry rather than only its commands',async()=>{const {db,journal,snapshot}=await boot();await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());await db.recordSale({expression:'5',method:'cash'});const [original]=await db.outbox.toArray();await expect(deliverLocalOutbox(db,target,async command=>{await db.outbox.update(original.id,{at:original.at+1});return cashReceipt(command);})).rejects.toThrow('queued action changed');expect((await db.outbox.get(original.id))?.receipts).toEqual([]);expect((await db.outbox.get(original.id))?.at).toBe(original.at+1);});

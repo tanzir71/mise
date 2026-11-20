@@ -2,9 +2,10 @@ import {expect,it} from 'vitest';
 // @ts-expect-error Deployment packaging is a standalone Node module.
 import {edgeBundle} from '../scripts/edge-bundle.mjs';
 import {purchaseBodyHeader} from '../packages/core/purchase-commands';
+import {savedCurrencyHeader} from '../packages/core/order-currency';
 const id=(n:number)=>String(n).padStart(26,'0');
 it('the deployment module admits the original invoice owner and runs shared exact-price validation without exposing service credentials',async()=>{
- const bundle=await edgeBundle('commands');for(const source of ['packages/core/purchases.ts','packages/core/purchase-commands.ts','supabase/functions/_shared/purchase-write.ts'])expect(bundle.sourceHashes).toHaveProperty(source);
+ const bundle=await edgeBundle('commands');for(const source of ['packages/core/purchases.ts','packages/core/purchase-commands.ts','packages/core/purchase-currency.ts','supabase/functions/_shared/purchase-write.ts'])expect(bundle.sourceHashes).toHaveProperty(source);
  const runtime=globalThis as unknown as {Deno?:unknown},previousDeno=runtime.Deno,previousFetch=globalThis.fetch;let handler:((request:Request)=>Promise<Response>)|undefined;
  try{
   runtime.Deno={env:{get:(name:string)=>({SUPABASE_URL:'https://api.test',MISE_PUBLISHABLE_API_KEY:'sb_publishable_test_only',MISE_SERVICE_API_KEY:'sb_secret_test_only',MISE_ALLOWED_ORIGINS:'https://shop.test'} as Record<string,string>)[name]},serve:(callback:typeof handler)=>{handler=callback;}};
@@ -17,7 +18,7 @@ it('the deployment module admits the original invoice owner and runs shared exac
    return new Response(JSON.stringify({id:id(4),outletId:id(2),type:'purchase.record',occurredAt:1000,at:10000,supplierId:null,purchaseId:id(5),revision:null,total:30003,updatedAt:10000,voidedAt:null,undoOf:null,private:'discard'}));
   };
   await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64')+'#purchase');expect(handler).toBeTypeOf('function');
-  const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[purchaseBodyHeader]:id(2)},body:JSON.stringify({id:id(4),outletId:id(2),occurredAt:1000,type:'purchase.record',purchaseId:id(5),input:{supplierId:null,supplierName:'Supplier',reference:'',paid:'due',wallet:null,note:'Manual only',lines:[{stockItemId:null,name:'চাল\0',unit:'kg',qty:2.5,unitPrice:12001}]}})}));
+  const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[purchaseBodyHeader]:id(2),[savedCurrencyHeader]:'BDT'},body:JSON.stringify({id:id(4),outletId:id(2),occurredAt:1000,type:'purchase.record',purchaseId:id(5),input:{supplierId:null,supplierName:'Supplier',reference:'',paid:'due',wallet:null,note:'Manual only',lines:[{stockItemId:null,name:'চাল\0',unit:'kg',qty:2.5,unitPrice:12001}]}})}));
   expect(response.status).toBe(200);expect(await response.json()).not.toHaveProperty('private');expect(calls).toEqual(['admit_purchase_record','prepare_purchase_write','finish_purchase_write']);
  }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
 },30000);

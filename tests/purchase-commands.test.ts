@@ -13,6 +13,7 @@ import {purchaseFingerprint,purchaseWriteFields} from '../supabase/functions/_sh
 import {CommandDenied,createCommandStore,createCommandsHandler} from '../supabase/functions/_shared/commands-handler';
 import type {SetupCommand,Supplier,StockItem,Purchase} from '../packages/core/models';
 import {purchaseHostedProofSql} from './purchase-hosted-fixture';
+import {savedCurrencyHeader} from '../packages/core/order-currency';
 const uid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,origin='https://shop.test',literal='চাল\0'+String.fromCharCode(0xd800);
 let db:PGlite,source:SetupCommand,branch:SetupCommand,foreign:SetupCommand,supplier:Supplier,branchSupplier:Supplier,stock:StockItem,branchStock:StockItem,branchPurchase:Purchase,lastError='';
 const actors:{n:number;id:string;role:string;outlet:string}[]=[],initial:CloudRecord[]=[];
@@ -26,7 +27,7 @@ function store(beforeFinish?:(args:Record<string,unknown>)=>Promise<void>){retur
  catch(error){const {code,message,detail:details}=error as {code:string;message:string;detail?:string};lastError=code+': '+message;return new Response(JSON.stringify({code,details}),{status:code==='42501'?403:['PT409','23505'].includes(code)?409:code==='PT429'?429:['22023','23514'].includes(code)?400:500});}
  },{serviceKey:'sb_secret_test_only'});}
 function request(c:unknown,header?:string){return new Request('https://api.test/commands',{method:'POST',headers:{Origin:origin,Authorization:'Bearer user.1.signature','Content-Type':'application/json',...(header?{[purchaseBodyHeader]:header}:{})},body:JSON.stringify(c)});}
-async function http(n:number,c:unknown,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>,header?:string|null){const value=c as PurchaseCommand,req=request(c,header===null?undefined:header??(value.type==='purchase.record'?value.outletId:undefined));req.headers.set('Authorization',`Bearer user.${n}.signature`);return createCommandsHandler({origins:new Set([origin]),store:store(beforeFinish)})(req);}
+async function http(n:number,c:unknown,beforeFinish?:(args:Record<string,unknown>)=>Promise<void>,header?:string|null,currency:string|null='BDT'){const value=c as PurchaseCommand,req=request(c,header===null?undefined:header??(value.type==='purchase.record'?value.outletId:undefined));req.headers.set('Authorization',`Bearer user.${n}.signature`);if(currency!==null&&['purchase.record','purchase.undo'].includes(value.type))req.headers.set(savedCurrencyHeader,currency);return createCommandsHandler({origins:new Set([origin]),store:store(beforeFinish)})(req);}
 const base=()=>({id:newInboxId(),outletId:source.snapshot.outlet.id,occurredAt:Date.now()-1000});
 const profile=()=>({name:literal,phone:'০১৭১২৩৪৫৪৮৩',note:literal});
 const createSupplier=():Extract<PurchaseCommand,{type:'supplier.create'}>=>({...base(),type:'supplier.create',supplierId:newInboxId(),input:profile()});
@@ -36,6 +37,44 @@ const invoiceInput=():PurchaseRecordInput=>({supplierId:supplier.id,supplierName
 const record=():Extract<PurchaseCommand,{type:'purchase.record'}>=>({...base(),type:'purchase.record',purchaseId:newInboxId(),input:invoiceInput()});
 const undo=(id:string):Extract<PurchaseCommand,{type:'purchase.undo'}>=>({...base(),type:'purchase.undo',purchaseId:id});
 async function accepted(c:PurchaseCommand,n=1){const r=await http(n,c);expect(r.status,lastError+' '+await r.clone().text()).toBe(200);return parsePurchaseCommandReceipt(await r.json(),c);}
+it('does not reinterpret an original BDT invoice as USD after the current shop profile changes',async()=>{
+ const c=record(),original=JSON.stringify(c),before=await counts();
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);
+  await expect(store().apply('user.1.signature',c,'BDT')).rejects.toThrow();
+  expect(await counts()).toEqual(before);expect(JSON.stringify(c)).toBe(original);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
+it('new invoices require their original unit, while a genuine completed invoice is recoverable without it',async()=>{
+ const c=record(),before=await counts();
+ expect((await http(1,c,undefined,undefined,null)).status).toBe(409);
+ expect((await http(1,c,undefined,undefined,'USD')).status).toBe(409);
+ expect((await http(1,c,undefined,undefined,'bdt')).status).toBe(400);
+ expect(await counts()).toEqual(before);
+ const receipt=await accepted(c);
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);
+  const replay=await http(1,c,undefined,undefined,null);expect(replay.status).toBe(200);expect(await replay.json()).toEqual(receipt);
+  expect((await counts()).purchases).toBe(before.purchases+1);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
+it('historical invoice undo keeps BDT after a USD profile change, with one actual audit and receipt',async()=>{
+ const c=record();await accepted(c);const command=undo(c.purchaseId),original=JSON.stringify(command);
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);
+  const before=await counts();expect((await http(1,command,undefined,undefined,'USD')).status).toBe(409);expect(await counts()).toEqual(before);
+  const receipt=await accepted(command);expect(await accepted(command)).toEqual(receipt);
+  expect(await savedPurchase(c.purchaseId)).toMatchObject({currency:'BDT',voidedAt:command.occurredAt});
+  expect((await counts()).receipts).toBe(before.receipts+1);expect((await counts()).events).toBe(before.events+1);expect(JSON.stringify(command)).toBe(original);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
+it('a profile race after invoice formatting rechecks the original unit on SQL retry before any financial commit',async()=>{
+ const c=record(),before=await counts();let finishes=0;
+ try{
+  const response=await http(1,c,async()=>{finishes++;await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);});
+  expect(response.status).toBe(409);expect(finishes).toBe(1);expect(await counts()).toEqual(before);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
 async function savedSupplier(id=supplier.id){return decodeCommandRecord('suppliers',JSON.parse((await db.query<{data:string}>('select row_to_json(s)::text data from public.suppliers s where id=$1',[id])).rows[0].data)) as unknown as Supplier;}
 async function savedPurchase(id:string){return decodeCommandRecord('purchases',JSON.parse((await db.query<{data:string}>('select row_to_json(p)::text data from public.purchases p where id=$1',[id])).rows[0].data)) as unknown as Purchase;}
 async function counts(){return (await db.query<{suppliers:number;purchases:number;stock:number;moves:number;entries:number;sales:number;events:number;receipts:number}>("select (select count(*)::int from public.suppliers) suppliers,(select count(*)::int from public.purchases) purchases,(select count(*)::int from public.stock_items) stock,(select count(*)::int from public.stock_moves) moves,(select count(*)::int from public.credit_entries) entries,(select count(*)::int from public.sales) sales,(select count(*)::int from public.events) events,(select count(*)::int from private.shop_command_receipts) receipts")).rows[0];}

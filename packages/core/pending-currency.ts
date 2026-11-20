@@ -2,6 +2,7 @@ import type { LocalOutboxEntry } from './local-outbox';
 import type { ShopCommand } from './shop-commands';
 import { savedOrderCurrency } from './order-currency';
 import { savedMoneyCurrency } from './money-currency';
+import { savedPurchaseCurrency } from './purchase-currency';
 
 /** Index the detached original queue, not a mutable working/canonical profile.
  * Derive only when a command is genuinely pending; coverage is checked first. */
@@ -17,6 +18,7 @@ export function originalCurrencyReader(entries: readonly Pick<LocalOutboxEntry, 
     if (!source || !original || original.type !== command.type ||
         original.outletId !== command.outletId) throw Error('Keep the original pending currency source.');
     return savedOrderCurrency(command, source.entry.changes) ??
-      savedMoneyCurrency(command, source.entry.changes, source.entry.commands.slice(0, source.index));
+      savedMoneyCurrency(command, source.entry.changes, source.entry.commands.slice(0, source.index)) ??
+      savedPurchaseCurrency(command, source.entry.changes, source.entry.commands.slice(0, source.index));
   };
 }

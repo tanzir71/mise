@@ -652,6 +652,12 @@ export async function startConvergenceServer(
         )
       ).rows[0].n;
     },
+    async purchaseCount(ids: string[]) {
+      return (await db.query<{n:number}>(
+        'select count(*)::int n from public.purchases where id in (select value::public.ulid from jsonb_array_elements_text($1::jsonb))',
+        [JSON.stringify(ids)],
+      )).rows[0].n;
+    },
     async close() {
       releaseCommand?.();
       server.closeAllConnections();

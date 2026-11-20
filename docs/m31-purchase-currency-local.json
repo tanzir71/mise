@@ -1,0 +1,199 @@
+{
+  "checkedAt": "2026-11-20T14:26:53.288Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Original invoice currency during normal admission, canonical pending replay and full-scope recovery; broader M30/M31 acceptance remains open",
+  "schemas": {
+    "local": 24,
+    "localStores": 38,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "verificationSequence": "The final unit, both portable builds, complete browser run and full visual report cover unchanged production source. Only redacted non-runtime evidence and delivery notes were finalized afterward.",
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 141,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "passed": 2669,
+      "files": 139,
+      "seconds": 549.64,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "limitsChanged": false
+    },
+    "focused": {
+      "sqlAndDeploymentBundle": 62,
+      "nativeDatabaseCases": 88,
+      "nativeFiles": 3,
+      "recoveryAndPurchasePair": 70,
+      "recoveryPairSeconds": 28.91,
+      "previouslyFailedCaseMs": 2584
+    },
+    "priorAttempts": {
+      "fullUnit": {
+        "passed": 2668,
+        "failed": 1,
+        "workerReportingErrors": 1,
+        "seconds": 602.58,
+        "explanation": "An existing owner-recovery case hit its unchanged 5-second limit and Vitest reported an onTaskUpdate timeout. The unchanged-limit 70-case pair and complete retry passed; no resource cause is claimed as proven."
+      },
+      "focusedBrowser": {
+        "passed": 7,
+        "failed": 1,
+        "explanation": "The new test treated a backup navigation link as a direct download. It now follows the actual Exports and backup controls, preserving all original domain records, source images and queue entries while permitting the legitimate export audit."
+      }
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "passed": 462,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "normalWorkers": 2,
+      "durationMinutes": 14.8,
+      "focusedPassed": 8,
+      "focusedMinutes": 1.3,
+      "actualSqlHttp": true,
+      "actualIndexedDb": true,
+      "offlineReload": true,
+      "actualBackupDownloadedAndParsed": true,
+      "allPortableDomainTablesCompared": true,
+      "originalImagesPreserved": true,
+      "originalCurrencyRetained": true,
+      "canonicalMismatchRefusedBeforeWrites": true,
+      "scopeRecoveryRefusedBeforeAdmission": true,
+      "historicalUndoConvergesOnce": true,
+      "syntheticAuthStorageRealtime": true
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T14:23:54.056Z",
+      "comparisons": 278,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "changedViewsSeriousCriticalAxe": 0,
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "dedicatedMilestoneFrame": false,
+      "comparisonDifferencesInformational": true,
+      "screenshots": [
+        "qa/screens/m31-sync-controls-phone-screen-390.png",
+        "qa/screens/m31-recovery-phone-review-390.png",
+        "qa/screens/m31-sync-controls-desktop-screen-1440.png"
+      ]
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T14:25:56.006Z",
+      "version": 27,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "exactSourceMatches": true,
+      "bundleBytes": 465361,
+      "bundleSha256": "cb7489bdadafa2db24de874740a39cf713ca38ea74ef01a5b29e08d770526201",
+      "sourceFiles": 89,
+      "migrations": 41,
+      "functions": 7,
+      "rls": {
+        "application_tables": 62,
+        "forced_rls": 62,
+        "anonymous_table_grants": 0,
+        "public_security_definers": 0,
+        "public_buckets": 0
+      },
+      "security": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      },
+      "performance": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      },
+      "deploymentChanged": true,
+      "schemaChanged": false,
+      "grantsChanged": false,
+      "authConfigurationChanged": false,
+      "serverSecretsChanged": false,
+      "realAccountsCreated": false,
+      "smsSent": false,
+      "genuineHostedOtpAcceptance": false,
+      "actualDeploymentValuesInPublicReport": false,
+      "positiveControl": {
+        "status": 200
+      },
+      "unauthenticatedChecks": [
+        {
+          "name": "tables",
+          "status": 401
+        },
+        {
+          "name": "commands",
+          "status": 401
+        },
+        {
+          "name": "invoice",
+          "status": 401
+        },
+        {
+          "name": "money-review",
+          "status": 401
+        },
+        {
+          "name": "upload",
+          "status": 401
+        },
+        {
+          "name": "images",
+          "status": 401
+        },
+        {
+          "name": "sync-read",
+          "status": 401
+        },
+        {
+          "name": "money-admission",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "privateValuesCompared": 10,
+      "credentials": 0,
+      "currentSourceIndexArtifactDeploymentReferences": 0,
+      "olderNonsecretHistoricalFindings": 22,
+      "newHistoricalReferences": 0,
+      "coverageGaps": 0,
+      "historyPolicyUnchanged": true,
+      "hooksEnabled": true,
+      "githubSecretScanning": true,
+      "githubPushProtection": true,
+      "openAlerts": 0
+    }
+  },
+  "publication": {
+    "workflows": "disabled",
+    "pages": "held by owner",
+    "ciRun": null,
+    "ciArtifact": null
+  },
+  "remaining": [
+    "Explicit review/resolution and other financial families",
+    "Genuine hosted phone OTP and physical-device acceptance",
+    "Remaining M30/M31 acceptance and later handover milestones"
+  ]
+}

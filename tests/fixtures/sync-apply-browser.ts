@@ -621,6 +621,8 @@ const api = {
     return db.saveOrder({source:order.source,sourceText:order.sourceText,customerId:order.customer.id,name:order.customer.name,phone:order.customer.phone??'',type:order.type,address:order.address,table:order.table,scheduledFor:order.scheduledFor,lines:order.lines.map(line=>({...line,unitPrice:(line.unitPrice??0)+100})),deliveryFee:order.deliveryFee,discount:order.discount,payment:{method:order.payment.method,wallet:order.payment.wallet}},{id:order.id,revision:order.revision});
   }),
   queueNewOrder:()=>use(db=>db.saveOrder({source:'phone',sourceText:'Original BDT order · বাংলা',name:'Rina',phone:'01712345483',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:2,unitPrice:1250}],deliveryFee:0,discount:0,payment:{method:'cash'}})),
+  queuePurchase:()=>use(db=>db.recordPurchase({supplierName:'Original supplier',reference:'Original BDT invoice · বাংলা',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due',note:'Keep invoice\0\ud800'})),
+  undoOriginalPurchase:(id:string)=>use(db=>db.undoPurchase(id)),
   setCurrency:(currency:string)=>use(async db=>{const setup=await db.setup();if(!setup)throw Error('Choose the original shop');return db.saveSetup({businessType:setup.business.businessType,marketCode:setup.business.marketCode,name:setup.business.name,phone:setup.owner.phone??'',outletName:setup.outlet.name,address:setup.outlet.address,language:setup.business.languages.length===2?'both':setup.business.languages[0],timezone:setup.outlet.timezone,currency});}),
   actionReviews: () => use(async db=>(await readLocalActionReviews(db)).map(({review,command,entry})=>({review,command,entryId:entry.id,changes:entry.changes,receipts:entry.receipts}))),
   prepareFinancialReview:()=>use(async(db,receiver)=>{
