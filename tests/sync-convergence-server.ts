@@ -11,6 +11,7 @@ import {linkBodyHeader} from '../packages/core/link-commands';
 import {commandReviewHeader} from '../packages/core/command-resolution';
 import {createOrderReviewHandler,createOrderReviewStore} from '../supabase/functions/_shared/order-review';
 import {createMoneyReviewHandler,createMoneyReviewStore} from '../supabase/functions/_shared/money-review';
+import {createPurchaseReviewHandler,createPurchaseReviewStore} from '../supabase/functions/_shared/purchase-review';
 import { resolve, join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -141,6 +142,11 @@ export async function startConvergenceServer(
     'prepare_money_review',
     'read_money_review',
     'finish_money_review',
+    'admit_purchase_review',
+    'inspect_purchase_outcome',
+    'prepare_purchase_review',
+    'read_purchase_review',
+    'finish_purchase_review',
     'prepare_stock_write',
     'finish_stock_write',
     'admit_stock_batch',
@@ -340,6 +346,7 @@ export async function startConvergenceServer(
     }),
     reviews=createOrderReviewHandler({origins,store:createOrderReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     moneyReviews=createMoneyReviewHandler({origins,store:createMoneyReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
+    purchaseReviews=createPurchaseReviewHandler({origins,store:createPurchaseReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     upload = createInitialUploadHandler({
       origins,
       store: createInitialUploadStore(
@@ -465,8 +472,8 @@ export async function startConvergenceServer(
       } else if (path === '/functions/v1/commands') {
         calls.commands++;
         const reviewMode = new URL(request.url).searchParams.get('review');
-        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?reviews:commands)(request);
-        if ((holdCommand || holdResolution && ['resolve','money-resolve'].includes(reviewMode??'')) && response.ok) {
+        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?reviews:commands)(request);
+        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve'].includes(reviewMode??'')) && response.ok) {
           holdCommand = false;
           holdResolution = false;
           await new Promise<void>((resolve) => {
@@ -475,7 +482,7 @@ export async function startConvergenceServer(
           });
           releaseCommand = null;
         }
-        if ((loseCommand||loseResolution&&['resolve','money-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
+        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
           loseCommand = false;
           loseResolution = false;
           await truncate(response);

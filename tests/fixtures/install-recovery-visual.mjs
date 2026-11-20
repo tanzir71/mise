@@ -108,6 +108,20 @@ export async function captureMoneyActionReview(page,mode='review'){
   await checkLocalInboxAccess(page);
  }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
+/** A rejected original invoice, a compatible current-value comparison or a lost
+ * real SQL outcome. No invoice receipt or choice is fabricated by the fixture. */
+export async function capturePurchaseActionReview(page,mode='review'){
+ const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));
+  await page.context().setOffline(true);await page.evaluate(()=>window.miseSyncApplyTest.queuePurchase());await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());await page.context().setOffline(false);await page.evaluate(()=>window.miseSyncApplyTest.cycle());
+  if(mode!=='currency'){await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('BDT'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());}
+  await installRealtimeFixture(page,server.config(2).jwt);await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review saved invoice',exact:true}).click();const panel=page.getByRole('region',{name:'Saved invoice review'});await panel.getByRole('button',{name:'Check current invoice values',exact:true}).click();await page.waitForFunction(()=>Array.from(document.querySelectorAll('.purchase-action-review button')).some(button=>button.textContent?.trim()==='Withdraw saved invoice action'&&!button.disabled));
+  if(mode==='currency'){if(await panel.getByRole('button',{name:'Apply reviewed invoice action',exact:true}).isEnabled())throw Error('Do not convert the original invoice currency.');}
+  else if(mode==='unconfirmed'){server.loseNextResolution();await panel.getByRole('button',{name:'Apply reviewed invoice action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();}
+  await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
+}
 /** A genuine rejected counter command; no order review or resolution is invented. */
 export async function captureMoneyCurrencyReview(page){
  const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();

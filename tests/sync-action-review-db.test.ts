@@ -463,7 +463,7 @@ it('schema 21 upgrades with every original source, image and queue intact and th
     stores: Record<string, string> = {};
   databases.push(legacy);
   for (const table of f.db.tables.filter(
-    (t) => !['syncActionReviews', 'orderReviews','moneyReviews'].includes(t.name),
+    (t) => !['syncActionReviews', 'orderReviews','moneyReviews','purchaseReviews'].includes(t.name),
   ))
     stores[table.name] = [
       table.schema.primKey.src,
@@ -475,8 +475,9 @@ it('schema 21 upgrades with every original source, image and queue intact and th
   legacy.close();
   const upgraded = new MiseDatabase(legacy.name);
   databases.push(upgraded);
-  expect(upgraded.verno).toBe(24);
-  expect(upgraded.tables).toHaveLength(38);
+  expect(upgraded.verno).toBe(25);
+  expect(upgraded.tables).toHaveLength(39);
+  expect(await upgraded.purchaseReviews.count()).toBe(0);
   expect(await upgraded.syncActionReviews.count()).toBe(0);
   expect(await upgraded.orderReviews.count()).toBe(0);
   expect(await upgraded.outbox.toArray()).toEqual(f.original);

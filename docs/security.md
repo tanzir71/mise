@@ -1,5 +1,18 @@
 # Deployment credentials
 
+The [saved invoice review](m31-purchase-review.md) keeps deliberate choices and
+original complete source in a token-free native journal. Actual review tokens
+remain ephemeral; neither deployment values nor Auth sessions enter that journal
+or portable backups. Scoped native guards and private forced-RLS server tickets
+bind the original account, source, saved currency, checked values and undo clock.
+Only the server may finalize a review. The exact retrieved commands source
+matches its reviewed bundle with JWT verification enabled. All 64 application
+tables retain forced RLS, with no anonymous/PUBLIC table grants, public definers
+or public buckets. Fourteen real unauthenticated probes return 401 after a
+valid-key positive control; advisors report no warnings or errors. No Auth
+configuration or server secret changes. Actual project/organization details and
+all credentials stay in ignored private inputs or the server secret manager.
+
 The [original customer account boundary](m31-customer-account.md) selects only an
 existing device-named khata in the authorized customer and outlet. A profile
 currency change grants no new account or table access. Contact-only updates

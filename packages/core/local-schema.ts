@@ -13,4 +13,5 @@ import {localRecoveryTableNames} from './scope-recovery';
 import {localActionReviewTableNames} from './sync-action-review';
 import {localOrderReviewTableNames} from './order-review-journal';
 import {localMoneyReviewTableNames} from './money-review-journal';
-export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames,...localActionReviewTableNames,...localOrderReviewTableNames,...localMoneyReviewTableNames] as const;
+import {localPurchaseReviewTableNames} from './purchase-review-journal';
+export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames,...localActionReviewTableNames,...localOrderReviewTableNames,...localMoneyReviewTableNames,...localPurchaseReviewTableNames] as const;

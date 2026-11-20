@@ -1,6 +1,7 @@
 import {createCommandsHandler,createCommandStore} from '../_shared/commands-handler.ts';
 import {createOrderReviewHandler,createOrderReviewStore} from '../_shared/order-review.ts';
 import {createMoneyReviewHandler,createMoneyReviewStore} from '../_shared/money-review.ts';
+import {createPurchaseReviewHandler,createPurchaseReviewStore} from '../_shared/purchase-review.ts';
 declare const Deno:{env:{get(name:string):string|undefined};serve(handler:(request:Request)=>Promise<Response>):void};
 let handler:(request:Request)=>Promise<Response>;
 try{
@@ -11,6 +12,7 @@ try{
     if(!new URL(request.url).searchParams.has('review'))return commands(request);
     try{
       if(new URL(request.url).searchParams.get('review')?.startsWith('money-'))return await createMoneyReviewHandler({store:createMoneyReviewStore(apiUrl,key,serviceKey||''),origins})(request);
+      if(new URL(request.url).searchParams.get('review')?.startsWith('purchase-'))return await createPurchaseReviewHandler({store:createPurchaseReviewStore(apiUrl,key,serviceKey||''),origins})(request);
       return await createOrderReviewHandler({store:createOrderReviewStore(apiUrl,key,serviceKey||''),origins})(request);
     }
     catch{return new Response(JSON.stringify({error:'Financial reviews are unavailable. Keep the original saved action.'}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}

@@ -631,6 +631,7 @@ const api = {
   editOriginalCustomer:(customerId:string,name:string,limit:number|null)=>use(async db=>{const customer=await db.customers.get(customerId),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customerId);if(!customer||!account)throw Error('Choose the original customer and khata');return db.saveCustomer({name,nickname:customer.nickname,phone:customer.phone??'',address:customer.address,notes:customer.notes,tags:customer.tags},{id:customerId,...(limit===null?{}:{credit:{allowed:account.allowed,limit,reminder:account.reminder}})});}),
   undoOriginalPurchase:(id:string)=>use(db=>db.undoPurchase(id)),
   setCurrency:(currency:string)=>use(async db=>{const setup=await db.setup();if(!setup)throw Error('Choose the original shop');return db.saveSetup({businessType:setup.business.businessType,marketCode:setup.business.marketCode,name:setup.business.name,phone:setup.owner.phone??'',outletName:setup.outlet.name,address:setup.outlet.address,language:setup.business.languages.length===2?'both':setup.business.languages[0],timezone:setup.outlet.timezone,currency});}),
+  setTimezone:(timezone:string)=>use(async db=>{const setup=await db.setup();if(!setup)throw Error('Choose the original shop');return db.saveSetup({businessType:setup.business.businessType,marketCode:setup.business.marketCode,name:setup.business.name,phone:setup.owner.phone??'',outletName:setup.outlet.name,address:setup.outlet.address,language:setup.business.languages.length===2?'both':setup.business.languages[0],timezone,currency:setup.outlet.currency});}),
   actionReviews: () => use(async db=>(await readLocalActionReviews(db)).map(({review,command,entry})=>({review,command,entryId:entry.id,changes:entry.changes,receipts:entry.receipts}))),
   prepareFinancialReview:()=>use(async(db,receiver)=>{
     const w=await wire(receiver),client=await commandClient(w),row=(await db.outbox.where('status').equals('pending').sortBy('sequence'))[0],command=row?.commands[row.receipts.length];if(!row||!command||!isOrderCommand(command))throw Error('Expected the first retained original order action.');
@@ -719,6 +720,7 @@ const api = {
       actionReviews: await db.syncActionReviews.toArray(),
       orderReviews: await db.orderReviews.toArray(),
       moneyReviews: await db.moneyReviews.toArray(),
+      purchaseReviews: await db.purchaseReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

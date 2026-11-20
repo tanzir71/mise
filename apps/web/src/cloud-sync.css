@@ -53,6 +53,15 @@
 .order-review-lines li { display:flex; justify-content:space-between; gap:16px; padding:8px 0; border-bottom:1px solid var(--border); }
 .review-outcome { border-left:2px solid var(--text); padding-left:16px; }
 .order-review-source { white-space:pre-wrap; overflow-wrap:anywhere; max-width:100%; font:inherit; }
+.purchase-action-review :is(dd,li,strong,span) { min-width:0; overflow-wrap:anywhere; }
+.purchase-review-lines { display:grid; gap:8px; padding:0; margin:16px 0; list-style:none; }
+.purchase-review-lines li { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; padding:8px 0; border-bottom:1px solid var(--border); }
+.purchase-review-lines strong { grid-column:1/-1; font-weight:500; }
+.purchase-review-lines li > .money { max-width:14ch; text-align:right; }
+.purchase-action-review .order-review-proposal { border:1px solid var(--border); border-radius:16px; padding:16px; }
+.purchase-action-review .order-review-proposal dl > div { display:flex; justify-content:space-between; gap:16px; padding:8px 0; }
+.purchase-action-review .order-review-proposal dt { color:var(--text-secondary); }
+.purchase-action-review .order-review-proposal dd { margin:0; text-align:right; }
 .order-review-effects { padding-left:24px; }
 .order-review-after { display:flex; flex-wrap:wrap; gap:16px; margin:16px 0; }
 .order-review-after dt { color:var(--text-secondary); }

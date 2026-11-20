@@ -1,0 +1,263 @@
+{
+  "scope": "Original saved supplier invoice comparison and deliberate withdrawal/replacement",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "local": {
+    "checkedAt": "2026-11-20T18:56:30.997Z",
+    "milestone": "M31",
+    "milestoneComplete": false,
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 144,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "focusedUnit": {
+      "files": 8,
+      "passed": 221,
+      "seconds": 91.19,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "unit": {
+      "files": 141,
+      "passed": 2756,
+      "seconds": 570.81,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "buildGuards": {
+      "root": {
+        "ok": true,
+        "artifacts": true,
+        "privateComparisons": 10,
+        "credentials": 0,
+        "privateDeploymentFindings": 0,
+        "coverageGaps": 0
+      },
+      "pages": {
+        "ok": true,
+        "artifacts": true,
+        "privateComparisons": 10,
+        "credentials": 0,
+        "privateDeploymentFindings": 0,
+        "coverageGaps": 0
+      }
+    },
+    "focusedBrowser": {
+      "total": 16,
+      "passed": 16,
+      "duration": "1.8m",
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "browser": {
+      "total": 472,
+      "passed": 472,
+      "duration": "23.8m",
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T18:53:40.840Z",
+      "comparisons": 290,
+      "completeMetrics": true,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "reviewedScreens": [
+        "qa/screens/m31-invoice-review-phone-review-360.png",
+        "qa/screens/m31-invoice-currency-phone-review-390.png",
+        "qa/screens/m31-invoice-unconfirmed-desktop-review-1440.png"
+      ],
+      "seriousCriticalAxe": 0
+    },
+    "sourceContinuity": {
+      "ok": true,
+      "checkedAt": "2026-11-20T19:06:20.294Z",
+      "files": 1178,
+      "changedSources": 1,
+      "lineEndingOnlyChanges": 1,
+      "unreviewedChanges": 0
+    },
+    "bundle": {
+      "ok": true,
+      "bytes": 487820,
+      "sha256": "551de8d26a22508a76996a4c396b5d1becc85353dbb8a8a25032f35202bdb435",
+      "sourceFiles": 92,
+      "privateValuesCompared": 8,
+      "findings": 0,
+      "changedSources": 0
+    },
+    "portableBackupChanged": false,
+    "nativeSchema": 25,
+    "cloudFlagsEnabled": false,
+    "actualSqlHttp": true,
+    "actualIndexedDb": true,
+    "completeImageHashesCompared": true,
+    "offlineJsonDownloadParsed": true,
+    "original1000And5000InputsPreserved": true,
+    "syntheticAuthStorageRealtime": true,
+    "lineEndingEquivalence": {
+      "path": "tests/e2e/sync-purchase-review-ui.spec.ts",
+      "sourceSha256": "598fcefbba257940763e59a1b025b0e32445cc0dd4aa9d7f60e63a4524ad3efd",
+      "normalizedSha256": "2a1e549da2906da85a400eb54284b50b01747295b68eb9549bd81d7e816a1159",
+      "sourceBytes": 14297,
+      "normalizedBytes": 14210,
+      "crlf": 87,
+      "originalManifestPreserved": true,
+      "otherContentChanged": false
+    },
+    "postNormalizationBrowser": {
+      "passed": 4,
+      "duration": "1.2m",
+      "configuredWorkers": 2,
+      "activeWorkers": 1,
+      "singleSerialSpec": true,
+      "failed": 0
+    }
+  },
+  "native": {
+    "schema": 25,
+    "stores": 39,
+    "portableBackupSchema": 10,
+    "portableBackupTables": 21,
+    "tokensPersisted": false
+  },
+  "hosted": {
+    "checkedAt": "2026-11-20T18:58:24.344Z",
+    "version": 30,
+    "status": "ACTIVE",
+    "verifyJwt": true,
+    "exactSourceMatches": true,
+    "bundleBytes": 487820,
+    "bundleSha256": "551de8d26a22508a76996a4c396b5d1becc85353dbb8a8a25032f35202bdb435",
+    "sourceFiles": 92,
+    "migrations": 43,
+    "functions": 7,
+    "rls": {
+      "forced_rls": 64,
+      "public_buckets": 0,
+      "application_tables": 64,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "invoice_review_tables_present": 2
+    },
+    "permissions": {
+      "service_finalizers": 1,
+      "anonymous_rpc_grants": 0,
+      "private_table_grants": 0,
+      "authenticated_readers": 4,
+      "private_review_tables": 2,
+      "authenticated_finalizers": 0
+    },
+    "security": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performance": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "positiveControl": {
+      "name": "publishable-key",
+      "status": 200
+    },
+    "unauthenticatedChecks": [
+      {
+        "name": "tables",
+        "status": 401
+      },
+      {
+        "name": "commands",
+        "status": 401
+      },
+      {
+        "name": "invoice",
+        "status": 401
+      },
+      {
+        "name": "customer",
+        "status": 401
+      },
+      {
+        "name": "customer-update",
+        "status": 401
+      },
+      {
+        "name": "money-review",
+        "status": 401
+      },
+      {
+        "name": "purchase-review-read",
+        "status": 401
+      },
+      {
+        "name": "purchase-review-resolve",
+        "status": 401
+      },
+      {
+        "name": "purchase-review-admission",
+        "status": 401
+      },
+      {
+        "name": "purchase-review-finish",
+        "status": 401
+      },
+      {
+        "name": "upload",
+        "status": 401
+      },
+      {
+        "name": "images",
+        "status": 401
+      },
+      {
+        "name": "sync-read",
+        "status": 401
+      },
+      {
+        "name": "money-admission",
+        "status": 401
+      }
+    ],
+    "authConfigurationChanged": false,
+    "serverSecretsChanged": false,
+    "realAccountsCreated": false,
+    "smsSent": false,
+    "genuinePhoneProviderAcceptance": false
+  },
+  "cloudFlagsEnabled": false,
+  "workflowsEnabled": false,
+  "pagesPublicationHeld": true,
+  "checkedAt": "2026-11-20T19:06:20.602Z",
+  "privacy": {
+    "checkedAt": "2026-11-20T19:07:16.068Z",
+    "knownValuesChecked": 10,
+    "credentials": 0,
+    "currentDeploymentReferences": 0,
+    "olderNonsecretHistoricalFindings": 22,
+    "newHistoricalReferences": 0,
+    "coverageGaps": 0,
+    "historyPolicyChanged": false,
+    "hooksEnabled": true
+  }
+}
