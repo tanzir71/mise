@@ -18,6 +18,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- Saved stock descriptions and archive choices now merge with the latest online item while preserving its current quantity, unit and physical-count history. Original edits stay intact; physical counts and undo retain their review rules. Cloud sync remains off by default.
+
+- Stock quantity, target and supplier buttons include their displayed values in their accessible names.
+
 - M31 saved invoice actions gain an opt-in comparison and explicit withdrawal or same-currency replacement. The original invoice identity, prices, quantities and undo clock stay intact; a token-free local journal retains deliberate choices and recovers genuine outcomes after interruption. Full cloud acceptance remains open and sync stays off by default.
 
 - M31 opt-in counter and khata review compares the original amount/currency with current sale, customer, balance and limit. Explicit withdrawal or replacement preserves original financial identities and undo clocks; credit above the checked limit needs separate consent. A token-free native journal recovers genuine outcomes after lost replies and offline reload, and changed values require another choice. Confirmed history remains recoverable after the original account is restored, without reviving an old decision. Full milestone and hosted acceptance remain open; cloud sync stays off by default.

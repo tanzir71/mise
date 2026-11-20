@@ -28,19 +28,27 @@ function move(item:StockItem,before:number,reason:StockReason,source:StockMove['
 }
 export const activeStockMoves = (moves:StockMove[]) => {const reversed = new Set(moves.map(move => move.undoOf).filter(Boolean));return moves.filter(move => !move.undoOf && !reversed.has(move.id));};
 export const stockIsLow = (item:StockItem) => item.archivedAt === undefined && item.target > 0 && stockAtoms(item.onHand) <= stockAtoms(item.lowAt);
-export function saveStockItemCommand(input:StockInput,context:StockWriteContext,before:StockItem|null = null,revision = 0,at = Date.now(),newId:StockIds=()=>ulid(at)):StockChange {
-  const {setup} = context;validateShop(setup);if (before) validateStockItem(before,setup,revision);
+function saveStockValue(input:StockInput,context:StockWriteContext,before:StockItem|null,revision:number,at:number,newId:StockIds,metadataOnly=false):StockChange {
+  const {setup} = context;validateShop(setup);if (before) validateStockItem(before,setup,revision,!metadataOnly);
   const name = text(input.name,120,'the stock name'), nameLocal = text(input.nameLocal || '',120,'the local name'), unit = text(stockUnit(input.unit),24,'the unit'), category = text(input.category || '',80,'the category');
-  if (!name || !unit) throw new Error('Enter the stock name and unit.');uniqueName(name,context,before?.id);
+  if (!name || !unit) throw new Error('Enter the stock name and unit.');if(before?.archivedAt===undefined)uniqueName(name,context,before?.id);
   if (before && before.unit !== unit) throw new Error('Stock history keeps its unit. Create a new stock item to use another unit.');
   const onHand = stockNumber(stockAtoms(input.onHand)), target = stockNumber(stockAtoms(input.target)), packSize = stockNumber(stockAtoms(input.packSize)), lowAt = input.lowAt === undefined ? stockNumber(stockAtoms(target)/2n) : stockNumber(stockAtoms(input.lowAt));
   if (packSize <= 0 || lowAt > target) throw new Error('Use a positive pack size and a low threshold no higher than the target.');
   const aliases = [...new Set((input.aliases || []).map(alias => text(alias,120,'each alias')).filter(Boolean))];if (aliases.length > 10) throw new Error('Use at most ten aliases.');
   if (input.supplierId) {const supplier = context.suppliers.find(supplier => supplier.id === input.supplierId && supplier.outletId === setup.outlet.id);if (!supplier || (supplier.archivedAt !== undefined && before?.supplierId !== supplier.id)) throw new Error('Choose an active supplier from this outlet.');}
   const counted = !before || onHand !== before.onHand;
-  const item:StockItem = {id:before?.id || newId('item'),outletId:setup.outlet.id,revision:(before?.revision || 0)+1,name,nameLocal,activeKey:stockNameKey(name),unit,category,aliases,onHand,target,packSize,lowAt,supplierId:input.supplierId || undefined,lastCountedAt:counted ? at : before?.lastCountedAt,eventId:'',createdAt:before?.createdAt ?? at,updatedAt:at};
+  const item:StockItem = {id:before?.id || newId('item'),outletId:setup.outlet.id,revision:(before?.revision || 0)+1,name,nameLocal,activeKey:before?.archivedAt===undefined?stockNameKey(name):undefined,unit,category,aliases,onHand,target,packSize,lowAt,supplierId:input.supplierId || undefined,lastCountedAt:counted ? at : before?.lastCountedAt,eventId:'',createdAt:before?.createdAt ?? at,updatedAt:at,...(before?.archivedAt===undefined?{}:{archivedAt:before.archivedAt})};
   const audit = stockEvent(item,setup,before ? 'stock.item-update' : 'stock.item-create',before,at,newId), countedMove = counted ? move(item,before?.onHand || 0,'count','manual',before ? 'On hand edited by owner' : 'Opening physical count',setup,at,newId) : undefined;
   audit.after = {item,...(countedMove ? {move:countedMove} : {})};return {items:[item],moves:countedMove ? [countedMove] : [],events:[audit]};
+}
+export function saveStockItemCommand(input:StockInput,context:StockWriteContext,before:StockItem|null = null,revision = 0,at = Date.now(),newId:StockIds=()=>ulid(at)):StockChange {
+  return saveStockValue(input,context,before,revision,at,newId);
+}
+/** A saved description edit never changes a current physical quantity or archive state. */
+export function saveStockMetadataCommand(input:Omit<StockInput,'onHand'>,before:StockItem,context:StockWriteContext,at=Date.now(),newId:StockIds=()=>ulid(at)):StockChange {
+  if(!before)throw new Error('Choose the existing stock item.');
+  return saveStockValue({...input,onHand:before.onHand},context,before,before.revision,at,newId,true);
 }
 export function adjustStockCommand(input:StockAdjustment,context:StockWriteContext,at = Date.now(),countBatchId?:string,newId:StockIds=()=>ulid(at)):StockChange {
   const before = context.items.find(item => item.id === input.id);if (!before) throw new Error('Stock item not found.');validateStockItem(before,context.setup,input.revision);
@@ -76,10 +84,17 @@ export function undoStockMoveCommand(record:StockMove,revision:number,context:St
   const audit = stockEvent(item,context.setup,'stock.undo',before,at,newId);audit.undoOf = original.eventId;
   const recorded = move(item,before.onHand,'undo','manual',`Undo ${original.reason}`,context.setup,at,newId,original.countBatchId,original.id);audit.after = {item,move:recorded};return {items:[item],moves:[recorded],events:[audit]};
 }
-export function archiveStockItemCommand(before:StockItem,archive:boolean,revision:number,context:StockWriteContext,at = Date.now(),newId:StockIds=()=>ulid(at)):StockChange {
-  validateStockItem(before,context.setup,revision,false);if ((before.archivedAt !== undefined) === archive) throw new Error('This stock item already has that archive state.');if (!archive) uniqueName(before.name,context,before.id);
+function stockArchiveValue(before:StockItem,archive:boolean,revision:number,context:StockWriteContext,at:number,newId:StockIds,allowSameState=false):StockChange {
+  validateStockItem(before,context.setup,revision,false);if (!allowSameState&&(before.archivedAt !== undefined) === archive) throw new Error('This stock item already has that archive state.');if (!archive) uniqueName(before.name,context,before.id);
   const item = {...before,revision:before.revision+1,activeKey:archive ? undefined : stockNameKey(before.name),archivedAt:archive ? at : undefined,updatedAt:at};
   const audit = stockEvent(item,context.setup,archive ? 'stock.archive' : 'stock.restore',before,at,newId);return {items:[item],moves:[],events:[audit]};
+}
+export function archiveStockItemCommand(before:StockItem,archive:boolean,revision:number,context:StockWriteContext,at=Date.now(),newId:StockIds=()=>ulid(at)):StockChange {
+  return stockArchiveValue(before,archive,revision,context,at,newId);
+}
+/** Last admitted explicit archive intent records its actual predecessor, including a same-state set. */
+export function setStockArchiveCommand(before:StockItem,archive:boolean,context:StockWriteContext,at=Date.now(),newId:StockIds=()=>ulid(at)):StockChange {
+  return stockArchiveValue(before,archive,before.revision,context,at,newId,true);
 }
 export interface SupplierInput {name:string;phone:string;note:string}
 export type SupplierIds=(kind:'supplier'|'event')=>string;

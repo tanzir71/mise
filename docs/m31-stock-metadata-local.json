@@ -1,0 +1,307 @@
+{
+  "scope": "Original stock metadata and explicit archive intents over current quantities",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "local": {
+    "checkedAt": "2026-11-20T20:40:59.192Z",
+    "milestone": "M31",
+    "milestoneComplete": false,
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 144,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "focusedUnit": {
+      "files": 3,
+      "passed": 74,
+      "seconds": 44,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "unit": {
+      "files": 142,
+      "passed": 2778,
+      "seconds": 507.53,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "buildGuards": {
+      "root": {
+        "ok": true,
+        "artifacts": true,
+        "privateComparisons": 10,
+        "credentials": 0,
+        "privateDeploymentFindings": 0,
+        "coverageGaps": 0
+      },
+      "pages": {
+        "ok": true,
+        "artifacts": true,
+        "privateComparisons": 10,
+        "credentials": 0,
+        "privateDeploymentFindings": 0,
+        "coverageGaps": 0
+      }
+    },
+    "focusedBrowser": {
+      "total": 23,
+      "passed": 23,
+      "duration": "1.7m",
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "browser": {
+      "total": 475,
+      "passed": 475,
+      "duration": "15.0m",
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T20:40:46.516Z",
+      "comparisons": 290,
+      "completeMetrics": true,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": "qa/report.html",
+      "cloneLocal": true
+    },
+    "sourceContinuity": {
+      "ok": true,
+      "files": 1181,
+      "changedSources": 0
+    },
+    "bundle": {
+      "ok": true,
+      "bytes": 488678,
+      "sha256": "de59bfdc65175d92183a06b954dbbaec46e84d89a6fdb199f856b613475b6fa6",
+      "sourceFiles": 92,
+      "privateValuesCompared": 8,
+      "findings": 0,
+      "changedSources": 0
+    },
+    "nativeSchema": 25,
+    "portableBackupChanged": false,
+    "cloudFlagsEnabled": false,
+    "privacyPolicySha256": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb"
+  },
+  "hosted": {
+    "ok": true,
+    "checkedAt": "2026-11-20 20:43:27 UTC",
+    "commands": {
+      "version": 31,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "exactCandidateSource": true,
+      "bytes": 488678,
+      "sha256": "de59bfdc65175d92183a06b954dbbaec46e84d89a6fdb199f856b613475b6fa6",
+      "sourceFiles": 92
+    },
+    "migrations": 44,
+    "functions": 7,
+    "catalog": {
+      "forced_rls": 64,
+      "public_buckets": 0,
+      "application_tables": 64,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "invoice_review_tables_present": 2
+    },
+    "permissions": {
+      "public_finish_anon": 0,
+      "private_finish_anon": 0,
+      "public_finish_service": 1,
+      "private_finish_service": 1,
+      "public_admit_authenticated": 1,
+      "stock_ticket_client_grants": 0,
+      "public_finish_authenticated": 0,
+      "private_finish_authenticated": 0,
+      "public_prepare_authenticated": 1
+    },
+    "advisors": {
+      "security": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      },
+      "performance": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      }
+    },
+    "authSettingsChanged": false,
+    "secretsChanged": false,
+    "realAccountsCreated": false,
+    "phoneSmsSent": false
+  },
+  "anonymous": {
+    "checkedAt": "2026-11-20T20:43:31.425Z",
+    "ok": true,
+    "positiveControl": {
+      "name": "publishable-key",
+      "status": 200
+    },
+    "requests": [
+      {
+        "name": "tables",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "commands",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "invoice",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "customer",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "customer-update",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "money-review",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "purchase-review-read",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "purchase-review-resolve",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "purchase-review-admission",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "purchase-review-finish",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "stock-metadata",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "stock-admission",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "stock-prepare",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "stock-finish",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "upload",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "images",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "sync-read",
+        "status": 401,
+        "denied": true
+      },
+      {
+        "name": "money-admission",
+        "status": 401,
+        "denied": true
+      }
+    ]
+  },
+  "privacy": {
+    "files": 1523,
+    "objects": 8517,
+    "privateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalNonsecretFindings": 22,
+    "newHistoricalFindings": 0,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "opaqueLegacyFingerprints": 21,
+    "policyUnchanged": true
+  },
+  "github": {
+    "checkedAt": "2026-11-20T20:44:34.030Z",
+    "remoteBranchesAndTagsFetched": true,
+    "remoteMatches": true,
+    "hooks": ".githooks",
+    "secretScanning": "enabled",
+    "pushProtection": "enabled",
+    "openAlerts": 0,
+    "disabledWorkflows": 3,
+    "totalWorkflows": 3,
+    "activeRuns": 0,
+    "headRuns": 0,
+    "pagesHeld": true
+  },
+  "keyScreenshots": [
+    "qa/screens/m15-stock-phone-screen-390.png",
+    "qa/screens/m15-stock-desktop-screen-1440.png",
+    "qa/screens/m15-night-count-screen-390.png"
+  ],
+  "logSha256": {
+    "unit-full": "1fae794db7f00906d6258c63645be8a53804f72dff9b51ff0bd2980f37feb1cb",
+    "browser-targeted": "1e4385f2b90e9a325254f2794500ddd8a56034cb5442dfc317b087c6b76b07b2",
+    "browser-full": "488435b221d1df629b0a50902d2e4803c2b9a2ec9e2c98402b7d2747aace21a7",
+    "visual-full": "15a1e39927df6763bf3c223db515e2584f23129bc16f9d426ceb5a50d798bc6c",
+    "types-full": "01b357da858c74b3f45d09da6fb2cdac40e337c315dd941ca2aa79d25b4d458b",
+    "build-root": "f1dd7005ac202d5ac01bd7751adc88974166d9aa7a5f6b89757049b56925e51e",
+    "build-pages": "27654c308a8987a749445f68631e2a0d4851744b798322fd8cf5345b726a1e6f"
+  },
+  "acceptance": {
+    "realPhoneProvider": false,
+    "signedOwnerHttp": false,
+    "physicalDevices": false,
+    "remainingConflictFamilies": true,
+    "laterMilestonesOpen": true
+  },
+  "publication": {
+    "workflowsEnabled": false,
+    "workflowDispatched": false,
+    "pagesPublished": false
+  }
+}

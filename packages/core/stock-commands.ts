@@ -14,6 +14,7 @@ export type StockCommand=Base&(
  |{type:'stock.batch';count:boolean;batchId:string|null;changes:(StockDelta&{eventId:string;moveId:string})[]});
 export interface StockResult {stockItemId:string;eventId:string;moveId:string|null;revision:number;onHand:number;updatedAt:number}
 export interface StockCommandReceipt {id:string;type:StockCommand['type'];outletId:string;occurredAt:number;at:number;batchId:string|null;undoOf:string|null;results:StockResult[]}
+export function isStockMetadataIntent(c:StockCommand):boolean{return c.type==='stock.update'&&c.moveId===null||c.type==='stock.archive'||c.type==='stock.restore';}
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const id=(v:unknown):v is string=>typeof v==='string'&&/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v);
 const integer=(v:unknown,min=0,max=Number.MAX_SAFE_INTEGER):v is number=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=min&&v<=max;
@@ -51,6 +52,6 @@ export function stockWritePlan(c:StockCommand){
 }
 export function parseStockCommandReceipt(v:unknown,c:StockCommand):StockCommandReceipt{
  const plan=stockWritePlan(c);if(!object(v)||v.id!==c.id||v.type!==c.type||v.outletId!==c.outletId||v.occurredAt!==c.occurredAt||v.batchId!==plan.batchId||v.undoOf!==plan.undoMoveId||!integer(v.at,0,8640000000000000)||!Array.isArray(v.results)||v.results.length!==plan.rows.length)throw new Error('Invalid stock receipt.');
- const results:StockResult[]=v.results.map((r,i)=>{const p=plan.rows[i],additive=c.type==='stock.undo'||c.type==='stock.adjust'&&c.change.reason!=='count'||c.type==='stock.batch'&&c.changes[i].reason!=='count';if(!object(r)||r.stockItemId!==p.itemId||r.eventId!==p.eventId||r.moveId!==p.moveId||!integer(r.revision,p.revision+1)||!additive&&r.revision!==p.revision+1||!quantity(r.onHand)||!integer(r.updatedAt,0,8640000000000000))throw new Error('Stock receipt does not match the reviewed IDs and revision.');return {stockItemId:p.itemId,eventId:p.eventId,moveId:p.moveId,revision:r.revision,onHand:r.onHand,updatedAt:r.updatedAt};});
+ const results:StockResult[]=v.results.map((r,i)=>{const p=plan.rows[i],rebased=isStockMetadataIntent(c)||c.type==='stock.undo'||c.type==='stock.adjust'&&c.change.reason!=='count'||c.type==='stock.batch'&&c.changes[i].reason!=='count';if(!object(r)||r.stockItemId!==p.itemId||r.eventId!==p.eventId||r.moveId!==p.moveId||!integer(r.revision,p.revision+1)||!rebased&&r.revision!==p.revision+1||!quantity(r.onHand)||!integer(r.updatedAt,0,8640000000000000))throw new Error('Stock receipt does not match the reviewed IDs and revision.');return {stockItemId:p.itemId,eventId:p.eventId,moveId:p.moveId,revision:r.revision,onHand:r.onHand,updatedAt:r.updatedAt};});
  return {id:c.id,type:c.type,outletId:c.outletId,occurredAt:c.occurredAt,at:v.at,batchId:plan.batchId,undoOf:plan.undoMoveId,results};
 }

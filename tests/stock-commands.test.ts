@@ -55,6 +55,43 @@ beforeEach(async()=>{lastError='';await db.exec("truncate public.suppliers,publi
 afterAll(async()=>{await db?.close();});
 it.each([1,2])('operator %s creates stock with stable IDs, original physical time and literal Unicode',async n=>{const c=create(),r=await accepted(c,n),saved=await item(c.stockItemId);expect(saved).toMatchObject({name:c.input.name,nameLocal:literal,onHand:20.125,eventId:c.id,revision:1,createdAt:c.occurredAt,lastCountedAt:c.occurredAt});expect((await moves(c.stockItemId))[0]).toMatchObject({id:c.moveId,createdAt:c.occurredAt,createdBy:actors.find(a=>a.n===n)!.id,note:'Opening physical count',delta:20.125});expect(r.results[0].stockItemId).toBe(c.stockItemId);});
 it('metadata-only edits preserve the active key and need no new physical movement',async()=>{const c=update();c.input.name='Renamed '+literal;const before=await counts(),r=await accepted(c);expect((await item()).name).toBe(c.input.name);expect((await counts()).moves).toBe(before.moves);expect(r.results[0].moveId).toBeNull();});
+it('the last admitted stock metadata intent retains current quantities, original command and losing values',async()=>{
+ const first=update(),last=update();first.input.name='Owner description';last.input.name='Manager description '+literal;last.input.aliases=['Original alias '+literal];first.occurredAt=seed.createdAt+2;last.occurredAt=seed.createdAt+1;
+ const original=JSON.stringify(last);await accepted(first);await accepted(adjust(await item(),'received',3));const current=await item(),before=await counts();
+ const receipt=await accepted(last,2),saved=await item(),audit=(await db.query<{before_data:StockItem;after_data:{item:StockItem}}>('select before_data,after_data from public.events where id=$1',[last.id])).rows[0];
+ expect(JSON.stringify(last)).toBe(original);expect(receipt.results[0]).toMatchObject({revision:4,onHand:23,moveId:null,eventId:last.id});expect(saved).toMatchObject({name:last.input.name,aliases:last.input.aliases,onHand:23,lastCountedAt:current.lastCountedAt,revision:4});expect((await counts()).moves).toBe(before.moves);expect(audit.before_data).toEqual(current);expect(audit.after_data.item).toEqual(saved);
+});
+it('an original metadata edit can update an archived item without restoring it or moving stock',async()=>{
+ const command=update();command.input.name=second.name;await accepted(archive());const current=await item(),before=await counts();await accepted(command,2);
+ const saved=await item();expect(saved).toMatchObject({name:second.name,onHand:current.onHand,archivedAt:current.archivedAt,lastCountedAt:current.lastCountedAt,revision:3});expect(saved.activeKey).toBeUndefined();expect((await counts()).moves).toBe(before.moves);
+});
+it.each([false,true])('the last archive-state intent accepts the current same state and logs its actual predecessor (restore: %s)',async restore=>{
+ if(restore)await accepted(archive());const originalItem=await item(),first=archive(originalItem,restore),last=archive(originalItem,restore);await accepted(first);const current=await item(),before=await counts();const receipt=await accepted(last,2),saved=await item(),audit=(await db.query<{before_data:StockItem}>('select before_data from public.events where id=$1',[last.id])).rows[0];
+ expect(saved.archivedAt===undefined).toBe(restore);expect(saved.onHand).toBe(current.onHand);expect(saved.revision).toBe(current.revision+1);expect(receipt.results[0].revision).toBe(saved.revision);expect(audit.before_data).toEqual(current);expect((await counts()).moves).toBe(before.moves);
+});
+it('metadata can cross a physical count without clearing its barrier for older relative work',async()=>{
+ const metadata=update(),older=adjust();metadata.input.name='Description after count';await accepted(adjust(seed,'count',17));const counted=await item(),before=await counts();await accepted(metadata,2);
+ expect(await item()).toMatchObject({name:metadata.input.name,onHand:17,lastCountedAt:counted.lastCountedAt});expect((await counts()).moves).toBe(before.moves);expect((await http(1,older)).status).toBe(409);expect((await item()).onHand).toBe(17);
+});
+it('an actual on-hand edit still requires its original revision after a concurrent movement',async()=>{
+ const command=update(seed,18);await accepted(adjust(seed,'received',3));const before=await counts();expect((await http(1,command)).status).toBe(409);expect(await counts()).toEqual(before);expect((await item()).onHand).toBe(23);
+});
+it('a metadata intent cannot claim a future stock revision',async()=>{
+ const command=update();command.revision++;const before=await counts();expect((await http(1,command)).status).toBe(409);expect(await counts()).toEqual(before);expect((await item()).revision).toBe(seed.revision);
+});
+it.each(['quantity','count-history','unit','archive-state','active-key'])('SQL independently rejects coherent %s tampering in a metadata-only proposal',async kind=>{
+ const command=update();await accepted(adjust(seed,'count',17));await accepted(archive(await item()));const prepared=await prepare(command),before=await counts(),current=await item();
+ await expect(finish(prepared,command,records=>{
+  const row=records.find(record=>record.table==='stock_items')!,event=records.find(record=>record.table==='events')!,after=JSON.parse(event.values.after_data as string) as {item:StockItem};
+  if(kind==='quantity'){row.values.on_hand=current.onHand+1;after.item.onHand=current.onHand+1;}
+  else if(kind==='count-history'){row.values.last_counted_at=current.lastCountedAt!+1;after.item.lastCountedAt=current.lastCountedAt!+1;}
+  else if(kind==='unit'){row.values.unit=JSON.stringify('L');after.item.unit='L';}
+  else if(kind==='archive-state'){row.values.archived_at=null;delete after.item.archivedAt;row.values.active_key=stockWritePlan(command).nameKey;after.item.activeKey=seed.activeKey;}
+  else{row.values.active_key=stockWritePlan(command).nameKey;after.item.activeKey=seed.activeKey;}
+  event.values.after_data=JSON.stringify(after);
+ })).rejects.toMatchObject({code:'22023'});
+ expect(await counts()).toEqual(before);expect(await item()).toEqual(current);
+});
 it('an edited physical count records exact decimal variance and its original device time',async()=>{const c=update(seed,18.125);await accepted(c);expect((await item()).onHand).toBe(18.125);expect((await moves()).at(-1)).toMatchObject({id:c.moveId,reason:'count',delta:-1.875,createdAt:c.occurredAt,note:'On hand edited by owner'});});
 it.each(['used','received','count','waste'] as const)('%s reuses exact shared thousandths and preserves original movement notes',async reason=>{const c=adjust(seed,reason,1.125);await accepted(c);expect((await item()).onHand).toBe(reason==='received'?21.125:reason==='count'?1.125:18.875);expect((await moves()).at(-1)).toMatchObject({id:c.moveId,note:literal,source:'manual',reason});});
 it('lost responses replay one original receipt after later stock changes',async()=>{const c=adjust(),first=await accepted(c);await accepted(adjust(await item(),'received',1));expect(await accepted(c)).toEqual(first);expect((await item()).onHand).toBe(19);expect((await http(2,c)).status).toBe(403);expect((await http(1,{...c,change:{...c.change,quantity:3}})).status).toBe(409);});

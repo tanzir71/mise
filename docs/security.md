@@ -1,5 +1,15 @@
 # Deployment credentials
 
+The [saved stock metadata boundary](m31-stock-metadata.md) preserves current
+quantities, immutable units, physical-count history and archive state while
+admitting original description intents. The private finalizer independently
+checks proposed rows and complete audits and rechecks live access after the
+outlet lock. The retrieved JWT-verified bundle matches the reviewed candidate;
+all 64 application tables force RLS and all 18 actual anonymous probes return
+401 after a valid-key positive control. Advisors have no warnings or errors.
+Auth settings and secrets are unchanged. Actual deployment details and
+credentials remain private.
+
 The [saved invoice review](m31-purchase-review.md) keeps deliberate choices and
 original complete source in a token-free native journal. Actual review tokens
 remain ephemeral; neither deployment values nor Auth sessions enter that journal

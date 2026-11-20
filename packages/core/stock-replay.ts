@@ -1,6 +1,6 @@
 import {decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
 import {parseStockCommand,stockWritePlan,type StockCommand} from './stock-commands';
-import {activeStockMoves,adjustStockCommand,archiveStockItemCommand,saveStockItemCommand,stockBatchCommand,undoStockMoveCommand,type StockChange,type StockIds,type StockWriteContext} from './stock';
+import {activeStockMoves,adjustStockCommand,setStockArchiveCommand,saveStockItemCommand,saveStockMetadataCommand,stockBatchCommand,undoStockMoveCommand,type StockChange,type StockIds,type StockWriteContext} from './stock';
 import type {Business,Outlet,StockItem,StockMove,Supplier} from './models';
 export class StockMutationInvalid extends Error {}
 export class StockMutationConflict extends Error {}
@@ -16,20 +16,20 @@ export function replayStockRecords(value:unknown,c:StockCommand):CloudRecord[]{
  if(business.id!==value.businessId||outlet.id!==c.outletId||outlet.businessId!==business.id||[...items,...moves,...suppliers].some(r=>r.outletId!==outlet.id)||moves.some(m=>!plan.rows.some(p=>p.itemId===m.stockItemId)))throw new Error('Invalid stock scope.');
  const context:StockWriteContext={setup:{business,outlet,owner:{id:value.actorId,businessId:business.id,active:true,outletIds:[outlet.id]}},items,moves,suppliers};
  const newId:StockIds=(kind,itemId)=>{if(kind==='item'&&c.type==='stock.create')return c.stockItemId;if(kind==='batch'&&plan.batchId)return plan.batchId;const p=plan.rows.find(r=>r.itemId===itemId);if(p&&kind==='event')return p.eventId;if(p&&kind==='move'&&p.moveId)return p.moveId;throw new Error('Missing planned stock ID.');};
- const reviewed=(itemId:string,revision:number,additive=false)=>{const before=items.find(i=>i.id===itemId);if(!before)throw new StockMutationConflict('The stock item is unavailable. Keep the retained intent.');if(before.revision<revision||!additive&&before.revision!==revision||additive&&activeStockMoves(moves).some(m=>m.stockItemId===itemId&&m.reason==='count'&&m.revision>revision))throw new StockMutationConflict('Review the latest stock and physical count before retrying.');return before;};
+ const reviewed=(itemId:string,revision:number,mode:'strict'|'relative'|'metadata'='strict')=>{const before=items.find(i=>i.id===itemId);if(!before)throw new StockMutationConflict('The stock item is unavailable. Keep the retained intent.');if(before.revision<revision||mode==='strict'&&before.revision!==revision||mode==='relative'&&activeStockMoves(moves).some(m=>m.stockItemId===itemId&&m.reason==='count'&&m.revision>revision))throw new StockMutationConflict('Review the latest stock and physical count before retrying.');return before;};
  let change:StockChange;
  try{
   if(c.occurredAt>value.at+300000)throw new Error('Check the device clock.');
   if(c.type==='stock.create'||c.type==='stock.update'){
-   const before=c.type==='stock.update'?reviewed(c.stockItemId,c.revision):null;
-   change=saveStockItemCommand({...c.input,lowAt:c.input.lowAt??undefined,supplierId:c.input.supplierId??undefined},context,before,before?.revision??0,c.occurredAt,newId);
-  }else if(c.type==='stock.archive'||c.type==='stock.restore')change=archiveStockItemCommand(reviewed(c.stockItemId,c.revision),c.type==='stock.archive',c.revision,context,c.occurredAt,newId);
+   const before=c.type==='stock.update'?reviewed(c.stockItemId,c.revision,c.moveId===null?'metadata':'strict'):null,input={...c.input,lowAt:c.input.lowAt??undefined,supplierId:c.input.supplierId??undefined};
+   change=c.type==='stock.update'&&c.moveId===null&&before?saveStockMetadataCommand(input,before,context,c.occurredAt,newId):saveStockItemCommand(input,context,before,before?.revision??0,c.occurredAt,newId);
+  }else if(c.type==='stock.archive'||c.type==='stock.restore')change=setStockArchiveCommand(reviewed(c.stockItemId,c.revision,'metadata'),c.type==='stock.archive',context,c.occurredAt,newId);
   else if(c.type==='stock.adjust'){
-   const before=reviewed(c.change.id,c.change.revision,c.change.reason!=='count');change=adjustStockCommand({...c.change,revision:before.revision},context,c.occurredAt,undefined,newId);
+   const before=reviewed(c.change.id,c.change.revision,c.change.reason!=='count'?'relative':'strict');change=adjustStockCommand({...c.change,revision:before.revision},context,c.occurredAt,undefined,newId);
   }else if(c.type==='stock.batch'){
-   const inputs=c.changes.map(d=>({...d,revision:reviewed(d.id,d.revision,d.reason!=='count').revision}));change=stockBatchCommand(inputs,context,c.occurredAt,c.count,newId);
+   const inputs=c.changes.map(d=>({...d,revision:reviewed(d.id,d.revision,d.reason!=='count'?'relative':'strict').revision}));change=stockBatchCommand(inputs,context,c.occurredAt,c.count,newId);
   }else if(c.type==='stock.undo'){
-   const before=reviewed(c.stockItemId,c.revision,true),original=moves.find(m=>m.id===c.undoMoveId);if(!original||original.stockItemId!==before.id||c.occurredAt<original.createdAt)throw new Error('Choose the original movement.');
+   const before=reviewed(c.stockItemId,c.revision,'relative'),original=moves.find(m=>m.id===c.undoMoveId);if(!original||original.stockItemId!==before.id||c.occurredAt<original.createdAt)throw new Error('Choose the original movement.');
    change=undoStockMoveCommand(original,before.revision,context,value.at,newId);
   }else throw new Error('Unsupported stock action');
  }catch(error){if(error instanceof StockMutationConflict)throw error;throw new StockMutationInvalid('Check the stock details, quantity, supplier, original movement or device time.');}
