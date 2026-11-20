@@ -565,6 +565,7 @@ const api = {
       }),
     ),
   captureImage: () => use(db=>db.captureInbox({title:'Original offline capture',text:'Literal\0\ud800',files:[new File([new Uint8Array(inboxPng)],'তালিকা.png',{type:'image/png'})]})),
+  imageHashes:()=>use(async db=>Promise.all((await db.inboxItems.toArray()).flatMap(item=>item.images.map(async image=>({id:image.id,bytes:image.blob.size,sha256:Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await image.blob.arrayBuffer())),byte=>byte.toString(16).padStart(2,'0')).join('')}))))),
   deliver: () =>
     use(async (db, receiver) => deliverCommands(db, await wire(receiver))),
   deliverWithReceiptSwitch: (config: Config) =>
@@ -627,6 +628,7 @@ const api = {
     return {customerId:customer.id,accountId:account.id,entryId:entry.id};
   }),
   setOriginalKhataLimit:(accountId:string,limit:number)=>use(async db=>{const account=await db.creditAccounts.get(accountId);if(!account)throw Error('Choose the original account');return db.saveCreditTerms(account.customerId,{allowed:account.allowed,limit,reminder:account.reminder},account.id);}),
+  editOriginalCustomer:(customerId:string,name:string,limit:number|null)=>use(async db=>{const customer=await db.customers.get(customerId),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customerId);if(!customer||!account)throw Error('Choose the original customer and khata');return db.saveCustomer({name,nickname:customer.nickname,phone:customer.phone??'',address:customer.address,notes:customer.notes,tags:customer.tags},{id:customerId,...(limit===null?{}:{credit:{allowed:account.allowed,limit,reminder:account.reminder}})});}),
   undoOriginalPurchase:(id:string)=>use(db=>db.undoPurchase(id)),
   setCurrency:(currency:string)=>use(async db=>{const setup=await db.setup();if(!setup)throw Error('Choose the original shop');return db.saveSetup({businessType:setup.business.businessType,marketCode:setup.business.marketCode,name:setup.business.name,phone:setup.owner.phone??'',outletName:setup.outlet.name,address:setup.outlet.address,language:setup.business.languages.length===2?'both':setup.business.languages[0],timezone:setup.outlet.timezone,currency});}),
   actionReviews: () => use(async db=>(await readLocalActionReviews(db)).map(({review,command,entry})=>({review,command,entryId:entry.id,changes:entry.changes,receipts:entry.receipts}))),

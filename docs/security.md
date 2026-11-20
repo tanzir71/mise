@@ -1,5 +1,15 @@
 # Deployment credentials
 
+The [original customer account boundary](m31-customer-account.md) selects only an
+existing device-named khata in the authorized customer and outlet. A profile
+currency change grants no new account or table access. Contact-only updates
+write no financial rows; terms retain their saved unit. Connection values and
+credentials stay in ignored private inputs and the server secret manager.
+The deployed commands source matches its reviewed bundle with JWT verification.
+All 62 tables retain forced RLS; ten actual anonymous probes return 401 after a
+valid-key positive control. Security and performance advisors report no warnings
+or errors. No Auth setting or server secret is changed.
+
 The [original customer credit currency boundary](m31-customer-currency.md) reads
 only the unit and scoped identities from original changed khata/opening images.
 It adds no connection values, credentials, grants or stored format. Grouped

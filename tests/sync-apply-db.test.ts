@@ -17,6 +17,15 @@ import {creditBalance,recordCreditPaymentCommand} from '../packages/core/khata';
 const databases:Dexie[]=[];
 afterEach(async()=>{await Promise.all(databases.splice(0).map(db=>db.delete()));});
 async function boot(manager=false){const f=await joinedApplyFixture(manager);databases.push(f.db);return f;}
+it.each([false,true])('an original customer update projects over a canonical USD profile with the existing BDT account (terms: %s)',async terms=>{
+ const f=await boot(),customer=f.backup.tables.customers[0],account=f.backup.tables.creditAccounts.find(a=>a.customerId===customer.id)!;
+ await f.db.saveCustomer({name:'Original contact edit',nickname:customer.nickname,phone:customer.phone??'',address:customer.address,notes:customer.notes,tags:customer.tags},{id:customer.id,...(terms?{credit:{allowed:account.allowed,limit:75000,reminder:account.reminder}}:{})});
+ const queue=await f.db.outbox.toArray(),before=await f.db.readBackup(),input=await f.stage([{table:'outlets',row:{...f.backup.tables.outlets[0],currency:'USD'}}]);
+ const result=await applyCanonicalDownload(f.db,input,{get:async source=>coverageFacts(source)},f.refresh);
+ expect(result.pending).toBe(1);expect((await f.db.setup())!.outlet.currency).toBe('USD');expect(await f.db.customers.get(customer.id)).toMatchObject({name:'Original contact edit'});
+ const projected=await f.db.creditAccounts.toArray(),original=before.tables.creditAccounts.find(a=>a.id===account.id)!;expect(projected.map(a=>terms&&a.id===account.id?{...a,updatedAt:original.updatedAt}:a)).toEqual(before.tables.creditAccounts);if(terms)expect(projected.find(a=>a.id===account.id)!.updatedAt).toBeGreaterThanOrEqual(original.updatedAt);
+ expect(await f.db.creditEntries.toArray()).toEqual(before.tables.creditEntries);expect(await f.db.outbox.toArray()).toEqual(queue);expect(queue[0].receipts).toEqual([]);expect(await f.db.syncApplications.count()).toBe(1);
+});
 it('a canonical USD profile cannot reinterpret an original BDT opening balance or advance its cursor',async()=>{
  const f=await boot(),customer=await f.db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Keep original opening',tags:[]},{opening:{amount:12345,occurredAt:1}});
  const before=backupToken(await f.db.readBackup()),queue=await f.db.outbox.toArray(),base=await f.db.syncCanonical.toArray(),operator=await f.db.operatorState.toArray(),binding=await f.db.cloudState.get('binding');

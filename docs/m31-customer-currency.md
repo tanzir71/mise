@@ -24,8 +24,9 @@ SQL/bundle/native checks pass all 137 cases, and canonical/scope checks pass all
 association; it now supplies that explicit association, preserving production
 snapshot completeness. Two historical-setting fixtures now explicitly use their
 actual saved USD unit. Ordinary contact-only edits and historical-account
-settings remain covered. Historical contact-profile/account selection under a
-changed shop currency still needs a separate verification pass.
+settings remain covered. The subsequent [original customer account pass](m31-customer-account.md)
+verifies contact/terms selection under a changed shop currency, including a
+competing current-unit khata and two-browser offline convergence.
 
 Final lint and type checks pass, including 142 Astro files without diagnostics.
 The first complete unit run passes all 2,689 tests across 139 files. Both `/` and

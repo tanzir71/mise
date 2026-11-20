@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
+- Offline customer contact and terms edits retain their existing khata identity after a shop currency change. Contact-only edits write no account or ledger entry; original-unit limits preserve other currency accounts. Scoped admission, fresh access checks and immutable source guards remain enforced.
+
 - Offline customer opening balances and credit limits keep their original khata currency during delivery, canonical sync and outlet recovery. Existing historical-account settings remain valid; contact-only edits cannot silently create an account in a different unit.
 
 - Offline supplier invoices keep their original currency during delivery, canonical sync and outlet recovery. A changed shop currency cannot reinterpret saved prices; historical invoice undo and genuine completed receipts retain their original unit.

@@ -36,6 +36,57 @@ function edit():Extract<CustomerCommand,{credit:unknown}>{const c=create();retur
 function archive(restore=false):CustomerCommand{return {id:newInboxId(),type:restore?'customer.restore':'customer.archive',customerId:customer.id,outletId:source.snapshot.outlet.id};}
 function settings():CustomerCommand{return {id:newInboxId(),type:'khata.settings',customerId:customer.id,outletId:source.snapshot.outlet.id,accountId:account.id,ids:plannedIds(account.id),input:terms()};}
 async function counts(){return (await db.query<{customers:number;accounts:number;entries:number;events:number;receipts:number}>("select (select count(*)::int from public.customers) customers,(select count(*)::int from public.credit_accounts) accounts,(select count(*)::int from public.credit_entries) entries,(select count(*)::int from public.events) events,(select count(*)::int from private.shop_command_receipts) receipts")).rows[0];}
+it('an original contact-only edit keeps its BDT account after a later USD profile without creating money',async()=>{
+ const c={...edit(),credit:null,opening:null};c.input.name='Last admitted original contact';const original=JSON.stringify(c),before=await counts(),accountBefore=(await db.query('select * from public.credit_accounts where id=$1',[account.id])).rows;
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);
+  const response=await http(1,c,undefined,null);expect(response.status,lastError).toBe(200);
+  expect((await db.query('select * from public.credit_accounts where id=$1',[account.id])).rows).toEqual(accountBefore);
+  const after=await counts();expect(after.accounts).toBe(before.accounts);expect(after.entries).toBe(before.entries);expect(after.events).toBe(before.events+1);expect(after.receipts).toBe(before.receipts+1);expect(JSON.stringify(c)).toBe(original);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
+it('an original customer terms edit selects its BDT account even when a different USD khata exists',async()=>{
+ const c=edit(),usd={...account,id:newInboxId(),currency:'USD',limit:90000};c.credit={...terms(),limit:75000};const original=JSON.stringify(c);
+ await insert([encodeCommandRecord('creditAccounts',usd,customer.businessId)]);const usdBefore=(await db.query('select * from public.credit_accounts where id=$1',[usd.id])).rows,before=await counts();
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);
+  expect((await http(1,c,undefined,'USD')).status).toBe(409);expect(await counts()).toEqual(before);
+  const accepted=await http(1,c);expect(accepted.status,lastError).toBe(200);const receipt=await accepted.json();
+  expect(receipt.accountId).toBe(account.id);expect((await db.query('select currency,credit_limit from public.credit_accounts where id=$1',[account.id])).rows).toEqual([{currency:'BDT',credit_limit:75000}]);
+  expect((await db.query('select * from public.credit_accounts where id=$1',[usd.id])).rows).toEqual(usdBefore);expect((await counts()).entries).toBe(before.entries);expect((await counts()).accounts).toBe(before.accounts);
+  expect(await (await http(1,c,undefined,null)).json()).toEqual(receipt);expect(JSON.stringify(c)).toBe(original);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
+it('the last admitted contact edit wins after a currency change while the existing khata stays byte-for-byte unchanged',async()=>{
+ const first={...edit(),credit:null,opening:null},last={...edit(),credit:null,opening:null};first.input.name='First contact';last.input.name='Last contact';const accountBefore=(await db.query('select * from public.credit_accounts where id=$1',[account.id])).rows;
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[first.outletId]);
+  expect((await http(2,first,undefined,null)).status,lastError).toBe(200);expect((await http(1,last,undefined,null)).status,lastError).toBe(200);
+  expect((await db.query<{name:string}>('select name from public.customers where id=$1',[customer.id])).rows[0].name).toBe('Last contact');expect((await db.query('select * from public.credit_accounts where id=$1',[account.id])).rows).toEqual(accountBefore);
+  expect(await counts()).toEqual({customers:2,accounts:1,entries:0,events:2,receipts:2});
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[first.outletId]);}
+});
+it.each(['customer','outlet','business'] as const)('an original account ID from another %s cannot select or change its khata',async kind=>{
+ const otherCustomer=kind==='business'?saveCustomerCommand({...profile(),phone:''},foreign.snapshot,[],null,1).customer:kind==='customer'?branchCustomer:customer;
+ const outlet=kind==='business'?foreign.snapshot.outlet:kind==='outlet'?branch.snapshot.outlet:source.snapshot.outlet;
+ if(kind==='business')await insert([encodeCommandRecord('customers',otherCustomer,otherCustomer.businessId)]);
+ const other={...account,id:newInboxId(),outletId:outlet.id,customerId:otherCustomer.id};await db.query('insert into public.customer_outlets values($1,$2,$3)',[outlet.businessId,outlet.id,otherCustomer.id]);await insert([encodeCommandRecord('creditAccounts',other,outlet.businessId)]);
+ const c={...edit(),credit:null,opening:null};c.ids.accountId=other.id;const before=await counts(),accountsBefore=(await db.query('select * from public.credit_accounts order by id')).rows;
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);let finishes=0;const response=await http(1,c,async()=>{finishes++;},null);
+  expect([403,409]).toContain(response.status);expect(finishes).toBe(0);expect(await counts()).toEqual(before);expect((await db.query('select * from public.credit_accounts order by id')).rows).toEqual(accountsBefore);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
+it('an update cannot bypass its device ID plan with the public explicit-account parameter',async()=>{
+ const c=edit();await expect(asRole(1,'authenticated','select public.prepare_customer_intent($1,$2,$3,$4,$5,$6,$7,$8)',[c.id,newInboxId(),c.type,c.customerId,c.outletId,account.id,await customerFingerprint(c),JSON.stringify(c.ids)])).rejects.toMatchObject({code:'22023'});expect((await counts()).receipts).toBe(0);
+});
+it('a historical-account preparation still rechecks manager outlet revocation before completion',async()=>{
+ const c={...edit(),credit:null,opening:null},before=await counts();
+ try{
+  await db.query("update public.outlets set currency='USD' where id=$1",[c.outletId]);
+  expect((await http(2,c,async()=>{await db.query('delete from public.member_outlets where member_id=$1',[actors.find(a=>a.n===2)!.id]);},null)).status).toBe(403);expect(await counts()).toEqual(before);
+ }finally{await db.query("update public.outlets set currency='BDT' where id=$1",[c.outletId]);}
+});
 it('does not reinterpret an original BDT opening balance and credit limit under a later USD profile',async()=>{
  const c=create(),original=JSON.stringify(c),before=await counts();
  try{

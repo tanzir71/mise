@@ -1,0 +1,181 @@
+{
+  "scope": "Original customer contact/terms account binding after a shop currency change",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "initialSqlRegressionReproduced": true,
+  "local": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 142,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "focusedUnit": {
+      "files": 3,
+      "passed": 115,
+      "seconds": 31.27
+    },
+    "unit": {
+      "files": 139,
+      "passed": 2699,
+      "seconds": 605.66,
+      "normalWorkers": 2,
+      "firstCompleteAttemptPassed": true,
+      "limitsChanged": false
+    },
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "focusedBrowser": {
+      "passed": 12,
+      "minutes": 1.5,
+      "normalWorkers": 2
+    },
+    "browser": {
+      "total": 468,
+      "passed": 468,
+      "normalWorkers": 2,
+      "minutes": 18.3,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "actualSqlHttp": true,
+      "actualIndexedDb": true,
+      "completeImageHashesCompared": true,
+      "offlineReload": true,
+      "sourceCommandsAndChangesPreserved": true,
+      "syntheticAuthStorageRealtime": true
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T16:32:32.915Z",
+      "comparisons": 278,
+      "completeMetrics": true,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": "qa/report.html",
+      "cloneLocal": true,
+      "reviewedScreens": [
+        "qa/screens/m13-customer-screen-390.png",
+        "qa/screens/m31-recovery-phone-review-390.png",
+        "qa/screens/m31-sync-controls-desktop-screen-1440.png"
+      ],
+      "seriousCriticalAxe": 0
+    },
+    "fixtureNotes": [
+      "Adversarial accounts include their required customer_outlet association, so denial checks reach admission.",
+      "Terms projections use the current rebase timestamp; original queued commands and images remain exact."
+    ]
+  },
+  "formatsChanged": false,
+  "cloudFlagsEnabled": false,
+  "workflowsEnabled": false,
+  "pagesPublicationHeld": true,
+  "bundle": {
+    "ok": true,
+    "bytes": 466672,
+    "sha256": "fbc4ec78fcc0576258d95c9af96030a57323c0dbed450bd55a90b34d75c1b669",
+    "sourceFiles": 90,
+    "privateValuesCompared": 8,
+    "findings": 0,
+    "changedSources": 0
+  },
+  "checkedAt": "2026-11-20T16:36:03.130Z",
+  "hosted": {
+    "checkedAt": "2026-11-20T16:33:53.420Z",
+    "version": 29,
+    "status": "ACTIVE",
+    "verifyJwt": true,
+    "exactSourceMatches": true,
+    "bundleBytes": 466672,
+    "bundleSha256": "fbc4ec78fcc0576258d95c9af96030a57323c0dbed450bd55a90b34d75c1b669",
+    "sourceFiles": 90,
+    "migrations": 42,
+    "functions": 7,
+    "rls": {
+      "application_tables": 62,
+      "forced_rls": 62,
+      "anonymous_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0
+    },
+    "security": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performance": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "positiveControl": {
+      "name": "publishable-key",
+      "status": 200
+    },
+    "unauthenticatedChecks": [
+      {
+        "name": "tables",
+        "status": 401
+      },
+      {
+        "name": "commands",
+        "status": 401
+      },
+      {
+        "name": "invoice",
+        "status": 401
+      },
+      {
+        "name": "customer",
+        "status": 401
+      },
+      {
+        "name": "customer-update",
+        "status": 401
+      },
+      {
+        "name": "money-review",
+        "status": 401
+      },
+      {
+        "name": "upload",
+        "status": 401
+      },
+      {
+        "name": "images",
+        "status": 401
+      },
+      {
+        "name": "sync-read",
+        "status": 401
+      },
+      {
+        "name": "money-admission",
+        "status": 401
+      }
+    ],
+    "authConfigurationChanged": false,
+    "serverSecretsChanged": false,
+    "realAccountsCreated": false,
+    "smsSent": false,
+    "genuinePhoneProviderAcceptance": false
+  },
+  "privacy": {
+    "knownValuesChecked": 10,
+    "credentials": 0,
+    "currentDeploymentReferences": 0,
+    "olderNonsecretHistoricalFindings": 22,
+    "newHistoricalReferences": 0,
+    "coverageGaps": 0,
+    "historyPolicyChanged": false,
+    "hooksEnabled": true
+  }
+}

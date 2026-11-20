@@ -26,8 +26,12 @@ export function replayCustomerRecords(value:unknown,c:CustomerCommand):CloudReco
   let records:CloudRecord[]=[];
   try{
     if(c.type==='customer.create'||c.type==='customer.update'){
-      const existing=accounts.find(a=>a.currency===outlet.currency);if(existing&&existing.id!==c.ids.accountId)throw new Error('Khata identity changed.');
-      const result=customerSaveMutation(c.input,{...(c.type==='customer.update'?{id:c.customerId}:{}),...(c.credit?{credit:c.credit}:{}),...(c.opening?{opening:c.opening}:{})},{setup,customers:customer?[customer]:[],accounts},value.at,mutationId);
+      const original=c.type==='customer.update'?accounts.find(a=>a.id===c.ids.accountId):undefined;
+      const existing=original??accounts.find(a=>a.currency===outlet.currency);if(existing&&existing.id!==c.ids.accountId)throw new Error('Khata identity changed.');
+      // An existing device-selected khata keeps its unit after a profile change.
+      // Clone only the calculation context; the actual profile and source stay intact.
+      const accountSetup=original?{...setup,outlet:{...outlet,currency:original.currency}}:setup;
+      const result=customerSaveMutation(c.input,{...(c.type==='customer.update'?{id:c.customerId}:{}),...(c.credit?{credit:c.credit}:{}),...(c.opening?{opening:c.opening}:{})},{setup:accountSetup,customers:customer?[customer]:[],accounts},value.at,mutationId);
       records.push(encodeCommandRecord('customers',result.customer,business.id));
       if(result.account)records.push(encodeCommandRecord('creditAccounts',result.account,business.id));
       if(result.entry)records.push(encodeCommandRecord('creditEntries',result.entry,business.id));

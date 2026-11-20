@@ -19,6 +19,20 @@ function expectConvergence(manager:State,owner:State,ownerId:string){
  const {members:managerMembers,...managerTables}=manager.backup.tables,{members:ownerMembers,...ownerTables}=owner.backup.tables;
  expect(managerTables).toEqual(ownerTables);expect(managerMembers).toEqual(ownerMembers.map(member=>{if(member.id!==ownerId)return member;const historical={...member,active:false};delete historical.phone;return historical;}));
 }
+for(const terms of [false,true])test(`an offline customer ${terms?'terms and contact':'contact-only'} edit converges after a later USD profile without replacing its BDT account`,async({page,browser})=>{
+ test.setTimeout(120000);
+ const server=await startConvergenceServer(),context=await browser.newContext({baseURL:test.info().project.use.baseURL}),manager=await context.newPage();
+ try{
+  await initialize(page,server.config(1));await initialize(manager,server.config(2));const initial=await inspect(manager),account=initial.backup.tables.creditAccounts.find(a=>a.currency==='BDT')!,before=await server.customerMoneyState(account.customerId);await context.setOffline(true);
+  await manager.evaluate(({id,limit})=>window.miseSyncApplyTest.editOriginalCustomer(id,'Manager original contact · বাংলা',limit),{id:account.customerId,limit:terms?75000:null});await manager.evaluate(()=>window.miseSyncApplyTest.captureImage());const original=await inspect(manager),originalImages=await manager.evaluate(()=>window.miseSyncApplyTest.imageHashes()),command=original.queue[0].commands[0];expect(command.type).toBe('customer.update');expect(originalImages.length).toBeGreaterThan(0);
+  await page.evaluate(id=>window.miseSyncApplyTest.editOriginalCustomer(id,'Owner earlier contact',null),account.customerId);await page.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));await page.evaluate(()=>window.miseSyncApplyTest.deliver());await page.evaluate(()=>window.miseSyncApplyTest.pull());await context.setOffline(false);
+  await manager.evaluate(()=>window.miseSyncApplyTest.cycle());await page.evaluate(()=>window.miseSyncApplyTest.pull());const accepted=await inspect(manager);
+  expect(accepted.queue.every(row=>row.status==='accepted')).toBe(true);expect(accepted.actionReviews).toEqual([]);expect(accepted.queue.map(row=>row.commands)).toEqual(original.queue.map(row=>row.commands));expect(accepted.queue.map(row=>row.changes)).toEqual(original.queue.map(row=>row.changes));
+  expect(accepted.backup.tables.customers.find(c=>c.id===account.customerId)?.name).toBe('Manager original contact · বাংলা');expect(accepted.backup.tables.creditAccounts.find(a=>a.id===account.id)).toMatchObject({currency:'BDT',limit:terms?75000:account.limit});expect(accepted.backup.tables.creditAccounts).toHaveLength(initial.backup.tables.creditAccounts.length);expect(accepted.backup.tables.creditEntries).toEqual(initial.backup.tables.creditEntries);expect(await server.customerMoneyState(account.customerId)).toEqual(before);expect(accepted.backup.tables.outlets.find(o=>o.id===account.outletId)?.currency).toBe('USD');
+  expect(accepted.imageSizes).toEqual(original.imageSizes);expect(await manager.evaluate(()=>window.miseSyncApplyTest.imageHashes())).toEqual(originalImages);expectConvergence(accepted,await inspect(page),server.config(1).actorId);expect(accepted.backup.tables.events.filter(e=>e.id===command.id&&e.command==='customer.update')).toHaveLength(1);await manager.evaluate(()=>window.miseSyncApplyTest.cycle());expect((await inspect(manager)).queue).toEqual(accepted.queue);
+  await context.setOffline(true);await manager.reload();await installSyncApplyFixture(manager);const reopened=await inspect(manager);expect(reopened.backup.tables).toEqual(accepted.backup.tables);expect(reopened.queue).toEqual(accepted.queue);expect(reopened.imageSizes).toEqual(original.imageSizes);expect(await manager.evaluate(()=>window.miseSyncApplyTest.imageHashes())).toEqual(originalImages);
+ }finally{await context.close();await server.close();}
+});
 
 test('an offline BDT opening balance and limit survive a USD profile change with the original images and an actual offline backup',async({page,browser})=>{
  test.setTimeout(120000);
