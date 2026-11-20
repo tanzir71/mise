@@ -12,7 +12,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- Sync now retains an account-bound observation of an exact rejected action, its original queue source and accepted receipt prefix. Reviews survive offline reload without changing money, source images or commands. A genuine later receipt confirms the observation atomically; server-authorized financial resolution and its interface remain unfinished, and cloud sync stays off by default.
+- M31 order conflicts now have a current-value review protocol and distinct server-authorized withdrawal or replacement receipts. Replacement retains the original financial IDs and physical time; lost replies recover the actual outcome, and canonical audit proof is required before retiring the original projection. Native two-browser checks preserve later cash, full sources and images. The review interface and other financial families remain unfinished; cloud sync stays off by default.
+
+- Sync now retains an account-bound observation of an exact rejected action, its original queue source and accepted receipt prefix. Reviews survive offline reload without changing money, source images or commands. A genuine later receipt confirms the observation atomically; the financial review interface remains unfinished, and cloud sync stays off by default.
 
 - M31 setup and outlet joining now show the count of shares already saved on an empty device. A real offline service-worker capture survives one phone verification and manager admission, then can be explicitly claimed before the first canonical application; original images and offline cash converge without duplicate money or another upload. Cloud and share-target flags remain default off.
 

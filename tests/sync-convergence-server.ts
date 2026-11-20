@@ -7,6 +7,8 @@ import {orderBodyHeader} from '../packages/core/order-commands';
 import {handoffBodyHeader} from '../packages/core/handoff-commands';
 import {inboxBodyHeader} from '../packages/core/inbox-commands';
 import {linkBodyHeader} from '../packages/core/link-commands';
+import {commandReviewHeader} from '../packages/core/command-resolution';
+import {createOrderReviewHandler,createOrderReviewStore} from '../supabase/functions/_shared/order-review';
 import { resolve, join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -147,6 +149,10 @@ export async function startConvergenceServer(
     'admit_order_write',
     'prepare_order_write',
     'finish_order_write',
+    'inspect_order_outcome',
+    'prepare_order_review',
+    'read_order_review',
+    'finish_order_review',
     'prepare_closing_write',
     'finish_closing_write',
     'prepare_settings_write',
@@ -325,6 +331,7 @@ export async function startConvergenceServer(
         { serviceKey: 'sb_secret_test_only' },
       ),
     }),
+    reviews=createOrderReviewHandler({origins,store:createOrderReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     upload = createInitialUploadHandler({
       origins,
       store: createInitialUploadStore(
@@ -413,7 +420,7 @@ export async function startConvergenceServer(
         'Access-Control-Allow-Origin': 'http://127.0.0.1:4321',
         'Access-Control-Allow-Methods': 'POST,GET,PUT,OPTIONS',
         'Access-Control-Allow-Headers':
-          ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader].join(','),
+          ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader,commandReviewHeader].join(','),
       };
       if (req.method === 'OPTIONS') {
         res.writeHead(204, cors).end();
@@ -447,7 +454,7 @@ export async function startConvergenceServer(
         }
       } else if (path === '/functions/v1/commands') {
         calls.commands++;
-        response = await commands(request);
+        response = await (new URL(request.url).searchParams.has('review')?reviews:commands)(request);
         if (holdCommand && response.ok) {
           holdCommand = false;
           await new Promise<void>((resolve) => {

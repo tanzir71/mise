@@ -12,6 +12,7 @@ import {isInboxCommandType,parseInboxCommand,parseInboxCommandReceipt,type Inbox
 import {isSettingsCommandType,parseSettingsCommand,parseSettingsCommandReceipt,type SettingsCommand,type SettingsCommandReceipt} from './settings-commands';
 import {parseProfileCommand,parseProfileCommandReceipt,type ProfileCommand,type ProfileCommandReceipt} from './profile-commands';
 import {isLinkCommandType,parseLinkCommand,parseLinkCommandReceipt,type LinkCommand,type LinkCommandReceipt} from './link-commands';
+import {parseCommandResolutionReceipt,type CommandResolutionReceipt} from './command-resolution';
 /** Reserve every possible companion ID once on the originating device. */
 export interface CustomerRecordIds {accountId:string;accountEventId:string;openingEntryId:string;openingEventId:string}
 export type CustomerCommand=
@@ -20,7 +21,7 @@ export type CustomerCommand=
   |{id:string;type:'khata.settings';customerId:string;outletId:string;accountId:string|null;input:CreditTermsInput;ids:CustomerRecordIds};
 export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand|InboxCommand|SettingsCommand|ProfileCommand|LinkCommand|SupplierMessageCommand;
 export interface CustomerCommandReceipt {id:string;type:CustomerCommand['type'];customerId:string;outletId:string;accountId:string|null;accountEventId:string|null;entryId:string|null;openingEventId:string|null;at:number;customerUpdatedAt:number;accountUpdatedAt:number|null}
-export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt;
+export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt|CommandResolutionReceipt;
 export function isSupplierMessageCommand(c:ShopCommand):c is SupplierMessageCommand{return c.type==='supplier-message.record';}
 export function isLinkCommand(c:ShopCommand):c is LinkCommand{return isLinkCommandType(c.type);}
 export function isProfileCommand(c:ShopCommand):c is ProfileCommand{return c.type==='setup.update';}
@@ -71,6 +72,10 @@ export function parseShopCommand(v:unknown):ShopCommand {
   throw new Error('Choose a supported customer action and its exact fields.');
 }
 export function parseShopCommandReceipt(v:unknown,c:ShopCommand):ShopCommandReceipt {
+  if(object(v)&&v.type==='command.resolved'){
+    if(!isOrderCommand(c))throw new Error('This resolution does not match the original command family.');
+    return parseCommandResolutionReceipt(v,c);
+  }
   if(isSupplierMessageCommand(c))return parseSupplierMessageCommandReceipt(v,c);
   if(isLinkCommand(c))return parseLinkCommandReceipt(v,c);
   if(isProfileCommand(c))return parseProfileCommandReceipt(v,c);

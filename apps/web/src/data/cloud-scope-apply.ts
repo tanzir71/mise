@@ -11,6 +11,7 @@ import {shopCommandFingerprint,syncCoverageLimit,type SyncCoverageIntent,type Lo
 import {parseScopeRecoverySession,scopeRecoveryHash,sameRecoveryIdentity,ScopeRecoveryError,type ScopeRecoverySession,type ScopeRecoveryAdmission} from '@mise/core/scope-recovery';
 import {readCanonicalState,assertCanonicalState,type CanonicalState} from './cloud-canonical-state';
 import {readRecoveryWorkingSource,assertRecoveryWorkingCoverage,type Source} from './cloud-sync-apply';
+import {assertCanonicalResolutions} from './command-resolution';
 import {readVerifiedSyncRecords,assertSyncDownloadContext} from './cloud-sync-journal';
 import {readVerifiedSyncImages} from './cloud-sync-images';
 import {downloadSyncCoverage,type SyncCoverageRemote} from './cloud-sync-coverage';
@@ -63,6 +64,7 @@ export async function prepareScopeRecoveryReview(db:MiseDatabase,value:ScopeReco
  }
  for(const id of committed)if(!covered.has(id))throw new ScopeRecoveryError();
  const images=await readVerifiedSyncImages(db,state.id,session.target,access.signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,null);
+ assertCanonicalResolutions(source.portable,snapshot.backup.tables.events,new Set(covered.keys()));
  let working=structuredClone(snapshot.backup);const times=new Map(source.portable.flatMap(row=>row.commands.map(c=>[c.id,row.at] as const))),pending=commands.filter(c=>!covered.has(c.id));
  for(const command of pending){active(access);working=await replayPendingIntent(working,command,source.operator.actorId,state.window.createdAt,source.working,times.get(command.id));}
  for(const item of source.working.tables.inboxItems.filter(row=>row.outletId===null)){if(working.tables.inboxItems.some(row=>row.id===item.id))throw new ScopeRecoveryError();working.tables.inboxItems.push(structuredClone(item));}

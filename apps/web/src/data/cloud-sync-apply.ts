@@ -21,6 +21,7 @@ import {downloadSyncCoverage,type SyncCoverageRemote} from './cloud-sync-coverag
 import {parseLocalOutboxEntry,assertLocalUploadCoverage} from './local-outbox';
 import {prepareCanonicalWrites,withCanonicalWrites,assertCanonicalTransaction,type CanonicalRowChange} from './canonical-writes';
 import {isLocalInboxRetention} from '@mise/core/local-inbox';
+import {assertResolutionSources,assertCanonicalResolutions} from './command-resolution';
 
 export interface ApplyCanonicalInput {readId:string;target:SyncDownloadTarget;expectedOperatorRevision:number;authKey:string}
 export interface AppliedCanonical {readId:string;canonicalHash:string;applicationHash:string;covered:number;pending:number;sequence:number}
@@ -33,6 +34,7 @@ const fail=(kind:ConstructorParameters<typeof ReconciliationError>[0]='review')=
 function active(signal?:AbortSignal,guard?:()=>void){signal?.throwIfAborted();if(guard){const result:unknown=guard();if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw fail('integrity');}}}
 function originalRows(rows:readonly LocalOutboxEntry[]){return rows.map(({status:_,receipts:__,...row})=>{void _;void __;return row;});}
 async function portableQueue(rows:readonly LocalOutboxEntry[]):Promise<LocalOutboxEntry[]>{
+ for(const row of rows)if(row.receipts.some(receipt=>receipt.type==='command.resolved'))await assertResolutionSources(row);
  const result=structuredClone([...rows]);for(const group of result)for(const change of group.changes)if(change.table==='inboxItems')for(const key of ['before','after'] as const)if(change[key]!==null)change[key]=(await portableInboxItems([change[key] as StoredInboxItem]))[0];return result;
 }
 function selected(raw:unknown,input:ApplyCanonicalInput,scope:SyncScope):LocalOperatorState {
@@ -92,7 +94,7 @@ export async function applyCanonicalDownload(db:MiseDatabase,input:ApplyCanonica
 }
 async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,origin:Origin,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void):Promise<AppliedCanonical>{
  input=structuredClone(input);const installed=origin.installed,previousBase=installed?.base??null,previous=installed?.application??null,s=await source(db,origin,input);await assertWorkingCoverage(origin,s);
- if(previousBase?.snapshot.readId===input.readId&&previous){await fresh(originScope(origin),refresh,signal);return db.transaction('r',db.tables,async()=>{await assertOrigin(db,origin);const latest=await source(db,origin,input);if(latest.queueToken!==s.queueToken||backupToken(latest.working)!==backupToken(s.working))throw fail();active(signal,assertActive);return response(previousBase,previous);});}
+ if(previousBase?.snapshot.readId===input.readId&&previous){assertCanonicalResolutions(s.portable,previousBase.snapshot.backup.tables.events,new Set(previous.covered.map(c=>c.id)));await fresh(originScope(origin),refresh,signal);return db.transaction('r',db.tables,async()=>{await assertOrigin(db,origin);const latest=await source(db,origin,input);if(latest.queueToken!==s.queueToken||backupToken(latest.working)!==backupToken(s.working))throw fail();active(signal,assertActive);return response(previousBase,previous);});}
  const verified=await readVerifiedSyncRecords(db,input.readId,input.target,signal),state=verified.context.state;if(state.source.previousCursor!==(previousBase?.snapshot.cursor??null)||!state.window||syncDownloadToken(parseSyncScope(state.window))!==syncDownloadToken(originScope(origin)))throw fail();
  if(origin.owner&&(state.sourceHash!==origin.owner.source.readSourceHash||state.seal!==origin.owner.source.readSeal||state.receivedCursor!==origin.owner.source.cursor))throw fail('integrity');
  if(s.portable.some(r=>r.status==='retained'&&!isLocalInboxRetention(r)))throw fail('retained');
@@ -100,7 +102,7 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
  const covered=new Map<string,SyncCoverageIntent>();for(const c of previous?.covered??[]){if(syncDownloadToken(identities.get(c.id))!==syncDownloadToken(c))throw fail('integrity');covered.set(c.id,c);}
  const needed=commands.filter(c=>!covered.has(c.id)),proofs:LocalSyncCoverage[]=[],unknown=new Set<string>(),conflicts=new Set<string>();
  for(let at=0;at<needed.length;at+=syncCoverageLimit){const batch=needed.slice(at,at+syncCoverageLimit),result=await downloadSyncCoverage(db,state.id,input.target,batch,remote,signal);for(const id of result.visible)covered.set(id,identities.get(id)!);result.unknown.forEach(id=>unknown.add(id));result.conflicts.forEach(id=>conflicts.add(id));const ids=new Set(batch.map(c=>c.id));const saved=(await db.syncCoverage.where('readId').equals(state.id).toArray()).find(p=>p.source.intents.length===ids.size&&p.source.intents.every(c=>ids.has(c.id)));if(!saved?.resultHash)throw fail('integrity');proofs.push(saved);}
- if(unknown.size||conflicts.size)throw fail('retained');const images=await readVerifiedSyncImages(db,state.id,input.target,signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,previousBase?.snapshot??null);let working=structuredClone(snapshot.backup);const pending:ShopCommand[]=[];
+ if(unknown.size||conflicts.size)throw fail('retained');const images=await readVerifiedSyncImages(db,state.id,input.target,signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,previousBase?.snapshot??null);assertCanonicalResolutions(s.portable,snapshot.backup.tables.events,new Set(covered.keys()));let working=structuredClone(snapshot.backup);const pending:ShopCommand[]=[];
  const originalTimes=new Map(s.portable.flatMap(row=>row.commands.map(command=>[command.id,row.at] as const)));
  for(const c of commands)if(!covered.has(c.id)){pending.push(c);working=await replayPendingIntent(working,c,s.operator.actorId,state.window.createdAt,s.working,originalTimes.get(c.id));}
  for(const item of s.working.tables.inboxItems.filter(i=>i.outletId===null)){if(working.tables.inboxItems.some(i=>i.id===item.id))throw fail('retained');working.tables.inboxItems.push(structuredClone(item));}

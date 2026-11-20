@@ -24,6 +24,10 @@ import {
   requestSync,
 } from '../../apps/web/src/data/sync-session';
 import { createShopCommandRemote } from '../../apps/web/src/data/shop-command-remote';
+import {createCloudOrderReviewRemote} from '../../apps/web/src/data/cloud-order-review-remote';
+import {prepareOrderReviewSource} from '../../apps/web/src/data/order-review-source';
+import {isOrderCommand} from '../../packages/core/shop-commands';
+import type {OrderReviewDecision} from '../../packages/core/order-review';
 import {
   createPhoneAuth,
   type PhoneAuth,
@@ -617,6 +621,15 @@ const api = {
     return db.saveOrder({source:order.source,sourceText:order.sourceText,customerId:order.customer.id,name:order.customer.name,phone:order.customer.phone??'',type:order.type,address:order.address,table:order.table,scheduledFor:order.scheduledFor,lines:order.lines.map(line=>({...line,unitPrice:(line.unitPrice??0)+100})),deliveryFee:order.deliveryFee,discount:order.discount,payment:{method:order.payment.method,wallet:order.payment.wallet}},{id:order.id,revision:order.revision});
   }),
   actionReviews: () => use(async db=>(await readLocalActionReviews(db)).map(({review,command,entry})=>({review,command,entryId:entry.id,changes:entry.changes,receipts:entry.receipts}))),
+  prepareFinancialReview:()=>use(async(db,receiver)=>{
+    const w=await wire(receiver),client=await commandClient(w),row=(await db.outbox.where('status').equals('pending').sortBy('sequence'))[0],command=row?.commands[row.receipts.length];if(!row||!command||!isOrderCommand(command))throw Error('Expected the first retained original order action.');
+    const packet=await prepareOrderReviewSource(row,row.receipts.length,newInboxId(),newInboxId());
+    const remote=createCloudOrderReviewRemote(connection(w.config),{scope:w.scope,accountHash:w.target.accountHash,targetHash:w.target.targetHash,getAuth:()=>client.auth.commandAuthorization(),assertCurrent:value=>client.auth.assertCommandAuthorization(value)},w.target),result=await remote.prepare(packet);
+    if(result.done)throw Error('Expected an explicit current-value review.');return {packet,review:result.review};
+  }),
+  resolveFinancialReview:(decision:OrderReviewDecision)=>use(async(_db,receiver)=>{
+    const w=await wire(receiver),client=await commandClient(w);return createCloudOrderReviewRemote(connection(w.config),{scope:w.scope,accountHash:w.target.accountHash,targetHash:w.target.targetHash,getAuth:()=>client.auth.commandAuthorization(),assertCurrent:value=>client.auth.assertCommandAuthorization(value)},w.target).resolve(decision);
+  }),
   editConcurrentSources: (label:'Owner'|'Manager') => use(async db=>{
     const order=(await db.orders.toArray())[0],supplier=(await db.suppliers.toArray())[0],inbox=(await db.inboxItems.toArray())[0];
     await db.addOrderNote(order.id,label+' original note · বাংলা',order.revision);

@@ -30,6 +30,10 @@ export function assertCommandReceipt(receipt:object):void {receiptGuards.get(rec
 export function createAccountJsonRequest(config:CloudConnection,input:CommandAccount,route:'commands'|'migration-upload',send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/'+route,config.apiUrl+'/'),'POST',send);
 }
+export function createOrderReviewRequest(config:CloudConnection,input:CommandAccount,mode:'read'|'resolve',send:typeof fetch){
+ const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review',mode);
+ return accountRequest(config,input,endpoint,'POST',send);
+}
 export function createAccountImageRequest(config:CloudConnection,input:CommandAccount,imageId:string,send:typeof fetch){
  if(!/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(imageId))throw new CommandRequestError('review');
  const endpoint=new URL('functions/v1/inbox-image',config.apiUrl+'/');endpoint.searchParams.set('image',imageId);

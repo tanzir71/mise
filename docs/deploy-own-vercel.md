@@ -21,7 +21,7 @@ You are deploying the Mise web app (landing page + app) from the owner's GitHub 
 6. **Environment variables.** Add only what exists for the current version, using `vercel env add <NAME> production`:
    - `PUBLIC_WHATSAPP_URL` (optional, the shop's `wa.me` link) or `PUBLIC_DEMO_URL`
    - `PUBLIC_GEO_URL` (optional country lookup for the landing page)
-   - from v0.4 (sync): `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` from the owner's own Supabase project. Help them create it if they ask. Never put a `service_role` key in Vercel public env vars.
+   - Supabase connection settings are entered on each device at runtime when cloud sync is available. Do not put actual Supabase URLs or API keys in public build variables. Keep server API keys, PIN peppers and cursor signing keys in the backend secret manager.
 7. **Deploy.** Run `vercel deploy --prod`. Open the URL and check `/`, `/app/` and `/setup/`. From M10, the local app includes shop setup, settings and navigation. Complete setup, then reload `/app/` offline to confirm its shell cache. Counter, orders and stock follow in their milestones; installation and storage-persistence polish is M18.
 8. **Connect Git for automatic updates** (recommended): `vercel git connect`, or in the Vercel dashboard → Project → Git. Every push to the fork's `main` then redeploys.
 9. **Custom domain** (optional): `vercel domains add <domain>`, then show the DNS records the owner must add at their registrar.

@@ -1,0 +1,160 @@
+{
+  "checkedAt": "2026-11-20T03:26:22.721Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Order current-value review protocol and actual withdrawal/replacement proof; operator interface and other financial families remain open",
+  "schemas": {
+    "local": 22,
+    "localStores": 36,
+    "portable": 10,
+    "portableTables": 21
+  },
+  "checks": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 134,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "passed": 2540,
+      "files": 137,
+      "seconds": 306.1,
+      "normalWorkers": 2,
+      "secretGuardTests": 35,
+      "newTests": 36,
+      "limitsChanged": false
+    },
+    "finalScopeGuard": {
+      "focusedTests": 42,
+      "seconds": 7.4,
+      "note": "Recovery canonical-audit guard was checked with lint, strict TypeScript and all source/recovery cases, then included in the final full suite."
+    },
+    "builds": {
+      "root": true,
+      "pages": true
+    },
+    "staticDeploymentGuide": {
+      "runtimeConnectionOnly": true,
+      "sourceEqualsBuiltCopy": true,
+      "note": "Only the static Markdown deployment guide changed after production builds. Its exact copied output was checked; app assets and bundled release notes stayed unchanged."
+    },
+    "browser": {
+      "startTime": "2026-11-20T02:58:03.773Z",
+      "duration": 600709.03,
+      "expected": 446,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "errors": 0,
+      "nativeResolutionOutcomes": [
+        "replaced",
+        "withdrawn"
+      ],
+      "lostActualCommitReply": true,
+      "offlineReload": true,
+      "originalCommandsAndSourcesPreserved": true,
+      "fullImagesPreserved": true,
+      "laterCashConverged": true,
+      "syntheticAuth": true,
+      "sqlOnlyFenceFollowup": {
+        "startTime": "2026-11-20T03:24:54.507Z",
+        "duration": 17155.958,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0,
+        "errors": 0,
+        "note": "Full 446-case run passed before the final SQL-only fence correction. Both native SQL/HTTP resolution cases were rerun afterward; client assets and bundled release notes did not change."
+      }
+    },
+    "visual": {
+      "generatedAt": "2026-11-20T03:13:51.088Z",
+      "comparisons": 247,
+      "overflow": 0,
+      "report": "qa/report.html",
+      "screenshots": [
+        "qa/screens/m31-sync-controls-phone-screen-390.png",
+        "qa/screens/m31-sync-controls-desktop-screen-1440.png",
+        "qa/screens/bd-hero-1440.png"
+      ],
+      "cloneLocal": true
+    },
+    "hosted": {
+      "checkedAt": "2026-11-20T03:26:22.644Z",
+      "migrations": 40,
+      "functions": 7,
+      "commandsVersion": 21,
+      "commandsVerifyJwt": true,
+      "commandsSourceMatches": true,
+      "commandsBundleBytes": 438765,
+      "commandsBundleSha256": "d69912605a7b4dbba5fc1bf0a328f2604e0a8240146bf5ba8ea8cc03ab0a7183",
+      "commandsBundleSourceFiles": 84,
+      "applicationTables": 60,
+      "forcedRlsTables": 60,
+      "privateArchiveGrants": 0,
+      "publicPrivilegedReviewFunctions": 0,
+      "anonymousOutcomeDenied": true,
+      "anonymousPreparationDenied": true,
+      "ordinaryCompletionDenied": true,
+      "serviceCompletionAllowed": true,
+      "ordinaryArchiveDenied": true,
+      "directServiceArchiveDenied": true,
+      "securityWarnings": 0,
+      "securityErrors": 0,
+      "expectedPrivateRlsInformationalFindings": 31,
+      "unauthenticatedChecks": 5,
+      "unauthenticatedStatus": 401,
+      "providerBodiesRead": false,
+      "actualDeploymentValuesInPublicReport": false,
+      "genuineHostedOtpAcceptance": false,
+      "financialFenceIndexValid": true,
+      "ordinaryFinancialFenceInstalled": true,
+      "guardedReviewCompletionInstalled": true,
+      "unauthenticatedResults": [
+        {
+          "kind": "commands",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=read",
+          "status": 401
+        },
+        {
+          "kind": "commands?review=resolve",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-outcome",
+          "status": 401
+        },
+        {
+          "kind": "anonymous-completion",
+          "status": 401
+        }
+      ]
+    },
+    "privacy": {
+      "actualValuesInRepository": false,
+      "exactPrivateValueChecks": 10,
+      "historyPolicyUnchanged": true,
+      "olderNonsecretFindings": 22,
+      "credentialsFound": 0
+    }
+  },
+  "publication": {
+    "githubWorkflows": "disabled",
+    "ciRun": null,
+    "ciArtifact": null,
+    "pages": "held by owner"
+  },
+  "remaining": [
+    "Operator financial review interface",
+    "Other financial action families",
+    "Genuine hosted phone OTP and signed-owner acceptance",
+    "Remaining M30/M31 acceptance",
+    "Other handover milestones"
+  ]
+}

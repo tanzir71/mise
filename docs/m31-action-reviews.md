@@ -41,8 +41,9 @@ establish genuine hosted OTP or provider acceptance.
 
 This observation is not proof that a financial action never committed. It does
 not authorize a replacement, deletion, changed revision or automatic rebase.
-Explicit current-value review, server-authorized financial resolution and its
-interface remain unfinished. M30 and M31 remain unchecked, cloud flags default
+The subsequent [order resolution protocol](m31-order-resolution.md) adds current-value
+review and server-authorized outcomes for orders. Its interface and other financial
+families remain unfinished. M30 and M31 remain unchecked, cloud flags default
 off, and the owner's GitHub workflows and Pages publication remain held.
 
 Local validation is recorded in [the verification record](m31-action-reviews-local.json).

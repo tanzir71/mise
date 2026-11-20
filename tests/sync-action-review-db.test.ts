@@ -18,6 +18,10 @@ import {
   type CommandAuthorization,
 } from '../apps/web/src/data/command-request';
 import { nativeRowHash } from '../apps/web/src/data/canonical-writes';
+import {assertResolutionSources,assertCanonicalResolutions} from '../apps/web/src/data/command-resolution';
+import {prepareOrderReviewSource} from '../apps/web/src/data/order-review-source';
+import type {CommandResolutionReceipt} from '../packages/core/command-resolution';
+import type {AuditEvent} from '../packages/core/models';
 import { backupToken } from '../packages/core/backup';
 import { parseSyncActionReview } from '../packages/core/sync-action-review';
 import {
@@ -37,6 +41,7 @@ const config = {
   publishableKey: 'sb_publishable_test_only',
 };
 const databases: Dexie[] = [];
+const reviewId='00000000000000000000000091',replacementId='00000000000000000000000092';
 afterEach(async () => {
   vi.restoreAllMocks();
   await Promise.all(databases.splice(0).map((db) => db.delete()));
@@ -466,4 +471,32 @@ it('schema 21 upgrades with every original source, image and queue intact and th
   expect(await upgraded.cloudState.toArray()).toEqual(
     await f.db.cloudState.toArray(),
   );
+});
+
+async function resolvedOriginal() {
+ const x=await boot(),row=structuredClone(x.original[0]);row.commands=row.commands.map(parseShopCommand);
+ const packet=await prepareOrderReviewSource(row,0,reviewId,replacementId),command=packet.command;
+ const receipt:CommandResolutionReceipt={id:reviewId,type:'command.resolved',commandId:command.id,commandType:command.type,outletId:command.outletId,occurredAt:command.occurredAt,commandHash:await syncHash(new TextEncoder().encode(JSON.stringify(command))),sourceHash:packet.sourceHash,at:Date.now(),outcome:'withdrawn',replacement:null};
+ return {...x,row,packet,receipt};
+}
+it('a genuine resolution stays bound to the complete original queued source and command',async()=>{
+ const {row,receipt}=await resolvedOriginal();row.receipts=[receipt];row.status='accepted';await expect(assertResolutionSources(row)).resolves.toBeUndefined();
+ const changed=structuredClone(row);changed.at++;await expect(assertResolutionSources(changed)).rejects.toThrow('original resolved action');
+ const forged=structuredClone(row);forged.receipts=[{...receipt,commandHash:'f'.repeat(64)}];await expect(assertResolutionSources(forged)).rejects.toThrow('original resolved action');
+});
+it('fixed-snapshot coverage requires the exact canonical resolution audit before retiring an original action',async()=>{
+ const {row,receipt}=await resolvedOriginal();row.receipts=[receipt];row.status='accepted';const covered=new Set([receipt.commandId]);
+ const event:AuditEvent={id:receipt.commandId,outletId:receipt.outletId,actor:{type:'member',id:replacementId},command:'sync.resolve',before:{resolutionId:receipt.id,commandHash:receipt.commandHash,sourceHash:receipt.sourceHash},after:{receipt},at:receipt.at};
+ expect(()=>assertCanonicalResolutions([row],[event],covered)).not.toThrow();
+ for(const events of [[],[{...event,command:'order.payment'}],[{...event,after:{receipt:{...receipt,sourceHash:'e'.repeat(64)}}}],[{...event,at:receipt.at+1}]])expect(()=>assertCanonicalResolutions([row],events,covered)).toThrow('canonical resolution audit');
+ expect(()=>assertCanonicalResolutions([row],[],new Set())).not.toThrow();
+});
+it('large literal order sources remain exact locally while their reviewed financial capsule stays bounded',async()=>{
+ const {row,packet}=await resolvedOriginal(),changed=structuredClone(row),large='original literal '.repeat(160000);
+ for(const change of changed.changes)if(change.table==='orders')for(const side of ['before','after'] as const){const order=change[side];if(order&&typeof order==='object')change[side]={...order,sourceText:large};}
+ const original=structuredClone(changed),review=await prepareOrderReviewSource(changed,0,reviewId,replacementId);expect(review.sourceJson.length).toBeLessThan(10000);expect(review.sourceJson).not.toContain(large);expect(review.sourceHash).not.toBe(packet.sourceHash);expect(changed).toEqual(original);expect(review.command).toEqual(packet.command);
+});
+it('a source-substituted resolution cannot acknowledge or rewrite the original outbox action',async()=>{
+ const {db,account,original,receipt}=await resolvedOriginal(),remote=createCloudCommandRemote(config,account,async()=>new Response(JSON.stringify({...receipt,sourceHash:'d'.repeat(64)}),{headers:{'Content-Type':'application/json'}}));
+ await expect(deliverLocalOutbox(db,account.targetHash,remote)).rejects.toThrow('original');expect(await db.outbox.toArray()).toEqual(original);
 });

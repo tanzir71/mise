@@ -127,6 +127,7 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
     throw error;
    }
    const receipt=parseShopCommandReceipt(confirmed,saved.commands[index]);assertCommandReceipt(confirmed);
+   if(receipt.type==='command.resolved'&&(receipt.sourceHash!==sourceHash||receipt.commandHash!==await syncHash(new TextEncoder().encode(JSON.stringify(command)))))throw new CommandRequestError('review');
    saved=await db.transaction('rw',db.cloudState,db.operatorState,db.outbox,db.syncActionReviews,async()=>{
     const tx=Dexie.currentTransaction;
     const state=await currentOperator();
