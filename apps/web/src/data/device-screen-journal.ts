@@ -2,6 +2,7 @@ import {newInboxId} from '@mise/core/inbox';
 import {deviceSecretHash} from '@mise/core/device-access';
 import {cloudConnectionStorageKey} from '@mise/core/cloud-connection';
 import {parseScreenJournalRecord,parseScreenState,type ScreenJournalRecord,type ScreenState} from '@mise/core/device-screen-state';
+import {kitchenScreenWire,parseKitchenScreenState,type KitchenScreenState} from '@mise/core/kitchen-screen';
 
 export class ScreenStorageError extends Error {
  constructor(readonly kind:'changed'|'unavailable'|'owner'|'damaged'){
@@ -17,9 +18,9 @@ function openDatabase(factory:IDBFactory,name:string):Promise<IDBDatabase>{
   let settled=false;const timer=setTimeout(()=>fail(),5000);
   const fail=()=>{if(settled)return;settled=true;clearTimeout(timer);reject(new ScreenStorageError('unavailable'));};
   try{
-   const request=factory.open(name,1);
+   const request=factory.open(name,2);
    request.onblocked=fail;request.onerror=fail;
-   request.onupgradeneeded=()=>{if(settled){request.transaction?.abort();return;}request.result.createObjectStore('state',{keyPath:'id'});};
+   request.onupgradeneeded=()=>{if(settled){request.transaction?.abort();return;}for(const name of ['state','kitchen'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:'id'});};
    request.onsuccess=()=>{if(settled){request.result.close();return;}settled=true;clearTimeout(timer);resolve(request.result);};
   }catch{fail();}
  });
@@ -60,6 +61,37 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
   if(value.state.phase==='pairing'&&await deviceSecretHash(value.state.source.token)!==value.state.source.tokenHash)throw new ScreenStorageError('damaged');
   return value;
  }
+ function kitchenTransaction(original:ScreenJournalRecord,expected?:KitchenScreenState|null,replacement?:KitchenScreenState,guard?:()=>void,signal?:AbortSignal):Promise<unknown>{
+  return new Promise((resolve,reject)=>{
+   if(original.state.phase!=='signed-in'||signal?.aborted){reject(new ScreenStorageError('changed'));return;}
+   const deviceId=original.state.credential.device.id;
+   let tx:IDBTransaction;try{if(closed)throw Error();tx=database.transaction(['state','kitchen'],'readwrite');}catch{reject(new ScreenStorageError('unavailable'));return;}
+   let result:unknown=null,failure:ScreenStorageError|undefined;
+   const timer=setTimeout(()=>{failure=new ScreenStorageError('unavailable');try{tx.abort();}catch{reject(failure);}},10000);
+   const stop=()=>{failure=new ScreenStorageError('changed');try{tx.abort();}catch{reject(failure);}};
+   signal?.addEventListener('abort',stop,{once:true});
+   const cleanup=()=>{clearTimeout(timer);signal?.removeEventListener('abort',stop);};
+   function current(){try{if(signal?.aborted)throw Error();const value:unknown=guard?.();if(value!==undefined){void Promise.resolve(value).catch(()=>{});throw Error();}}catch{throw new ScreenStorageError('changed');}}
+   const setup=tx.objectStore('state').get('current'),cache=tx.objectStore('kitchen').get(deviceId);
+   let read=0;
+   const loaded=()=>{
+    if(++read!==2)return;
+    try{
+     let enrolled:ScreenJournalRecord;try{enrolled=parseScreenJournalRecord(setup.result);}catch{throw new ScreenStorageError('damaged');}
+     if(JSON.stringify(enrolled)!==JSON.stringify(original))throw new ScreenStorageError('changed');
+     const raw:unknown=cache.result??null;
+     if(expected!==undefined&&JSON.stringify(raw)!==JSON.stringify(expected===null?null:kitchenScreenWire(expected)))throw new ScreenStorageError('changed');
+     current();
+     if(replacement!==undefined){if(replacement.id!==deviceId)throw new ScreenStorageError('changed');tx.objectStore('kitchen').put(kitchenScreenWire(replacement));result=kitchenScreenWire(replacement);}
+     else result=raw;
+    }catch(error){failure=error instanceof ScreenStorageError?error:new ScreenStorageError('unavailable');tx.abort();}
+   };
+   setup.onsuccess=loaded;cache.onsuccess=loaded;
+   tx.onerror=()=>{failure??=new ScreenStorageError('unavailable');};
+   tx.onabort=()=>{cleanup();reject(failure??new ScreenStorageError('unavailable'));};
+   tx.oncomplete=()=>{cleanup();try{current();resolve(result);}catch(error){reject(error);}};
+  });
+ }
  return {
   name:database.name,
   async read(){return verified(await transaction(null));},
@@ -75,6 +107,19 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
    // Notify sibling owner/screen routes using no credential or source fields.
    if(typeof window!=='undefined')try{window.dispatchEvent(new Event('mise-screen-profile'));if(typeof BroadcastChannel==='function'){const channel=new BroadcastChannel('mise.screen.profile:'+base);channel.postMessage({changed:true});channel.close();}}catch{/* The native commit is authoritative even when notifications are unavailable. */}
    return saved;
+  },
+  async readKitchen(input:ScreenJournalRecord){
+   const original=parseScreenJournalRecord(input),raw=await kitchenTransaction(original);
+   const parsed=raw===null?null:await parseKitchenScreenState(raw);
+   await transaction(original);
+   return parsed;
+  },
+  async replaceKitchen(input:ScreenJournalRecord,expected:KitchenScreenState|null,next:KitchenScreenState,options:{assertCurrent?:()=>void;signal?:AbortSignal}={}){
+   // Hashing and strict decoding finish before the native transaction opens.
+   // Both the complete enrollment and complete cache are compared atomically.
+   const original=parseScreenJournalRecord(input),before=expected===null?null:await parseKitchenScreenState(kitchenScreenWire(expected)),after=await parseKitchenScreenState(kitchenScreenWire(next));
+   const saved=await kitchenTransaction(original,before,after,options.assertCurrent,options.signal);
+   return parseKitchenScreenState(saved);
   },
   close(){closed=true;database.close();},
  };

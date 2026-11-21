@@ -12,11 +12,15 @@ import type {Order} from '../packages/core/models';
 import type {BusinessType} from '../packages/core/packs';
 import {createStaffPin} from '../supabase/functions/_shared/staff-pin';
 import {createKitchenActionsHandler, createKitchenActionsStore, replayKitchenPreparation, type KitchenStep} from '../supabase/functions/_shared/kitchen-actions-handler';
+import {createKitchenTicketsHandler,createKitchenTicketsStore} from '../supabase/functions/_shared/kitchen-tickets-handler';
+import {parseKitchenPage,parseKitchenChanges} from '../packages/core/kitchen-tickets';
+import {kitchenContentHash} from '../packages/core/kitchen';
+import type {SharedDevice,StaffDeviceSession} from '../packages/core/device-access';
 import {orderFixture, ORDER_AT} from './order-fixture';
 
 type Sql = Pick<PGlite, 'query' | 'exec'>;
-type Device = {id: string; token: string};
-type Session = {id: string; token: string};
+type Device = SharedDevice & {token: string};
+type Session = StaffDeviceSession;
 interface Shop {businessId: string; outletId: string; memberId: string; order: Order; device: Device; session: Session; counter: Device; counterSession: Session}
 const origin = 'https://shop.test', literal = 'বাংলা\0' + String.fromCharCode(0xd800), shops: Shop[] = [];
 let db: PGlite, requestNumber = 0, lastRpcError = '';
@@ -36,10 +40,10 @@ async function current(sql: Sql, shop: Shop) {
 }
 /** Exercise the production HTTP/RPC adapter with real PostgreSQL named
  * arguments. An incorrect RPC field cannot pass a positional fake callback. */
-function rpc(sql: Sql, hooks: {afterPrepare?: () => Promise<void>; afterFinish?: () => Promise<void>} = {}): typeof fetch {
+function rpc(sql: Sql, hooks: {afterPrepare?: () => Promise<void>; afterFinish?: () => Promise<void>;afterRead?:()=>Promise<void>} = {}): typeof fetch {
   return async (url, options) => {
     const route = new URL(String(url)).pathname.split('/').at(-1);
-    if (!['prepare_kitchen_action', 'finish_kitchen_action'].includes(route ?? '')) throw Error('Unexpected RPC');
+    if (!['prepare_kitchen_action', 'finish_kitchen_action','read_kitchen_page','read_kitchen_changes','read_kitchen_acknowledgements'].includes(route ?? '')) throw Error('Unexpected RPC');
     expect(options).toMatchObject({method: 'POST', redirect: 'error', headers: {apikey: 'sb_secret_test_only'}});
     const body = JSON.parse(String(options?.body)) as Record<string, unknown>, keys = Object.keys(body), savepoint = 'request_' + ++requestNumber;
     if (keys.some(key => !/^p_[a-z_]+$/.test(key))) throw Error('Invalid RPC field');
@@ -58,12 +62,19 @@ function rpc(sql: Sql, hooks: {afterPrepare?: () => Promise<void>; afterFinish?:
       return new Response('privileged SQL detail never reaches the screen', {status: code === 'PT409' ? 409 : code === 'PT429' ? 429 : code === '22023' ? 400 : 500});
     }
     if (route === 'prepare_kitchen_action') await hooks.afterPrepare?.();
-    else await hooks.afterFinish?.();
+    else if(route==='finish_kitchen_action')await hooks.afterFinish?.();
+    else if(route==='read_kitchen_page'||route==='read_kitchen_changes')await hooks.afterRead?.();
     return new Response(JSON.stringify(value), {headers: {'Content-Type': 'application/json'}});
   };
 }
 function gateway(sql: Sql, hooks: Parameters<typeof rpc>[1] = {}) {
   return createKitchenActionsHandler({origins: new Set([origin]), store: createKitchenActionsStore('https://api.test', 'sb_secret_test_only', rpc(sql, hooks))});
+}
+function ticketGateway(sql:Sql,hooks:Parameters<typeof rpc>[1]={}){
+ return createKitchenTicketsHandler({origins:new Set([origin]),store:createKitchenTicketsStore('https://api.test','sb_secret_test_only',rpc(sql,hooks))});
+}
+function ticketRequest(shop:Shop,input:Record<string,unknown>={action:'page'}){
+ return new Request('https://api.test/functions/v1/kitchen-tickets',{method:'POST',headers:{origin,authorization:'Bearer '+shop.device.token,'Content-Type':'application/json'},body:JSON.stringify({sessionToken:shop.session.token,...input})});
 }
 function request(shop: Shop, action: KitchenAction, counter = false) {
   return new Request('https://api.test/functions/v1/kitchen-actions', {method: 'POST', headers: {
@@ -271,3 +282,57 @@ it('preserves the full existing source limit, including escaped NUL, through int
   const event = (await sql.query<{before_data: Order; after_data: Order}>('select before_data,after_data from public.events where id=$1', [saved.eventId])).rows[0];
   expect(event.before_data.sourceText).toBe(text); expect(event.after_data.sourceText).toBe(text);
 }), 30000);
+
+it.each([0,1,2,3])('reads private-field-free, hash-verified preparation tickets through actual named SQL/HTTP for pack %s',async index=>rollback(async sql=>{
+ const shop=shops[index],response=await ticketGateway(sql)(ticketRequest(shop));
+ expect(response.status,lastRpcError+'; '+await response.clone().text()).toBe(200);
+ const body=await response.json(),page=await parseKitchenPage(body,shop);
+ expect(page.tickets).toHaveLength(1);expect(page.tickets[0].contentHash).toBe(await kitchenContentHash(await current(sql,shop)));
+ expect(page.tickets[0].lines[0].name).toBe(literal);expect(page.tickets[0].acknowledgement).toBeNull();
+ const text=JSON.stringify(body);for(const value of ['PRIVATE CHAT','PRIVATE CUSTOMER',shop.device.token,shop.session.token])expect(text).not.toContain(value);
+ for(const key of ['unitPrice','lineTotal','subtotal','total','payment','customer','customerName','customerPhone','address','sourceText'])expect(text).not.toContain('"'+key+'":');
+ expect(response.headers.get('cache-control')).toBe('no-store');
+}));
+it('delivers actual acknowledgement parents and retains a frozen change window while newer changes arrive',async()=>rollback(async sql=>{
+ const shop=shops[0],handler=ticketGateway(sql),initial=await parseKitchenPage(await (await handler(ticketRequest(shop))).json(),shop);
+ const {receipt}=await gotIt(sql,shop);
+ const firstBody=await (await handler(ticketRequest(shop,{action:'changes',afterSeq:initial.watermark,limit:1}))).json();
+ const first=await parseKitchenChanges(firstBody,shop,initial.watermark,null,1);
+ expect(first.nextSeq).toBeGreaterThan(initial.watermark);expect(first.nextSeq).toBeLessThan(first.watermark);
+ expect(first.tickets[0].acknowledgement).toEqual(receipt);
+ await sql.query('update public.orders set customer_name=$1,revision=revision+1 where id=$2',[JSON.stringify('Current private contact'),shop.order.id]);
+ const second=await parseKitchenChanges(await (await handler(ticketRequest(shop,{action:'changes',afterSeq:first.nextSeq,untilSeq:first.watermark,limit:1}))).json(),shop,first.nextSeq,first.watermark,1);
+ expect(second.nextSeq).toBe(first.watermark);
+ const later=await parseKitchenChanges(await (await handler(ticketRequest(shop,{action:'changes',afterSeq:second.nextSeq}))).json(),shop,second.nextSeq);
+ expect(later.watermark).toBeGreaterThan(second.watermark);expect(later.tickets[0].contentHash).toBe(first.tickets[0].contentHash);
+ expect(later.tickets[0].acknowledgement?.id).toBe(receipt.id);
+}));
+it('a changed preparation line loses its old acknowledgement without exposing a customer or payment',async()=>rollback(async sql=>{
+ const shop=shops[0];await gotIt(sql,shop);const before=await current(sql,shop),lines=structuredClone(before.lines);lines[0].note='New instruction '+literal;
+ await sql.query('update public.orders set lines=$1,revision=revision+1 where id=$2',[JSON.stringify(lines),shop.order.id]);
+ const page=await parseKitchenPage(await (await ticketGateway(sql)(ticketRequest(shop))).json(),shop);
+ expect(page.tickets[0].acknowledgement).toBeNull();expect(page.tickets[0].lines[0].note).toBe(lines[0].note);
+ expect(page.tickets[0].contentHash).not.toBe(await kitchenContentHash(before));
+}));
+it('does not return a partial ticket page after live access is revoked before acknowledgement lookup',async()=>rollback(async sql=>{
+ const shop=shops[0],handler=ticketGateway(sql,{afterRead:async()=>{await sql.query('update public.members set active=false where id=$1',[shop.memberId]);}});
+ const response=await handler(ticketRequest(shop));expect(response.status).toBe(401);expect(await response.text()).not.toContain(shop.order.id);
+}));
+it('another outlet cannot widen a device cursor and deletion leaves an explicit scoped tombstone',async()=>rollback(async sql=>{
+ const shop=shops[0],handler=ticketGateway(sql),first=await parseKitchenPage(await (await handler(ticketRequest(shop))).json(),shop);
+ await sql.query('update public.orders set revision=revision+1 where id=$1',[shops[1].order.id]);
+ const quiet=await parseKitchenChanges(await (await handler(ticketRequest(shop,{action:'changes',afterSeq:first.watermark}))).json(),shop,first.watermark);
+ expect(quiet.tickets).toEqual([]);expect(quiet.nextSeq).toBe(first.watermark);
+ await sql.query('delete from public.orders where id=$1',[shop.order.id]);
+ const removed=await parseKitchenChanges(await (await handler(ticketRequest(shop,{action:'changes',afterSeq:first.watermark}))).json(),shop,first.watermark);
+ expect(removed.tickets).toEqual([]);expect(removed.removed).toEqual([shop.order.id]);
+}));
+it('holds a transaction fence for each changed outlet before its feed numbers can escape in commit order',async()=>rollback(async sql=>{
+ // This single-backend WASM runtime reports null PIDs in pg_locks. Match the
+ // actual 64-bit scoped lock tag; multi-connection blocking is checked on PG.
+ const held=async(shop:Shop)=>(await sql.query<{n:number}>("select count(*)::int n from pg_locks where locktype='advisory' and granted and objsubid=1 and classid::bigint=((hashtextextended($1,0)>>32)&4294967295) and objid::bigint=(hashtextextended($1,0)&4294967295)",['mise:kitchen-feed:'+shop.businessId+':'+shop.outletId])).rows[0].n;
+ expect(await held(shops[0])).toBe(0);expect(await held(shops[1])).toBe(0);
+ await sql.query('update public.orders set updated_at=updated_at+1 where id=$1',[shops[0].order.id]);expect(await held(shops[0])).toBe(1);expect(await held(shops[1])).toBe(0);
+ await gotIt(sql,shops[0]);expect(await held(shops[0])).toBe(1);
+ await sql.query('update public.orders set updated_at=updated_at+1 where id=$1',[shops[1].order.id]);expect(await held(shops[1])).toBe(1);
+}));

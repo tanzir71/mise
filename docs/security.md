@@ -1,5 +1,20 @@
 # Deployment credentials
 
+The [shared preparation screen](m32-kitchen-screen.md) uses an enrolled device
+and current PIN session for prep-only reads and a private realtime relay. The
+browser receives closed wake metadata; the service key stays in the upstream
+WebSocket upgrade header, outside URLs, frames, native ticket caches and
+portable backups. Both retrieved deployed modules exactly match the reviewed
+sources. All 75 application tables force RLS, with no anonymous/PUBLIC table
+grants, public definers, public buckets or direct client kitchen RPC grants.
+All 23 hosted transport checks pass, including a real scoped read, private
+Broadcast delivery and live revocation. The committed synthetic fixture creates
+no Auth accounts and is fully cleaned up; another 29 managed role checks roll
+their fictional rows back. Advisors report no warnings or errors. Real Auth
+accounts, phone-provider settings and server secrets are unchanged. Actual
+deployment/credential values stay private. The screen flag, workflows and Pages
+publication remain held while full M32 acceptance is completed.
+
 The [kitchen preparation backend](m32-kitchen-actions.md) authenticates an
 enrolled device and current staff session, with no owner JWT or caller-supplied
 member authority. Final SQL admission rechecks the live device, PIN revision,

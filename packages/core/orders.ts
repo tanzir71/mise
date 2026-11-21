@@ -16,7 +16,8 @@ export const orderFlows: Record<BusinessType, readonly OrderStatus[]> = {
 };
 export const orderStatusLabels: Record<OrderStatus,string> = {new:'New',confirmed:'Confirmed',kitchen_seen:'Kitchen has it',cooking:'Cooking',ready:'Ready',out:'Out with rider',delivered:'Delivered',to_confirm:'To confirm',packed:'Packed',booked:'Booked',with_courier:'With courier',returning:'Returning',returned:'Returned',ordered:'Ordered',making:'Making',ready_called:'Ready · call out',collected:'Collected',requested:'Requested',priced:'Priced',accepted:'Accepted',packing:'Packing',delivering:'Delivering',done:'Done',cancelled:'Cancelled'};
 export const orderSourceLabels: Record<OrderSource,string> = {phone:'Phone',walk_in:'Walk-in',table:'Table',paste:'Paste chat',other:'Other'};
-export const isOrderFinished = (order: Order) => ['delivered','returned','collected','done','cancelled'].includes(order.status);
+export type OrderFlowSource = Pick<Order,'businessType'|'status'> & {type:OrderType|'counter'};
+export const isOrderFinished = (order: Pick<Order,'status'>) => ['delivered','returned','collected','done','cancelled'].includes(order.status);
 export const editableOrder = (order: Order) => !isOrderFinished(order) && order.status !== 'returning';
 export function editableOrderPrices(order: Order): boolean { return order.payment.status === 'pending' && ({restaurant:['new','confirmed'],online_shop:['new','to_confirm','confirmed'],food_stall:['ordered'],corner_shop:['requested','priced']}[order.businessType]).includes(order.status); }
 export interface OrderInput {
@@ -66,7 +67,7 @@ export function saveOrderCommand(input: OrderInput, context: OrderContext, befor
   const event = orderEvent(order,setup,before ? 'order.update' : 'order.create',before,order,at,()=>eventId);
   return {order,event};
 }
-export function nextOrderStatuses(order: Order): OrderStatus[] {
+export function nextOrderStatuses(order: OrderFlowSource): OrderStatus[] {
   if (isOrderFinished(order)) return [];
   if (order.status === 'ready' && order.businessType === 'restaurant') return [order.type === 'delivery' ? 'out' : 'delivered'];
   if (order.status === 'ready' && order.businessType === 'corner_shop') return [order.type === 'delivery' ? 'delivering' : 'done'];

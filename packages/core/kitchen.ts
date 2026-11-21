@@ -1,11 +1,23 @@
 import {parseStaffDeviceAccess, isDeviceId, type StaffDeviceAccess} from './device-access';
 import {ulid} from 'ulid';
 import {orderPricing} from './order-lines';
-import {changeOrderStatusCommand, isOrderFinished, nextOrderStatuses, validateOrder} from './orders';
+import {changeOrderStatusCommand, isOrderFinished, nextOrderStatuses, validateOrder, type OrderFlowSource} from './orders';
 import type {AuditEvent, Order, OrderLine, OrderStatus} from './models';
 import type {ShopSetup} from './shop-access';
 
 export type KitchenActionKind = 'kitchen.acknowledge' | 'kitchen.ready';
+export type KitchenLine = Pick<OrderLine, 'id'|'itemId'|'name'|'unit'|'qty'|'note'|'unavailable'> & {
+  substitution?: OrderLine['substitution'] | null;
+};
+/** A shared screen has preparation data, never a fabricated full Order with
+ * made-up prices, customer details or payments. Full Orders remain compatible. */
+export type KitchenSource = Pick<Order, 'id'|'outletId'|'businessType'|'number'|'table'|'scheduledFor'|'status'> & {
+  type: OrderFlowSource['type'];
+  source: Order['source'] | 'counter'|'link'|'whatsapp'|'messenger'|'foodpanda'|'pathao';
+  lines: KitchenLine[];
+};
+export type KitchenActionSource = KitchenSource & Pick<Order, 'revision'>;
+export type KitchenClockSource = KitchenActionSource & Pick<Order, 'createdAt'>;
 export interface KitchenAction {
   v: 1;
   id: string;
@@ -66,7 +78,7 @@ export function parseKitchenAction(value: unknown): KitchenAction {
     parentAckId: value.parentAckId as string | null, transitionEventIds: [...value.transitionEventIds] as [string, string, string]};
 }
 
-function kitchenLine(line: OrderLine) {
+function kitchenLine(line: KitchenLine) {
   return {id: line.id, itemId: line.itemId ?? null, name: line.name, unit: line.unit, qty: line.qty, note: line.note,
     unavailable: line.unavailable, substitution: line.substitution ? {
       from: line.substitution.from, accepted: line.substitution.accepted, acceptedAt: line.substitution.acceptedAt ?? null,
@@ -75,7 +87,7 @@ function kitchenLine(line: OrderLine) {
 /** The same visible preparation content can survive a price, contact, payment
  * or ordinary status edit. Changes to items, swaps, schedule or table cannot.
  * JSON escaping preserves NUL and lone UTF-16 code units before UTF-8 hashing. */
-export function kitchenContent(order: Order) {
+export function kitchenContent(order: KitchenSource) {
   return {v: 1, orderId: order.id, outletId: order.outletId, businessType: order.businessType, number: order.number,
     type: order.type, source: order.source, table: order.table, scheduledFor: order.scheduledFor ?? null,
     cancelled: order.status === 'cancelled', lines: order.lines.map(kitchenLine)};
@@ -84,12 +96,12 @@ async function fingerprint(value: unknown) {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(value)));
   return Array.from(new Uint8Array(bytes), b => b.toString(16).padStart(2, '0')).join('');
 }
-export const kitchenContentHash = (order: Order) => fingerprint(kitchenContent(order));
+export const kitchenContentHash = (order: KitchenSource) => fingerprint(kitchenContent(order));
 export const kitchenActionHash = (action: KitchenAction) => fingerprint(parseKitchenAction(action));
 
 /** Capture fields, full visible content and all identities before the hash can
  * yield. These are retained unchanged when a tap waits offline or is retried. */
-export async function prepareKitchenAction(order: Order, type: KitchenActionKind, parentAckId: string | null = null,
+export async function prepareKitchenAction(order: KitchenActionSource, type: KitchenActionKind, parentAckId: string | null = null,
   occurredAt = Date.now(), newId: () => string = () => newKitchenId(occurredAt)): Promise<KitchenAction> {
   const content = kitchenContent(order);
   const original = {v: 1, id: newId(), type, outletId: order.outletId, orderId: order.id, revision: order.revision,
@@ -105,7 +117,7 @@ const readyStages = {
 } as const;
 /** Never infer commercial confirmation from a kitchen tap. Every returned step
  * must also be the actual next step of the existing business order flow. */
-export function kitchenReadyPath(order: Order): OrderStatus[] | null {
+export function kitchenReadyPath(order: OrderFlowSource): OrderStatus[] | null {
   const stages: readonly OrderStatus[] = readyStages[order.businessType] ?? [];
   const at = stages.indexOf(order.status);
   if (at < 0) return null;
@@ -130,7 +142,7 @@ function acknowledgementPath(order: Order): OrderStatus[] {
 
 /** A server or cached-screen hint only; live authority and state are rechecked
  * on admission. Scheduled work starts its acknowledgement clock when due. */
-export async function kitchenAlarm(order: Order, acknowledgement: KitchenReceipt | null, now: number, warningMinutes: number | null = null) {
+export async function kitchenAlarm(order: KitchenClockSource, acknowledgement: KitchenReceipt | null, now: number, warningMinutes: number | null = null) {
   const minutes = warningMinutes ?? 2;
   if (!time(now) || !Number.isInteger(minutes) || minutes < 1 || minutes > 1440 || !time(order.createdAt) ||
       order.scheduledFor !== undefined && !time(order.scheduledFor)) throw invalid();

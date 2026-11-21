@@ -1,0 +1,249 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-21T21:58:56.682Z",
+  "flag": {
+    "name": "kitchenScreen",
+    "default": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "unitFiles": 193,
+    "unitCases": 3968,
+    "unitRuns": "Complete inventory reconciled across verified runs after the initial command ended without a final summary.",
+    "pagesBrowserCases": 509,
+    "visualComparisons": 380,
+    "kitchenVisualComparisons": 15,
+    "horizontalOverflow": 0,
+    "kitchenAutomatedAccessibilityViolations": 0,
+    "rootAppBrowserCases": 16,
+    "nativeStorageCases": 7,
+    "rootBuild": true,
+    "pagesBuildRestored": true
+  },
+  "schema": {
+    "migrationVersion": "20261121215427",
+    "migrations": 54,
+    "application_tables": 75,
+    "forced_rls_tables": 75,
+    "anonymous_table_grants": 0,
+    "public_definers": 0,
+    "public_buckets": 0,
+    "kitchen_client_rpc_grants": 0
+  },
+  "functions": [
+    {
+      "name": "kitchen-tickets",
+      "version": 1,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "bytes": 19164,
+      "sha256": "a448b7377d524662ecc7da3f17bd8536b46e64878cc856492a26cd4b35598b0d",
+      "sourceFiles": 9,
+      "sourceHashes": {
+        "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+        "packages/core/device-access.ts": "58c8c04fbdb55cbf6fdea1c436d4d85d2f1a708f8016823a2a7e98a0c114600a",
+        "packages/core/kitchen-tickets.ts": "94203ce589a5c4b41c20baa905ece4f4683e94922c47539506040d5e2ef39b39",
+        "packages/core/kitchen.ts": "eab115577b05347c3ae2e53ef4865408530571fdf3847d8e0e97ef6cbf6334e7",
+        "packages/core/orders.ts": "3d6130b9bd42ba931e6eb38cb889da662b6e5f5636d90a1da02ef7b74c92c8b6",
+        "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+        "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+        "supabase/functions/_shared/kitchen-tickets-handler.ts": "7a1ae129026d1283886e5258bde29684a3b69449478d1d4cb073df7c91290667",
+        "supabase/functions/kitchen-tickets/index.ts": "e25fa372cb81c1f84aab3329622c2362d948558cb8c18ea6a5f7b64a666dab30"
+      },
+      "runtimeImports": [],
+      "retrievedSourceMatches": true
+    },
+    {
+      "name": "kitchen-live",
+      "version": 1,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "bytes": 13392,
+      "sha256": "8c0dadf44d22c472d75d18a47f96a41b79daa3f0fc89135b7aaf24c7ea27eab8",
+      "sourceFiles": 6,
+      "sourceHashes": {
+        "packages/core/device-access.ts": "58c8c04fbdb55cbf6fdea1c436d4d85d2f1a708f8016823a2a7e98a0c114600a",
+        "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+        "supabase/functions/_shared/device-access-handler.ts": "b6dabef03332bacf6cb09428e1e465b137a13d8b4ebc7fc419a5f05905f598b0",
+        "supabase/functions/_shared/kitchen-broadcast.ts": "4f3709f711cd71fec7b394e5554d57d0df4315257335b756a1e80310aecce4aa",
+        "supabase/functions/_shared/kitchen-live-handler.ts": "5d9bdfaaece85d3ed98205f70457acfd7b07930850ccad5bd5b5e5f0e93f3be5",
+        "supabase/functions/kitchen-live/index.ts": "5cab0e07c2d88def0e0f55863d63933616eb9f5b98bb14535c3ca99b07a8562a"
+      },
+      "runtimeImports": [
+        "npm:ws@8.23.0"
+      ],
+      "retrievedSourceMatches": true
+    }
+  ],
+  "otherFunctionsUnchanged": true,
+  "managedSql": {
+    "checks": 29,
+    "remainingAuthRows": 0,
+    "remainingShopRows": 0,
+    "syntheticAuth": true,
+    "phoneProviderCommissioned": false
+  },
+  "hostedTransport": {
+    "passed": 23,
+    "failed": 0,
+    "syntheticDevice": true,
+    "phoneProviderCommissioned": false,
+    "hostedLatencyAcceptance": false,
+    "checks": [
+      {
+        "label": "valid-key-control",
+        "ok": true,
+        "status": 200,
+        "expected": 200
+      },
+      {
+        "label": "reader-preflight",
+        "ok": true,
+        "status": 204,
+        "expected": 204
+      },
+      {
+        "label": "reader-device-required",
+        "ok": true,
+        "status": 401,
+        "expected": 401
+      },
+      {
+        "label": "reader-unknown-session",
+        "ok": true,
+        "status": 401,
+        "expected": 401
+      },
+      {
+        "label": "reader-method",
+        "ok": true,
+        "status": 405,
+        "expected": 405
+      },
+      {
+        "label": "reader-foreign-origin",
+        "ok": true,
+        "status": 403,
+        "expected": 403
+      },
+      {
+        "label": "reader-json-required",
+        "ok": true,
+        "status": 415,
+        "expected": 415
+      },
+      {
+        "label": "reader-malformed",
+        "ok": true,
+        "status": 400,
+        "expected": 400
+      },
+      {
+        "label": "reader-oversized",
+        "ok": true,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "label": "reader-authority-denied",
+        "ok": true,
+        "status": 400,
+        "expected": 400
+      },
+      {
+        "label": "reader-live-device",
+        "ok": true
+      },
+      {
+        "label": "stream-preflight",
+        "ok": true,
+        "status": 204,
+        "expected": 204
+      },
+      {
+        "label": "stream-device-required",
+        "ok": true,
+        "status": 401,
+        "expected": 401
+      },
+      {
+        "label": "stream-unknown-session",
+        "ok": true,
+        "status": 401,
+        "expected": 401
+      },
+      {
+        "label": "stream-authority-denied",
+        "ok": true,
+        "status": 400,
+        "expected": 400
+      },
+      {
+        "label": "authenticated-stream-open",
+        "ok": true,
+        "status": 200,
+        "expected": 200
+      },
+      {
+        "label": "closed-ready-frame",
+        "ok": true
+      },
+      {
+        "label": "actual-private-broadcast-and-scoped-reread",
+        "ok": true
+      },
+      {
+        "label": "hosted-stream-ready",
+        "ok": true
+      },
+      {
+        "label": "hosted-order-wake",
+        "ok": true
+      },
+      {
+        "label": "live-revocation-frame",
+        "ok": true
+      },
+      {
+        "label": "revoked-reader",
+        "ok": true,
+        "status": 401,
+        "expected": 401
+      },
+      {
+        "label": "revoked-stream",
+        "ok": true,
+        "status": 401,
+        "expected": 401
+      }
+    ]
+  },
+  "fixtureCleanup": {
+    "remaining_shops": 0,
+    "remaining_devices": 0,
+    "remaining_orders": 0,
+    "remaining_feed_rows": 0,
+    "remaining_sync_rows": 0
+  },
+  "advisors": [
+    {
+      "type": "security",
+      "info": 1,
+      "warnings": 0,
+      "errors": 0
+    },
+    {
+      "type": "performance",
+      "info": 1,
+      "warnings": 0,
+      "errors": 0
+    }
+  ],
+  "remaining": [
+    "Configurable unacknowledged Inbox alarm",
+    "Desk web push",
+    "Explicit expired-session tap review and recovery",
+    "Final M32 acceptance and publication"
+  ]
+}

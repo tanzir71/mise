@@ -7,13 +7,13 @@ const base='/mise/app/',connection={apiUrl:'https://screen.test',publishableKey:
 const storage=(entries:Record<string,string>={})=>({get length(){return Object.keys(entries).length;},key:(i:number)=>Object.keys(entries)[i]??null,getItem:(key:string)=>entries[key]??null});
 async function pairing():Promise<ScreenState>{const token='D'.repeat(43);return {phase:'pairing',source:{connection,requestId:id(5),token,tokenHash:await deviceSecretHash(token),code:'123456',pairingId:id(10)},receipt:null};}
 async function db(factory:IDBFactory,name:string,table='state'){
- return new Promise<IDBDatabase>((resolve,reject)=>{const request=factory.open(name,1);request.onupgradeneeded=()=>request.result.createObjectStore(table,{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+ return new Promise<IDBDatabase>((resolve,reject)=>{const request=factory.open(name);request.onupgradeneeded=()=>request.result.createObjectStore(table,{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
 }
 async function write(database:IDBDatabase,table:string,value:unknown){await new Promise<void>((resolve,reject)=>{const tx=database.transaction(table,'readwrite');tx.objectStore(table).put(value);tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error);});}
 afterEach(()=>vi.restoreAllMocks());
 it('persists the original pairing secret and identity across close/reopen, separate from every owner store',async()=>{
  const factory=new IDBFactory(),journal=await openScreenJournal(base,factory),empty=await journal.read(),state=await pairing(),saved=await journal.replace(empty,state);journal.close();
- const reopened=await openScreenJournal(base,factory);expect(await reopened.read()).toEqual(saved);expect(saved.revision).not.toBe(empty.revision);expect(await factory.databases()).toEqual([{name:screenJournalDatabaseName(base),version:1}]);reopened.close();
+ const reopened=await openScreenJournal(base,factory);expect(await reopened.read()).toEqual(saved);expect(saved.revision).not.toBe(empty.revision);expect(await factory.databases()).toEqual([{name:screenJournalDatabaseName(base),version:2}]);reopened.close();
 });
 it('two tabs competing for one empty screen cannot install different credentials',async()=>{
  const factory=new IDBFactory(),a=await openScreenJournal(base,factory),b=await openScreenJournal(base,factory),old=await a.read(),source=await pairing();

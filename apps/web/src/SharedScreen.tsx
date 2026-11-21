@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import { MiseIcon } from '@mise/ui/MiseIcon.tsx';
@@ -24,6 +24,7 @@ import { watchScreenProfile } from './data/screen-profile';
 import { ConnectionForm } from './CloudAuthForms';
 import { installApp, useAppInstall } from './app-install';
 import './device-access.css';
+const KitchenScreen=lazy(()=>import('./KitchenScreen').then(module=>({default:module.KitchenScreen})));
 
 type Session = ReturnType<typeof createDeviceScreenSession>;
 interface Runtime {
@@ -52,7 +53,7 @@ const problem = (error: unknown) =>
     ? error.message
     : 'This screen could not finish the step. Keep its saved setup and try again.';
 
-export function SharedScreen({ setupHash = '' }: { setupHash?: string }) {
+export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setupHash?: string; kitchenEnabled?: boolean }) {
   const [incoming] = useState(() => setupLink(setupHash)),
     [connection, setConnection] = useState<CloudConnection | null>(
       incoming.link?.connection ?? null,
@@ -245,7 +246,7 @@ export function SharedScreen({ setupHash = '' }: { setupHash?: string }) {
     return () => clearInterval(timer);
   }, [phase, online, blocked]);
   useEffect(() => {
-    if (!saved || phase !== 'signed-in' || !online || blocked) {
+    if (!saved || phase !== 'signed-in' || !online || blocked || kitchenEnabled) {
       setAccess(null);
       return;
     }
@@ -289,7 +290,7 @@ export function SharedScreen({ setupHash = '' }: { setupHash?: string }) {
       if (observer.current === reader) observer.current = null;
       clearInterval(timer);
     };
-  }, [saved?.revision, phase, online, blocked, accessRevision]);
+  }, [saved?.revision, phase, online, blocked, accessRevision, kitchenEnabled]);
   useEffect(() => {
     if (phase !== 'enrolled' || blocked || !online) return;
     let active = true;
@@ -377,6 +378,7 @@ export function SharedScreen({ setupHash = '' }: { setupHash?: string }) {
     : enrolled
       ? 'Sign in on this screen'
       : 'Turn this device into a shared screen';
+  if(kitchenEnabled&&!blocked&&saved?.state.phase==='signed-in'&&runtime.current?.active)return <Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening kitchen tickets…</p></main>}><KitchenScreen key={saved.revision} journal={runtime.current.journal} source={saved} onSignOut={()=>void reset()}/></Suspense>;
   return (
     <main className="shared-screen">
       <a className="app-skip" href="#screen-main">

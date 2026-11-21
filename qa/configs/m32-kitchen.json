@@ -1,0 +1,36 @@
+{
+  "title": "M32 — Shared preparation tickets, offline taps and private realtime",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "m32-kitchen-board",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "board",
+      "note": "Actual domain orders, staff PIN session, PostgreSQL roles, private WebSocket relay, scoped HTTP reads and preparation receipts. Synthetic identities only. The supplied 65:1843 and 107:1222 frames guide the ticket grid, large phone controls and status words. Translations, batches and pack checkboxes are not fabricated. The device bezel, current clock and literal fixture data differ; pixel differences are informational. Alarm/push and expired-session review remain unfinished.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "m32-kitchen-offline",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "offline",
+      "note": "The real browser context is offline after scoped tickets are cached. Uses 65:1843/107:1222 for structure, spacing and type; no unavailable live status is claimed. Synthetic data and browser/device chrome differ from the export.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "m32-kitchen-queued",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "queued",
+      "note": "Got it and Ready are tapped through the actual UI while the browser is offline. Complete sources and original IDs are saved in native IndexedDB. The pending label does not claim a server acknowledgement. Uses 65:1843/107:1222 controls and ticket layout; literal fixture data and missing device chrome differ.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    }
+  ]
+}

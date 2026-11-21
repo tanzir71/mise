@@ -1,6 +1,9 @@
 import {parseCloudConnection,type CloudConnection} from '@mise/core/cloud-connection';
 import {deviceSecretHash,isDeviceId,isDeviceToken,pairingCode,parseDeviceDirectory,parsePairingOutcome,parsePairingRequest,parseSharedDevice,parseStaffDeviceAccess,parseStaffDeviceSession,type SharedDevice,type StaffDeviceSession} from '@mise/core/device-access';
 import {bindCommandReceipt} from './command-request';
+import {parseKitchenPage,parseKitchenChanges,type KitchenCursor} from '@mise/core/kitchen-tickets';
+import {parseKitchenAction,parseKitchenReceipt,type KitchenAction} from '@mise/core/kitchen';
+import type {StaffDeviceAccess} from '@mise/core/device-access';
 
 export class DeviceScreenRequestError extends Error {
  constructor(readonly kind:'auth'|'review'|'retry'|'backoff',readonly retryAt:number|null=null){
@@ -20,7 +23,7 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
  function checked<T extends object>(value:T):T{current();return bindCommandReceipt(value,current);}
  function pinned(value:SharedDevice){const d=parseSharedDevice(value);if(d.id!==requestId||d.revokedAt!==null)throw new DeviceScreenRequestError('review');return d;}
  function session(value:StaffDeviceSession,device:SharedDevice){return parseStaffDeviceSession(value,{deviceId:device.id,memberId:value.memberId});}
- async function call(route:'device-access'|'device-pin',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
+ async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
   // Serialize before the first await, so form/selection mutations cannot alter
   // an already prepared request. No credential is ever added to the URL.
   const serialized=JSON.stringify(body),controller=new AbortController(),lifetime=signal?AbortSignal.any([controller.signal,signal]):controller.signal;
@@ -37,9 +40,10 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
    if([401,403].includes(response.status))throw new DeviceScreenRequestError('auth');
    if([400,409,413,415].includes(response.status))throw new DeviceScreenRequestError('review');
    if(!response.ok&&response.status!==429)throw new DeviceScreenRequestError('retry');
-   const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>responseLimit))throw new DeviceScreenRequestError('retry');
+   const maximum=route==='kitchen-tickets'?32*1024*1024:responseLimit;
+   const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>maximum))throw new DeviceScreenRequestError('retry');
    const reader=response.body?.getReader();if(!reader)throw new DeviceScreenRequestError('retry');const chunks:Uint8Array[]=[];let size=0;
-   try{for(;;){const part=await abortable(reader.read());if(part.done)break;size+=part.value.byteLength;if(size>responseLimit)throw new DeviceScreenRequestError('retry');chunks.push(part.value);}}
+   try{for(;;){const part=await abortable(reader.read());if(part.done)break;size+=part.value.byteLength;if(size>maximum)throw new DeviceScreenRequestError('retry');chunks.push(part.value);}}
    catch(error){void reader.cancel().catch(()=>{});throw error;}finally{reader.releaseLock();}
    const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
    const value:unknown=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));current();
@@ -55,6 +59,21 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
   finally{clearTimeout(timer);controller.abort();}
  }
  return {
+  async tickets(device:SharedDevice,input:StaffDeviceSession,after:KitchenCursor|null=null,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original),cursor=after===null?null:{...after};
+   const value=await call('kitchen-tickets',{action:'page',sessionToken:saved.token,after:cursor,limit:50},signal);
+   return checked(await parseKitchenPage(value,{device:original,session:saved},cursor));
+  },
+  async ticketChanges(device:SharedDevice,input:StaffDeviceSession,afterSeq:number,untilSeq:number|null=null,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original);
+   if(!Number.isSafeInteger(afterSeq)||afterSeq<0||untilSeq!==null&&(!Number.isSafeInteger(untilSeq)||untilSeq<afterSeq))throw new DeviceScreenRequestError('review');
+   const value=await call('kitchen-tickets',{action:'changes',sessionToken:saved.token,afterSeq,untilSeq,limit:50},signal);
+   return checked(await parseKitchenChanges(value,{device:original,session:saved},afterSeq,untilSeq));
+  },
+  async kitchenAction(device:SharedDevice,input:StaffDeviceSession,access:StaffDeviceAccess,inputAction:KitchenAction,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original),actor=parseStaffDeviceAccess(access,{device:original,session:saved}),action=parseKitchenAction(inputAction);
+   return checked(parseKitchenReceipt(await call('kitchen-actions',{sessionToken:saved.token,action},signal),{action,access:actor}));
+  },
   async request(code:string,pairingId:string|null,signal?:AbortSignal){
    const original={code:pairingCode(code),pairingId};if(pairingId!==null&&!isDeviceId(pairingId))throw new DeviceScreenRequestError('review');
    const hash=await deviceSecretHash(token);current();const value=await call('device-access',{action:'request',id:requestId,...original},signal);
