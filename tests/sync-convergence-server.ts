@@ -13,6 +13,7 @@ import {createOrderReviewHandler,createOrderReviewStore} from '../supabase/funct
 import {createMoneyReviewHandler,createMoneyReviewStore} from '../supabase/functions/_shared/money-review';
 import {createPurchaseReviewHandler,createPurchaseReviewStore} from '../supabase/functions/_shared/purchase-review';
 import {createStockReviewHandler,createStockReviewStore} from '../supabase/functions/_shared/stock-review';
+import {createCustomerReviewHandler,createCustomerReviewStore} from '../supabase/functions/_shared/customer-review';
 import { resolve, join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -153,6 +154,11 @@ export async function startConvergenceServer(
     'prepare_stock_review',
     'read_stock_review',
     'finish_stock_review',
+    'admit_customer_review',
+    'inspect_customer_outcome',
+    'prepare_customer_review',
+    'read_customer_review',
+    'finish_customer_review',
     'prepare_stock_write',
     'finish_stock_write',
     'admit_stock_batch',
@@ -354,6 +360,7 @@ export async function startConvergenceServer(
     moneyReviews=createMoneyReviewHandler({origins,store:createMoneyReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     purchaseReviews=createPurchaseReviewHandler({origins,store:createPurchaseReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     stockReviews=createStockReviewHandler({origins,store:createStockReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
+    customerReviews=createCustomerReviewHandler({origins,store:createCustomerReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     upload = createInitialUploadHandler({
       origins,
       store: createInitialUploadStore(
@@ -479,8 +486,8 @@ export async function startConvergenceServer(
       } else if (path === '/functions/v1/commands') {
         calls.commands++;
         const reviewMode = new URL(request.url).searchParams.get('review');
-        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?.startsWith('stock-')?stockReviews:reviewMode?reviews:commands)(request);
-        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve','stock-resolve'].includes(reviewMode??'')) && response.ok) {
+        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?.startsWith('stock-')?stockReviews:reviewMode?.startsWith('customer-')?customerReviews:reviewMode?reviews:commands)(request);
+        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve'].includes(reviewMode??'')) && response.ok) {
           holdCommand = false;
           holdResolution = false;
           await new Promise<void>((resolve) => {
@@ -489,7 +496,7 @@ export async function startConvergenceServer(
           });
           releaseCommand = null;
         }
-        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
+        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
           loseCommand = false;
           loseResolution = false;
           await truncate(response);
@@ -680,6 +687,9 @@ export async function startConvergenceServer(
     },
     async customerMoneyState(customerId:string) {
       return (await db.query<{customers:number;accounts:number;entries:number}>('select (select count(*)::int from public.customers where id=$1) customers,(select count(*)::int from public.credit_accounts where customer_id=$1) accounts,(select count(*)::int from public.credit_entries where customer_id=$1) entries',[customerId])).rows[0];
+    },
+    async customerReviewState(customerId:string) {
+      return (await db.query<{customers:number;accounts:number;entries:number;resolutions:number}>('select (select count(*)::int from public.customers where id=$1) customers,(select count(*)::int from public.credit_accounts where customer_id=$1) accounts,(select count(*)::int from public.credit_entries where customer_id=$1) entries,(select count(*)::int from private.customer_command_resolutions where customer_id=$1) resolutions',[customerId])).rows[0];
     },
     async close() {
       releaseCommand?.();

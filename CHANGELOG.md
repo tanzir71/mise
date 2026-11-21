@@ -18,6 +18,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- Saved customer and khata actions gain an opt-in comparison of original details, current records and the reviewed result. Explicit withdrawal or replacement preserves the original financial parents, opening amount and balance date. A token-free journal recovers genuine outcomes after lost replies, offline reloads and account changes; conflicting khatas are never silently retargeted. Copy and JSON backup remain available. Cloud sync stays off by default.
+
 - Saved stock actions now have an opt-in comparison of original and current quantities, units, supplier selections and physical-count history. Explicit withdrawal or replacement retains the original source and recovers genuine outcomes after lost replies, offline reloads and account changes. Review tokens stay ephemeral; cloud sync remains off by default.
 
 - Saved stock descriptions and archive choices now merge with the latest online item while preserving its current quantity, unit and physical-count history. Original edits stay intact; physical counts and undo retain their review rules. Cloud sync remains off by default.

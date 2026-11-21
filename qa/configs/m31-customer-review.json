@@ -1,0 +1,116 @@
+{
+  "title": "M31 — Original saved customer and khata review",
+  "pages": [
+    {
+      "id": "m31-customer-review-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated customer review frame. Uses supplied Khata and Business data typography, monochrome cards, spacing and controls. Actual local scoped SQL/HTTP; Auth, Realtime and Storage identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".customer-action-review",
+          "id": "review",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "customerActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-customer-review-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated customer review frame. Uses supplied Khata and Business data typography, monochrome cards, spacing and controls. Actual local scoped SQL/HTTP; Auth, Realtime and Storage identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".customer-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "customerActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-customer-blocked-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated customer review frame. Uses supplied Khata and Business data typography, monochrome cards, spacing and controls. Actual local scoped SQL/HTTP; Auth, Realtime and Storage identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".customer-action-review",
+          "id": "blocked",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "customerActionReviewFixture": "blocked"
+    },
+    {
+      "id": "m31-customer-blocked-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated customer review frame. Uses supplied Khata and Business data typography, monochrome cards, spacing and controls. Actual local scoped SQL/HTTP; Auth, Realtime and Storage identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".customer-action-review",
+          "id": "blocked",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "customerActionReviewFixture": "blocked"
+    },
+    {
+      "id": "m31-customer-unconfirmed-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated customer review frame. Uses supplied Khata and Business data typography, monochrome cards, spacing and controls. Actual local scoped SQL/HTTP; Auth, Realtime and Storage identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".customer-action-review",
+          "id": "unconfirmed",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "customerActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-customer-unconfirmed-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated customer review frame. Uses supplied Khata and Business data typography, monochrome cards, spacing and controls. Actual local scoped SQL/HTTP; Auth, Realtime and Storage identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".customer-action-review",
+          "id": "unconfirmed",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "customerActionReviewFixture": "unconfirmed"
+    }
+  ]
+}

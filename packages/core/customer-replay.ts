@@ -3,7 +3,8 @@ import {archiveCustomerCommand,type CustomerSetup} from './customers';
 import {saveCreditTermsCommand} from './khata';
 import {decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
 import type {Business,CreditAccount,Customer,Outlet} from './models';
-import {parseShopCommand,type CustomerCommand} from './shop-commands';
+import type {CustomerCommand} from './customer-commands';
+export {customerFingerprint} from './customer-commands';
 export class CustomerMutationInvalid extends Error {}
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const id=(v:unknown):v is string=>typeof v==='string'&&/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v);
@@ -49,7 +50,4 @@ export function replayCustomerRecords(value:unknown,c:CustomerCommand):CloudReco
   const events=records.filter(r=>r.table==='events');
   if(!events.some(e=>e.values.id===c.id)||events.some(e=>e.values.actor_id!==value.actorId)||records.some(r=>r.values.business_id!==value.businessId))throw new Error('Invalid generated customer records.');
   return records;
-}
-export async function customerFingerprint(c:CustomerCommand):Promise<string>{
-  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(parseShopCommand(c))))),b=>b.toString(16).padStart(2,'0')).join('');
 }

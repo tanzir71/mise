@@ -625,10 +625,13 @@ const api = {
   queuePurchase:()=>use(db=>db.recordPurchase({supplierName:'Original supplier',reference:'Original BDT invoice · বাংলা',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due',note:'Keep invoice\0\ud800'})),
   stockEdit:(supplierName:string,quantity:number)=>use(async(db,receiver)=>{const w=await wire(receiver),item=(await db.stockItems.get(w.config.stockId))!,supplier=await db.saveSupplier({name:supplierName,phone:'',note:''});return db.saveStockItem({...item,supplierId:supplier.id,onHand:quantity},{id:item.id,revision:item.revision});}),
   renameStockSupplier:(name:string)=>use(async(db,receiver)=>{const w=await wire(receiver),item=(await db.stockItems.get(w.config.stockId))!,supplier=item.supplierId?await db.suppliers.get(item.supplierId):null;if(!supplier)throw Error('Choose the original stock supplier');return db.saveSupplier({name,phone:supplier.phone??'',note:supplier.note??''},{id:supplier.id,revision:supplier.revision});}),
-  queueCustomerOpening:()=>use(async db=>{
-    const customer=await db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Original opening · বাংলা\0\ud800',tags:[]},{credit:{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}},opening:{amount:12345,occurredAt:1}}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!,entry=(await db.creditEntries.toArray()).find(e=>e.accountId===account.id)!;
+  queueCustomerOpening:(phone='')=>use(async db=>{
+    const customer=await db.saveCustomer({name:'Original customer',nickname:'',phone,address:'',notes:'Original opening · বাংলা\0\ud800',tags:[]},{credit:{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}},opening:{amount:12345,occurredAt:1}}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!,entry=(await db.creditEntries.toArray()).find(e=>e.accountId===account.id)!;
     return {customerId:customer.id,accountId:account.id,entryId:entry.id};
   }),
+  createCustomerConflict:()=>use(async db=>{const customer=await db.saveCustomer({name:'Other private customer',nickname:'',phone:'+8801812345678',address:'',notes:'Do not expose this other customer',tags:[]});return customer.id;}),
+  queueCurrentKhata:()=>use(async db=>{const customer=(await db.customers.toArray())[0],account=await db.saveCreditTerms(customer.id,{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}});return {customerId:customer.id,accountId:account.id};}),
+  clearCustomerConflict:(id:string)=>use(async db=>{const customer=(await db.customers.get(id))!;return db.saveCustomer({name:customer.name,nickname:customer.nickname,phone:'',address:customer.address,notes:customer.notes,tags:customer.tags},{id});}),
   setOriginalKhataLimit:(accountId:string,limit:number)=>use(async db=>{const account=await db.creditAccounts.get(accountId);if(!account)throw Error('Choose the original account');return db.saveCreditTerms(account.customerId,{allowed:account.allowed,limit,reminder:account.reminder},account.id);}),
   editOriginalCustomer:(customerId:string,name:string,limit:number|null)=>use(async db=>{const customer=await db.customers.get(customerId),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customerId);if(!customer||!account)throw Error('Choose the original customer and khata');return db.saveCustomer({name,nickname:customer.nickname,phone:customer.phone??'',address:customer.address,notes:customer.notes,tags:customer.tags},{id:customerId,...(limit===null?{}:{credit:{allowed:account.allowed,limit,reminder:account.reminder}})});}),
   undoOriginalPurchase:(id:string)=>use(db=>db.undoPurchase(id)),
@@ -724,6 +727,7 @@ const api = {
       moneyReviews: await db.moneyReviews.toArray(),
       purchaseReviews: await db.purchaseReviews.toArray(),
       stockReviews: await db.stockReviews.toArray(),
+      customerReviews: await db.customerReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

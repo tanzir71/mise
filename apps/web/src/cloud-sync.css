@@ -55,6 +55,19 @@
 .order-review-source { white-space:pre-wrap; overflow-wrap:anywhere; max-width:100%; font:inherit; }
 .purchase-action-review :is(dd,li,strong,span) { min-width:0; overflow-wrap:anywhere; }
 .stock-action-review :is(dd,li,strong,span) { min-width:0; overflow-wrap:anywhere; }
+.customer-action-review :is(dd,li,strong,span,details) { min-width:0; overflow-wrap:anywhere; }
+.customer-action-review h5 { margin:16px 0 8px; font-size:14px; line-height:24px; font-weight:500; }
+.customer-action-review .order-review-comparison > div { display:flex; flex-direction:column; }
+.customer-action-review .order-review-comparison > div > p:last-child { margin-top:auto; padding-top:16px; }
+.customer-action-review .order-review-proposal { border:1px solid var(--border); border-radius:16px; padding:16px; }
+.customer-review-fields { margin:16px 0; }
+.customer-review-fields > div { display:flex; justify-content:space-between; gap:16px; padding:8px 0; }
+.customer-review-fields dt { flex-shrink:0; color:var(--text-secondary); }
+.customer-review-fields dd { margin:0; text-align:right; }
+.customer-review-fields summary { text-align:left; }
+.customer-review-fields pre { text-align:left; }
+.customer-review-copy { display:grid; gap:8px; }
+.customer-review-copy textarea { box-sizing:border-box; width:100%; resize:vertical; }
 .stock-action-review .order-review-comparison > div { display:flex; flex-direction:column; }
 .stock-action-review .order-review-comparison > div > p:last-child { margin-top:auto; padding-top:16px; }
 .stock-review-items,.stock-review-notes { padding:0; margin:16px 0; list-style:none; }

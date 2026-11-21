@@ -8,7 +8,7 @@ import LZString from 'lz-string';
 import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
 import { installUploadReviewFixture } from '../tests/fixtures/install-upload-review.mjs';
 import { installOperatorsFixture } from '../tests/fixtures/install-operators.mjs';
-import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyActionReview,capturePurchaseActionReview,captureStockActionReview,captureMoneyCurrencyReview,capturePendingCurrencyRecovery,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
+import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyActionReview,capturePurchaseActionReview,captureStockActionReview,captureCustomerActionReview,captureMoneyCurrencyReview,capturePendingCurrencyRecovery,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
 
 const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
 const configs = configPaths.map(path => JSON.parse(readFileSync(path, 'utf8')));
@@ -62,6 +62,7 @@ try {
     if(target.moneyActionReviewFixture)await captureMoneyActionReview(page,target.moneyActionReviewFixture);
     if(target.purchaseActionReviewFixture)await capturePurchaseActionReview(page,target.purchaseActionReviewFixture);
     if(target.stockActionReviewFixture)await captureStockActionReview(page,target.stockActionReviewFixture);
+    if(target.customerActionReviewFixture)await captureCustomerActionReview(page,target.customerActionReviewFixture);
     if(target.moneyCurrencyReviewFixture)await captureMoneyCurrencyReview(page);
     if(target.pendingCurrencyRecoveryFixture)await capturePendingCurrencyRecovery(page);
     await page.evaluate(() => document.fonts.ready);

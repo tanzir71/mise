@@ -1,5 +1,20 @@
 # Deployment credentials
 
+The [saved customer and khata review](m31-customer-review.md) keeps original
+actions and deliberate choices in a token-free native journal. Deployment values
+and Auth sessions never enter that journal or portable backups. The retrieved
+JWT-verified backend matches the reviewed bundle; all 68 application tables
+force RLS, with no anonymous/PUBLIC table grants, public definers or public
+buckets. All 32 anonymous probes return 401 after valid-key 200 controls, and
+all 20 managed role-proof cases pass with fictional rows rolled back. Advisors
+have no warnings or errors. Auth settings and server secrets are unchanged.
+The full source, index, history and generated-output guard compares ten actual
+private values, including the project and organization references, without
+printing them. It finds no credentials or current deployment references. The
+[22 previously recorded nonsecret historical findings](security-history.md)
+remain; new history findings block a push. Actual private values stay in ignored
+inputs or the server secret manager, and all guards remain enabled.
+
 The [saved stock review](m31-stock-review.md) retains original actions and deliberate
 choices in a token-free native journal. Review tokens and Auth sessions remain
 ephemeral; connection values never enter the journal or portable backup. Private

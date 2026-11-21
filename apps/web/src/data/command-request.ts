@@ -2,6 +2,7 @@ import {cloudConnectionTarget,type CloudConnection} from '@mise/core/cloud-conne
 import {operatorAccountHash} from '@mise/core/operators';
 import {syncHash} from '@mise/core/sync-read';
 import {stockReviewResponseLimit} from '@mise/core/stock-review-source';
+import {customerReviewResponseLimit} from '@mise/core/customer-review-view';
 
 export interface CommandAuthorization {jwt:string;userId:string;generation:number}
 export interface CommandAccount {scope:string;accountHash:string;targetHash:string;getAuth:()=>Promise<CommandAuthorization>;assertCurrent:(value:CommandAuthorization)=>void}
@@ -46,6 +47,10 @@ export function createPurchaseReviewRequest(config:CloudConnection,input:Command
 export function createStockReviewRequest(config:CloudConnection,input:CommandAccount,mode:'read'|'resolve',send:typeof fetch){
  const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review','stock-'+mode);
  return accountRequest(config,input,endpoint,'POST',send,stockReviewResponseLimit);
+}
+export function createCustomerReviewRequest(config:CloudConnection,input:CommandAccount,mode:'read'|'resolve',send:typeof fetch){
+ const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review','customer-'+mode);
+ return accountRequest(config,input,endpoint,'POST',send,customerReviewResponseLimit);
 }
 export function createAccountImageRequest(config:CloudConnection,input:CommandAccount,imageId:string,send:typeof fetch){
  if(!/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(imageId))throw new CommandRequestError('review');
