@@ -1,4 +1,4 @@
-import {expect,it} from 'vitest';
+import {afterEach,expect,it} from 'vitest';
 import {zipSync,strToU8} from 'fflate';
 import {mkdtempSync,writeFileSync,rmSync,mkdirSync,copyFileSync,chmodSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -9,6 +9,9 @@ import {spawnSync} from 'node:child_process';
 // @ts-expect-error The repository guard is a standalone Node script.
 import {inspectSecretBytes} from '../scripts/check-secrets.mjs';
 const key='sb_secret_'+'x'.repeat(32);
+// Git fixtures run synchronously. Let the worker deliver progress between cases
+// so a complete history scan cannot starve the runner's normal RPC deadline.
+afterEach(()=>new Promise<void>(resolve=>setImmediate(resolve)));
 function utf16(text:string,bigEndian:boolean,bom:boolean){const body=Buffer.from(text,'utf16le');if(bigEndian)body.swap16();return bom?Buffer.concat([Buffer.from(bigEndian?[254,255]:[255,254]),body]):body;}
 it.each([[false,false],[false,true],[true,false],[true,true]])('detects UTF-16 credentials (big endian: %s, BOM: %s) without exposing their values',(bigEndian,bom)=>{
   const pepper='f17c'.repeat(16),bytes=utf16('KEY='+key+'\nPEPPER='+pepper,bigEndian,bom);
