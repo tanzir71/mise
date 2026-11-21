@@ -1,5 +1,8 @@
 import type {LocalOutboxEntry} from '@mise/core/local-outbox';
-import {parseShopCommand,parseShopCommandReceipt} from '@mise/core/shop-commands';
+import {isClosingCommand,parseShopCommand,parseShopCommandReceipt} from '@mise/core/shop-commands';
+import {parseClosingResolutionReceipt,reviewedClosingProposal} from '@mise/core/closing-review';
+import {closingFingerprint} from '@mise/core/closing-replay';
+import {readClosingReviewSource} from './closing-review-source';
 import {syncHash} from '@mise/core/sync-read';
 import {nativeRowHash} from './canonical-writes';
 import type {AuditEvent} from '@mise/core/models';
@@ -13,6 +16,10 @@ export async function assertResolutionSources(row:LocalOutboxEntry):Promise<void
  for(const {receipt,index} of resolved){
   const command=parseShopCommand(row.commands[index]),parsed=parseShopCommandReceipt(receipt,command),commandHash=await syncHash(new TextEncoder().encode(JSON.stringify(command)));
   if(parsed.type!=='command.resolved'||parsed.sourceHash!==sourceHash||parsed.commandHash!==commandHash)throw new Error('Keep the exact original resolved action, source and server proof.');
+  if(isClosingCommand(command)){
+   const packet=readClosingReviewSource({...row,status:'pending',receipts:row.receipts.slice(0,index)},index),actual=parseClosingResolutionReceipt(receipt,packet);
+   if(actual.replacement&&actual.replacement.commandHash!==await closingFingerprint(reviewedClosingProposal(command,actual.replacement.id,actual.replacement.reviewJson)))throw new Error('Keep the complete reviewed closing and genuine replacement hash.');
+  }
  }
 }
 

@@ -1,3 +1,5 @@
+import {localTableNames} from '../packages/core/local-schema';
+import {localSchemaVersion} from '../packages/core/local-outbox';
 import 'fake-indexeddb/auto';
 import Dexie from 'dexie';
 import {afterEach,expect,it} from 'vitest';
@@ -75,8 +77,8 @@ it('rolls every native write back when live authorization changes during domain 
  expect(allowed).toBe(false);expect(backupToken(await f.db.readBackup())).toBe(before);expect(await f.db.cloudState.get('binding')).toEqual(binding);expect(await f.db.operatorState.get('active')).toEqual(operator);expect(await f.db.scopeRecoveries.where('kind').equals('admission').count()).toBe(0);
 });
 it('upgrades schema 20 with all 34 original stores, complete images, queue and canonical evidence unchanged',async()=>{
- const f=await boot();await f.db.recordSale({expression:'37',method:'cash'});const before=backupToken(await f.db.readBackup()),name='mise-recovery-upgrade-'+newInboxId(),legacy=new Dexie(name),tables=f.db.tables.filter(table=>!['scopeRecoveries','syncActionReviews','orderReviews','moneyReviews','purchaseReviews','stockReviews','customerReviews'].includes(table.name)),saved=await Promise.all(tables.map(table=>table.toArray()));
+ const f=await boot();await f.db.recordSale({expression:'37',method:'cash'});const before=backupToken(await f.db.readBackup()),name='mise-recovery-upgrade-'+newInboxId(),legacy=new Dexie(name),tables=f.db.tables.filter(table=>!['scopeRecoveries','syncActionReviews','orderReviews','moneyReviews','purchaseReviews','stockReviews','customerReviews','closingReviews'].includes(table.name)),saved=await Promise.all(tables.map(table=>table.toArray()));
  legacy.version(20).stores(Object.fromEntries(tables.map(table=>[table.name,[table.schema.primKey.src,...table.schema.indexes.map(index=>index.src)].join(',')])));
  try{await legacy.open();expect(legacy.tables).toHaveLength(34);for(let index=0;index<tables.length;index++)await legacy.table(tables[index].name).bulkPut(saved[index]);}finally{legacy.close();}
- const upgraded=new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(27);expect(upgraded.tables).toHaveLength(41);expect(await upgraded.scopeRecoveries.count()).toBe(0);expect(await upgraded.syncActionReviews.count()).toBe(0);expect(await Promise.all(tables.map(table=>upgraded.table(table.name).toArray()))).toEqual(saved);expect(backupToken(await upgraded.readBackup())).toBe(before);expect((await readCanonicalState(upgraded)).binding).toEqual(await f.db.cloudState.get('binding'));
+ const upgraded=new MiseDatabase(name);databases.push(upgraded);await upgraded.open();expect(upgraded.verno).toBe(localSchemaVersion);expect(upgraded.tables).toHaveLength(localTableNames.length);expect(await upgraded.scopeRecoveries.count()).toBe(0);expect(await upgraded.syncActionReviews.count()).toBe(0);expect(await Promise.all(tables.map(table=>upgraded.table(table.name).toArray()))).toEqual(saved);expect(backupToken(await upgraded.readBackup())).toBe(before);expect((await readCanonicalState(upgraded)).binding).toEqual(await f.db.cloudState.get('binding'));
 });

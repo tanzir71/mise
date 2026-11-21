@@ -210,7 +210,7 @@ export async function runSyncCycle(
       delivery = await deliverLocalOutbox(
         db,
         claimed.target.targetHash,
-        (command,currency) => commands(command,currency,lifetime),
+        (command,currency,_signal,parent) => commands(command,currency,lifetime,parent),
       );
     if (delivery.retained) throw new SyncSessionError('review');
     await deliverLocalInboxImages(db,claimed.target.targetHash,createCloudInboxImageUploader(options.config,account,send),lifetime);

@@ -1,5 +1,16 @@
 # Deployment credentials
 
+The [saved physical-count review](m31-closing-review.md) retains original sources
+and deliberate choices in a token-free native journal. Deployment values and
+Auth sessions remain outside the journal and portable backups. Its retrieved
+JWT-verified backend exactly matches the reviewed bundle. All 70 application
+tables force RLS; closing review tables and their sequence have no direct client
+or service grants. Twenty managed SQL-role checks pass with fictional rows
+rolled back, and all 40 actual anonymous probes return 401 after valid-key 200
+controls. The current module's preflight returns 204 with its new parent header.
+Advisors report no warnings or errors. Real Auth accounts, phone-provider settings
+and server secrets were not changed; cloud flags and workflows stay off.
+
 The [saved customer and khata review](m31-customer-review.md) keeps original
 actions and deliberate choices in a token-free native journal. Deployment values
 and Auth sessions never enter that journal or portable backups. The retrieved

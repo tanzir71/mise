@@ -13,6 +13,7 @@ import {
   purchaseBodyLimit,
 } from '@mise/core/purchase-commands';
 import { orderBodyHeader, orderBodyLimit } from '@mise/core/order-commands';
+import {savedClosingParentHeader,validClosingParent} from '@mise/core/closing-source';
 import {
   savedCurrencyHeader,
   validSavedCurrency,
@@ -65,6 +66,7 @@ export function createShopCommandRemote(
       value: unknown,
       currencyOrSignal?: string | AbortSignal,
       abort?: AbortSignal,
+      closingParent?: string,
     ): Promise<ShopCommandReceipt> {
       const currency =
           typeof currencyOrSignal === 'string' ? currencyOrSignal : undefined,
@@ -84,6 +86,7 @@ export function createShopCommandRemote(
           command.type === 'supplier-message.record',
         inboxSave = command.type === 'inbox.capture',
         linkSave = command.type === 'shopLink.generate';
+      if(command.type==='closing.undo'?!validClosingParent(closingParent):closingParent!==undefined)throw new CommandRequestError('review');
       if (
         new TextEncoder().encode(body).byteLength >
         (command.type === 'stock.batch'
@@ -107,6 +110,7 @@ export function createShopCommandRemote(
         body,
         {
           'Content-Type': 'application/json',
+          ...(closingParent===undefined?{}:{[savedClosingParentHeader]:closingParent}),
           ...(currency === undefined
             ? {}
             : { [savedCurrencyHeader]: currency }),

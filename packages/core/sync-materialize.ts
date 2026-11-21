@@ -11,6 +11,8 @@ import {replayStockRecords} from './stock-replay';
 import {stockWritePlan} from './stock-commands';
 import {stockReviewBoundary,StockReviewBoundaryError,type StockReviewBoundary} from './stock-review-boundary';
 import {customerReviewBoundary,CustomerReviewBoundaryError,type CustomerReviewBoundary} from './customer-review-boundary';
+import {validClosingParent} from './closing-source';
+import {closingReviewBoundary,ClosingReviewBoundaryError,type ClosingReviewBoundary} from './closing-review-boundary';
 import {syncDownloadToken} from './sync-download';
 import {syncHash} from './sync-read';
 import type {SyncCoverageIntent} from './sync-coverage';
@@ -48,7 +50,7 @@ function applyRecords(backup:MiseBackup,records:readonly CloudRecord[]):MiseBack
  * original outbox records, IDs and receipts are never edited or manufactured.
  * A tentative projection never substitutes for genuine receipt coverage.
  */
-export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at,savedCurrency?:string,stockBoundary?:StockReviewBoundary,customerBoundary?:CustomerReviewBoundary):Promise<MiseBackup> {
+export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at,savedCurrency?:string,stockBoundary?:StockReviewBoundary,customerBoundary?:CustomerReviewBoundary,closingParent:string|null=null,closingBoundary?:ClosingReviewBoundary):Promise<MiseBackup> {
  const backup=parseBackup(input),c=parseShopCommand(value),t=backup.tables,business=t.businesses[0],outlet=t.outlets[0],actor=t.members.find(m=>m.id===actorId);
  if(!business||!outlet||!actor?.active||!['owner','manager'].includes(actor.role)||actor.businessId!==business.id||outlet.businessId!==business.id||'outletId'in c&&c.outletId!==outlet.id||actor.role==='manager'&&!actor.outletIds.includes(outlet.id))throw new ReconciliationError('review',c.id);
  // A matching row/audit never proves receipt inclusion. Without actual coverage
@@ -77,16 +79,22 @@ export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,act
    raw={business:row('businesses',business),outlet:row('outlets',outlet),items:rows('stockItems',t.stockItems.filter(i=>ids.has(i.id))),moves:rows('stockMoves',t.stockMoves.filter(m=>ids.has(m.stockItemId))),suppliers:rows('suppliers',t.suppliers)};
    records=replayStockRecords({...context,contextJson:JSON.stringify(raw)},c);
   }else{
+   if(c.type==='closing.undo'){
+    if(!validClosingParent(closingParent))throw new ReconciliationError('integrity',c.id);
+    if(t.dayClosings.find(row=>row.id===c.closingId)?.eventId!==closingParent)throw new ReconciliationError('conflict',c.id);
+   }
    const projection=await replayOtherPending(backup,c,actor,projectionAt);
    if(isOrderCommand(c)&&!proposedOrderCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
    if(isPurchaseCommand(c)&&!proposedPurchaseCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
    if(isCustomerCommand(c)&&!proposedCustomerCurrencyMatches(c,projection.records,savedCurrency))throw new ReconciliationError('conflict',c.id);
    (customerBoundary??await customerReviewBoundary(t.events,outlet.id)).assert(projection.records,backup);
+   (closingBoundary??await closingReviewBoundary(t.events,outlet.id)).assert(projection.records,backup);
    return await applyReplayProjection(backup,projection,parseBackup(original));
   }
   (customerBoundary??await customerReviewBoundary(t.events,outlet.id)).assert(records,backup);
+  (closingBoundary??await closingReviewBoundary(t.events,outlet.id)).assert(records,backup);
   return applyRecords(backup,records);
- }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError||error instanceof StockReviewBoundaryError||error instanceof CustomerReviewBoundaryError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
+ }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError||error instanceof StockReviewBoundaryError||error instanceof CustomerReviewBoundaryError||error instanceof ClosingReviewBoundaryError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
 }
 export function materializedRows(base:MiseBackup,working:MiseBackup):MaterializedRow[]{
  parseBackup(base);parseBackup(working);const result:MaterializedRow[]=[];

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
+- Saved closing undo stays bound to its original count creation event during delivery and canonical replay. A reviewed replacement cannot silently become the target of the old undo; the saved action remains available for explicit review.
+
 - Offline customer contact and terms edits retain their existing khata identity after a shop currency change. Contact-only edits write no account or ledger entry; original-unit limits preserve other currency accounts. Scoped admission, fresh access checks and immutable source guards remain enforced.
 
 - Offline customer opening balances and credit limits keep their original khata currency during delivery, canonical sync and outlet recovery. Existing historical-account settings remain valid; contact-only edits cannot silently create an account in a different unit.
@@ -17,6 +19,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 - Rechecked source, staged files, fetched Git history and existing site output against private Supabase values: no credentials or current deployment details found. All 35 credential-guard tests pass; commit/push/build guards and GitHub secret scanning/push protection remain enabled. Older nonsecret project identifiers remain disclosed in the audit; GitHub workflows remain stopped.
 
 ### Added
+
+- Saved physical cash counts gain an opt-in comparison of the original count, current records and proposed cash effect. Explicit withdrawal or replacement preserves the physical amount, count time, day, currency and complete source. A token-free local journal recovers genuine outcomes after lost replies and offline reloads; changed cash parents require another review. Copy and JSON backup remain available. Cloud sync stays off by default.
 
 - Saved customer and khata actions gain an opt-in comparison of original details, current records and the reviewed result. Explicit withdrawal or replacement preserves the original financial parents, opening amount and balance date. A token-free journal recovers genuine outcomes after lost replies, offline reloads and account changes; conflicting khatas are never silently retargeted. Copy and JSON backup remain available. Cloud sync stays off by default.
 

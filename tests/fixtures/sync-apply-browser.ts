@@ -215,8 +215,8 @@ async function deliverCommands(
   };
   if (switchOnReceipt) db.outbox.hook('reading', reading);
   try {
-    const result=await deliverLocalOutbox(db, w.target.targetHash, (command,currency) =>
-      c.remote.apply(command,currency),
+    const result=await deliverLocalOutbox(db, w.target.targetHash, (command,currency,_signal,parent) =>
+      c.remote.apply(command,currency,undefined,parent),
     );
     await deliverLocalInboxImages(db,w.target.targetHash,createCloudInboxImageUploader(connection(w.config),{scope:w.scope,accountHash:w.target.accountHash,targetHash:w.target.targetHash,getAuth:()=>c.auth.commandAuthorization(),assertCurrent:value=>c.auth.assertCommandAuthorization(value)}));
     return result;
@@ -629,6 +629,8 @@ const api = {
     const customer=await db.saveCustomer({name:'Original customer',nickname:'',phone,address:'',notes:'Original opening · বাংলা\0\ud800',tags:[]},{credit:{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}},opening:{amount:12345,occurredAt:1}}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!,entry=(await db.creditEntries.toArray()).find(e=>e.accountId===account.id)!;
     return {customerId:customer.id,accountId:account.id,entryId:entry.id};
   }),
+  queueClosing:(extra=2501)=>use(async db=>{const preview=closingPreview(await db.readToday()),closing=await db.closeDay({id:newInboxId(),day:preview.summary.day,fingerprint:preview.fingerprint,countedCash:preview.summary.expectedCash+extra,note:'Original physical count · বাংলা\0\ud800',addDifference:extra>0});return {id:closing.id,saleId:closing.addedSaleId,eventId:closing.eventId,countedCash:closing.countedCash,difference:closing.difference};}),
+  undoOriginalClosing:(id:string)=>use(db=>db.undoDayClosing(id)),
   createCustomerConflict:()=>use(async db=>{const customer=await db.saveCustomer({name:'Other private customer',nickname:'',phone:'+8801812345678',address:'',notes:'Do not expose this other customer',tags:[]});return customer.id;}),
   queueCurrentKhata:()=>use(async db=>{const customer=(await db.customers.toArray())[0],account=await db.saveCreditTerms(customer.id,{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}});return {customerId:customer.id,accountId:account.id};}),
   clearCustomerConflict:(id:string)=>use(async db=>{const customer=(await db.customers.get(id))!;return db.saveCustomer({name:customer.name,nickname:customer.nickname,phone:'',address:customer.address,notes:customer.notes,tags:customer.tags},{id});}),
@@ -728,6 +730,7 @@ const api = {
       purchaseReviews: await db.purchaseReviews.toArray(),
       stockReviews: await db.stockReviews.toArray(),
       customerReviews: await db.customerReviews.toArray(),
+      closingReviews: await db.closingReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

@@ -4,6 +4,7 @@ import {createMoneyReviewHandler,createMoneyReviewStore} from '../_shared/money-
 import {createPurchaseReviewHandler,createPurchaseReviewStore} from '../_shared/purchase-review.ts';
 import {createStockReviewHandler,createStockReviewStore} from '../_shared/stock-review.ts';
 import {createCustomerReviewHandler,createCustomerReviewStore} from '../_shared/customer-review.ts';
+import {createClosingReviewHandler,createClosingReviewStore} from '../_shared/closing-review.ts';
 declare const Deno:{env:{get(name:string):string|undefined};serve(handler:(request:Request)=>Promise<Response>):void};
 let handler:(request:Request)=>Promise<Response>;
 try{
@@ -17,6 +18,7 @@ try{
       if(new URL(request.url).searchParams.get('review')?.startsWith('purchase-'))return await createPurchaseReviewHandler({store:createPurchaseReviewStore(apiUrl,key,serviceKey||''),origins})(request);
       if(new URL(request.url).searchParams.get('review')?.startsWith('stock-'))return await createStockReviewHandler({store:createStockReviewStore(apiUrl,key,serviceKey||''),origins})(request);
       if(new URL(request.url).searchParams.get('review')?.startsWith('customer-'))return await createCustomerReviewHandler({store:createCustomerReviewStore(apiUrl,key,serviceKey||''),origins})(request);
+      if(new URL(request.url).searchParams.get('review')?.startsWith('closing-'))return await createClosingReviewHandler({store:createClosingReviewStore(apiUrl,key,serviceKey||''),origins})(request);
       return await createOrderReviewHandler({store:createOrderReviewStore(apiUrl,key,serviceKey||''),origins})(request);
     }
     catch{return new Response(JSON.stringify({error:'Saved action reviews are unavailable. Keep the original saved action.'}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}

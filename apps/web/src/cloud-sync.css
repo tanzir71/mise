@@ -66,6 +66,16 @@
 .customer-review-fields dd { margin:0; text-align:right; }
 .customer-review-fields summary { text-align:left; }
 .customer-review-fields pre { text-align:left; }
+.closing-action-review .order-review-comparison > div { display:flex; flex-direction:column; }
+.closing-action-review .order-review-comparison > div > p:last-child { margin-top:auto; padding-top:16px; }
+.closing-action-review .order-review-proposal { border:1px solid var(--border); border-radius:16px; padding:16px; }
+.closing-review-fields { margin:16px 0; }
+.closing-review-fields > div { display:flex; justify-content:space-between; gap:16px; padding:8px 0; }
+.closing-review-fields dt { flex-shrink:0; color:var(--text-secondary); }
+.closing-review-fields dd { min-width:0; margin:0; text-align:right; }
+.closing-review-fields summary,.closing-review-fields pre { text-align:left; }
+.closing-review-copy { display:block; margin:16px 0; }
+.closing-review-copy textarea { display:block; width:100%; min-height:144px; margin-top:8px; }
 .customer-review-copy { display:grid; gap:8px; }
 .customer-review-copy textarea { box-sizing:border-box; width:100%; resize:vertical; }
 .stock-action-review .order-review-comparison > div { display:flex; flex-direction:column; }

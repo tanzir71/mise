@@ -1,0 +1,153 @@
+{
+  "title": "M31 — Original physical cash counts and closing review",
+  "pages": [
+    {
+      "id": "m31-closing-review-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M12 · Manager — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-closing-review-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 03 · Mise — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-closing-blocked-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "blocked",
+          "reference": "screens/mobile/M12 · Manager — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "blocked"
+    },
+    {
+      "id": "m31-closing-blocked-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "blocked",
+          "reference": "screens/desktop/Desktop 03 · Mise — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "blocked"
+    },
+    {
+      "id": "m31-closing-unconfirmed-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "unconfirmed",
+          "reference": "screens/mobile/M12 · Manager — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-closing-unconfirmed-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "unconfirmed",
+          "reference": "screens/desktop/Desktop 03 · Mise — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-closing-parent-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "parent",
+          "reference": "screens/mobile/M12 · Manager — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "parent"
+    },
+    {
+      "id": "m31-closing-parent-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated closing-review frame. Uses the supplied phone and desktop Today frames for monochrome cards, typography, spacing and controls. Actual scoped local SQL/HTTP; Auth and Realtime identities are explicit test fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".closing-action-review",
+          "id": "parent",
+          "reference": "screens/desktop/Desktop 03 · Mise — Today.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "closingActionReviewFixture": "parent"
+    }
+  ]
+}

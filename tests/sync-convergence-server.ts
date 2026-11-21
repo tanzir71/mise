@@ -5,6 +5,7 @@ import {stockBatchHeader} from '../packages/core/stock-commands';
 import {purchaseBodyHeader} from '../packages/core/purchase-commands';
 import {orderBodyHeader} from '../packages/core/order-commands';
 import {savedCurrencyHeader} from '../packages/core/order-currency';
+import {savedClosingParentHeader} from '../packages/core/closing-source';
 import {handoffBodyHeader} from '../packages/core/handoff-commands';
 import {inboxBodyHeader} from '../packages/core/inbox-commands';
 import {linkBodyHeader} from '../packages/core/link-commands';
@@ -14,6 +15,7 @@ import {createMoneyReviewHandler,createMoneyReviewStore} from '../supabase/funct
 import {createPurchaseReviewHandler,createPurchaseReviewStore} from '../supabase/functions/_shared/purchase-review';
 import {createStockReviewHandler,createStockReviewStore} from '../supabase/functions/_shared/stock-review';
 import {createCustomerReviewHandler,createCustomerReviewStore} from '../supabase/functions/_shared/customer-review';
+import {createClosingReviewHandler,createClosingReviewStore} from '../supabase/functions/_shared/closing-review';
 import { resolve, join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -159,6 +161,12 @@ export async function startConvergenceServer(
     'prepare_customer_review',
     'read_customer_review',
     'finish_customer_review',
+    'admit_closing_review',
+    'inspect_closing_outcome',
+    'prepare_closing_review',
+    'read_closing_review',
+    'finish_closing_review',
+    'prepare_saved_closing',
     'prepare_stock_write',
     'finish_stock_write',
     'admit_stock_batch',
@@ -361,6 +369,7 @@ export async function startConvergenceServer(
     purchaseReviews=createPurchaseReviewHandler({origins,store:createPurchaseReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     stockReviews=createStockReviewHandler({origins,store:createStockReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     customerReviews=createCustomerReviewHandler({origins,store:createCustomerReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
+    closingReviews=createClosingReviewHandler({origins,store:createClosingReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     upload = createInitialUploadHandler({
       origins,
       store: createInitialUploadStore(
@@ -451,7 +460,7 @@ export async function startConvergenceServer(
         'Access-Control-Allow-Origin': 'http://127.0.0.1:4321',
         'Access-Control-Allow-Methods': 'POST,GET,PUT,OPTIONS',
         'Access-Control-Allow-Headers':
-          ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,savedCurrencyHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader,commandReviewHeader].join(','),
+          ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,savedCurrencyHeader,savedClosingParentHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader,commandReviewHeader].join(','),
       };
       if (req.method === 'OPTIONS') {
         res.writeHead(204, cors).end();
@@ -486,8 +495,8 @@ export async function startConvergenceServer(
       } else if (path === '/functions/v1/commands') {
         calls.commands++;
         const reviewMode = new URL(request.url).searchParams.get('review');
-        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?.startsWith('stock-')?stockReviews:reviewMode?.startsWith('customer-')?customerReviews:reviewMode?reviews:commands)(request);
-        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve'].includes(reviewMode??'')) && response.ok) {
+        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?.startsWith('stock-')?stockReviews:reviewMode?.startsWith('customer-')?customerReviews:reviewMode?.startsWith('closing-')?closingReviews:reviewMode?reviews:commands)(request);
+        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve','closing-resolve'].includes(reviewMode??'')) && response.ok) {
           holdCommand = false;
           holdResolution = false;
           await new Promise<void>((resolve) => {
@@ -496,7 +505,7 @@ export async function startConvergenceServer(
           });
           releaseCommand = null;
         }
-        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
+        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve','closing-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
           loseCommand = false;
           loseResolution = false;
           await truncate(response);
@@ -690,6 +699,9 @@ export async function startConvergenceServer(
     },
     async customerReviewState(customerId:string) {
       return (await db.query<{customers:number;accounts:number;entries:number;resolutions:number}>('select (select count(*)::int from public.customers where id=$1) customers,(select count(*)::int from public.credit_accounts where customer_id=$1) accounts,(select count(*)::int from public.credit_entries where customer_id=$1) entries,(select count(*)::int from private.customer_command_resolutions where customer_id=$1) resolutions',[customerId])).rows[0];
+    },
+    async closingReviewState(closingId:string){
+      return (await db.query<{closings:number;addedCash:number;resolutions:number}>('select (select count(*)::int from public.day_closings where id=$1) closings,(select coalesce(sum(amount),0)::int from public.sales where closing_id=$1 and voided_at is null) "addedCash",(select count(*)::int from private.closing_command_resolutions where closing_id=$1) resolutions',[closingId])).rows[0];
     },
     async close() {
       releaseCommand?.();

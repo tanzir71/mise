@@ -5,6 +5,7 @@ import {parseSupplierMessageCommand,parseSupplierMessageCommandReceipt,type Supp
 import {parseMoneyResolutionReceipt,type MoneyResolutionReceipt} from './money-review';
 import {parsePurchaseResolutionReceipt,type PurchaseResolutionReceipt} from './purchase-review';
 import {parseStockResolutionReceipt,type StockResolutionReceipt} from './stock-review';
+import {parseClosingResolutionMetadata,type ClosingResolutionReceipt} from './closing-review';
 import {parseCloudCommand,parseCloudCommandReceipt,type CloudCommand,type CloudCommandReceipt} from './cloud-commands';
 import {isMoneyCommandType,parseMoneyCommand,parseMoneyCommandReceipt,type MoneyCommand,type MoneyCommandReceipt} from './money-commands';
 import {isStockCommandType,parseStockCommand,parseStockCommandReceipt,type StockCommand,type StockCommandReceipt} from './stock-commands';
@@ -18,7 +19,7 @@ import {parseProfileCommand,parseProfileCommandReceipt,type ProfileCommand,type 
 import {isLinkCommandType,parseLinkCommand,parseLinkCommandReceipt,type LinkCommand,type LinkCommandReceipt} from './link-commands';
 import {parseCommandResolutionReceipt,type CommandResolutionReceipt} from './command-resolution';
 export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand|InboxCommand|SettingsCommand|ProfileCommand|LinkCommand|SupplierMessageCommand;
-export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|CustomerResolutionReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt|CommandResolutionReceipt|MoneyResolutionReceipt|PurchaseResolutionReceipt|StockResolutionReceipt;
+export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|CustomerResolutionReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|ClosingResolutionReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt|CommandResolutionReceipt|MoneyResolutionReceipt|PurchaseResolutionReceipt|StockResolutionReceipt;
 export function isSupplierMessageCommand(c:ShopCommand):c is SupplierMessageCommand{return c.type==='supplier-message.record';}
 export function isLinkCommand(c:ShopCommand):c is LinkCommand{return isLinkCommandType(c.type);}
 export function isProfileCommand(c:ShopCommand):c is ProfileCommand{return c.type==='setup.update';}
@@ -53,6 +54,7 @@ export function parseShopCommandReceipt(v:unknown,c:ShopCommand):ShopCommandRece
     if(isMoneyCommand(c)&&c.type!=='khata.communication')return parseMoneyResolutionReceipt(v,c);
     if(isPurchaseCommand(c)&&'purchaseId'in c)return parsePurchaseResolutionReceipt(v,c);
     if(isStockCommand(c))return parseStockResolutionReceipt(v,c);
+    if(isClosingCommand(c))return parseClosingResolutionMetadata(v,c);
     if(!isOrderCommand(c))throw new Error('This resolution does not match the original command family.');
     return parseCommandResolutionReceipt(v,c);
   }

@@ -1,0 +1,423 @@
+{
+  "checkedAt": "2026-11-21T11:40:43.957Z",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "scope": "Saved physical cash counts, original-parent undo and explicit recoverable closing review",
+  "local": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 163,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "files": 174,
+      "passed": 3701,
+      "seconds": 697.64,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "initialUnitTimingRun": {
+      "passed": 3699,
+      "timeouts": 2,
+      "unchangedIsolatedCasesPassed": 18,
+      "fullRecheckPassed": true,
+      "payloadsChanged": false,
+      "deadlinesChanged": false
+    },
+    "browser": {
+      "passed": 486,
+      "duration": "18.9m",
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "upgradeCorrection": {
+      "schema": 28,
+      "stores": 42,
+      "originalDataAssertionsPreserved": true,
+      "newCustomerAndClosingStoresEmpty": true,
+      "focusedCasesPassed": 7
+    },
+    "interruptedBrowserRunsCountAsPasses": false,
+    "visual": {
+      "comparisons": 340,
+      "focusedComparisons": 20,
+      "overflow": 0,
+      "dedicatedClosingReviewFrameSupplied": false,
+      "referencePixelDifferences": "informational",
+      "reportIsLocal": true,
+      "screenshots": [
+        {
+          "id": "m31-closing-review-phone-review-390",
+          "path": "docs/screenshots/m31-closing-review-prepared-390.png",
+          "width": 390,
+          "bytes": 136753,
+          "sha256": "b25fc6253c75f4a27d1131c5c042829d448da5bfd9f658b4d75cb79f94279b2d"
+        },
+        {
+          "id": "m31-closing-parent-desktop-parent-1440",
+          "path": "docs/screenshots/m31-closing-review-parent-1440.png",
+          "width": 1440,
+          "bytes": 96286,
+          "sha256": "51479cd2343aa6b7cc5aa2f3ff321b90400f0bbfbd1d67ac37fbb371d84a478b"
+        },
+        {
+          "id": "m31-closing-unconfirmed-phone-unconfirmed-390",
+          "path": "docs/screenshots/m31-closing-review-unconfirmed-390.png",
+          "width": 390,
+          "bytes": 144453,
+          "sha256": "954fe9821035adadbd882508d65d83d62076e1384d51a69f428899e3002f3a2b"
+        }
+      ],
+      "fontMeasurements": [
+        {
+          "id": "english",
+          "renderedSamples": 32,
+          "maxWidthDifference": 0.890625,
+          "meanWidthDifference": 0.36962890625
+        },
+        {
+          "id": "bengali",
+          "renderedSamples": 104,
+          "maxWidthDifference": 1.25,
+          "meanWidthDifference": 0.294921875
+        }
+      ],
+      "changedReviewViews": {
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "seriousAxeViolations": 0,
+        "criticalAxeViolations": 0
+      },
+      "preparedReviewBrowser": {
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "allAxeViolations": 0
+      }
+    },
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "storage": {
+      "nativeSchema": 28,
+      "nativeStores": 42,
+      "portableTables": 21
+    },
+    "managedProof": {
+      "local": true,
+      "cases": 20,
+      "residualRows": 0,
+      "sourceArchivesExact": true,
+      "originalParentProtected": true
+    },
+    "sourceFilesVerified": 847,
+    "fixtures": {
+      "postgres": "actual local SQL",
+      "http": "actual handlers",
+      "auth": "synthetic local accounts",
+      "realtime": "synthetic local events",
+      "storage": "synthetic local bytes",
+      "hostedOtpAcceptance": false
+    }
+  },
+  "hosted": {
+    "closingChangesDeployed": true,
+    "checkedAt": "2026-11-21T11:39:13.475Z",
+    "deployed": true,
+    "commands": {
+      "version": 34,
+      "jwtRequired": true,
+      "bytes": 589301,
+      "sha256": "7d7ef46e892b644b7f45ce4f177f80bb5d6116488b7e83808ba275b26352f235",
+      "sourceFiles": 110
+    },
+    "migrations": [
+      {
+        "name": "closing_review_preparation",
+        "sha256": "7a934cf306af0be5dc61d1f52077183bbfc3aca9e3ce10fec664c7a5839443af"
+      },
+      {
+        "name": "closing_review_completion",
+        "sha256": "27cd4ea8182ac7cb3c17626293bbcdb3a8971269aa1c6d0ccad69c4d8a867bf7"
+      },
+      {
+        "name": "saved_closing_parent",
+        "sha256": "4ebae79e1e569cd4c9763c1346b934029e6caf68c90ce64430bc00af1f32508c"
+      }
+    ],
+    "migrationCount": 50,
+    "catalog": {
+      "applicationTables": 70,
+      "forcedRlsTables": 70,
+      "anonymousTablePrivileges": 0,
+      "publicTablePrivileges": 0,
+      "publicDefiners": 0,
+      "publicBuckets": 0,
+      "directReviewTablePrivileges": 0,
+      "reviewSequencePrivileges": 0,
+      "clientFinishPrivileges": 0,
+      "serviceFinishAllowed": true,
+      "authenticatedReadAllowed": true,
+      "authenticatedParentPrepareAllowed": true,
+      "publicReviewInvokers": 6
+    },
+    "managed": {
+      "cases": 20,
+      "residualRows": 0,
+      "sourceArchivesExact": true,
+      "originalParentProtected": true,
+      "casesPassed": [
+        "original-owner-preparation",
+        "client-completion-denied",
+        "private-source-read-denied",
+        "foreign-subject-denied",
+        "anonymous-admission-denied",
+        "service-admission-denied",
+        "staff-admission-denied",
+        "unassigned-manager-denied",
+        "explicit-withdrawal",
+        "genuine-outcome-first",
+        "distinct-later-review-available",
+        "ordinary-original-jwt-preparation",
+        "exact-reviewed-replacement",
+        "changed-parent-review-available",
+        "original-undo-parent-denied",
+        "explicit-old-undo-withdrawal",
+        "original-count-and-time-retained",
+        "revised-cash-parent-remains-active",
+        "complete-source-archives-retained",
+        "literal-unicode-and-atomic-audits"
+      ]
+    },
+    "anonymous": {
+      "denied": 40,
+      "positiveControls": 3,
+      "positiveControlStatus": 200,
+      "currentModulePreflight": {
+        "status": 204,
+        "parentHeaderAllowed": true
+      },
+      "requests": [
+        {
+          "name": "tables",
+          "status": 401
+        },
+        {
+          "name": "commands",
+          "status": 401
+        },
+        {
+          "name": "invoice",
+          "status": 401
+        },
+        {
+          "name": "customer",
+          "status": 401
+        },
+        {
+          "name": "customer-update",
+          "status": 401
+        },
+        {
+          "name": "money-review",
+          "status": 401
+        },
+        {
+          "name": "purchase-review-read",
+          "status": 401
+        },
+        {
+          "name": "purchase-review-resolve",
+          "status": 401
+        },
+        {
+          "name": "purchase-review-admission",
+          "status": 401
+        },
+        {
+          "name": "purchase-review-finish",
+          "status": 401
+        },
+        {
+          "name": "stock-metadata",
+          "status": 401
+        },
+        {
+          "name": "stock-admission",
+          "status": 401
+        },
+        {
+          "name": "stock-prepare",
+          "status": 401
+        },
+        {
+          "name": "stock-finish",
+          "status": 401
+        },
+        {
+          "name": "upload",
+          "status": 401
+        },
+        {
+          "name": "images",
+          "status": 401
+        },
+        {
+          "name": "sync-read",
+          "status": 401
+        },
+        {
+          "name": "money-admission",
+          "status": 401
+        },
+        {
+          "name": "stock-review-read",
+          "status": 401
+        },
+        {
+          "name": "stock-review-resolve",
+          "status": 401
+        },
+        {
+          "name": "stock-review-admission",
+          "status": 401
+        },
+        {
+          "name": "stock-review-inspection",
+          "status": 401
+        },
+        {
+          "name": "stock-review-prepare",
+          "status": 401
+        },
+        {
+          "name": "stock-review-ticket",
+          "status": 401
+        },
+        {
+          "name": "stock-review-finish",
+          "status": 401
+        },
+        {
+          "name": "customer-review-read",
+          "status": 401
+        },
+        {
+          "name": "customer-review-resolve",
+          "status": 401
+        },
+        {
+          "name": "customer-review-admit",
+          "status": 401
+        },
+        {
+          "name": "customer-original-outcome",
+          "status": 401
+        },
+        {
+          "name": "customer-review-prepare",
+          "status": 401
+        },
+        {
+          "name": "customer-review-read-proof",
+          "status": 401
+        },
+        {
+          "name": "customer-review-finish",
+          "status": 401
+        },
+        {
+          "name": "closing-review-read",
+          "status": 401
+        },
+        {
+          "name": "closing-review-resolve",
+          "status": 401
+        },
+        {
+          "name": "closing-review-admit",
+          "status": 401
+        },
+        {
+          "name": "closing-original-outcome",
+          "status": 401
+        },
+        {
+          "name": "closing-review-prepare",
+          "status": 401
+        },
+        {
+          "name": "closing-review-read-proof",
+          "status": 401
+        },
+        {
+          "name": "closing-review-finish",
+          "status": 401
+        },
+        {
+          "name": "saved-closing-parent",
+          "status": 401
+        }
+      ]
+    },
+    "advisors": {
+      "security": {
+        "INFO": 1
+      },
+      "performance": {
+        "INFO": 1
+      }
+    },
+    "knownPrivateValuesCompared": 10,
+    "realAuthAccountsChanged": false,
+    "providerSettingsChanged": false,
+    "serverSecretsChanged": false
+  },
+  "cloudFlags": {
+    "cloudSetup": false,
+    "cloudSync": false
+  },
+  "publication": {
+    "workflowsDisabled": true,
+    "pagesHeld": true,
+    "newCiRun": false,
+    "uploadedCiArtifact": false
+  },
+  "remaining": [
+    "Genuine phone-provider commissioning and signed-user acceptance",
+    "Physical-device acceptance",
+    "Remaining handover milestones"
+  ],
+  "privacy": {
+    "checkedAt": "2026-11-21T11:43:02.742Z",
+    "sourceAndIndex": true,
+    "completeReachableHistory": true,
+    "generatedOutput": true,
+    "privateValuesCompared": 10,
+    "credentialFindings": 0,
+    "currentDeploymentReferenceFindings": 0,
+    "historicalNonsecretReferenceFindings": 22,
+    "reviewedLegacyFindings": 22,
+    "newBlockedHistoryFindings": 0,
+    "coverageGaps": 0,
+    "historyRewritten": false,
+    "hooksEnabled": true,
+    "gitHubSecretScanning": "enabled",
+    "gitHubPushProtection": "enabled",
+    "openSecretAlerts": 0
+  }
+}

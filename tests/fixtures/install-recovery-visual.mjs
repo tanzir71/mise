@@ -132,6 +132,22 @@ export async function captureCustomerActionReview(page,mode='review'){
   if(mode==='unconfirmed'){server.loseNextResolution();await panel.getByRole('button',{name:'Apply reviewed customer action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();}await checkLocalInboxAccess(page);
  }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
+export async function captureClosingActionReview(page,mode='review'){
+ const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));
+  await page.context().setOffline(true);await ownerContext.setOffline(true);await owner.evaluate(()=>window.miseSyncApplyTest.cash('10'));const closing=await page.evaluate(()=>window.miseSyncApplyTest.queueClosing());if(mode==='parent')await page.evaluate(id=>window.miseSyncApplyTest.undoOriginalClosing(id),closing.id);
+  await ownerContext.setOffline(false);if(mode==='blocked')await owner.evaluate(()=>window.miseSyncApplyTest.setCurrency('USD'));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());await page.context().setOffline(false);await page.evaluate(()=>window.miseSyncApplyTest.cycle());
+  await installRealtimeFixture(page,server.config(2).jwt);await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review saved closing',exact:true}).click();const panel=page.getByRole('region',{name:'Saved closing review'});await panel.getByRole('button',{name:'Check current closing values',exact:true}).click();
+  if(mode==='blocked')await panel.locator('.order-review-proposal').filter({hasText:'different currency'}).waitFor();else await page.waitForFunction(()=>Array.from(document.querySelectorAll('.closing-action-review button')).some(button=>button.textContent?.trim()==='Apply reviewed closing action'&&!button.disabled));
+  if(mode==='parent'){
+   await panel.getByRole('button',{name:'Apply reviewed closing action',exact:true}).click();await panel.locator('.review-outcome').waitFor();await installSyncApplyFixture(page);await page.waitForFunction(async()=>(await window.miseSyncApplyTest.inspect()).syncSession?.problem==='review');
+   await panel.getByRole('button',{name:'Close review',exact:true}).click();await page.getByRole('button',{name:'Review saved closing',exact:true}).click();await panel.getByRole('button',{name:'Check current closing values',exact:true}).click();await panel.locator('.order-review-proposal').filter({hasText:'original closing or cash receipt has changed'}).waitFor();
+  }
+  if(mode==='unconfirmed'){server.loseNextResolution();await panel.getByRole('button',{name:'Apply reviewed closing action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();}
+  await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
+}
 export async function captureStockActionReview(page,mode='review'){
  const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
  try{

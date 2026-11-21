@@ -16,6 +16,7 @@ import {savedOrderCurrency} from '@mise/core/order-currency';
 import {savedMoneyCurrency} from '@mise/core/money-currency';
 import {savedPurchaseCurrency} from '@mise/core/purchase-currency';
 import {savedCustomerCurrency} from '@mise/core/customer-currency';
+import {savedClosingParent} from '@mise/core/closing-source';
 import {readCanonicalState} from './cloud-canonical-state';
 import {syncHash} from '@mise/core/sync-read';
 import {isLocalInboxRetention} from '@mise/core/local-inbox';
@@ -94,7 +95,7 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 }
 
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
-export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand,currency?:string)=>Promise<ShopCommandReceipt>,throughCommandId?:string):Promise<{accepted:number;retained:number;pending:number}>{
+export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand,currency?:string,signal?:AbortSignal,closingParent?:string)=>Promise<ShopCommandReceipt>,throughCommandId?:string):Promise<{accepted:number;retained:number;pending:number}>{
  const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
  const originalOperator=deliveryToken(initial,operator);let deliveryIdentityHash:Promise<string>|null=null;
  async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
@@ -109,7 +110,7 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
    const sourceHash=await nativeRowHash(originalEntry(saved));await db.transaction('r',db.cloudState,db.operatorState,currentOperator);
    const command=parseShopCommand(JSON.parse(JSON.stringify(saved.commands[index]))),reviewId=await syncHash(new TextEncoder().encode(JSON.stringify([initial.uploadId,command.id,identityHash])));
    let confirmed:ShopCommandReceipt;
-   try{let currency:string|undefined;try{currency=savedOrderCurrency(command,saved.changes)??savedMoneyCurrency(command,saved.changes,saved.commands.slice(0,index))??savedPurchaseCurrency(command,saved.changes,saved.commands.slice(0,index))??savedCustomerCurrency(command,saved.changes,saved.commands.slice(0,index));}catch{throw new CommandRequestError('review');}confirmed=await send(command,currency);}
+   try{let currency:string|undefined,parent:string|null=null;try{currency=savedOrderCurrency(command,saved.changes)??savedMoneyCurrency(command,saved.changes,saved.commands.slice(0,index))??savedPurchaseCurrency(command,saved.changes,saved.commands.slice(0,index))??savedCustomerCurrency(command,saved.changes,saved.commands.slice(0,index));if(command.type==='closing.undo')parent=savedClosingParent(command,saved.changes);}catch{throw new CommandRequestError('review');}confirmed=await(parent?send(command,currency,undefined,parent):send(command,currency));}
    catch(error){
     const proof=commandReviewProof(error);
     if(proof){

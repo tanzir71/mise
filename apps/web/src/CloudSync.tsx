@@ -34,6 +34,8 @@ import {StockActionReview} from './StockActionReview';
 import {hasSavedStockReview} from './data/stock-review-session';
 import {CustomerActionReview} from './CustomerActionReview';
 import {hasSavedCustomerReview} from './data/customer-review-session';
+import {ClosingActionReview} from './ClosingActionReview';
+import {hasSavedClosingReview} from './data/closing-review-session';
 
 function useSyncView() {
   return useLiveQuery(async () => {
@@ -51,8 +53,9 @@ function useSyncView() {
       hasPurchaseReview = binding ? await hasSavedPurchaseReview(db,binding.uploadId) : false,
       hasStockReview = binding ? await hasSavedStockReview(db,binding.uploadId) : false,
       hasCustomerReview = binding ? await hasSavedCustomerReview(db,binding.uploadId) : false,
+      hasClosingReview = binding ? await hasSavedClosingReview(db,binding.uploadId) : false,
       canRecover = await db.syncCanonical.where('id').equals('active').count() > 0;
-    return { state, unsent, binding, operator, canRecover, hasOrderReview, hasMoneyReview, hasPurchaseReview, hasStockReview, hasCustomerReview };
+    return { state, unsent, binding, operator, canRecover, hasOrderReview, hasMoneyReview, hasPurchaseReview, hasStockReview, hasCustomerReview, hasClosingReview };
   }, []);
 }
 function sameConnection(config: CloudConnection) {
@@ -289,6 +292,7 @@ export function CloudSyncControls({
         {state&&view?.hasPurchaseReview?<PurchaseActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {state&&view?.hasStockReview?<StockActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {state&&view?.hasCustomerReview?<CustomerActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
+        {state&&view?.hasClosingReview?<ClosingActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {view?.binding&&view.canRecover&&state?.problem==='review'?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/recovery')}>Review outlet access</Button>:null}
         {view?.binding?.version===1&&view.binding.phase==='ready'&&!view.canRecover&&(state?.problem==='review'||state?.problem==='auth'||needsRebind)?<Button kind="secondary" disabled={busy} onClick={()=>navigate('/settings/owner-recovery')}>Review original connection</Button>:null}
         {!state || state.problem === 'auth' || needsRebind ? (

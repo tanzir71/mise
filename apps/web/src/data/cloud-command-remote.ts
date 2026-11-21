@@ -27,6 +27,7 @@ import {
 } from '@mise/core/handoff-commands';
 import { inboxBodyHeader, inboxBodyLimit } from '@mise/core/inbox-commands';
 import { linkBodyHeader, linkBodyLimit } from '@mise/core/link-commands';
+import {savedClosingParentHeader,validClosingParent} from '@mise/core/closing-source';
 import {
   createCommandRequest,
   bindCommandReceipt,
@@ -47,6 +48,7 @@ export function createCloudCommandRemote(
     value: ShopCommand,
     currencyOrSignal?: string | AbortSignal,
     abort?: AbortSignal,
+    closingParent?: string,
   ): Promise<ShopCommandReceipt> => {
     const currency =
         typeof currencyOrSignal === 'string' ? currencyOrSignal : undefined,
@@ -66,6 +68,10 @@ export function createCloudCommandRemote(
         'Content-Type': 'application/json',
       };
     if (currency !== undefined) headers[savedCurrencyHeader] = currency;
+    if(command.type==='closing.undo'){
+      if(!validClosingParent(closingParent))throw new CommandRequestError('review');
+      headers[savedClosingParentHeader]=closingParent;
+    }else if(closingParent!==undefined)throw new CommandRequestError('review');
     let maximum = 32000,
       deadline = 45000;
     if (command.type === 'stock.batch') {

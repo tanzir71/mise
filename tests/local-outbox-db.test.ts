@@ -20,6 +20,7 @@ import {savedMoneyCurrency} from '../packages/core/money-currency';
 import {savedPurchaseCurrency} from '../packages/core/purchase-currency';
 import {savedCustomerCurrency} from '../packages/core/customer-currency';
 import {defaultCreditTerms} from '../packages/core/khata';
+import {closingPreview} from '../packages/core/today';
 
 const customerInput=()=>({name:'Original customer',nickname:'',phone:'',address:'',notes:'Original opening · বাংলা',tags:[]});
 const customerCredit=()=>({...defaultCreditTerms,allowed:true,limit:50000});
@@ -99,6 +100,29 @@ const target='a'.repeat(64),databases:Dexie[]=[];
 afterEach(async()=>{await Promise.all(databases.splice(0).map(db=>db.delete()));});
 async function boot(){const db=new MiseDatabase('mise-local-outbox-test-'+randomUUID()),journal=new CloudUploadJournal('mise-local-outbox-journal-'+randomUUID());databases.push(db,journal);const backup=cloudUploadFixture();await db.restoreBackup(backup,await db.previewRestore(backup));const snapshot=await journal.prepare(db,uploadId());return {db,journal,snapshot};}
 async function armed(){const value=await boot();await beginLocalUpload(value.db,value.snapshot,target);return value;}
+async function closingUndoQueue(){
+ const {db,journal}=await boot(),preview=closingPreview(await db.readToday());
+ const closing=await db.closeDay({id:uploadId(990),day:preview.summary.day,fingerprint:preview.fingerprint,countedCash:preview.summary.expectedCash+700,note:'Original physical count',addDifference:true});
+ const snapshot=await journal.prepare(db,uploadId(991));await beginLocalUpload(db,snapshot,target);await db.undoDayClosing(closing.id);
+ await uploadWithLocalOutbox(db,journal,snapshot.manifest.id,target,new MemoryCloudUpload());return {db,closing};
+}
+it('native undo delivery keeps its original parent despite a changed current profile and mutable closing row',async()=>{
+ const {db,closing}=await closingUndoQueue();await db.saveSetup({businessType:'corner_shop',marketCode:'BD',name:'Changed display name',phone:'01712345482',currency:'USD'});
+ const originalEvent=(await db.events.get(closing.eventId))!;await db.events.add({...originalEvent,id:uploadId(992),after:{...(originalEvent.after as object),eventId:uploadId(992)}});
+ await db.dayClosings.update(closing.id,{eventId:uploadId(992)});const original=await db.outbox.toArray(),backup=backupToken(await db.readBackup());
+ const send=vi.fn(async()=>{throw Error('Stop before HTTP');});await expect(deliverLocalOutbox(db,target,send)).rejects.toThrow('Stop before HTTP');
+ expect(send).toHaveBeenCalledWith(expect.objectContaining({type:'closing.undo',closingId:closing.id}),undefined,undefined,closing.eventId);
+ expect(await db.outbox.toArray()).toEqual(original);expect(backupToken(await db.readBackup())).toBe(backup);
+});
+it.each(['missing-primary','changed-parent','missing-cash'] as const)('native %s undo evidence cannot reach Auth or HTTP',async kind=>{
+ const {db}=await closingUndoQueue(),[row]=await db.outbox.toArray(),command=row.commands[0];if(command.type!=='closing.undo')throw Error('Expected original undo');
+ const changes=structuredClone(row.changes),primary=changes.find(change=>change.table==='events'&&change.key===command.id)!;
+ if(kind==='missing-primary')changes.splice(changes.indexOf(primary),1);
+ if(kind==='changed-parent')(primary.after as {before:{eventId:string}}).before.eventId=uploadId(993);
+ if(kind==='missing-cash')changes.splice(changes.findIndex(change=>change.table==='events'&&change.key===command.saleEventId),1);
+ await db.outbox.update(row.id,{changes});const original=await db.outbox.toArray(),send=vi.fn();await expect(deliverLocalOutbox(db,target,send)).rejects.toThrow();
+ expect(send).not.toHaveBeenCalled();expect(await db.outbox.toArray()).toEqual(original);
+});
 function cashReceipt(command:ShopCommand):ShopCommandReceipt {if(command.type!=='sale.record')throw Error('Expected cash command');return {id:command.id,type:command.type,outletId:command.outletId,occurredAt:command.occurredAt,saleId:command.saleId,accountId:null,entryId:null,amount:500,at:command.occurredAt+1,saleUpdatedAt:command.occurredAt,entrySequence:null,undoOf:null};}
 
 it('native money delivery keeps the original BDT source even when the current local profile is USD',async()=>{

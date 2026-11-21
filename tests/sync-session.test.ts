@@ -1,3 +1,4 @@
+import {localTableNames} from '../packages/core/local-schema';
 import 'fake-indexeddb/auto';
 import { afterEach, expect, it } from 'vitest';
 import { MiseDatabase } from '../apps/web/src/data/db';
@@ -116,7 +117,7 @@ it('activation preserves the original local shop, upload receipt and portable ba
   expect(await f.db.syncSessions.count()).toBe(1);
   expect(backupToken(await f.db.readBackup())).toBe(before);
   expect(Object.keys((await f.db.readBackup()).tables)).toHaveLength(21);
-  expect(f.db.tables).toHaveLength(41);
+  expect(f.db.tables).toHaveLength(localTableNames.length);
   expect(JSON.stringify(state)).not.toContain(config.apiUrl);
   expect(JSON.stringify(state)).not.toContain(config.publishableKey);
   expect(JSON.stringify(state)).not.toContain(user);
