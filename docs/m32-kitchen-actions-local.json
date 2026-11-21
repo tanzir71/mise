@@ -1,0 +1,160 @@
+{
+  "checkedAt": "2026-11-21T18:32:41.081Z",
+  "milestone": "M32",
+  "milestoneComplete": false,
+  "scope": "Device-session-authorized kitchen acknowledgement and Ready backend; kitchen interface, offline queue, realtime and alarms remain unfinished",
+  "enabledByDefault": false,
+  "local": {
+    "focused": {
+      "files": 6,
+      "passed": 139
+    },
+    "unit": {
+      "files": 190,
+      "passed": 3905,
+      "seconds": 689.78,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "typecheck": {
+      "astroFiles": 167,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "lint": true,
+    "portableBuilds": [
+      "/",
+      "/mise/"
+    ],
+    "browser": {
+      "pagesPassed": 501,
+      "pagesMinutes": 22.8,
+      "rootFocusedPassed": 15,
+      "rootSeconds": 49.3,
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "syntheticAuth": true
+    },
+    "visual": {
+      "status": "passed",
+      "comparisons": 365,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": 0,
+      "deviceCaptures": 25,
+      "deviceAxeViolations": 0,
+      "appliesTo": "Existing landing and app regressions; this is not M32 kitchen-screen acceptance",
+      "pixelDifferencesInformational": true
+    },
+    "indexFollowup": {
+      "finalNativeSqlCheck": "passed",
+      "passed": 25,
+      "managedRoleChecks": 29,
+      "remainingAuthRows": 0,
+      "remainingShopRows": 0,
+      "schemaVersion": 53,
+      "fullUnitPrecededIndexOnlyFollowup": true
+    }
+  },
+  "hosted": {
+    "migrations": 53,
+    "applicationTables": 74,
+    "forcedRlsTables": 74,
+    "anonymousTableGrants": 0,
+    "publicDefiners": 0,
+    "publicBuckets": 0,
+    "directClientKitchenRpcs": 0,
+    "securityAdvisor": {
+      "info": 1,
+      "warnings": 0,
+      "errors": 0
+    },
+    "performanceAdvisor": {
+      "info": 1,
+      "warnings": 0,
+      "errors": 0,
+      "unindexedForeignKeys": 0
+    },
+    "functions": [
+      {
+        "name": "device-access",
+        "version": 3,
+        "verifyJwt": false,
+        "bytes": 14310,
+        "sha256": "bcab888a5d8a18c9372d7af634b0a14369da4de7e0d7bca00a49f34ab7cdf6a5",
+        "sourceFiles": 5,
+        "retrievedSourceMatches": true
+      },
+      {
+        "name": "kitchen-actions",
+        "version": 1,
+        "verifyJwt": false,
+        "bytes": 31511,
+        "sha256": "22db687690f8b15d75844bc6487c19a8822fb1a8cfbb68ff332bcd1232e30c2e",
+        "sourceFiles": 12,
+        "retrievedSourceMatches": true
+      }
+    ],
+    "migrationVersions": [
+      "20261121173011",
+      "20261121173327"
+    ],
+    "managedSql": {
+      "checks": 29,
+      "remainingAuthRows": 0,
+      "remainingShopRows": 0,
+      "syntheticAuth": true,
+      "genuinePhoneOtp": false,
+      "phoneProviderCommissioned": false
+    },
+    "http": {
+      "validPublishableKeyControl": 200,
+      "passed": 13,
+      "failed": 0
+    },
+    "initialHttpProbeAttempt": {
+      "completed": false,
+      "reason": "Generic harness or transport failure with no completed probe report; exact cause unproven",
+      "freshControlledRunPassed": true
+    },
+    "authProviderChanged": false,
+    "serverSecretsChanged": false
+  },
+  "privacy": {
+    "sourceAndBuildGuardsPassed": true,
+    "sourceIndexFetchedHistoryAndArtifacts": true,
+    "knownPrivateValuesCompared": 10,
+    "credentials": 0,
+    "currentSourceIdentifiers": 0,
+    "newHistoricalIdentifiers": 0,
+    "coverageGaps": 0,
+    "legacyNonsecretFindings": 22,
+    "legacyPolicyChanged": false,
+    "historyRewritten": false,
+    "newPrivateValuesPublished": false
+  },
+  "publication": {
+    "directMain": true,
+    "pullRequest": false,
+    "ciRunStarted": false,
+    "ciArtifactUploaded": false,
+    "workflowsHeld": true,
+    "pagesPublished": false
+  },
+  "remaining": [
+    "Kitchen UI matching supplied tablet and phone exports",
+    "Cached tickets and native offline tap queue",
+    "New orders delivered within two seconds through realtime",
+    "Scheduled unacknowledged Inbox alarm and desk web push",
+    "Genuine phone-provider and physical-device acceptance"
+  ]
+}

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
+- Kitchen preparation has a device-scoped backend for Got it and Ready. Original tap identities, ticket content and acknowledgement parents survive retries; changed items require review, and prices, payments and customer details stay intact. Revoked devices, PIN sessions, assignments and permissions are checked again before a write. The kitchen interface, offline queue, realtime delivery and notification alarms remain unfinished; device access stays off by default.
+
 - Shared screens keep device credentials in an isolated native journal, outside shop backups and owner Auth. Pairing requires the owner's complete verification comparison; PIN digits stay transient. Lost replies recover the original attempt, and revoked staff or managers lose access after a fresh server check. The new interface remains off by default.
 
 - Saved closing undo stays bound to its original count creation event during delivery and canonical replay. A reviewed replacement cannot silently become the target of the old undo; the saved action remains available for explicit review.

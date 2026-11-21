@@ -1,5 +1,20 @@
 # Deployment credentials
 
+The [kitchen preparation backend](m32-kitchen-actions.md) authenticates an
+enrolled device and current staff session, with no owner JWT or caller-supplied
+member authority. Final SQL admission rechecks the live device, PIN revision,
+member assignment and permissions before writing only preparation status.
+Staff receive a closed metadata receipt; private customer fields, money, source
+messages and credentials remain outside it. All 74 application tables force
+RLS; anonymous/PUBLIC table grants, public definers, public buckets and direct
+client kitchen RPC grants remain absent. The exact deployed sources match the
+reviewed bundles. All 29 managed role checks roll fictional rows back, and 13
+hosted HTTP checks pass after a valid-key positive control. Advisors have no
+warnings or errors. Real Auth accounts, phone-provider settings and server
+secrets were not changed. Actual deployment values stay in ignored private
+inputs or the server secret manager. Device/cloud flags, workflows and Pages
+publication remain held; full M32 acceptance remains unfinished.
+
 The [saved physical-count review](m31-closing-review.md) retains original sources
 and deliberate choices in a token-free native journal. Deployment values and
 Auth sessions remain outside the journal and portable backups. Its retrieved

@@ -126,6 +126,7 @@ Spec: `phases/phase-3-backend-sync.md`
   - [Durable local download staging](../../docs/m30-sync-staging.md) preserves the exact request, pages and verified records across offline reload, concurrent tabs and storage failure. Same-database schema 12 retains original uploads/outbox/images; portable backups remain unchanged. The current operator, canonical application and convergence status is tracked above.
   - [Original receipt coverage](../../docs/m31-receipt-coverage.md) distinguishes visible, later, unknown and unconfirmed commands using real transaction/snapshot proof. Schema 15 retains exact batches without changing original queue entries; the current join, application and convergence status is tracked above.
 - [ ] **M32** Kitchen / pack / counter screen on a second device; Got it / Ready; 2-minute unacknowledged alarm · M · T2
+  - The [preparation backend](../../docs/m32-kitchen-actions.md) records scoped acknowledgements and Ready transitions with original-content checks, durable receipts and final live device/PIN authorization. Kitchen UI, cached tickets, offline taps, realtime delivery, Inbox alarms and desk push remain unfinished; M32 stays unchecked and publication stays held.
 - [ ] **M33** Order link writes real orders (no WhatsApp step needed); live tracking page for customers · M · T2
 - [ ] **M34** Staff: members, staff links ("My shift", "I'm here"), on-duty board, manual check-in · M · T2
 - [ ] **M35** Customer's own khata page (read-only + "Pay with bKash" deep link + "Ask for more time") · S · T2

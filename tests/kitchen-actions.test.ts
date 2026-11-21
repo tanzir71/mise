@@ -1,0 +1,273 @@
+import {readFileSync, readdirSync} from 'node:fs';
+import {PGlite} from '@electric-sql/pglite';
+import {afterAll, beforeAll, expect, it} from 'vitest';
+import {createBackup} from '../packages/core/backup';
+import {emptyBackupTables} from '../packages/core/backup-tables';
+import {decodeCommandRecord, prepareCloudMigration} from '../packages/core/cloud-records';
+import {newKitchenId, prepareKitchenAction, type KitchenAction, type KitchenReceipt} from '../packages/core/kitchen';
+import {changeOrderStatusCommand, nextOrderStatuses, saveOrderCommand} from '../packages/core/orders';
+import {ORDER_SOURCE_MAX_TEXT} from '../packages/core/order-limits';
+import {orderPricing} from '../packages/core/order-lines';
+import type {Order} from '../packages/core/models';
+import type {BusinessType} from '../packages/core/packs';
+import {createStaffPin} from '../supabase/functions/_shared/staff-pin';
+import {createKitchenActionsHandler, createKitchenActionsStore, replayKitchenPreparation, type KitchenStep} from '../supabase/functions/_shared/kitchen-actions-handler';
+import {orderFixture, ORDER_AT} from './order-fixture';
+
+type Sql = Pick<PGlite, 'query' | 'exec'>;
+type Device = {id: string; token: string};
+type Session = {id: string; token: string};
+interface Shop {businessId: string; outletId: string; memberId: string; order: Order; device: Device; session: Session; counter: Device; counterSession: Session}
+const origin = 'https://shop.test', literal = 'বাংলা\0' + String.fromCharCode(0xd800), shops: Shop[] = [];
+let db: PGlite, requestNumber = 0, lastRpcError = '';
+
+async function role<T>(sql: Sql, selected: 'anon' | 'authenticated' | 'service_role', uid: string | null, query: string, args: unknown[] = []) {
+  await sql.exec('set local role ' + selected);
+  await sql.query("select set_config('request.jwt.claims',$1,true)", [JSON.stringify({role: selected, ...(uid ? {sub: uid} : {}), user_metadata: {role: 'owner'}})]);
+  return (await sql.query<T>(query, args)).rows;
+}
+async function rollback(work: (sql: Sql) => Promise<void>) {
+  const sentinel = new Error('rollback fixture');
+  try {await db.transaction(async sql => {await work(sql); throw sentinel;});} catch (error) {if (error !== sentinel) throw error;}
+}
+async function current(sql: Sql, shop: Shop) {
+  const row = (await sql.query<Record<string, unknown>>('select * from public.orders where id=$1', [shop.order.id])).rows[0];
+  return decodeCommandRecord('orders', row) as unknown as Order;
+}
+/** Exercise the production HTTP/RPC adapter with real PostgreSQL named
+ * arguments. An incorrect RPC field cannot pass a positional fake callback. */
+function rpc(sql: Sql, hooks: {afterPrepare?: () => Promise<void>; afterFinish?: () => Promise<void>} = {}): typeof fetch {
+  return async (url, options) => {
+    const route = new URL(String(url)).pathname.split('/').at(-1);
+    if (!['prepare_kitchen_action', 'finish_kitchen_action'].includes(route ?? '')) throw Error('Unexpected RPC');
+    expect(options).toMatchObject({method: 'POST', redirect: 'error', headers: {apikey: 'sb_secret_test_only'}});
+    const body = JSON.parse(String(options?.body)) as Record<string, unknown>, keys = Object.keys(body), savepoint = 'request_' + ++requestNumber;
+    if (keys.some(key => !/^p_[a-z_]+$/.test(key))) throw Error('Invalid RPC field');
+    await sql.exec('savepoint ' + savepoint);
+    let value: unknown;
+    try {
+      value = (await role<{data: unknown}>(sql, 'service_role', null,
+        `select public.${route}(${keys.map((key, index) => key + ' => $' + (index + 1)).join(',')}) as data`,
+        Object.values(body).map(v => v !== null && typeof v === 'object' ? JSON.stringify(v) : v)))[0].data;
+      await sql.exec('reset role; release savepoint ' + savepoint);
+    } catch (error) {
+      await sql.exec('rollback to savepoint ' + savepoint + '; release savepoint ' + savepoint);
+      const code = (error as {code?: string}).code;
+      lastRpcError = String(code) + ': ' + String((error as Error).message).slice(0, 350) + '; ' +
+        String((error as {where?: string}).where ?? '').split('\n').filter(line => /function/.test(line)).join('; ').slice(0, 500);
+      return new Response('privileged SQL detail never reaches the screen', {status: code === 'PT409' ? 409 : code === 'PT429' ? 429 : code === '22023' ? 400 : 500});
+    }
+    if (route === 'prepare_kitchen_action') await hooks.afterPrepare?.();
+    else await hooks.afterFinish?.();
+    return new Response(JSON.stringify(value), {headers: {'Content-Type': 'application/json'}});
+  };
+}
+function gateway(sql: Sql, hooks: Parameters<typeof rpc>[1] = {}) {
+  return createKitchenActionsHandler({origins: new Set([origin]), store: createKitchenActionsStore('https://api.test', 'sb_secret_test_only', rpc(sql, hooks))});
+}
+function request(shop: Shop, action: KitchenAction, counter = false) {
+  return new Request('https://api.test/functions/v1/kitchen-actions', {method: 'POST', headers: {
+    origin, authorization: 'Bearer ' + (counter ? shop.counter : shop.device).token, 'Content-Type': 'application/json'},
+    body: JSON.stringify({sessionToken: (counter ? shop.counterSession : shop.session).token, action})});
+}
+async function gotIt(sql: Sql, shop: Shop, counter = false) {
+  const action = await prepareKitchenAction(await current(sql, shop), 'kitchen.acknowledge');
+  const response = await gateway(sql)(request(shop, action, counter));
+  expect(response.status, lastRpcError + '; ' + await response.clone().text()).toBe(200);
+  return {action, receipt: await response.json() as KitchenReceipt};
+}
+
+beforeAll(async () => {
+  db = await PGlite.create();
+  for (const name of ['supabase-auth.sql', 'supabase-storage.sql']) await db.exec(readFileSync(new URL('./fixtures/' + name, import.meta.url), 'utf8'));
+  const directory = new URL('../supabase/migrations/', import.meta.url);
+  for (const name of readdirSync(directory).filter(name => name.endsWith('.sql')).sort()) await db.exec(readFileSync(new URL(name, directory), 'utf8'));
+  for (const [index, pack] of (['restaurant','online_shop','food_stall','corner_shop'] as BusinessType[]).entries()) {
+    const f = orderFixture(pack), setup = f.context.setup, tables = emptyBackupTables();
+    const created = saveOrderCommand({...f.input, type: 'delivery', address: literal, table: '', sourceText: 'PRIVATE CHAT ' + literal,
+      name: 'PRIVATE CUSTOMER ' + literal, lines: [{name: literal, unit: 'cup', qty: 1.125, unitPrice: 1200, note: literal}]}, f.context, null, 0, ORDER_AT);
+    let order = created.order;
+    tables.events.push(created.event);
+    const target = pack === 'corner_shop' ? 'accepted' : pack === 'food_stall' ? 'ordered' : 'confirmed';
+    while (order.status !== target) {
+      const change = changeOrderStatusCommand(order, nextOrderStatuses(order)[0], setup, order.revision, ORDER_AT + 1000);
+      order = change.order; tables.events.push(change.event);
+    }
+    tables.businesses.push(setup.business); tables.outlets.push(setup.outlet); tables.members.push(setup.owner); tables.orders.push(order);
+    const uid = `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`;
+    const plan = await prepareCloudMigration(createBackup(tables), uid);
+    await db.query('insert into auth.users(id,phone,phone_confirmed_at) values($1,$2,now())', [uid, '1415555010' + index]);
+    await db.transaction(async sql => {
+      for (const record of plan.records) {
+        const keys = Object.keys(record.values);
+        await sql.query(`insert into public.${record.table}(${keys.join(',')}) values(${keys.map((_, i) => '$' + (i + 1)).join(',')})`, Object.values(record.values));
+      }
+    });
+    const memberId = newKitchenId(), memberPermissions = {'orders.read': true, 'orders.acknowledge': true, 'orders.ready': true};
+    await db.query('insert into public.members(id,business_id,name,role,permissions,created_at,updated_at) values($1,$2,$3,$4,$5,1,1)',
+      [memberId, setup.business.id, '"Staff"', 'staff', JSON.stringify(memberPermissions)]);
+    await db.query('insert into public.member_outlets values($1,$2,$3)', [setup.business.id, memberId, setup.outlet.id]);
+    const pin = await createStaffPin('0042', {businessId: setup.business.id, memberId}, new Uint8Array(32).fill(23));
+    await db.transaction(sql => role(sql, 'authenticated', uid, 'select public.set_staff_pin($1,$2,$3,$4,$5,$6)',
+      [setup.outlet.id, memberId, newKitchenId(), pin.salt, pin.verifier, pin.pepperVersion]));
+    const devices: Device[] = [], sessions: Session[] = [];
+    for (const mode of ['kitchen', 'counter']) {
+      const device = (await db.transaction(sql => role<{data: Device}>(sql, 'authenticated', uid,
+        'select public.enrol_device($1,$2,$3,$4,$5) as data', [newKitchenId(), newKitchenId(), setup.outlet.id, 'Test screen', mode])))[0].data;
+      const attempt = (await db.transaction(sql => role<{data: {attemptId: string}}>(sql, 'service_role', null,
+        'select public.begin_staff_pin($1,$2,$3) as data', [newKitchenId(), device.token, memberId])))[0].data;
+      const session = (await db.transaction(sql => role<{data: Session}>(sql, 'service_role', null,
+        'select public.finish_staff_pin($1,$2,$3,$4,$5) as data', [device.token, attempt.attemptId, pin.verifier, newKitchenId(), newKitchenId()])))[0].data;
+      devices.push(device); sessions.push(session);
+    }
+    shops.push({businessId: setup.business.id, outletId: setup.outlet.id, order, memberId, device: devices[0], session: sessions[0], counter: devices[1], counterSession: sessions[1]});
+  }
+}, 30000);
+afterAll(async () => {await db?.close();});
+
+it.each([0,1,2,3])('commits Got it then Ready over real scoped HTTP/SQL for pack %s without changing money', async index => rollback(async sql => {
+  const shop = shops[index], original = await current(sql, shop), {receipt} = await gotIt(sql, shop);
+  const beforeReady = await current(sql, shop), tap = await prepareKitchenAction(beforeReady, 'kitchen.ready', receipt.id);
+  const response = await gateway(sql)(request(shop, tap));
+  expect(response.status, await response.clone().text()).toBe(200);
+  const accepted = await response.json() as KitchenReceipt, saved = await current(sql, shop);
+  expect(saved.status).toBe(['ready','packed','ready_called','ready'][index]);
+  for (const field of ['lines','payment','sourceText','address','customer','subtotal','deliveryFee','discount','total','createdBy','handledBy','createdAt'] as const) expect(saved[field]).toEqual(original[field]);
+  expect(accepted).toMatchObject({id: tap.id, memberId: shop.memberId, deviceId: shop.device.id, sessionId: shop.session.id, status: saved.status, revision: saved.revision});
+  const event = (await sql.query<{after_data: Order}>('select after_data from public.events where id=$1', [saved.eventId])).rows[0];
+  expect(event.after_data).toEqual(saved);
+  const body = JSON.stringify(accepted);
+  for (const privateText of [literal, 'PRIVATE CUSTOMER', 'PRIVATE CHAT', shop.device.token, shop.session.token]) expect(body).not.toContain(privateText);
+  expect(response.headers.get('cache-control')).toBe('no-store');
+}));
+
+it('allows explicitly granted counter preparation without giving it to every counter user', async () => rollback(async sql => {
+  const shop = shops[0];
+  await sql.query('update public.members set permissions=$1 where id=$2', [JSON.stringify({'orders.read': true, 'counter.sell': true}), shop.memberId]);
+  const tap = await prepareKitchenAction(shop.order, 'kitchen.acknowledge');
+  expect((await gateway(sql)(request(shop, tap, true))).status).toBe(401);
+  await sql.query('update public.members set permissions=$1 where id=$2', [JSON.stringify({'orders.read': true, 'orders.acknowledge': true, 'orders.ready': true}), shop.memberId]);
+  const {receipt} = await gotIt(sql, shop, true), ready = await prepareKitchenAction(await current(sql, shop), 'kitchen.ready', receipt.id);
+  expect((await gateway(sql)(request(shop, ready, true))).status).toBe(200);
+}));
+
+it.each(['unpriced','unaccepted-swap','all-unavailable'] as const)('records Got it for %s without bypassing commercial readiness', async kind => rollback(async sql => {
+  const shop = shops[0], before = await current(sql, shop), lines = structuredClone(before.lines);
+  if (kind === 'unpriced') {lines[0].unitPrice = null; lines[0].lineTotal = null;}
+  else if (kind === 'unaccepted-swap') lines[0].substitution = {from: 'Original ' + literal, accepted: false};
+  else lines[0].unavailable = true;
+  const priced = orderPricing(lines, before.deliveryFee, before.discount);
+  await sql.query('update public.orders set lines=$1,subtotal=$2,total=$3,revision=revision+1 where id=$4', [JSON.stringify(lines), priced.subtotal, priced.total, before.id]);
+  const {receipt} = await gotIt(sql, shop), seen = await current(sql, shop);
+  expect(seen.status).toBe('confirmed'); expect(receipt.transitionEventIds).toEqual([]); expect(seen.total).toBeNull();
+  const ready = await prepareKitchenAction(seen, 'kitchen.ready', receipt.id);
+  expect((await gateway(sql)(request(shop, ready))).status).toBe(409);
+  expect(await current(sql, shop)).toEqual(seen);
+}));
+
+it('preserves scheduled ticket times in the actual status before/after images', async () => rollback(async sql => {
+  const shop = shops[0], scheduledFor = Date.now() + 3600000;
+  await sql.query('update public.orders set scheduled_for=$1 where id=$2', [scheduledFor, shop.order.id]);
+  await gotIt(sql, shop);
+  const saved = await current(sql, shop), event = (await sql.query<{before_data: Order; after_data: Order}>('select before_data,after_data from public.events where id=$1', [saved.eventId])).rows[0];
+  expect(event.before_data.scheduledFor).toBe(scheduledFor); expect(event.after_data).toEqual(saved);
+}));
+
+it('returns the original committed outcome after a lost HTTP reply with no duplicate transition or audit', async () => rollback(async sql => {
+  const shop = shops[0], tap = await prepareKitchenAction(shop.order, 'kitchen.acknowledge');
+  const response = await gateway(sql, {afterFinish: async () => {throw Error('lost after commit');}})(request(shop, tap));
+  expect(response.status).toBe(503);
+  const saved = await current(sql, shop), retry = await gateway(sql)(request(shop, tap));
+  expect(retry.status).toBe(200);
+  expect(await current(sql, shop)).toEqual(saved);
+  expect((await sql.query<{n: number}>('select count(*)::int as n from private.kitchen_action_receipts where id=$1', [tap.id])).rows[0].n).toBe(1);
+  expect((await sql.query<{n: number}>('select count(*)::int as n from public.events where id=any($1)', [[tap.id, ...tap.transitionEventIds]])).rows[0].n).toBe(2);
+  for (const patch of [{contentHash: '0'.repeat(64)}, {occurredAt: tap.occurredAt + 1}, {transitionEventIds: [newKitchenId(), newKitchenId(), newKitchenId()]}]) {
+    expect((await gateway(sql)(request(shop, {...tap, ...patch} as KitchenAction))).status).toBe(409);
+  }
+}));
+
+it.each(['device','session','member','assignment','pin','permission'] as const)('rechecks %s revocation between preparation and completion', async kind => rollback(async sql => {
+  const shop = shops[0], before = await current(sql, shop), tap = await prepareKitchenAction(before, 'kitchen.acknowledge');
+  const handler = gateway(sql, {afterPrepare: async () => {
+    if (kind === 'device') await sql.query('update private.devices set revoked_at=created_at where id=$1', [shop.device.id]);
+    else if (kind === 'session') await sql.query('update private.device_sessions set revoked_at=created_at where id=$1', [shop.session.id]);
+    else if (kind === 'member') await sql.query('update public.members set active=false where id=$1', [shop.memberId]);
+    else if (kind === 'assignment') await sql.query('delete from public.member_outlets where member_id=$1', [shop.memberId]);
+    else if (kind === 'pin') await sql.query('delete from private.staff_pins where member_id=$1', [shop.memberId]);
+    else await sql.query('update public.members set permissions=$1 where id=$2', [JSON.stringify({'orders.read': true}), shop.memberId]);
+  }});
+  expect((await handler(request(shop, tap))).status).toBe(401);
+  expect(await current(sql, shop)).toEqual(before);
+  expect((await sql.query<{n: number}>('select count(*)::int as n from private.kitchen_action_receipts')).rows[0].n).toBe(0);
+}));
+
+it('rejects a changed SQL snapshot, then safely replays the original visible intent over current private fields', async () => rollback(async sql => {
+  const shop = shops[0], tap = await prepareKitchenAction(shop.order, 'kitchen.acknowledge');
+  const first = await gateway(sql, {afterPrepare: async () => {
+    await sql.query('update public.orders set customer_name=$1,revision=revision+1 where id=$2', [JSON.stringify('Current private name ' + literal), shop.order.id]);
+  }})(request(shop, tap));
+  expect(first.status).toBe(409);
+  expect((await current(sql, shop)).status).toBe('confirmed');
+  expect((await gateway(sql)(request(shop, tap))).status).toBe(200);
+  expect((await current(sql, shop)).customer.name).toBe('Current private name ' + literal);
+}));
+
+it('rejects a stale visible ticket and never substitutes a newer line for the queued Ready', async () => rollback(async sql => {
+  const shop = shops[0], {receipt} = await gotIt(sql, shop), before = await current(sql, shop);
+  const tap = await prepareKitchenAction(before, 'kitchen.ready', receipt.id), changed = structuredClone(before.lines);
+  changed[0].name = 'Changed food';
+  await sql.query('update public.orders set lines=$1,revision=revision+1 where id=$2', [JSON.stringify(changed), shop.order.id]);
+  expect((await gateway(sql)(request(shop, tap))).status).toBe(409);
+  expect((await current(sql, shop)).status).toBe('kitchen_seen');
+}));
+
+it('denies other device/session pairs, outlet selection and direct anonymous/authenticated SQL', async () => rollback(async sql => {
+  const shop = shops[0], tap = await prepareKitchenAction(shop.order, 'kitchen.acknowledge');
+  expect((await gateway(sql)(request(shops[1], tap))).status).toBe(401);
+  const wrong = request({...shop, session: shop.counterSession}, tap);
+  expect((await gateway(sql)(wrong)).status).toBe(401);
+  for (const selected of ['anon', 'authenticated'] as const) {
+    await sql.exec('savepoint denied');
+    await expect(role(sql, selected, null, 'select public.prepare_kitchen_action($1,$2,$3,$4)', [shop.device.token, shop.session.token, newKitchenId(), JSON.stringify(tap)]))
+      .rejects.toMatchObject({code: '42501'});
+    await sql.exec('rollback to savepoint denied; release savepoint denied');
+  }
+}));
+
+it('never rebinds a completed original action to another valid screen session', async () => rollback(async sql => {
+  const shop = shops[0], {action} = await gotIt(sql, shop);
+  const response = await gateway(sql)(request(shop, action, true));
+  expect(response.status).toBe(409);
+  expect((await sql.query<{n: number}>('select count(*)::int as n from private.kitchen_action_receipts where id=$1', [action.id])).rows[0].n).toBe(1);
+}));
+
+it('rejects incomplete, reused or caller-authorized action plans at the SQL boundary itself', async () => rollback(async sql => {
+  const tap = await prepareKitchenAction(shops[0].order, 'kitchen.acknowledge');
+  for (const action of [{...tap, memberId: shops[0].memberId}, {...tap, type: null}, {...tap, revision: 1.5}, {...tap, parentAckId: newKitchenId()},
+    {...tap, transitionEventIds: [tap.id, ...tap.transitionEventIds.slice(1)]}, {...tap, transitionEventIds: []}]) {
+    expect((await sql.query<{valid: boolean}>('select private.kitchen_action_valid($1) as valid', [JSON.stringify(action)])).rows[0].valid).toBe(false);
+  }
+}));
+
+it.each(['steps','receipt','expired'] as const)('SQL rejects altered %s and rolls back any attempted status/audit writes', async kind => rollback(async sql => {
+  const shop = shops[0], tap = await prepareKitchenAction(shop.order, 'kitchen.acknowledge'), ticketId = newKitchenId(), send = rpc(sql);
+  const store = createKitchenActionsStore('https://api.test', 'sb_secret_test_only', send), prepared = await store.prepare(shop.device.token, shop.session.token, ticketId, tap);
+  const write = await replayKitchenPreparation(prepared, tap, ticketId), before = await current(sql, shop);
+  if (kind === 'expired') await sql.query('update private.kitchen_action_tickets set created_at=0,expires_at=60000 where id=$1', [ticketId]);
+  await expect(store.finish(shop.device.token, shop.session.token, ticketId, write.token,
+    kind === 'steps' ? [{id: tap.transitionEventIds[0], status: 'delivered'} as KitchenStep] : write.steps,
+    kind === 'receipt' ? {...write.receipt, memberId: newKitchenId()} : write.receipt)).rejects.toMatchObject({status: 409});
+  expect(await current(sql, shop)).toEqual(before);
+  expect((await sql.query<{n: number}>('select count(*)::int as n from public.events where id=$1', [tap.id])).rows[0].n).toBe(0);
+}));
+
+it('preserves the full existing source limit, including escaped NUL, through internal context and original audits', async () => rollback(async sql => {
+  const shop = shops[0], text = '\0'.repeat(ORDER_SOURCE_MAX_TEXT);
+  await sql.query('update public.orders set source_text=$1 where id=$2', [JSON.stringify(text), shop.order.id]);
+  const {receipt} = await gotIt(sql, shop), saved = await current(sql, shop);
+  expect(saved.sourceText).toBe(text);
+  expect(JSON.stringify(receipt).length).toBeLessThan(1500);
+  const event = (await sql.query<{before_data: Order; after_data: Order}>('select before_data,after_data from public.events where id=$1', [saved.eventId])).rows[0];
+  expect(event.before_data.sourceText).toBe(text); expect(event.after_data.sourceText).toBe(text);
+}), 30000);
