@@ -1,6 +1,7 @@
 import {cloudConnectionTarget,type CloudConnection} from '@mise/core/cloud-connection';
 import {operatorAccountHash} from '@mise/core/operators';
 import {syncHash} from '@mise/core/sync-read';
+import {stockReviewResponseLimit} from '@mise/core/stock-review-source';
 
 export interface CommandAuthorization {jwt:string;userId:string;generation:number}
 export interface CommandAccount {scope:string;accountHash:string;targetHash:string;getAuth:()=>Promise<CommandAuthorization>;assertCurrent:(value:CommandAuthorization)=>void}
@@ -42,12 +43,16 @@ export function createPurchaseReviewRequest(config:CloudConnection,input:Command
  const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review','purchase-'+mode);
  return accountRequest(config,input,endpoint,'POST',send);
 }
+export function createStockReviewRequest(config:CloudConnection,input:CommandAccount,mode:'read'|'resolve',send:typeof fetch){
+ const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review','stock-'+mode);
+ return accountRequest(config,input,endpoint,'POST',send,stockReviewResponseLimit);
+}
 export function createAccountImageRequest(config:CloudConnection,input:CommandAccount,imageId:string,send:typeof fetch){
  if(!/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(imageId))throw new CommandRequestError('review');
  const endpoint=new URL('functions/v1/inbox-image',config.apiUrl+'/');endpoint.searchParams.set('image',imageId);
  return accountRequest(config,input,endpoint,'PUT',send);
 }
-function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL,method:'POST'|'PUT',send:typeof fetch){
+function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL,method:'POST'|'PUT',send:typeof fetch,maximumResponse=responseLimit){
  if(!input||typeof input.scope!=='string'||!input.scope||input.scope.length>2048||!['accountHash','targetHash'].every(k=>typeof input[k as 'accountHash'|'targetHash']==='string'&&/^[a-f0-9]{64}$/.test(input[k as 'accountHash'|'targetHash']))||typeof input.getAuth!=='function'||typeof input.assertCurrent!=='function')throw new CommandRequestError('auth');
  const {scope,accountHash,targetHash,getAuth,assertCurrent}=input;
  const current=(value:CommandAuthorization)=>{try{const result:unknown=assertCurrent(value);if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw Error();}}catch{throw new CommandRequestError('auth');}};
@@ -83,9 +88,9 @@ function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL
     throw error;
    }
    if(!response.ok)throw new CommandRequestError('retry');
-   const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>responseLimit))throw new CommandRequestError('retry');
+   const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>maximumResponse))throw new CommandRequestError('retry');
    const reader=response.body?.getReader();if(!reader)throw new CommandRequestError('retry');let size=0;const parts:Uint8Array[]=[];
-   try{while(true){const part=await abortable(reader.read());if(part.done)break;size+=part.value.byteLength;if(size>responseLimit)throw new CommandRequestError('retry');parts.push(part.value);}}catch(error){void reader.cancel().catch(()=>{});throw error;}finally{reader.releaseLock();}
+   try{while(true){const part=await abortable(reader.read());if(part.done)break;size+=part.value.byteLength;if(size>maximumResponse)throw new CommandRequestError('retry');parts.push(part.value);}}catch(error){void reader.cancel().catch(()=>{});throw error;}finally{reader.releaseLock();}
    const bytes=new Uint8Array(size);let at=0;for(const part of parts){bytes.set(part,at);at+=part.byteLength;}const value:unknown=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
    const latest=await auth();if(latest.generation!==original.generation)throw new CommandRequestError('auth');current(latest);if(lifetime.aborted)throw new CommandRequestError('retry');return {value,guard:()=>current(latest)};
   }catch(error){void response?.body?.cancel().catch(()=>{});if(error instanceof CommandRequestError)throw error;throw new CommandRequestError('retry');}

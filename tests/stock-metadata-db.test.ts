@@ -8,6 +8,11 @@ import {adjustStockCommand,archiveStockItemCommand,saveStockItemCommand,type Sto
 import {syncHash} from '../packages/core/sync-read';
 import type {StockItem} from '../packages/core/models';
 import type {MiseDatabase} from '../apps/web/src/data/db';
+import {newInboxId} from '../packages/core/inbox';
+import {stockAdjustmentIntent} from '../apps/web/src/data/outbox-intents';
+import {stockReviewSourceAudits} from '../packages/core/stock-review-source';
+import {stockResolutionEvent} from './stock-resolution-fixture';
+import type {LocalStockReview} from '../packages/core/stock-review-journal';
 
 const databases:MiseDatabase[]=[];
 afterEach(async()=>{for(const db of databases.splice(0))await db.delete();});
@@ -50,4 +55,17 @@ it('a pending physical count remains a conflict after a canonical movement and r
  await f.db.saveStockItem({...input(before),onHand:before.onHand+2},{id:before.id,revision:before.revision});
  const queue=await f.db.outbox.toArray(),saved=backupToken(await f.db.readBackup()),canonical=await f.db.syncCanonical.get('active'),remote=adjustStockCommand({id:before.id,revision:before.revision,reason:'received',quantity:3},ctx);
  await expect(apply(f,changes(remote))).rejects.toMatchObject({kind:'conflict'});expect(await f.db.outbox.toArray()).toEqual(queue);expect(backupToken(await f.db.readBackup())).toBe(saved);expect(await f.db.syncCanonical.get('active')).toEqual(canonical);expect(await f.db.syncApplications.count()).toBe(0);
+});
+async function withdrawal(ctx:StockContext,item:StockItem){const change=adjustStockCommand({id:item.id,revision:item.revision,reason:'count',quantity:item.onHand+1},ctx),command=stockAdjustmentIntent(change),p={id:newInboxId(),replacementId:newInboxId(),command,sourceHash:'a'.repeat(64),sourceJson:JSON.stringify({v:1,entryId:newInboxId(),sequence:1,commandIndex:0,at:command.occurredAt,events:stockReviewSourceAudits(command,change.events)})};return stockResolutionEvent(ctx,p);}
+it('a canonical movement withdrawal blocks a coincidentally matching pending count and preserves every native row and cursor',async()=>{
+ const f=await boot(),ctx=await context(f),before=ctx.items.find(item=>item.archivedAt===undefined)!,event=await withdrawal(ctx,before);await f.db.saveStockItem({...input(before),onHand:before.onHand+2},{id:before.id,revision:before.revision});const queue=await f.db.outbox.toArray(),saved=backupToken(await f.db.readBackup()),canonical=await f.db.syncCanonical.get('active'),originalImages=await images(f.db);
+ await expect(apply(f,[{table:'events',row:event}])).rejects.toMatchObject({kind:'conflict'});expect(await f.db.outbox.toArray()).toEqual(queue);expect(backupToken(await f.db.readBackup())).toBe(saved);expect(await f.db.syncCanonical.get('active')).toEqual(canonical);expect(await images(f.db)).toEqual(originalImages);expect(await f.db.syncApplications.count()).toBe(0);
+});
+it('a canonical movement withdrawal still allows a retained description while keeping quantities and original queue',async()=>{
+ const f=await boot(),ctx=await context(f),before=ctx.items.find(item=>item.archivedAt===undefined)!,event=await withdrawal(ctx,before);await f.db.saveStockItem(input(before,'Description remains usable'),{id:before.id,revision:before.revision});const queue=await f.db.outbox.toArray(),result=await apply(f,[{table:'events',row:event}]);expect(result.pending).toBe(1);expect(await f.db.outbox.toArray()).toEqual(queue);expect(await f.db.stockItems.get(before.id)).toMatchObject({name:'Description remains usable',onHand:before.onHand,lastCountedAt:before.lastCountedAt});
+});
+it('the finite canonical writer rejects an unexpected stock journal write and rolls every native change back',async()=>{
+ const f=await boot(),ctx=await context(f),before=ctx.items.find(item=>item.archivedAt===undefined)!,remote=adjustStockCommand({id:before.id,revision:before.revision,reason:'received',quantity:1},ctx),saved=backupToken(await f.db.readBackup()),canonical=await f.db.syncCanonical.get('active'),queue=await f.db.outbox.toArray();let attempted=false;
+ const mutate=()=>{attempted=true;void f.db.stockReviews.put({id:'a'.repeat(64),marker:'unexpected native write'} as unknown as LocalStockReview).catch(()=>{});};f.db.stockItems.hook('creating',mutate);
+ try{await expect(apply(f,changes(remote))).rejects.toThrow();expect(attempted).toBe(true);expect(backupToken(await f.db.readBackup())).toBe(saved);expect(await f.db.syncCanonical.get('active')).toEqual(canonical);expect(await f.db.outbox.toArray()).toEqual(queue);expect(await f.db.stockReviews.count()).toBe(0);}finally{f.db.stockItems.hook('creating').unsubscribe(mutate);}
 });

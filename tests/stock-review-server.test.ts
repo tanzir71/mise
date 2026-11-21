@@ -1,0 +1,107 @@
+import {expect,it,vi} from 'vitest';
+import {createStockReviewHandler,createStockReviewStore,type StockReviewStore} from '../supabase/functions/_shared/stock-review';
+import {commandReviewHeader} from '../packages/core/command-resolution';
+import {parseStockCommand,stockWritePlan,type StockCommand,type StockCommandReceipt} from '../packages/core/stock-commands';
+import {parseStockReviewRequest,stockReviewBodyLimit,stockReviewSourceAudits,stockReviewUnitFacts,type StockReviewRequest} from '../packages/core/stock-review-source';
+import {reviewedStockProposal,type StockResolutionReceipt} from '../packages/core/stock-review';
+import {stockFingerprint} from '../packages/core/stock-replay';
+import {syncHash} from '../packages/core/sync-read';
+import {stockNameKey} from '../packages/core/stock-quantity';
+import {adjustStockCommand,archiveStockItemCommand,saveStockItemCommand,saveStockMetadataCommand,saveSupplierCommand,stockBatchCommand,undoStockMoveCommand,type StockChange,type StockContext} from '../packages/core/stock';
+import {stockAdjustmentIntent,stockBatchIntent,stockSaveIntent} from '../apps/web/src/data/outbox-intents';
+import {cloudRecordMaps,encodeCommandRecord} from '../packages/core/cloud-records';
+import {stockFixture,stockInput,STOCK_AT} from './stock-fixture';
+import type {PreparedStockReview} from '../packages/core/stock-review-view';
+import type {BackupTable} from '../packages/core/backup-tables';
+const id=(n:number)=>String(n).padStart(26,'0'),jwt='original.account.signature',publishable='sb_'+'publishable_'+'p'.repeat(24),service='sb_'+'secret_'+'s'.repeat(24),at=STOCK_AT+10000;
+function packet(command:StockCommand,change:StockChange):StockReviewRequest{return parseStockReviewRequest({id:id(90000),replacementId:id(90001),command,sourceHash:'a'.repeat(64),sourceJson:JSON.stringify({v:1,entryId:id(90002),sequence:1,commandIndex:0,at:command.occurredAt,events:stockReviewSourceAudits(command,change.events)})},false);}
+function apply(f:StockContext,change:StockChange){for(const item of change.items){const index=f.items.findIndex(row=>row.id===item.id);if(index<0)f.items.push(item);else f.items[index]=item;}f.moves.push(...change.moves);}
+function adjusted(){const f=stockFixture(),change=adjustStockCommand({id:f.items[0].id,revision:1,reason:'received',quantity:2.125,note:'Saved · বাংলা\0\ud800'},f,STOCK_AT+1000);return {f,p:packet(stockAdjustmentIntent(change),change)};}
+/** This fixture simulates RPCs, exercising the real HTTP handler/store and
+ * pure domain replay. Native SQL authorization is verified separately. */
+async function gateway(f:StockContext,p:StockReviewRequest){
+ const c=p.command,plan=stockWritePlan(c),raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,f.setup.business.id).values).map(([key,value])=>[key,value!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
+ const context=()=>({business:raw('businesses',f.setup.business),outlet:raw('outlets',f.setup.outlet),items:f.items.filter(row=>plan.rows.some(p=>p.itemId===row.id)||JSON.stringify(row.activeKey)===plan.nameKey).map(row=>raw('stockItems',row)),moves:f.moves.filter(row=>plan.rows.some(p=>p.itemId===row.stockItemId)).map(row=>raw('stockMoves',row)),suppliers:f.suppliers.filter(row=>row.id===plan.supplierId).map(row=>raw('suppliers',row))});
+ const state={contextJson:JSON.stringify(context()),suppliersJson:JSON.stringify('input'in c?f.suppliers.filter(row=>row.id===c.input.supplierId||row.id===f.items.find(item=>item.id===plan.rows[0].itemId)?.supplierId).map(row=>({id:row.id,name:row.name,archived:row.archivedAt!==undefined})):[]),activeKeys:c.type==='stock.restore'?f.items.filter(row=>row.archivedAt===undefined).map(row=>({id:row.id,key:JSON.stringify(row.activeKey)})):[],selectionValid:true,reserved:false,resolutionState:plan.rows.map(row=>({itemId:row.itemId,position:null as string|null}))};
+ const prepared={done:false,id:p.id,replacementId:p.replacementId,commandId:c.id,type:c.type,occurredAt:c.occurredAt,outletId:c.outletId,businessId:f.setup.business.id,actorId:f.setup.owner.id,commandHash:await stockFingerprint(c),sourceHash:p.sourceHash,sourceJsonHash:await syncHash(new TextEncoder().encode(p.sourceJson)),plan,unitFacts:stockReviewUnitFacts(p),token:'x'.repeat(43),at,expiresAt:at+120000,stateJson:JSON.stringify(state)},calls:{name:string;args:Record<string,unknown>;headers:Headers}[]=[];
+ let accepted:StockCommandReceipt|StockResolutionReceipt|null=null,normalContext=JSON.stringify(context()),normalDone=false,admitted=true,finishOutcome:StockResolutionReceipt|null=null;
+ const normalPlan=()=>stockWritePlan(reviewedStockProposal(c,p.replacementId,plan.rows.map(row=>({stockItemId:row.itemId,revision:f.items.find(i=>i.id===row.itemId)?.revision??0}))));
+ const send:typeof fetch=async(url,init)=>{
+  const name=new URL(String(url)).pathname.split('/').at(-1)!,args=JSON.parse(String(init?.body)) as Record<string,unknown>,headers=new Headers(init?.headers);calls.push({name,args,headers});expect(init?.redirect).toBe('error');expect(init?.signal).toBeInstanceOf(AbortSignal);
+  if(name==='admit_stock_review')return Response.json(admitted);
+  if(name==='inspect_stock_outcome')return Response.json(accepted);
+  if(name==='prepare_stock_review'||name==='read_stock_review')return Response.json(prepared);
+  if(name==='prepare_stock_write')return Response.json(normalDone?{done:true,receipt:{}}:{done:false,ticketId:args.p_ticket_id,token:'n'.repeat(43),businessId:f.setup.business.id,outletId:c.outletId,actorId:f.setup.owner.id,at:at+1,contextJson:normalContext});
+  if(name==='finish_stock_review'){
+   if(finishOutcome)return Response.json(finishOutcome);const np=args.p_outcome==='replaced'?normalPlan():null,replacement=np?{id:p.replacementId,commandHash:args.p_replacement_hash as string,revisions:np.rows.map(row=>({stockItemId:row.itemId,revision:row.revision})),receipt:{id:p.replacementId,type:c.type,outletId:c.outletId,occurredAt:c.occurredAt,at:at+1,batchId:np.batchId,undoOf:np.undoMoveId,results:np.rows.map(row=>{const result=(args.p_replacement_records as {table:string;values:Record<string,unknown>}[]).find(x=>x.table==='stock_items'&&x.values.id===row.itemId)!.values;return {stockItemId:row.itemId,eventId:row.eventId,moveId:row.moveId,revision:result.revision as number,onHand:result.on_hand as number,updatedAt:result.updated_at as number};})}}:null;
+   return Response.json({id:p.id,type:'command.resolved',commandId:c.id,commandType:c.type,outletId:c.outletId,occurredAt:c.occurredAt,commandHash:prepared.commandHash,sourceHash:p.sourceHash,at:at+2,outcome:args.p_outcome,replacement});
+  }
+  throw Error('Unexpected synthetic RPC '+name);
+ };
+ const store=createStockReviewStore('https://cloud.test',publishable,service,send,()=>id(90003)),handler=createStockReviewHandler({store,origins:new Set(['https://shop.test'])});
+ return {store,handler,prepared,state,calls,setAccepted:(value:typeof accepted)=>{accepted=value;},setNormalContext:(value:string)=>{normalContext=value;},setNormalDone:()=>{normalDone=true;},deny:()=>{admitted=false;},finishAs:(value:StockResolutionReceipt)=>{finishOutcome=value;},refresh:()=>{prepared.stateJson=JSON.stringify(state);}};
+}
+function request(p:StockReviewRequest,resolve=false){return new Request('https://cloud.test/functions/v1/commands?review=stock-'+(resolve?'resolve':'read'),{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer '+jwt,'Content-Type':'application/json',[commandReviewHeader]:p.command.outletId},body:JSON.stringify(resolve?{...p,token:'x'.repeat(43),outcome:'replaced'}:p)});}
+async function prepared(g:Awaited<ReturnType<typeof gateway>>,p:StockReviewRequest){const response=await g.handler(request(p));expect(response.status).toBe(200);return (await response.json()).review as PreparedStockReview;}
+it('prepares an actual original relative quantity over current counted stock without rewriting its command',async()=>{
+ const {f,p}=adjusted(),saved=structuredClone(p);apply(f,adjustStockCommand({id:f.items[0].id,revision:1,reason:'count',quantity:10},f,STOCK_AT+2000));const g=await gateway(f,p),v=await prepared(g,p);
+ expect(v.current.items[0].item?.onHand).toBe(10);expect(v.proposal).toMatchObject({enabled:true,revisions:[{revision:2}],items:[{onHand:12.125,revision:3,unit:'kg',lastCountedAt:STOCK_AT+2000}]});expect(p).toEqual(saved);expect(g.calls.map(c=>c.name)).toEqual(['admit_stock_review','inspect_stock_outcome','prepare_stock_review']);const args=g.calls[2].args;expect(args.p_intent_json).toBe(JSON.stringify(p.command));expect(args.p_source_json).toBe(p.sourceJson);expect(args.p_unit_facts).toEqual(stockReviewUnitFacts(p));
+ expect(g.calls.every(c=>c.headers.get('apikey')===publishable&&c.headers.get('Authorization')==='Bearer '+jwt)).toBe(true);expect(JSON.stringify(v)).not.toContain(publishable);expect(JSON.stringify(v)).not.toContain(service);
+});
+it('sends a source-bound reviewed action through ordinary stock replay and server-only completion',async()=>{
+ const {f,p}=adjusted();apply(f,adjustStockCommand({id:f.items[0].id,revision:1,reason:'count',quantity:10},f,STOCK_AT+2000));const g=await gateway(f,p),response=await g.handler(request(p,true));expect(response.status).toBe(200);const resolved=await response.json() as StockResolutionReceipt;
+ expect(resolved).toMatchObject({outcome:'replaced',commandId:p.command.id,replacement:{id:p.replacementId,revisions:[{revision:2}],receipt:{results:[{onHand:12.125,revision:3}]}}});expect(g.calls.map(c=>c.name)).toEqual(['admit_stock_review','inspect_stock_outcome','read_stock_review','prepare_stock_write','finish_stock_review']);const normal=g.calls[3],finish=g.calls[4];expect(normal.args.p_occurred_at).toBe(p.command.occurredAt);expect(finish.headers.get('apikey')).toBe(service);expect(finish.headers.has('Authorization')).toBe(false);expect((finish.args.p_replacement_records as {table:string;values:unknown}[]).find(r=>r.table==='stock_moves')?.values).toMatchObject({id:'moveId'in p.command?p.command.moveId:null,before_quantity:10,after_quantity:12.125,delta:2.125,created_at:p.command.occurredAt});
+});
+it('withdraws without preparing a movement, even when the original item is unavailable',async()=>{
+ const {f,p}=adjusted();f.items=[];const g=await gateway(f,p);g.state.selectionValid=false;g.refresh();const v=await prepared(g,p);expect(v.current.items[0].item).toBeNull();expect(v.proposal).toEqual({enabled:false,reason:'unavailable'});const r=await g.store.resolve(jwt,{...p,token:'x'.repeat(43),outcome:'withdrawn'});expect(r).toMatchObject({outcome:'withdrawn',replacement:null});expect(g.calls.some(c=>c.name==='prepare_stock_write')).toBe(false);expect(g.calls.at(-1)?.args).toMatchObject({p_replacement_records:null,p_replacement_hash:null,p_replacement_ticket:null,p_replacement_token:null});
+});
+it('returns an actual prior original receipt before reading an expired review token',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p),plan=stockWritePlan(p.command),receipt:StockCommandReceipt={id:p.command.id,type:p.command.type,outletId:p.command.outletId,occurredAt:p.command.occurredAt,at,batchId:plan.batchId,undoOf:plan.undoMoveId,results:plan.rows.map(row=>({stockItemId:row.itemId,eventId:row.eventId,moveId:row.moveId,revision:2,onHand:22.125,updatedAt:at}))};g.setAccepted(receipt);
+ expect(await g.store.resolve(jwt,{...p,token:'o'.repeat(43),outcome:'withdrawn'})).toEqual(receipt);expect(g.calls.map(c=>c.name)).toEqual(['inspect_stock_outcome']);g.calls.splice(0);expect(await g.store.prepare(jwt,p)).toEqual({done:true,receipt});expect(g.calls.map(c=>c.name)).toEqual(['inspect_stock_outcome']);
+});
+it('resumes a lost replacement response through its genuine resolved receipt without executing again',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p),resolved=await g.store.resolve(jwt,{...p,token:'x'.repeat(43),outcome:'replaced'}) as StockResolutionReceipt;g.setAccepted(resolved);g.calls.splice(0);const later={...p,id:id(91000),replacementId:id(91001)};
+ expect(await g.store.resolve(jwt,{...later,token:'o'.repeat(43),outcome:'withdrawn'})).toEqual(resolved);expect(g.calls.map(c=>c.name)).toEqual(['inspect_stock_outcome']);g.setAccepted({...resolved,sourceHash:'f'.repeat(64)});await expect(g.store.prepare(jwt,p)).rejects.toMatchObject({status:409});
+});
+it.each(['unit','birth','reserved','selection'] as const)('disables substitution for a changed %s while retaining the withdrawal comparison',async kind=>{
+ const {f,p}=adjusted();if(kind==='unit')f.items[0].unit='g';if(kind==='birth')f.items[0].createdAt++;const g=await gateway(f,p);if(kind==='reserved')g.state.reserved=true;if(kind==='selection')g.state.selectionValid=false;g.refresh();const v=await prepared(g,p);expect(v.proposal).toEqual({enabled:false,reason:kind==='unit'?'unit':'unavailable'});await expect(g.store.resolve(jwt,{...p,token:'x'.repeat(43),outcome:'replaced'})).rejects.toMatchObject({status:409});expect(g.calls.some(c=>c.name==='prepare_stock_write')).toBe(false);
+});
+it('checks the restore name against the bounded active-key comparison omitted from normal movement context',async()=>{
+ const f=stockFixture(),archived=archiveStockItemCommand(f.items[0],true,1,f,STOCK_AT+1000);apply(f,archived);const restored=archiveStockItemCommand(f.items[0],false,2,f,STOCK_AT+2000),c=parseStockCommand({id:restored.events[0].id,type:'stock.restore',outletId:f.setup.outlet.id,stockItemId:f.items[0].id,revision:2,occurredAt:STOCK_AT+2000}),p=packet(c,restored);apply(f,saveStockItemCommand({...stockInput,name:' ＣＨＩＣＫＥＮ '},f,null,0,STOCK_AT+3000));const g=await gateway(f,p),v=await prepared(g,p);
+ expect(stockNameKey(f.items.at(-1)!.name)).toBe(stockNameKey(f.items[0].name));expect(v.proposal).toEqual({enabled:false,reason:'unavailable'});expect(JSON.stringify(v)).not.toContain('activeKeys');expect(JSON.parse(g.state.contextJson).items).toHaveLength(1);
+});
+it('binds hidden current facts into the state hash even when the visible quantities are identical',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p),a=await prepared(g,p);g.state.reserved=true;g.refresh();const b=await prepared(g,p);expect(a.current.items).toEqual(b.current.items);expect(a.current.stateHash).not.toBe(b.current.stateHash);expect(b.proposal.enabled).toBe(false);
+});
+it('preserves a custom unit with literal NUL and surrogate code units as encoded scalar facts',async()=>{
+ const f=stockFixture(),unit='carton\0\ud800',change=saveStockItemCommand({...stockInput,name:'Original cartons',unit},f,null,0,STOCK_AT+1000),p=packet(stockSaveIntent(change,null),change),g=await gateway(f,p),v=await prepared(g,p);
+ expect(stockReviewUnitFacts(p)).toEqual([{itemId:change.items[0].id,unitKey:JSON.stringify(unit),createdAt:p.command.occurredAt,undoEventId:null,undoDelta:null}]);expect(v.proposal).toMatchObject({enabled:true,items:[{unit}],input:{unit}});expect(JSON.stringify(g.prepared.unitFacts)).not.toContain('\0');
+});
+it('keeps undo expiry and a later active count as separate unavailable reasons',async()=>{
+ const {f}=adjusted(),used=adjustStockCommand({id:f.items[0].id,revision:1,reason:'used',quantity:2},f,STOCK_AT+1000);apply(f,used);const undone=undoStockMoveCommand(used.moves[0],2,f,STOCK_AT+2000),c=parseStockCommand({id:undone.events[0].id,type:'stock.undo',outletId:f.setup.outlet.id,stockItemId:f.items[0].id,revision:2,undoMoveId:used.moves[0].id,moveId:undone.moves[0].id,occurredAt:STOCK_AT+2000}),p=packet(c,undone),g=await gateway(f,p);
+ g.prepared.at=used.moves[0].createdAt+86400001;g.prepared.expiresAt=g.prepared.at+120000;expect((await prepared(g,p)).proposal).toEqual({enabled:false,reason:'expired'});apply(f,adjustStockCommand({id:f.items[0].id,revision:2,reason:'count',quantity:8},f,STOCK_AT+3000));const newer=await gateway(f,p);expect((await prepared(newer,p)).proposal).toEqual({enabled:false,reason:'count'});
+});
+it('rejects a changed comparison between review and ordinary preparation before finishing',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p),raw=JSON.parse(g.state.contextJson);raw.items[0].on_hand=4;g.setNormalContext(JSON.stringify(raw));await expect(g.store.resolve(jwt,{...p,token:'x'.repeat(43),outcome:'replaced'})).rejects.toMatchObject({status:409});expect(g.calls.some(c=>c.name==='finish_stock_review')).toBe(false);g.setNormalDone();await expect(g.store.resolve(jwt,{...p,token:'x'.repeat(43),outcome:'replaced'})).rejects.toMatchObject({status:409});
+});
+it.each(['commandHash','sourceHash','sourceJsonHash','unitFacts','plan','actorId'] as const)('rejects mismatched private %s proof without returning its contents',async field=>{
+ const {f,p}=adjusted(),g=await gateway(f,p);if(field==='unitFacts')g.prepared.unitFacts[0].unitKey='"g"';else if(field==='plan')g.prepared.plan.rows[0].quantity=9;else g.prepared[field]='private-provider-detail';const response=await g.handler(request(p));expect(response.status).toBe(503);expect(await response.text()).not.toContain('private-provider-detail');expect(g.calls.some(c=>c.name==='finish_stock_review')).toBe(false);
+});
+it('keeps the full 1,000-line original count and its ordered reviewed result through the HTTP handler',async()=>{
+ const f=stockFixture(),base=f.items[0];f.items=Array.from({length:1000},(_,i)=>({...base,id:id(1000+i),eventId:id(2000+i),name:'Item '+i,activeKey:'item '+i}));f.moves=[];const change=stockBatchCommand(f.items.map(row=>({id:row.id,revision:1,reason:'count',quantity:0.125,note:'Original note · বাংলা\0\ud800'})),f,STOCK_AT+1000,true),p=packet(stockBatchIntent(change,true),change),g=await gateway(f,p),v=await prepared(g,p);
+ expect(v.current.items).toHaveLength(1000);expect(v.proposal.enabled&&v.proposal.items).toHaveLength(1000);expect(v.proposal.enabled&&v.proposal.items[999].eventId).toBe(stockWritePlan(p.command).rows[999].eventId);expect(g.calls.at(-1)?.args.p_plan).toEqual(stockWritePlan(p.command));
+});
+it('admits the original outlet before reading a larger body, and never accepts a scope mismatch',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p);g.deny();const oversized=request(p);oversized.headers.set('Content-Length',String(stockReviewBodyLimit+1));const read=vi.spyOn(oversized.body!,'getReader'),denied=await g.handler(oversized);expect(denied.status).toBe(403);expect(read).not.toHaveBeenCalled();expect(g.calls.map(c=>c.name)).toEqual(['admit_stock_review']);const fresh=await gateway(f,p),other=request(p);other.headers.set(commandReviewHeader,id(80000));expect((await fresh.handler(other)).status).toBe(400);expect(fresh.calls.map(c=>c.name)).toEqual(['admit_stock_review']);
+});
+it('refuses oversized bodies after admission, unknown routes and unapproved origins',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p),over=request(p);over.headers.set('Content-Length',String(stockReviewBodyLimit+1));expect((await g.handler(over)).status).toBe(413);expect(g.calls.map(c=>c.name)).toEqual(['admit_stock_review']);const duplicate=new Request(request(p).url+'&review=stock-read',request(p));expect((await g.handler(duplicate)).status).toBe(400);const origin=request(p);origin.headers.set('Origin','https://other.test');expect((await g.handler(origin)).status).toBe(403);const auth=request(p);auth.headers.delete('Authorization');expect((await g.handler(auth)).status).toBe(401);
+});
+it('keeps private failures generic at the HTTP boundary',async()=>{
+ const {f,p}=adjusted(),g=await gateway(f,p),store:StockReviewStore={...g.store,prepare:async()=>{throw Error('private-provider-detail '+service);}},handler=createStockReviewHandler({store,origins:new Set(['https://shop.test'])}),response=await handler(request(p));expect(response.status).toBe(503);expect(await response.text()).not.toContain('private-provider-detail');
+});
+it('checks the saved and current supplier names without exposing an unrelated supplier',async()=>{
+ const f=stockFixture(),saved=saveSupplierCommand({name:'Saved supplier · বাংলা\0\ud800',phone:'',note:''},f.setup,null,0,STOCK_AT).supplier,current=saveSupplierCommand({name:'Current supplier',phone:'',note:''},f.setup,null,0,STOCK_AT).supplier,other=saveSupplierCommand({name:'Unrelated supplier',phone:'',note:''},f.setup,null,0,STOCK_AT).supplier;f.suppliers.push(saved,current,other);const change=saveStockMetadataCommand({...f.items[0],supplierId:saved.id},f.items[0],f,STOCK_AT+1000),p=packet(stockSaveIntent(change,f.items[0]),change);apply(f,saveStockMetadataCommand({...f.items[0],supplierId:current.id},f.items[0],f,STOCK_AT+2000));const g=await gateway(f,p),a=await prepared(g,p);
+ expect(a.current.suppliers).toEqual({saved:{id:saved.id,name:saved.name,archived:false},current:{id:current.id,name:current.name,archived:false}});expect(JSON.stringify(a)).not.toContain(other.name);expect(a.proposal).toMatchObject({enabled:true,input:{supplierId:saved.id}});const values=JSON.parse(g.state.suppliersJson);values.find((row:{id:string})=>row.id===current.id).name='Renamed current supplier';g.state.suppliersJson=JSON.stringify(values);g.refresh();const b=await prepared(g,p);expect(b.current.stateHash).not.toBe(a.current.stateHash);expect(b.current.suppliers.current?.name).toBe('Renamed current supplier');
+ values.push({id:other.id,name:other.name,archived:false});g.state.suppliersJson=JSON.stringify(values);g.refresh();expect((await g.handler(request(p))).status).toBe(503);
+});

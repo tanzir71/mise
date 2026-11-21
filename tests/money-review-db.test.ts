@@ -157,11 +157,11 @@ it('rejects tokens or forged completed choices in the durable journal',async()=>
  expect(await hasSavedMoneyReview(f.db,f.original[0].uploadId)).toBe(true);
 });
 it('a real schema-23 upgrade preserves every original store and complete image while adding only an empty private review journal',async()=>{
- const f=await boot(),old=new Dexie('mise-money-review-v23-'+randomUUID()),tables=f.db.tables.filter(t=>t.name!=='moneyReviews'&&t.name!=='purchaseReviews'),saved=await Promise.all(tables.map(t=>t.toArray()));databases.push(old);
+ const f=await boot(),old=new Dexie('mise-money-review-v23-'+randomUUID()),tables=f.db.tables.filter(t=>t.name!=='moneyReviews'&&t.name!=='purchaseReviews'&&t.name!=='stockReviews'),saved=await Promise.all(tables.map(t=>t.toArray()));databases.push(old);
  old.version(23).stores(Object.fromEntries(tables.map(t=>[t.name,[t.schema.primKey.src,...t.schema.indexes.map(i=>i.src)].join(',')])));
  for(let i=0;i<tables.length;i++)await old.table(tables[i].name).bulkPut(saved[i]);old.close();
  const upgraded=new MiseDatabase(old.name);databases.push(upgraded);await upgraded.open();
- expect(upgraded.verno).toBe(25);expect(upgraded.tables).toHaveLength(39);expect(await upgraded.moneyReviews.count()).toBe(0);expect(await upgraded.purchaseReviews.count()).toBe(0);
+ expect(upgraded.verno).toBe(26);expect(upgraded.tables).toHaveLength(40);expect(await upgraded.moneyReviews.count()).toBe(0);expect(await upgraded.purchaseReviews.count()).toBe(0);
  expect(await Promise.all(tables.map(t=>upgraded.table(t.name).toArray()))).toEqual(saved);expect(backupToken(await upgraded.readBackup())).toBe(f.backup);expect(Object.keys((await upgraded.readBackup()).tables)).toHaveLength(21);
 });
 async function activateOriginalOwner(f:Awaited<ReturnType<typeof boot>>){

@@ -1,6 +1,7 @@
 import {parseSupplierMessageCommand,parseSupplierMessageCommandReceipt,type SupplierMessageCommand,type SupplierMessageCommandReceipt} from './supplier-message-commands';
 import {parseMoneyResolutionReceipt,type MoneyResolutionReceipt} from './money-review';
 import {parsePurchaseResolutionReceipt,type PurchaseResolutionReceipt} from './purchase-review';
+import {parseStockResolutionReceipt,type StockResolutionReceipt} from './stock-review';
 import {parseCloudCommand,parseCloudCommandReceipt,type CloudCommand,type CloudCommandReceipt} from './cloud-commands';
 import type {CustomerInput} from './customers';
 import type {CreditTermsInput} from './khata';
@@ -23,7 +24,7 @@ export type CustomerCommand=
   |{id:string;type:'khata.settings';customerId:string;outletId:string;accountId:string|null;input:CreditTermsInput;ids:CustomerRecordIds};
 export type ShopCommand=CloudCommand|CustomerCommand|MoneyCommand|StockCommand|PurchaseCommand|OrderCommand|ClosingCommand|HandoffCommand|InboxCommand|SettingsCommand|ProfileCommand|LinkCommand|SupplierMessageCommand;
 export interface CustomerCommandReceipt {id:string;type:CustomerCommand['type'];customerId:string;outletId:string;accountId:string|null;accountEventId:string|null;entryId:string|null;openingEventId:string|null;at:number;customerUpdatedAt:number;accountUpdatedAt:number|null}
-export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt|CommandResolutionReceipt|MoneyResolutionReceipt|PurchaseResolutionReceipt;
+export type ShopCommandReceipt=CloudCommandReceipt|CustomerCommandReceipt|MoneyCommandReceipt|StockCommandReceipt|PurchaseCommandReceipt|OrderCommandReceipt|ClosingCommandReceipt|HandoffCommandReceipt|InboxCommandReceipt|SettingsCommandReceipt|ProfileCommandReceipt|LinkCommandReceipt|SupplierMessageCommandReceipt|CommandResolutionReceipt|MoneyResolutionReceipt|PurchaseResolutionReceipt|StockResolutionReceipt;
 export function isSupplierMessageCommand(c:ShopCommand):c is SupplierMessageCommand{return c.type==='supplier-message.record';}
 export function isLinkCommand(c:ShopCommand):c is LinkCommand{return isLinkCommandType(c.type);}
 export function isProfileCommand(c:ShopCommand):c is ProfileCommand{return c.type==='setup.update';}
@@ -77,6 +78,7 @@ export function parseShopCommandReceipt(v:unknown,c:ShopCommand):ShopCommandRece
   if(object(v)&&v.type==='command.resolved'){
     if(isMoneyCommand(c)&&c.type!=='khata.communication')return parseMoneyResolutionReceipt(v,c);
     if(isPurchaseCommand(c)&&'purchaseId'in c)return parsePurchaseResolutionReceipt(v,c);
+    if(isStockCommand(c))return parseStockResolutionReceipt(v,c);
     if(!isOrderCommand(c))throw new Error('This resolution does not match the original command family.');
     return parseCommandResolutionReceipt(v,c);
   }

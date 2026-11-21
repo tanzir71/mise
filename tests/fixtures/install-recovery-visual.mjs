@@ -122,6 +122,16 @@ export async function capturePurchaseActionReview(page,mode='review'){
   await checkLocalInboxAccess(page);
  }finally{try{await ownerContext.close();}finally{await server.close();}}
 }
+/** Original stock intent and actual checked/committed SQL outcome. */
+export async function captureStockActionReview(page,mode='review'){
+ const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();
+ try{
+  await owner.goto(base.href);await installSyncApplyFixture(owner);await owner.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(1));await installSyncApplyFixture(page);await page.evaluate(config=>window.miseSyncApplyTest.initialize(config),server.config(2));await page.context().setOffline(true);
+  if(mode==='supplier')await page.evaluate(()=>window.miseSyncApplyTest.stockEdit('Saved supplier · বাংলা',7));else await page.evaluate(()=>window.miseSyncApplyTest.stock('count',7));
+  if(mode==='supplier')await owner.evaluate(()=>window.miseSyncApplyTest.stockEdit('Current supplier',10));else await owner.evaluate(()=>window.miseSyncApplyTest.stock('count',10));await owner.evaluate(()=>window.miseSyncApplyTest.deliver());await owner.evaluate(()=>window.miseSyncApplyTest.pull());await page.context().setOffline(false);await page.evaluate(()=>window.miseSyncApplyTest.cycle());await installRealtimeFixture(page,server.config(2).jwt);await page.goto(new URL('settings/sync?flags=cloudSync',base).href);await page.getByRole('button',{name:'Review saved stock',exact:true}).click();const panel=page.getByRole('region',{name:'Saved stock review'});await panel.getByRole('button',{name:'Check current stock values',exact:true}).click();await page.waitForFunction(()=>Array.from(document.querySelectorAll('.stock-action-review button')).some(button=>button.textContent?.trim()==='Withdraw saved stock action'&&!button.disabled));
+  if(mode==='unconfirmed'){server.loseNextResolution();await panel.getByRole('button',{name:'Apply reviewed stock action',exact:true}).click();await panel.getByRole('alert').filter({hasText:'unconfirmed'}).waitFor();}await checkLocalInboxAccess(page);
+ }finally{try{await ownerContext.close();}finally{await server.close();}}
+}
 /** A genuine rejected counter command; no order review or resolution is invented. */
 export async function captureMoneyCurrencyReview(page){
  const {server,installRealtimeFixture}=await start(),base=new URL('.',page.url()),ownerContext=await page.context().browser().newContext(),owner=await ownerContext.newPage();

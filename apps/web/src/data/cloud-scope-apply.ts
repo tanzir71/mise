@@ -12,6 +12,7 @@ import {parseScopeRecoverySession,scopeRecoveryHash,sameRecoveryIdentity,ScopeRe
 import {readCanonicalState,assertCanonicalState,type CanonicalState} from './cloud-canonical-state';
 import {readRecoveryWorkingSource,assertRecoveryWorkingCoverage,type Source} from './cloud-sync-apply';
 import {assertCanonicalResolutions} from './command-resolution';
+import {stockReviewBoundary} from '@mise/core/stock-review-boundary';
 import {readVerifiedSyncRecords,assertSyncDownloadContext} from './cloud-sync-journal';
 import {readVerifiedSyncImages} from './cloud-sync-images';
 import {downloadSyncCoverage,type SyncCoverageRemote} from './cloud-sync-coverage';
@@ -67,8 +68,8 @@ export async function prepareScopeRecoveryReview(db:MiseDatabase,value:ScopeReco
  const images=await readVerifiedSyncImages(db,state.id,session.target,access.signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,null);
  assertCanonicalResolutions(source.portable,snapshot.backup.tables.events,new Set(covered.keys()));
  let working=structuredClone(snapshot.backup);const times=new Map(source.portable.flatMap(row=>row.commands.map(c=>[c.id,row.at] as const))),pending=commands.filter(c=>!covered.has(c.id));
- const currencyFor=originalCurrencyReader(source.portable);
- for(const command of pending){active(access);let currency:string|undefined;try{currency=currencyFor(command);}catch{throw new ScopeRecoveryError('integrity');}working=await replayPendingIntent(working,command,source.operator.actorId,state.window.createdAt,source.working,times.get(command.id),currency);}
+ const currencyFor=originalCurrencyReader(source.portable),stockBoundary=await stockReviewBoundary(snapshot.backup.tables.events,session.target.outletId);
+ for(const command of pending){active(access);let currency:string|undefined;try{currency=currencyFor(command);}catch{throw new ScopeRecoveryError('integrity');}working=await replayPendingIntent(working,command,source.operator.actorId,state.window.createdAt,source.working,times.get(command.id),currency,stockBoundary);}
  for(const item of source.working.tables.inboxItems.filter(row=>row.outletId===null)){if(working.tables.inboxItems.some(row=>row.id===item.id))throw new ScopeRecoveryError();working.tables.inboxItems.push(structuredClone(item));}
  working=createBackup(working.tables,working.exportedAt);
  const canonicalHash=await canonicalSnapshotHash(snapshot),queueHash=await materializationHash(originalRows(source.portable)),valueApp:CanonicalApplication={id:state.id,version:1,previousApplicationHash:origin.application?.hash??null,previousBaseHash:origin.base.hash,readSourceHash:state.sourceHash,readSeal:state.seal,cursor:state.receivedCursor,baseHash:canonicalHash,throughSequence:source.binding.sequence,queueHash,workingHash:await workingSnapshotHash(working),overlay:materializedRows(snapshot.backup,working),covered:[...covered.values()].sort((a,b)=>a.id.localeCompare(b.id)),pending:pending.map(c=>c.id),proofs:proofs.map(p=>({batchHash:p.batchHash,sourceHash:p.sourceHash,resultHash:p.resultHash!})),recoveryId:session.operationId};

@@ -1,5 +1,19 @@
 # Deployment credentials
 
+The [saved stock review](m31-stock-review.md) retains original actions and deliberate
+choices in a token-free native journal. Review tokens and Auth sessions remain
+ephemeral; connection values never enter the journal or portable backup. Private
+server tickets and archives force RLS, have no direct client table grants and
+permit only service-side completion after independent account, source and current
+state checks. The retrieved JWT-verified function matches the reviewed bundle;
+all 66 application tables force RLS, with no anonymous/PUBLIC table grants,
+public definers or public buckets. Review finalization denies anonymous and
+authenticated execution. All 25 actual anonymous probes return 401 after a
+valid-key 200 control; advisors have no warnings or errors. Auth settings and
+server secrets are unchanged. Actual project, organization and credential values
+stay in ignored private inputs or the server secret manager. Commit, push and
+generated-output guards remain enabled.
+
 The [saved stock metadata boundary](m31-stock-metadata.md) preserves current
 quantities, immutable units, physical-count history and archive state while
 admitting original description intents. The private finalizer independently

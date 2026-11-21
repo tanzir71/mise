@@ -43,8 +43,8 @@ export function parseStockCommand(v:unknown):StockCommand{
   const changes=v.changes.map(x=>{const d=delta(x,true);if(!id(x.eventId)||!id(x.moveId)||v.count&&d.reason!=='count')throw new Error('Check the batch IDs and count lines.');return {...d,eventId:x.eventId,moveId:x.moveId};});
   if(changes[0].eventId!==v.id||new Set(changes.map(x=>x.id)).size!==changes.length)throw new Error('Each batch item needs one reviewed change.');c={...base,type:v.type,count:v.count,batchId:v.batchId as string|null,changes};
  }else throw new Error('Choose a supported stock action and its exact fields.');
- const plan=stockWritePlan(c),created=[...plan.rows.map(r=>r.eventId),...plan.rows.flatMap(r=>r.moveId?[r.moveId]:[]),...(c.type==='stock.batch'&&c.batchId?[c.batchId]:[])];
- if(new Set(created).size!==created.length||created.some(value=>plan.rows.some(r=>r.itemId===value))||c.type==='stock.undo'&&created.includes(c.undoMoveId))throw new Error('Use distinct stock, movement and audit IDs.');return c;
+ const plan=stockWritePlan(c),itemIds=new Set(plan.rows.map(r=>r.itemId)),created=[...plan.rows.map(r=>r.eventId),...plan.rows.flatMap(r=>r.moveId?[r.moveId]:[]),...(c.type==='stock.batch'&&c.batchId?[c.batchId]:[])];
+ if(new Set(created).size!==created.length||created.some(value=>itemIds.has(value))||c.type==='stock.undo'&&created.includes(c.undoMoveId))throw new Error('Use distinct stock, movement and audit IDs.');return c;
 }
 export function stockWritePlan(c:StockCommand){
  const rows=c.type==='stock.batch'?c.changes.map(x=>({itemId:x.id,revision:x.revision,eventId:x.eventId,moveId:x.moveId,reason:x.reason,quantity:x.quantity,source:c.count?'count':x.source})):c.type==='stock.adjust'?[{itemId:c.change.id,revision:c.change.revision,eventId:c.id,moveId:c.moveId,reason:c.change.reason,quantity:c.change.quantity,source:c.change.source}]:[{itemId:c.stockItemId,revision:c.type==='stock.create'?0:c.revision,eventId:c.id,moveId:'moveId'in c?c.moveId:null,reason:c.type==='stock.undo'?'undo':'moveId'in c&&c.moveId?'count':null,quantity:'input'in c&&c.moveId?c.input.onHand:null,source:'moveId'in c&&c.moveId?'manual':null}];

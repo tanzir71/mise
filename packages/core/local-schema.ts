@@ -14,4 +14,5 @@ import {localActionReviewTableNames} from './sync-action-review';
 import {localOrderReviewTableNames} from './order-review-journal';
 import {localMoneyReviewTableNames} from './money-review-journal';
 import {localPurchaseReviewTableNames} from './purchase-review-journal';
-export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames,...localActionReviewTableNames,...localOrderReviewTableNames,...localMoneyReviewTableNames,...localPurchaseReviewTableNames] as const;
+import {localStockReviewTableNames} from './stock-review-journal';
+export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames,...localActionReviewTableNames,...localOrderReviewTableNames,...localMoneyReviewTableNames,...localPurchaseReviewTableNames,...localStockReviewTableNames] as const;

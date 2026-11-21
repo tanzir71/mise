@@ -1,0 +1,116 @@
+{
+  "title": "M31 — Original saved stock review",
+  "pages": [
+    {
+      "id": "m31-stock-review-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated stock review frame. Uses supplied Business data and stock count tokens, card rhythm and controls. Actual scoped SQL/HTTP with explicit local Auth, Realtime and Storage fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".stock-action-review",
+          "id": "review",
+          "reference": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "stockActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-stock-review-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated stock review frame. Uses supplied Business data and stock count tokens, card rhythm and controls. Actual scoped SQL/HTTP with explicit local Auth, Realtime and Storage fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".stock-action-review",
+          "id": "review",
+          "reference": "screens/desktop/Desktop 04b · Mise — Stock · count & quick updates.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "stockActionReviewFixture": "review"
+    },
+    {
+      "id": "m31-stock-unconfirmed-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated stock review frame. Uses supplied Business data and stock count tokens, card rhythm and controls. Actual scoped SQL/HTTP with explicit local Auth, Realtime and Storage fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".stock-action-review",
+          "id": "unconfirmed",
+          "reference": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "stockActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-stock-unconfirmed-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated stock review frame. Uses supplied Business data and stock count tokens, card rhythm and controls. Actual scoped SQL/HTTP with explicit local Auth, Realtime and Storage fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".stock-action-review",
+          "id": "unconfirmed",
+          "reference": "screens/desktop/Desktop 04b · Mise — Stock · count & quick updates.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "stockActionReviewFixture": "unconfirmed"
+    },
+    {
+      "id": "m31-stock-supplier-phone",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        360,
+        390
+      ],
+      "note": "M31 supplies no dedicated stock review frame. Uses supplied Business data and stock count tokens, card rhythm and controls. Actual scoped SQL/HTTP with explicit local Auth, Realtime and Storage fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".stock-action-review",
+          "id": "supplier",
+          "reference": "screens/mobile/M28 · Manager — Business data (menu, tables, suppliers, payments).png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "stockActionReviewFixture": "supplier"
+    },
+    {
+      "id": "m31-stock-supplier-desktop",
+      "path": "app/?flags=cloudSync",
+      "widths": [
+        768,
+        1024,
+        1440
+      ],
+      "note": "M31 supplies no dedicated stock review frame. Uses supplied Business data and stock count tokens, card rhythm and controls. Actual scoped SQL/HTTP with explicit local Auth, Realtime and Storage fixtures. Pixel differences are informational.",
+      "sections": [
+        {
+          "selector": ".stock-action-review",
+          "id": "supplier",
+          "reference": "screens/desktop/Desktop 04b · Mise — Stock · count & quick updates.png"
+        }
+      ],
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "stockActionReviewFixture": "supplier"
+    }
+  ]
+}

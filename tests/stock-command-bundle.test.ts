@@ -2,6 +2,8 @@ import {expect,it} from 'vitest';
 // @ts-expect-error Deployment packaging is a standalone Node module.
 import {edgeBundle} from '../scripts/edge-bundle.mjs';
 import {stockBatchHeader} from '../packages/core/stock-commands';
+import {commandReviewHeader} from '../packages/core/command-resolution';
+import {adjusted} from './stock-review-fixture';
 const id=(n:number)=>String(n).padStart(26,'0');
 it('the exact deployment module admits the owner before reading a stock batch and runs shared physical-count rules',async()=>{
  const bundle=await edgeBundle('commands');for(const source of ['packages/core/stock.ts','packages/core/stock-commands.ts','supabase/functions/_shared/stock-write.ts'])expect(bundle.sourceHashes).toHaveProperty(source);
@@ -19,5 +21,25 @@ it('the exact deployment module admits the owner before reading a stock batch an
   await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64')+'#stock');expect(handler).toBeTypeOf('function');
   const response=await handler!(new Request('https://api.test/commands',{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[stockBatchHeader]:id(2)},body:JSON.stringify({id:id(4),outletId:id(2),occurredAt:1000,type:'stock.batch',count:true,batchId:id(8),changes:[{id:id(5),revision:1,eventId:id(4),moveId:id(7),reason:'count',source:'count',quantity:0,note:'চাল\0'}]})}));
   expect(response.status).toBe(200);expect(await response.json()).not.toHaveProperty('private');expect(calls).toEqual(['admit_stock_batch','prepare_stock_write','finish_stock_write']);
+ }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
+},30000);
+
+it.each(['stock-read','stock-resolve'])('the exact deployment routes %s through stock admission and recovers its genuine ordinary receipt',async mode=>{
+ const bundle=await edgeBundle('commands');expect(bundle.sourceHashes).toHaveProperty('supabase/functions/_shared/stock-review.ts');
+ const {p,change}=adjusted(),command=p.command;if(command.type!=='stock.adjust')throw Error('Expected stock adjustment');
+ const item=change.items[0],at=command.occurredAt+10000,receipt={id:command.id,type:command.type,outletId:command.outletId,occurredAt:command.occurredAt,at,batchId:null,undoOf:null,results:[{stockItemId:item.id,eventId:command.id,moveId:command.moveId,revision:item.revision,onHand:item.onHand,updatedAt:at}]};
+ const runtime=globalThis as unknown as {Deno?:unknown},previousDeno=runtime.Deno,previousFetch=globalThis.fetch;let handler:((request:Request)=>Promise<Response>)|undefined;
+ try{
+  runtime.Deno={env:{get:(name:string)=>({SUPABASE_URL:'https://api.test',MISE_PUBLISHABLE_API_KEY:'sb_publishable_test_only',MISE_SERVICE_API_KEY:'sb_secret_test_only',MISE_ALLOWED_ORIGINS:'https://shop.test'} as Record<string,string>)[name]},serve:(callback:typeof handler)=>{handler=callback;}};
+  const calls:string[]=[];globalThis.fetch=async(url,options)=>{
+   const name=new URL(String(url)).pathname.split('/').at(-1)!,args=JSON.parse(options?.body as string),headers=new Headers(options?.headers);calls.push(name);
+   expect(headers.get('apikey')).toBe('sb_publishable_test_only');expect(headers.get('Authorization')).toBe('Bearer user.valid.signature');
+   if(name==='admit_stock_review'){expect(args).toEqual({p_outlet_id:command.outletId});return Response.json(true);}
+   expect(name).toBe('inspect_stock_outcome');expect(args).toMatchObject({p_command_id:command.id,p_type:command.type,p_outlet_id:command.outletId});return Response.json({...receipt,private:'discard'});
+  };
+  await import('data:text/javascript;base64,'+Buffer.from(bundle.files[0].content).toString('base64')+'#'+mode);expect(handler).toBeTypeOf('function');
+  const body=mode==='stock-resolve'?{...p,token:'z'.repeat(43),outcome:'withdrawn'}:p;
+  const response=await handler!(new Request('https://api.test/commands?review='+mode,{method:'POST',headers:{Origin:'https://shop.test',Authorization:'Bearer user.valid.signature','Content-Type':'application/json',[commandReviewHeader]:command.outletId},body:JSON.stringify(body)}));
+  expect(response.status).toBe(200);expect(await response.json()).toEqual(mode==='stock-read'?{done:true,receipt}:receipt);expect(calls).toEqual(['admit_stock_review','inspect_stock_outcome']);
  }finally{runtime.Deno=previousDeno;globalThis.fetch=previousFetch;}
 },30000);

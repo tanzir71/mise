@@ -9,6 +9,7 @@ import {proposedCustomerCurrencyMatches} from './customer-currency';
 import {replayMoneyRecords} from './money-replay';
 import {replayStockRecords} from './stock-replay';
 import {stockWritePlan} from './stock-commands';
+import {stockReviewBoundary,StockReviewBoundaryError,type StockReviewBoundary} from './stock-review-boundary';
 import {syncDownloadToken} from './sync-download';
 import {syncHash} from './sync-read';
 import type {SyncCoverageIntent} from './sync-coverage';
@@ -46,7 +47,7 @@ function applyRecords(backup:MiseBackup,records:readonly CloudRecord[]):MiseBack
  * original outbox records, IDs and receipts are never edited or manufactured.
  * A tentative projection never substitutes for genuine receipt coverage.
  */
-export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at,savedCurrency?:string):Promise<MiseBackup> {
+export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,actorId:string,at:number,original:MiseBackup=input,originalActionAt=at,savedCurrency?:string,stockBoundary?:StockReviewBoundary):Promise<MiseBackup> {
  const backup=parseBackup(input),c=parseShopCommand(value),t=backup.tables,business=t.businesses[0],outlet=t.outlets[0],actor=t.members.find(m=>m.id===actorId);
  if(!business||!outlet||!actor?.active||!['owner','manager'].includes(actor.role)||actor.businessId!==business.id||outlet.businessId!==business.id||'outletId'in c&&c.outletId!==outlet.id||actor.role==='manager'&&!actor.outletIds.includes(outlet.id))throw new ReconciliationError('review',c.id);
  // A matching row/audit never proves receipt inclusion. Without actual coverage
@@ -69,6 +70,7 @@ export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,act
    records=replayMoneyRecords({...context,contextJson:JSON.stringify(raw)},c);
    if(!proposedMoneyCurrencyMatches(c,records,savedCurrency))throw new ReconciliationError('conflict',c.id);
   }else if(isStockCommand(c)){
+   (stockBoundary??await stockReviewBoundary(t.events,outlet.id)).assert(c);
    if(c.type==='stock.create'&&t.stockItems.some(i=>i.id===c.stockItemId))throw new ReconciliationError('conflict',c.id);
    const plan=stockWritePlan(c),ids=new Set(plan.rows.map(r=>r.itemId));
    raw={business:row('businesses',business),outlet:row('outlets',outlet),items:rows('stockItems',t.stockItems.filter(i=>ids.has(i.id))),moves:rows('stockMoves',t.stockMoves.filter(m=>ids.has(m.stockItemId))),suppliers:rows('suppliers',t.suppliers)};
@@ -81,7 +83,7 @@ export async function replayPendingIntent(input:MiseBackup,value:ShopCommand,act
    return await applyReplayProjection(backup,projection,parseBackup(original));
   }
   return applyRecords(backup,records);
- }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
+ }catch(error){if(error instanceof ReconciliationError)throw error;if(error instanceof PendingReplayError||error instanceof StockReviewBoundaryError)throw new ReconciliationError(error.kind,c.id);throw new ReconciliationError('conflict',c.id);}
 }
 export function materializedRows(base:MiseBackup,working:MiseBackup):MaterializedRow[]{
  parseBackup(base);parseBackup(working);const result:MaterializedRow[]=[];

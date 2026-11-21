@@ -623,6 +623,8 @@ const api = {
   }),
   queueNewOrder:()=>use(db=>db.saveOrder({source:'phone',sourceText:'Original BDT order · বাংলা',name:'Rina',phone:'01712345483',type:'pickup',address:'',table:'',lines:[{name:'Tea',unit:'cup',qty:2,unitPrice:1250}],deliveryFee:0,discount:0,payment:{method:'cash'}})),
   queuePurchase:()=>use(db=>db.recordPurchase({supplierName:'Original supplier',reference:'Original BDT invoice · বাংলা',lines:[{name:'Rice',unit:'kg',qty:2.5,unitPrice:12001}],paid:'due',note:'Keep invoice\0\ud800'})),
+  stockEdit:(supplierName:string,quantity:number)=>use(async(db,receiver)=>{const w=await wire(receiver),item=(await db.stockItems.get(w.config.stockId))!,supplier=await db.saveSupplier({name:supplierName,phone:'',note:''});return db.saveStockItem({...item,supplierId:supplier.id,onHand:quantity},{id:item.id,revision:item.revision});}),
+  renameStockSupplier:(name:string)=>use(async(db,receiver)=>{const w=await wire(receiver),item=(await db.stockItems.get(w.config.stockId))!,supplier=item.supplierId?await db.suppliers.get(item.supplierId):null;if(!supplier)throw Error('Choose the original stock supplier');return db.saveSupplier({name,phone:supplier.phone??'',note:supplier.note??''},{id:supplier.id,revision:supplier.revision});}),
   queueCustomerOpening:()=>use(async db=>{
     const customer=await db.saveCustomer({name:'Original customer',nickname:'',phone:'',address:'',notes:'Original opening · বাংলা\0\ud800',tags:[]},{credit:{allowed:true,limit:50000,reminder:{enabled:false,dayOfMonth:1,tone:'gentle',channel:'whatsapp'}},opening:{amount:12345,occurredAt:1}}),account=(await db.creditAccounts.toArray()).find(a=>a.customerId===customer.id)!,entry=(await db.creditEntries.toArray()).find(e=>e.accountId===account.id)!;
     return {customerId:customer.id,accountId:account.id,entryId:entry.id};
@@ -683,7 +685,7 @@ const api = {
     use(async (db, receiver) =>
       finishPull(db, receiver, await preparePull(db, receiver), true),
     ),
-  stock: (reason: 'used' | 'received', quantity: number) =>
+  stock: (reason: 'used' | 'received' | 'count', quantity: number) =>
     use(async (db, receiver) => {
       const w = await wire(receiver),
         item = (await db.stockItems.get(w.config.stockId))!;
@@ -721,6 +723,7 @@ const api = {
       orderReviews: await db.orderReviews.toArray(),
       moneyReviews: await db.moneyReviews.toArray(),
       purchaseReviews: await db.purchaseReviews.toArray(),
+      stockReviews: await db.stockReviews.toArray(),
       syncSession: await db.syncSessions.get('active'),
       imageSizes: await Promise.all(
         (await db.inboxItems.toArray()).flatMap((item) =>

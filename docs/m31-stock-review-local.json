@@ -1,0 +1,440 @@
+{
+  "scope": "Original saved stock comparison, deliberate withdrawal or replacement, native recovery and canonical convergence",
+  "milestone": "M31",
+  "milestoneComplete": false,
+  "local": {
+    "scope": "Original saved stock comparison, deliberate withdrawal or replacement, native recovery and canonical convergence",
+    "milestone": "M31",
+    "milestoneComplete": false,
+    "checkedAt": "2026-11-21T00:56:27.434Z",
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 149,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "unit": {
+      "files": 151,
+      "passed": 2964,
+      "seconds": 767.24,
+      "normalWorkerLimit": 2,
+      "limitsChanged": false
+    },
+    "initialTimingFailures": {
+      "tests": 2,
+      "file": "owner-apply-db.test.ts",
+      "deadlineMs": 30000,
+      "isolatedRetest": {
+        "files": 1,
+        "passed": 10,
+        "seconds": 107.92,
+        "normalWorkerLimit": 2,
+        "limitsChanged": false
+      },
+      "sourceChanged": false,
+      "fullRerunPassed": true
+    },
+    "browser": {
+      "passed": 479,
+      "duration": "17.9m",
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "visual": {
+      "comparisons": 305,
+      "focusedComparisons": 15,
+      "overflow": 0,
+      "missingMetrics": 0,
+      "referencePixelDifferences": "informational",
+      "reviewedCaptures": [
+        "m31-stock-review-phone-review-390",
+        "m31-stock-review-desktop-review-1440",
+        "m31-stock-supplier-phone-supplier-390",
+        "m31-stock-unconfirmed-phone-unconfirmed-390"
+      ]
+    },
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "buildGuards": {
+      "root": {
+        "ok": true,
+        "artifacts": true,
+        "privateComparisons": 10,
+        "credentials": 0,
+        "currentDeploymentDetails": 0,
+        "coverageGaps": 0
+      },
+      "pages": {
+        "ok": true,
+        "artifacts": true,
+        "privateComparisons": 10,
+        "credentials": 0,
+        "currentDeploymentDetails": 0,
+        "coverageGaps": 0
+      }
+    },
+    "sourceContinuity": {
+      "files": 1207,
+      "changedSources": 0,
+      "period": "Through full unit, browser and visual verification"
+    },
+    "storage": {
+      "nativeSchema": 26,
+      "nativeStores": 40,
+      "portableSchema": 10,
+      "portableTables": 21
+    },
+    "fixtures": {
+      "postgres": "actual local SQL",
+      "http": "actual handlers",
+      "auth": "synthetic local account",
+      "realtime": "synthetic local events",
+      "storage": "synthetic local bytes",
+      "hostedOtpAcceptance": false
+    },
+    "cloudFlags": {
+      "cloudSetup": false,
+      "cloudSync": false
+    },
+    "publication": {
+      "workflowsDisabled": true,
+      "pagesHeld": true
+    },
+    "remaining": [
+      "Genuine hosted phone-provider acceptance",
+      "Physical-device acceptance",
+      "Other concurrent conflict families",
+      "Remaining Phase 3 and later milestones"
+    ],
+    "interruptedContentionRun": {
+      "completed": false,
+      "stopped": true,
+      "observedHostCpuPercent": 100,
+      "productSourceChanged": false,
+      "testConfigurationChanged": false
+    },
+    "postVerificationFormatting": {
+      "ok": true,
+      "verifiedSourceFiles": 1207,
+      "unchangedSources": 1206,
+      "formattingOnlySources": 1,
+      "path": "apps/web/src/StockActionReview.tsx",
+      "bytesRemoved": 1,
+      "beforeSha256": "bf5cb2663a6ac13e848f246167b8b47cce6813dec0974d6df9b6453c27d12ddb",
+      "afterSha256": "49a42193a794231b53708b28154508475a0163fe4e9d104fb31b7d294475679f",
+      "generatedJavaScriptIdentical": true,
+      "compiledCodeSha256": "f5cfd612b9b0602e96276bde35f4def707897089507c389a0efac4338e286540",
+      "rebuiltBasePath": "/mise/",
+      "productionArtifacts": {
+        "ok": true,
+        "files": 467,
+        "changedArtifacts": 0
+      }
+    }
+  },
+  "hosted": {
+    "checkedAt": "2026-11-21T01:02:41.533Z",
+    "ok": true,
+    "migrations": 45,
+    "applicationTables": 66,
+    "forcedRlsTables": 66,
+    "function": {
+      "name": "commands",
+      "version": 32,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "exactReviewedSource": true,
+      "bytes": 520260,
+      "sha256": "87a9eb3f8b4c3aad5c4a7341efa286e17a851ca229736099852e2cdd866e9fa6",
+      "sourceFiles": 96,
+      "sourceHashes": {
+        "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+        "packages/core/calc.ts": "38b8e78484a7792551071f7f44cc639717a760c669ff9c8d92167ac772cf1ed0",
+        "packages/core/catalogue-save.ts": "9b4bfa3c2d0239683bdb5c04c9434e71e1f8de82781e9ffb2bf94f9ec5c80442",
+        "packages/core/catalogue.ts": "5ae9770f861750d246adc43f70c61d191110cf77575d6225f6ae47a827194bca",
+        "packages/core/closing-commands.ts": "5028d3ce8943e4bb58298494d923845ea6bdbe02fa02f7571f70ab9c6cfd4d83",
+        "packages/core/closing-replay.ts": "0871809df56bf0a9b473fc5f85fcee2324ec1225d984777d2d1042c37b639865",
+        "packages/core/closing.ts": "14c8b4d0c889c7652ba6bd91d03cecdc328ef1c84a95b1d4fa037270e14fcf5e",
+        "packages/core/cloud-commands.ts": "337893203a6a0329d924b22c443df441ad5e7b8943c99502e5ac8d77b59786a5",
+        "packages/core/cloud-records.ts": "a6c853a29c116c25c40e662d56933d28747e429eacaf0a91448809085bf322c8",
+        "packages/core/command-resolution.ts": "446b3efc5317b3cf0475ca3ac9a16b50e4be8e7758bbeaf567ccbf0e53a8de39",
+        "packages/core/credit-sales.ts": "7f5d9d5410677ef16876cabca7d98fd4d7e07b16cf3efbcdad48b2ec9219a5fd",
+        "packages/core/customer-currency.ts": "00d973269c62ebc14851cb0fe787850198aa6d0757d67f8062f2984a71aac195",
+        "packages/core/customer-mutation.ts": "bc4ef7c9b41c96ae29ff255096df896307fa58b5af6dbb1549d78b7bf214c9b8",
+        "packages/core/customer-replay.ts": "2e032dd6801c109e4ae9e51cc602caef5994318ccfb1afd46cc42e7b7860f91e",
+        "packages/core/customers.ts": "39f0e5bf9319aa08bc9d69d73113f349a8cf067d0168011eca345ca26812b3c4",
+        "packages/core/export-audit.ts": "a1721a2f6fc67b0799c1e45a4614e6d7b21719884cc1159a77f3c64aca1db82b",
+        "packages/core/exports.ts": "a5a0726b910969087ba459bb691f69fe213f36def50eb2d5be9173935eaa5b06",
+        "packages/core/handoff-commands.ts": "e7655e6a48f2ea95e7c5f93ab6d2c3bbb4c209e3b40e1f8c97018c6bcee56646",
+        "packages/core/handoff-completion.ts": "39a8f9d1a9dc27cf1c8099565638d00c1746f0d0e1137df6837f8344afb37676",
+        "packages/core/handoff-progress.ts": "520ed0f7e9bfacfb375a0132d416115b9b87888b960e6f71485203870e2dd7c3",
+        "packages/core/handoff-replay.ts": "a6a1c24724fefe0cb1dea69eef6323d5fe263309374af9f194784e707ee299c7",
+        "packages/core/handoff.ts": "d4812aa7e88030ee5b36b17712a6bb84acc25c524110f76b7563e378b8919f46",
+        "packages/core/inbox-commands.ts": "07656f0008a8c1ce02c7abb805a9b415a72ec344c79eea84d7cd62015c816b8a",
+        "packages/core/inbox-history.ts": "4b4a4b1ea07f0366313205579e8a920cd227bfa965149749c7a2221f0723880b",
+        "packages/core/inbox-image.ts": "0836f8d4edcb64b6f754955c098b124f8c6dd7c4546e2d187fe8b7fc647f6341",
+        "packages/core/inbox-replay.ts": "e56192cc3a5fc103c285d926a196bfa0ceeef32a15a598a3affdbf226e254bfb",
+        "packages/core/inbox.ts": "e6327f0bbf6f42160fa62aed80c211909a72f6008fe36e3a88ec2b248d5ad98d",
+        "packages/core/khata-messages.ts": "5077dde00aac1b064b7db18be99ba4a6371e829afc54c936f457e01c55784522",
+        "packages/core/khata-reports.ts": "56d8a5790d824ae4b3aee2bb0f537e116fa78ca6c28d7eef6ce890f2172032ec",
+        "packages/core/khata.ts": "e79a89f955ae9763dc2750cd9a6c113f4842f3cdebda5eef83fa2e644765cff4",
+        "packages/core/link-commands.ts": "f04de33d2382a69417706787d877cd12534fcf28ea56d2d49f32c6786d3ca3d8",
+        "packages/core/lz-bounded.ts": "00febd779a9b4f0ecf168ae47d73192301f361508d16747f2d5f5e6beb632ee4",
+        "packages/core/money-commands.ts": "f451d374a4c158c4052cba53b5fa014c0e28d8eca94570cb6625683486e33398",
+        "packages/core/money-currency.ts": "1c535abb1ea71725fb9fad497f73e9f3b78af49c287978794656225ddaccccc8",
+        "packages/core/money-replay.ts": "9835b14f4d5ba64d72ecadcdc41631f8fff4fde5d6fe89b7d9eb6e44a8d0af16",
+        "packages/core/money-review.ts": "dc6262193fd74a0129188e6dce7e28726bb0e5ce10850baaf4d9fe42ce7d30b9",
+        "packages/core/money.ts": "e0423962cd74585e8c52fbe548c48ca99f614efbfa2ed4542aa201529caafdc1",
+        "packages/core/order-commands.ts": "4c4b061b4cccc783f0d149ed3c612c6dd95f3c8bc7d571e40c4ddd75a23ecc93",
+        "packages/core/order-currency.ts": "3156d20df0355328609294d2ac20182aa21fd8b0a6118dceb65e38ebc131ff6f",
+        "packages/core/order-limits.ts": "661ff0d6056d178f6c303e2b52e745bfab0c93011d6b3019a0539faf001ee0e4",
+        "packages/core/order-lines.ts": "d45aed0ad0ec62dd00c438ced216733cf252cc5ee5d51144fa72b950cd274471",
+        "packages/core/order-payments.ts": "37291d3588d25df22a902c5fb9b0217965fc0304c2e67165d624e5d6b391f359",
+        "packages/core/order-replay.ts": "4b053f5233f45417e5a0be17cb114ecb9257c9cde2ad945eeb1337e50e9fcd41",
+        "packages/core/order-review.ts": "419f0b7b0c6e487df182c63b4301bbed49a6d6270e5556cd74e66e3e98e02387",
+        "packages/core/orders.ts": "d9f5bb8ee46ae6469f7e9b3bfdad30f13c6e3f2c142fcdb53e97ec392facefb9",
+        "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+        "packages/core/phone.ts": "e1ec8d78648f8d3b626544aef7aa7fb22c3ece3d4419d4ce216455980d873c5d",
+        "packages/core/profile-commands.ts": "aba0003868a070c2f218a43020f209ae89023fabdfb432ca384da2589cf08a37",
+        "packages/core/public-shop-base64.ts": "8ef050b6f7d53ab5dcad309f7551914e1bdd46a70dcb21dc485a724dd85a4e66",
+        "packages/core/public-shop-codec.ts": "66ad1ea69bd73d034f3ccec13bf9f08a601112568157cc7a6fafd0b2bfd4edf0",
+        "packages/core/public-shop-decode.ts": "0ac7bfc5153f5f5cc46326af7f9b24bb72a68d3bedace0904258ba7af0890ecb",
+        "packages/core/public-shop.ts": "c1b0380b3f4504ee1ec47959c9743ad85886ab06c3be0d0f14749bf3da75c0dc",
+        "packages/core/purchase-commands.ts": "59ac8e45e8e1296800c1a234fc6d8fba5909bf9673a31075d6d37204f51a741f",
+        "packages/core/purchase-currency.ts": "f3e5dc3010aa0a62f4cae9a473ab2c6182e2a56a7496dc1fd3ee62013e62b1de",
+        "packages/core/purchase-replay.ts": "10dc71842312337ea1ee645f64a896a9d73b96ff9838c4a119150447db7dd22f",
+        "packages/core/purchase-review.ts": "be84b527db2fda4ee632a8073259f1bc976a1477d422ba5f9792cb717fff4846",
+        "packages/core/purchases.ts": "67da2c99859b71a40b15ccb7635c74b54a2c7309b39b4b4f4e42dce4b23e8189",
+        "packages/core/sales.ts": "1527ea77d7e44ed6e7a7fe364001c91f9a2cbf44ee0a04bc990d1f460d643870",
+        "packages/core/settings-commands.ts": "fbe9be41cf3daa17d635d39af1b5fd6464de38b07a74163c23b62420459b51b0",
+        "packages/core/setup.ts": "61276a5ee5acf97ec68db296f9c5c79d6b75f4ca3bf4fa9e966e9dfd28b91b27",
+        "packages/core/shop-access.ts": "64cf9acadce32df5fb635472ed4b4e25ce08e1a249542a0e7efdd8631e1abf91",
+        "packages/core/shop-commands.ts": "eb20fa6e0f6f482ce6d2f8744ecc4bfa8b1d0fb4a8c367a7f8c4d3cc01dc9ca9",
+        "packages/core/shop-links.ts": "58fd560984d828ef501b658acde0add44dd8076f4acd25b15214cb41cd703ab3",
+        "packages/core/stock-commands.ts": "34ffd826deb251ce4f44591182235ac57e811acf337c02a5c450933688f09fa7",
+        "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+        "packages/core/stock-replay.ts": "033df4bf0febd408470eb8cae0fafdec4343b959d76f00faa9243301e3343dfa",
+        "packages/core/stock-review-source.ts": "941265909d3df5ddba467f5799567d6ef5e843153d05ebfda27129681bba6806",
+        "packages/core/stock-review-view.ts": "a8872d2cfc14739c07f44e57a2e4812119b358237fd34163566cea5e219e6ca4",
+        "packages/core/stock-review.ts": "e52deaf377457cdaaa2c9729bcf0fe1364c0a56b665b8f1e039f7da88f0ce21c",
+        "packages/core/stock.ts": "8092de74aa39175fb64559dee5f9ddf72f43456f08c5c5c813d74286271371c4",
+        "packages/core/supplier-drafts.ts": "6fdf47d01c7a837d0fef3a2729be8c81b50b1c71f912288422b98bcbe35a858f",
+        "packages/core/supplier-message-commands.ts": "3dce2a9e837c1fccc3dbfd66b42da68fc48fcc820699d7bcf75bfee20f8ca793",
+        "packages/core/sync-download.ts": "a5c6ee4a6b9f37f088141f4530378fba4bc68b15481fc068eb04a161edd9c987",
+        "packages/core/sync-read.ts": "95cde74bc9aee950f2aa1a43573c5ceedba5a068d821baea18d7822455805f45",
+        "packages/core/today.ts": "5169218afb8069a854a14b2d6ffc1cc53fd5bdfd9f0c7a4198f92dae39ee23f0",
+        "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+        "supabase/functions/_shared/catalogue-write.ts": "4134bc07c29961a3d42194a339dc2ebc275d5ecb3b87255317cada912e580a09",
+        "supabase/functions/_shared/closing-write.ts": "306f2884da3bfad14f2127ede8bb1baa0561fe57ee858449f71dc5555493bde6",
+        "supabase/functions/_shared/commands-handler.ts": "f7fed5f07c6912804c5f254d0c45bfa2e4cbd6fcf3c0c5e416d92355c5824163",
+        "supabase/functions/_shared/customer-write.ts": "913a1f24b8aba60abd62c66b45f4629e71233affd9234b54bcda4e15ec055ae6",
+        "supabase/functions/_shared/device-pin-handler.ts": "a895812265c4c3d4941816631af35fb8428b55802c3d71605c3a79812a78c8fb",
+        "supabase/functions/_shared/handoff-write.ts": "d15874868815b5163319895030f92fde614cd2f8cd2bb1c31f0d6bee0a516753",
+        "supabase/functions/_shared/inbox-write.ts": "feb78009d82768c6a2c693cd3286d842be1e25a95573500f48062643dfd24056",
+        "supabase/functions/_shared/link-write.ts": "95d77fba60ed74b40148d7dfdc4b279c7d6fb89548398d91f3f2344f0dc9c456",
+        "supabase/functions/_shared/money-review.ts": "d1da588c79a1fa150a55bec6a0c4769dd7c4fb525e3385bbafd111016cc24223",
+        "supabase/functions/_shared/money-write.ts": "979548688f74f78a25428a625cfbe4b22c2561535cd55cccf4b9b850ac6a6753",
+        "supabase/functions/_shared/order-review.ts": "5df48055a10ef2aa1ae4ad78d98f2a18e982cac2ed3055b41f31ccf097a41fae",
+        "supabase/functions/_shared/order-write.ts": "2e3d96e213fefc22700ff0f6ea4c60852cafe92092b568747c9ebd4b3ea7ca07",
+        "supabase/functions/_shared/profile-write.ts": "3b9932914c87abfb6044d8b6fbbec1e9a1c2deb9dbb2a953c4e12e95196dd8e4",
+        "supabase/functions/_shared/purchase-review.ts": "74c9658899ff77e1eea3f78e6708b4dd18573ef1e834849fcda2fdba1d582d4f",
+        "supabase/functions/_shared/purchase-write.ts": "e900b781d8a252259d6defd24ca6db91fef7aea8a8ded0753819233278b2648a",
+        "supabase/functions/_shared/settings-write.ts": "6977d2004a71178ff89245d5732ae08b169e739bcabec873302b2b1ddb3568a1",
+        "supabase/functions/_shared/stock-review.ts": "1c2d3e1e6129cde4d9b4598e8e68dbc1104676aad20c16c318f55a016987580a",
+        "supabase/functions/_shared/stock-write.ts": "5d7b9ef80d351a47eb110ef8871c4f75d7303eb0f3949b7d408546d5111cc790",
+        "supabase/functions/_shared/supplier-message-write.ts": "c6ba28271d39e02b882e1e899d8282763748a503a8a76949eb13b2a3409964c7",
+        "supabase/functions/commands/index.ts": "9e25c42672ec78fff11e7b3660b9ae83082b255e6113c0fef7dab0a97f91a2f4"
+      }
+    },
+    "catalog": {
+      "application_tables": 66,
+      "forced_rls_tables": 66,
+      "anonymous_accessible_tables": 0,
+      "public_table_grants": 0,
+      "public_security_definers": 0,
+      "public_buckets": 0,
+      "review_tables": 2,
+      "forced_review_tables": 2,
+      "review_direct_grants": 0,
+      "review_effective_client_grants": 0,
+      "review_sequence_client_grants": 0,
+      "review_internal_client_execute": 0,
+      "admit_anon": 0,
+      "admit_authenticated": 1,
+      "prepare_anon": 0,
+      "prepare_authenticated": 1,
+      "inspect_anon": 0,
+      "inspect_authenticated": 1,
+      "read_anon": 0,
+      "read_authenticated": 1,
+      "finish_anon": 0,
+      "finish_authenticated": 0,
+      "finish_service": 1,
+      "private_finish_anon": 0,
+      "private_finish_authenticated": 0,
+      "private_finish_service": 1
+    },
+    "advisors": {
+      "security": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      },
+      "performance": {
+        "INFO": 1,
+        "WARN": 0,
+        "ERROR": 0
+      }
+    },
+    "anonymous": {
+      "checkedAt": "2026-11-21T01:00:13.964Z",
+      "ok": true,
+      "positiveControl": {
+        "name": "publishable-key",
+        "status": 200
+      },
+      "requests": [
+        {
+          "name": "tables",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "commands",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "invoice",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "customer",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "customer-update",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "money-review",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "purchase-review-read",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "purchase-review-resolve",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "purchase-review-admission",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "purchase-review-finish",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-metadata",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-admission",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-prepare",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-finish",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "upload",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "images",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "sync-read",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "money-admission",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-read",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-resolve",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-admission",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-inspection",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-prepare",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-ticket",
+          "status": 401,
+          "denied": true
+        },
+        {
+          "name": "stock-review-finish",
+          "status": 401,
+          "denied": true
+        }
+      ]
+    },
+    "authSettingsChanged": false,
+    "serverSecretsChanged": false,
+    "actualTargetDetailsPublished": false
+  },
+  "delivery": {
+    "method": "direct main commit with local checks",
+    "workflows": "disabled",
+    "pages": "held",
+    "cloudFlagsDefaultOff": true
+  },
+  "privateTargetAndCredentialValuesExcluded": true
+}

@@ -18,6 +18,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- Saved stock actions now have an opt-in comparison of original and current quantities, units, supplier selections and physical-count history. Explicit withdrawal or replacement retains the original source and recovers genuine outcomes after lost replies, offline reloads and account changes. Review tokens stay ephemeral; cloud sync remains off by default.
+
 - Saved stock descriptions and archive choices now merge with the latest online item while preserving its current quantity, unit and physical-count history. Original edits stay intact; physical counts and undo retain their review rules. Cloud sync remains off by default.
 
 - Stock quantity, target and supplier buttons include their displayed values in their accessible names.

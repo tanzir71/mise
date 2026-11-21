@@ -12,6 +12,7 @@ import {commandReviewHeader} from '../packages/core/command-resolution';
 import {createOrderReviewHandler,createOrderReviewStore} from '../supabase/functions/_shared/order-review';
 import {createMoneyReviewHandler,createMoneyReviewStore} from '../supabase/functions/_shared/money-review';
 import {createPurchaseReviewHandler,createPurchaseReviewStore} from '../supabase/functions/_shared/purchase-review';
+import {createStockReviewHandler,createStockReviewStore} from '../supabase/functions/_shared/stock-review';
 import { resolve, join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -147,6 +148,11 @@ export async function startConvergenceServer(
     'prepare_purchase_review',
     'read_purchase_review',
     'finish_purchase_review',
+    'admit_stock_review',
+    'inspect_stock_outcome',
+    'prepare_stock_review',
+    'read_stock_review',
+    'finish_stock_review',
     'prepare_stock_write',
     'finish_stock_write',
     'admit_stock_batch',
@@ -347,6 +353,7 @@ export async function startConvergenceServer(
     reviews=createOrderReviewHandler({origins,store:createOrderReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     moneyReviews=createMoneyReviewHandler({origins,store:createMoneyReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     purchaseReviews=createPurchaseReviewHandler({origins,store:createPurchaseReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
+    stockReviews=createStockReviewHandler({origins,store:createStockReviewStore('https://database.test','sb_publishable_test_only','sb_secret_test_only',bridge)}),
     upload = createInitialUploadHandler({
       origins,
       store: createInitialUploadStore(
@@ -472,8 +479,8 @@ export async function startConvergenceServer(
       } else if (path === '/functions/v1/commands') {
         calls.commands++;
         const reviewMode = new URL(request.url).searchParams.get('review');
-        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?reviews:commands)(request);
-        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve'].includes(reviewMode??'')) && response.ok) {
+        response = await (reviewMode?.startsWith('money-')?moneyReviews:reviewMode?.startsWith('purchase-')?purchaseReviews:reviewMode?.startsWith('stock-')?stockReviews:reviewMode?reviews:commands)(request);
+        if ((holdCommand || holdResolution && ['resolve','money-resolve','purchase-resolve','stock-resolve'].includes(reviewMode??'')) && response.ok) {
           holdCommand = false;
           holdResolution = false;
           await new Promise<void>((resolve) => {
@@ -482,7 +489,7 @@ export async function startConvergenceServer(
           });
           releaseCommand = null;
         }
-        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
+        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
           loseCommand = false;
           loseResolution = false;
           await truncate(response);
@@ -664,6 +671,9 @@ export async function startConvergenceServer(
         'select count(*)::int n from public.purchases where id in (select value::public.ulid from jsonb_array_elements_text($1::jsonb))',
         [JSON.stringify(ids)],
       )).rows[0].n;
+    },
+    async stockState(id:string) {
+      return (await db.query<{onHand:number;revision:number;supplierId:string|null;moves:number;resolutions:number}>("select on_hand::float8 \"onHand\",revision::int revision,supplier_id \"supplierId\",(select count(*)::int from public.stock_moves where stock_item_id=$1) moves,(select count(*)::int from private.stock_command_resolutions where stock_item_ids@>array[$1::public.ulid]) resolutions from public.stock_items where id=$1",[id])).rows[0];
     },
     async creditEntryCount(ids:string[]) {
       return (await db.query<{n:number}>('select count(*)::int n from public.credit_entries where id in (select value::public.ulid from jsonb_array_elements_text($1::jsonb))',[JSON.stringify(ids)])).rows[0].n;

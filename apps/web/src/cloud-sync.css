@@ -54,6 +54,22 @@
 .review-outcome { border-left:2px solid var(--text); padding-left:16px; }
 .order-review-source { white-space:pre-wrap; overflow-wrap:anywhere; max-width:100%; font:inherit; }
 .purchase-action-review :is(dd,li,strong,span) { min-width:0; overflow-wrap:anywhere; }
+.stock-action-review :is(dd,li,strong,span) { min-width:0; overflow-wrap:anywhere; }
+.stock-action-review .order-review-comparison > div { display:flex; flex-direction:column; }
+.stock-action-review .order-review-comparison > div > p:last-child { margin-top:auto; padding-top:16px; }
+.stock-review-items,.stock-review-notes { padding:0; margin:16px 0; list-style:none; }
+.stock-review-items li { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; padding:16px 0; border-bottom:1px solid var(--border); }
+.stock-review-items strong { font-weight:500; }
+.stock-review-items small { grid-column:1/-1; color:var(--text-secondary); font-size:12px; line-height:20px; }
+.stock-review-items li > span { text-align:right; }
+.stock-review-notes li { padding:16px 0; border-bottom:1px solid var(--border); }
+.stock-review-copy { display:grid; gap:8px; }
+.stock-review-copy textarea { box-sizing:border-box; width:100%; resize:vertical; }
+.stock-action-review .order-review-proposal { border:1px solid var(--border); border-radius:16px; padding:16px; }
+.stock-review-fields { margin:16px 0; }
+.stock-review-fields > div { display:flex; justify-content:space-between; gap:16px; padding:8px 0; }
+.stock-review-fields dt { color:var(--text-secondary); }
+.stock-review-fields dd { margin:0; text-align:right; }
 .purchase-review-lines { display:grid; gap:8px; padding:0; margin:16px 0; list-style:none; }
 .purchase-review-lines li { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; padding:8px 0; border-bottom:1px solid var(--border); }
 .purchase-review-lines strong { grid-column:1/-1; font-weight:500; }
