@@ -13,6 +13,12 @@ import appCopy from '../../../handover/copy/app.en.json';
 
 const Gallery = lazy(() => import('./Gallery').then(module => ({ default: module.Gallery })));
 const LocalApp = lazy(() => import('./LocalApp').then(module => ({ default: module.LocalApp })));
+const SharedScreen=lazy(()=>import('./SharedScreen').then(module=>({default:module.SharedScreen})));
+const ScreenProfileGuard=lazy(()=>import('./ScreenProfileGuard').then(module=>({default:module.ScreenProfileGuard})));
+let screenSetupHash='',screenLinkBlocked=false;
+if((location.pathname===import.meta.env.BASE_URL+'screen'||location.pathname.startsWith(import.meta.env.BASE_URL+'screen/'))&&location.hash){
+  const original=location.hash;try{history.replaceState(history.state,'',location.pathname+location.search);screenSetupHash=original;}catch{screenLinkBlocked=true;}
+}
 
 const base = import.meta.env.DEV ? (import.meta.env.VITE_LANDING_ORIGIN || `http://127.0.0.1:4321${import.meta.env.BASE_URL.replace(/app\/$/, '')}`) : import.meta.env.BASE_URL.replace(/app\/$/, '');
 const markUrl = `${import.meta.env.BASE_URL}mise-mark.svg`;
@@ -33,8 +39,9 @@ const showQrPosters = flagEnabled('qrPosters', location.search, storedFlags);
 const showHandoffs = flagEnabled('handOffs', location.search, storedFlags);
 const showShareTarget=flagEnabled('shareTarget',location.search,storedFlags);
 const showCloudSync=flagEnabled('cloudSync',location.search,storedFlags);
-const showCloudSetup=showCloudSync||flagEnabled('cloudSetup',location.search,storedFlags);
-if(showCloudSetup)try{localStorage.setItem('mise.flags',JSON.stringify({...JSON.parse(storedFlags||'{}'),cloudSetup:true,...(showCloudSync?{cloudSync:true}:{})}));}catch{/* The current visit retains its explicit opt-in. */}
+const showDeviceAccess=flagEnabled('deviceAccess',location.search,storedFlags);
+const showCloudSetup=showDeviceAccess||showCloudSync||flagEnabled('cloudSetup',location.search,storedFlags);
+if(showCloudSetup)try{localStorage.setItem('mise.flags',JSON.stringify({...JSON.parse(storedFlags||'{}'),cloudSetup:true,...(showDeviceAccess?{deviceAccess:true}:{}),...(showCloudSync?{cloudSync:true}:{})}));}catch{/* The current visit retains its explicit opt-in. */}
 if(showShareTarget){
   const manifest=document.querySelector<HTMLLinkElement>('link[rel=manifest]');if(manifest)manifest.href=`${import.meta.env.BASE_URL}manifest-share.webmanifest`;
   try{const flags=JSON.parse(localStorage.getItem('mise.flags')||'{}');localStorage.setItem('mise.flags',JSON.stringify({...flags,shareTarget:true}));}catch{/* The incoming share URL retains the opt-in when storage is unavailable. */}
@@ -48,4 +55,6 @@ function WhatsNew() {
   return <main className="coming-soon"><p className="eyebrow">WHAT’S NEW</p><h1>{appCopy.whatsNew}</h1><p>{appCopy.recentChanges}</p><pre className="changelog">{changelog.replace(/^# Changelog\s*/, '')}</pre><Link to="/">Back to Mise</Link></main>;
 }
 
-createRoot(document.getElementById('root')!).render(<React.StrictMode><HandoffContext.Provider value={showHandoffs}><BrowserRouter basename={import.meta.env.BASE_URL}><Routes><Route path="/whats-new" element={<WhatsNew />} />{showGallery && <Route path="/_ui" element={<Suspense fallback={<p>Loading UI gallery…</p>}><Gallery /></Suspense>} />}<Route path="*" element={showLocalApp ? <Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening Mise…</p></main>}><LocalApp counterEnabled={showCounter} khataEnabled={showKhata} ordersEnabled={showOrders} stockEnabled={showStock} todayEnabled={showToday} exportsEnabled={showExports} pwaEnabled={showPwa} shopLinksEnabled={showShopLinks} pasteOrdersEnabled={showPasteOrders} qrPostersEnabled={showQrPosters} shareTargetEnabled={showShareTarget} cloudSetupEnabled={showCloudSetup} cloudSyncEnabled={showCloudSync} /></Suspense> : <ComingSoon />} /></Routes></BrowserRouter></HandoffContext.Provider></React.StrictMode>);
+function ScreenUnavailable(){return <main className="coming-soon"><h1>Shared screen setup is unavailable.</h1><p>Open the complete setup link from the owner to continue.</p><Link to="/">Back to Mise</Link></main>;}
+
+createRoot(document.getElementById('root')!).render(<React.StrictMode><HandoffContext.Provider value={showHandoffs}><BrowserRouter basename={import.meta.env.BASE_URL}><Routes><Route path="/screen/*" element={showDeviceAccess&&!screenLinkBlocked?<Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening screen setup…</p></main>}><SharedScreen setupHash={screenSetupHash}/></Suspense>:<ScreenUnavailable/>}/><Route path="/whats-new" element={<WhatsNew />} />{showGallery && <Route path="/_ui" element={<Suspense fallback={<p>Loading UI gallery…</p>}><Gallery /></Suspense>} />}<Route path="*" element={<Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening Mise…</p></main>}><ScreenProfileGuard>{showLocalApp?<LocalApp deviceAccessEnabled={showDeviceAccess} counterEnabled={showCounter} khataEnabled={showKhata} ordersEnabled={showOrders} stockEnabled={showStock} todayEnabled={showToday} exportsEnabled={showExports} pwaEnabled={showPwa} shopLinksEnabled={showShopLinks} pasteOrdersEnabled={showPasteOrders} qrPostersEnabled={showQrPosters} shareTargetEnabled={showShareTarget} cloudSetupEnabled={showCloudSetup} cloudSyncEnabled={showCloudSync}/>:<ComingSoon/>}</ScreenProfileGuard></Suspense>} /></Routes></BrowserRouter></HandoffContext.Provider></React.StrictMode>);

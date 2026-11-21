@@ -28,9 +28,11 @@ export function createDevicePinHandler(deps:{store:DevicePinStore;peppers:Readon
     if(!deviceToken)return reply(401,{error:'Check the device and PIN, then try again.'});
     if(!/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type')||''))return reply(415,{error:'Use JSON.'});
     let input:unknown;try{input=await readAuthBody(request);}catch(error){return reply(error instanceof AuthBodyError?error.status:400,{error:'Enter a member and four digits.'});}
-    if(!object(input)||Object.keys(input).sort().join(',')!=='memberId,pin'||typeof input.memberId!=='string'||!ulid.test(input.memberId)||typeof input.pin!=='string'||!/^[0-9]{4}$/.test(input.pin))return reply(400,{error:'Enter a member and four digits.'});
+    if(!object(input)||!['memberId,pin','attemptId,memberId,pin'].includes(Object.keys(input).sort().join(','))||input.attemptId!==undefined&&(typeof input.attemptId!=='string'||!ulid.test(input.attemptId))||typeof input.memberId!=='string'||!ulid.test(input.memberId)||typeof input.pin!=='string'||!/^[0-9]{4}$/.test(input.pin))return reply(400,{error:'Enter a member and four digits.'});
     try{
-      const attemptId=newId(),challenge=await deps.store.begin(attemptId,deviceToken,input.memberId);
+      // A screen may durably choose its attempt ID before sending a PIN. A
+      // concurrent reset can retire that ID even before this request reaches SQL.
+      const attemptId=typeof input.attemptId==='string'?input.attemptId:newId(),challenge=await deps.store.begin(attemptId,deviceToken,input.memberId);
       if(challenge===null)return reply(401,{error:'Check the device and PIN, then try again.'});
       if(!object(challenge))throw new Error('Invalid verification response');
       if(challenge.allowed===false&&time(challenge.retryAt))return reply(429,{error:'Too many tries. Wait before trying again.',retryAt:challenge.retryAt},{'Retry-After':String(Math.max(1,Math.min(900,Math.ceil((challenge.retryAt-now())/1000))))});

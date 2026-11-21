@@ -33,6 +33,14 @@ export function assertCommandReceipt(receipt:object):void {receiptGuards.get(rec
 export function createAccountJsonRequest(config:CloudConnection,input:CommandAccount,route:'commands'|'migration-upload',send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/'+route,config.apiUrl+'/'),'POST',send);
 }
+export type DeviceAdminRpc='read_device_admin'|'start_device_pairing'|'inspect_device_pairing'|'approve_device_pairing'|'cancel_device_pairing'|'revoke_device';
+export function createDeviceAdminRequest(config:CloudConnection,input:CommandAccount,rpc:DeviceAdminRpc,send:typeof fetch){
+ if(!['read_device_admin','start_device_pairing','inspect_device_pairing','approve_device_pairing','cancel_device_pairing','revoke_device'].includes(rpc))throw new CommandRequestError('review');
+ return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8000000);
+}
+export function createOwnerPinRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+ return accountRequest(config,input,new URL('functions/v1/staff-pin',config.apiUrl+'/'),'POST',send);
+}
 export function createOrderReviewRequest(config:CloudConnection,input:CommandAccount,mode:'read'|'resolve',send:typeof fetch){
  const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review',mode);
  return accountRequest(config,input,endpoint,'POST',send);

@@ -8,6 +8,7 @@ import LZString from 'lz-string';
 import { installPhoneAuthFixture } from '../tests/fixtures/phone-auth-browser.mjs';
 import { installUploadReviewFixture } from '../tests/fixtures/install-upload-review.mjs';
 import { installOperatorsFixture } from '../tests/fixtures/install-operators.mjs';
+import {captureDeviceAccess,closeDeviceAccessVisual} from '../tests/fixtures/device-access-visual.mjs';
 import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyActionReview,capturePurchaseActionReview,captureStockActionReview,captureCustomerActionReview,captureClosingActionReview,captureMoneyCurrencyReview,capturePendingCurrencyRecovery,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
 
 const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
@@ -54,6 +55,7 @@ try {
     const targetUrl = new URL(target.path, origin);
     if (target.publicShop) targetUrl.hash = Buffer.from(LZString.compressToUint8Array(JSON.stringify(target.publicShop))).toString('base64url');
     await page.goto(targetUrl.href);
+    if(target.deviceAccessFixture)await captureDeviceAccess(page,target.deviceAccessFixture);
     if(target.scopeRecoveryFixture)await captureRecoveryReview(page);
     if(target.ownerResumeFixture)await captureOwnerResumeReview(page);
     if(target.localInboxFixture)await captureLocalInboxReview(page,typeof target.localInboxFixture==='string'?target.localInboxFixture:'review');
@@ -131,5 +133,5 @@ try {
   if(configPaths.some(path=>path.endsWith('/m20.json')))await import('./proof-public-fonts.mjs');
 } finally {
   try { await browser?.close(); }
-  finally { try { await closeRecoveryVisual(); } finally { server?.kill(); } }
+  finally { try { await closeRecoveryVisual(); } finally { try { await closeDeviceAccessVisual(); } finally { server?.kill(); } } }
 }

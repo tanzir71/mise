@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
+- Shared screens keep device credentials in an isolated native journal, outside shop backups and owner Auth. Pairing requires the owner's complete verification comparison; PIN digits stay transient. Lost replies recover the original attempt, and revoked staff or managers lose access after a fresh server check. The new interface remains off by default.
+
 - Saved closing undo stays bound to its original count creation event during delivery and canonical replay. A reviewed replacement cannot silently become the target of the old undo; the saved action remains available for explicit review.
 
 - Offline customer contact and terms edits retain their existing khata identity after a shop currency change. Contact-only edits write no account or ledger entry; original-unit limits preserve other currency accounts. Scoped admission, fresh access checks and immutable source guards remain enforced.
@@ -19,6 +21,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 - Rechecked source, staged files, fetched Git history and existing site output against private Supabase values: no credentials or current deployment details found. All 35 credential-guard tests pass; commit/push/build guards and GitHub secret scanning/push protection remain enabled. Older nonsecret project identifiers remain disclosed in the audit; GitHub workflows remain stopped.
 
 ### Added
+
+- Opt-in shared-screen settings let owners and assigned managers create pairing codes, compare and approve a screen, and revoke it. Owners can set or clear staff PINs. The separate screen setup supports QR or manual entry, staff PIN sign-in and interrupted sign-in/sign-out recovery while preserving any owner records in the browser. M30/M31 and hosted acceptance remain open.
 
 - Saved physical cash counts gain an opt-in comparison of the original count, current records and proposed cash effect. Explicit withdrawal or replacement preserves the physical amount, count time, day, currency and complete source. A token-free local journal recovers genuine outcomes after lost replies and offline reloads; changed cash parents require another review. Copy and JSON backup remain available. Cloud sync stays off by default.
 

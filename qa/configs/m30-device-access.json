@@ -1,0 +1,72 @@
+{
+  "title": "M30 — Owner pairing and isolated shared-screen sign-in",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "m30-device-owner",
+      "path": "app/?flags=deviceAccess",
+      "deviceAccessFixture": "owner",
+      "captureStyle": ".phone-app-header,.app-bottom-nav,.app-skip{visibility:hidden}",
+      "note": "M30 has no dedicated owner pairing/PIN frame. Uses 74:2354 for the Settings shell, monochrome panels, type and controls. Actual local SQL/HTTP and synthetic verified Auth. Pixel differences are informational; the screen administration content is the implemented M30 requirement.",
+      "sections": [
+        {
+          "id": "settings",
+          "selector": ".device-admin",
+          "reference": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png"
+        }
+      ]
+    },
+    {
+      "id": "m30-screen-setup",
+      "path": "app/?flags=deviceAccess",
+      "deviceAccessFixture": "setup",
+      "note": "Uses the supplied 66:1846 two-column pairing layout, six-digit controls and installation panel. This M30 authentication step precedes the later M32 service filters, sound and wake-lock checks. Their success is not claimed. Reflow/content differences are informational.",
+      "sections": [
+        {
+          "id": "setup",
+          "selector": ".shared-screen-layout",
+          "reference": "screens/desktop/Kitchen PWA · set up a screen (pairing).png"
+        }
+      ]
+    },
+    {
+      "id": "m30-screen-compare",
+      "path": "app/?flags=deviceAccess",
+      "deviceAccessFixture": "waiting",
+      "note": "The screen-owned verification is a required M30 authorization gate before the supplied M32 service setup. Uses 66:1846 for layout, spacing, type and controls; literal codes are synthetic and pixel differences are informational.",
+      "sections": [
+        {
+          "id": "compare",
+          "selector": ".shared-screen-layout",
+          "reference": "screens/desktop/Kitchen PWA · set up a screen (pairing).png"
+        }
+      ]
+    },
+    {
+      "id": "m30-screen-signin",
+      "path": "app/?flags=deviceAccess",
+      "deviceAccessFixture": "signin",
+      "note": "Actual paired-device staff discovery with synthetic owner/Auth and real SQL roles. Four-digit staff PIN gate has no dedicated frame; uses 66:1846 structure/tokens. No M32 ticket or readiness behavior is substituted.",
+      "sections": [
+        {
+          "id": "signin",
+          "selector": ".shared-screen-layout",
+          "reference": "screens/desktop/Kitchen PWA · set up a screen (pairing).png"
+        }
+      ]
+    },
+    {
+      "id": "m30-screen-recovery",
+      "path": "app/?flags=deviceAccess",
+      "deviceAccessFixture": "recovery",
+      "note": "Actual successful PIN derivation with deliberately lost HTTP reply. The isolated native journal retains the original attempt for sign-out recovery without persisting PIN digits. No dedicated recovery frame; uses 66:1846 layout/tokens. Differences are informational.",
+      "sections": [
+        {
+          "id": "recovery",
+          "selector": ".shared-screen-layout",
+          "reference": "screens/desktop/Kitchen PWA · set up a screen (pairing).png"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "checkedAt": "2026-11-21T16:15:44.910Z",
+  "milestone": "M30",
+  "milestoneComplete": false,
+  "scope": "Owner/assigned-manager pairing, owner PIN administration and isolated shared-screen sign-in/recovery",
+  "enabledByDefault": false,
+  "local": {
+    "focused": {
+      "files": 18,
+      "passed": 257
+    },
+    "unit": {
+      "files": 187,
+      "passed": 3818,
+      "seconds": 480.27,
+      "normalWorkers": 2,
+      "limitsChanged": false
+    },
+    "typecheck": {
+      "astroFiles": 166,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "lint": true,
+    "portableBuilds": [
+      "/",
+      "/mise/"
+    ],
+    "browser": {
+      "pagesPassed": 501,
+      "rootFocusedPassed": 15,
+      "normalWorkers": 2,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "syntheticAuth": true
+    },
+    "initialBrowserRun": {
+      "passed": 500,
+      "failed": 1,
+      "originalIsolatedCasesPassed": 3,
+      "receiptFencedRepeatsPassed": 3,
+      "fullRecheckPassed": true,
+      "expectedAdmissionOrderRequiresDurableOwnerReceipts": true,
+      "automaticDeliveryRetained": true,
+      "originalDataAssertionsRetained": true,
+      "deadlinesChanged": false
+    },
+    "secondBrowserRun": {
+      "passed": 500,
+      "failed": 1,
+      "reason": "Offline was set before the manager app loaded",
+      "readinessRepeatsPassed": 3,
+      "fullRecheckPassed": true,
+      "originalCashAssertionsRetained": true,
+      "deadlineMilliseconds": 30000
+    },
+    "publishedRpcRegressionCases": 13,
+    "visual": {
+      "comparisons": 365,
+      "deviceCaptures": 25,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": 0,
+      "deviceAxeViolations": 0,
+      "referenceFrames": [
+        "66:1846",
+        "74:2354"
+      ],
+      "pixelDifferencesInformational": true
+    }
+  },
+  "privacy": {
+    "sourceIndexFetchedHistoryAndArtifacts": true,
+    "knownPrivateValuesCompared": 10,
+    "credentials": 0,
+    "currentSourceIdentifiers": 0,
+    "newHistoricalIdentifiers": 0,
+    "coverageGaps": 0,
+    "legacyNonsecretFindings": 22,
+    "legacyPolicyChanged": false,
+    "historyRewritten": false,
+    "newPrivateValuesPublished": false,
+    "guardTestsPassed": 35
+  },
+  "hosted": {
+    "edgeVersions": {
+      "deviceAccess": 2,
+      "devicePin": 3,
+      "staffPin": 3,
+      "commands": 34
+    },
+    "exactSources": true,
+    "migrations": 51,
+    "applicationTables": 72,
+    "forcedRlsTables": 72,
+    "roleChecks": 19,
+    "remainingAuthRows": 0,
+    "remainingShopRows": 0,
+    "anonymousTableGrants": 0,
+    "publicDefiners": 0,
+    "publicBuckets": 0,
+    "securityWarnings": 0,
+    "securityErrors": 0,
+    "performanceWarnings": 0,
+    "performanceErrors": 0,
+    "anonymousHttpChecks": 24,
+    "anonymousHttpChecksPassed": 24,
+    "validKeyControl": 200,
+    "preflightStatus": 204,
+    "functions": [
+      {
+        "name": "device-access",
+        "bytes": 14272,
+        "sha256": "ae51ccfe4788e54a6e53013b246d00acb7d793e45246f954327f927bde615e68",
+        "sourceFiles": 5,
+        "verifyJwt": false
+      },
+      {
+        "name": "device-pin",
+        "bytes": 8297,
+        "sha256": "f5f31ff87d711f4ceac715ff3f0ac89e8f122712ac345dba53a676587117a330",
+        "sourceFiles": 4,
+        "verifyJwt": false
+      },
+      {
+        "name": "staff-pin",
+        "bytes": 8630,
+        "sha256": "5af75725136e3246d411e5f93d4619fe7710bd46699693cee00aeda2349e42c1",
+        "sourceFiles": 5,
+        "verifyJwt": true
+      }
+    ],
+    "migrationSha256": "3b9589f5ba0e238b17b7f37f600af6ad6b7d87afbbaa47406591d4dfac9c644e",
+    "initialHttpVerification": {
+      "passed": 22,
+      "argumentNameErrors": 2,
+      "publishedSqlArgumentsVerified": true,
+      "productionAdapterCoveredBySqlIntegration": true
+    },
+    "commandsSourceUnchanged": true,
+    "commandsJwtRequired": true,
+    "phoneProviderCommissioned": false,
+    "genuineOwnerHttpAcceptance": false
+  },
+  "screenshots": [
+    "evidence/m30-device-access/owner-settings-1440.png",
+    "evidence/m30-device-access/screen-setup-390.png",
+    "evidence/m30-device-access/screen-recovery-390.png"
+  ],
+  "publication": {
+    "githubWorkflowsHeld": true,
+    "ciArtifactUploaded": false,
+    "pagesDeployment": false
+  }
+}

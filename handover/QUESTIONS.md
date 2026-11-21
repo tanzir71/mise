@@ -1,5 +1,7 @@
 # Open questions
 
+- Resolved M30 pairing scope: the supplied setup frame uses a six-digit code, which is too short to act as a device credential. Use it only to select a pending request. The screen generates its own secret; a live owner/assigned manager compares a matching verification on both devices before approval. Keep runtime credentials outside shop backups, and require a blank browser/profile for a staff screen so existing owner records or sign-ins cannot leak into it. This is a product pairing action, not a delivery sign-off request. Native storage and UI are implemented behind default-off device access; full M30 acceptance remains open.
+
 - Resolved M30 upload storage: initial upload and local writes need one native IndexedDB transaction boundary. Local schema 11 therefore adds two internal stores while portable backups remain schema 10. Typed financial intents can be delivered; all other local writes remain retained recovery evidence until their adapters and canonical reconciliation are ready. This does not enable the sync interface or complete M30.
 
 - Resolved by the refinement handover: all indexed Figma exports are supplied. Phase R replaces the previous HTML/CSS marketing previews with those images and compares the new hero with the exported references.
@@ -20,3 +22,5 @@
 - Resolved M31 ordinary money currency: counter and khata actions now derive their original unit from immutable saved sale/entry images, retaining companion and undo identities. Admission checks every retry after actual outcome lookup; historical account currency remains valid after profile changes. Explicit money review/resolution, stock/purchase/closing boundaries and full hosted acceptance remain open before enabling cloud sync.
 
 - Resolved M31 pending canonical currency: a real native regression projected a saved BDT sale in USD during download. Both canonical and outlet-recovery plans now bind pending projections to the immutable original queue currency, after real coverage checks and before any domain/cursor write. Historical covered rows and valid original-account payments remain usable. Financial review/resolution and remaining M31 acceptance stay open.
+
+- Resolved M30 lost shared-screen PIN replies: a server-created session secret cannot be recovered after its response is lost. Persist the screen's attempt ID before HTTP, keep PIN digits transient, and use an idempotent device-authenticated reset to retire both that attempt and the screen's sessions before an explicit retry. This also handles delayed begin requests, failed native writes and interrupted sign-out without affecting another screen or guessing counters. Owner records stay untouched; original provider, genuine signed-owner HTTP and full M30 delivery acceptance remain open.
