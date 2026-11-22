@@ -18,6 +18,19 @@ it.each([[119999,'waiting'],[120000,'due'],[120001,'due']] as const)('checks the
  const result=evaluateKitchenAlarm(f.ticket,on,scope,f.ticket.createdAt+elapsed);expect(result.state).toBe(state);expect(result.dueAt).toBe(f.ticket.createdAt+120000);
 });
 it('uses the configured period instead of raising at the previous default',()=>{expect(evaluateKitchenAlarm(f.ticket,{enabled:true,minutes:5},scope,f.ticket.createdAt+120000)).toMatchObject({state:'waiting',dueAt:f.ticket.createdAt+300000});});
+it('starts a scheduled acknowledgement clock at the original scheduled time and keeps the two-minute boundary',()=>{
+ const start=f.now+3600000,ticket={...f.ticket,scheduledFor:start};
+ expect(evaluateKitchenAlarm(ticket,on,scope,f.ticket.createdAt+120000)).toMatchObject({state:'waiting',dueAt:start+120000});
+ expect(evaluateKitchenAlarm(ticket,on,scope,start+119999).state).toBe('waiting');
+ expect(evaluateKitchenAlarm(ticket,on,scope,start+120000).state).toBe('due');
+ expect(evaluateKitchenAlarm({...ticket,scheduledFor:f.ticket.createdAt-1},on,scope,f.ticket.createdAt+120000)).toMatchObject({state:'due',dueAt:f.ticket.createdAt+120000});
+});
+it.each(['out','booked','with_courier','returning','delivering'] as const)('does not warn about %s after preparation has been handed off',status=>{
+ expect(evaluateKitchenAlarm({...f.ticket,status},on,scope,f.now).state).toBe('finished');
+});
+it.each([-1,Number.NaN,Number.POSITIVE_INFINITY])('rejects an invalid original scheduled clock: %s',scheduledFor=>{
+ expect(()=>evaluateKitchenAlarm({...f.ticket,scheduledFor},on,scope,f.now)).toThrow();
+});
 it('does not substitute Ready status for a real acknowledgement',()=>{expect(evaluateKitchenAlarm({...f.ticket,status:'ready'},on,scope,f.now).state).toBe('due');});
 it.each([['cancelled','cancelled'],['delivered','finished']] as const)('stops preparation alerts for %s orders', (status,state)=>{expect(evaluateKitchenAlarm({...f.ticket,status},on,scope,f.now).state).toBe(state);});
 it('stops on the actual current domain acknowledgement',()=>{expect(evaluateKitchenAlarm(current,on,scope,f.now+1)).toMatchObject({state:'acknowledged',acknowledgementId:current.acknowledgement!.id});});

@@ -1,0 +1,184 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T16:38:06.084Z",
+  "sourceParentCommit": "96cd367a4a5fe4c43074170f0f6c93005ea9b847",
+  "publicationHeld": true,
+  "featureFlags": {
+    "kitchenScreen": false,
+    "kitchenAlarms": false,
+    "cloudSetup": false,
+    "cloudSync": false,
+    "deviceAccess": false
+  },
+  "installationConfiguration": {
+    "ownership": "each installation",
+    "privilegedKeys": "server only",
+    "maintainerInputsRequired": false,
+    "physicalDeviceAndProviderCommissioning": "installation acceptance; not exercised"
+  },
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 175,
+    "astroDiagnostics": 0,
+    "unitFiles": 212,
+    "unitCases": 4355,
+    "unitDurationSeconds": 963.89,
+    "originalHistoryOrders": 5004,
+    "historySetupDeadlineMs": 120000,
+    "historyUpgradeReadDeadlineMs": 60000,
+    "historyUpgradeReadDurationMs": 3945,
+    "initialUnitRun": "Resource contention caused setup and unrelated short-test timeouts. All 212 original files and all datasets/deadlines are retained; the history fixture runs after the other WASM fixtures and the final full run passes.",
+    "rootBuild": true,
+    "rootBrowserCases": 79,
+    "rootInitialSweep": {
+      "passed": 78,
+      "failed": 1,
+      "resolution": "The new test now waits for the real two-saved-taps confirmation before inspecting IndexedDB; product source unchanged."
+    },
+    "pagesBuild": true,
+    "pagesFullSweep": {
+      "passed": 551,
+      "failed": 0
+    },
+    "referenceExports": 270,
+    "visualComparisons": 40,
+    "visualWidths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "visualHorizontalOverflow": 0,
+    "visualReport": "qa/report.html",
+    "visualDifferences": "Informational comparisons with supplied Figma exports; synthetic literal data, bezel and viewport differ.",
+    "keyScreenshots": [
+      "qa/screens/m32-kitchen-scheduled-phone-390.png",
+      "qa/screens/m32-kitchen-handoff-tablet-1440.png",
+      "qa/screens/m32-kitchen-cancelled-phone-390.png"
+    ],
+    "deviceControls": "Real AudioContext activation/oscillator observation and injected wake-lock protocol; no physical sound or sleep guarantee."
+  },
+  "managed": {
+    "checkedAt": "2026-11-22T16:13:57.959Z",
+    "cronJobs": 0,
+    "authUsers": 0,
+    "forcedRls": 88,
+    "businesses": 0,
+    "migrations": 64,
+    "exactBodies": 6,
+    "expectedBodies": 6,
+    "publicDefiners": 0,
+    "cancellationWork": 0,
+    "preparationIndex": true,
+    "schedulerEnabled": false,
+    "applicationTables": 88,
+    "pushSubscriptions": 0,
+    "predicateImmutable": true,
+    "apiPredicateExecute": 0,
+    "apiProjectionAccess": 0,
+    "isolatedDomainOrders": 4,
+    "actualRoleDenials": 9,
+    "rolledBack": true,
+    "remainingFixtureRows": 0,
+    "alarmProbe": "Real scoped watch/version and canonical source stamp; finish checks scheduled waiting and default due. Public preparation is exercised in native multi-message tests.",
+    "edgeFunctions": [
+      {
+        "name": "kitchen-actions",
+        "versionBefore": 2,
+        "versionAfter": 3,
+        "verifyJwt": false,
+        "exactSource": true,
+        "sha256": "2ad8586b84b5eacbc7c0c665364576b8a3e347b54ce40a839dc28fd553196a00",
+        "bytes": 31806
+      },
+      {
+        "name": "kitchen-alarms",
+        "versionBefore": 1,
+        "versionAfter": 2,
+        "verifyJwt": false,
+        "exactSource": true,
+        "sha256": "e5d68a30aa9830b97a1b3a7cdd02f80337081d32cfe623a986b657314a05f473",
+        "bytes": 20492
+      },
+      {
+        "name": "kitchen-dispatch",
+        "versionBefore": 1,
+        "versionAfter": 2,
+        "verifyJwt": false,
+        "exactSource": true,
+        "sha256": "ec4bb603231f80fc30adcc0d36f18922a4cb9344354b7d5d002f2e0f905f9646",
+        "bytes": 34887
+      },
+      {
+        "name": "kitchen-tickets",
+        "versionBefore": 2,
+        "versionAfter": 3,
+        "verifyJwt": false,
+        "exactSource": true,
+        "sha256": "532ad4afda555ea988715e824ea3835fb64318768e30bd677c69745247a93d2c",
+        "bytes": 19195
+      }
+    ],
+    "totalEdgeFunctions": 16,
+    "otherEdgeVersionsPreserved": 12,
+    "allEdgeAuthSettingsPreserved": true,
+    "security": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performance": {
+      "INFO": 2,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "hostedUnauthorizedRequestsDenied": 6
+  },
+  "credentialGuard": {
+    "command": "pnpm check:secrets --history --artifacts",
+    "commitAndPushHooksRequired": true,
+    "legacyPolicyUnchanged": true
+  },
+  "sourceHashes": {
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "7a8e953382298805d55621865e7071c2c1162cdfdb34a2dc4e2e219229a217f9",
+    "README.md": "53b4abeb4ed6b45b48450ec6aa388cc3957813875c3d2d1425201e3639f9f3bf",
+    "apps/web/src/KitchenScreen.tsx": "5ad7b46881faa33635a136a2f579b3fee85248236645868bd6d3d34b440301f6",
+    "docs/configure-services.md": "4a549a1249ed4f48cf2af81cbd040731626ca6101e9fa77530d83ab5effaab43",
+    "docs/m32-preparation-scope.md": "a18e6bad6f7370cd83c2bedf57d2f3d98168eac27cf7af9dadd6ae6dd0252769",
+    "handover/DECISIONS.md": "125017bf793996c1c281d503633930118d31781a5e291bfe328264edaaa0e542",
+    "handover/QUESTIONS.md": "508e961416c6622e1be99b86d2d8e1466a96f5075d26e014270931bd70e9e8dd",
+    "handover/docs/03-roadmap.md": "11e5e1cdf825b223d1e52907fc0647462615bfccfbb6b31acfd906a60003a93d",
+    "packages/core/flags.ts": "5f9fcc4b9a3b13ccb4b591819f47d16d1c0cfb9370b0906b631935d77eb07525",
+    "packages/core/kitchen-alarms.ts": "34ff361ea89aed4d4437a66da80dcd1f9c73843ae84b5df4b70baa810808bd8e",
+    "packages/core/kitchen-preparation.ts": "432e05abf752d1f96b9aeb4122d156b1b7cf0307a3314bf43fe3bc782accff5a",
+    "packages/core/kitchen-screen.ts": "0bd75acebe5ce013503cff440ac3df8c65383bf92e3451c09dada6d10e0e6709",
+    "packages/core/kitchen.ts": "5260cf4ef1051e12502de2db8c7880f6616ed8e6f691db37f50d347dcf582c21",
+    "qa/configs/m32-kitchen.json": "5f1e63eb7d12faedf2a1a441593095ffdc204f2a61cdec8ae3f1234e9d7ce56a",
+    "scripts/build.mjs": "593b53f0bd66af079c2a9fb6ed86b4cc1623cc523a85fb8ea8a983c9e229a63d",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/edge-bundle.mjs": "57e590f8c30e77df170c6b582cc8ca7b57f19ffa0d0414837aa2ed4c6611a843",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "supabase/functions/.env.example": "2deadf6e1286863b050331ddd24a6be21a91e2c917a1e40f9e648cfaffbfa831",
+    "supabase/functions/kitchen-actions/index.ts": "4a3d1c068beefb631e3768b852a5163e9379d5e052291ce2b4facf53fd8e8f05",
+    "supabase/functions/kitchen-alarms/index.ts": "4b395de7c40352b81bb9324cd29565eb633245e032ed5e1d2848a832f7862097",
+    "supabase/functions/kitchen-dispatch/index.ts": "ab50db58fc3cb8d608f7735a2ed8b086b08f96fb6d472b298a0ff9ba331c356f",
+    "supabase/functions/kitchen-tickets/index.ts": "e25fa372cb81c1f84aab3329622c2362d948558cb8c18ea6a5f7b64a666dab30",
+    "supabase/migrations/20261122144829_kitchen_preparation_scope.sql": "54191485dd839570c4a206f3c8918567c059e14b8a5d0075cd0ba812ecf48196",
+    "tests/e2e/kitchen-screen-ui.spec.ts": "1200f483519676852178da020e5499b0d236a23572c10bb0612e00447955b73f",
+    "tests/fixtures/install-kitchen-ui.d.mts": "072e5ed503432f1acb7f1e0a232805ee411006b1e1c389bc3dd45d91a686188c",
+    "tests/fixtures/install-kitchen-ui.mjs": "ac69930393267ce50da124948eae5a8ad292617883ebd94eb275f0ebab0b135b",
+    "tests/fixtures/kitchen-ui-browser.ts": "1b432441a4c1d35d6f3ef5ca86379afc3c00b002c0246b6a34b15f873e27b21e",
+    "tests/fixtures/kitchen-ui-service.ts": "02c7bc789275ee62efa046b1afff4abc797498284b68f5a4d17cff3a247c505a",
+    "tests/kitchen-actions.test.ts": "3b5ee1337adc9d06071e4ac6d4d340e342103306080d2a44fe2917787e415ba0",
+    "tests/kitchen-alarm-tasks.test.ts": "1add6503fef2f3f22136ead4d8987bc9db24c07e332a64e8efc303a7e24ea2fe",
+    "tests/kitchen-alarms.test.ts": "d3681509a7e475b6f375d222127f4bce69caf70d721f6eb1df8fdfb38a85e85f",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/kitchen-screen.test.ts": "0e0fcf0adebde8983cfbee38c867fa655ec3c40ad84671c2a048c629b27b70b7",
+    "tests/kitchen.test.ts": "2c4b4608cdee4c0ee310c88d7b1276a3b26c7970a8f41189f230d47c3490eedd",
+    "vitest.config.ts": "1241e2ca8c4e6be1952d92bb8333209d406b290cd34276c22dfa6c1da36c8d52"
+  }
+}

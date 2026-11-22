@@ -1,4 +1,5 @@
 import {isDeviceId, parseStaffDeviceAccess, type StaffDeviceAccess} from './device-access';
+import {isKitchenPreparation} from './kitchen-preparation';
 import {parseKitchenAction, parseKitchenReceipt, type KitchenAction, type KitchenReceipt} from './kitchen';
 import {kitchenTicketWire, parseKitchenCursor, parseKitchenTicket, type KitchenChanges, type KitchenCursor, type KitchenPage, type KitchenTicket} from './kitchen-tickets';
 import {parseKitchenCloseIntent,parseKitchenTapClosure,retainedKitchenTap,type KitchenCloseIntent,type KitchenTapClosure} from './kitchen-recovery';
@@ -42,6 +43,10 @@ export function sameKitchenSession(a: StaffDeviceAccess, b: StaffDeviceAccess) {
 }
 export function kitchenScreenWire(state: KitchenScreenState) {
   return {...state, tickets: state.tickets.map(kitchenTicketWire), taps: state.taps.map(tap => ({...tap, source: kitchenTicketWire(tap.source)}))};
+}
+/** A derived view only: keep cached fulfilment history and original taps. */
+export function visibleKitchenTickets(state:KitchenScreenState):KitchenTicket[] {
+ return state.tickets.filter(ticket=>ticket.status==='cancelled'?!kitchenCancellationAcknowledged(state,ticket):isKitchenPreparation(ticket));
 }
 export async function parseKitchenScreenState(value: unknown): Promise<KitchenScreenState> {
   if (!object(value) || !exact(value, 'v,id,revision,access,at,outletName,warningMinutes,after,bootstrapWatermark,cursor,until,tickets,nextPosition,taps') ||

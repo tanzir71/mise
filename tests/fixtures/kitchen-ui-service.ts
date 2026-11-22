@@ -73,6 +73,12 @@ export async function startKitchenUiService(){
  });
  server.listen(0,'127.0.0.1');await once(server,'listening');apiUrl='http://127.0.0.1:'+(server.address() as {port:number}).port;
  let orderId='',currentScreen:Extract<ScreenState,{phase:'signed-in'}>|undefined;
+ const deskSeed=orderFixture('corner_shop'),deskSetup={business:{...deskSeed.context.setup.business,id:deviceId(1)},outlet:{...deskSeed.context.setup.outlet,id:deviceId(11),businessId:deviceId(1)},owner:{...deskSeed.context.setup.owner,id:deviceId(101),businessId:deviceId(1),outletIds:[deviceId(11)]}};
+ async function ownedOrder(){return decodeCommandRecord('orders',(await f.db.query<Record<string,unknown>>('select * from public.orders where id=$1',[orderId])).rows[0]) as unknown as Order;}
+ async function persistDesk(result:{order:Order;event:AuditEvent}){
+  const record=encodeCommandRecord('orders',result.order,deviceId(1)),audit=encodeCommandRecord('events',result.event,deviceId(1));
+  await f.db.transaction(async sql=>{const keys=Object.keys(audit.values);await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));const changes=Object.entries(record.values).filter(([key])=>key!=='id');await sql.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),result.order.id]);});return result.order;
+ }
  async function addOrder(sequence=2041){
   const original=orderFixture('corner_shop'),at=Date.now(),seed=original.context.setup;
   const setup={business:{...seed.business,id:deviceId(1)},outlet:{...seed.outlet,id:deviceId(11),businessId:deviceId(1)},owner:{...seed.owner,id:deviceId(101),businessId:deviceId(1),outletIds:[deviceId(11)]}};
@@ -109,6 +115,8 @@ export async function startKitchenUiService(){
  return {
   prepare,
   prepareBoard,
+  async handoffFromDesk(){let order=await ownedOrder();while(order.status!=='delivering'){const next=nextOrderStatuses(order)[0];if(!next)throw Error('Cannot hand off this fixture order');order=await persistDesk(changeOrderStatusCommand(order,next,deskSetup,order.revision));}return order;},
+  async scheduleFromDesk(scheduledFor:number){const before=await ownedOrder();return persistDesk(saveOrderCommand({source:before.source,sourceText:before.sourceText,name:before.customer.name,phone:before.customer.phone??'',type:before.type,address:before.address,table:before.table,scheduledFor,lines:before.lines,deliveryFee:before.deliveryFee,discount:before.discount,payment:{method:before.payment.method}},{...deskSeed.context,setup:deskSetup,sequence:before.sequence},before,before.revision));},
   loseNext(){lose=true;},
   loseOriginalReplies(){loseAll=true;},
   loseNextClose(){loseClose=true;},

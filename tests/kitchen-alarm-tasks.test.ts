@@ -4,7 +4,7 @@ import {createPairingDatabase,deviceId,deviceUid,type PairingDatabase} from './d
 import {orderFixture} from './order-fixture';
 import {saveOrderCommand,changeOrderStatusCommand,nextOrderStatuses,undoOrderStatusCommand} from '../packages/core/orders';
 import {encodeCommandRecord,decodeCommandRecord} from '../packages/core/cloud-records';
-import {newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../packages/core/kitchen';
+import {newKitchenId,prepareKitchenAction,kitchenContentHash,type KitchenReceipt} from '../packages/core/kitchen';
 import {createKitchenAlarmsHandler,createKitchenAlarmsStore} from '../supabase/functions/_shared/kitchen-alarms-handler';
 import {createKitchenActionsHandler,createKitchenActionsStore} from '../supabase/functions/_shared/kitchen-actions-handler';
 import {createStaffPin} from '../supabase/functions/_shared/staff-pin';
@@ -12,6 +12,7 @@ import type {Order,AuditEvent} from '../packages/core/models';
 import type {SharedDevice,StaffDeviceSession} from '../packages/core/device-access';
 import {createKitchenTicketsStore,projectKitchenRead} from '../supabase/functions/_shared/kitchen-tickets-handler';
 import {parseKitchenPage} from '../packages/core/kitchen-tickets';
+import {readFileSync} from 'node:fs';
 type Sql=Pick<PGlite,'exec'|'query'>;
 let f:PairingDatabase,order:Order,device:SharedDevice&{token:string},session:StaffDeviceSession,lastSqlError='';
 const key='A'.repeat(43),origin='https://desk.test',literal='বাংলা\0'+String.fromCharCode(0xd800);
@@ -38,6 +39,16 @@ const store=(sql:Sql)=>createKitchenAlarmsStore('https://rpc.test','sb_secret_te
 const alarmRequest=()=>new Request('https://rpc.test/functions/v1/kitchen-alarms',{method:'POST',headers:{authorization:'Bearer '+key,'Content-Type':'application/json'},body:'{}'});
 async function run(sql:Sql){const response=await createKitchenAlarmsHandler({key,store:store(sql)})(alarmRequest());expect(response.status,await response.clone().text()+' '+lastSqlError).toBe(200);return response.json();}
 async function current(sql:Sql){return decodeCommandRecord('orders',(await sql.query<Record<string,unknown>>('select * from public.orders where id=$1',[order.id])).rows[0]) as unknown as Order;}
+function ownerSetup(){const seed=orderFixture('corner_shop').context.setup;return {business:{...seed.business,id:scope.businessId},outlet:{...seed.outlet,id:scope.outletId,businessId:scope.businessId},owner:{...seed.owner,id:deviceId(101),businessId:scope.businessId,outletIds:[scope.outletId]}};}
+async function persist(sql:Sql,changed:{order:Order;event:AuditEvent}){
+ const audit=encodeCommandRecord('events',changed.event,scope.businessId),record=encodeCommandRecord('orders',changed.order,scope.businessId),keys=Object.keys(audit.values);
+ await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));const changes=Object.entries(record.values).filter(([key])=>key!=='id');
+ await sql.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),changed.order.id]);return changed.order;
+}
+async function transition(sql:Sql,status:Order['status']){const before=await current(sql);return persist(sql,changeOrderStatusCommand(before,status,ownerSetup(),before.revision));}
+async function schedule(sql:Sql,scheduledFor:number){
+ const before=await current(sql),seed=orderFixture('corner_shop');return persist(sql,saveOrderCommand({source:before.source,sourceText:before.sourceText,name:before.customer.name,phone:before.customer.phone??'',type:before.type,address:before.address,table:before.table,scheduledFor,lines:before.lines,deliveryFee:before.deliveryFee,discount:before.discount,payment:{method:before.payment.method}},{...seed.context,setup:ownerSetup(),sequence:before.sequence},before,before.revision));
+}
 async function tasks(sql:Sql){return(await sql.query<{id:string;status:string;generation:number;reason:string|null;acknowledgement_id:string|null;source_revision:number;content_hash:string}>(
  'select t.id,t.status,b.generation,b.reason,b.acknowledgement_id,b.source_revision,b.content_hash from public.tasks t join private.kitchen_alarm_tasks b on b.task_id=t.id where t.outlet_id=$1 order by t.id',[scope.outletId])).rows;}
 async function acknowledge(sql:Sql){
@@ -59,7 +70,7 @@ beforeAll(async()=>{
  for(const outlet of [11,12,21]){
   const original=orderFixture('corner_shop'),seed=original.context.setup,business=outlet===21?2:1,owner=business===2?107:101;
   const setup={business:{...seed.business,id:deviceId(business)},outlet:{...seed.outlet,id:deviceId(outlet),businessId:deviceId(business)},owner:{...seed.owner,id:deviceId(owner),businessId:deviceId(business),outletIds:[deviceId(outlet)]}};
-  const made=saveOrderCommand({...original.input,sourceText:'PRIVATE CHAT '+literal,name:'PRIVATE CUSTOMER',address:'PRIVATE ADDRESS',lines:original.input.lines.map(l=>({...l,name:literal,note:literal}))},{...original.context,setup},null,0,Date.now()-180000);
+  const made=saveOrderCommand({...original.input,type:'delivery',sourceText:'PRIVATE CHAT '+literal,name:'PRIVATE CUSTOMER',address:'PRIVATE ADDRESS',lines:original.input.lines.map(l=>({...l,name:literal,note:literal}))},{...original.context,setup},null,0,Date.now()-180000);
   let saved=made.order;const events=[made.event];while(saved.status!=='accepted'){const next=changeOrderStatusCommand(saved,nextOrderStatuses(saved)[0],setup,saved.revision,saved.updatedAt+1);saved=next.order;events.push(next.event);}
   await f.db.transaction(async sql=>{for(const record of [...events.map(e=>encodeCommandRecord('events',e,deviceId(business))),encodeCommandRecord('orders',saved,deviceId(business))]){
    const keys=Object.keys(record.values);await sql.query(`insert into public.${record.table}(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(record.values));
@@ -73,6 +84,52 @@ beforeAll(async()=>{
  session=await f.asRole(null,'service_role','select public.finish_staff_pin($1,$2,$3,$4,$5) data',[device.token,attempt.attemptId,pin.verifier,newKitchenId(),newKitchenId()]);
 },30000);
 afterAll(async()=>{await f?.db.close();});
+
+it('closes a handed-off preparation warning immediately, fences a prepared worker and allows an actual owner undo',async()=>rollback(async sql=>{
+ await run(sql);const first=(await tasks(sql))[0],before=await current(sql);
+ await sql.query('update public.orders set updated_at=updated_at+1 where id=$1',[order.id]);const prepared=await store(sql).prepare(25);
+ await transition(sql,'packing');await transition(sql,'ready');const handed=await transition(sql,'delivering');
+ expect(handed.payment).toEqual(before.payment);expect(handed.total).toBe(before.total);
+ expect((await tasks(sql))[0]).toMatchObject({id:first.id,status:'resolved',reason:'finished',generation:1});
+ expect(await finishFirst(sql,prepared)).toMatchObject({state:'stale',raised:false});
+ await settings(sql,true,1);expect((await store(sql).prepare(25) as {jobs:{orderId:string}[]}).jobs.some(job=>job.orderId===order.id)).toBe(false);
+ const raw=(await sql.query<Record<string,unknown>>('select * from public.events where id=$1',[handed.statusEventId])).rows[0],event=decodeCommandRecord('events',raw) as unknown as AuditEvent;
+ await persist(sql,undoOrderStatusCommand(handed,event,ownerSetup(),handed.revision));await run(sql);
+ expect((await tasks(sql))[0]).toMatchObject({id:first.id,status:'open',generation:2});
+ expect((await current(sql)).payment).toEqual(before.payment);expect((await current(sql)).total).toBe(before.total);
+}));
+
+it('uses the original future schedule for SQL warning deadlines and resolves an earlier warning without inventing Got it',async()=>rollback(async sql=>{
+ await run(sql);const first=(await tasks(sql))[0],before=await current(sql),start=Date.now()+3600000;
+ const scheduled=await schedule(sql,start);await run(sql);
+ expect((await tasks(sql))[0]).toMatchObject({id:first.id,status:'resolved',reason:'waiting'});
+ expect((await sql.query<{next_at:number}>('select next_at from private.kitchen_alarm_work where order_id=$1',[order.id])).rows[0].next_at).toBe(start+120000);
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts where order_id=$1',[order.id])).rows[0].n).toBe(0);
+ expect(scheduled.payment).toEqual(before.payment);expect(scheduled.total).toBe(before.total);expect(scheduled.createdAt).toBe(before.createdAt);
+}));
+
+it('upgrades an existing premature scheduled warning without rewriting its original order, event prefix or task identity',async()=>{
+ const migration='20261122144829_kitchen_preparation_scope.sql',local=await createPairingDatabase(undefined,false,migration);
+ try{
+  await local.seed();const seed=orderFixture('corner_shop'),setup=ownerSetup(),at=Date.now()-180000,start=Date.now()+3600000;
+  const made=saveOrderCommand({...seed.input,type:'delivery',address:'Fixture address',scheduledFor:start},{...seed.context,setup,sequence:1},null,0,at);
+  let saved=made.order;const events=[made.event];while(saved.status!=='accepted'){const next=changeOrderStatusCommand(saved,nextOrderStatuses(saved)[0],setup,saved.revision,at+events.length);saved=next.order;events.push(next.event);}
+  await local.db.transaction(async sql=>{for(const record of [...events.map(event=>encodeCommandRecord('events',event,scope.businessId)),encodeCommandRecord('orders',saved,scope.businessId)]){const keys=Object.keys(record.values);await sql.query(`insert into public.${record.table}(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(record.values));}});
+  await local.db.exec('begin');
+  const prepared=await store(local.db).prepare(25) as {jobs:{businessId:string;outletId:string;orderId:string;version:number;stamp:string}[]};
+  await run(local.db);const first=(await tasks(local.db))[0];expect(first.status).toBe('open');
+  const source=(await local.db.query<{data:unknown}>('select row_to_json(o) data from public.orders o where id=$1',[saved.id])).rows[0].data;
+  const prefix=(await local.db.query<{id:string;data:unknown}>('select id,row_to_json(e) data from public.events e where business_id=$1 order by id',[scope.businessId])).rows;
+  await local.db.exec(readFileSync(new URL('../supabase/migrations/'+migration,import.meta.url),'utf8'));
+  expect((await local.db.query<{data:unknown}>('select row_to_json(o) data from public.orders o where id=$1',[saved.id])).rows[0].data).toEqual(source);
+  for(const row of prefix)expect((await local.db.query<{data:unknown}>('select row_to_json(e) data from public.events e where id=$1',[row.id])).rows[0].data).toEqual(row.data);
+  expect((await tasks(local.db))[0]).toMatchObject({id:first.id,generation:1,status:'resolved',reason:'waiting'});
+  const job=prepared.jobs.find(job=>job.orderId===saved.id)!;
+  expect(await store(local.db).finish({...job,contentHash:await kitchenContentHash(saved),taskId:newKitchenId(),eventId:newKitchenId(),resolveEventId:newKitchenId()})).toMatchObject({state:'stale',raised:false});
+  await run(local.db);expect((await local.db.query<{next_at:number}>('select next_at from private.kitchen_alarm_work where order_id=$1',[saved.id])).rows[0].next_at).toBe(start+120000);
+  expect((await local.db.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts where order_id=$1',[saved.id])).rows[0].n).toBe(0);
+ }finally{try{await local.db.exec('rollback');}finally{await local.db.close();}}
+},30000);
 
 it('raises a real Inbox task and one pending notification without changing the order or its money',async()=>rollback(async sql=>{
  const before=await current(sql);expect(await run(sql)).toMatchObject({processed:3,raised:3,failed:0});

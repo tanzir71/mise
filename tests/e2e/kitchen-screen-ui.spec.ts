@@ -13,6 +13,63 @@ async function enterNextPin(page:Page){
  await expect(page.getByRole('heading',{name:'Kitchen',exact:true})).toBeVisible();await installKitchenUi(page);
 }
 
+test('owner handoff and undo update the focused board while offline original taps and cached history stay intact',async({page,context})=>{
+ await initialize(page);const before=await service.inspect();await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);
+ await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByRole('button',{name:'Ready',exact:true})).toBeEnabled();
+ await page.getByRole('button',{name:'Ready',exact:true}).click();await expect(page.getByText('2 saved taps need confirmation.',{exact:false})).toBeVisible();
+ const original=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;expect(original).toHaveLength(2);
+ await service.handoffFromDesk();await page.reload();await installKitchenUi(page);expect((await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps).toEqual(original);
+ await context.setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);
+ await expect.poll(async()=>page.evaluate(()=>window.miseKitchenUiTest.inspect())).toMatchObject({tickets:1,ticketStates:[{status:'delivering'}]});
+ const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;for(let i=0;i<2;i++){expect(saved[i].id).toBe(original[i].id);expect(saved[i].source).toEqual(original[i].source);expect(saved[i].receipt).toBeNull();}
+ expect(await service.inspect()).toMatchObject({status:'delivering',receipts:0,payment:before.payment,total:before.total});
+ await service.undoLastStatus();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();
+ const after=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;for(let i=0;i<2;i++){expect(after[i].id).toBe(original[i].id);expect(after[i].source).toEqual(original[i].source);expect(after[i].receipt).toBeNull();}
+ expect(await service.inspect()).toMatchObject({status:'ready',receipts:0,payment:before.payment,total:before.total});
+});
+
+test('a future schedule updates the actual warning deadline and remains quiet through an offline reload',async({page,context})=>{
+ await initialize(page);await service.ageOrder();await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toBeVisible();
+ const start=Date.now()+3600000;await service.scheduleFromDesk(start);await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toHaveCount(0);
+ await expect.poll(async()=>page.evaluate(()=>window.miseKitchenUiTest.inspect())).toMatchObject({ticketStates:[{scheduledFor:start}]});
+ await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);await page.reload();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toHaveCount(0);
+ await context.setOffline(false);await service.scheduleFromDesk(Date.now()-180000);await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toBeVisible();
+ expect(await service.inspect()).toMatchObject({status:'accepted',receipts:0});
+});
+
+declare global{interface Window{miseKitchenControls:{sounds:number;requests:string[];releases:number;current:WakeLockSentinel|null}}}
+test('sound needs the actual gesture and visible work, and an involuntary wake-lock release clears its On claim',async({page})=>{
+ await page.addInitScript(()=>{
+  const trace:Window['miseKitchenControls']={sounds:0,requests:[],releases:0,current:null};window.miseKitchenControls=trace;
+  const Original=window.AudioContext;class ObservedAudio extends Original{createOscillator(){trace.sounds++;return super.createOscillator();}}
+  Object.defineProperty(window,'AudioContext',{value:ObservedAudio});
+  class ScreenLock extends EventTarget{released=false;readonly type='screen' as const;onrelease=null;async release(){if(this.released)return;this.released=true;trace.releases++;this.dispatchEvent(new Event('release'));}}
+  Object.defineProperty(navigator,'wakeLock',{value:{request:async(type:string)=>{trace.requests.push(type);const lock=new ScreenLock();trace.current=lock;return lock;}}});
+ });
+ await initialize(page);expect(await page.evaluate(()=>window.miseKitchenControls.sounds)).toBe(0);
+ await page.getByRole('button',{name:'Sound off',exact:true}).click();await expect(page.getByRole('button',{name:'Sound on',exact:true})).toHaveAttribute('aria-pressed','true');
+ const first=await page.evaluate(()=>window.miseKitchenControls.sounds);expect(first).toBeGreaterThan(0);
+ const next=await service.addOrder(2042);await expect(page.getByRole('heading',{name:next.number,exact:true})).toBeVisible();await expect.poll(()=>page.evaluate(()=>window.miseKitchenControls.sounds)).toBeGreaterThan(first);
+ await service.handoffFromDesk();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);const quiet=await page.evaluate(()=>window.miseKitchenControls.sounds),start=Date.now()+3600000;
+ await service.scheduleFromDesk(start);await expect.poll(async()=>{await installKitchenUi(page);return (await page.evaluate(()=>window.miseKitchenUiTest.inspect()))?.ticketStates.find(ticket=>ticket.status==='delivering')?.scheduledFor;}).toBe(start);
+ expect(await page.evaluate(()=>window.miseKitchenControls.sounds)).toBe(quiet);
+ await page.getByRole('button',{name:'Sound on',exact:true}).click();const last=await page.evaluate(()=>window.miseKitchenControls.sounds),third=await service.addOrder(2043);await expect(page.getByRole('heading',{name:third.number,exact:true})).toBeVisible();expect(await page.evaluate(()=>window.miseKitchenControls.sounds)).toBe(last);
+ await page.getByRole('button',{name:'Keep awake off',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.miseKitchenControls.requests)).toEqual(['screen']);
+ await page.evaluate(()=>window.miseKitchenControls.current!.release());await expect(page.getByRole('button',{name:'Keep awake off',exact:true})).toHaveAttribute('aria-pressed','false');
+ await expect(page.getByText('Keep this screen open and adjust the device’s sleep setting if needed.',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Keep awake off',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.miseKitchenControls.requests.length)).toBe(2);
+ await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.miseKitchenControls.releases)).toBe(2);
+});
+
+test('unavailable audio and rejected wake lock leave visible manual controls and no false On state',async({page})=>{
+ await page.addInitScript(()=>{Object.defineProperty(window,'AudioContext',{value:undefined});Object.defineProperty(navigator,'wakeLock',{value:{request:async()=>{throw Error('Synthetic device denial');}}});});
+ await initialize(page);const before=await service.inspect();await page.getByRole('button',{name:'Sound off',exact:true}).click();await expect(page.getByText('Sound could not start. Check new tickets on this screen.',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Sound off',exact:true})).toHaveAttribute('aria-pressed','false');await page.getByRole('button',{name:'Keep awake off',exact:true}).click();
+ await expect(page.getByText('Keep this screen open and adjust the device’s sleep setting if needed.',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Keep awake off',exact:true})).toHaveAttribute('aria-pressed','false');await expect(page.getByRole('button',{name:'Copy ticket',exact:true})).toBeVisible();
+ expect(await service.inspect()).toMatchObject({status:before.status,receipts:0,payment:before.payment,total:before.total});
+});
+
 test('Understood retains the cancellation through offline reload and confirms one original receipt after a lost reply',async({page,context})=>{
  await initialize(page);await service.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();const before=await service.inspect();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);

@@ -1,7 +1,8 @@
 import {parseStaffDeviceAccess, isDeviceId, type StaffDeviceAccess} from './device-access';
 import {ulid} from 'ulid';
 import {orderPricing} from './order-lines';
-import {changeOrderStatusCommand, isOrderFinished, nextOrderStatuses, validateOrder, type OrderFlowSource} from './orders';
+import {changeOrderStatusCommand, nextOrderStatuses, validateOrder, type OrderFlowSource} from './orders';
+import {isKitchenPreparation,kitchenAlarmStart} from './kitchen-preparation';
 import type {AuditEvent, Order, OrderLine, OrderStatus} from './models';
 import type {ShopSetup} from './shop-access';
 
@@ -146,14 +147,14 @@ export async function kitchenAlarm(order: KitchenClockSource, acknowledgement: K
   const minutes = warningMinutes ?? 2;
   if (!time(now) || !Number.isInteger(minutes) || minutes < 1 || minutes > 1440 || !time(order.createdAt) ||
       order.scheduledFor !== undefined && !time(order.scheduledFor)) throw invalid();
-  const start = Math.max(order.createdAt, order.scheduledFor ?? order.createdAt);
+  const start = kitchenAlarmStart(order);
   const dueAt = start + minutes * 60000;
   if (!time(dueAt)) throw invalid();
   const ack = acknowledgement === null ? null : parseKitchenReceipt(acknowledgement);
   const matchingAck = ack?.type === 'kitchen.acknowledge' && ack.orderId === order.id &&
     ack.outletId === order.outletId && ack.revision <= order.revision && ack.acceptedAt <= now &&
     ack.contentHash === await kitchenContentHash(order);
-  return {dueAt, active: !isOrderFinished(order) && order.status !== 'returning' && !matchingAck && now >= dueAt};
+  return {dueAt, active: isKitchenPreparation(order) && !matchingAck && now >= dueAt};
 }
 
 export function parseKitchenReceipt(value: unknown, expected?: {action: KitchenAction; access?: StaffDeviceAccess}): KitchenReceipt {
@@ -199,6 +200,7 @@ export async function applyKitchenAction(input: {
   // member. It carries no owner role or Auth identity and grants no HTTP access.
   const setup: ShopSetup = {...input.shop, owner: {id: access.memberId, businessId: access.businessId, active: true, outletIds: [access.outletId]}};
   validateOrder(before, setup, before.revision);
+  if(before.status!=='cancelled'&&!isKitchenPreparation(before))throw invalid();
   if (before.id !== action.orderId || before.businessType !== input.shop.business.businessType || before.revision < action.revision || action.occurredAt > input.admittedAt + 300000 ||
       action.contentHash !== await kitchenContentHash(before)) throw invalid();
   let path: OrderStatus[];

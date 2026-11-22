@@ -99,15 +99,16 @@ async function nextKitchenStaff(sql:Sql,shop:Shop){
  const session=(await role<{data:Session}>(sql,'service_role',null,'select public.finish_staff_pin($1,$2,$3,$4,$5) data',[shop.device.token,attempt.attemptId,pin.verifier,newKitchenId(),newKitchenId()]))[0].data;
  await sql.exec('reset role');return {...shop,memberId,session};
 }
-async function cancelForScreen(sql:Sql,shop:Shop){
+async function statusForScreen(sql:Sql,shop:Shop,status:Order['status']){
  const order=await current(sql,shop),seed=orderFixture(order.businessType).context.setup;
  const setup={business:{...seed.business,id:shop.businessId},outlet:{...seed.outlet,id:shop.outletId,businessId:shop.businessId},owner:{...seed.owner,id:order.createdBy,businessId:shop.businessId,outletIds:[shop.outletId]}};
- const result=changeOrderStatusCommand(order,'cancelled',setup,order.revision,Math.max(Date.now(),order.updatedAt,order.statusChangedAt));
+ const result=changeOrderStatusCommand(order,status,setup,order.revision,Math.max(Date.now(),order.updatedAt,order.statusChangedAt));
  const record=encodeCommandRecord('orders',result.order,shop.businessId),audit=encodeCommandRecord('events',result.event,shop.businessId),keys=Object.keys(audit.values);
  await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));
  const changes=Object.entries(record.values).filter(([key])=>key!=='id');await sql.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),order.id]);
  return result.order;
 }
+const cancelForScreen=(sql:Sql,shop:Shop)=>statusForScreen(sql,shop,'cancelled');
 function ticketRequest(shop:Shop,input:Record<string,unknown>={action:'page'}){
  return new Request('https://api.test/functions/v1/kitchen-tickets',{method:'POST',headers:{origin,authorization:'Bearer '+shop.device.token,'Content-Type':'application/json'},body:JSON.stringify({sessionToken:shop.session.token,...input})});
 }
@@ -194,11 +195,27 @@ it('an accepted earlier Understood remains history and cannot dismiss a later un
  const fresh=await gotIt(sql,shop);expect(fresh.receipt.id).not.toBe(earlier.receipt.id);expect(await current(sql,shop)).toEqual(later);
 }));
 
+it.each([0,1,2,3])('pack %s retains handed-off history and real receipts, blocks fresh taps, and returns through the original feed after owner undo',async index=>rollback(async sql=>{
+ const shop=shops[index],original=await current(sql,shop),unaccepted=await prepareKitchenAction(original,'kitchen.acknowledge'),accepted=await gotIt(sql,shop),handler=ticketGateway(sql);
+ const page=await parseKitchenPage(await(await handler(ticketRequest(shop))).json(),shop),target=(['out','booked','collected','delivering'] as const)[index];
+ let handed=await current(sql,shop);while(handed.status!==target){const next=nextOrderStatuses(handed)[0];if(!next)throw Error('Real handoff is unreachable');handed=await statusForScreen(sql,shop,next);}
+ expect(handed.payment).toEqual(original.payment);expect(handed.total).toBe(original.total);
+ expect((await parseKitchenPage(await(await handler(ticketRequest(shop))).json(),shop)).tickets.map(ticket=>ticket.id)).not.toContain(original.id);
+ const feed=await parseKitchenChanges(await(await handler(ticketRequest(shop,{action:'changes',afterSeq:page.watermark}))).json(),shop,page.watermark);
+ expect(feed.tickets.some(ticket=>ticket.id===original.id&&ticket.status===target)).toBe(true);expect(feed.removed).toEqual([]);
+ expect(await(await gateway(sql)(request(shop,accepted.action))).json()).toEqual(accepted.receipt);
+ expect((await gateway(sql)(request(shop,unaccepted))).status).toBe(409);
+ expect((await gateway(sql)(request(shop,await prepareKitchenAction(handed,'kitchen.acknowledge')))).status).toBe(409);expect(await current(sql,shop)).toEqual(handed);
+ await undoLastStatus(sql,shop);const returned=await current(sql,shop);
+ const reopened=await parseKitchenPage(await(await handler(ticketRequest(shop))).json(),shop);expect(reopened.tickets.some(ticket=>ticket.id===original.id&&ticket.revision===returned.revision)).toBe(true);
+ expect(returned.payment).toEqual(original.payment);expect(returned.total).toBe(original.total);
+}));
+
 it.each(['anon','authenticated','service_role'] as const)('%s cannot read or modify the private cancellation projection or invoke its trigger helpers',async selected=>rollback(async sql=>{
  const shop=shops[0];await cancelForScreen(sql,shop);
  for(const query of ['select * from private.kitchen_cancellation_work','delete from private.kitchen_cancellation_work',
   'select private.note_kitchen_cancellation_order()','select private.note_kitchen_cancellation_receipt()',
-  "select private.kitchen_ack_active(null,null,null,'{}')"]){
+  "select private.kitchen_ack_active(null,null,null,'{}')","select private.kitchen_preparation_status('confirmed')"]){
   await sql.exec('savepoint private_denial');
   await expect(role(sql,selected,null,query)).rejects.toMatchObject({code:'42501'});
   await sql.exec('rollback to savepoint private_denial; release savepoint private_denial');

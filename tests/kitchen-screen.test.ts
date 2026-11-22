@@ -2,9 +2,18 @@ import {afterEach,expect,it,vi} from 'vitest';
 import {IDBFactory,IDBObjectStore} from 'fake-indexeddb';
 import {openScreenJournal,screenJournalDatabaseName,type ScreenJournal} from '../apps/web/src/data/device-screen-journal';
 import {createKitchenScreenSession} from '../apps/web/src/data/kitchen-screen-session';
-import {appendKitchenTap,finishKitchenTap,kitchenCancellationAcknowledged,kitchenScreenWire,kitchenTapAcknowledges,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage} from '../packages/core/kitchen-screen';
+import {appendKitchenTap,finishKitchenTap,kitchenCancellationAcknowledged,kitchenScreenWire,kitchenTapAcknowledges,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage,visibleKitchenTickets} from '../packages/core/kitchen-screen';
 import {kitchenContentHash,newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../packages/core/kitchen';
 import {kitchenScreenFixture} from './fixtures/kitchen-screen';
+
+it('filters handed-off tickets without deleting cached history or its original pending gesture',async()=>{
+ const f=await kitchenScreenFixture(),tap=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now);
+ const saved=appendKitchenTap(f.state,f.ticket,tap,newKitchenId()),original=JSON.stringify(saved.taps);
+ const handed={...saved,tickets:[{...f.ticket,status:'out' as const,revision:f.ticket.revision+1}]};
+ expect(visibleKitchenTickets(handed)).toEqual([]);expect(handed.tickets).toHaveLength(1);expect(JSON.stringify(handed.taps)).toBe(original);
+ expect(visibleKitchenTickets({...handed,tickets:[{...f.ticket,status:'ready',revision:f.ticket.revision+2}]})).toHaveLength(1);
+ expect(JSON.stringify(handed.taps)).toBe(original);
+});
 import {beginKitchenTapClose,finishKitchenTapClose} from '../packages/core/kitchen-screen';
 import {parseKitchenTapRecovery,retainedKitchenTap,type KitchenTapClosure} from '../packages/core/kitchen-recovery';
 const base='/mise/app/',opened:ScreenJournal[]=[];

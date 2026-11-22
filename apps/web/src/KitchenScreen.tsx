@@ -1,8 +1,8 @@
 import {useEffect, useRef, useState} from 'react';
 import {Button} from '@mise/ui/primitives.tsx';
 import {kitchenReadyPath, type KitchenActionKind} from '@mise/core/kitchen';
-import {isOrderFinished} from '@mise/core/orders';
-import {kitchenCancellationAcknowledged,kitchenTapAcknowledges,sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
+import {kitchenAlarmStart} from '@mise/core/kitchen-preparation';
+import {visibleKitchenTickets,kitchenTapAcknowledges,sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
 import type {KitchenTicket} from '@mise/core/kitchen-tickets';
 import type {ScreenJournalRecord} from '@mise/core/device-screen-state';
 import type {ScreenJournal} from './data/device-screen-journal';
@@ -37,7 +37,7 @@ function Ticket({ticket,state,now,busy,phoneHidden,onTap,onCopy}: {ticket: Kitch
   const closing=state.taps.some(tap=>tap.action.orderId===ticket.id&&!tap.receipt&&!tap.closure&&tap.closeIntents?.length);
   const acknowledged = Boolean(ticket.acknowledgement) || taps.some(tap => kitchenTapAcknowledges(state,ticket,tap));
   const ready = ticketStage(state,ticket) === 'Ready', cancelled = ticket.status === 'cancelled';
-  const late = state.warningMinutes !== null && !acknowledged && !cancelled && now >= ticket.createdAt + state.warningMinutes * 60000;
+  const late = state.warningMinutes !== null && !acknowledged && !cancelled && now >= kitchenAlarmStart(ticket) + state.warningMinutes * 60000;
   const canReady = acknowledged && !ready && ticket.priced && Boolean(kitchenReadyPath(ticket)?.length) && state.access.permissions.includes('orders.ready');
   const expired = now >= state.access.expiresAt;
   const changed = !acknowledged && state.taps.some(tap=>tap.action.orderId===ticket.id&&tap.action.contentHash!==ticket.contentHash);
@@ -143,7 +143,7 @@ export function KitchenScreen({journal,source,onSignOut}: {journal: ScreenJourna
   }
   useEffect(() => {
     if (!state) return;
-    const current = new Set(state.tickets.map(ticket => ticket.id+':'+ticket.contentHash));
+    const current = new Set(visibleKitchenTickets(state).map(ticket => ticket.id+':'+ticket.contentHash));
     if (oldTickets.current && [...current].some(id => !oldTickets.current!.has(id))) beep();
     oldTickets.current = current;
   },[state]);
@@ -156,7 +156,10 @@ export function KitchenScreen({journal,source,onSignOut}: {journal: ScreenJourna
         const lock = await navigator.wakeLock.request('screen');
         if (!active) {await lock.release(); return;}
         wake.current = lock;
-        lock.addEventListener('release',() => {if (wake.current === lock) wake.current = null;});
+        lock.addEventListener('release',() => {if (wake.current === lock) {
+          wake.current = null;
+          if(active&&document.visibilityState==='visible'){setAwake(false);setNotice('Keep this screen open and adjust the device’s sleep setting if needed.');}
+        }});
       } catch {if (active) {setAwake(false); setNotice('Keep this screen open and adjust the device’s sleep setting if needed.');}}
     };
     void acquire(); document.addEventListener('visibilitychange',acquire);
@@ -202,7 +205,7 @@ export function KitchenScreen({journal,source,onSignOut}: {journal: ScreenJourna
     try{await onSignOut();const latest=await journal.read();if(mounted.current&&latest.state.phase==='signed-in')setError('Sign-out could not be saved. Tickets are paused. Try Sign out again.');}
     catch{if(mounted.current)setError('Sign-out could not finish. Tickets are paused. Try Sign out again.');}
   }
-  const tickets = state?.tickets.filter(ticket => ticket.status === 'cancelled' ? !kitchenCancellationAcknowledged(state,ticket) : !isOrderFinished(ticket)) ?? [];
+  const tickets = state ? visibleKitchenTickets(state) : [];
   const pending = state?.taps.filter(tap => !tap.receipt&&!tap.closure).length ?? 0;
   return <main className="kitchen-screen">
     <a className="app-skip" href="#kitchen-tickets">Skip to tickets</a>

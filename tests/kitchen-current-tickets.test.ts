@@ -6,12 +6,15 @@ import {orderFixture} from './order-fixture';
 import {deriveStaffPin} from '../supabase/functions/_shared/staff-pin';
 import {applyKitchenAction,newKitchenId,prepareKitchenAction} from '../packages/core/kitchen';
 import {saveOrderCommand,changeOrderStatusCommand,nextOrderStatuses,undoOrderStatusCommand} from '../packages/core/orders';
-import {encodeCommandRecord} from '../packages/core/cloud-records';
+import {encodeCommandRecord,decodeCommandRecord} from '../packages/core/cloud-records';
+import type {Order,AuditEvent} from '../packages/core/models';
 import {parseStaffDeviceAccess,type SharedDevice,type StaffDeviceSession} from '../packages/core/device-access';
+import type {PairingDatabase} from './device-pairing-fixture';
 
 const migration='20261122121013_kitchen_current_tickets.sql';
 type Row=Record<string,unknown>;
 type CurrentPage={orders:{id:string}[];next:{createdAt:number;id:string}|null};
+let opening:PairingDatabase|undefined;
 async function insert(sql:Pick<PGlite,'query'>,table:string,rows:Row[]){
  if(!rows.length)return;const keys=Object.keys(rows[0]),args:unknown[]=[];
  const values=rows.map(row=>'('+keys.map(key=>{args.push(row[key]);return '$'+args.length;}).join(',')+')');
@@ -22,6 +25,7 @@ async function insert(sql:Pick<PGlite,'query'>,table:string,rows:Row[]){
 // is setup. The unchanged test deadline covers the actual upgrade and reads.
 async function historicalFixture(){
  const f=await createPairingDatabase(undefined,false,migration);
+ opening=f;
  const started=performance.now(),progress=(stage:string,count?:number)=>console.info(JSON.stringify({stage,count,elapsedMs:Math.round(performance.now()-started)}));
  try{
   await f.seed();
@@ -81,7 +85,7 @@ async function historicalFixture(){
 }
 let loaded:Awaited<ReturnType<typeof historicalFixture>>|undefined;
 beforeAll(async()=>{loaded=await historicalFixture();},120000);
-afterAll(async()=>{await loaded?.f.db.close();});
+afterAll(async()=>{await(loaded?.f??opening)?.db.close();});
 it('upgrades 5,000 genuinely completed or acknowledged original orders without loading their history or changing source records',async()=>{
  if(!loaded)throw Error('The original history fixture is unavailable.');
  const {f,device,session,setup,before,current,digest,progress,recancelled,oldWatermark}=loaded;
@@ -109,4 +113,31 @@ it('upgrades 5,000 genuinely completed or acknowledged original orders without l
   expect(scans.length).toBeGreaterThan(0);expect(scans.some(row=>row['Index Name']==='orders_kitchen_current_idx')).toBe(true);expect(scans.every(row=>row['Node Type']!=='Seq Scan')).toBe(true);
   expect(await digest()).toEqual(before);
 
+  // A real owner hands off one of the current orders. The next migration
+  // must exclude that work without walking or rewriting the 5,000 originals.
+  let handed=decodeCommandRecord('orders',(await f.db.query<Row>('select * from public.orders where id=$1',[current[0]])).rows[0]) as unknown as Order;
+  async function persist(changed:{order:Order;event:AuditEvent}){
+   const audit=encodeCommandRecord('events',changed.event,setup.business.id),record=encodeCommandRecord('orders',changed.order,setup.business.id);
+   await f.db.transaction(async sql=>{const keys=Object.keys(audit.values);await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));const changes=Object.entries(record.values).filter(([key])=>key!=='id');await sql.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),changed.order.id]);});return changed.order;
+  }
+  handed=await persist(saveOrderCommand({source:handed.source,sourceText:handed.sourceText,name:handed.customer.name,phone:handed.customer.phone??'',type:'delivery',address:'Fixture door',table:handed.table,lines:handed.lines,deliveryFee:handed.deliveryFee,discount:handed.discount,payment:{method:handed.payment.method}},{...orderFixture('corner_shop').context,setup,sequence:handed.sequence},handed,handed.revision));
+  while(handed.status!=='delivering')handed=await persist(changeOrderStatusCommand(handed,nextOrderStatuses(handed)[0],setup,handed.revision));
+  const sourceBefore=await digest();
+  await f.db.exec(readFileSync(new URL('../supabase/migrations/20261122144829_kitchen_preparation_scope.sql',import.meta.url),'utf8'));
+  expect(await digest()).toEqual(sourceBefore);
+  const scoped:string[]=[];let cursor:CurrentPage['next']=null;
+  do{const page:CurrentPage=await f.asRole<CurrentPage>(null,'service_role','select public.read_kitchen_page($1,$2,$3,$4,1) data',[device.token,session.token,cursor?.createdAt??null,cursor?.id??null]);scoped.push(...page.orders.map(order=>order.id));cursor=page.next;}while(cursor);
+  expect(scoped).toEqual(current.slice(1));
+  const currentBody=(await f.db.query<{source:string}>("select prosrc source from pg_proc where oid='private.read_kitchen_page(text,text,public.utc_ms,public.ulid,integer)'::regprocedure")).rows[0].source;
+  const begin=currentBody.indexOf('with candidates as materialized ('),last=currentBody.indexOf('), sized as (',begin);expect(begin).toBeGreaterThan(-1);expect(last).toBeGreaterThan(begin);
+  let currentQuery=currentBody.slice(begin,last)+') select * from candidates';
+  for(const[name,value]of Object.entries({business:'$1',outlet:'$2',after_time:'$3::bigint',after_id:'$4::public.ulid',page_size:'$5::integer'}))currentQuery=currentQuery.replace(new RegExp('\\b'+name+'\\b','g'),()=>value);
+  const currentPlan=(await f.db.query<Row>('explain (analyze,format json) '+currentQuery,[setup.business.id,setup.outlet.id,null,null,50])).rows[0]['QUERY PLAN'];
+  const currentScans:Row[]=[];function walk(value:unknown){if(Array.isArray(value))value.forEach(walk);else if(value&&typeof value==='object'){const row=value as Row;if(row['Relation Name']==='orders')currentScans.push(row);Object.values(row).forEach(walk);}}walk(currentPlan);
+  expect(currentScans.some(row=>row['Index Name']==='orders_kitchen_current_idx')).toBe(true);expect(currentScans.every(row=>row['Node Type']!=='Seq Scan')).toBe(true);
+  expect(await digest()).toEqual(sourceBefore);
+  const raw=(await f.db.query<Row>('select * from public.events where id=$1',[handed.statusEventId])).rows[0],event=decodeCommandRecord('events',raw) as unknown as AuditEvent;
+  const returned=await persist(undoOrderStatusCommand(handed,event,setup,handed.revision));
+  const refreshedPage=await f.asRole<CurrentPage>(null,'service_role','select public.read_kitchen_page($1,$2,null,null,50) data',[device.token,session.token]);expect(refreshedPage.orders.map(order=>order.id)).toEqual(current);
+  expect(returned.payment).toEqual(handed.payment);expect(returned.total).toBe(handed.total);
 },60000);

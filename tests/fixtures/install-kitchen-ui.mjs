@@ -17,6 +17,14 @@ export async function captureKitchenScreen(page,mode='board'){
  if(mode==='cancelled'){
   await visualService.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();
  }
+ if(mode==='scheduled'){
+  const start=Date.now()+3600000;await visualService.ageOrder();await visualService.scheduleFromDesk(start);await installKitchenUi(page);
+  await expect.poll(()=>page.evaluate(id=>window.miseKitchenUiTest.inspect().then(state=>state?.ticketStates.find(ticket=>ticket.id===id)?.scheduledFor),config.orderId)).toBe(start);
+  await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toHaveCount(0);
+ }
+ if(mode==='handoff'){
+  await visualService.handoffFromDesk();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);
+ }
  if(mode==='offline'||mode==='queued'||mode==='review'){
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await page.context().setOffline(true);await expect(page.getByText('Offline · showing saved tickets',{exact:false})).toBeVisible();
  }

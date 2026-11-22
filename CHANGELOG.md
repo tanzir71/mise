@@ -16,6 +16,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Fixed
 
+- In progress: preparation screens and warnings stop at fulfilment handoff while retaining original history and offline taps. Scheduled warnings consistently use the later original creation/scheduled time; premature warnings resolve without a fabricated Got it. A released wake lock clears its visible On state and keeps manual controls available.
+
 - The private kitchen scheduler now binds the original Vault secret references explicitly, avoiding a collision with Vault's encryption-key column. An isolated live run verifies the default two-minute alarm, actual Got it, disable/resume and transactional dispatch recovery without changing order money or registering notification recipients. Cleanup leaves no job enabled; full M32 acceptance remains open.
 
 - A Ready gesture keeps its original ticket and acknowledgement parent when its own accepted Got it reaches the cache during the save. Changed preparation content, undone acknowledgements and unrelated newer revisions still require review; original receipts and money stay unchanged.

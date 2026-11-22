@@ -78,6 +78,60 @@
           "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
         }
       ]
+    },
+    {
+      "id": "m32-kitchen-scheduled",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "scheduled",
+      "note": "A real owner schedules an aged ticket for later using the domain command and native SQL/live relay. The warning clock waits for that original schedule, with cached source retained. Supplied 65:1843/107:1222 frames provide layout, type and controls; literal schedule and fixture data differ.",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".kitchen-screen",
+          "widths": [
+            360,
+            390
+          ],
+          "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+        },
+        {
+          "id": "tablet",
+          "selector": ".kitchen-screen",
+          "widths": [
+            768,
+            1024,
+            1440
+          ],
+          "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+        }
+      ]
+    },
+    {
+      "id": "m32-kitchen-handoff",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "handoff",
+      "note": "The actual owner advances A-2041 into Delivering through the domain lifecycle and live relay. The focused board retains the other three preparation cards while keeping the original handed-off ticket and pending history in the cache. Supplied 65:1843/107:1222 references provide layout and controls; remaining literal cards differ.",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".kitchen-screen",
+          "widths": [
+            360,
+            390
+          ],
+          "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+        },
+        {
+          "id": "tablet",
+          "selector": ".kitchen-screen",
+          "widths": [
+            768,
+            1024,
+            1440
+          ],
+          "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+        }
+      ]
     }
   ]
 }

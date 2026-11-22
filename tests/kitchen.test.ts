@@ -1,16 +1,17 @@
 import {expect, it} from 'vitest';
 import {applyKitchenAction, kitchenActionHash, kitchenAlarm, kitchenContent, kitchenContentHash, kitchenReadyPath,
   KitchenActionConflict, KitchenActionDenied, newKitchenId as ulid, parseKitchenAction, parseKitchenReceipt, prepareKitchenAction, type KitchenAction, type KitchenReceipt} from '../packages/core/kitchen';
-import {changeOrderStatusCommand, nextOrderStatuses, saveOrderCommand} from '../packages/core/orders';
+import {changeOrderStatusCommand, nextOrderStatuses, saveOrderCommand,orderFlows} from '../packages/core/orders';
+import {isKitchenPreparation} from '../packages/core/kitchen-preparation';
 import type {Order, OrderStatus} from '../packages/core/models';
 import type {BusinessType} from '../packages/core/packs';
 import type {StaffDeviceAccess} from '../packages/core/device-access';
 import {orderFixture, ORDER_AT} from './order-fixture';
 
 const now = ORDER_AT + 180000;
-function fixture(pack: BusinessType = 'restaurant', status?: OrderStatus) {
+function fixture(pack: BusinessType = 'restaurant', status?: OrderStatus,delivery=false) {
   const base = orderFixture(pack), setup = base.context.setup;
-  let order = ['restaurant', 'online_shop'].includes(pack)
+  let order = ['restaurant', 'online_shop'].includes(pack)||delivery
     ? saveOrderCommand({...base.input, type: 'delivery', address: 'Door 8'}, base.context, null, 0, ORDER_AT).order : base.order;
   for (let i = 0; status && order.status !== status && i < 12; i++) {
     const choices = nextOrderStatuses(order);
@@ -80,10 +81,27 @@ it.each<[BusinessType, OrderStatus]>([
   ['restaurant','out'], ['restaurant','delivered'], ['online_shop','booked'], ['online_shop','with_courier'],
   ['online_shop','returning'], ['online_shop','returned'], ['food_stall','collected'], ['corner_shop','done'],
 ])('does not use Ready to bypass or reverse %s / %s', async (pack, status) => {
-  const {f, result} = await acknowledge(fixture(pack, status));
+  const source=fixture(pack,status);
+  if(!isKitchenPreparation(source.order)){
+    expect(kitchenReadyPath(source.order)).toBeNull();
+    await expect(acknowledge(source)).rejects.toBeInstanceOf(KitchenActionConflict);
+    await expect(applyKitchenAction({...source,action:await action(source.order,'kitchen.ready',ulid()),admittedAt:now,acknowledgement:null})).rejects.toBeInstanceOf(KitchenActionConflict);
+    return;
+  }
+  const {f, result} = await acknowledge(source);
   expect(kitchenReadyPath(result.order)).toBeNull();
   await expect(applyKitchenAction({...f, order: result.order, action: await action(result.order, 'kitchen.ready', result.receipt.id), admittedAt: now + 1, acknowledgement: result.receipt}))
     .rejects.toBeInstanceOf(KitchenActionConflict);
+});
+
+it.each(['restaurant','online_shop','food_stall','corner_shop'] as const)('%s leaves preparation at its real handoff without changing the original order',async pack=>{
+ const last={restaurant:'ready',online_shop:'packed',food_stall:'ready_called',corner_shop:'ready'}[pack];
+ for(const [index,status]of orderFlows[pack].entries()){
+  const f=fixture(pack,status,pack==='corner_shop'),original=JSON.stringify(f.order),expected=index<=orderFlows[pack].indexOf(last as OrderStatus);
+  expect(isKitchenPreparation(f.order),pack+'/'+status).toBe(expected);
+  expect((await kitchenAlarm(f.order,null,now)).active,pack+'/'+status).toBe(expected);
+  expect(JSON.stringify(f.order)).toBe(original);
+ }
 });
 
 it('retains an old acknowledgement through confirmation and plans three legitimate steps to Ready', async () => {
