@@ -34,6 +34,12 @@ The opt-in `customerLinks` preview adds controls to existing order and customer 
 
 Customer pages use only the shop contact explicitly published in the approved public shop link. Configure that number in the shop-link settings; the owner sign-in and customer's stored phone are never substituted for it. Full public ordering, arrival estimates, swaps, customer payment choices and customer task writes remain in development and are not enabled by this read preview.
 
+## Public order submission
+
+Public ordering is still in development and has no connected customer submission interface in this release. Its separate `public` Edge Function stays disabled by default. Do not enable it merely because its backend migration is installed. When the complete flow is available, the installation deploys that function and explicitly sets `MISE_PUBLIC_ORDERS_ENABLED=true` in its own backend environment. It reuses `MISE_SERVICE_API_KEY` and `MISE_ALLOWED_ORIGINS`; no maintainer account or additional provider is required. Never put the server key in a customer link or browser configuration.
+
+Optional backend settings `MISE_PUBLIC_ORDERS_PER_MINUTE` and `MISE_PUBLIC_SHOP_ORDERS_PER_MINUTE` default to 300 HTTP requests and 30 new attempts per shop per server minute. Valid values are integers from 1 to 60,000; invalid configuration keeps ordering unavailable. Limits do not confirm payment, ownership of a customer's phone or successful provider delivery. The existing message path remains the manual fallback. See [the current admission scope](https://github.com/tanzir71/mise/blob/main/docs/public-order-admission.md).
+
 ## Other integrations
 
 As capture, courier, payment and AI integrations are delivered, their account choices, connections, limits and tests belong in the installation's setup/settings or private backend environment. Keep privileged credentials on that backend. An unconfigured optional integration stays off and explains how to configure it; it does not silently use the maintainer's account.

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: public-order admission validates an owner-approved shop snapshot, rate limits and honeypot, then atomically creates one real Core order, system audit and original tracking link. Secret-bound retries and closure preserve the original source through lost responses; customer text cannot confirm payment or charge khata. Unknown delivery fees remain unpriced. The endpoint stays disabled by default, with all installation settings end-user configured. The customer submission interface and full M33 remain open; publication stays held.
+
 - In progress: opt-in owner and assigned-manager controls issue, share, inspect and revoke scoped customer links, preserving original attempts across lost replies and reloads. Account-free English/Bangla customer pages read actual order status, prices and khata entries without owner credentials or local storage. Installation connections and contact details are end-user configured; full order submission, ETA, swaps, payment and customer-task flows remain open. Publication stays held.
 
 - In progress: owners and assigned managers can inspect and close an original customer-link issuance attempt without recovering its secret. A durable closure revokes an issued link and blocks a delayed original request before replacement; original audit identities and retry receipts are preserved. The owner interface and full M30 acceptance remain open.

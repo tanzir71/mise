@@ -121,3 +121,8 @@ verify_jwt = false
 # The customer capability is the authority; no account or owner JWT is required.
 [functions.public-read]
 verify_jwt = false
+
+# Public shop capability plus the customer's own request secret. Disabled in the
+# server environment until that installation explicitly enables public orders.
+[functions.public]
+verify_jwt = false

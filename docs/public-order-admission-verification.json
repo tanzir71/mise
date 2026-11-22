@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-22T23:50:46.705Z",
+  "sourceParentCommit": "50567924bb107ec92b091ccc374b9ae3f2233d77",
+  "status": "backend increment verified; full M33 remains open",
+  "publication": "All three workflows and Pages remain held; new public function undeployed",
+  "configuration": "all installation hosting, backend, origins, providers, accounts, phone numbers and credentials are end-user configured",
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "f23d098f1f11b87bbf3a9772b25210adbfb9fbb56f5759df6fd59d8baa6a86d2",
+    "docs/configure-services.md": "332efc8767325b5d01f01498e52074ef69069bec0e46bf85a0d76666f2c79795",
+    "docs/public-order-admission.md": "1859ae564e073eac43103633dd09d3a68079f56b7011456655f301ecc8940bec",
+    "handover/AGENTS.md": "49aaeb9a8a80d02a374d82fe5ccfa9ed80312125aa4b9a2ebf0b944e7a7f9eff",
+    "handover/DECISIONS.md": "23521f8d52b660bfa4537182ad42a625f19619ca42aecce407b76792fc222d6f",
+    "handover/QUESTIONS.md": "e3f5ecebf1f03cde7c67d59362b8e9c499839b1e48e432f817d2c438c19729f5",
+    "handover/docs/03-roadmap.md": "767f972ab8ca8566de4b8bc26b1d561a21e2bd74600dd077f39e91e410860229",
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/cloud-records.ts": "a6c853a29c116c25c40e662d56933d28747e429eacaf0a91448809085bf322c8",
+    "packages/core/flags.ts": "1275511b83de5081c2aedd8735c447c1bac3e8f3dd2f3f1f5181b364f22be84c",
+    "packages/core/order-limits.ts": "661ff0d6056d178f6c303e2b52e745bfab0c93011d6b3019a0539faf001ee0e4",
+    "packages/core/order-lines.ts": "d45aed0ad0ec62dd00c438ced216733cf252cc5ee5d51144fa72b950cd274471",
+    "packages/core/orders.ts": "3d6130b9bd42ba931e6eb38cb889da662b6e5f5636d90a1da02ef7b74c92c8b6",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "packages/core/phone.ts": "e1ec8d78648f8d3b626544aef7aa7fb22c3ece3d4419d4ce216455980d873c5d",
+    "packages/core/public-order-projection.ts": "3f511f95bab53f9f4f437a7ea67a97d873188c03987aee4c97fa82246bfacadb",
+    "packages/core/public-order-submission.ts": "2747c0d44123908b6503a40c983c496737446729cd7a9d0a6cf2e2ee85e6f476",
+    "packages/core/public-order.ts": "375ab89abd04cd26a2d05f22f6ee8ce487d013299ce30a9193b2408fe57417f6",
+    "packages/core/public-phone-lengths.json": "d37ad47cbc9756cde941e587d503508d0aea2797d603679eeec76e9518b5b587",
+    "packages/core/public-phone.ts": "868467794e2ad253029d1123fa80a37a082ace355086868d89b3a9f1ccdf87ed",
+    "packages/core/public-shop.ts": "c1b0380b3f4504ee1ec47959c9743ad85886ab06c3be0d0f14749bf3da75c0dc",
+    "packages/core/shop-access.ts": "64cf9acadce32df5fb635472ed4b4e25ce08e1a249542a0e7efdd8631e1abf91",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/edge-bundle.mjs": "57e590f8c30e77df170c6b582cc8ca7b57f19ffa0d0414837aa2ed4c6611a843",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "supabase/config.toml": "7b185e2d7443c6f7a20cd47567402f4c878d0c6ba6bb8a99173e18ce3e89cee2",
+    "supabase/functions/.env.example": "426a5eb76d5c6e71dc4717cd764951bd827fed8fd9acebd2a7f4b5536273f02d",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/public-order-handler.ts": "64d4732c25fcdd3b265e0a019427a072ced5d0bcdd984f6d013cf319ef6f2680",
+    "supabase/functions/public/index.ts": "796e1bed81391717f13abf8e9e1ae8268e78ceb67c6b743398fc6da9d8b382fb",
+    "supabase/migrations/20261122221346_public_shop_order_admission.sql": "6c226f342486357271b82cb5ca39058e57c1ea7ebd1f359cb5a5eab47c4562bc",
+    "tests/device-pairing-fixture.ts": "ab8b3a2e245fa282f1145cd42d0d8e661c8ae94264d644875edceefd3aace796",
+    "tests/public-order-admission.test.ts": "c933402d23f3b11838377f2ef739306bac90e887b262ad536e4c6579ba39af30",
+    "tests/public-order-fixture.ts": "5957c00f2e351e8ee1ade8dc55e6296fa87797adcdb2ca0e893f0e83a543e402",
+    "tests/public-order-http.test.ts": "f7308c0d8dec6e56f50026edd6bb8f221093656e352f22482188230b0097a724",
+    "tests/public-order-submission.test.ts": "e492476cddcbc934d4e4f66f9d6b37435d22a2e4c276751f5d4b810539538cf0",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  },
+  "local": {
+    "requiredChecks": [
+      "lint",
+      "types",
+      "pages-build",
+      "full-unit",
+      "full-pages-browser",
+      "root-build",
+      "root-browser",
+      "pages-restored",
+      "customer-links-visual",
+      "history-artifact-guard"
+    ],
+    "unit": {
+      "passed": 4573,
+      "files": 221,
+      "failed": 0
+    },
+    "pagesBrowser": 568,
+    "rootBrowser": 59,
+    "bothBuildBases": true,
+    "focusedCases": 76,
+    "visualComparisons": 42,
+    "bundle": {
+      "checks": 3,
+      "bytes": 193090,
+      "sha256": "ad1560f3790fbe7780939efcb7adc162be91c1e95f85033c77564b75c91d6b12",
+      "sourceFiles": 18,
+      "runtimeImports": [],
+      "fetches": 0,
+      "newEdgeDeployed": false
+    },
+    "accessibility": {
+      "scenes": 40,
+      "violations": 0,
+      "horizontalOverflows": 0
+    },
+    "exportsPresent": 270,
+    "secretGuard": {
+      "history": true,
+      "artifacts": true,
+      "protectedPrivateValues": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "unchangedReviewedLegacyFindings": 22
+    }
+  },
+  "managed": {
+    "sourceMigrations": 68,
+    "forcedRlsTables": 93,
+    "newFunctionBodiesVerified": 15,
+    "oldFunctionsDigestUnchanged": true,
+    "oldEdgeFunctionsPreserved": 17,
+    "newEdgeDeployed": false,
+    "migrationSha256": "6c226f342486357271b82cb5ca39058e57c1ea7ebd1f359cb5a5eab47c4562bc",
+    "rawPrivateGrants": 0,
+    "rollbackProbe": {
+      "checks": 27,
+      "rollback": true,
+      "ordersCreated": 1,
+      "financialWrites": 0,
+      "noProviderRequests": true
+    },
+    "retainedFixtures": {
+      "businesses": 0,
+      "authUsers": 0,
+      "shops": 0,
+      "attempts": 0,
+      "links": 0,
+      "closures": 0
+    },
+    "scheduler": false,
+    "cronJobs": 0,
+    "advisors": {
+      "security": {
+        "count": 1,
+        "levels": {
+          "INFO": 1
+        }
+      },
+      "performance": {
+        "count": 2,
+        "levels": {
+          "INFO": 2
+        }
+      }
+    }
+  }
+}

@@ -35,3 +35,5 @@
 - Resolved 2026-11-22: customer-link HTTP rate limits use the installation's existing backend and private capability records, with numeric limits owned by its installer. No maintainer account, extra pepper, raw IP database or cleanup Cron job is needed. Direct reads are closed so the HTTP budget is enforceable; M33/M35 own the later customer interfaces.
 
 - Resolved 2026-11-23: customer links carry the installation's runtime public API origin in a fragment and the scoped capability in the specified customer route. Public reads need no API key or customer account. Missing ETA/payment/task data is shown honestly or left for full M33/M35; no installer account, provider, wallet number or maintainer phone is invented.
+
+- 2026-11-23: M20 publishes a delivery note but no numeric delivery fee. Until a shop explicitly prices a public delivery request, retain an unpriced delivery confirmation line and an unknown total, including when delivery will ultimately be free. Continue without requesting maintainer configuration; installer policy and the later customer price-acceptance flow own that choice. Full M33 remains open.
