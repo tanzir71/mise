@@ -1,6 +1,8 @@
 import {isDeviceId} from './device-access';
 export interface DeskPushSubscription {endpoint:string;expirationTime:number|null;keys:{p256dh:string;auth:string}}
 export interface KitchenPushNotice {v:1;type:'kitchen-alarm';subscriptionId:string;businessId:string;outletId:string;taskId:string;generation:number}
+export interface DeskPushContext {v:1;businessId:string;outletId:string;memberId:string;role:'owner'|'manager'}
+export interface DeskPushMetadata {v:1;id:string;businessId:string;outletId:string;memberId:string;createdAt:number;expiresAt:number|null;revokedAt:number|null}
 const object=(v:unknown):v is Record<string,unknown>=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const exact=(v:Record<string,unknown>,keys:string)=>Object.keys(v).sort().join(',')===keys.split(',').sort().join(',');
 const invalid=()=>Error('Enable notifications again on this desk device.');
@@ -8,6 +10,18 @@ function bytes(value:unknown,length:number){
  if(typeof value!=='string'||!/^[A-Za-z0-9_-]+$/.test(value))throw invalid();
  const raw=atob(value.replaceAll('-','+').replaceAll('_','/'));if(raw.length!==length||btoa(raw).replaceAll('+','-').replaceAll('/','_').replaceAll('=','')!==value)throw invalid();
  return Uint8Array.from(raw,c=>c.charCodeAt(0));
+}
+const time=(v:unknown):v is number=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=0&&v<=8640000000000000;
+export function parseDeskApplicationKey(value:unknown):string {if(bytes(value,65)[0]!==4)throw invalid();return value as string;}
+export function parseDeskPushContext(input:unknown):DeskPushContext {
+ if(!object(input)||!exact(input,'v,businessId,outletId,memberId,role')||input.v!==1||![input.businessId,input.outletId,input.memberId].every(isDeviceId)||!['owner','manager'].includes(input.role as string))throw invalid();
+ return {v:1,businessId:input.businessId as string,outletId:input.outletId as string,memberId:input.memberId as string,role:input.role as 'owner'|'manager'};
+}
+/** Browser capability metadata excludes endpoint, encryption keys and Auth IDs. */
+export function parseDeskPushMetadata(input:unknown):DeskPushMetadata {
+ if(!object(input)||!exact(input,'v,id,businessId,outletId,memberId,createdAt,expiresAt,revokedAt')||input.v!==1||![input.id,input.businessId,input.outletId,input.memberId].every(isDeviceId)||
+  !time(input.createdAt)||input.expiresAt!==null&&(!time(input.expiresAt)||input.expiresAt<=input.createdAt)||input.revokedAt!==null&&(!time(input.revokedAt)||input.revokedAt<input.createdAt))throw invalid();
+ return {v:1,id:input.id as string,businessId:input.businessId as string,outletId:input.outletId as string,memberId:input.memberId as string,createdAt:input.createdAt,expiresAt:input.expiresAt as number|null,revokedAt:input.revokedAt as number|null};
 }
 /** Restrict server-side delivery to browser push providers, never an arbitrary
  * owner-supplied URL. Credentials are supplied only in the encrypted protocol. */

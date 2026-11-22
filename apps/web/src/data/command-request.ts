@@ -29,6 +29,11 @@ export function commandReviewProof(error:unknown):CommandReviewProof|null {
 export function bindCommandReceipt<T extends object>(receipt:T,guard:()=>void):T {receiptGuards.set(receipt,guard);return receipt;}
 /** Network receipts carry an ephemeral check; no session field is added to the record. */
 export function assertCommandReceipt(receipt:object):void {receiptGuards.get(receipt)?.();}
+/** Projection caches require a live HTTP proof; serialized metadata alone cannot
+ * activate a private desk profile or replace its verified complete task list. */
+export function assertLiveCommandReceipt(receipt:object):void {
+ const guard=receiptGuards.get(receipt);if(!guard)throw new CommandRequestError('review');guard();
+}
 /** Runtime identity only. The account, connection and generation never enter a command. */
 export function createAccountJsonRequest(config:CloudConnection,input:CommandAccount,route:'commands'|'migration-upload',send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/'+route,config.apiUrl+'/'),'POST',send);
@@ -40,6 +45,14 @@ export function createDeviceAdminRequest(config:CloudConnection,input:CommandAcc
 }
 export function createOwnerPinRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/staff-pin',config.apiUrl+'/'),'POST',send);
+}
+export function createDeskNotificationsRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+ return accountRequest(config,input,new URL('functions/v1/desk-notifications',config.apiUrl+'/'),'POST',send);
+}
+export type DeskAlarmRpc='read_kitchen_alarm_task_page'|'set_kitchen_alarm_settings';
+export function createDeskAlarmRequest(config:CloudConnection,input:CommandAccount,rpc:DeskAlarmRpc,send:typeof fetch){
+ if(!['read_kitchen_alarm_task_page','set_kitchen_alarm_settings'].includes(rpc))throw new CommandRequestError('review');
+ return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send);
 }
 export function createOrderReviewRequest(config:CloudConnection,input:CommandAccount,mode:'read'|'resolve',send:typeof fetch){
  const endpoint=new URL('functions/v1/commands',config.apiUrl+'/');endpoint.searchParams.set('review',mode);

@@ -1,0 +1,211 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T05:49:33.528Z",
+  "parentCommit": "fdff2fd0c178817dd9fb5c3be80c3db965311ac9",
+  "flag": {
+    "name": "kitchenScreen",
+    "default": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "unitFiles": 206,
+    "unitCases": 4248,
+    "unitDurationSeconds": 644.45,
+    "existingPagesBrowserCases": 522,
+    "existingPagesBrowserDuration": "23.2m",
+    "additionalNativeBrowserCases": 7,
+    "additionalNativeBrowserDuration": "7.5s",
+    "compiledRootBrowserCases": 36,
+    "compiledRootBrowserDuration": "48.5s",
+    "rootBuild": true,
+    "pagesBuild": true,
+    "pagesBuildRestored": true,
+    "referenceExports": 270,
+    "productLayoutChanged": false,
+    "newVisualComparison": false
+  },
+  "privacy": {
+    "fullHistory": true,
+    "generatedArtifacts": true,
+    "files": 1757,
+    "objects": 9644,
+    "knownPrivateValuesChecked": 10,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "reviewedOlderNonsecretFindings": 22,
+    "legacyPolicyUnchanged": true
+  },
+  "deployment": {
+    "newMigrationsApplied": false,
+    "pushWorkerDeployed": false,
+    "notificationsEndpointDeployed": false,
+    "newDeploymentKeysGenerated": 0,
+    "newScheduledJobs": 0,
+    "newBrowserSubscriptions": 0,
+    "newProviderDeliveries": 0,
+    "githubWorkflowsHeld": true,
+    "pagesPublicationHeld": true
+  },
+  "limits": [
+    "Phone Auth and provider HTTP in local fixtures are synthetic.",
+    "Chromium checks use real IndexedDB and Crypto; native Auth/operator controls and service-worker delivery still need integration.",
+    "Backend deployment, scheduling, actual provider/browser delivery and physical-device acceptance remain open."
+  ],
+  "runtimeBundles": {
+    "kitchen-push": {
+      "bytes": 14158,
+      "sha256": "5a905460db1d05b57dc660f5c351aed017d87ebbe45ea1d6da33d2a70a2d043a",
+      "sourceFiles": 9,
+      "currentSourceHashesMatch": true,
+      "runtimeImports": [
+        "npm:web-push@4.0.0"
+      ]
+    },
+    "desk-notifications": {
+      "bytes": 10445,
+      "sha256": "2f84cfc9f5ef41393077987c1b3d4f01a4276b9f625c37ed3249a6016ad46adb",
+      "sourceFiles": 5,
+      "currentSourceHashesMatch": true,
+      "runtimeImports": []
+    }
+  },
+  "sources": {
+    "apps/web/src/data/command-request.ts": {
+      "bytes": 11693,
+      "sha256": "193a5b8ac860c9ed147dee57da9c2a4418532a57d1897f8cefe7b60357c38bfe"
+    },
+    "apps/web/src/data/desk-cache.ts": {
+      "bytes": 19080,
+      "sha256": "ded8e0bbc503e75e417cab2ac72da9054ad64203ea1072ad6d5d25e6a07e563d"
+    },
+    "apps/web/src/data/desk-operation.ts": {
+      "bytes": 7025,
+      "sha256": "fb974c7e8217a93e22822778f38c7e4a273f0f66aa1bbd6e4cc05deba15da65d"
+    },
+    "apps/web/src/data/desk-proof.ts": {
+      "bytes": 1449,
+      "sha256": "c44bea06d0d0d459e28a1598ef9f1732e401250ab473af7a7466394665e06306"
+    },
+    "apps/web/src/data/desk-remote.ts": {
+      "bytes": 5992,
+      "sha256": "4607870ce7745d413a2cee07b7c968ac5093b6770c7343e5c698086ac320b4b8"
+    },
+    "packages/core/desk-push.ts": {
+      "bytes": 4724,
+      "sha256": "e1734abca4eea56e45f450aa15595488b54052fee0995428b382e1f28e5d9bcc"
+    },
+    "packages/core/desk-tasks.ts": {
+      "bytes": 6190,
+      "sha256": "78a7c6b431656e75643a5689173163d79ccf9edca8a88fff913d42b9ea559cd1"
+    },
+    "packages/core/flags.ts": {
+      "bytes": 899,
+      "sha256": "3ea179bc42dc5242009e7e2be815fcce55f5c39af9ffbe9fcf9c7cce308fa2c2"
+    },
+    "pnpm-lock.yaml": {
+      "bytes": 383100,
+      "sha256": "547a2fd5b98d9a0160f56cff3a4c70fedfed95b3bfcd33dab68ba2caa0e5db3f"
+    },
+    "scripts/edge-bundle.mjs": {
+      "bytes": 3298,
+      "sha256": "757b646bbcbfa467e268dfc35ac6b6d9e1fe11488da6ab313fed26440f8cb380"
+    },
+    "scripts/legacy-deployment-findings.json": {
+      "bytes": 1613,
+      "sha256": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb"
+    },
+    "supabase/config.toml": {
+      "bytes": 2561,
+      "sha256": "7422d9d974cb7bd2cb0fa19fef2d8a28d0cd15d67ffe1d032ef134f600cf1830"
+    },
+    "supabase/functions/.env.example": {
+      "bytes": 956,
+      "sha256": "0f4fb93dac0a4d228ae944a2fbfe2d8130d728e0182fc889f57a8a0088ec0a4b"
+    },
+    "supabase/functions/_shared/desk-notifications-handler.ts": {
+      "bytes": 7445,
+      "sha256": "c6db23db7f32437079a71855e263eaa2ab3cf4589bdfb370192d7231ac07339a"
+    },
+    "supabase/functions/_shared/kitchen-push-handler.ts": {
+      "bytes": 7854,
+      "sha256": "da0c87612eeebddfff8d9658b9bce3252f7bb5a68878862e709a291b3cccbd86"
+    },
+    "supabase/functions/desk-notifications/index.ts": {
+      "bytes": 896,
+      "sha256": "a5ecd2cef89e6d800ffac1e974965caeff98b20b614ed695aa7586df5534033e"
+    },
+    "supabase/functions/kitchen-push/index.ts": {
+      "bytes": 1031,
+      "sha256": "c414e2acd88ef7e087e7dc352d3035e2f06f8261390562cb76d0a0bb5aa20ca6"
+    },
+    "supabase/functions/kitchen-push/npm.d.ts": {
+      "bytes": 90,
+      "sha256": "9b9e13274dc6a3df3714306cd6afbbcc6bb1b926bed61a77f26f8477746a6afb"
+    },
+    "supabase/migrations/20261122011706_kitchen_alarm_tasks.sql": {
+      "bytes": 28671,
+      "sha256": "039cb0b2c36d77b2d6aa96927c09acf72134c8bb6af199ba910272472b035c55"
+    },
+    "supabase/migrations/20261122032259_desk_push_delivery.sql": {
+      "bytes": 29465,
+      "sha256": "c9219fcc1354baa12cbec300a915b3d6fe08c043034d93b4827e4d6cbab4a333"
+    },
+    "supabase/migrations/20261122035303_kitchen_alarm_task_pages.sql": {
+      "bytes": 6208,
+      "sha256": "6c0b3fc8271f0aeed6bf376908ccfa56f7714fd60a7fbdf1a52f4944c9ebe14e"
+    },
+    "supabase/migrations/20261122043724_desk_push_withdrawal_fence.sql": {
+      "bytes": 9880,
+      "sha256": "1aaf95bf00286471c8361fb01f663860ebfab0c0597698dc21c38f2b7ad483a7"
+    },
+    "tests/desk-cache.test.ts": {
+      "bytes": 10251,
+      "sha256": "f12f2c5f795d16ba576d64b6eda9a44af7e1a9ab966d616ec1353c1dd425231e"
+    },
+    "tests/desk-notifications.test.ts": {
+      "bytes": 9346,
+      "sha256": "3b9cba15157c55561afcfe0c148bff65b795e4cfa9de516db465aa1aa1487e9c"
+    },
+    "tests/desk-operation.test.ts": {
+      "bytes": 15532,
+      "sha256": "20891b1dd341989f5327bad6ec752bce7844cb32581ff8a09b3fdeb335435428"
+    },
+    "tests/desk-push-bundles.test.ts": {
+      "bytes": 5316,
+      "sha256": "4b052f77accc3c50668fe7fd4c93d09d9e96d586684b2a26136d73e19c67d28f"
+    },
+    "tests/desk-push-delivery.test.ts": {
+      "bytes": 36789,
+      "sha256": "7fb880358e80e3e125a47a0e0723a22e0eaaa1f53f08366c786d172f3d855b7c"
+    },
+    "tests/desk-remote.test.ts": {
+      "bytes": 9064,
+      "sha256": "7351a96a26e213bb5906b0a900c7cd2a2134578e7633c263492e6e5994c49df1"
+    },
+    "tests/desk-task-fixture.ts": {
+      "bytes": 908,
+      "sha256": "5ded5db2b93a90a3bd91abd82c7e3b133f21b09d1046907da02d20da9c21e0fd"
+    },
+    "tests/desk-task-pages.test.ts": {
+      "bytes": 9769,
+      "sha256": "57c5b9cd29e22339c1644a3ea01a607a31caea0c7abe530205a2dd7c9e541ac0"
+    },
+    "tests/e2e/desk-storage.spec.ts": {
+      "bytes": 5694,
+      "sha256": "e07db9f2d8d97bf92e3d5d98678eb0812319b8733dc060f12c87b57d66a18277"
+    },
+    "tests/fixtures/desk-browser.ts": {
+      "bytes": 9945,
+      "sha256": "0bb757d3bc405ea08ce2418a35acda5da091ae0e62cb164615d4160f67db7f54"
+    },
+    "tests/kitchen-push-handler.test.ts": {
+      "bytes": 9111,
+      "sha256": "7e2d86e86750e2b143a6a8e6e3b40d0e18c73e566b82253aaf029b1ae8a689c5"
+    }
+  }
+}

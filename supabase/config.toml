@@ -106,3 +106,10 @@ verify_jwt = true
 
 [functions.sync-read]
 verify_jwt = true
+
+# Dedicated internal scheduler credential; no browser/device-selected messages.
+[functions.kitchen-push]
+verify_jwt = false
+
+[functions.desk-notifications]
+verify_jwt = true
