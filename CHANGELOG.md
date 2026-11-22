@@ -4,6 +4,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
+### Added
+
+- In progress: opt-in desk notification controls connect complete kitchen warnings to Inbox and the red order-queue indicator. Enable preserves the explicit browser gesture; offline Disable and earlier-setup cleanup retain original requests through reload and lost replies. Generic service-worker notices check the actual native desk and current browser capability before opening this installation’s Inbox. Share capture stays independently gated. Scheduling, provider/device commissioning and full M32 acceptance remain open; publication stays held.
+
 ### Fixed
 
 - A Ready gesture keeps its original ticket and acknowledgement parent when its own accepted Got it reaches the cache during the save. Changed preparation content, undone acknowledgements and unrelated newer revisions still require review; original receipts and money stay unchanged.

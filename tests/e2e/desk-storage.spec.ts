@@ -17,7 +17,7 @@ test.beforeEach(async({page})=>{await install(page);});
 test.afterEach(async({page})=>{await page.evaluate(()=>window.miseDeskBrowserTest.cleanup()).catch(()=>{});});
 test('native desk operations survive a browser reload and confirm the original HTTP event without storing capability values',async({page})=>{
  const prepared=await page.evaluate(()=>window.miseDeskBrowserTest.prepare());expect(prepared).toMatchObject({privateValuesCopied:false,counts:{registers:0,withdrawals:0}});
- await page.reload();await page.waitForFunction(()=>!!window.miseDeskBrowserTest);const saved=await page.evaluate(()=>window.miseDeskBrowserTest.inspect());expect(saved).toMatchObject({version:2,pending:[{id:prepared.id,kind:'register'}]});
+ await page.reload();await page.waitForFunction(()=>!!window.miseDeskBrowserTest);const saved=await page.evaluate(()=>window.miseDeskBrowserTest.inspect());expect(saved).toMatchObject({version:3,pending:[{id:prepared.id,kind:'register'}]});
  expect(await page.evaluate(source=>window.miseDeskBrowserTest.confirm(source),prepared.source)).toEqual({eventId:prepared.id,id:'00000000000000000000000005',counts:{registers:1,withdrawals:0},enabled:true});
 });
 test('offline Disable retains the complete native Inbox and original withdrawals after reload without sending HTTP',async({page,context})=>{

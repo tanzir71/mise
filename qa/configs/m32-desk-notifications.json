@@ -1,0 +1,41 @@
+{
+  "title": "M32 — Desk notification settings, complete Inbox tasks and original removal recovery",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "m32-desk-inbox",
+      "path": "app/inbox?flags=kitchenAlarms",
+      "deskNotificationsFixture": "inbox",
+      "note": "Actual React/IndexedDB/phone Auth transport, scoped PostgreSQL task paging and original kitchen-alarm task. Browser subscription and phone accounts are synthetic. M20 103:900 guides the outlet header, Inbox title, count and white action cards. Literal tasks, corner-shop navigation and omitted phone bezel differ; pixel differences are informational. Share capture remains independently disabled.",
+      "sections": [{"id":"inbox","selector":".desk-inbox","reference":"screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"}]
+    },
+    {
+      "id": "m32-desk-settings",
+      "path": "app/settings/notifications?flags=kitchenAlarms",
+      "deskNotificationsFixture": "settings",
+      "note": "Actual private browser settings with explicit Enable and separate outlet-warning settings. Uses M06 58:201 white cards, restrained type and simple ink actions. The supplied frame has no notification settings, so this extension and its pixel differences are documented. Permission is never requested by loading this page.",
+      "sections": [{"id":"settings","selector":".desk-settings","reference":"screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"}]
+    },
+    {
+      "id": "m32-desk-queue",
+      "path": "app/orders?flags=kitchenAlarms",
+      "deskNotificationsFixture": "queue",
+      "note": "The existing actual order queue highlights the order referenced by a complete verified kitchen task. Red is only a line and words. Desktop09 53:1251 guides queue cards; synthetic corner-shop content and responsive phone layout differ from the restaurant export. No order status, payment or financial entry is changed.",
+      "sections": [{"id":"queue","selector":".orders-page","reference":"screens/desktop/Desktop 09 · Mise — Orders · live queue.png"}]
+    },
+    {
+      "id": "m32-desk-offline-disable",
+      "path": "app/settings/notifications?flags=kitchenAlarms",
+      "deskNotificationsFixture": "offline",
+      "note": "Actual native offline Disable after a synthetic browser subscription and real SQL registration. The original withdrawal stays pending; no server receipt is fabricated. M06 58:201 guides controls and cards. This recovery state extends that frame and has informational pixel differences.",
+      "sections": [{"id":"offline","selector":".desk-settings","reference":"screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"}]
+    },
+    {
+      "id": "m32-desk-original-cleanup",
+      "path": "app/settings/notifications?flags=kitchenAlarms",
+      "deskNotificationsFixture": "cleanup",
+      "note": "Personal earlier-setup cleanup uses the actual independent phone client and original saved withdrawal. Only generic setup labels are shown; no task/customer details or credential values. M06 58:201 supplies card/control reference; this recovery page extends its design. No push or SMS provider is contacted.",
+      "sections": [{"id":"cleanup","selector":".desk-cleanup","reference":"screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"}]
+    }
+  ]
+}

@@ -11,6 +11,14 @@ function wire(){const user={id:subject,aud:'authenticated',role:'authenticated',
  return {send,calls,session,access,user,setPhone:(v:boolean)=>{phoneEnabled=v;},setOTP:(v:number)=>{otpStatus=v;},setVerify:(v:number)=>{verifyStatus=v;},setConfirmed:(v:boolean)=>{confirmed=v;}};
 }
 async function boot(w=wire(),storage=new MemoryStorage(),now?:()=>number){const auth=await createPhoneAuth(config,scope,{storage,send:w.send,now});clients.push(auth);await auth.check();return {auth,w,storage};}
+it('disposing one independently owned view preserves the complete stored session and another live view without logging out',async()=>{
+ const {auth,w,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');const first=await auth.commandAuthorization(),before=storage.getItem(auth.key),other=await createPhoneAuth(config,scope,{storage,send:w.send});clients.push(other);await other.check();const second=await other.commandAuthorization();
+ await auth.dispose();expect(auth.closed).toBe(true);expect(()=>auth.assertCommandAuthorization(first)).toThrow('closed');expect(storage.getItem(auth.key)).toBe(before);expect(w.calls.filter(call=>call.path==='logout')).toEqual([]);expect(()=>other.assertCommandAuthorization(second)).not.toThrow();expect((await other.commandAuthorization()).userId).toBe(subject);
+});
+it('view disposal emits no false operator sign-out, while a later explicit Forget still revokes the stored identity',async()=>{
+ const {auth,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');await auth.commandAuthorization();const notices:{key:string;accountHash:string|null}[]=[],browser=new EventTarget();browser.addEventListener('mise:operator-auth',event=>notices.push((event as CustomEvent).detail));vi.stubGlobal('window',browser);
+ try{await auth.dispose();expect(notices.filter(notice=>notice.key===auth.key&&notice.accountHash===null)).toEqual([]);expect(storage.getItem(auth.key)).not.toBeNull();await auth.close();expect(storage.getItem(auth.key)).toBeNull();expect(notices.filter(notice=>notice.key===auth.key&&notice.accountHash===null)).toHaveLength(1);}finally{vi.unstubAllGlobals();}
+});
 it.each([[503,'retry'],[401,'auth']] as const)('fresh command verification keeps HTTP %s as %s without exposing transport details',async(status,kind)=>{
  const w=wire(),storage=new MemoryStorage();let fail=false;
  const send:typeof fetch=async(url,init)=>fail&&new URL(String(url)).pathname.endsWith('/user')?new Response(JSON.stringify({msg:'private upstream details'}),{status,headers:{'Content-Type':'application/json'}}):w.send(url,init);
