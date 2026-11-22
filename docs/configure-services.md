@@ -26,6 +26,10 @@ The installer configures the installation's own alarm signing key, VAPID keys an
 
 Until notification setup is ready, the cached Inbox, visible warnings and manual controls remain the working path. Verify actual notification delivery on the intended device after opting in.
 
+## Customer link reads
+
+The installation's `public-read` function uses the existing backend server key and exact allowed origins. Optional private backend settings `MISE_PUBLIC_READS_PER_MINUTE` and `MISE_PUBLIC_LINK_READS_PER_MINUTE` control the installation-wide and per-link budgets. Empty values use 3,000 and 60 reads per server minute; valid configured values are integers from 1 to 60,000. Invalid values leave reads unavailable rather than silently weakening the limits. No additional provider account or secret is required. Deploy only the customer interfaces available in your release; configuring this endpoint does not enable unfinished tracking or khata pages.
+
 ## Other integrations
 
 As capture, courier, payment and AI integrations are delivered, their account choices, connections, limits and tests belong in the installation's setup/settings or private backend environment. Keep privileged credentials on that backend. An unconfigured optional integration stays off and explains how to configure it; it does not silently use the maintainer's account.

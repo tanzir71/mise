@@ -117,3 +117,7 @@ verify_jwt = true
 # Database-selected due work only. The handler checks its dedicated internal key.
 [functions.kitchen-dispatch]
 verify_jwt = false
+
+# The customer capability is the authority; no account or owner JWT is required.
+[functions.public-read]
+verify_jwt = false

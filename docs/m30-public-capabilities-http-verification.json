@@ -1,0 +1,170 @@
+{
+  "milestone": "M30",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T18:14:34.669Z",
+  "sourceParentCommit": "ae0da1db087e7382848c3979995b42418aa18b10",
+  "publicationHeld": true,
+  "installationConfiguration": {
+    "ownership": "each installation",
+    "additionalAccountsOrSecretsRequired": false,
+    "privilegedKeys": "server only",
+    "budgets": {
+      "installationDefault": 3000,
+      "capabilityDefault": 60,
+      "maximumConfigured": 60000,
+      "window": "fixed UTC server minute"
+    },
+    "providerCommissioning": "not exercised; installation responsibility"
+  },
+  "featureFlags": {
+    "cloudSetup": false,
+    "cloudSync": false,
+    "deviceAccess": false,
+    "kitchenScreen": false,
+    "kitchenAlarms": false
+  },
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 176,
+    "astroDiagnostics": 0,
+    "focusedCases": 45,
+    "unitFiles": 214,
+    "unitCases": 4400,
+    "unitDurationSeconds": 677.97,
+    "originalHistoryOrders": 5004,
+    "historySetupDeadlineMs": 120000,
+    "historyUpgradeReadDeadlineMs": 60000,
+    "historyUpgradeReadDurationMs": 3752,
+    "errorBudgetRegression": "An unsafe ledger projection initially rolled back its read reservation. A confirmed failing test now passes with the projection in a nested exception block, preserving the reservation and original financial data.",
+    "rootBuild": true,
+    "rootBrowserCases": 50,
+    "pagesBuild": true,
+    "pagesFullSweep": {
+      "passed": 551,
+      "failed": 0,
+      "durationMinutes": 33.1
+    },
+    "referenceExports": 270,
+    "visualComparisons": 40,
+    "visualWidths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "visualHorizontalOverflow": 0,
+    "appComponentOrStyleChanges": false,
+    "visualReport": "qa/report.html",
+    "keyScreenshots": [
+      "qa/screens/m32-kitchen-scheduled-phone-390.png",
+      "qa/screens/m32-kitchen-handoff-tablet-1440.png",
+      "qa/screens/m32-kitchen-cancelled-phone-390.png"
+    ],
+    "nativeLatestSchemaFixture": {
+      "migrations": 65,
+      "businesses": 2,
+      "outlets": 3,
+      "orders": 3,
+      "accounts": 3,
+      "positiveReads": 6,
+      "financialRowsPreserved": true,
+      "cleanupPassed": true
+    }
+  },
+  "managed": {
+    "checkedAt": "2026-11-22T17:40:26.587Z",
+    "tables": 89,
+    "cronJobs": 0,
+    "authUsers": 0,
+    "forcedRls": 89,
+    "businesses": 0,
+    "migrations": 65,
+    "exactBodies": 2,
+    "capabilities": 0,
+    "budgetIdsValid": true,
+    "publicDefiners": 0,
+    "reviewedBodies": 2,
+    "budgetApiGrants": 0,
+    "fixedBudgetRows": 1,
+    "legacyApiReaders": 0,
+    "schedulerEnabled": false,
+    "boundedApiReaders": 0,
+    "boundedHelperPinned": true,
+    "boundedServiceReaders": 2,
+    "preservedLegacyCapabilityFunctions": 9,
+    "oldFunctionsPreserved": 16,
+    "newFunction": {
+      "name": "public-read",
+      "version": 1,
+      "verifyJwt": false,
+      "exactSource": true,
+      "bytes": 17277,
+      "sha256": "bd7afd49df55932c9a58af95aa6c487d4711c2b842870124c4c892db4d6fa557"
+    },
+    "security": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performance": {
+      "INFO": 2,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "roleProof": {
+      "authUsers": 0,
+      "businesses": 0,
+      "rolledBack": true,
+      "fixedBudgetRows": 1,
+      "actualRoleDenials": 25
+    },
+    "httpChecks": 33,
+    "positiveCustomerScopes": 6,
+    "concurrentRequests": 8,
+    "concurrentAccepted": 2,
+    "concurrentLimited": 6,
+    "originalFinancialRowsPreserved": true,
+    "fixtureRowsRemaining": 0,
+    "realAuthAccounts": 0,
+    "providerRequests": 0,
+    "fixtureAuthority": "Capabilities inserted and revoked as database-owner fixtures; not owner-Auth or phone-provider acceptance."
+  },
+  "credentialGuard": {
+    "command": "pnpm check:secrets --history --artifacts",
+    "commitAndPushHooksRequired": true,
+    "legacyPolicyUnchanged": true
+  },
+  "sourceHashes": {
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "37f125ba8c8eb1c4ffef9cda2abad4ee7edd7636b6973ded7f16875c59415833",
+    "docs/configure-services.md": "52f235e185043bc805273a2baf0c74b51a49443fff09740222ae609599d5a141",
+    "docs/m30-delivery.md": "e3d5a2f87c9cc1df8d870f42ebcbe1074b8db5f9e5e7d13ed37d5ced3a3ce4e4",
+    "docs/m30-public-capabilities-http.md": "ddcdf8292dd8534c3dafa7dd016cb1851c1a50536ef01f71bc05df35f695a2e2",
+    "handover/DECISIONS.md": "e0d9082760c16e256043de5220103e952b986e5e58dcc62fc64df7ae3434d813",
+    "handover/QUESTIONS.md": "2a3a1a47a556013b69511fb1cac157a48318804ffa9535ba12e3b2a991367d5f",
+    "handover/docs/03-roadmap.md": "0ae5afccf42392afe424e32a4fecf42da7ec17e1458bc57e48ce94fafbd1ac8d",
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/customer-links.ts": "5e6e8924793fe2a5e8c2a2243daca8b98641a9be834a93e4c17deeac55490aae",
+    "packages/core/flags.ts": "5f9fcc4b9a3b13ccb4b591819f47d16d1c0cfb9370b0906b631935d77eb07525",
+    "packages/core/order-lines.ts": "d45aed0ad0ec62dd00c438ced216733cf252cc5ee5d51144fa72b950cd274471",
+    "packages/core/orders.ts": "3d6130b9bd42ba931e6eb38cb889da662b6e5f5636d90a1da02ef7b74c92c8b6",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55",
+    "scripts/build.mjs": "593b53f0bd66af079c2a9fb6ed86b4cc1623cc523a85fb8ea8a983c9e229a63d",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/edge-bundle.mjs": "57e590f8c30e77df170c6b582cc8ca7b57f19ffa0d0414837aa2ed4c6611a843",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "supabase/config.toml": "d028609b743594e67ac89c73118d56d6e9e8ef007378f076f9060f4623eb62a5",
+    "supabase/functions/.env.example": "5d0707e5c10060651aeec002eeb3bb4cc9b561515a80905555f3636083968959",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/public-capability-handler.ts": "de7e9e549548218ad55e965203e8262054a93458fbdc765284adceff207c3a5a",
+    "supabase/functions/public-read/index.ts": "81dc7e67fd77198f0cf6e95ce19cc77fa4a22643055f85bcb6b80cbb82caf13e",
+    "supabase/migrations/20261122164721_public_capability_http.sql": "5758ae6c93fc5d75d83811a1a94e880ebf0985b89a5ebd4accc5920ec41e8d2a",
+    "tests/public-read-fixture.ts": "7b7c2899422eeca84b38d79121c9478f642d896acd4c667cd337832da52ae1da",
+    "tests/public-read-protocol.test.ts": "4bbf45a5f73cbb4ca008c973339e45a69986de4b695b3a3567891012c1ffd5f6",
+    "tests/public-read-sql.test.ts": "6ec8661562d635236cee43d73a0f49c847d672d2be346ec2ce25d3e2b95a7e47",
+    "vitest.config.ts": "1241e2ca8c4e6be1952d92bb8333209d406b290cd34276c22dfa6c1da36c8d52"
+  }
+}
