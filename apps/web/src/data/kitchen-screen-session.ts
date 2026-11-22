@@ -1,7 +1,8 @@
 import {parseScreenJournalRecord, type ScreenJournalRecord} from '@mise/core/device-screen-state';
 import {parseStaffDeviceAccess} from '@mise/core/device-access';
 import {kitchenReadyPath, newKitchenId, prepareKitchenAction, type KitchenActionKind} from '@mise/core/kitchen';
-import {appendKitchenTap, finishKitchenTap, receiveKitchenChanges, receiveKitchenPage, sameKitchenSession, type KitchenScreenState} from '@mise/core/kitchen-screen';
+import {appendKitchenTap,beginKitchenTapClose,finishKitchenTapClose,finishKitchenTap, receiveKitchenChanges, receiveKitchenPage, sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
+import {retainedKitchenTap,type KitchenCloseIntent} from '@mise/core/kitchen-recovery';
 import type {KitchenTicket} from '@mise/core/kitchen-tickets';
 import {assertCommandReceipt} from './command-request';
 import {assertBlankScreenProfile, ScreenStorageError, type ScreenJournal} from './device-screen-journal';
@@ -12,7 +13,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
   const original = parseScreenJournalRecord(input);
   if (original.state.phase !== 'signed-in') throw new ScreenStorageError('changed');
   const {credential, session} = original.state, blank = deps.blank ?? assertBlankScreenProfile, now = deps.now ?? Date.now;
-  let disposed = false, pulling = false, delivering = false, local: Promise<unknown> = Promise.resolve();
+  let disposed = false, pulling = false, delivering = false, recovering=false, local: Promise<unknown> = Promise.resolve();
   const controller = new AbortController();
   const current = () => {if (disposed) throw new ScreenStorageError('changed');};
   const expected = {device: credential.device, session};
@@ -38,6 +39,17 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
     });
     local = saving;
     return saving;
+  }
+  async function recoverOriginal(original:KitchenTap,intent:KitchenCloseIntent|null=null){
+    await verify();
+    const outcome=await api.recoverKitchenTap(credential.device,session,retainedKitchenTap(original),intent,controller.signal);
+    await verify();
+    if(outcome.outcome==='pending')return read();
+    return edit(latest=>{
+      if(!latest)throw new ScreenStorageError('changed');
+      return outcome.receipt?finishKitchenTap(latest,original,outcome.receipt,newKitchenId()):
+        finishKitchenTapClose(latest,original,outcome.closure!,newKitchenId());
+    },outcome);
   }
   return {
     async load() {
@@ -90,7 +102,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
       if (!before) throw new DeviceScreenRequestError('review');
       const access = actor(before);
       if (access.expiresAt <= occurredAt || !access.permissions.includes(kind === 'kitchen.acknowledge' ? 'orders.acknowledge' : 'orders.ready')) throw new DeviceScreenRequestError('auth');
-      const pendingAck = before.taps.find(tap => !tap.review && sameKitchenSession(tap.access, access) && tap.action.type === 'kitchen.acknowledge' &&
+      const pendingAck = before.taps.find(tap => !tap.closure && (tap.receipt?.type==='kitchen.acknowledge'||!tap.review&&!tap.closeIntents?.length&&sameKitchenSession(tap.access, access)) && tap.action.type === 'kitchen.acknowledge' &&
         tap.action.orderId === orderId && tap.action.contentHash === source.contentHash);
       const parent = source.acknowledgement?.id ?? pendingAck?.action.id ?? null;
       if (kind === 'kitchen.ready' && (!source.priced || !parent || !kitchenReadyPath(source)?.length)) throw new DeviceScreenRequestError('review');
@@ -99,6 +111,39 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
         if (!latest || !sameKitchenSession(latest.access, access)) throw new ScreenStorageError('changed');
         return appendKitchenTap(latest, source, action, newKitchenId());
       });
+    },
+    async recoverTap(inputTap:KitchenTap){return recoverOriginal(structuredClone(inputTap));},
+    async closeTap(inputTap:KitchenTap){
+      // The retained source, reviewer and gesture time are captured before
+      // asynchronous profile work. Persist the request before any HTTP write.
+      const original=structuredClone(inputTap),occurredAt=now(),id=newKitchenId(occurredAt),before=await read();
+      if(!before)throw new DeviceScreenRequestError('review');
+      const access=actor(before);
+      if(access.expiresAt<=occurredAt||!access.permissions.includes(original.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready'))throw new DeviceScreenRequestError('auth');
+      const saved=await edit(latest=>{
+        if(!latest)throw new ScreenStorageError('changed');
+        return beginKitchenTapClose(latest,original,{id,access,occurredAt},newKitchenId());
+      });
+      return saved;
+    },
+    async recover(){
+      if(recovering)return;recovering=true;
+      try{
+        const state=await read();if(!state)return;
+        const access=actor(state);if(access.expiresAt<=now())throw new DeviceScreenRequestError('auth');
+        for(const tap of state.taps){
+          if(tap.receipt||tap.closure||sameKitchenSession(tap.access,access)&&!tap.review&&!tap.closeIntents?.length)continue;
+          const canClose=access.permissions.includes(tap.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready');
+          const intent=canClose?tap.closeIntents?.find(intent=>sameKitchenSession(intent.access,access))??null:null;
+          // A previous reviewer's missing reply is looked up, never sent as
+          // the newly signed-in member. A fresh close needs their own click.
+          try{await recoverOriginal(tap,intent);}
+          catch(error){
+            if(!(error instanceof DeviceScreenRequestError)||error.kind!=='review')throw error;
+            await edit(latest=>{if(!latest)throw new ScreenStorageError('changed');return finishKitchenTap(latest,tap,null,newKitchenId());});
+          }
+        }
+      }finally{recovering=false;}
     },
     async deliver() {
       if (delivering) return;
@@ -110,7 +155,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
           let access;
           try {access = actor(state);} catch {return;}
           if (access.expiresAt <= now()) throw new DeviceScreenRequestError('auth');
-          const next = state.taps.find(tap => !tap.receipt && !tap.review && sameKitchenSession(tap.access, access) &&
+          const next = state.taps.find(tap => !tap.receipt && !tap.review && !tap.closure && !tap.closeIntents?.length && sameKitchenSession(tap.access, access) &&
             (tap.action.type === 'kitchen.acknowledge' || tap.source.acknowledgement?.id === tap.action.parentAckId ||
               state.taps.some(parent => parent.action.id === tap.action.parentAckId && parent.receipt?.type === 'kitchen.acknowledge')));
           if (!next) return;

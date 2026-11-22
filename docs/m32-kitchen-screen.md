@@ -2,7 +2,7 @@
 
 The opt-in kitchen screen shows real preparation tickets on an enrolled second device. Got it and Ready are saved to native IndexedDB before delivery. Offline reload, a lost reply or a later staff sign-in retains the original ticket, tap IDs and staff session. A saved tap is labelled pending until the device receives its actual scoped receipt.
 
-`kitchenScreen` stays off by default. M32 remains unchecked: configurable Inbox alarms, desk push, expired-session tap review and final hosted acceptance remain open. GitHub workflows and Pages publication stay stopped at the owner's request. This note is an implementation record, not a new published-site announcement.
+`kitchenScreen` stays off by default. M32 remains unchecked: configurable Inbox alarms, desk push and final hosted acceptance remain open. [Saved preparation-tap recovery](m32-kitchen-tap-recovery.md) now adds explicit older-session receipt lookup and closure; its current verification is recorded separately. GitHub workflows and Pages publication stay stopped at the owner's request. This note records the earlier reader/relay delivery checkpoint, not a new published-site announcement.
 
 ## Ticket access and storage
 
@@ -42,4 +42,4 @@ The managed database now has 54 migrations and 75 application tables, all with f
 
 All 23 hosted transport checks pass, including a valid enrolled-device read, actual private Broadcast → deployed relay → scoped reread, closed stream metadata, live revocation and revoked-device denial. The isolated committed fixture creates no Auth accounts; cleanup verifies zero remaining shops, devices, orders, kitchen-feed rows or sync-history rows. Another 29 managed role checks pass with their fictional Auth/shop rows fully rolled back. These prove the deployed transport and authorization boundaries, not genuine phone-provider or physical-device acceptance. The two-second acceptance remains established by the complete local browser path; final hosted latency acceptance is still open.
 
-The [verification record](m32-kitchen-screen-verification.json) contains only source hashes, versions and closed check metadata. Actual project, organization, connection and credential values stay private. The existing preparation action backend is documented separately in `m32-kitchen-actions.md`; its action/receipt protocol is unchanged. M32 stays open and the flag stays off while alarms, push and expired-session recovery are completed.
+The [verification record](m32-kitchen-screen-verification.json) contains only source hashes, versions and closed check metadata for that reader/relay checkpoint. Actual project, organization, connection and credential values stay private. The existing preparation action backend is documented separately in `m32-kitchen-actions.md`; its action/receipt protocol is unchanged. M32 stays open and the flag stays off while alarms, push and final acceptance are completed.

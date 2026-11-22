@@ -85,6 +85,9 @@ verify_jwt = false
 [functions.kitchen-live]
 verify_jwt = false
 
+[functions.kitchen-recovery]
+verify_jwt = false
+
 # Own authentication: screen-owned secret, confirmed pairing and live PIN session.
 # Short pairing codes can request approval; they cannot enroll a screen alone.
 [functions.device-access]

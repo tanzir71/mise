@@ -5,6 +5,8 @@ import {createKitchenScreenSession} from '../apps/web/src/data/kitchen-screen-se
 import {appendKitchenTap,finishKitchenTap,kitchenScreenWire,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage} from '../packages/core/kitchen-screen';
 import {newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../packages/core/kitchen';
 import {kitchenScreenFixture} from './fixtures/kitchen-screen';
+import {beginKitchenTapClose,finishKitchenTapClose} from '../packages/core/kitchen-screen';
+import {parseKitchenTapRecovery,retainedKitchenTap,type KitchenTapClosure} from '../packages/core/kitchen-recovery';
 const base='/mise/app/',opened:ScreenJournal[]=[];
 afterEach(()=>{for(const journal of opened)journal.close();opened.length=0;vi.restoreAllMocks();});
 async function fixture(){const f=await kitchenScreenFixture(),factory=new IDBFactory(),journal=await openScreenJournal(base,factory);opened.push(journal);const record=await journal.replace(await journal.read(),f.screen);await journal.replaceKitchen(record,null,f.state);return {...f,factory,journal,record};}
@@ -98,4 +100,70 @@ it('refuses a duplicate offline tap and preserves literal preparation text witho
  const action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId());
  const parsed=await parseKitchenScreenState(kitchenScreenWire(queued));expect(parsed.taps[0].source.lines[0].note).toBe(note);expect(()=>appendKitchenTap(parsed,f.ticket,{...action,id:newKitchenId(),transitionEventIds:[newKitchenId(),newKitchenId(),newKitchenId()]},newKitchenId())).toThrow();
  await expect(parseKitchenScreenState({...kitchenScreenWire(queued),token:'PRIVATE'})).rejects.toThrow();
+});
+
+function closureFor(f:Awaited<ReturnType<typeof kitchenScreenFixture>>,tap:NonNullable<Awaited<ReturnType<ScreenJournal['readKitchen']>>>['taps'][number],id=newKitchenId()):KitchenTapClosure{
+ return {v:1,id,type:'kitchen.tap-closed',businessId:f.access.businessId,outletId:f.access.outletId,deviceId:f.access.deviceId,
+  originalSessionId:tap.access.sessionId,originalMemberId:tap.access.memberId,action:tap.action,sessionId:f.access.sessionId,memberId:f.access.memberId,occurredAt:f.now,closedAt:f.now};
+}
+it('keeps legacy cache bytes comparable and upgrades review fields only with an explicit close request',async()=>{
+ const f=await fixture(),screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});await screen.tap(f.ticket,'kitchen.acknowledge');
+ const before=(await f.journal.readKitchen(f.record))!,wire=kitchenScreenWire(before);expect(before.v).toBe(1);expect(await parseKitchenScreenState(wire)).toEqual(before);
+ const intent={id:newKitchenId(),access:f.access,occurredAt:f.now},next=beginKitchenTapClose(before,before.taps[0],intent,newKitchenId());
+ expect(next.v).toBe(2);await f.journal.replaceKitchen(f.record,before,next);const saved=(await f.journal.readKitchen(f.record))!;
+ expect(saved.taps[0].source).toEqual(before.taps[0].source);expect(saved.taps[0].closeIntents).toEqual([intent]);expect(saved.taps[0].closure).toBeNull();
+ expect(beginKitchenTapClose(saved,saved.taps[0],{...intent,id:newKitchenId(),occurredAt:f.now+1000},newKitchenId())).toBe(saved);screen.dispose();
+});
+it('a close request is journaled offline before HTTP and blocks a replacement until actual outcome proof',async()=>{
+ const f=await fixture(),send=vi.fn(async()=>{throw Error('Offline');}),screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now,send});
+ await screen.tap(f.ticket,'kitchen.acknowledge');const original=(await f.journal.readKitchen(f.record))!.taps[0];await screen.closeTap(original);
+ expect(send).not.toHaveBeenCalled();const closing=(await f.journal.readKitchen(f.record))!;expect(closing.taps[0].closeIntents).toHaveLength(1);expect(closing.taps[0].receipt).toBeNull();
+ await expect(screen.tap(f.ticket,'kitchen.acknowledge')).rejects.toThrow();
+ const closed=finishKitchenTapClose(closing,original,closureFor(f,original,closing.taps[0].closeIntents![0].id),newKitchenId());
+ expect(closed.taps[0].source).toEqual(original.source);expect(closed.taps[0].receipt).toBeNull();expect(closed.taps[0].closure).toBeTruthy();
+ expect(finishKitchenTapClose(closed,original,closed.taps[0].closure!,newKitchenId())).toBe(closed);
+ expect(()=>appendKitchenTap(closed,f.ticket,{...original.action,id:newKitchenId(),transitionEventIds:[newKitchenId(),newKitchenId(),newKitchenId()]},newKitchenId())).not.toThrow();screen.dispose();
+});
+it('quota failure leaves the original tap and no close request or HTTP write',async()=>{
+ const f=await fixture(),send=vi.fn(async()=>Response.json({})),screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now,send});await screen.tap(f.ticket,'kitchen.acknowledge');
+ const before=(await f.journal.readKitchen(f.record))!;vi.spyOn(IDBObjectStore.prototype,'put').mockImplementation(()=>{throw new DOMException('Full','QuotaExceededError');});
+ await expect(screen.closeTap(before.taps[0])).rejects.toMatchObject({kind:'unavailable'});vi.restoreAllMocks();expect(await f.journal.readKitchen(f.record)).toEqual(before);expect(send).not.toHaveBeenCalled();screen.dispose();
+});
+it('a lost close reply resumes the same stored review ID, actor and time after native reload',async()=>{
+ const f=await fixture(),bodies:Record<string,unknown>[]=[],screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});
+ await screen.tap(f.ticket,'kitchen.acknowledge');await screen.closeTap((await f.journal.readKitchen(f.record))!.taps[0]);screen.dispose();
+ const before=(await f.journal.readKitchen(f.record))!,original=before.taps[0],actual=closureFor(f,original,original.closeIntents![0].id);let lose=true;
+ const send:typeof fetch=async(url,init)=>{expect(String(url)).toBe('https://screen.test/functions/v1/kitchen-recovery');const body=JSON.parse(init!.body as string);bodies.push(body);if(lose){lose=false;throw Error('Lost reply');}return Response.json({v:1,access:f.access,at:f.now,original:retainedKitchenTap(original),outcome:'closed',receipt:null,closure:actual});};
+ const first=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now,send});await expect(first.recover()).rejects.toMatchObject({kind:'retry'});first.dispose();expect(await f.journal.readKitchen(f.record)).toEqual(before);
+ f.journal.close();const journal=await openScreenJournal(base,f.factory);opened.push(journal);const resumed=createKitchenScreenSession(journal,f.record,{blank:async()=>{},now:()=>f.now+1000,send});await resumed.recover();
+ expect(bodies).toHaveLength(2);expect(bodies[1]).toEqual(bodies[0]);expect((await journal.readKitchen(f.record))!.taps[0]).toMatchObject({receipt:null,closure:actual,source:original.source,closeIntents:original.closeIntents});resumed.dispose();
+});
+it('a fresh PIN recovers an actual older receipt with its original actor and sends no new preparation action',async()=>{
+ const f=await fixture(),first=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});await first.tap(f.ticket,'kitchen.acknowledge');first.dispose();
+ const saved=(await f.journal.readKitchen(f.record))!,original=saved.taps[0],later=f.session.expiresAt+1,nextSession={...f.session,id:newKitchenId(),memberId:newKitchenId(),token:'N'.repeat(43),createdAt:later,expiresAt:later+43200000};
+ if(f.screen.phase!=='signed-in')throw Error();const nextRecord=await f.journal.replace(f.record,{...f.screen,session:nextSession}),access={...f.access,sessionId:nextSession.id,memberId:nextSession.memberId,expiresAt:nextSession.expiresAt},calls:string[]=[];
+ const send:typeof fetch=async(url,init)=>{calls.push(String(url));const body=JSON.parse(init!.body as string);if(String(url).endsWith('/kitchen-tickets'))return Response.json(body.action==='page'?{...f.wire,access,at:later}:{v:1,access,at:later,outletName:f.page.outletName,warningMinutes:2,watermark:7,nextSeq:7,tickets:[],removed:[]});expect(body.action).toBe('lookup');return Response.json({v:1,access,at:later,original:retainedKitchenTap(original),outcome:'accepted',receipt:receipt(f,original.action),closure:null});};
+ const current=createKitchenScreenSession(f.journal,nextRecord,{blank:async()=>{},now:()=>later,send});expect(await current.load()).toBeNull();await current.pull();await current.recover();
+ const recovered=(await f.journal.readKitchen(nextRecord))!;expect(recovered.access.memberId).toBe(nextSession.memberId);expect(recovered.taps[0].receipt?.memberId).toBe(f.session.memberId);expect(recovered.taps[0].source).toEqual(original.source);expect(calls.some(url=>url.endsWith('/kitchen-actions'))).toBe(false);
+ await current.tap(recovered.tickets[0],'kitchen.ready');const ready=(await f.journal.readKitchen(nextRecord))!.taps[1];expect(ready.action.parentAckId).toBe(original.action.id);expect(ready.access.memberId).toBe(nextSession.memberId);current.dispose();
+});
+it('a different reviewing PIN only looks up an earlier close intent until that member explicitly chooses to close',async()=>{
+ const f=await fixture(),first=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});await first.tap(f.ticket,'kitchen.acknowledge');await first.closeTap((await f.journal.readKitchen(f.record))!.taps[0]);first.dispose();
+ const old=(await f.journal.readKitchen(f.record))!,nextSession={...f.session,id:newKitchenId(),memberId:newKitchenId(),token:'N'.repeat(43)};
+ if(f.screen.phase!=='signed-in')throw Error();const nextRecord=await f.journal.replace(f.record,{...f.screen,session:nextSession}),access={...f.access,sessionId:nextSession.id,memberId:nextSession.memberId};
+ const seen:string[]=[];const send:typeof fetch=async(url,init)=>{const body=JSON.parse(init!.body as string);if(String(url).endsWith('/kitchen-tickets'))return Response.json(body.action==='page'?{...f.wire,access}:{v:1,access,at:f.now,outletName:f.page.outletName,warningMinutes:2,watermark:7,nextSeq:7,tickets:[],removed:[]});seen.push(body.action);return Response.json({v:1,access,at:f.now,original:retainedKitchenTap(old.taps[0]),outcome:'pending',receipt:null,closure:null});};
+ const current=createKitchenScreenSession(f.journal,nextRecord,{blank:async()=>{},now:()=>f.now,send});await current.pull();await current.recover();expect(seen).toEqual(['lookup']);
+ const before=(await f.journal.readKitchen(nextRecord))!;expect(before.taps[0].closeIntents).toEqual(old.taps[0].closeIntents);await current.closeTap(before.taps[0]);
+ const after=(await f.journal.readKitchen(nextRecord))!;expect(after.taps[0].closeIntents).toHaveLength(2);expect(after.taps[0].closeIntents![0]).toEqual(old.taps[0].closeIntents![0]);expect(after.taps[0].closeIntents![1].access.memberId).toBe(nextSession.memberId);expect(after.taps[0].action).toEqual(old.taps[0].action);current.dispose();
+});
+it('actual acceptance arriving after a close request retains the receipt and never labels it closed',async()=>{
+ const f=await kitchenScreenFixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId()),original=queued.taps[0];
+ const closing=beginKitchenTapClose(queued,original,{id:newKitchenId(),access:f.access,occurredAt:f.now},newKitchenId());
+ const accepted=finishKitchenTap(closing,original,receipt(f,action),newKitchenId());expect(accepted.taps[0].receipt?.id).toBe(action.id);expect(accepted.taps[0].closure).toBeNull();expect(accepted.taps[0].closeIntents).toEqual(closing.taps[0].closeIntents);
+ expect(()=>finishKitchenTapClose(accepted,original,closureFor(f,original),newKitchenId())).toThrow();
+});
+it('recovery rejects forged outcomes and keeps arbitrary extra authority or data outside the response contract',async()=>{
+ const f=await kitchenScreenFixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),original={action,sessionId:f.session.id,memberId:f.session.memberId};
+ const pending={v:1,access:f.access,at:f.now,original,outcome:'pending',receipt:null,closure:null};expect(parseKitchenTapRecovery(pending,original).outcome).toBe('pending');
+ for(const patch of [{receipt:receipt(f,action)},{token:'PRIVATE'},{outcome:'accepted',receipt:{...receipt(f,action),memberId:newKitchenId()}},{original:{...original,action:{...action,occurredAt:action.occurredAt+1}}}])expect(()=>parseKitchenTapRecovery({...pending,...patch},original)).toThrow();
 });

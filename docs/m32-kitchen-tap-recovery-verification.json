@@ -1,0 +1,212 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T00:03:17.823Z",
+  "flag": {
+    "name": "kitchenScreen",
+    "default": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "unitFiles": 194,
+    "unitCases": 4004,
+    "pagesBrowserCases": 519,
+    "kitchenBrowserCases": 18,
+    "visualComparisons": 385,
+    "kitchenVisualComparisons": 20,
+    "reviewVisualComparisons": 5,
+    "horizontalOverflow": 0,
+    "kitchenAutomatedAccessibilityViolations": 0,
+    "rootAppBrowserCases": 26,
+    "nativeStorageCases": 7,
+    "rootBuild": true,
+    "pagesBuildRestored": true,
+    "visualGeneratedAt": "2026-11-21T23:59:31.727Z"
+  },
+  "hosted": {
+    "checkedAt": "2026-11-21T23:22:44.696Z",
+    "migrationVersion": "20261121231427",
+    "migrationBytes": 15424,
+    "migrationSha256": "559f68b7d00a56c332a113c29d7e3ebfb44d4f3a6ae526782684a3fd8773923c",
+    "migrations": 55,
+    "schema": {
+      "application_tables": 76,
+      "forced_rls_tables": 76,
+      "anonymous_public_table_grants": 0,
+      "public_definers": 0,
+      "public_buckets": 0,
+      "kitchen_client_rpc_grants": 0,
+      "service_can_call_recovery": true,
+      "service_direct_closure_access": false,
+      "recovery_public_invoker_volatile": true
+    },
+    "functions": 12,
+    "recoveryFunction": {
+      "name": "kitchen-recovery",
+      "version": 1,
+      "status": "ACTIVE",
+      "verifyJwt": false,
+      "bytes": 14385,
+      "sha256": "5491dca0bc79d36c49cc79751f1f837c035e777c62d820d7cce231309ac30e0d",
+      "sourceFiles": 8,
+      "sourceHashes": {
+        "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+        "packages/core/device-access.ts": "58c8c04fbdb55cbf6fdea1c436d4d85d2f1a708f8016823a2a7e98a0c114600a",
+        "packages/core/kitchen-recovery.ts": "562838fe1feaef8356b2ec999739d61d4b6e510ddc22f5087fcf0a9dd7828d2d",
+        "packages/core/kitchen.ts": "eab115577b05347c3ae2e53ef4865408530571fdf3847d8e0e97ef6cbf6334e7",
+        "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+        "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+        "supabase/functions/_shared/kitchen-recovery-handler.ts": "e3d4093abbc73ff3edd64e1bc5ab73a4b51c2ce9c9b425a7dc310ad4f3b0d2e9",
+        "supabase/functions/kitchen-recovery/index.ts": "6f9ef3ab904ee39821d6201d4c142212ba6f5b6b369845ea149073fa269118b7"
+      },
+      "runtimeImports": [],
+      "retrievedSourceMatches": true
+    },
+    "existingElevenFunctionsUnchanged": true,
+    "managedRoles": {
+      "checks": 29,
+      "remainingAuthRows": 0,
+      "remainingShopRows": 0
+    },
+    "cleanup": {
+      "remaining_shops": 0,
+      "remaining_devices": 0,
+      "remaining_orders": 0,
+      "remaining_closures": 0,
+      "remaining_receipts": 0,
+      "remaining_plans": 0,
+      "remaining_sessions": 0,
+      "remaining_pins": 0,
+      "remaining_events": 0,
+      "remaining_members": 0,
+      "remaining_feed": 0,
+      "remaining_sync": 0,
+      "remaining_pending": 0,
+      "remaining_scopes": 0
+    },
+    "advisors": {
+      "security": {
+        "INFO": 1
+      },
+      "performance": {
+        "INFO": 1
+      }
+    },
+    "phoneProviderCommissioned": false,
+    "physicalDeviceAcceptance": false,
+    "publicationHeld": true,
+    "http": {
+      "passed": 24,
+      "failed": 0,
+      "checks": [
+        {
+          "label": "actual-original-acceptance",
+          "ok": true
+        },
+        {
+          "label": "real-prepared-original-plan",
+          "ok": true
+        },
+        {
+          "label": "pending-lookup-has-no-receipt",
+          "ok": true
+        },
+        {
+          "label": "explicit-close-keeps-original-and-reviewer",
+          "ok": true
+        },
+        {
+          "label": "lost-close-reply-exact-retry",
+          "ok": true
+        },
+        {
+          "label": "readonly-lookup-recovers-real-closure",
+          "ok": true
+        },
+        {
+          "label": "late-prepared-finish-denied",
+          "ok": true
+        },
+        {
+          "label": "retired-action-cannot-prepare-again",
+          "ok": true
+        },
+        {
+          "label": "expired-original-pin-denied",
+          "ok": true
+        },
+        {
+          "label": "fresh-pin-recovers-actual-original-receipt",
+          "ok": true
+        },
+        {
+          "label": "close-after-acceptance-returns-original-receipt",
+          "ok": true
+        },
+        {
+          "label": "preflight",
+          "ok": true
+        },
+        {
+          "label": "method",
+          "ok": true
+        },
+        {
+          "label": "device-required",
+          "ok": true
+        },
+        {
+          "label": "unknown-pin",
+          "ok": true
+        },
+        {
+          "label": "foreign-origin",
+          "ok": true
+        },
+        {
+          "label": "json-required",
+          "ok": true
+        },
+        {
+          "label": "malformed",
+          "ok": true
+        },
+        {
+          "label": "oversized",
+          "ok": true
+        },
+        {
+          "label": "caller-authority-denied",
+          "ok": true
+        },
+        {
+          "label": "changed-original-denied",
+          "ok": true
+        },
+        {
+          "label": "changed-original-actor-denied",
+          "ok": true
+        },
+        {
+          "label": "caller-selected-reviewer-denied",
+          "ok": true
+        },
+        {
+          "label": "current-order-and-actual-acknowledgement-retained",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "remaining": [
+    "Configurable unacknowledged alarms",
+    "Authoritative Inbox tasks",
+    "Desk web push",
+    "Final hosted latency, real phone-provider and physical-device acceptance"
+  ],
+  "screenshots": [
+    "qa/screens/m32-kitchen-review-phone-390.png",
+    "qa/screens/m32-kitchen-review-tablet-1440.png",
+    "qa/screens/m32-kitchen-board-tablet-1440.png"
+  ]
+}

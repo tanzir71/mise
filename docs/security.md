@@ -1,11 +1,24 @@
 # Deployment credentials
 
+The [saved preparation-tap recovery endpoint](m32-kitchen-tap-recovery.md)
+checks both the enrolled device and current PIN while preserving earlier tap
+actors. Explicit closure removes matching prepared plans under the original
+action lock and records the actual reviewer without changing order or money.
+Its deployed source exactly matches the reviewed bundle; all eleven earlier
+functions retain their versions and JWT settings. The current 76 application
+tables force RLS, with no anonymous/PUBLIC table grants, public definers,
+public buckets or direct client kitchen RPC grants. Service credentials cannot
+read the closure table directly. All 24 hosted recovery checks and another
+29 rolled-back managed role checks pass. The committed synthetic device
+fixture creates no Auth accounts and is cleaned up completely. No real
+phone-provider or server-secret configuration changes were made.
+
 The [shared preparation screen](m32-kitchen-screen.md) uses an enrolled device
 and current PIN session for prep-only reads and a private realtime relay. The
 browser receives closed wake metadata; the service key stays in the upstream
 WebSocket upgrade header, outside URLs, frames, native ticket caches and
 portable backups. Both retrieved deployed modules exactly match the reviewed
-sources. All 75 application tables force RLS, with no anonymous/PUBLIC table
+sources. At that reader/relay checkpoint, all 75 application tables forced RLS, with no anonymous/PUBLIC table
 grants, public definers, public buckets or direct client kitchen RPC grants.
 All 23 hosted transport checks pass, including a real scoped read, private
 Broadcast delivery and live revocation. The committed synthetic fixture creates
@@ -20,7 +33,7 @@ enrolled device and current staff session, with no owner JWT or caller-supplied
 member authority. Final SQL admission rechecks the live device, PIN revision,
 member assignment and permissions before writing only preparation status.
 Staff receive a closed metadata receipt; private customer fields, money, source
-messages and credentials remain outside it. All 74 application tables force
+messages and credentials remain outside it. At that backend checkpoint, all 74 application tables forced
 RLS; anonymous/PUBLIC table grants, public definers, public buckets and direct
 client kitchen RPC grants remain absent. The exact deployed sources match the
 reviewed bundles. All 29 managed role checks roll fictional rows back, and 13

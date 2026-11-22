@@ -17,6 +17,8 @@ import {parseKitchenPage,parseKitchenChanges} from '../packages/core/kitchen-tic
 import {kitchenContentHash} from '../packages/core/kitchen';
 import type {SharedDevice,StaffDeviceSession} from '../packages/core/device-access';
 import {orderFixture, ORDER_AT} from './order-fixture';
+import {createKitchenRecoveryHandler,createKitchenRecoveryStore} from '../supabase/functions/_shared/kitchen-recovery-handler';
+import {parseKitchenTapRecovery,type RetainedKitchenTap} from '../packages/core/kitchen-recovery';
 
 type Sql = Pick<PGlite, 'query' | 'exec'>;
 type Device = SharedDevice & {token: string};
@@ -43,7 +45,7 @@ async function current(sql: Sql, shop: Shop) {
 function rpc(sql: Sql, hooks: {afterPrepare?: () => Promise<void>; afterFinish?: () => Promise<void>;afterRead?:()=>Promise<void>} = {}): typeof fetch {
   return async (url, options) => {
     const route = new URL(String(url)).pathname.split('/').at(-1);
-    if (!['prepare_kitchen_action', 'finish_kitchen_action','read_kitchen_page','read_kitchen_changes','read_kitchen_acknowledgements'].includes(route ?? '')) throw Error('Unexpected RPC');
+    if (!['prepare_kitchen_action', 'finish_kitchen_action','read_kitchen_page','read_kitchen_changes','read_kitchen_acknowledgements','recover_kitchen_tap'].includes(route ?? '')) throw Error('Unexpected RPC');
     expect(options).toMatchObject({method: 'POST', redirect: 'error', headers: {apikey: 'sb_secret_test_only'}});
     const body = JSON.parse(String(options?.body)) as Record<string, unknown>, keys = Object.keys(body), savepoint = 'request_' + ++requestNumber;
     if (keys.some(key => !/^p_[a-z_]+$/.test(key))) throw Error('Invalid RPC field');
@@ -72,6 +74,21 @@ function gateway(sql: Sql, hooks: Parameters<typeof rpc>[1] = {}) {
 }
 function ticketGateway(sql:Sql,hooks:Parameters<typeof rpc>[1]={}){
  return createKitchenTicketsHandler({origins:new Set([origin]),store:createKitchenTicketsStore('https://api.test','sb_secret_test_only',rpc(sql,hooks))});
+}
+function recoveryGateway(sql:Sql){return createKitchenRecoveryHandler({origins:new Set([origin]),store:createKitchenRecoveryStore('https://api.test','sb_secret_test_only',rpc(sql))});}
+function recoveryRequest(shop:Shop,original:RetainedKitchenTap,closeId:string|null=null,patch:Record<string,unknown>={}){
+ return new Request('https://api.test/functions/v1/kitchen-recovery',{method:'POST',headers:{origin,authorization:'Bearer '+shop.device.token,'Content-Type':'application/json'},
+  body:JSON.stringify({action:closeId?'close':'lookup',sessionToken:shop.session.token,original,...(closeId?{resolution:{id:closeId,sessionId:shop.session.id,memberId:shop.memberId,occurredAt:Date.now()}}:{}),...patch})});
+}
+async function nextKitchenStaff(sql:Sql,shop:Shop){
+ const memberId=newKitchenId(),pin=await createStaffPin('0042',{businessId:shop.businessId,memberId},new Uint8Array(32).fill(23));
+ await sql.query('insert into public.members(id,business_id,name,role,permissions,created_at,updated_at) values($1,$2,\'"Next shift"\',\'staff\',$3,1,1)',[memberId,shop.businessId,JSON.stringify({'orders.read':true,'orders.acknowledge':true,'orders.ready':true})]);
+ await sql.query('insert into public.member_outlets values($1,$2,$3)',[shop.businessId,memberId,shop.outletId]);
+ const uid=`00000000-0000-4000-8000-${String(shops.indexOf(shop)+1).padStart(12,'0')}`;
+ await role(sql,'authenticated',uid,'select public.set_staff_pin($1,$2,$3,$4,$5,$6)',[shop.outletId,memberId,newKitchenId(),pin.salt,pin.verifier,pin.pepperVersion]);
+ const attempt=(await role<{data:{attemptId:string}}>(sql,'service_role',null,'select public.begin_staff_pin($1,$2,$3) data',[newKitchenId(),shop.device.token,memberId]))[0].data;
+ const session=(await role<{data:Session}>(sql,'service_role',null,'select public.finish_staff_pin($1,$2,$3,$4,$5) data',[shop.device.token,attempt.attemptId,pin.verifier,newKitchenId(),newKitchenId()]))[0].data;
+ await sql.exec('reset role');return {...shop,memberId,session};
 }
 function ticketRequest(shop:Shop,input:Record<string,unknown>={action:'page'}){
  return new Request('https://api.test/functions/v1/kitchen-tickets',{method:'POST',headers:{origin,authorization:'Bearer '+shop.device.token,'Content-Type':'application/json'},body:JSON.stringify({sessionToken:shop.session.token,...input})});
@@ -335,4 +352,66 @@ it('holds a transaction fence for each changed outlet before its feed numbers ca
  await sql.query('update public.orders set updated_at=updated_at+1 where id=$1',[shops[0].order.id]);expect(await held(shops[0])).toBe(1);expect(await held(shops[1])).toBe(0);
  await gotIt(sql,shops[0]);expect(await held(shops[0])).toBe(1);
  await sql.query('update public.orders set updated_at=updated_at+1 where id=$1',[shops[1].order.id]);expect(await held(shops[1])).toBe(1);
+}));
+
+it('recovers a real lost original receipt with a different valid PIN session and preserves the original actor',async()=>rollback(async sql=>{
+ const shop=shops[0],done=await gotIt(sql,shop),next=await nextKitchenStaff(sql,shop);
+ await sql.query('update private.device_sessions set revoked_at=created_at where id=$1',[shop.session.id]);
+ const original={action:done.action,sessionId:shop.session.id,memberId:shop.memberId};
+ const response=await recoveryGateway(sql)(recoveryRequest(next,original));expect(response.status,lastRpcError).toBe(200);
+ const recovered=parseKitchenTapRecovery(await response.json(),original,{device:next.device,session:next.session});
+ expect(recovered.outcome).toBe('accepted');expect(recovered.receipt).toEqual(done.receipt);expect(recovered.receipt!.memberId).toBe(shop.memberId);
+ expect(recovered.access.memberId).toBe(next.memberId);expect(recovered.closure).toBeNull();
+}));
+it('lookup alone preserves a missing original action without retiring or acknowledging it',async()=>rollback(async sql=>{
+ const shop=shops[0],action=await prepareKitchenAction(await current(sql,shop),'kitchen.acknowledge'),next=await nextKitchenStaff(sql,shop),before=await current(sql,shop);
+ const original={action,sessionId:shop.session.id,memberId:shop.memberId},response=await recoveryGateway(sql)(recoveryRequest(next,original));
+ expect(response.status,lastRpcError).toBe(200);expect(parseKitchenTapRecovery(await response.json(),original).outcome).toBe('pending');
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_tap_closures')).rows[0].n).toBe(0);expect(await current(sql,shop)).toEqual(before);
+}));
+it('an explicit close removes every prepared plan and prevents both late finalization and a fresh original retry',async()=>rollback(async sql=>{
+ const shop=shops[0],action=await prepareKitchenAction(await current(sql,shop),'kitchen.acknowledge'),before=await current(sql,shop);
+ const ticketId=newKitchenId(),prepared=(await role<{data:unknown}>(sql,'service_role',null,'select public.prepare_kitchen_action($1,$2,$3,$4) data',[shop.device.token,shop.session.token,ticketId,JSON.stringify(action)]))[0].data;
+ const write=await replayKitchenPreparation(prepared,action,ticketId);await sql.exec('reset role');
+ const next=await nextKitchenStaff(sql,shop),original={action,sessionId:shop.session.id,memberId:shop.memberId},id=newKitchenId();
+ const response=await recoveryGateway(sql)(recoveryRequest(next,original,id));expect(response.status,lastRpcError).toBe(200);
+ const closed=parseKitchenTapRecovery(await response.json(),original);expect(closed.outcome).toBe('closed');expect(closed.closure).toMatchObject({id,originalMemberId:shop.memberId,memberId:next.memberId,action});
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_tickets where action->>\'id\'=$1',[action.id])).rows[0].n).toBe(0);
+ const late=await rpc(sql)('https://api.test/rest/v1/rpc/finish_kitchen_action',{method:'POST',redirect:'error',headers:{apikey:'sb_secret_test_only'},body:JSON.stringify({p_device_token:shop.device.token,p_session_token:shop.session.token,p_ticket_id:ticketId,p_token:write.token,p_steps:write.steps,p_receipt:write.receipt})});
+ expect(late.status).toBe(409);expect((await gateway(sql)(request(shop,action))).status).toBe(409);
+ expect(await current(sql,shop)).toEqual(before);expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts')).rows[0].n).toBe(0);
+ expect((await sql.query<{n:number}>("select count(*)::int n from public.events where command='kitchen.tap-close'")).rows[0].n).toBe(1);
+}));
+it('closing after a real acceptance returns that receipt and creates no closure or extra order event',async()=>rollback(async sql=>{
+ const shop=shops[0],done=await gotIt(sql,shop),next=await nextKitchenStaff(sql,shop),before=await current(sql,shop),original={action:done.action,sessionId:shop.session.id,memberId:shop.memberId};
+ const response=await recoveryGateway(sql)(recoveryRequest(next,original,newKitchenId()));expect(response.status,lastRpcError).toBe(200);
+ expect(parseKitchenTapRecovery(await response.json(),original).receipt).toEqual(done.receipt);expect(await current(sql,shop)).toEqual(before);
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_tap_closures')).rows[0].n).toBe(0);
+}));
+it('a lost close reply returns the original closure and reviewer without duplicate audits',async()=>rollback(async sql=>{
+ const shop=shops[0],action=await prepareKitchenAction(await current(sql,shop),'kitchen.acknowledge'),next=await nextKitchenStaff(sql,shop),original={action,sessionId:shop.session.id,memberId:shop.memberId};
+ const body=await (await recoveryGateway(sql)(recoveryRequest(next,original,newKitchenId()))).json();
+ const recovered=await (await recoveryGateway(sql)(recoveryRequest(shop,original))).json();expect(recovered.closure).toEqual(body.closure);
+ expect((await sql.query<{n:number}>("select count(*)::int n from public.events where command='kitchen.tap-close'")).rows[0].n).toBe(1);
+}));
+it('a different physical device or a changed original cannot recover or close another screen’s tap',async()=>rollback(async sql=>{
+ const shop=shops[0],done=await gotIt(sql,shop),original={action:done.action,sessionId:shop.session.id,memberId:shop.memberId};
+ const other={...shop,device:shop.counter,session:shop.counterSession};
+ expect((await recoveryGateway(sql)(recoveryRequest(other,original))).status).toBe(409);
+ expect((await recoveryGateway(sql)(recoveryRequest(shop,{...original,action:{...done.action,occurredAt:done.action.occurredAt+1}}))).status).toBe(409);
+}));
+it('a prepared plan on another device cannot be poisoned by a claimed offline intent on this one',async()=>rollback(async sql=>{
+ const shop=shops[0],action=await prepareKitchenAction(await current(sql,shop),'kitchen.acknowledge'),id=newKitchenId();
+ await role(sql,'service_role',null,'select public.prepare_kitchen_action($1,$2,$3,$4)',[shop.counter.token,shop.counterSession.token,id,JSON.stringify(action)]);await sql.exec('reset role');
+ const response=await recoveryGateway(sql)(recoveryRequest(shop,{action,sessionId:shop.session.id,memberId:shop.memberId},newKitchenId()));
+ expect(response.status).toBe(409);expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_tickets where id=$1',[id])).rows[0].n).toBe(1);
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_tap_closures')).rows[0].n).toBe(0);
+}));
+it('read permission can look up an original but closing requires current action permission and the original review actor',async()=>rollback(async sql=>{
+ const shop=shops[0],action=await prepareKitchenAction(await current(sql,shop),'kitchen.acknowledge'),next=await nextKitchenStaff(sql,shop),original={action,sessionId:shop.session.id,memberId:shop.memberId};
+ const id=newKitchenId(),wrong={id,sessionId:shop.session.id,memberId:shop.memberId,occurredAt:Date.now()};
+ expect((await recoveryGateway(sql)(recoveryRequest(next,original,id,{resolution:wrong}))).status).toBe(409);
+ await sql.query("update public.members set permissions=permissions||'{\"orders.acknowledge\":false}' where id=$1",[next.memberId]);
+ expect((await recoveryGateway(sql)(recoveryRequest(next,original))).status).toBe(200);
+ expect((await recoveryGateway(sql)(recoveryRequest(next,original,id))).status).toBe(401);
 }));

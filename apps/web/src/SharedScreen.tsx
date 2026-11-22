@@ -378,7 +378,7 @@ export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setup
     : enrolled
       ? 'Sign in on this screen'
       : 'Turn this device into a shared screen';
-  if(kitchenEnabled&&!blocked&&saved?.state.phase==='signed-in'&&runtime.current?.active)return <Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening kitchen tickets…</p></main>}><KitchenScreen key={saved.revision} journal={runtime.current.journal} source={saved} onSignOut={()=>void reset()}/></Suspense>;
+  if(kitchenEnabled&&!blocked&&saved?.state.phase==='signed-in'&&runtime.current?.active)return <Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening kitchen tickets…</p></main>}><KitchenScreen key={saved.revision} journal={runtime.current.journal} source={saved} onSignOut={()=>reset()}/></Suspense>;
   return (
     <main className="shared-screen">
       <a className="app-skip" href="#screen-main">

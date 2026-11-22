@@ -4,6 +4,7 @@ import {bindCommandReceipt} from './command-request';
 import {parseKitchenPage,parseKitchenChanges,type KitchenCursor} from '@mise/core/kitchen-tickets';
 import {parseKitchenAction,parseKitchenReceipt,type KitchenAction} from '@mise/core/kitchen';
 import type {StaffDeviceAccess} from '@mise/core/device-access';
+import {parseKitchenCloseIntent,parseKitchenTapRecovery,parseRetainedKitchenTap,type KitchenCloseIntent,type RetainedKitchenTap} from '@mise/core/kitchen-recovery';
 
 export class DeviceScreenRequestError extends Error {
  constructor(readonly kind:'auth'|'review'|'retry'|'backoff',readonly retryAt:number|null=null){
@@ -23,7 +24,7 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
  function checked<T extends object>(value:T):T{current();return bindCommandReceipt(value,current);}
  function pinned(value:SharedDevice){const d=parseSharedDevice(value);if(d.id!==requestId||d.revokedAt!==null)throw new DeviceScreenRequestError('review');return d;}
  function session(value:StaffDeviceSession,device:SharedDevice){return parseStaffDeviceSession(value,{deviceId:device.id,memberId:value.memberId});}
- async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
+ async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions'|'kitchen-recovery',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
   // Serialize before the first await, so form/selection mutations cannot alter
   // an already prepared request. No credential is ever added to the URL.
   const serialized=JSON.stringify(body),controller=new AbortController(),lifetime=signal?AbortSignal.any([controller.signal,signal]):controller.signal;
@@ -73,6 +74,17 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
   async kitchenAction(device:SharedDevice,input:StaffDeviceSession,access:StaffDeviceAccess,inputAction:KitchenAction,signal?:AbortSignal){
    const original=pinned(device),saved=session(input,original),actor=parseStaffDeviceAccess(access,{device:original,session:saved}),action=parseKitchenAction(inputAction);
    return checked(parseKitchenReceipt(await call('kitchen-actions',{sessionToken:saved.token,action},signal),{action,access:actor}));
+  },
+  async recoverKitchenTap(device:SharedDevice,input:StaffDeviceSession,inputOriginal:RetainedKitchenTap,inputResolution:KitchenCloseIntent|null=null,signal?:AbortSignal){
+   const originalDevice=pinned(device),saved=session(input,originalDevice),original=parseRetainedKitchenTap(inputOriginal);
+   let resolution;
+   if(inputResolution!==null){
+    const actor=parseStaffDeviceAccess(inputResolution.access,{device:originalDevice,session:saved});
+    const intent=parseKitchenCloseIntent(inputResolution,original.action,actor);
+    resolution={id:intent.id,sessionId:actor.sessionId,memberId:actor.memberId,occurredAt:intent.occurredAt};
+   }
+   const value=await call('kitchen-recovery',resolution?{action:'close',sessionToken:saved.token,original,resolution}:{action:'lookup',sessionToken:saved.token,original},signal);
+   return checked(parseKitchenTapRecovery(value,original,{device:originalDevice,session:saved}));
   },
   async request(code:string,pairingId:string|null,signal?:AbortSignal){
    const original={code:pairingCode(code),pairingId};if(pairingId!==null&&!isDeviceId(pairingId))throw new DeviceScreenRequestError('review');

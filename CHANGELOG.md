@@ -6,7 +6,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
-- An opt-in shared preparation screen caches actual tickets and journals Got it/Ready taps before delivery. A device-authenticated private realtime relay wakes scoped reads without sending service credentials, customer details or money to the screen. Original sources and PIN sessions remain bound across offline reload and retries. Alarm/push, expired-session review and final M32 acceptance remain open; `kitchenScreen` stays off by default and publication stays held.
+- Saved kitchen taps can be checked after a fresh staff PIN without changing the original actor or resending an earlier gesture. Explicit closure is journaled before delivery, recovers lost replies and prevents a late original request from preparing the order. Full original tickets remain available to copy; prices and payments stay unchanged. M32 alarms/push and final acceptance remain open, with the screen flag off and publication held.
+
+- An opt-in shared preparation screen caches actual tickets and journals Got it/Ready taps before delivery. A device-authenticated private realtime relay wakes scoped reads without sending service credentials, customer details or money to the screen. Original sources and PIN sessions remain bound across offline reload and retries. Alarm/push and final M32 acceptance remain open; `kitchenScreen` stays off by default and publication stays held.
 
 - Kitchen preparation has a device-scoped backend for Got it and Ready. Original tap identities, ticket content and acknowledgement parents survive retries; changed items require review, and prices, payments and customer details stay intact. Revoked devices, PIN sessions, assignments and permissions are checked again before a write. Full M32 acceptance remains unfinished; device access stays off by default.
 
