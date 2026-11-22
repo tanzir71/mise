@@ -14,6 +14,9 @@ export async function captureKitchenScreen(page,mode='board'){
  const config=mode==='queued'||mode==='review'||mode==='undone'?await visualService.prepare():await visualService.prepareBoard();
  await installKitchenUi(page);await page.evaluate(screen=>window.miseKitchenUiTest.initialize(screen),config.screen);await page.reload();
  await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();
+ if(mode==='cancelled'){
+  await visualService.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();
+ }
  if(mode==='offline'||mode==='queued'||mode==='review'){
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await page.context().setOffline(true);await expect(page.getByText('Offline · showing saved tickets',{exact:false})).toBeVisible();
  }

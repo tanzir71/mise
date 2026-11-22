@@ -12,6 +12,28 @@ async function enterNextPin(page:Page){
  await page.getByLabel('Four-digit PIN',{exact:true}).fill('0042');await page.getByRole('button',{name:'Sign in',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Kitchen',exact:true})).toBeVisible();await installKitchenUi(page);
 }
+
+test('Understood retains the cancellation through offline reload and confirms one original receipt after a lost reply',async({page,context})=>{
+ await initialize(page);await service.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();const before=await service.inspect();
+ await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);
+ await page.getByRole('button',{name:'Understood',exact:true}).click();await expect(page.getByText('Understood saved on this screen · waiting for confirmation',{exact:true})).toBeVisible();
+ const original=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0];expect(original.receipt).toBeNull();expect(original.source.status).toBe('cancelled');
+ await page.reload();await installKitchenUi(page);await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();expect((await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0]).toEqual(original);
+ service.loseNext();await context.setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();
+ await expect.poll(async()=>service.inspect()).toMatchObject({status:'cancelled',receipts:1,payment:before.payment,total:before.total});
+ await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);
+ const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0];expect(saved).toMatchObject({...original,receipt:original.id});expect(saved.source).toEqual(original.source);
+});
+
+test('a genuine older Understood cannot dismiss a new cancellation after an owner undo',async({page})=>{
+ await initialize(page);await service.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();const before=await service.inspect();
+ await page.getByRole('button',{name:'Understood',exact:true}).click();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);
+ const original=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0];expect(original.receipt).toBe(original.id);
+ await service.undoLastStatus();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await service.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeEnabled();
+ await page.getByRole('button',{name:'Understood',exact:true}).click();await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);
+ const taps=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;expect(taps).toHaveLength(2);expect(taps[0]).toEqual(original);expect(taps[1].receipt).toBe(taps[1].id);expect(taps[1].id).not.toBe(original.id);expect(taps[1].source.revision).toBeGreaterThan(original.source.revision);
+ expect(await service.inspect()).toMatchObject({status:'cancelled',receipts:2,payment:before.payment,total:before.total});
+});
 test('live outlet warning settings reach the actual screen and remain disabled after an offline reload',async({page,context})=>{
  await initialize(page);const before=await service.inspect();await service.ageOrder();
  await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toBeVisible();
@@ -74,7 +96,9 @@ test('earlier offline Got it and Ready require explicit review and closing them 
  await page.getByRole('button',{name:'Got it',exact:true}).click();await page.getByRole('button',{name:'Ready',exact:true}).click();
  await expect(page.getByText('2 saved taps need confirmation.',{exact:false})).toBeVisible();
  const originals=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps,before=await service.inspect();
- await page.getByRole('button',{name:'Sign out',exact:true}).click();await context.setOffline(false);await enterNextPin(page);
+ await page.getByRole('button',{name:'Sign out',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Finish the previous sign-out',exact:true})).toBeVisible();
+ await context.setOffline(false);await page.getByRole('button',{name:'Retry sign-out',exact:true}).click();await enterNextPin(page);
  await page.getByRole('button',{name:'Saved taps · 2',exact:true}).click();await expect(page.getByText('Earlier PIN session',{exact:false}).first()).toBeVisible();
  expect(await service.inspect()).toMatchObject({receipts:0,closures:0,actionCalls:0,status:before.status});
  const first=page.locator('.kitchen-review-item').filter({has:page.getByRole('heading',{name:'A-2041 · Got it',exact:true})});

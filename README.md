@@ -84,7 +84,7 @@ pnpm build
 pnpm preview
 ```
 
-The static build is written to `site/`. The default base path is `/`; set `BASE_PATH=/mise/` when building for this GitHub Pages repository. Configuration is documented in [.env.example](.env.example). For your own deployment, see the [self-hosting guide](docs/deploy-own-vercel.md).
+The static build is written to `site/`. The default base path is `/`; set `BASE_PATH=/mise/` when building for this GitHub Pages repository. Configuration is documented in [.env.example](.env.example). For your own deployment, see the [self-hosting guide](docs/deploy-own-vercel.md). Each installation configures its own backend, SMS and other services using the [service setup guide](docs/configure-services.md); privileged credentials stay in its backend.
 
 Keep deployment values in ignored environment/private files or the server's secret manager. Only blank templates belong in Git. Run `pnpm security:install-hooks` once per clone to enable local commit and push protection. Commits scan source and staged files; pushes also scan reachable history and built output. Lint and production builds run the same redacting secret guard. For a full manual audit, run `pnpm check:secrets --history --artifacts`. See the [credential handling and audit notes](docs/security.md).
 

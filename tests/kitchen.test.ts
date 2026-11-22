@@ -14,7 +14,7 @@ function fixture(pack: BusinessType = 'restaurant', status?: OrderStatus) {
     ? saveOrderCommand({...base.input, type: 'delivery', address: 'Door 8'}, base.context, null, 0, ORDER_AT).order : base.order;
   for (let i = 0; status && order.status !== status && i < 12; i++) {
     const choices = nextOrderStatuses(order);
-    const next = choices.includes(status) ? status : status === 'returned' && choices.includes('returning') ? 'returning' : choices[0];
+    const next = status === 'cancelled' ? status : choices.includes(status) ? status : status === 'returned' && choices.includes('returning') ? 'returning' : choices[0];
     if (!next) throw Error('Fixture status is unreachable');
     order = changeOrderStatusCommand(order, next, setup, order.revision, ORDER_AT + 1000 + i).order;
   }
@@ -42,6 +42,16 @@ it.each<BusinessType>(['restaurant', 'online_shop', 'food_stall', 'corner_shop']
   expect(result.events.at(-1)?.command).toBe('kitchen.acknowledge');
   expect(result.events.every(event => event.actor.id === f.access.memberId)).toBe(true);
   expect(f.order).toEqual(original);
+});
+
+it.each<BusinessType>(['restaurant','online_shop','food_stall','corner_shop'])('%s Understood acknowledges the original cancellation without a preparation or financial change',async pack=>{
+ const f=fixture(pack,'cancelled'),before=structuredClone(f.order),tap=await action(before);
+ const result=await applyKitchenAction({...f,action:tap,admittedAt:now,acknowledgement:null});
+ expect(result.order).toEqual(before);expect(result.receipt.status).toBe('cancelled');expect(result.receipt.transitionEventIds).toEqual([]);
+ expect(result.events).toHaveLength(1);expect(result.events[0].command).toBe('kitchen.acknowledge');
+ const metadata={...before,revision:before.revision+2};
+ expect((await applyKitchenAction({...f,order:metadata,action:tap,admittedAt:now,acknowledgement:null})).order).toEqual(metadata);
+ await expect(applyKitchenAction({...f,action:await action(before,'kitchen.ready',result.receipt.id),admittedAt:now,acknowledgement:result.receipt})).rejects.toBeInstanceOf(KitchenActionConflict);
 });
 
 it.each<[BusinessType, OrderStatus, OrderStatus, OrderStatus]>([

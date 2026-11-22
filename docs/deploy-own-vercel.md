@@ -22,6 +22,7 @@ You are deploying the Mise web app (landing page + app) from the owner's GitHub 
    - `PUBLIC_WHATSAPP_URL` (optional, the shop's `wa.me` link) or `PUBLIC_DEMO_URL`
    - `PUBLIC_GEO_URL` (optional country lookup for the landing page)
    - Supabase connection settings are entered on each device at runtime when cloud sync is available. Do not put actual Supabase URLs or API keys in public build variables. Keep server API keys, PIN peppers and cursor signing keys in the backend secret manager.
+   - The installation owner configures optional services using [the service setup guide](configure-services.md). Use their backend and provider accounts; never request personal credentials or a verification phone from the upstream Mise maintainer.
 7. **Deploy.** Run `vercel deploy --prod`. Open the URL and check `/`, `/app/` and `/setup/`. From M10, the local app includes shop setup, settings and navigation. Complete setup, then reload `/app/` offline to confirm its shell cache. Counter, orders and stock follow in their milestones; installation and storage-persistence polish is M18.
 8. **Connect Git for automatic updates** (recommended): `vercel git connect`, or in the Vercel dashboard → Project → Git. Every push to the fork's `main` then redeploys.
 9. **Custom domain** (optional): `vercel domains add <domain>`, then show the DNS records the owner must add at their registrar.

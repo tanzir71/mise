@@ -2,12 +2,33 @@ import {afterEach,expect,it,vi} from 'vitest';
 import {IDBFactory,IDBObjectStore} from 'fake-indexeddb';
 import {openScreenJournal,screenJournalDatabaseName,type ScreenJournal} from '../apps/web/src/data/device-screen-journal';
 import {createKitchenScreenSession} from '../apps/web/src/data/kitchen-screen-session';
-import {appendKitchenTap,finishKitchenTap,kitchenScreenWire,kitchenTapAcknowledges,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage} from '../packages/core/kitchen-screen';
-import {newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../packages/core/kitchen';
+import {appendKitchenTap,finishKitchenTap,kitchenCancellationAcknowledged,kitchenScreenWire,kitchenTapAcknowledges,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage} from '../packages/core/kitchen-screen';
+import {kitchenContentHash,newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../packages/core/kitchen';
 import {kitchenScreenFixture} from './fixtures/kitchen-screen';
 import {beginKitchenTapClose,finishKitchenTapClose} from '../packages/core/kitchen-screen';
 import {parseKitchenTapRecovery,retainedKitchenTap,type KitchenTapClosure} from '../packages/core/kitchen-recovery';
 const base='/mise/app/',opened:ScreenJournal[]=[];
+
+it('keeps an offline cancellation visible until an actual version-bound Understood receipt, retaining the original through reload',async()=>{
+ const f=await fixture(),ticket={...f.ticket,status:'cancelled' as const,acknowledgement:null,contentHash:''};ticket.contentHash=await kitchenContentHash(ticket);
+ const state={...f.state,tickets:[ticket]},action=await prepareKitchenAction(ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(state,ticket,action,newKitchenId());
+ expect(kitchenCancellationAcknowledged(queued,ticket)).toBe(false);
+ await f.journal.replaceKitchen(f.record,f.state,queued);f.journal.close();
+ const reopened=await openScreenJournal(base,f.factory);opened.push(reopened);const saved=(await reopened.readKitchen(f.record))!;
+ expect(saved.taps[0].action).toEqual(action);expect(saved.taps[0].source).toEqual(ticket);expect(kitchenCancellationAcknowledged(saved,ticket)).toBe(false);
+ const actual={...receipt(f,action),revision:action.revision,status:'cancelled' as const,transitionEventIds:[]},done=finishKitchenTap(saved,saved.taps[0],actual,newKitchenId());
+ expect(kitchenCancellationAcknowledged(done,ticket)).toBe(true);expect(done.taps[0].source).toEqual(ticket);
+ const later={...ticket,revision:ticket.revision+2};expect(kitchenCancellationAcknowledged(done,later)).toBe(false);expect(kitchenTapAcknowledges(done,later,done.taps[0])).toBe(false);
+ const confirmed={...later,acknowledgement:actual};expect(kitchenCancellationAcknowledged(done,confirmed)).toBe(true);expect(kitchenTapAcknowledges(done,confirmed,done.taps[0])).toBe(true);
+});
+
+it('retains an older unconfirmed Understood while permitting an explicit tap for a later cancellation version',async()=>{
+ const f=await fixture(),ticket={...f.ticket,status:'cancelled' as const,acknowledgement:null,contentHash:''};ticket.contentHash=await kitchenContentHash(ticket);
+ const state={...f.state,tickets:[ticket]},original=await prepareKitchenAction(ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(state,ticket,original,newKitchenId());
+ const later={...ticket,revision:ticket.revision+2},updated=receiveKitchenChanges(queued,{...f.page,tickets:[later],watermark:9,nextSeq:9,removed:[]},newKitchenId());
+ const fresh=await prepareKitchenAction(later,'kitchen.acknowledge',null,f.now),next=appendKitchenTap(updated,later,fresh,newKitchenId());
+ expect(next.taps).toHaveLength(2);expect(next.taps[0]).toEqual(queued.taps[0]);expect(next.taps[1].source).toEqual(later);expect(kitchenCancellationAcknowledged(next,later)).toBe(false);
+});
 afterEach(()=>{for(const journal of opened)journal.close();opened.length=0;vi.restoreAllMocks();});
 async function fixture(){const f=await kitchenScreenFixture(),factory=new IDBFactory(),journal=await openScreenJournal(base,factory);opened.push(journal);const record=await journal.replace(await journal.read(),f.screen);await journal.replaceKitchen(record,null,f.state);return {...f,factory,journal,record};}
 it('retains a disabled outlet warning through an actual native cache close and reopen',async()=>{

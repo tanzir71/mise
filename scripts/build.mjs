@@ -12,6 +12,7 @@ mkdirSync('site/downloads', { recursive: true });
 if (existsSync('downloads')) cpSync('downloads', 'site/downloads', { recursive: true });
 mkdirSync('site/docs', { recursive: true });
 cpSync('docs/deploy-own-vercel.md', 'site/docs/deploy-own-vercel.md');
+cpSync('docs/configure-services.md', 'site/docs/configure-services.md');
 writeFileSync('site/.nojekyll', '');
 cpSync('site/app/index.html', 'site/404.html');
 hardenSite('site');

@@ -128,6 +128,12 @@ export async function startKitchenUiService(){
    const result=undoOrderStatusCommand(order,event,setup,order.revision),record=encodeCommandRecord('orders',result.order,deviceId(1)),audit=encodeCommandRecord('events',result.event,deviceId(1));
    await f.db.transaction(async tx=>{const keys=Object.keys(audit.values);await tx.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));const changes=Object.entries(record.values).filter(([key])=>key!=='id');await tx.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),order.id]);});
   },
+  async cancelFromDesk(){
+   const raw=(await f.db.query<Record<string,unknown>>('select * from public.orders where id=$1',[orderId])).rows[0],order=decodeCommandRecord('orders',raw) as unknown as Order;
+   const seed=orderFixture('corner_shop').context.setup,setup={business:{...seed.business,id:deviceId(1)},outlet:{...seed.outlet,id:deviceId(11),businessId:deviceId(1)},owner:{...seed.owner,id:deviceId(101),businessId:deviceId(1),outletIds:[deviceId(11)]}};
+   const result=changeOrderStatusCommand(order,'cancelled',setup,order.revision),record=encodeCommandRecord('orders',result.order,deviceId(1)),audit=encodeCommandRecord('events',result.event,deviceId(1));
+   await f.db.transaction(async tx=>{const keys=Object.keys(audit.values);await tx.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));const changes=Object.entries(record.values).filter(([key])=>key!=='id');await tx.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),order.id]);});
+  },
   addOrder,
   async ageOrder(){await f.db.query('update public.orders set created_at=$1 where id=$2',[Date.now()-180000,orderId]);},
   async setAlarmSettings(enabled:boolean,minutes:number){

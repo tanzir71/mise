@@ -7,10 +7,10 @@ import {createStaffPin} from '../supabase/functions/_shared/staff-pin';
 import {newInboxId} from '../packages/core/inbox';
 import {deviceSecretHash,newDeviceSecret,parseDevicePairing,parsePairingRequest,parseSharedDevice,type DeviceMode} from '../packages/core/device-access';
 export const deviceId=(n:number)=>String(n).padStart(26,'0'),deviceUid=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
-export async function createPairingDatabase(root?:string,withCrypto=false){
+export async function createPairingDatabase(root?:string,withCrypto=false,beforeMigration?:string){
  const fixtureRoot=root?pathToFileURL(resolve(root,'tests')+'/'):new URL('./',import.meta.url);
  const db=await PGlite.create(withCrypto?{extensions:{pgcrypto}}:{});if(withCrypto)await db.exec('create schema extensions;create extension pgcrypto with schema extensions');for(const name of ['supabase-auth.sql','supabase-storage.sql'])await db.exec(readFileSync(new URL('./fixtures/'+name,fixtureRoot),'utf8'));
- const directory=root?pathToFileURL(resolve(root,'supabase/migrations')+'/'):new URL('../supabase/migrations/',import.meta.url);for(const name of readdirSync(directory).filter(name=>name.endsWith('.sql')).sort())await db.exec(readFileSync(new URL(name,directory),'utf8'));
+ const directory=root?pathToFileURL(resolve(root,'supabase/migrations')+'/'):new URL('../supabase/migrations/',import.meta.url);for(const name of readdirSync(directory).filter(name=>name.endsWith('.sql')&&(!beforeMigration||name<beforeMigration)).sort())await db.exec(readFileSync(new URL(name,directory),'utf8'));
  const pepper=new Uint8Array(32).fill(19),credentials=await Promise.all([104,105].map(n=>createStaffPin('0042',{businessId:deviceId(1),memberId:deviceId(n)},pepper)));
  async function asRole<T=unknown>(n:number|null,role:'anon'|'authenticated'|'service_role',query:string,args:unknown[]=[]):Promise<T>{return db.transaction(async tx=>{await tx.exec('set local role '+role);await tx.query("select set_config('request.jwt.claims',$1,true)",[JSON.stringify({role,...(n===null?{}:{sub:deviceUid(n)}),user_metadata:{role:'owner'}})]);return (await tx.query<{data:T}>(query,args)).rows[0]?.data;});}
  async function seed(){

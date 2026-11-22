@@ -125,7 +125,8 @@ export function appendKitchenTap(state: KitchenScreenState, source: KitchenTicke
       action.revision !== source.revision || action.contentHash !== source.contentHash || action.orderId !== source.id || action.outletId !== source.outletId ||
       state.taps.some(tap=>!tap.receipt&&!tap.closure&&tap.closeIntents?.length&&tap.action.orderId===action.orderId)||
       state.taps.some(tap => tap.action.id === action.id || !tap.receipt && !tap.review && !tap.closure && !tap.closeIntents?.length && sameKitchenSession(tap.access, state.access) &&
-        tap.action.orderId === action.orderId && tap.action.contentHash === action.contentHash && tap.action.type === action.type)) throw invalid();
+        tap.action.orderId === action.orderId && tap.action.contentHash === action.contentHash && tap.action.type === action.type &&
+        (source.status!=='cancelled'||tap.action.revision===action.revision))) throw invalid();
   return {...state, revision, nextPosition: state.nextPosition + 1, taps: [...state.taps, {position: state.nextPosition, access: state.access,
     observedAt: state.at, source: structuredClone(source), action: parseKitchenAction(action), receipt: null, review: false,
     ...(state.v===2?{closeIntents:[],closure:null}:{})}]};
@@ -136,6 +137,14 @@ export function kitchenTapAcknowledges(state:KitchenScreenState,ticket:KitchenTi
   if(tap.closure||tap.action.type!=='kitchen.acknowledge'||tap.action.orderId!==ticket.id||tap.action.contentHash!==ticket.contentHash)return false;
   if(tap.receipt)return tap.receipt.type==='kitchen.acknowledge'&&(tap.receipt.revision>=ticket.revision||ticket.acknowledgement?.id===tap.receipt.id);
   return !tap.review&&!tap.closeIntents?.length&&sameKitchenSession(tap.access,state.access)&&tap.action.revision>=ticket.revision;
+}
+/** A saved offline gesture is retained, but only an actual current receipt may
+ * dismiss a cancellation notice. An older cancellation never dismisses a new one. */
+export function kitchenCancellationAcknowledged(state:KitchenScreenState,ticket:KitchenTicket):boolean {
+  if(ticket.status!=='cancelled')return false;
+  const ack=ticket.acknowledgement;
+  return Boolean(ack?.type==='kitchen.acknowledge'&&ack.status==='cancelled')||
+    state.taps.some(tap=>Boolean(tap.receipt)&&kitchenTapAcknowledges(state,ticket,tap));
 }
 function sameTapSource(a:KitchenTap,b:KitchenTap){
   const source=(tap:KitchenTap)=>({position:tap.position,access:tap.access,observedAt:tap.observedAt,source:kitchenTicketWire(tap.source),action:parseKitchenAction(tap.action)});

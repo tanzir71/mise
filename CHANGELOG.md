@@ -6,6 +6,10 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- Each installation configures its own backend, phone provider and other optional services. Cloud setup links to a configuration guide included in the site build; privileged credentials stay in the installation backend. Blank server templates and provider readiness checks keep unconfigured services off while local work remains available.
+
+- In progress: preparation screens load current tickets without paging through completed history. Cancelled orders retain the design's outlined Understood control until a real acknowledgement; offline taps, lost replies and undo/re-cancel preserve their original sources and receipts. M32 remains open and its flags stay off.
+
 - In progress: one coordinated kitchen scheduler inspects due orders and starts eligible desk notifications without a second polling delay. Idle ticks enqueue no HTTP request. Private Vault references and a fixed Cron command keep runtime configuration out of job metadata; expiring, single-use signed requests keep reusable keys out of the platform queue. Failed inspections retain their original work with bounded retries, and fresh work can proceed independently. The managed scheduler passes isolated timing and recovery checks and is disabled afterward; real provider/device acceptance and full M32 delivery remain open.
 
 - In progress: opt-in desk notification controls connect complete kitchen warnings to Inbox and the red order-queue indicator. Enable preserves the explicit browser gesture; offline Disable and earlier-setup cleanup retain original requests through reload and lost replies. Generic service-worker notices check the actual native desk and current browser capability before opening this installation’s Inbox. Share capture stays independently gated. Scheduling, provider/device commissioning and full M32 acceptance remain open; publication stays held.

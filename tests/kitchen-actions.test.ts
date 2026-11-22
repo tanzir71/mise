@@ -99,6 +99,15 @@ async function nextKitchenStaff(sql:Sql,shop:Shop){
  const session=(await role<{data:Session}>(sql,'service_role',null,'select public.finish_staff_pin($1,$2,$3,$4,$5) data',[shop.device.token,attempt.attemptId,pin.verifier,newKitchenId(),newKitchenId()]))[0].data;
  await sql.exec('reset role');return {...shop,memberId,session};
 }
+async function cancelForScreen(sql:Sql,shop:Shop){
+ const order=await current(sql,shop),seed=orderFixture(order.businessType).context.setup;
+ const setup={business:{...seed.business,id:shop.businessId},outlet:{...seed.outlet,id:shop.outletId,businessId:shop.businessId},owner:{...seed.owner,id:order.createdBy,businessId:shop.businessId,outletIds:[shop.outletId]}};
+ const result=changeOrderStatusCommand(order,'cancelled',setup,order.revision,Math.max(Date.now(),order.updatedAt,order.statusChangedAt));
+ const record=encodeCommandRecord('orders',result.order,shop.businessId),audit=encodeCommandRecord('events',result.event,shop.businessId),keys=Object.keys(audit.values);
+ await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));
+ const changes=Object.entries(record.values).filter(([key])=>key!=='id');await sql.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),order.id]);
+ return result.order;
+}
 function ticketRequest(shop:Shop,input:Record<string,unknown>={action:'page'}){
  return new Request('https://api.test/functions/v1/kitchen-tickets',{method:'POST',headers:{origin,authorization:'Bearer '+shop.device.token,'Content-Type':'application/json'},body:JSON.stringify({sessionToken:shop.session.token,...input})});
 }
@@ -161,6 +170,63 @@ beforeAll(async () => {
   }
 }, 30000);
 afterAll(async () => {await db?.close();});
+
+it.each([0,1,2,3])('pack %s keeps the cancellation until actual Understood, removes only current work and preserves the original feed and money',async index=>rollback(async sql=>{
+ const shop=shops[index],cancelled=await cancelForScreen(sql,shop),handler=ticketGateway(sql);
+ const page=await parseKitchenPage(await(await handler(ticketRequest(shop))).json(),shop);
+ expect(page.tickets.map(ticket=>ticket.id)).toContain(cancelled.id);expect(page.tickets[0].status).toBe('cancelled');
+ const seen=await gotIt(sql,shop);expect(seen.receipt).toMatchObject({status:'cancelled',sourceRevision:cancelled.revision,revision:cancelled.revision,transitionEventIds:[]});
+ expect(await current(sql,shop)).toEqual(cancelled);
+ expect(await(await gateway(sql)(request(shop,seen.action))).json()).toEqual(seen.receipt);
+ const refreshed=await parseKitchenPage(await(await handler(ticketRequest(shop))).json(),shop);expect(refreshed.tickets).toEqual([]);
+ const changes=await parseKitchenChanges(await(await handler(ticketRequest(shop,{action:'changes',afterSeq:page.watermark}))).json(),shop,page.watermark);
+ expect(changes.tickets[0].status).toBe('cancelled');expect(changes.tickets[0].acknowledgement?.id).toBe(seen.receipt.id);expect(changes.removed).toEqual([]);
+ await sql.exec('reset role');expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_cancellation_work where order_id=$1',[cancelled.id])).rows[0].n).toBe(0);
+}));
+
+it('an accepted earlier Understood remains history and cannot dismiss a later undo-and-recancel notice',async()=>rollback(async sql=>{
+ const shop=shops[0];const original=await cancelForScreen(sql,shop),unaccepted=await prepareKitchenAction(original,'kitchen.acknowledge'),earlier=await gotIt(sql,shop);
+ await undoLastStatus(sql,shop);const later=await cancelForScreen(sql,shop);
+ const page=await parseKitchenPage(await(await ticketGateway(sql)(ticketRequest(shop))).json(),shop);
+ expect(page.tickets[0].revision).toBe(later.revision);expect(page.tickets[0].acknowledgement).toBeNull();
+ expect(await(await gateway(sql)(request(shop,earlier.action))).json()).toEqual(earlier.receipt);expect(await current(sql,shop)).toEqual(later);
+ expect((await gateway(sql)(request(shop,unaccepted))).status).toBe(409);expect(await current(sql,shop)).toEqual(later);
+ const fresh=await gotIt(sql,shop);expect(fresh.receipt.id).not.toBe(earlier.receipt.id);expect(await current(sql,shop)).toEqual(later);
+}));
+
+it.each(['anon','authenticated','service_role'] as const)('%s cannot read or modify the private cancellation projection or invoke its trigger helpers',async selected=>rollback(async sql=>{
+ const shop=shops[0];await cancelForScreen(sql,shop);
+ for(const query of ['select * from private.kitchen_cancellation_work','delete from private.kitchen_cancellation_work',
+  'select private.note_kitchen_cancellation_order()','select private.note_kitchen_cancellation_receipt()',
+  "select private.kitchen_ack_active(null,null,null,'{}')"]){
+  await sql.exec('savepoint private_denial');
+  await expect(role(sql,selected,null,query)).rejects.toMatchObject({code:'42501'});
+  await sql.exec('rollback to savepoint private_denial; release savepoint private_denial');
+ }
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_cancellation_work where order_id=$1',[shop.order.id])).rows[0].n).toBe(1);
+}));
+
+it('a cancellation acknowledged between bounded pages does not hide the next active order, and a reopened order returns through the original feed',async()=>rollback(async sql=>{
+ const shop=shops[0],seed=orderFixture('restaurant'),setup={business:{...seed.context.setup.business,id:shop.businessId},outlet:{...seed.context.setup.outlet,id:shop.outletId,businessId:shop.businessId},owner:{...seed.context.setup.owner,id:shop.order.createdBy,businessId:shop.businessId,outletIds:[shop.outletId]}};
+ const made=saveOrderCommand(seed.input,{...seed.context,setup,sequence:2042},null,0,shop.order.createdAt+1);
+ for(const record of [encodeCommandRecord('events',made.event,shop.businessId),encodeCommandRecord('orders',made.order,shop.businessId)]){const keys=Object.keys(record.values);await sql.query(`insert into public.${record.table}(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(record.values));}
+ await cancelForScreen(sql,shop);const handler=ticketGateway(sql),first=await parseKitchenPage(await(await handler(ticketRequest(shop,{action:'page',limit:1}))).json(),shop,null,1);
+ expect(first.tickets.map(ticket=>ticket.id)).toEqual([shop.order.id]);expect(first.next).not.toBeNull();await gotIt(sql,shop);
+ const next=await parseKitchenPage(await(await handler(ticketRequest(shop,{action:'page',after:first.next,limit:1}))).json(),shop,first.next,1);expect(next.tickets.map(ticket=>ticket.id)).toEqual([made.order.id]);expect(next.next).toBeNull();
+ await undoLastStatus(sql,shop);const changed=await parseKitchenChanges(await(await handler(ticketRequest(shop,{action:'changes',afterSeq:first.watermark}))).json(),shop,first.watermark);expect(changed.tickets.some(ticket=>ticket.id===shop.order.id&&ticket.status!=='cancelled')).toBe(true);
+}));
+
+it('retains the real cancellation acknowledgement across non-preparation revisions, including a previously saved source',async()=>rollback(async sql=>{
+ const shop=shops[0],cancelled=await cancelForScreen(sql,shop),original=await prepareKitchenAction(cancelled,'kitchen.acknowledge');
+ await sql.query('update public.orders set revision=revision+1,updated_at=updated_at+1 where id=$1',[cancelled.id]);
+ const before=await current(sql,shop),response=await gateway(sql)(request(shop,original));expect(response.status,lastRpcError).toBe(200);
+ const actual=await response.json() as KitchenReceipt;expect(actual.sourceRevision).toBe(cancelled.revision);expect(actual.revision).toBe(before.revision);expect(await current(sql,shop)).toEqual(before);
+ await sql.query('update public.orders set revision=revision+1,updated_at=updated_at+1 where id=$1',[cancelled.id]);
+ const page=await parseKitchenPage(await(await ticketGateway(sql)(ticketRequest(shop))).json(),shop);expect(page.tickets).toEqual([]);
+ const hint=await sql.query<{data:unknown}>('select public.read_kitchen_acknowledgements($1,$2,$3) data',[shop.device.token,shop.session.token,JSON.stringify([{orderId:before.id,contentHash:original.contentHash,revision:before.revision+1}])]);
+ expect((hint.rows[0].data as {entries:{receipt:KitchenReceipt}[]}).entries[0].receipt).toEqual(actual);
+ await sql.exec('reset role');expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_cancellation_work where order_id=$1',[cancelled.id])).rows[0].n).toBe(0);
+}));
 
 it.each([0,1,2,3])('commits Got it then Ready over real scoped HTTP/SQL for pack %s without changing money', async index => rollback(async sql => {
   const shop = shops[index], original = await current(sql, shop), {receipt} = await gotIt(sql, shop);

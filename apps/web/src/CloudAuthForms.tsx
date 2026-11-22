@@ -4,6 +4,11 @@ import { normalisePhone } from '@mise/core/phone';
 import type { MarketCode } from '@mise/core/packs';
 import type { CloudConnection } from '@mise/core/cloud-connection';
 import type { PhoneAuth, PhoneAuthState } from './data/phone-auth';
+import { sitePath } from '@mise/core/paths';
+const servicesGuide = sitePath(
+  import.meta.env.BASE_URL.replace(/app\/$/, ''),
+  'docs/configure-services.md',
+);
 function errorText(error: unknown) {
   return error instanceof Error
     ? error.message
@@ -30,7 +35,15 @@ export function ConnectionForm({
         void onSave({ apiUrl, publishableKey });
       }}
     >
-      <p>Use the connection provided for your Mise project.</p>
+      <p>
+        Use the cloud connection configured for your shop. Your shop controls its
+        services and accounts.
+      </p>
+      <p>
+        <a href={servicesGuide} target="_blank" rel="noreferrer">
+          Cloud and service setup guide
+        </a>
+      </p>
       <fieldset className="form-fields" disabled={saving}>
         <label>
           Project URL
@@ -243,7 +256,15 @@ export function PhoneSignIn({
             void send();
           }}
         >
-          <p>Use your own phone number to sign in.</p>
+          <p>
+            Use your own phone number to sign in. Your shop’s installer configures
+            the SMS service.
+          </p>
+          <p>
+            <a href={servicesGuide} target="_blank" rel="noreferrer">
+              Set up phone sign-in and services
+            </a>
+          </p>
           <fieldset className="form-fields" disabled={busy || !online}>
             <label>
               Phone number

@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {Button} from '@mise/ui/primitives.tsx';
 import {kitchenReadyPath, type KitchenActionKind} from '@mise/core/kitchen';
 import {isOrderFinished} from '@mise/core/orders';
-import {kitchenTapAcknowledges,sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
+import {kitchenCancellationAcknowledged,kitchenTapAcknowledges,sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
 import type {KitchenTicket} from '@mise/core/kitchen-tickets';
 import type {ScreenJournalRecord} from '@mise/core/device-screen-state';
 import type {ScreenJournal} from './data/device-screen-journal';
@@ -23,9 +23,11 @@ function scheduledTime(ticket: KitchenTicket) {
   catch{return new Date(ticket.scheduledFor).toISOString();}
 }
 function ticketTaps(state: KitchenScreenState, ticket: KitchenTicket) {
-  return state.taps.filter(tap => (tap.receipt||sameKitchenSession(tap.access,state.access))&&!tap.closure && tap.action.orderId === ticket.id && tap.action.contentHash === ticket.contentHash);
+  return state.taps.filter(tap => (tap.receipt||sameKitchenSession(tap.access,state.access))&&!tap.closure && tap.action.orderId === ticket.id && tap.action.contentHash === ticket.contentHash &&
+    (ticket.status!=='cancelled'||tap.action.revision===ticket.revision));
 }
 function ticketStage(state: KitchenScreenState, ticket: KitchenTicket): Stage {
+  if(ticket.status==='cancelled')return 'New';
   const taps = ticketTaps(state,ticket);
   if (readyStatuses.has(ticket.status) || taps.some(tap => tap.receipt?.type === 'kitchen.ready'&&tap.receipt.revision>=ticket.revision)) return 'Ready';
   return ticket.acknowledgement || taps.some(tap => kitchenTapAcknowledges(state,ticket,tap)) ? 'Cooking' : 'New';
@@ -51,11 +53,12 @@ function Ticket({ticket,state,now,busy,phoneHidden,onTap,onCopy}: {ticket: Kitch
       {line.note ? <p>{line.note}</p> : null}{line.unavailable ? <p className="kitchen-status-warning">Unavailable</p> : null}
       {line.substitution ? <p>Swap from {line.substitution.from} · {line.substitution.accepted ? 'Accepted' : 'Awaiting customer acceptance'}</p> : null}</li>)}</ul>
     <footer>
-      {pending.length ? <p className="kitchen-pending">{pending.some(tap => tap.action.type === 'kitchen.ready') ? 'Ready tap' : 'Got it tap'} saved on this screen · waiting for confirmation</p> : null}
+      {pending.length ? <p className="kitchen-pending">{cancelled ? 'Understood' : pending.some(tap => tap.action.type === 'kitchen.ready') ? 'Ready tap' : 'Got it tap'} saved on this screen · waiting for confirmation</p> : null}
       {review ? <p role="status">The ticket changed. Your original tap is saved for review. Copy the ticket and check with the desk.</p> : null}
-      {!ticket.priced ? <p>Waiting for the desk to finish pricing.</p> : null}
+      {!ticket.priced && !cancelled ? <p>Waiting for the desk to finish pricing.</p> : null}
       <div className="kitchen-ticket-actions">
         {!acknowledged && !cancelled ? <Button disabled={busy || expired || closing || !state.access.permissions.includes('orders.acknowledge')} onClick={() => onTap('kitchen.acknowledge')}>Got it</Button> : null}
+        {cancelled ? <Button kind="secondary" disabled={busy || expired || closing || pending.length>0 || !state.access.permissions.includes('orders.acknowledge')} onClick={() => onTap('kitchen.acknowledge')}>Understood</Button> : null}
         {acknowledged && !cancelled && !ready ? <Button kind="secondary" disabled={busy || expired || closing || !canReady || pending.some(tap => tap.action.type === 'kitchen.ready')} onClick={() => onTap('kitchen.ready')}>Ready</Button> : null}
         {ready ? <span className="kitchen-status">Ready</span> : null}
         <Button kind="ghost" onClick={onCopy}>Copy ticket</Button>
@@ -199,7 +202,7 @@ export function KitchenScreen({journal,source,onSignOut}: {journal: ScreenJourna
     try{await onSignOut();const latest=await journal.read();if(mounted.current&&latest.state.phase==='signed-in')setError('Sign-out could not be saved. Tickets are paused. Try Sign out again.');}
     catch{if(mounted.current)setError('Sign-out could not finish. Tickets are paused. Try Sign out again.');}
   }
-  const tickets = state?.tickets.filter(ticket => !isOrderFinished(ticket) || ticket.status === 'cancelled') ?? [];
+  const tickets = state?.tickets.filter(ticket => ticket.status === 'cancelled' ? !kitchenCancellationAcknowledged(state,ticket) : !isOrderFinished(ticket)) ?? [];
   const pending = state?.taps.filter(tap => !tap.receipt&&!tap.closure).length ?? 0;
   return <main className="kitchen-screen">
     <a className="app-skip" href="#kitchen-tickets">Skip to tickets</a>

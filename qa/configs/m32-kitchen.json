@@ -51,6 +51,33 @@
         {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
         {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
       ]
+    },
+    {
+      "id": "m32-kitchen-cancelled",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "cancelled",
+      "note": "An owner cancellation is persisted through the real domain command and native SQL, then delivered by the private live relay. The outlined Understood control follows frame 65:1843; it retains the stop-preparation notice until an actual acknowledgement. Frame 107:1222 supplies the phone layout. Synthetic order data and browser chrome differ.",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".kitchen-screen",
+          "widths": [
+            360,
+            390
+          ],
+          "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+        },
+        {
+          "id": "tablet",
+          "selector": ".kitchen-screen",
+          "widths": [
+            768,
+            1024,
+            1440
+          ],
+          "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+        }
+      ]
     }
   ]
 }

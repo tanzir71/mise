@@ -1,0 +1,112 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T14:38:08.115Z",
+  "sourceParentCommit": "075255abef535da738d5ed4b9dd1aac3ba4e45c9",
+  "publicationHeld": true,
+  "featureFlags": {
+    "kitchenScreen": false,
+    "kitchenAlarms": false
+  },
+  "installationConfiguration": {
+    "ownership": "each installation",
+    "privilegedKeys": "server only",
+    "maintainerInputsRequired": false,
+    "realProviderCommissioning": "installation acceptance; not exercised"
+  },
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 174,
+    "astroDiagnostics": 0,
+    "unitFiles": 212,
+    "unitCases": 4334,
+    "unitDurationSeconds": 937.13,
+    "rootBuild": true,
+    "rootBrowserCases": 75,
+    "pagesBuild": true,
+    "pagesUniqueBrowserCasesVerified": 547,
+    "pagesFullSweep": {
+      "passed": 546,
+      "failed": 1,
+      "resolution": "Test now waits for the unconfirmed offline sign-out and uses its explicit Retry control after reconnecting; no product change."
+    },
+    "finalKitchenCases": 23,
+    "correctedOfflineSignOutRepeatedCases": 5,
+    "referenceExports": 270,
+    "visualComparisons": 45,
+    "cancellationWidths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "visualReport": "qa/report.html",
+    "keyScreenshots": [
+      "qa/screens/m32-kitchen-cancelled-phone-390.png",
+      "qa/screens/m32-kitchen-cancelled-tablet-1440.png",
+      "qa/screens/m30-auth-connection-phone-screen-390.png"
+    ],
+    "finalRootChangedPageCases": 8,
+    "outlineCorrection": "Desktop Ready styling excludes cancelled cards, preserving the reference Understood outline."
+  },
+  "managed": {
+    "migrations": 63,
+    "forcedRlsTables": 88,
+    "reviewedSqlBodiesMatched": 5,
+    "reviewedIndexes": 7,
+    "apiRolesWithProjectionAccess": 0,
+    "publicDefiners": 0,
+    "isolatedDomainOrders": 3,
+    "actualRoleDenials": 6,
+    "rolledBack": true,
+    "remainingFixtureRows": 0,
+    "schedulerEnabled": false,
+    "cronJobs": 0,
+    "edgeFunctionVersionsUnchanged": true,
+    "security": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performance": {
+      "INFO": 2,
+      "WARN": 0,
+      "ERROR": 0
+    }
+  },
+  "credentialGuard": {
+    "command": "pnpm check:secrets --history --artifacts",
+    "commitAndPushHooksRequired": true,
+    "legacyPolicyUnchanged": true
+  },
+  "sourceHashes": {
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "README.md": "53b4abeb4ed6b45b48450ec6aa388cc3957813875c3d2d1425201e3639f9f3bf",
+    "apps/web/src/CloudAuthForms.tsx": "0241e49fd69ca27a2365ef171a1b2e35225b7b0a6ce4512fda41204b96475a25",
+    "apps/web/src/KitchenScreen.tsx": "2203ef631302499447f357e3db9c49ca32da77197be62c6f13f82bce822833e9",
+    "apps/web/src/KitchenTapReview.tsx": "f8f0b5d7bb6ff27f8f6a68338df8e0361d454e9aac69060c2eef275e05b08071",
+    "packages/core/kitchen-screen.ts": "cb8c175ceb52eb451b52d1997c86c321c29ed3c6c87569c556ee7fd4311e0ad4",
+    "packages/core/flags.ts": "5f9fcc4b9a3b13ccb4b591819f47d16d1c0cfb9370b0906b631935d77eb07525",
+    "scripts/build.mjs": "593b53f0bd66af079c2a9fb6ed86b4cc1623cc523a85fb8ea8a983c9e229a63d",
+    "supabase/functions/.env.example": "2deadf6e1286863b050331ddd24a6be21a91e2c917a1e40f9e648cfaffbfa831",
+    "supabase/migrations/20261122121013_kitchen_current_tickets.sql": "94a6fd1d2d3d3fa4f83f95308fbbe43d9fa2b492b451bc3f85368fb603907850",
+    "docs/configure-services.md": "4a549a1249ed4f48cf2af81cbd040731626ca6101e9fa77530d83ab5effaab43",
+    "docs/deploy-own-vercel.md": "6ee670ab767cf80895247fd6a7e2b205511dd490a889ec7de793f13747218ffa",
+    "handover/docs/08-distribution.md": "0edfeae082202bfc19a527c3c7fdac54ef23e1f9dc558efc2188a1cd399a9e0c",
+    "handover/prompts/04-deploy-own-vercel.md": "0e469b83ec2e17b00a98c1417a7c3854240b5b501f09d297cf3c2018f1b948ae",
+    "qa/configs/m32-kitchen.json": "3638c358a91ed33f261f90effd536571037b32ff2c7805fb9955bc63fab65315",
+    "tests/device-pairing-fixture.ts": "ab8b3a2e245fa282f1145cd42d0d8e661c8ae94264d644875edceefd3aace796",
+    "tests/kitchen.test.ts": "c5eeb252e2403b5d668f63c324170a667a202dbfd48f63b79af541640d30fed9",
+    "tests/kitchen-screen.test.ts": "60a96b85a11a5e75ddf75db4e7fbc807d40894fb95c803a46811c25eaec7e348",
+    "tests/kitchen-actions.test.ts": "53644ecf2004ae9f5c1961eeaa59d4056bad22a360569f0fec50574b10af3cdd",
+    "tests/kitchen-current-tickets.test.ts": "27d71324d4dd2e80e3fc7e19831619a72e43a7b410d82549e3b8797d756e9b19",
+    "tests/e2e/cloud-auth.spec.ts": "909d753730ff3cbae578fd9a515f9955dc776d948586dfe6d4c53a8d2d1e3a89",
+    "tests/e2e/kitchen-screen-ui.spec.ts": "15a0f8674c3635eb848521dddf310fd9dfbc31d205dab3743f8b351d32bcb7ca",
+    "tests/fixtures/install-kitchen-ui.d.mts": "a141dff0a06351c2222d611d02a35736ef01a09fcdd0e3f6620aaea4b608ac5b",
+    "tests/fixtures/install-kitchen-ui.mjs": "65ed39796f3d7c87717b195c77a4296e47b2b6adf7d307d2ac323b8641e5aa1d",
+    "tests/fixtures/kitchen-ui-service.ts": "801ce643e4dac606555ca3140144b57201801c231abba290d4db5b24b8957376",
+    "apps/web/src/kitchen-screen.css": "113be8a126be60248a7a8d8687077467c75ad2e327fdbf11ede447f8bd1f1eff"
+  }
+}

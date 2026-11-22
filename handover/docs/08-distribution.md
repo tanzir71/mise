@@ -91,10 +91,10 @@ Owners can run their own copy of the web app (landing page + app) on their Verce
 - **`prompts/04-deploy-own-vercel.md` copied to `docs/deploy-own-vercel.md`** in the repo, and linked from `/setup/#vercel`. The setup page shows a "Copy prompt for your agent" button with the short version of the prompt.
 - **A "Deploy to Vercel" button** for the manual path:
   `https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2F<owner>%2F<repo>&project-name=mise&repository-name=mise`
-  - Add `&env=PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_ANON_KEY` once Phase 3 ships.
+  - Backend connections are supplied by each installation at runtime; keep actual project URLs and keys out of public build variables.
   - Verify the current parameter names against Vercel's docs when implementing.
 - **A "Pair to a self-hosted copy" option** on the extension and Android pairing screens: enter the base URL, then the 6-digit code or QR, so devices talk to the owner's deployment.
-- **From Phase 3:** a self-hosting checklist in the docs: create your own Supabase project → run `supabase db push` → set the two public env vars in Vercel.
+- **From Phase 3:** the installation owner configures their backend, deploys the schema/functions to that project and enters its connection on the device. SMS, notifications and later integrations use that installation's own accounts and private server settings. Follow [the service configuration guide](../../docs/configure-services.md); the Mise maintainer supplies no personal provider accounts or verification numbers.
 
 **Accept**
 - [ ] `vercel deploy --prod` from a clean fork serves `/`, `/app/` (deep links reload correctly) and `/setup/`.
