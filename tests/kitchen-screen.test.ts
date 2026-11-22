@@ -2,7 +2,7 @@ import {afterEach,expect,it,vi} from 'vitest';
 import {IDBFactory,IDBObjectStore} from 'fake-indexeddb';
 import {openScreenJournal,screenJournalDatabaseName,type ScreenJournal} from '../apps/web/src/data/device-screen-journal';
 import {createKitchenScreenSession} from '../apps/web/src/data/kitchen-screen-session';
-import {appendKitchenTap,finishKitchenTap,kitchenScreenWire,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage} from '../packages/core/kitchen-screen';
+import {appendKitchenTap,finishKitchenTap,kitchenScreenWire,kitchenTapAcknowledges,parseKitchenScreenState,receiveKitchenChanges,receiveKitchenPage} from '../packages/core/kitchen-screen';
 import {newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../packages/core/kitchen';
 import {kitchenScreenFixture} from './fixtures/kitchen-screen';
 import {beginKitchenTapClose,finishKitchenTapClose} from '../packages/core/kitchen-screen';
@@ -14,6 +14,25 @@ function receipt(f:Awaited<ReturnType<typeof kitchenScreenFixture>>,action:Await
  return {v:1,id:action.id,type:action.type,businessId:f.access.businessId,outletId:action.outletId,orderId:action.orderId,deviceId:f.device.id,sessionId:f.session.id,memberId:f.session.memberId,
   sourceRevision:action.revision,revision:action.revision+1,contentHash:action.contentHash,parentAckId:action.parentAckId,occurredAt:action.occurredAt,acceptedAt:f.now,status:'kitchen_seen',transitionEventIds:action.transitionEventIds.slice(0,1)};
 }
+it('a newer ticket can undo Got it without erasing its actual historical receipt or a still-current acknowledgement',async()=>{
+ const f=await kitchenScreenFixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId());
+ expect(kitchenTapAcknowledges(queued,f.ticket,queued.taps[0])).toBe(true);
+ const undone={...f.ticket,revision:f.ticket.revision+2,status:'confirmed' as const,acknowledgement:null};
+ expect(kitchenTapAcknowledges(queued,undone,queued.taps[0])).toBe(false);
+ const actual=receipt(f,action),accepted=finishKitchenTap(queued,queued.taps[0],actual,newKitchenId());
+ expect(kitchenTapAcknowledges(accepted,undone,accepted.taps[0])).toBe(false);expect(accepted.taps[0].receipt).toEqual(actual);
+ const stillCurrent={...undone,revision:undone.revision+2,status:'cooking' as const,acknowledgement:actual};
+ expect(kitchenTapAcknowledges(accepted,stillCurrent,accepted.taps[0])).toBe(true);
+});
+it('native Ready after an undone Got it needs a fresh parent while keeping the historical original unchanged',async()=>{
+ const f=await fixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId());
+ const accepted=finishKitchenTap(queued,queued.taps[0],receipt(f,action),newKitchenId()),undone={...f.ticket,revision:f.ticket.revision+2,status:'confirmed' as const,acknowledgement:null};
+ const changed=receiveKitchenChanges(accepted,{...f.page,tickets:[undone],nextSeq:8,watermark:8,removed:[]},newKitchenId());
+ await f.journal.replaceKitchen(f.record,f.state,changed);const screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});
+ await expect(screen.tap(undone,'kitchen.ready')).rejects.toThrow();expect(await f.journal.readKitchen(f.record)).toEqual(changed);
+ await screen.tap(undone,'kitchen.acknowledge');await screen.tap(undone,'kitchen.ready');
+ const saved=(await f.journal.readKitchen(f.record))!;expect(saved.taps[0]).toEqual(changed.taps[0]);expect(saved.taps[2].action.parentAckId).toBe(saved.taps[1].action.id);expect(saved.taps[2].action.parentAckId).not.toBe(action.id);screen.dispose();
+});
 it('retains complete offline source and FIFO Got it/Ready identities through close/reopen',async()=>{
  const f=await fixture(),screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});
  await screen.tap(f.ticket,'kitchen.acknowledge');await screen.tap(f.ticket,'kitchen.ready');

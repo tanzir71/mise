@@ -1,5 +1,5 @@
 {
-  "title": "M32 — Shared preparation tickets, offline taps and private realtime",
+  "title": "M32 — Shared preparation tickets, offline taps, explicit undo and private realtime",
   "widths": [360, 390, 768, 1024, 1440],
   "pages": [
     {
@@ -37,6 +37,16 @@
       "path": "app/screen/kitchen?flags=kitchenScreen",
       "kitchenScreenFixture": "review",
       "note": "Expanded original saved-tap review after an actual offline Got it gesture and native IndexedDB commit. Full original ticket, confirmation state, Copy, Check confirmation and explicit Close controls remain accessible at every width. This recovery panel extends the supplied 65:1843/107:1222 ticket layouts; those frames have no recovery panel, so pixel differences are informational. No acceptance or closure is inferred while offline.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "m32-kitchen-undone",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "undone",
+      "note": "Actual Got it acceptance followed by an owner status undo through the domain command, SQL transaction and live ticket feed. The current ticket returns to New and asks for a fresh acknowledgement while the original accepted receipt and complete ticket remain available in Saved taps. Uses the supplied 65:1843/107:1222 layout references; their frames contain no historical review panel, so pixel differences are informational. All identities are synthetic.",
       "sections": [
         {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
         {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}

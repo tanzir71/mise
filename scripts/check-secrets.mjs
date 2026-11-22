@@ -50,7 +50,7 @@ function knownValues(directory){
   const raw=readFileSync(join(directory,'api-keys.json'),'utf8');let document;try{document=JSON.parse(raw.slice(raw.indexOf('{')));}catch{throw new Error('Private key document cannot be parsed.');}
   function visit(v){if(Array.isArray(v))v.forEach(visit);else if(v&&typeof v==='object'){if(typeof v.api_key==='string')add(v.api_key,'known-supabase-key');else Object.values(v).forEach(visit);}}
   visit(document);const project=raw.match(/Target: project [^\r\n]*\(([a-z]{20})\)/)?.[1];if(project)add(project,'known-deployment-reference','deployment');
-  for(const line of readFileSync(join(directory,'edge.env'),'utf8').split(/\r?\n/)){const match=line.match(/^(MISE_(?:SERVICE_API_KEY|PUBLISHABLE_API_KEY|STAFF_PIN_PEPPER_V\d+|SYNC_CURSOR_KEY_V\d+))=(.+)$/);if(match)add(match[2].replace(/^['"]|['"]$/g,''),'known-edge-secret');}
+  for(const line of readFileSync(join(directory,'edge.env'),'utf8').split(/\r?\n/)){const match=line.match(/^(MISE_(?:SERVICE_API_KEY|PUBLISHABLE_API_KEY|STAFF_PIN_PEPPER_V\d+|SYNC_CURSOR_KEY_V\d+|KITCHEN_ALARM_KEY|WEB_PUSH_VAPID_(?:PUBLIC|PRIVATE)_KEY))=(.+)$/);if(match)add(match[2].replace(/^['"]|['"]$/g,''),'known-edge-secret');}
   return result;
 }
 function walk(directory){const result=[];for(const entry of readdirSync(directory,{withFileTypes:true})){const path=join(directory,entry.name);if(entry.isSymbolicLink())continue;if(entry.isDirectory())result.push(...walk(path));else if(entry.isFile())result.push(path);}return result;}

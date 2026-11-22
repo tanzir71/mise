@@ -1,0 +1,137 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T01:03:40.840Z",
+  "flag": {
+    "name": "kitchenScreen",
+    "default": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "unitFiles": 194,
+    "unitCases": 4014,
+    "pagesBrowserCases": 521,
+    "kitchenBrowserCases": 20,
+    "visualScope": "Changed kitchen pages; other page layouts unchanged",
+    "visualComparisons": 25,
+    "undoVisualComparisons": 5,
+    "horizontalOverflow": 0,
+    "kitchenAutomatedAccessibilityViolations": 0,
+    "rootAppBrowserCases": 28,
+    "nativeStorageCases": 7,
+    "rootBuild": true,
+    "pagesBuildRestored": true,
+    "visualGeneratedAt": "2026-11-22T00:25:04.514Z",
+    "credentialGuardCases": 38
+  },
+  "hosted": {
+    "checkedAt": "2026-11-22T00:40:51.848Z",
+    "migrations": 56,
+    "migration": {
+      "version": "20261122003035",
+      "path": "supabase/migrations/20261122003035_kitchen_undo_barriers.sql",
+      "bytes": 8374,
+      "sha256": "8020664f0dfc456fb4b93f285dc99875ba6011745a73c4f326ba434fdf7e4537"
+    },
+    "sqlFunctions": [
+      {
+        "name": "prepare_kitchen_action",
+        "body_sha256": "903ff4791a99b7ab99f67850a682bdf039f9909d2b3a75936548282b5a0d27f4",
+        "security_definer": true,
+        "volatility": "v"
+      },
+      {
+        "name": "read_kitchen_acknowledgements",
+        "body_sha256": "39d6744d72148139c18f6548fa8bd0f4302bd1c96dd815d4b1d1f497272c646c",
+        "security_definer": true,
+        "volatility": "s"
+      },
+      {
+        "name": "kitchen_ack_active",
+        "body_sha256": "03343c873514c72772d20c70911d8a01b73bde2d4708a1dc0f0862c44e3c75fd",
+        "security_definer": false,
+        "volatility": "s"
+      }
+    ],
+    "allThreeSqlBodiesMatch": true,
+    "schema": {
+      "application_tables": 76,
+      "forced_rls_tables": 76,
+      "anonymous_public_table_grants": 0,
+      "public_definers": 0,
+      "public_buckets": 0,
+      "kitchen_client_rpc_grants": 0,
+      "internal_helper_role_grants": 0,
+      "internal_helper_same_owner": true
+    },
+    "edgeFunctions": 12,
+    "allTwelveEdgeFunctionsUnchanged": true,
+    "managedRoleChecks": 38,
+    "remainingAuthRows": 0,
+    "remainingShopRows": 0,
+    "managedCases": [
+      "original-owner-invitation-retry",
+      "client-service-rpc-denied",
+      "client-private-table-denied",
+      "short-code-is-request-only",
+      "original-screen-secret-required",
+      "service-private-table-denied",
+      "assigned-manager-can-compare",
+      "manager-pin-metadata-denied",
+      "unassigned-manager-denied",
+      "foreign-owner-denied",
+      "full-comparison-required",
+      "approved-device-retry-idempotent",
+      "server-retains-only-device-hash",
+      "scoped-eligible-staff-directory",
+      "kitchen-acknowledgement-scope-and-original-receipt",
+      "kitchen-lost-reply-idempotent",
+      "undo-old-unaccepted-acknowledgement-needs-review",
+      "undo-acknowledgement-removed-from-current-reader",
+      "undo-real-original-acknowledgement-receipt-retained",
+      "undo-fresh-explicit-acknowledgement-allowed",
+      "undo-ready-cannot-reuse-undone-parent",
+      "undo-private-acknowledgement-helper-not-client-callable",
+      "kitchen-original-action-cannot-be-replaced",
+      "kitchen-two-secret-authority-required",
+      "kitchen-ready-only-preparation-stages",
+      "kitchen-financial-rows-unchanged",
+      "undo-old-unaccepted-ready-needs-review",
+      "undo-historical-ready-receipt-retained",
+      "undo-ready-keeps-current-acknowledgement-parent",
+      "kitchen-anonymous-rpc-denied",
+      "kitchen-direct-service-table-denied",
+      "kitchen-revocation-after-preparation-denied",
+      "kitchen-complete-snapshot-rechecked",
+      "original-signout-receipt-retained",
+      "delayed-pin-attempt-retired",
+      "live-revocation-enforced",
+      "revoked-screen-cleanup-only",
+      "audits-contain-no-device-secret"
+    ],
+    "advisors": {
+      "security": {
+        "INFO": 1
+      },
+      "performance": {
+        "INFO": 1
+      }
+    },
+    "phoneProviderCommissioned": false,
+    "physicalDeviceAcceptance": false,
+    "newKeysGenerated": 0,
+    "newScheduledJobs": 0,
+    "publicationHeld": true
+  },
+  "screenshots": [
+    "qa/screens/m32-kitchen-undone-phone-390.png",
+    "qa/screens/m32-kitchen-undone-tablet-1440.png",
+    "qa/screens/m32-kitchen-review-tablet-1440.png"
+  ],
+  "remaining": [
+    "Configurable unacknowledged alarms",
+    "Authoritative Inbox tasks",
+    "Desk Web Push",
+    "Active-ticket startup and final hosted/provider/physical acceptance"
+  ]
+}

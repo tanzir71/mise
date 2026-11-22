@@ -91,10 +91,35 @@ test('a held saved-tap recovery reply cannot delay another real committed order 
 test('a historical Ready receipt does not override the newer real order state after an owner undo',async({page})=>{
  await initialize(page);await page.getByRole('button',{name:'Got it',exact:true}).click();await expect.poll(async()=>service.inspect()).toMatchObject({receipts:1});
  await page.getByRole('button',{name:'Ready',exact:true}).click();await expect.poll(async()=>service.inspect()).toMatchObject({receipts:2,status:'ready'});
- const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;await service.undoReady();
+ const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;await service.undoLastStatus();
  await expect(page.locator('.kitchen-ticket').getByText('Cooking',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Ready',exact:true})).toBeEnabled();
  const retained=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;expect(retained.map(tap=>tap.receipt)).toEqual(saved.map(tap=>tap.receipt));
  expect(await service.inspect()).toMatchObject({status:'packing',receipts:2});
+});
+test('an undone Got it returns to New and a fresh Ready keeps the new actual acknowledgement parent',async({page})=>{
+ await initialize(page);const before=await service.inspect();await page.getByRole('button',{name:'Got it',exact:true}).click();
+ await expect.poll(async()=>{return (await page.evaluate(()=>window.miseKitchenUiTest.inspect()))?.taps[0]?.receipt??null;}).not.toBeNull();
+ const original=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0];await service.undoLastStatus();
+ await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'Ready',exact:true})).toHaveCount(0);
+ expect((await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0]).toEqual(original);
+ await page.getByRole('button',{name:'Got it',exact:true}).click();await expect.poll(async()=>{return (await page.evaluate(()=>window.miseKitchenUiTest.inspect()))?.taps[1]?.receipt??null;}).not.toBeNull();
+ const second=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[1];await page.getByRole('button',{name:'Ready',exact:true}).click();
+ await expect.poll(async()=>service.inspect()).toMatchObject({status:'ready',receipts:3,payment:before.payment,total:before.total});
+ const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;expect(saved[0]).toEqual(original);expect(saved[2].parent).toBe(second.id);expect(saved[2].parent).not.toBe(original.id);
+});
+test('an offline queued Ready is retained for review after another screen readies and the owner undoes it',async({page,context})=>{
+ await initialize(page);const before=await service.inspect();await page.getByRole('button',{name:'Got it',exact:true}).click();
+ await expect.poll(async()=>{return (await page.evaluate(()=>window.miseKitchenUiTest.inspect()))?.taps[0]?.receipt??null;}).not.toBeNull();
+ await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);await page.getByRole('button',{name:'Ready',exact:true}).click();
+ await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toBeVisible();const queued=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[1];
+ await service.readyFromAnotherScreen();await service.undoLastStatus();await context.setOffline(false);
+ await expect.poll(async()=>{return (await page.evaluate(()=>window.miseKitchenUiTest.inspect()))?.taps.find(tap=>tap.id===queued.id)?.review??false;}).toBe(true);
+ expect(await service.inspect()).toMatchObject({status:'packing',receipts:2,payment:before.payment,total:before.total});
+ const reviewed=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[1];expect(reviewed.source).toEqual(queued.source);expect(reviewed.receipt).toBeNull();
+ await page.getByRole('button',{name:'Saved taps · 2',exact:true}).click();await page.getByRole('button',{name:'Close saved tap',exact:true}).click();
+ await expect.poll(async()=>{return (await page.evaluate(()=>window.miseKitchenUiTest.inspect()))?.taps[1]?.closure??null;}).not.toBeNull();
+ await page.getByRole('button',{name:'Ready',exact:true}).click();await expect.poll(async()=>service.inspect()).toMatchObject({status:'ready',receipts:3,closures:1,payment:before.payment,total:before.total});
+ const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps;expect(saved[1].source).toEqual(queued.source);expect(saved[1].receipt).toBeNull();expect(saved[2].id).not.toBe(queued.id);expect(saved[2].parent).toBe(queued.parent);
 });
 for(const width of [360,390,768,1024,1440])test(`saved kitchen tap review fits ${width}px and meets WCAG AA`,async({page,context})=>{
  await page.setViewportSize({width,height:900});await initialize(page);await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);

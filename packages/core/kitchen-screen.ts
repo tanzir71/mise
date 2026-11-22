@@ -121,6 +121,13 @@ export function appendKitchenTap(state: KitchenScreenState, source: KitchenTicke
     observedAt: state.at, source: structuredClone(source), action: parseKitchenAction(action), receipt: null, review: false,
     ...(state.v===2?{closeIntents:[],closure:null}:{})}]};
 }
+/** Historical acceptance remains proof, but a newer ticket may have explicitly
+ * undone that preparation effect. A fresh scoped acknowledgement is decisive. */
+export function kitchenTapAcknowledges(state:KitchenScreenState,ticket:KitchenTicket,tap:KitchenTap):boolean {
+  if(tap.closure||tap.action.type!=='kitchen.acknowledge'||tap.action.orderId!==ticket.id||tap.action.contentHash!==ticket.contentHash)return false;
+  if(tap.receipt)return tap.receipt.type==='kitchen.acknowledge'&&(tap.receipt.revision>=ticket.revision||ticket.acknowledgement?.id===tap.receipt.id);
+  return !tap.review&&!tap.closeIntents?.length&&sameKitchenSession(tap.access,state.access)&&tap.action.revision>=ticket.revision;
+}
 function sameTapSource(a:KitchenTap,b:KitchenTap){
   const source=(tap:KitchenTap)=>({position:tap.position,access:tap.access,observedAt:tap.observedAt,source:kitchenTicketWire(tap.source),action:parseKitchenAction(tap.action)});
   return JSON.stringify(source(a))===JSON.stringify(source(b));

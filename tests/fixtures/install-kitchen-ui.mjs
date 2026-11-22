@@ -11,7 +11,7 @@ export async function installKitchenUi(page){bundle??=build({lib:{entry:resolve(
 let visualService;
 export async function captureKitchenScreen(page,mode='board'){
  visualService??=await startKitchenUiService();
- const config=mode==='queued'||mode==='review'?await visualService.prepare():await visualService.prepareBoard();
+ const config=mode==='queued'||mode==='review'||mode==='undone'?await visualService.prepare():await visualService.prepareBoard();
  await installKitchenUi(page);await page.evaluate(screen=>window.miseKitchenUiTest.initialize(screen),config.screen);await page.reload();
  await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();
  if(mode==='offline'||mode==='queued'||mode==='review'){
@@ -27,6 +27,13 @@ export async function captureKitchenScreen(page,mode='board'){
   await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toBeVisible();
   await page.getByRole('button',{name:'Saved taps · 1',exact:true}).click();
   await page.getByText('Original ticket',{exact:true}).click();
+ }
+ if(mode==='undone'){
+  await page.getByRole('button',{name:'Got it',exact:true}).click();
+  await expect.poll(async()=>visualService.inspect()).toMatchObject({receipts:1});
+  await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toHaveCount(0);
+  await visualService.undoLastStatus();await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'Saved taps · 1',exact:true}).click();await page.getByText('Original ticket',{exact:true}).click();
  }
  const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();if(result.violations.length)throw Error('Kitchen visual fixture has accessibility violations: '+result.violations.map(v=>v.id).join(', '));
 }

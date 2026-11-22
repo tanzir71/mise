@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {Button} from '@mise/ui/primitives.tsx';
 import {kitchenReadyPath, type KitchenActionKind} from '@mise/core/kitchen';
 import {isOrderFinished} from '@mise/core/orders';
-import {sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
+import {kitchenTapAcknowledges,sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
 import type {KitchenTicket} from '@mise/core/kitchen-tickets';
 import type {ScreenJournalRecord} from '@mise/core/device-screen-state';
 import type {ScreenJournal} from './data/device-screen-journal';
@@ -28,12 +28,12 @@ function ticketTaps(state: KitchenScreenState, ticket: KitchenTicket) {
 function ticketStage(state: KitchenScreenState, ticket: KitchenTicket): Stage {
   const taps = ticketTaps(state,ticket);
   if (readyStatuses.has(ticket.status) || taps.some(tap => tap.receipt?.type === 'kitchen.ready'&&tap.receipt.revision>=ticket.revision)) return 'Ready';
-  return ticket.acknowledgement || taps.some(tap => tap.action.type==='kitchen.acknowledge'&&(tap.receipt||!tap.review&&!tap.closeIntents?.length)) ? 'Cooking' : 'New';
+  return ticket.acknowledgement || taps.some(tap => kitchenTapAcknowledges(state,ticket,tap)) ? 'Cooking' : 'New';
 }
 function Ticket({ticket,state,now,busy,phoneHidden,onTap,onCopy}: {ticket: KitchenTicket;state: KitchenScreenState;now: number;busy: boolean;phoneHidden: boolean;onTap: (kind: KitchenActionKind) => void;onCopy: () => void}) {
   const taps = ticketTaps(state,ticket), pending = taps.filter(tap => !tap.receipt && !tap.review&&!tap.closeIntents?.length), review = taps.some(tap => tap.review);
   const closing=state.taps.some(tap=>tap.action.orderId===ticket.id&&!tap.receipt&&!tap.closure&&tap.closeIntents?.length);
-  const acknowledged = Boolean(ticket.acknowledgement) || taps.some(tap => tap.action.type==='kitchen.acknowledge'&&(tap.receipt||!tap.review&&!tap.closeIntents?.length));
+  const acknowledged = Boolean(ticket.acknowledgement) || taps.some(tap => kitchenTapAcknowledges(state,ticket,tap));
   const ready = ticketStage(state,ticket) === 'Ready', cancelled = ticket.status === 'cancelled';
   const late = !acknowledged && !cancelled && now >= ticket.createdAt + state.warningMinutes * 60000;
   const canReady = acknowledged && !ready && ticket.priced && Boolean(kitchenReadyPath(ticket)?.length) && state.access.permissions.includes('orders.ready');

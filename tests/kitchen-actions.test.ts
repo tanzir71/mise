@@ -3,12 +3,12 @@ import {PGlite} from '@electric-sql/pglite';
 import {afterAll, beforeAll, expect, it} from 'vitest';
 import {createBackup} from '../packages/core/backup';
 import {emptyBackupTables} from '../packages/core/backup-tables';
-import {decodeCommandRecord, prepareCloudMigration} from '../packages/core/cloud-records';
+import {decodeCommandRecord, encodeCommandRecord, prepareCloudMigration} from '../packages/core/cloud-records';
 import {newKitchenId, prepareKitchenAction, type KitchenAction, type KitchenReceipt} from '../packages/core/kitchen';
-import {changeOrderStatusCommand, nextOrderStatuses, saveOrderCommand} from '../packages/core/orders';
+import {changeOrderStatusCommand, nextOrderStatuses, saveOrderCommand, undoOrderStatusCommand} from '../packages/core/orders';
 import {ORDER_SOURCE_MAX_TEXT} from '../packages/core/order-limits';
 import {orderPricing} from '../packages/core/order-lines';
-import type {Order} from '../packages/core/models';
+import type {AuditEvent,Order} from '../packages/core/models';
 import type {BusinessType} from '../packages/core/packs';
 import {createStaffPin} from '../supabase/functions/_shared/staff-pin';
 import {createKitchenActionsHandler, createKitchenActionsStore, replayKitchenPreparation, type KitchenStep} from '../supabase/functions/_shared/kitchen-actions-handler';
@@ -39,6 +39,15 @@ async function rollback(work: (sql: Sql) => Promise<void>) {
 async function current(sql: Sql, shop: Shop) {
   const row = (await sql.query<Record<string, unknown>>('select * from public.orders where id=$1', [shop.order.id])).rows[0];
   return decodeCommandRecord('orders', row) as unknown as Order;
+}
+async function undoLastStatus(sql:Sql,shop:Shop){
+ const order=await current(sql,shop),raw=(await sql.query<Record<string,unknown>>('select * from public.events where id=$1',[order.statusEventId])).rows[0];
+ const event=decodeCommandRecord('events',raw) as unknown as AuditEvent,seed=orderFixture(order.businessType).context.setup;
+ const setup={business:{...seed.business,id:shop.businessId},outlet:{...seed.outlet,id:shop.outletId,businessId:shop.businessId},owner:{...seed.owner,id:order.createdBy,businessId:shop.businessId,outletIds:[shop.outletId]}};
+ const result=undoOrderStatusCommand(order,event,setup,order.revision),record=encodeCommandRecord('orders',result.order,shop.businessId),audit=encodeCommandRecord('events',result.event,shop.businessId);
+ const keys=Object.keys(audit.values);await sql.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));
+ const changes=Object.entries(record.values).filter(([key])=>key!=='id');await sql.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),order.id]);
+ return result.order;
 }
 /** Exercise the production HTTP/RPC adapter with real PostgreSQL named
  * arguments. An incorrect RPC field cannot pass a positional fake callback. */
@@ -248,6 +257,41 @@ it('rejects a stale visible ticket and never substitutes a newer line for the qu
   await sql.query('update public.orders set lines=$1,revision=revision+1 where id=$2', [JSON.stringify(changed), shop.order.id]);
   expect((await gateway(sql)(request(shop, tap))).status).toBe(409);
   expect((await current(sql, shop)).status).toBe('kitchen_seen');
+}));
+
+it('a queued Ready cannot reverse a newer explicit owner undo',async()=>rollback(async sql=>{
+ const shop=shops[3],{receipt}=await gotIt(sql,shop),seen=await current(sql,shop);
+ const queued=await prepareKitchenAction(seen,'kitchen.ready',receipt.id),later=await prepareKitchenAction(seen,'kitchen.ready',receipt.id);
+ expect((await gateway(sql)(request(shop,later))).status).toBe(200);
+ const undone=await undoLastStatus(sql,shop);
+ expect((await gateway(sql)(request(shop,queued))).status).toBe(409);
+ expect(await current(sql,shop)).toEqual(undone);
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts where id=$1',[queued.id])).rows[0].n).toBe(0);
+ expect((await gateway(sql)(request(shop,later))).status).toBe(200);expect(await current(sql,shop)).toEqual(undone);
+ const page=await (await ticketGateway(sql)(ticketRequest(shop))).json();expect(page.tickets[0].acknowledgement.id).toBe(receipt.id);
+ const fresh=await prepareKitchenAction(undone,'kitchen.ready',receipt.id);expect((await gateway(sql)(request(shop,fresh))).status).toBe(200);
+}));
+
+it.each([0,2,3])('undoing Got it keeps its historical proof but requires a new acknowledgement for pack %s',async index=>rollback(async sql=>{
+ const shop=shops[index],before=await current(sql,shop),queued=await prepareKitchenAction(before,'kitchen.acknowledge'),accepted=await gotIt(sql,shop);
+ const undone=await undoLastStatus(sql,shop),page=await (await ticketGateway(sql)(ticketRequest(shop))).json();
+ expect(page.tickets[0].acknowledgement).toBeNull();
+ expect((await gateway(sql)(request(shop,queued))).status).toBe(409);
+ const invalidReady=await prepareKitchenAction(undone,'kitchen.ready',accepted.receipt.id);expect((await gateway(sql)(request(shop,invalidReady))).status).toBe(409);
+ const historical=await gateway(sql)(request(shop,accepted.action));expect(historical.status).toBe(200);expect(await historical.json()).toEqual(accepted.receipt);
+ expect(await current(sql,shop)).toEqual(undone);
+ const fresh=await gotIt(sql,shop);expect(fresh.receipt.id).not.toBe(accepted.receipt.id);
+ const currentPage=await (await ticketGateway(sql)(ticketRequest(shop))).json();expect(currentPage.tickets[0].acknowledgement.id).toBe(fresh.receipt.id);
+ expect((await current(sql,shop)).payment).toEqual(before.payment);expect((await current(sql,shop)).total).toBe(before.total);
+}));
+it('an undo between preparation and completion blocks both the held Ready and its exact retry',async()=>rollback(async sql=>{
+ const shop=shops[3],{receipt}=await gotIt(sql,shop),before=await current(sql,shop),queued=await prepareKitchenAction(before,'kitchen.ready',receipt.id);
+ const handler=gateway(sql,{afterPrepare:async()=>{
+  const competing=await prepareKitchenAction(before,'kitchen.ready',receipt.id);expect((await gateway(sql)(request(shop,competing))).status).toBe(200);await undoLastStatus(sql,shop);
+ }});
+ expect((await handler(request(shop,queued))).status).toBe(409);const undone=await current(sql,shop);
+ expect((await gateway(sql)(request(shop,queued))).status).toBe(409);expect(await current(sql,shop)).toEqual(undone);
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts where id=$1',[queued.id])).rows[0].n).toBe(0);
 }));
 
 it('denies other device/session pairs, outlet selection and direct anonymous/authenticated SQL', async () => rollback(async sql => {

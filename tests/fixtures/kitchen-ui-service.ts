@@ -113,7 +113,15 @@ export async function startKitchenUiService(){
   loseOriginalReplies(){loseAll=true;},
   loseNextClose(){loseClose=true;},
   holdNextRecovery(){let entered!:()=>void,finish!:()=>void;const started=new Promise<void>(resolve=>{entered=resolve;}),gate=new Promise<void>(resolve=>{finish=resolve;});const release=()=>{finish();releases.delete(release);};releases.add(release);nextRecovery={entered,gate};return {started,release};},
-  async undoReady(){
+  async readyFromAnotherScreen(){
+   if(!currentScreen)throw Error('Prepare the synthetic screen first.');
+   const row=(await f.db.query<Record<string,unknown>>('select * from public.orders where id=$1',[orderId])).rows[0],order=decodeCommandRecord('orders',row) as unknown as Order;
+   const ack=(await f.db.query<{receipt:KitchenReceipt}>("select receipt from private.kitchen_action_receipts where order_id=$1 and action->>'type'='kitchen.acknowledge' order by accepted_at desc,id desc limit 1",[orderId])).rows[0]?.receipt;
+   if(!ack)throw Error('A real acknowledgement is required.');const action=await prepareKitchenAction(order,'kitchen.ready',ack.id);
+   const response=await fetch(apiUrl+'/functions/v1/kitchen-actions',{method:'POST',headers:{origin,Authorization:'Bearer '+currentScreen.credential.token,'Content-Type':'application/json'},body:JSON.stringify({sessionToken:currentScreen.session.token,action})});
+   if(!response.ok)throw Error('The other screen did not prepare this order.');return await response.json() as KitchenReceipt;
+  },
+  async undoLastStatus(){
    const raw=(await f.db.query<Record<string,unknown>>('select * from public.orders where id=$1',[orderId])).rows[0],order=decodeCommandRecord('orders',raw) as unknown as Order;
    const eventRow=(await f.db.query<Record<string,unknown>>('select * from public.events where id=$1',[order.statusEventId])).rows[0],event=decodeCommandRecord('events',eventRow) as unknown as AuditEvent;
    const seed=orderFixture('corner_shop').context.setup,setup={business:{...seed.business,id:deviceId(1)},outlet:{...seed.outlet,id:deviceId(11),businessId:deviceId(1)},owner:{...seed.owner,id:deviceId(101),businessId:deviceId(1),outletIds:[deviceId(11)]}};

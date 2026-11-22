@@ -1,7 +1,7 @@
 import {parseScreenJournalRecord, type ScreenJournalRecord} from '@mise/core/device-screen-state';
 import {parseStaffDeviceAccess} from '@mise/core/device-access';
 import {kitchenReadyPath, newKitchenId, prepareKitchenAction, type KitchenActionKind} from '@mise/core/kitchen';
-import {appendKitchenTap,beginKitchenTapClose,finishKitchenTapClose,finishKitchenTap, receiveKitchenChanges, receiveKitchenPage, sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
+import {appendKitchenTap,beginKitchenTapClose,finishKitchenTapClose,finishKitchenTap,kitchenTapAcknowledges, receiveKitchenChanges, receiveKitchenPage, sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
 import {retainedKitchenTap,type KitchenCloseIntent} from '@mise/core/kitchen-recovery';
 import type {KitchenTicket} from '@mise/core/kitchen-tickets';
 import {assertCommandReceipt} from './command-request';
@@ -97,13 +97,12 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
     async tap(inputTicket: KitchenTicket, kind: KitchenActionKind) {
       // Capture the displayed ticket and gesture clock before ANY asynchronous
       // profile/cache work. A newer cached ticket must be reviewed separately.
-      const source = structuredClone(inputTicket), occurredAt = now(), orderId = source.id;
+      const source = structuredClone(inputTicket), occurredAt = now();
       const before = await read();
       if (!before) throw new DeviceScreenRequestError('review');
       const access = actor(before);
       if (access.expiresAt <= occurredAt || !access.permissions.includes(kind === 'kitchen.acknowledge' ? 'orders.acknowledge' : 'orders.ready')) throw new DeviceScreenRequestError('auth');
-      const pendingAck = before.taps.find(tap => !tap.closure && (tap.receipt?.type==='kitchen.acknowledge'||!tap.review&&!tap.closeIntents?.length&&sameKitchenSession(tap.access, access)) && tap.action.type === 'kitchen.acknowledge' &&
-        tap.action.orderId === orderId && tap.action.contentHash === source.contentHash);
+      const pendingAck = before.taps.find(tap => kitchenTapAcknowledges(before,source,tap));
       const parent = source.acknowledgement?.id ?? pendingAck?.action.id ?? null;
       if (kind === 'kitchen.ready' && (!source.priced || !parent || !kitchenReadyPath(source)?.length)) throw new DeviceScreenRequestError('review');
       const action = await prepareKitchenAction(source, kind, kind === 'kitchen.ready' ? parent : null, occurredAt);

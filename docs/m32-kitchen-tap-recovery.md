@@ -1,5 +1,7 @@
 # M32 saved preparation taps — in progress
 
+This note records the recovery delivery checkpoint. [Preparation after an explicit undo](m32-kitchen-undo.md) documents the subsequent distinction between historical proof and the current acknowledgement.
+
 A fresh staff PIN can check what happened to a tap saved by an earlier PIN session on the same enrolled screen. A real accepted receipt keeps its original member, session, action ID, ticket and occurrence time. A pending lookup confirms nothing and never resends the earlier gesture as the new member.
 
 The Saved taps panel keeps the complete original preparation ticket available to copy. Check confirmation performs a scoped lookup. Close saved tap explicitly journals a review request on the device before any HTTP write. Closing an unaccepted tap changes no order status, price or payment. A new Got it or Ready gesture must be made on the current ticket.

@@ -1,5 +1,19 @@
 # Deployment credentials
 
+The [explicit preparation-undo fix](m32-kitchen-undo.md) keeps real historical
+receipts while preventing an older unaccepted tap from defeating a newer
+owner undo. Only an acknowledgement whose own status effect remains active
+may parent a new Ready. All three deployed SQL body hashes match the reviewed
+migration; all twelve Edge Functions retain their versions and JWT settings.
+The internal helper cannot be called directly by anonymous, authenticated or
+service roles. All 76 application tables force RLS, with no anonymous/PUBLIC
+table grants, public definers, public buckets or client kitchen RPC grants.
+All 38 managed role checks roll their synthetic Auth/shop rows back, and
+advisors report no warnings or errors. The local guard recognizes the reserved
+alarm and VAPID values before generation; no new key, subscription, extension
+or scheduler is created here. Actual deployment and credential values remain
+private, with the reviewed history policy unchanged.
+
 The [saved preparation-tap recovery endpoint](m32-kitchen-tap-recovery.md)
 checks both the enrolled device and current PIN while preserving earlier tap
 actors. Explicit closure removes matching prepared plans under the original

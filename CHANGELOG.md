@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Security
 
+- An older unconfirmed kitchen tap can no longer defeat a newer owner status undo. An undone Got it remains historical proof, while Ready requires a current acknowledgement; undoing Ready keeps its still-current Got it. Original offline taps remain available for review, with prices and payments unchanged. Reserved alarm and VAPID values are covered by the credential guard before generation. M32 alarms/push and full acceptance remain open.
+
 - Saved kitchen taps can be checked after a fresh staff PIN without changing the original actor or resending an earlier gesture. Explicit closure is journaled before delivery, recovers lost replies and prevents a late original request from preparing the order. Full original tickets remain available to copy; prices and payments stay unchanged. M32 alarms/push and final acceptance remain open, with the screen flag off and publication held.
 
 - An opt-in shared preparation screen caches actual tickets and journals Got it/Ready taps before delivery. A device-authenticated private realtime relay wakes scoped reads without sending service credentials, customer details or money to the screen. Original sources and PIN sessions remain bound across offline reload and retries. Alarm/push and final M32 acceptance remain open; `kitchenScreen` stays off by default and publication stays held.
