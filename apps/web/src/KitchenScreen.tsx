@@ -35,7 +35,7 @@ function Ticket({ticket,state,now,busy,phoneHidden,onTap,onCopy}: {ticket: Kitch
   const closing=state.taps.some(tap=>tap.action.orderId===ticket.id&&!tap.receipt&&!tap.closure&&tap.closeIntents?.length);
   const acknowledged = Boolean(ticket.acknowledgement) || taps.some(tap => kitchenTapAcknowledges(state,ticket,tap));
   const ready = ticketStage(state,ticket) === 'Ready', cancelled = ticket.status === 'cancelled';
-  const late = !acknowledged && !cancelled && now >= ticket.createdAt + state.warningMinutes * 60000;
+  const late = state.warningMinutes !== null && !acknowledged && !cancelled && now >= ticket.createdAt + state.warningMinutes * 60000;
   const canReady = acknowledged && !ready && ticket.priced && Boolean(kitchenReadyPath(ticket)?.length) && state.access.permissions.includes('orders.ready');
   const expired = now >= state.access.expiresAt;
   const changed = !acknowledged && state.taps.some(tap=>tap.action.orderId===ticket.id&&tap.action.contentHash!==ticket.contentHash);

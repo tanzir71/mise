@@ -23,7 +23,7 @@ export interface KitchenScreenState {
   access: StaffDeviceAccess;
   at: number;
   outletName: string;
-  warningMinutes: number;
+  warningMinutes: number | null;
   after: KitchenCursor | null;
   bootstrapWatermark: number | null;
   cursor: number | null;
@@ -46,7 +46,7 @@ export function kitchenScreenWire(state: KitchenScreenState) {
 export async function parseKitchenScreenState(value: unknown): Promise<KitchenScreenState> {
   if (!object(value) || !exact(value, 'v,id,revision,access,at,outletName,warningMinutes,after,bootstrapWatermark,cursor,until,tickets,nextPosition,taps') ||
       ![1,2].includes(value.v as number) || !isDeviceId(value.id) || !isDeviceId(value.revision) || !time(value.at) || typeof value.outletName !== 'string' ||
-      typeof value.warningMinutes !== 'number' || !Number.isInteger(value.warningMinutes) || value.warningMinutes < 1 || value.warningMinutes > 1440 ||
+      value.warningMinutes !== null && (typeof value.warningMinutes !== 'number' || !Number.isInteger(value.warningMinutes) || value.warningMinutes < 1 || value.warningMinutes > 1440) ||
       ![value.bootstrapWatermark,value.cursor,value.until].every(v => v === null || sequence(v)) || !Array.isArray(value.tickets) || !Array.isArray(value.taps) ||
       !sequence(value.nextPosition) || value.nextPosition < 1) throw invalid();
   const access = parseStaffDeviceAccess(value.access);
@@ -112,7 +112,16 @@ export function receiveKitchenChanges(state: KitchenScreenState, page: KitchenCh
 }
 export function appendKitchenTap(state: KitchenScreenState, source: KitchenTicket, action: KitchenAction, revision: string): KitchenScreenState {
   const ticket = state.tickets.find(ticket => ticket.id === source.id);
-  if (!ticket || JSON.stringify(kitchenTicketWire(ticket)) !== JSON.stringify(kitchenTicketWire(source)) ||
+  const wire = JSON.stringify(kitchenTicketWire(source)),ack=ticket?.acknowledgement;
+  // A current read can install this screen's real Got it while Ready is being
+  // saved from the displayed pre-ACK ticket. Retain that exact source/action;
+  // only the known acknowledgement's status/clock metadata may have advanced.
+  const ownAcknowledgement = ticket && action.type==='kitchen.ready' && ack?.id===action.parentAckId &&
+    ack.sourceRevision===source.revision && ack.revision===ticket.revision && ack.status===ticket.status &&
+    state.taps.some(parent=>parent.action.id===ack.id&&parent.action.type==='kitchen.acknowledge'&&JSON.stringify(kitchenTicketWire(parent.source))===wire) &&
+    JSON.stringify(kitchenTicketWire({...source,revision:ticket.revision,status:ticket.status,updatedAt:ticket.updatedAt,
+      statusChangedAt:ticket.statusChangedAt,acknowledgement:ack}))===JSON.stringify(kitchenTicketWire(ticket));
+  if (!ticket || JSON.stringify(kitchenTicketWire(ticket)) !== wire && !ownAcknowledgement ||
       action.revision !== source.revision || action.contentHash !== source.contentHash || action.orderId !== source.id || action.outletId !== source.outletId ||
       state.taps.some(tap=>!tap.receipt&&!tap.closure&&tap.closeIntents?.length&&tap.action.orderId===action.orderId)||
       state.taps.some(tap => tap.action.id === action.id || !tap.receipt && !tap.review && !tap.closure && !tap.closeIntents?.length && sameKitchenSession(tap.access, state.access) &&

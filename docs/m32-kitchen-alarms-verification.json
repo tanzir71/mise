@@ -1,0 +1,165 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T03:17:06.7247475Z",
+  "flag": {
+    "name": "kitchenScreen",
+    "default": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "unitFiles": 198,
+    "unitCases": 4091,
+    "pagesBrowserCases": 522,
+    "pagesBrowserDuration": "17.8m",
+    "rootBrowserCases": 36,
+    "rootCompiledAppCases": 29,
+    "rootNativeStorageCases": 7,
+    "rootBuild": true,
+    "pagesBuildRestored": true,
+    "visualScope": "Changed kitchen pages only",
+    "visualComparisons": 25,
+    "visualGeneratedAt": "2026-11-22T03:16:08.811Z",
+    "horizontalOverflow": 0
+  },
+  "privacy": {
+    "fullHistory": true,
+    "generatedArtifacts": true,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "knownPrivateValuesChecked": 10,
+    "reviewedOlderNonsecretFindings": 22
+  },
+  "deployment": {
+    "newMigrationApplied": false,
+    "newAlarmWorkerDeployed": false,
+    "newKeysGenerated": 0,
+    "newScheduledJobs": 0,
+    "newBrowserSubscriptions": 0,
+    "newProviderDeliveries": 0,
+    "githubWorkflowsHeld": true,
+    "pagesPublicationHeld": true
+  },
+  "alarmWorkerBundle": {
+    "bytes": 19404,
+    "sha256": "6bd1335b52625df6bda1e4a94295f1ff5e0825af38ef75f0e9a177ffc7e3575a",
+    "sourceFiles": 11,
+    "currentSourceHashesMatch": true,
+    "runtimeImports": []
+  },
+  "sources": {
+    "apps/web/src/KitchenScreen.tsx": {
+      "bytes": 18947,
+      "sha256": "799c1edcf26b697da55c97c88cff0df9a4efb52a09bca335abb546a46f4a782d"
+    },
+    "apps/web/src/data/kitchen-screen-session.ts": {
+      "bytes": 11128,
+      "sha256": "70b5cb088c5e56533924dfd9caaef0812307f85a995317f61aa54380e0b766f0"
+    },
+    "package.json": {
+      "bytes": 1983,
+      "sha256": "7e8c83777e4fe951be672c657f977a237285071a4299b55ab71855bc54208312"
+    },
+    "packages/core/desk-push.ts": {
+      "bytes": 2947,
+      "sha256": "b481532d2a97c0d822a48009500c15261ce4872672ae1eb8acffd7b9cf40b36a"
+    },
+    "packages/core/kitchen-alarms.ts": {
+      "bytes": 2450,
+      "sha256": "9c568281310c4321e4ce85bab6c49a5ec26cfd0554d41b57d7c3c73125332fb6"
+    },
+    "packages/core/kitchen-screen.ts": {
+      "bytes": 14511,
+      "sha256": "4791459279524afaffd73e18bd04532cf7ae709eb442fc8fd76dba56366e4ebf"
+    },
+    "packages/core/kitchen-tickets.ts": {
+      "bytes": 10191,
+      "sha256": "65abdc9ba2979941ac67509b8e669cb1606f2d9fc67ef2cb45aeae3d7ce192b1"
+    },
+    "pnpm-lock.yaml": {
+      "bytes": 383100,
+      "sha256": "547a2fd5b98d9a0160f56cff3a4c70fedfed95b3bfcd33dab68ba2caa0e5db3f"
+    },
+    "supabase/config.toml": {
+      "bytes": 2386,
+      "sha256": "bdb3f4856e694cf1c038f17e355c310b9666f4f63323239e125ef771f2801ba3"
+    },
+    "supabase/functions/.env.example": {
+      "bytes": 956,
+      "sha256": "0f4fb93dac0a4d228ae944a2fbfe2d8130d728e0182fc889f57a8a0088ec0a4b"
+    },
+    "supabase/functions/_shared/desk-push-sender.ts": {
+      "bytes": 2090,
+      "sha256": "66519e761d759b91baef286c58d4140a5eb2f5ec2bd78a07b29b7ecca89a43ec"
+    },
+    "supabase/functions/_shared/kitchen-alarms-handler.ts": {
+      "bytes": 7048,
+      "sha256": "367dfe2e18b738ccb1d4885f0026293b3f5fc3a21c9312db26e64cf2b51c0826"
+    },
+    "supabase/functions/_shared/kitchen-tickets-handler.ts": {
+      "bytes": 11432,
+      "sha256": "842b9066e312872d550690ef33b590966a0c368d39018edd9ae93b66ce63d1d6"
+    },
+    "supabase/functions/kitchen-alarms/index.ts": {
+      "bytes": 631,
+      "sha256": "4b395de7c40352b81bb9324cd29565eb633245e032ed5e1d2848a832f7862097"
+    },
+    "supabase/migrations/20261122011706_kitchen_alarm_tasks.sql": {
+      "bytes": 28671,
+      "sha256": "039cb0b2c36d77b2d6aa96927c09acf72134c8bb6af199ba910272472b035c55"
+    },
+    "tests/desk-push.test.ts": {
+      "bytes": 5868,
+      "sha256": "5d3d1f718356dc0958509899ee020ffd2b47953b7589f7cc61c7d8c37c3803c1"
+    },
+    "tests/e2e/kitchen-screen-ui.spec.ts": {
+      "bytes": 18867,
+      "sha256": "c61426aee7a3356c6e6b4794dba3f9ead628654f8f07a358cb379f4c26670f94"
+    },
+    "tests/fixtures/kitchen-ui-browser.ts": {
+      "bytes": 1511,
+      "sha256": "b64e93613051d38e396b0a1fc53495b7c6662a871d72fcbff3500104ddae6bfc"
+    },
+    "tests/fixtures/kitchen-ui-service.ts": {
+      "bytes": 17465,
+      "sha256": "717dc6f8bc58019ef9a9ab693b17df74c9372790baa01d5862001921e38d401f"
+    },
+    "tests/kitchen-actions.test.ts": {
+      "bytes": 43633,
+      "sha256": "e138a9812478d1d6b04504d4b1ce643f65241f13d4820590fb08fc4edd62099f"
+    },
+    "tests/kitchen-alarm-tasks.test.ts": {
+      "bytes": 18864,
+      "sha256": "80e87ac200f8e01d998c981c485379f788b43634d83fea8211a8cd3537153d45"
+    },
+    "tests/kitchen-alarms-handler.test.ts": {
+      "bytes": 4055,
+      "sha256": "a4c2df4625aacf2d5747220cad1c0dcdfa2df97714ce3a57de2bc2bab65e9d4b"
+    },
+    "tests/kitchen-alarms.test.ts": {
+      "bytes": 3723,
+      "sha256": "5036a25885c251fe4292dde6d8391544727ae680c6f6f00be86b0a88c227ae43"
+    },
+    "tests/kitchen-screen.test.ts": {
+      "bytes": 28996,
+      "sha256": "a63d730245e496b85167d7d7fc4de5c9d08bffcafa5894d9ce0bb2c51e98162f"
+    }
+  },
+  "screenshots": [
+    "qa/screens/m32-kitchen-board-phone-390.png",
+    "qa/screens/m32-kitchen-board-tablet-1440.png",
+    "qa/screens/m32-kitchen-undone-tablet-1440.png"
+  ],
+  "remaining": [
+    "Per-desk subscription registration and revocation",
+    "Durable per-recipient delivery and service-worker notification targets",
+    "Scoped desk Inbox and owner queue integration",
+    "Owner warning controls and private scheduler configuration",
+    "Active-ticket startup and genuine hosted/provider/physical acceptance"
+  ],
+  "postVerificationNormalization": "Removed an extra blank line at the end of the unapplied migration; SQL statements are identical."
+}

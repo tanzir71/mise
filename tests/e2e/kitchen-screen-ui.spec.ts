@@ -12,6 +12,20 @@ async function enterNextPin(page:Page){
  await page.getByLabel('Four-digit PIN',{exact:true}).fill('0042');await page.getByRole('button',{name:'Sign in',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Kitchen',exact:true})).toBeVisible();await installKitchenUi(page);
 }
+test('live outlet warning settings reach the actual screen and remain disabled after an offline reload',async({page,context})=>{
+ await initialize(page);const before=await service.inspect();await service.ageOrder();
+ await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toBeVisible();
+ await service.setAlarmSettings(true,5);await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toHaveCount(0);
+ await service.setAlarmSettings(false,2);await page.getByRole('button',{name:'Check now',exact:true}).click();
+ await expect.poll(async()=>page.evaluate(()=>window.miseKitchenUiTest.inspect())).toMatchObject({warningMinutes:null});
+ await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);await page.reload();
+ await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toHaveCount(0);
+ await installKitchenUi(page);expect(await page.evaluate(()=>window.miseKitchenUiTest.inspect())).toMatchObject({warningMinutes:null});
+ await context.setOffline(false);await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();
+ await service.setAlarmSettings(true,2);await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByText('Waiting for acknowledgement',{exact:true})).toHaveCount(0);
+ await expect.poll(async()=>service.inspect()).toMatchObject({receipts:1,payment:before.payment,total:before.total});
+});
 test('native offline Got it and Ready survive reload and converge once without changing payment',async({page,context})=>{
  await initialize(page);const before=await service.inspect();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
@@ -25,10 +39,12 @@ test('native offline Got it and Ready survive reload and converge once without c
  const text=await page.locator('main').innerText();for(const privateText of ['PRIVATE MESSAGE','PRIVATE CUSTOMER','PRIVATE ADDRESS','14155550199'])expect(text).not.toContain(privateText);
 });
 test('a SQL-committed acknowledgement with a lost reply retries the original ID and creates one receipt',async({page})=>{
+ const requests:string[]=[];page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname.endsWith('/functions/v1/kitchen-actions'))requests.push(request.postDataJSON().action.id);});
  await initialize(page);service.loseNext();await page.getByRole('button',{name:'Got it',exact:true}).click();
- await expect.poll(async()=>service.inspect()).toMatchObject({receipts:1});await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toBeVisible();
- const saved=await page.evaluate(()=>window.miseKitchenUiTest.inspect());await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toHaveCount(0);
- expect((await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0]).toMatchObject({id:saved!.taps[0].id,receipt:saved!.taps[0].id});expect(await service.inspect()).toMatchObject({receipts:1,actionCalls:2});
+ await expect.poll(async()=>service.inspect()).toMatchObject({receipts:1});
+ const saved=await page.evaluate(()=>window.miseKitchenUiTest.inspect());await page.getByRole('button',{name:'Check now',exact:true}).click();
+ await expect.poll(async()=>page.evaluate(()=>window.miseKitchenUiTest.inspect())).toMatchObject({taps:[{id:saved!.taps[0].id,receipt:saved!.taps[0].id}]});
+ expect(requests.length).toBeGreaterThanOrEqual(2);expect(requests.every(id=>id===saved!.taps[0].id)).toBe(true);expect(await service.inspect()).toMatchObject({receipts:1});
 });
 test('a committed order reaches the kitchen through PostgreSQL notify, private WebSocket relay and scoped HTTP within two seconds',async({page})=>{
  await initialize(page);await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();expect(service.liveCounts().connections).toBeGreaterThan(0);

@@ -129,6 +129,11 @@ export async function startKitchenUiService(){
    await f.db.transaction(async tx=>{const keys=Object.keys(audit.values);await tx.query(`insert into public.events(${keys.join(',')}) values(${keys.map((_,i)=>'$'+(i+1)).join(',')})`,Object.values(audit.values));const changes=Object.entries(record.values).filter(([key])=>key!=='id');await tx.query(`update public.orders set ${changes.map(([key],i)=>key+'=$'+(i+1)).join(',')} where id=$${changes.length+1}`,[...changes.map(([,value])=>value),order.id]);});
   },
   addOrder,
+  async ageOrder(){await f.db.query('update public.orders set created_at=$1 where id=$2',[Date.now()-180000,orderId]);},
+  async setAlarmSettings(enabled:boolean,minutes:number){
+   const row=(await f.db.query<{revision:number}>('select revision from public.kitchen_alarm_settings where outlet_id=$1',[deviceId(11)])).rows[0];
+   return f.asRole(1,'authenticated','select public.set_kitchen_alarm_settings($1,$2,$3,$4,$5) data',[deviceId(11),row?.revision??0,enabled,minutes,newKitchenId()]);
+  },
   liveCounts(){return {connections:subscriptions.size,broadcasts};},
   async inspect(){const raw=(await f.db.query<Record<string,unknown>>('select * from public.orders where id=$1',[orderId])).rows[0];const order=decodeCommandRecord('orders',raw);return {status:order.status,payment:order.payment,total:order.total,actionCalls,actionOrigins:[...actionOrigins],recoveryCalls,receipts:(await f.db.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts')).rows[0].n,
     closures:(await f.db.query<{n:number}>('select count(*)::int n from private.kitchen_tap_closures')).rows[0].n};},

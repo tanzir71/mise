@@ -15,7 +15,7 @@ const sequence = (v: unknown): v is number => typeof v === 'number' && Number.is
 const unavailable = () => Error('Preparation tickets are unavailable.');
 class Denied extends Error {}
 
-async function projectRow(value: unknown, access: StaffDeviceAccess, at: number): Promise<KitchenTicket> {
+export async function projectKitchenTicketRow(value: unknown, access: Pick<StaffDeviceAccess,'businessId'|'outletId'>, at: number): Promise<KitchenTicket> {
   if (!object(value) || !isDeviceId(value.id) || value.outletId !== access.outletId || typeof value.linesJson !== 'string' || typeof value.tableJson !== 'string' ||
       typeof value.priced !== 'boolean' || !sequence(value.revision) || value.revision < 1 || ![value.createdAt,value.updatedAt,value.statusChangedAt].every(time)) throw unavailable();
   const lines: unknown = JSON.parse(value.linesJson), table: unknown = JSON.parse(value.tableJson);
@@ -36,12 +36,12 @@ function identity(a: StaffDeviceAccess, b: StaffDeviceAccess) {
 export async function projectKitchenRead(raw: unknown, device: string, session: string, store: KitchenTicketsStore, limit: number, change: boolean) {
   if (raw === null) throw new Denied();
   if (!object(raw) || raw.v !== 1 || typeof raw.outletNameJson !== 'string' || !time(raw.at) || !sequence(raw.watermark) ||
-      typeof raw.warningMinutes !== 'number' || !Number.isInteger(raw.warningMinutes) || raw.warningMinutes < 1 || raw.warningMinutes > 1440 ||
+      raw.warningMinutes !== null && (typeof raw.warningMinutes !== 'number' || !Number.isInteger(raw.warningMinutes) || raw.warningMinutes < 1 || raw.warningMinutes > 1440) ||
       !Array.isArray(raw.orders) || raw.orders.length > limit) throw unavailable();
   const access = parseStaffDeviceAccess(raw.access), outletName: unknown = JSON.parse(raw.outletNameJson);
   if (!access.permissions.includes('orders.read')) throw new Denied();
   if (typeof outletName !== 'string') throw unavailable();
-  const tickets = await Promise.all(raw.orders.map(row => projectRow(row, access, raw.at as number)));
+  const tickets = await Promise.all(raw.orders.map(row => projectKitchenTicketRow(row, access, raw.at as number)));
   const sources = tickets.map(ticket => ({orderId: ticket.id, contentHash: ticket.contentHash, revision: ticket.revision}));
   const ackRaw = await store.acknowledgements(device, session, sources);
   if (ackRaw === null) throw new Denied();

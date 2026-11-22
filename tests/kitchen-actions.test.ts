@@ -188,6 +188,16 @@ it('allows explicitly granted counter preparation without giving it to every cou
   expect((await gateway(sql)(request(shop, ready, true))).status).toBe(200);
 }));
 
+it.each([0,1,2,3])('delivers pack %s Ready from its original displayed pre-ACK source after that exact Got it commits',async index=>rollback(async sql=>{
+ const shop=shops[index],original=await current(sql,shop),{receipt:ack}=await gotIt(sql,shop);
+ expect((await current(sql,shop)).revision).toBeGreaterThanOrEqual(original.revision);
+ const action=await prepareKitchenAction(original,'kitchen.ready',ack.id),response=await gateway(sql)(request(shop,action));
+ expect(response.status,lastRpcError+'; '+await response.clone().text()).toBe(200);
+ const result=await response.json() as KitchenReceipt,saved=await current(sql,shop);
+ expect(result).toMatchObject({id:action.id,sourceRevision:original.revision,parentAckId:ack.id,status:['ready','packed','ready_called','ready'][index],contentHash:action.contentHash});
+ for(const field of ['lines','payment','customer','sourceText','subtotal','deliveryFee','discount','total'] as const)expect(saved[field]).toEqual(original[field]);
+}));
+
 it.each(['unpriced','unaccepted-swap','all-unavailable'] as const)('records Got it for %s without bypassing commercial readiness', async kind => rollback(async sql => {
   const shop = shops[0], before = await current(sql, shop), lines = structuredClone(before.lines);
   if (kind === 'unpriced') {lines[0].unitPrice = null; lines[0].lineTotal = null;}

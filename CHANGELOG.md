@@ -4,7 +4,13 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ## [Unreleased]
 
+### Fixed
+
+- A Ready gesture keeps its original ticket and acknowledgement parent when its own accepted Got it reaches the cache during the save. Changed preparation content, undone acknowledgements and unrelated newer revisions still require review; original receipts and money stay unchanged.
+
 ### Security
+
+- In progress: server-owned kitchen alarms create audited Inbox tasks and cancel pending notifications on a genuine Got it. Configured or disabled warnings pass through the scoped reader and offline cache. Web Push request encryption, provider restrictions and deadlines are verified locally; subscriptions, scheduled delivery, desk Inbox/queue integration and hosted acceptance remain open. The new migration/worker are not deployed and kitchen flags stay off.
 
 - An older unconfirmed kitchen tap can no longer defeat a newer owner status undo. An undone Got it remains historical proof, while Ready requires a current acknowledgement; undoing Ready keeps its still-current Got it. Original offline taps remain available for review, with prices and payments unchanged. Reserved alarm and VAPID values are covered by the credential guard before generation. M32 alarms/push and full acceptance remain open.
 

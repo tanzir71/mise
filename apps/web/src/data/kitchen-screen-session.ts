@@ -96,7 +96,8 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
     },
     async tap(inputTicket: KitchenTicket, kind: KitchenActionKind) {
       // Capture the displayed ticket and gesture clock before ANY asynchronous
-      // profile/cache work. A newer cached ticket must be reviewed separately.
+      // profile/cache work. Changed preparation content needs review; the
+      // known Got it may advance while this original Ready gesture is saved.
       const source = structuredClone(inputTicket), occurredAt = now();
       const before = await read();
       if (!before) throw new DeviceScreenRequestError('review');

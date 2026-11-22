@@ -10,6 +10,12 @@ import {parseKitchenTapRecovery,retainedKitchenTap,type KitchenTapClosure} from 
 const base='/mise/app/',opened:ScreenJournal[]=[];
 afterEach(()=>{for(const journal of opened)journal.close();opened.length=0;vi.restoreAllMocks();});
 async function fixture(){const f=await kitchenScreenFixture(),factory=new IDBFactory(),journal=await openScreenJournal(base,factory);opened.push(journal);const record=await journal.replace(await journal.read(),f.screen);await journal.replaceKitchen(record,null,f.state);return {...f,factory,journal,record};}
+it('retains a disabled outlet warning through an actual native cache close and reopen',async()=>{
+ const f=await fixture(),state=receiveKitchenChanges(f.state,{...f.page,warningMinutes:null,nextSeq:8,watermark:8,removed:[]},newKitchenId());
+ await f.journal.replaceKitchen(f.record,f.state,state);f.journal.close();const reopened=await openScreenJournal(base,f.factory);opened.push(reopened);
+ const read=await reopened.readKitchen(f.record);expect(read?.warningMinutes).toBeNull();expect(read?.tickets).toEqual(f.state.tickets);expect(read?.taps).toEqual(f.state.taps);
+ expect((await parseKitchenScreenState(kitchenScreenWire(state))).warningMinutes).toBeNull();
+});
 function receipt(f:Awaited<ReturnType<typeof kitchenScreenFixture>>,action:Awaited<ReturnType<typeof prepareKitchenAction>>):KitchenReceipt{
  return {v:1,id:action.id,type:action.type,businessId:f.access.businessId,outletId:action.outletId,orderId:action.orderId,deviceId:f.device.id,sessionId:f.session.id,memberId:f.session.memberId,
   sourceRevision:action.revision,revision:action.revision+1,contentHash:action.contentHash,parentAckId:action.parentAckId,occurredAt:action.occurredAt,acceptedAt:f.now,status:'kitchen_seen',transitionEventIds:action.transitionEventIds.slice(0,1)};
@@ -23,6 +29,26 @@ it('a newer ticket can undo Got it without erasing its actual historical receipt
  expect(kitchenTapAcknowledges(accepted,undone,accepted.taps[0])).toBe(false);expect(accepted.taps[0].receipt).toEqual(actual);
  const stillCurrent={...undone,revision:undone.revision+2,status:'cooking' as const,acknowledgement:actual};
  expect(kitchenTapAcknowledges(accepted,stillCurrent,accepted.taps[0])).toBe(true);
+});
+it('retains Ready against the displayed source when its own accepted Got it reaches the cache before the gesture is saved',async()=>{
+ const f=await fixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId());
+ const actual=receipt(f,action),accepted=finishKitchenTap(queued,queued.taps[0],actual,newKitchenId());
+ const current={...f.ticket,status:actual.status,revision:actual.revision,updatedAt:actual.acceptedAt,statusChangedAt:actual.acceptedAt,acknowledgement:actual};
+ const changed=receiveKitchenChanges(accepted,{...f.page,tickets:[current],nextSeq:8,watermark:8,removed:[]},newKitchenId());
+ await f.journal.replaceKitchen(f.record,f.state,changed);
+ const screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});await screen.tap(f.ticket,'kitchen.ready');
+ const saved=(await f.journal.readKitchen(f.record))!;expect(saved.taps).toHaveLength(2);expect(saved.taps[0]).toEqual(changed.taps[0]);
+ expect(saved.taps[1].source).toEqual(f.ticket);expect(saved.taps[1].action).toMatchObject({revision:f.ticket.revision,contentHash:f.ticket.contentHash,parentAckId:actual.id});
+ expect(saved.tickets).toEqual(changed.tickets);screen.dispose();
+});
+it.each(['undone','newer revision'] as const)('does not admit a stale Ready through %s after the known acknowledgement',async change=>{
+ const f=await fixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId());
+ const actual=receipt(f,action),accepted=finishKitchenTap(queued,queued.taps[0],actual,newKitchenId());
+ const ticket={...f.ticket,status:change==='undone'?'confirmed' as const:actual.status,revision:actual.revision+1,
+  updatedAt:actual.acceptedAt,statusChangedAt:actual.acceptedAt,acknowledgement:change==='undone'?null:actual};
+ const changed=receiveKitchenChanges(accepted,{...f.page,tickets:[ticket],nextSeq:8,watermark:8,removed:[]},newKitchenId());
+ await f.journal.replaceKitchen(f.record,f.state,changed);const screen=createKitchenScreenSession(f.journal,f.record,{blank:async()=>{},now:()=>f.now});
+ await expect(screen.tap(f.ticket,'kitchen.ready')).rejects.toThrow();expect(await f.journal.readKitchen(f.record)).toEqual(changed);screen.dispose();
 });
 it('native Ready after an undone Got it needs a fresh parent while keeping the historical original unchanged',async()=>{
  const f=await fixture(),action=await prepareKitchenAction(f.ticket,'kitchen.acknowledge',null,f.now),queued=appendKitchenTap(f.state,f.ticket,action,newKitchenId());

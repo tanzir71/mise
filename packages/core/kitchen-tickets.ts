@@ -18,7 +18,8 @@ export interface KitchenPage {
   access: StaffDeviceAccess;
   outletName: string;
   at: number;
-  warningMinutes: number;
+  /** null means the outlet has disabled unacknowledged warnings. */
+  warningMinutes: number | null;
   watermark: number;
   tickets: KitchenTicket[];
   next: KitchenCursor | null;
@@ -67,7 +68,7 @@ export function kitchenTicketWire(ticket: KitchenTicket) {
     createdAt:ticket.createdAt,updatedAt:ticket.updatedAt,statusChangedAt:ticket.statusChangedAt,timezone:ticket.timezone,
     contentHash:ticket.contentHash,priced:ticket.priced,acknowledgement:ticket.acknowledgement};
 }
-export async function parseKitchenTicket(value: unknown, access: StaffDeviceAccess, at: number): Promise<KitchenTicket> {
+export async function parseKitchenTicket(value: unknown, access: Pick<StaffDeviceAccess,'businessId'|'outletId'>, at: number): Promise<KitchenTicket> {
   if (!object(value) || !exact(value, 'id,outletId,businessType,number,type,source,table,scheduledFor,status,lines,revision,createdAt,updatedAt,statusChangedAt,timezone,contentHash,priced,acknowledgement') ||
       !isDeviceId(value.id) || value.outletId !== access.outletId || !Object.hasOwn(orderFlows, value.businessType as string) ||
       typeof value.number !== 'string' || !['delivery','pickup','dine_in','counter'].includes(value.type as string) ||
@@ -92,8 +93,8 @@ export async function parseKitchenTicket(value: unknown, access: StaffDeviceAcce
 }
 export async function parseKitchenPage(value: unknown, expected: {device: SharedDevice; session: StaffDeviceSession}, after: KitchenCursor | null = null, limit = 50): Promise<KitchenPage> {
   if (!object(value) || !exact(value, 'v,access,outletName,at,warningMinutes,watermark,tickets,next') || value.v !== 1 ||
-      typeof value.outletName !== 'string' || !time(value.at) || typeof value.warningMinutes !== 'number' || !Number.isInteger(value.warningMinutes) ||
-      value.warningMinutes < 1 || value.warningMinutes > 1440 || typeof value.watermark !== 'number' || !Number.isSafeInteger(value.watermark) || value.watermark < 0 ||
+      typeof value.outletName !== 'string' || !time(value.at) || value.warningMinutes !== null && (typeof value.warningMinutes !== 'number' || !Number.isInteger(value.warningMinutes) ||
+      value.warningMinutes < 1 || value.warningMinutes > 1440) || typeof value.watermark !== 'number' || !Number.isSafeInteger(value.watermark) || value.watermark < 0 ||
       !Array.isArray(value.tickets) || !Number.isInteger(limit) || limit < 1 || limit > 100 || value.tickets.length > limit) throw invalid();
   const access = parseStaffDeviceAccess(value.access, expected), cursor = parseKitchenCursor(after), next = parseKitchenCursor(value.next);
   if (!access.permissions.includes('orders.read') || access.expiresAt <= value.at) throw invalid();

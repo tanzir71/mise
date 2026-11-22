@@ -88,6 +88,11 @@ verify_jwt = false
 [functions.kitchen-recovery]
 verify_jwt = false
 
+# Dedicated server scheduler credential, verified by the handler; never a user
+# session, device token, project key or query-string credential.
+[functions.kitchen-alarms]
+verify_jwt = false
+
 # Own authentication: screen-owned secret, confirmed pairing and live PIN session.
 # Short pairing codes can request approval; they cannot enroll a screen alone.
 [functions.device-access]
