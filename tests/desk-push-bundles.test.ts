@@ -2,12 +2,13 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {beforeAll,expect,it} from 'vitest';
 import {generateVAPIDKeys} from 'web-push';
+import {createHmac,randomUUID} from 'node:crypto';
 // @ts-expect-error Deployment packaging is a standalone Node module.
 import {edgeBundle} from '../scripts/edge-bundle.mjs';
 interface Bundle {files:{content:string}[];runtimeImports:string[];sourceHashes:Record<string,string>}
-let worker:Bundle,desk:Bundle,loadNumber=0;
+let worker:Bundle,desk:Bundle,dispatch:Bundle,loadNumber=0;
 const vapid=generateVAPIDKeys(),key='A'.repeat(43),webPushUrl=pathToFileURL(createRequire(import.meta.url).resolve('web-push')).href;
-beforeAll(async()=>{worker=await edgeBundle('kitchen-push');desk=await edgeBundle('desk-notifications');},30000);
+beforeAll(async()=>{worker=await edgeBundle('kitchen-push');desk=await edgeBundle('desk-notifications');dispatch=await edgeBundle('kitchen-dispatch');},30000);
 async function execute(bundle:Bundle,env:Record<string,string>,send:typeof fetch,work:(handler:(request:Request)=>Promise<Response>)=>Promise<void>){
  const runtime=globalThis as unknown as {Deno?:unknown},oldDeno=runtime.Deno,oldFetch=globalThis.fetch;let handler:((request:Request)=>Promise<Response>)|undefined;
  try{
@@ -39,6 +40,24 @@ it('the packaged worker reads its actual private runtime configuration and compl
 });
 it('the packaged worker fails closed without configured secrets',async()=>{
  await execute(worker,{},never,async handler=>{const response=await handler(new Request('https://rpc.test/functions/v1/kitchen-push',{method:'POST'}));expect(response.status).toBe(503);expect(await response.text()).not.toContain('sb_secret');});
+});
+it('the packaged coordinator retains its reviewed alarm, push and pinned encryption dependencies without embedding private configuration',()=>{
+ expect(dispatch.runtimeImports).toEqual(['npm:web-push@4.0.0']);
+ for(const path of ['supabase/functions/_shared/kitchen-dispatch-handler.ts','supabase/functions/_shared/kitchen-alarms-handler.ts','supabase/functions/_shared/kitchen-push-handler.ts','supabase/functions/_shared/desk-push-sender.ts'])expect(dispatch.sourceHashes).toHaveProperty(path);
+ expect(dispatch.files[0].content).not.toContain(vapid.privateKey);expect(dispatch.files[0].content).not.toContain(workerEnv.MISE_SERVICE_API_KEY);
+});
+it('the packaged coordinator denies unauthenticated requests and fails closed with absent configuration before any SQL or provider call',async()=>{
+ await execute(dispatch,workerEnv,never,async handler=>{expect((await handler(new Request('https://rpc.test/functions/v1/kitchen-dispatch',{method:'POST'}))).status).toBe(401);});
+ await execute(dispatch,{},never,async handler=>{const response=await handler(new Request('https://rpc.test/functions/v1/kitchen-dispatch',{method:'POST'}));expect(response.status).toBe(503);expect(await response.text()).not.toContain('sb_secret');});
+});
+it('the packaged coordinator uses real private runtime configuration for a counts-only empty coordinated request',async()=>{
+ const calls:string[]=[];const send:typeof fetch=async(url,init)=>{const path=new URL(String(url)).pathname;calls.push(path);expect(new Headers(init?.headers).get('apikey')).toBe('sb_secret_test_only');expect(new Headers(init?.headers).has('authorization')).toBe(false);
+  if(path==='/rest/v1/rpc/claim_kitchen_dispatch')return Response.json(true);
+  expect(['/rest/v1/rpc/prepare_kitchen_alarms','/rest/v1/rpc/prepare_kitchen_push']).toContain(path);return Response.json({v:1,at:Date.now(),jobs:[]});};
+ const at=Date.now(),nonce=randomUUID(),mac=createHmac('sha256',key).update(`mise:kitchen-dispatch:v1\n${at}\n${nonce}\n25`).digest('hex');
+ await execute(dispatch,workerEnv,send,async handler=>{const response=await handler(new Request('https://rpc.test/functions/v1/kitchen-dispatch',{method:'POST',headers:{authorization:`Bearer v1.${at}.${nonce}.${mac}`,'Content-Type':'application/json'},body:'{}'}));expect(response.status).toBe(200);expect(await response.json()).toMatchObject({alarms:{processed:0,failed:0},push:{processed:0,failed:0},unconfirmedBatches:0});});
+ expect(calls[0]).toBe('/rest/v1/rpc/claim_kitchen_dispatch');
+ expect(calls).toContain('/rest/v1/rpc/prepare_kitchen_alarms');expect(calls).toContain('/rest/v1/rpc/prepare_kitchen_push');
 });
 it('the packaged owner endpoint forwards the original JWT and supports cleanup without a private VAPID key',async()=>{
  const env={SUPABASE_URL:'https://rpc.test',MISE_PUBLISHABLE_API_KEY:'sb_publishable_test_only',MISE_ALLOWED_ORIGINS:'https://desk.test'},id='00000000000000000000000001';let calls=0;

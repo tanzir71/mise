@@ -8,7 +8,8 @@ export interface KitchenAlarmWork {
  businessId:string;outletId:string;orderId:string;version:number;stamp:string;contentHash:string|null;
  taskId:string;eventId:string;resolveEventId:string;
 }
-export interface KitchenAlarmsStore {prepare(limit:number):Promise<unknown>;finish(work:KitchenAlarmWork):Promise<unknown>}
+export type KitchenAlarmRetry=Pick<KitchenAlarmWork,'businessId'|'outletId'|'orderId'|'version'|'stamp'>;
+export interface KitchenAlarmsStore {prepare(limit:number):Promise<unknown>;finish(work:KitchenAlarmWork):Promise<unknown>;defer?(work:KitchenAlarmRetry):Promise<unknown>;claimDispatch?(nonce:string,issuedAt:number,limit:number):Promise<unknown>}
 const object=(v:unknown):v is Record<string,unknown>=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const exact=(v:Record<string,unknown>,keys:string)=>Object.keys(v).sort().join(',')===keys.split(',').sort().join(',');
 const unavailable=()=>Error('Kitchen alarms are unavailable.');
@@ -17,8 +18,9 @@ const time=(v:unknown):v is number=>typeof v==='number'&&Number.isSafeInteger(v)
 
 /** Called only by the authenticated scheduler. No request supplies a shop,
  * order, clock, acknowledgement, task outcome or notification recipient. */
-export function createKitchenAlarmsHandler(deps:{key:string;store:KitchenAlarmsStore}) {
+export function createKitchenAlarmsHandler(deps:{key:string;store:KitchenAlarmsStore;run?:{deadline:number;onSettled:()=>void;deferFailures:boolean}}) {
  if(!isDeviceToken(deps.key))throw unavailable();
+ if(deps.run&&(!time(deps.run.deadline)||deps.run.deferFailures&&typeof deps.store.defer!=='function'))throw unavailable();
  const expected=crypto.subtle.digest('SHA-256',new TextEncoder().encode(deps.key));
  return async(request:Request):Promise<Response>=>{
   const reply=(status:number,data:unknown)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','Pragma':'no-cache'}});
@@ -39,12 +41,15 @@ export function createKitchenAlarmsHandler(deps:{key:string;store:KitchenAlarmsS
   try {
    const raw=await deps.store.prepare(limit);
    if(!object(raw)||!exact(raw,'v,at,jobs')||raw.v!==1||!time(raw.at)||!Array.isArray(raw.jobs)||raw.jobs.length>limit)throw unavailable();
-   let raised=0,failed=0,stale=0,processed=0;
+   let raised=0,failed=0,stale=0,processed=0,examined=0;
    for(const job of raw.jobs) {
+    if(deps.run&&Date.now()>=deps.run.deadline)break;
+    examined++;let retry:KitchenAlarmRetry|undefined;
     try {
      if(!object(job)||!exact(job,'businessId,outletId,orderId,version,settings,source,stamp')||![job.businessId,job.outletId,job.orderId].every(isDeviceId)||
       typeof job.version!=='number'||!Number.isSafeInteger(job.version)||job.version<1||!hash(job.stamp))throw unavailable();
      const scope={businessId:job.businessId as string,outletId:job.outletId as string};
+     retry={...scope,orderId:job.orderId as string,version:job.version as number,stamp:job.stamp};
      const settings=parseKitchenAlarmSettings(job.settings);
      let contentHash:string|null=null;
      if(job.source!==null) {
@@ -59,11 +64,14 @@ export function createKitchenAlarmsHandler(deps:{key:string;store:KitchenAlarmsS
      if(!object(result)||!['stale','removed','disabled','cancelled','finished','acknowledged','waiting','due'].includes(result.state as string)||typeof result.raised!=='boolean'||
       result.raised&&result.state!=='due')throw unavailable();
      processed++;if(result.raised)raised++;if(result.state==='stale')stale++;
-    }catch{failed++;}
+     // A coordinated caller can wake its already bounded delivery pump after
+     // each real SQL outcome, without waiting for the rest of this batch.
+     try{deps.run?.onSettled();}catch{/* Wake-up failure cannot undo a genuine alarm outcome. */}
+    }catch{failed++;if(deps.run?.deferFailures&&retry)try{await deps.store.defer!(retry);}catch{/* Keep the original durable work when deferral itself is unconfirmed. */}}
    }
    // Counts only: private order data, task IDs and RPC errors never appear in
    // scheduler responses or logs. Failed jobs stay durable for the next tick.
-   return reply(failed?503:200,{v:1,processed,raised,stale,failed});
+   return reply(failed?503:200,{v:1,processed,raised,stale,failed,...(deps.run?{remaining:raw.jobs.length-examined}:{})});
   }catch{return reply(503,{error:'Kitchen alarms are unconfirmed. Retry the saved work.'});}
  };
 }
@@ -90,5 +98,7 @@ export function createKitchenAlarmsStore(apiUrl:string,serviceKey:string,send:ty
   prepare:limit=>rpc('prepare_kitchen_alarms',{p_limit:limit}),
   finish:work=>rpc('finish_kitchen_alarm',{p_business_id:work.businessId,p_outlet_id:work.outletId,p_order_id:work.orderId,p_version:work.version,
    p_stamp:work.stamp,p_content_hash:work.contentHash,p_task_id:work.taskId,p_event_id:work.eventId,p_resolve_event_id:work.resolveEventId}),
+  defer:work=>rpc('defer_kitchen_alarm',{p_business_id:work.businessId,p_outlet_id:work.outletId,p_order_id:work.orderId,p_version:work.version,p_stamp:work.stamp}),
+  claimDispatch:(nonce,issuedAt,limit)=>rpc('claim_kitchen_dispatch',{p_nonce:nonce,p_issued_at:issuedAt,p_limit:limit}),
  };
 }

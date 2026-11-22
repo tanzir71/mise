@@ -19,7 +19,7 @@ function parseJob(value:unknown):KitchenPushJob {
 /** Scheduled transport, not a public user-selected recipient/message API. SQL
  * supplies current original tasks/recipients and rechecks authorization at claim.
  * Responses contain counts; no endpoint, browser key or provider body is logged. */
-export function createKitchenPushHandler(deps:{key:string;applicationKey:string;store:KitchenPushStore;
+export function createKitchenPushHandler(deps:{key:string;applicationKey:string;store:KitchenPushStore;deadline?:number;
  send:(subscription:unknown,notice:unknown)=>Promise<'sent'|'expired'|'retry'>}){
  if(!isDeviceToken(deps.key)||!/^B[A-Za-z0-9_-]{86}$/.test(deps.applicationKey))throw unavailable();
  const expected=crypto.subtle.digest('SHA-256',new TextEncoder().encode(deps.key));
@@ -39,7 +39,7 @@ export function createKitchenPushHandler(deps:{key:string;applicationKey:string;
    if(!object(input)||Object.keys(input).some(k=>k!=='limit')||input.limit!==undefined&&(typeof input.limit!=='number'||!Number.isInteger(input.limit)||input.limit<1||input.limit>25))throw Error();
    limit=input.limit as number??25;
   }catch(error){return reply(error instanceof AuthBodyError?error.status:400,{error:'Use a bounded notification batch.'});}
-  const until=Date.now()+10000;
+  const until=Math.min(Date.now()+10000,deps.deadline??Infinity);
   try{
    const raw=await deps.store.prepare(deps.applicationKey,limit);
    if(!object(raw)||!exact(raw,'v,at,jobs')||raw.v!==1||typeof raw.at!=='number'||!Number.isSafeInteger(raw.at)||raw.at<0||!Array.isArray(raw.jobs)||raw.jobs.length>limit)throw unavailable();

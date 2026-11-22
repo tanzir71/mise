@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: one coordinated kitchen scheduler inspects due orders and starts eligible desk notifications without a second polling delay. Idle ticks enqueue no HTTP request. Private Vault references and a fixed Cron command keep runtime configuration out of job metadata; expiring, single-use signed requests keep reusable keys out of the platform queue. Failed inspections retain their original work with bounded retries, and fresh work can proceed independently. The scheduler installs disabled; managed provisioning, real provider/device acceptance and full M32 delivery remain open.
+
 - In progress: opt-in desk notification controls connect complete kitchen warnings to Inbox and the red order-queue indicator. Enable preserves the explicit browser gesture; offline Disable and earlier-setup cleanup retain original requests through reload and lost replies. Generic service-worker notices check the actual native desk and current browser capability before opening this installation’s Inbox. Share capture stays independently gated. Scheduling, provider/device commissioning and full M32 acceptance remain open; publication stays held.
 
 ### Fixed

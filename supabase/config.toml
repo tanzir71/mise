@@ -113,3 +113,7 @@ verify_jwt = false
 
 [functions.desk-notifications]
 verify_jwt = true
+
+# Database-selected due work only. The handler checks its dedicated internal key.
+[functions.kitchen-dispatch]
+verify_jwt = false

@@ -10,7 +10,7 @@ const root=fileURLToPath(new URL('..',import.meta.url)),hash=value=>createHash('
 export async function edgeBundle(name){
   if(!/^[a-z][a-z0-9-]{0,62}$/.test(name))throw new Error('Choose one named Edge Function.');
   const entry='supabase/functions/'+name+'/index.ts',vitePath=createRequire(new URL('../package.json',import.meta.url)).resolve('vite',{paths:[resolve(root,'apps/web')]}),{build}=await import(pathToFileURL(vitePath).href);
-  const allowedRuntimeImports=name==='kitchen-live'?['npm:ws@8.23.0']:name==='kitchen-push'?['npm:web-push@4.0.0']:[];
+  const allowedRuntimeImports=name==='kitchen-live'?['npm:ws@8.23.0']:['kitchen-push','kitchen-dispatch'].includes(name)?['npm:web-push@4.0.0']:[];
   const result=await build({root,configFile:false,envDir:resolve(root,'supabase/functions',name),logLevel:'silent',build:{target:'esnext',write:false,minify:true,lib:{entry:resolve(root,entry),formats:['es']},rollupOptions:{external:allowedRuntimeImports,output:{inlineDynamicImports:true}}}});
   const output=Array.isArray(result)?result[0].output:result.output,files=output.filter(item=>item.type==='chunk');
   if(files.length!==1||output.length!==1||files[0].imports.some(value=>!allowedRuntimeImports.includes(value))||files[0].dynamicImports.length)throw new Error('Edge bundle must be one module with only reviewed pinned runtime imports.');

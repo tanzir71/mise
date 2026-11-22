@@ -1,0 +1,186 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T10:13:24.795Z",
+  "sourceParentCommit": "408334c29e89d8e5724430c54e291df2be22d2ae",
+  "featureFlags": {
+    "kitchenScreen": false,
+    "kitchenAlarms": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 174,
+    "astroDiagnostics": 0,
+    "unitFiles": 211,
+    "unitCases": 4317,
+    "unitDurationSeconds": 618.95,
+    "dedicatedCases": 45,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "pagesBuildRestored": true,
+    "compiledRootBrowserCases": 61,
+    "compiledRootBrowserDuration": "2.3m",
+    "pagesBrowserCases": 545,
+    "pagesBrowserDuration": "23.5m",
+    "newUiLayout": false,
+    "newVisualComparisonsClaimed": false,
+    "frozenNonDocumentSourceHashes": {
+      "scripts/edge-bundle.mjs": "57e590f8c30e77df170c6b582cc8ca7b57f19ffa0d0414837aa2ed4c6611a843",
+      "supabase/config.toml": "90ccf8170c6c2bfa318dff6e668915dbaa03659d1a0f5036fcd92ea46478cac6",
+      "supabase/functions/_shared/kitchen-alarms-handler.ts": "f32a09748fb1f29394f1e287c38924ac13a7621e457e429dd1b7111ceca311bb",
+      "supabase/functions/_shared/kitchen-dispatch-auth.ts": "f7ff72d9fed5acffc025ad2b40815c7019c30cb7a8dc8dbac56519edaed568ac",
+      "supabase/functions/_shared/kitchen-dispatch-handler.ts": "60b29b3053b64cd0a41a6479dbb4bf11508a4fcf1d87e655fa8450cfc57967c2",
+      "supabase/functions/_shared/kitchen-push-handler.ts": "fc2cc96c282581b85afc7a0003ab3fb67ab0b687aec7e5981f6680d53afb00c9",
+      "supabase/functions/kitchen-dispatch/index.ts": "ab50db58fc3cb8d608f7735a2ed8b086b08f96fb6d472b298a0ff9ba331c356f",
+      "supabase/migrations/20261122083543_kitchen_dispatch_scheduler.sql": "f01969cb850dbaebe8121918260154885b1610973384b936c4342c0b1a9eeb06",
+      "supabase/ops/kitchen-scheduler-dependencies.sql": "9da17c6b7e72a2c579f90af44c2189c53ddc150e08b25952721928c4dc550572",
+      "tests/desk-push-bundles.test.ts": "5062e274c84179b37d75110ef319fe929f62228335d9a2a9ce7b7026ccb77317",
+      "tests/device-pairing-fixture.ts": "b3e996126a1fd1d89019d2c61308d0c97737d42dfcc1da23de72e0dcdb663f59",
+      "tests/fixtures/kitchen-dispatch-platform.sql": "ae8a8cbbc2b6f57174f04ddf4710d4b7fa407677ecdde05533e1067f9b9c4e84",
+      "tests/kitchen-dispatch-auth.test.ts": "5dcae0a24c0419f2e99d4e67404106cd3f844c2d8237fa124e835b0227de236e",
+      "tests/kitchen-dispatch-fixture.ts": "03bdabcf84c76cc9304b5a7044e5fa3126c16f81130277364f173ce454f2233c",
+      "tests/kitchen-dispatch.test.ts": "3ba521edbf6004766a22eb8c1f18bf363db160bfb601396087f5ce1dea9cb622"
+    }
+  },
+  "hosted": {
+    "migrationsApplied": 5,
+    "totalMigrations": 61,
+    "applicationTables": 87,
+    "forcedRlsTables": 87,
+    "publicDefiners": 0,
+    "unsafePrivateTableGrants": 0,
+    "unsafeSchedulerControlGrants": 0,
+    "securityAdvisor": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performanceAdvisor": {
+      "INFO": 2,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "functions": [
+      {
+        "name": "kitchen-alarms",
+        "version": 1,
+        "verifyJwt": false,
+        "sourceMatches": true,
+        "bytes": 20206,
+        "sha256": "bf18728f09d951a020f163b1af79d75dd42c7f9adb9d17d9d74883ec27273878",
+        "runtimeImports": []
+      },
+      {
+        "name": "kitchen-push",
+        "version": 1,
+        "verifyJwt": false,
+        "sourceMatches": true,
+        "bytes": 14189,
+        "sha256": "284d1a9c2174982ce8900aa35c4e73c660475e3ea609a710fe1e820ec91ce90f",
+        "runtimeImports": [
+          "npm:web-push@4.0.0"
+        ]
+      },
+      {
+        "name": "desk-notifications",
+        "version": 1,
+        "verifyJwt": true,
+        "sourceMatches": true,
+        "bytes": 10445,
+        "sha256": "2f84cfc9f5ef41393077987c1b3d4f01a4276b9f625c37ed3249a6016ad46adb",
+        "runtimeImports": []
+      },
+      {
+        "name": "kitchen-dispatch",
+        "version": 1,
+        "verifyJwt": false,
+        "sourceMatches": true,
+        "bytes": 34601,
+        "sha256": "6534879cbfee47fa69bb979ddbed241d4e12f0c2b1b0231fef63ccc0438952b7",
+        "runtimeImports": [
+          "npm:web-push@4.0.0"
+        ]
+      }
+    ],
+    "existingFunctionsRetained": 12,
+    "existingVersionsAndJwtSettingsRetained": true,
+    "liveHttpBoundaryCases": 16,
+    "protectedApiSchemas": [
+      {
+        "schema": "net",
+        "status": 406,
+        "errorCode": "PGRST106"
+      },
+      {
+        "schema": "private",
+        "status": 406,
+        "errorCode": "PGRST106"
+      }
+    ],
+    "serverSecretHashesVerified": 4,
+    "vaultSecretHashesVerified": 2,
+    "actualCredentialsOrReferencesPublished": false,
+    "emptyExtensionProbeReverted": true,
+    "cronNetInstalled": false,
+    "schedulerEnabled": false,
+    "subscriptions": 0,
+    "providerRequests": 0
+  },
+  "privacy": {
+    "history": true,
+    "artifacts": true,
+    "knownValuesChecked": 13,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "reviewedLegacyFindings": 22,
+    "legacyPolicyChanged": false,
+    "normalCommitAndPushGuardsEnabled": true,
+    "scanNote": "Source, full history and generated output checked before this record; final guard and normal commit/push hooks rescan the record itself."
+  },
+  "acceptance": {
+    "realIsolatedPostgresPgcryptoAndWebCrypto": true,
+    "realWebPushRequestEncryptionLocally": true,
+    "syntheticLocalExtensionAndProviderBoundaries": true,
+    "actualHostedSchemaAndFunctionDeployment": true,
+    "actualHostedBoundaryChecks": true,
+    "actualCoordinatedScheduledDelivery": false,
+    "genuinePhoneOwnerAcceptance": false,
+    "genuineProviderBrowserOrPhysicalAcceptance": false,
+    "ciOrPagesPublicationClaimed": false
+  },
+  "remaining": [
+    "Cron/Net provisioning with post-provision API checks",
+    "Explicit scheduler enable/disable/recovery and actual scheduled timing",
+    "Current-ticket startup paging without reading all history",
+    "Meaningful subscription-reference index follow-up",
+    "Genuine phone/provider/browser/physical commissioning",
+    "CI artifact upload and Pages publication held by owner",
+    "Full M30/M31/M32 and all remaining handover milestones"
+  ],
+  "sourceHashFormat": "SHA-256 of UTF-8 text with LF newlines; this record excludes itself",
+  "sourceHashes": {
+    "CHANGELOG.md": "ff2a1822bfc9772bfbc789d29af2f13bc863a3f4bb686661941129e75e7b365f",
+    "docs/m32-kitchen-scheduler.md": "d918c44aa76bbf459becd1fc141f365817d6c84a9e5c44e8bb3b12f5eee77374",
+    "handover/DECISIONS.md": "6c857f5a3ffb51080ba2b76cb57602b0795b4ea5a34186e7ada2b784b7e3b19c",
+    "handover/docs/03-roadmap.md": "18d69ea600276b876d13975370d0f468d3302cf0de5c274ddc2ddb5141d8e9c3",
+    "scripts/edge-bundle.mjs": "57e590f8c30e77df170c6b582cc8ca7b57f19ffa0d0414837aa2ed4c6611a843",
+    "supabase/config.toml": "90ccf8170c6c2bfa318dff6e668915dbaa03659d1a0f5036fcd92ea46478cac6",
+    "supabase/functions/_shared/kitchen-alarms-handler.ts": "f32a09748fb1f29394f1e287c38924ac13a7621e457e429dd1b7111ceca311bb",
+    "supabase/functions/_shared/kitchen-dispatch-auth.ts": "f7ff72d9fed5acffc025ad2b40815c7019c30cb7a8dc8dbac56519edaed568ac",
+    "supabase/functions/_shared/kitchen-dispatch-handler.ts": "60b29b3053b64cd0a41a6479dbb4bf11508a4fcf1d87e655fa8450cfc57967c2",
+    "supabase/functions/_shared/kitchen-push-handler.ts": "fc2cc96c282581b85afc7a0003ab3fb67ab0b687aec7e5981f6680d53afb00c9",
+    "supabase/functions/kitchen-dispatch/index.ts": "ab50db58fc3cb8d608f7735a2ed8b086b08f96fb6d472b298a0ff9ba331c356f",
+    "supabase/migrations/20261122083543_kitchen_dispatch_scheduler.sql": "f01969cb850dbaebe8121918260154885b1610973384b936c4342c0b1a9eeb06",
+    "supabase/ops/kitchen-scheduler-dependencies.sql": "9da17c6b7e72a2c579f90af44c2189c53ddc150e08b25952721928c4dc550572",
+    "tests/desk-push-bundles.test.ts": "5062e274c84179b37d75110ef319fe929f62228335d9a2a9ce7b7026ccb77317",
+    "tests/device-pairing-fixture.ts": "b3e996126a1fd1d89019d2c61308d0c97737d42dfcc1da23de72e0dcdb663f59",
+    "tests/fixtures/kitchen-dispatch-platform.sql": "ae8a8cbbc2b6f57174f04ddf4710d4b7fa407677ecdde05533e1067f9b9c4e84",
+    "tests/kitchen-dispatch-auth.test.ts": "5dcae0a24c0419f2e99d4e67404106cd3f844c2d8237fa124e835b0227de236e",
+    "tests/kitchen-dispatch-fixture.ts": "03bdabcf84c76cc9304b5a7044e5fa3126c16f81130277364f173ce454f2233c",
+    "tests/kitchen-dispatch.test.ts": "3ba521edbf6004766a22eb8c1f18bf363db160bfb601396087f5ce1dea9cb622"
+  }
+}
