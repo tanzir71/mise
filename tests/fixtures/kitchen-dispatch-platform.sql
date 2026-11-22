@@ -2,8 +2,8 @@
 -- transactional queue writes, fixed Cron metadata and ACLs, not networking,
 -- background execution or Vault encryption. Values are always synthetic.
 create schema vault;
-create table vault.secrets(id uuid primary key,secret text not null);
-create view vault.decrypted_secrets as select id,secret as decrypted_secret from vault.secrets;
+create table vault.secrets(id uuid primary key,secret text not null,key_id uuid);
+create view vault.decrypted_secrets as select id,secret as decrypted_secret,key_id from vault.secrets;
 create schema net;
 create unlogged table net.http_request_queue (
  id bigint generated always as identity primary key,method text not null,url text not null,

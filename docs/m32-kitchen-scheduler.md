@@ -1,5 +1,7 @@
 # M32 coordinated kitchen scheduling — in progress
 
+The [later live timing checkpoint](m32-kitchen-timing.md) commissions Cron/Net, corrects the Vault parameter binding and verifies actual two-minute timing, disable/resume and rollback recovery. The results below describe the preceding scheduler delivery; its extension and activation status are historical.
+
 The scheduler connects due order inspection and desk notification delivery in one internal invocation. A private SQL dispatcher checks bounded due work every second when explicitly enabled. Idle ticks enqueue no HTTP request. The migration installs disabled and needs no extension, job or credential to apply.
 
 The coordinated worker starts any already-ready deliveries while inspecting independent orders. Each genuine inspection result wakes the same delivery pump, so a raised task can reach transport before a later unrelated inspection finishes. Both workers stop starting additional work at a shared ten-second deadline. Existing SQL authorization, original-content checks, recipient selection and twenty-second delivery leases remain authoritative. No request can choose an order, clock, scope, message or recipient.

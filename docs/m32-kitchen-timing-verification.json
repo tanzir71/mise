@@ -1,0 +1,219 @@
+{
+  "milestone": "M32",
+  "status": "in progress",
+  "checkedAt": "2026-11-22T11:53:36.134Z",
+  "sourceParentCommit": "5305fbef0bfe64750981e7c37bb4bd528eabe63c",
+  "featureFlags": {
+    "kitchenScreen": false,
+    "kitchenAlarms": false
+  },
+  "publicationHeld": true,
+  "local": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 174,
+    "astroDiagnostics": 0,
+    "unitFiles": 211,
+    "unitCases": 4317,
+    "unitDurationSeconds": 736.36,
+    "dedicatedCases": 45,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "pagesBuildRestored": true,
+    "compiledRootBrowserCases": 76,
+    "compiledRootBrowserBatches": [
+      {
+        "suite": "Device, preparation and desk",
+        "cases": 59,
+        "duration": "3.2m"
+      },
+      {
+        "suite": "PWA and smoke",
+        "cases": 17,
+        "duration": "28.4s"
+      }
+    ],
+    "pagesBrowserCases": 545,
+    "pagesBrowserDuration": "25.8m",
+    "newUiLayout": false,
+    "newVisualComparisonsClaimed": false,
+    "frozenNonDocumentSourceHashes": {
+      "supabase/migrations/20261122105507_kitchen_dispatch_vault_binding.sql": "99d30cf671e40f0e1e63d379e3a836bbd7db8d1d556df3dd3a8528d916f333c9",
+      "tests/fixtures/kitchen-dispatch-platform.sql": "c83971849373d05e6cb81b515c36b5702c05cf63b0f04699d43fc55bd8f54e4d",
+      "tests/kitchen-dispatch.test.ts": "bdc8230f8e2a720191f3d469ec1b9dcfdcdea24cfb71c32c0ba2f0d57dbbe091"
+    }
+  },
+  "hosted": {
+    "checkedAt": "2026-11-22T11:50:41.570Z",
+    "migrationsApplied": 1,
+    "totalMigrations": 62,
+    "applicationSchemas": [
+      "public",
+      "private"
+    ],
+    "applicationTables": 87,
+    "forcedRlsTables": 87,
+    "publicDefiners": 0,
+    "unsafeSchedulerControlGrants": 0,
+    "unsafeDirectSchedulerTableGrants": 0,
+    "helperBodySha256": "f28bca9f26ce44529c4866ad30c4f35fe22cff616503b244071805dde5d7c515",
+    "actualFunctionBodyMatchesMigration": true,
+    "securityAdvisor": {
+      "INFO": 1,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "performanceAdvisor": {
+      "INFO": 2,
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "cronNetInstalled": true,
+    "schedulerEnabled": false,
+    "cronJobs": 0,
+    "queuedRequests": 0,
+    "remainingFixtureShops": 0,
+    "authUsers": 0,
+    "subscriptions": 0,
+    "deliveries": 0,
+    "dispatchGrants": 0,
+    "alarmTasks": 0,
+    "alarmWatches": 0,
+    "protectedApiSchemas": [
+      {
+        "schema": "net",
+        "status": 406,
+        "errorCode": "PGRST106"
+      },
+      {
+        "schema": "private",
+        "status": 406,
+        "errorCode": "PGRST106"
+      }
+    ],
+    "actualCredentialsOrReferencesPublished": false,
+    "edgeFunctionsChanged": false
+  },
+  "liveTiming": {
+    "startedAt": "2026-11-22T10:58:51.107Z",
+    "finishedAt": "2026-11-22T11:01:24.743Z",
+    "cases": 16,
+    "checks": [
+      {
+        "label": "isolated-fixture-no-auth-accounts",
+        "ok": true
+      },
+      {
+        "label": "scoped-cleanup-rolls-back",
+        "ok": true
+      },
+      {
+        "label": "default-two-minute-window-not-yet-due",
+        "ok": true
+      },
+      {
+        "label": "cron-inspects-original-future-order",
+        "ok": true
+      },
+      {
+        "label": "disable-preserves-original-watch-and-money",
+        "ok": true
+      },
+      {
+        "label": "disabled-job-enqueues-no-http",
+        "ok": true
+      },
+      {
+        "label": "real-default-alarm-at-two-minutes",
+        "ok": true,
+        "latencyMs": 815
+      },
+      {
+        "label": "alarm-does-not-change-order-money",
+        "ok": true
+      },
+      {
+        "label": "production-got-it-http-accepted",
+        "ok": true
+      },
+      {
+        "label": "got-it-closes-alarm-with-money-intact",
+        "ok": true
+      },
+      {
+        "label": "acknowledged-source-becomes-idle",
+        "ok": true
+      },
+      {
+        "label": "real-net-queue-and-job-roll-back",
+        "ok": true
+      },
+      {
+        "label": "rollback-sends-no-http-and-retains-original",
+        "ok": true
+      },
+      {
+        "label": "cron-recovers-original-after-rollback",
+        "ok": true,
+        "latencyMs": 2495
+      },
+      {
+        "label": "no-recipient-delivery-created",
+        "ok": true
+      },
+      {
+        "label": "scoped-fixture-cleanup-complete",
+        "ok": true
+      }
+    ],
+    "defaultAlarmSeconds": 120,
+    "alarmLatencyMs": 815,
+    "rollbackRecoveryLatencyMs": 2495,
+    "originalMoneyUnchanged": true,
+    "productionTicketReaderAndGotIt": true,
+    "actualCronNetAndHttp": true,
+    "syntheticDeviceSession": true,
+    "syntheticAuthAccounts": 0,
+    "providerRequests": 0,
+    "cleanupVerified": true,
+    "schedulerLeftEnabled": false
+  },
+  "privacy": {
+    "history": true,
+    "artifacts": true,
+    "knownValuesChecked": 13,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "reviewedLegacyFindings": 22,
+    "legacyPolicyChanged": false,
+    "normalCommitAndPushGuardsEnabled": true,
+    "scanNote": "Final guard and normal commit/push hooks also rescan this record."
+  },
+  "acceptance": {
+    "actualDefaultScheduledAlarm": true,
+    "actualDisableResumeAndQueueRollback": true,
+    "genuinePhoneOwnerAcceptance": false,
+    "genuineProviderBrowserOrPhysicalAcceptance": false,
+    "ciOrPagesPublicationClaimed": false
+  },
+  "remaining": [
+    "Current-ticket startup paging without reading all history",
+    "Useful subscription-reference indexes",
+    "Genuine phone/provider/browser/physical commissioning",
+    "CI artifact upload and Pages publication held by owner",
+    "Full M30/M31/M32 and all remaining handover milestones"
+  ],
+  "sourceHashFormat": "SHA-256 of UTF-8 text with LF newlines; this record excludes itself",
+  "sourceHashes": {
+    "CHANGELOG.md": "b38e1a5082482d7a92dcc530b379090e30967945b55371dbd85884b3600fa2aa",
+    "docs/m32-kitchen-scheduler.md": "c24a0b0501d8b8775d7a3613d3b659233e10c5e7a98300209c391000e89adb7c",
+    "docs/m32-kitchen-timing.md": "22d025d557cc8eacb3ed0ba0fb2d879024f7046a9bef1093454e64b09dea8819",
+    "handover/DECISIONS.md": "c3672c0432041688109b78f1e4a0ae06174179b51bbc4a7023a68d90fb3787f2",
+    "handover/docs/03-roadmap.md": "facfd7515420e14e165d203c157f3329bad971c9f71ed920c33afa21955edfa5",
+    "supabase/migrations/20261122105507_kitchen_dispatch_vault_binding.sql": "99d30cf671e40f0e1e63d379e3a836bbd7db8d1d556df3dd3a8528d916f333c9",
+    "tests/fixtures/kitchen-dispatch-platform.sql": "c83971849373d05e6cb81b515c36b5702c05cf63b0f04699d43fc55bd8f54e4d",
+    "tests/kitchen-dispatch.test.ts": "bdc8230f8e2a720191f3d469ec1b9dcfdcdea24cfb71c32c0ba2f0d57dbbe091"
+  }
+}

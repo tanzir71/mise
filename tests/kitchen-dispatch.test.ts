@@ -62,6 +62,9 @@ it('rejects request-selected scope, clocks, messages, foreign origins and wrong 
  expect(f.rpc).not.toHaveBeenCalled();expect(f.transport).not.toHaveBeenCalled();
 });
 it('executes the committed due request through actual SQL and Web Push encryption within one coordinated tick',async()=>{
+ // Vault's encryption key_id is a different identity from either secret ID.
+ // Point it at the other secret to expose accidental column-bound lookups.
+ await f.db.query('update vault.secrets set key_id=$1::uuid',[f.configId]);
  await f.configure();await f.register();const order=await f.addOrder(),before=await f.currentOrder(order.id),start=performance.now();expect(await f.dispatch()).toEqual({state:'queued'});const response=await f.bridge();expect(response.status).toBe(200);
  const result=await response.json();expect(result).toMatchObject({v:1,alarms:{raised:1,failed:0},push:{sent:1,failed:0},unconfirmedBatches:0});expect(performance.now()-start).toBeLessThan(5000);expect(f.packets).toHaveLength(1);expect(f.packets[0].headers.get('content-encoding')).toBe('aes128gcm');
  const body=Buffer.from(await f.packets[0].arrayBuffer()).toString('latin1');expect(body).not.toContain('PRIVATE CUSTOMER');expect(body).not.toContain('PRIVATE SOURCE');expect((await f.currentOrder(order.id)).payment).toEqual(before.payment);expect((await f.currentOrder(order.id)).total).toBe(before.total);
