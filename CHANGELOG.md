@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: opt-in owner and assigned-manager controls issue, share, inspect and revoke scoped customer links, preserving original attempts across lost replies and reloads. Account-free English/Bangla customer pages read actual order status, prices and khata entries without owner credentials or local storage. Installation connections and contact details are end-user configured; full order submission, ETA, swaps, payment and customer-task flows remain open. Publication stays held.
+
 - In progress: owners and assigned managers can inspect and close an original customer-link issuance attempt without recovering its secret. A durable closure revokes an issued link and blocks a delayed original request before replacement; original audit identities and retry receipts are preserved. The owner interface and full M30 acceptance remain open.
 
 - In progress: customer order and khata capabilities gain a bounded, uncached HTTP read endpoint with installation-wide and per-link server budgets. Direct reader RPCs cannot bypass those limits. Original tokens, expiry, revocation, private projections and financial records are preserved; M30 stays open and customer pages remain gated.

@@ -1,0 +1,119 @@
+{
+  "title": "M30/M33/M35 — owner capabilities and customer reads (remaining order/payment/task flows open)",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "customer-owner-order",
+      "path": "app/?flags=customerLinks",
+      "customerLinksFixture": "owner-order",
+      "captureStyle": ".order-detail-actions{position:static!important}",
+      "note": "M14 tracking-card placement and Copy/Send controls with actual synthetic phone Auth, native operator selection, Core orders, HTTP and PostgreSQL issuance. The one-time secret remains in memory; opening counts and message delivery are not invented.",
+      "sections": [
+        {
+          "id": "detail",
+          "selector": ".order-detail",
+          "reference": "screens/mobile/M14 · Manager — Order detail, tracking link, handled by.png"
+        },
+        {
+          "id": "controls",
+          "selector": ".customer-link-card",
+          "widths": [1024, 1440],
+          "reference": "screens/mobile/M14 · Manager — Order detail, tracking link, handled by.png",
+          "note": "Capture the actual tracking controls separately at larger widths so the queue panel's normal scroll viewport cannot hide them. The full M14 reference remains informational."
+        }
+      ]
+    },
+    {
+      "id": "customer-owner-recovery",
+      "path": "app/?flags=customerLinks",
+      "customerLinksFixture": "owner-recovery",
+      "captureStyle": ".order-detail-actions{position:static!important}",
+      "note": "Actual committed issuance with a deliberately truncated reply, followed by a real reload. M14 supplies the card layout; its lost secret is honestly unavailable and the original attempt must be closed before replacement.",
+      "sections": [
+        {
+          "id": "detail",
+          "selector": ".order-detail",
+          "reference": "screens/mobile/M14 · Manager — Order detail, tracking link, handled by.png"
+        }
+      ]
+    },
+    {
+      "id": "customer-owner-khata",
+      "path": "app/?flags=customerLinks",
+      "customerLinksFixture": "owner-khata",
+      "note": "Existing C05 owner profile plus customer capability controls. Core opening balance, actual owner Auth and scoped SQL metadata; no payment or delivery is fabricated.",
+      "sections": [
+        {
+          "id": "profile",
+          "selector": ".khata-page",
+          "reference": "screens/corner-shop/C05 · Owner — Karim bhai · khata, limit, reminders, history.png"
+        }
+      ]
+    },
+    {
+      "id": "customer-order",
+      "path": "app/t/incomplete?flags=customerLinks",
+      "customerLinksFixture": "public-order",
+      "note": "M02 tracking layout, actual purpose-bound customer HTTP projection and business-pack steps. No account, key, private customer contact or local database. Current schedule is distinct from an ETA; no arrival estimate or delay is invented. Submission, swaps and full M33 remain open.",
+      "sections": [
+        {
+          "id": "page",
+          "selector": ".customer-view",
+          "reference": "screens/mobile/M02 · Guest — tracking link from chat (honest delay notice) · full page.png"
+        }
+      ]
+    },
+    {
+      "id": "customer-order-bangla",
+      "path": "app/t/incomplete?flags=customerLinks",
+      "customerLinksFixture": "public-bangla",
+      "note": "Same actual M02 customer read, with the customer selecting Bangla. Original items and integer money remain unchanged; Hind Siliguri renders Bengali and the taka glyph.",
+      "sections": [
+        {
+          "id": "page",
+          "selector": ".customer-view",
+          "reference": "screens/mobile/M02 · Guest — tracking link from chat (honest delay notice) · full page.png"
+        }
+      ]
+    },
+    {
+      "id": "customer-khata",
+      "path": "app/k/incomplete?flags=customerLinks",
+      "customerLinksFixture": "public-khata",
+      "note": "C10 balance/entry/contact structure with a genuine scoped HTTP ledger. Payment deep links, author names, ask-for-time tasks and entry questions remain open; contact/manual copy stays available. No wallet account or payment is guessed.",
+      "sections": [
+        {
+          "id": "page",
+          "selector": ".customer-view",
+          "reference": "screens/corner-shop/C10 · Customer — My khata at this shop (pay, ask for time, check every entry).png"
+        }
+      ]
+    },
+    {
+      "id": "customer-unavailable",
+      "path": "app/t/incomplete?flags=customerLinks",
+      "customerLinksFixture": "unavailable",
+      "note": "A real revoked capability returns the generic unavailable page and no customer data. M02 supplies the restrained customer-page structure; no owner workspace or sign-in is opened.",
+      "sections": [
+        {
+          "id": "page",
+          "selector": ".customer-view",
+          "reference": "screens/mobile/M02 · Guest — tracking link from chat (honest delay notice) · full page.png"
+        }
+      ]
+    },
+    {
+      "id": "customer-cancelled",
+      "path": "app/t/incomplete?flags=customerLinks",
+      "customerLinksFixture": "public-cancelled",
+      "note": "Actual Core cancellation is written to native SQL before the customer read. M02 layout with the real cancelled status and manual contact; no invented progress timestamps or refund completion.",
+      "sections": [
+        {
+          "id": "page",
+          "selector": ".customer-view",
+          "reference": "screens/mobile/M02 · Guest — tracking link from chat (honest delay notice) · full page.png"
+        }
+      ]
+    }
+  ]
+}

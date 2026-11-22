@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-22T22:02:31.780Z",
+  "sourceParentCommit": "10f465df8dc8932994353a4d12895db5859b34a8",
+  "status": "increment verified; M30, M33 and M35 remain open",
+  "publication": "GitHub workflows and Pages held",
+  "configuration": "all installation accounts, providers, credentials, phone numbers and backend settings are end-user-owned",
+  "sourceHashes": {
+    "apps/web/index.html": "07de3d1c5014c6f0125dc3dbb5486d1c8c0c0bb7ffb5266ee25ed77ba79c3c32",
+    "apps/web/src/main.tsx": "75ccbecf3d6a703014b47895649e163efd65976e701e01dbdaf59dce1eb20df8",
+    "apps/web/src/OrderDetail.tsx": "021939f41be9387fb649045dba9990b1789c026df4d495c1c3ad6c8fd5f845da",
+    "apps/web/src/Khata.tsx": "e5385ff3c364ed09505f94a0446920825f467b486c89b2cac27ab7a8bf653b78",
+    "apps/web/src/CustomerLinkArea.tsx": "f326bf55c9e6f9b770416bcecdcffa1cb26c7cd3ab6f733953a50bb94f4553fa",
+    "apps/web/src/CustomerLinkControls.tsx": "87f6a32c7428352b2f8c3b2e587713f1e0a3fb2f1a687bbe6443a4eba823fec6",
+    "apps/web/src/CustomerLinkView.tsx": "84d02c06742c9fd2a2ed1f3e453514442905de73b0e6616cebe8c05c8495b115",
+    "apps/web/src/customer-link-controls.css": "b58902fd88ff20168bf34e05d446fef4c64d4c743497142e57ef58563fed6725",
+    "apps/web/src/customer-link-view.css": "6b7676e8259bfeaf8abdb1b8b016a283e7db0bc8ad98e459b044a8e4ed2895f5",
+    "apps/web/src/customer-links-context.ts": "d880949c75768b134d0faf3999eea8ac264b372a9ab83c4acbb0a72c5cdb1b44",
+    "apps/web/src/use-customer-link-owner.ts": "83a36b81b48580149ce2dfe999b6ded8e5948be121c9703b5515aeab1d9b8632",
+    "apps/web/src/data/command-request.ts": "f61fd6e46d169f048daca8574963cdefae76e4646f62da224f12962686b5201d",
+    "apps/web/src/data/customer-link-read.ts": "0da2e0d16e247c32d35b2e2b5010f0571427f2606c9d63b9c185a63cc36952b6",
+    "apps/web/src/data/customer-link-remote.ts": "5ccd323664483ae55fcc7e2f33d457d26ec60136472cfbbe1b395d5289c89bf8",
+    "apps/web/src/data/customer-link-session.ts": "3b6d8dc998a0a7429bacdc5aca1ebc120d262c08d186c9c4c776966a019031ff",
+    "packages/core/customer-link-admin.ts": "e065ef43cbaa96c16d11144584d7e6924704cbbcf0257e8f612d763479a8f077",
+    "packages/core/customer-link-url.ts": "598bdb6c3e551c49c701761ab976555b7aea9b517cc25f8c1a92c5c1486a5bf5",
+    "packages/core/flags.ts": "1275511b83de5081c2aedd8735c447c1bac3e8f3dd2f3f1f5181b364f22be84c",
+    "supabase/migrations/20261122200729_owner_customer_link_controls.sql": "c265900dfc641ab60fb9adcb0afa880addf9313759c2620d10ff2a840e3bebcd",
+    "tests/customer-link-page.test.ts": "a96dd447717b701272aaa0071d60028b44a82f8eb779f7fd191586cf9dc80d73",
+    "tests/customer-link-read.test.ts": "9f1f38433caee431390fe5de103bf44dd4d480efcea8e8553509ae04bf9df806",
+    "tests/customer-link-session.test.ts": "7e9102361b0e333d1ead0507e4dd5cb8d86018c4fe3ccbe1842ea6c809f61a89",
+    "tests/e2e/customer-links.spec.ts": "d6df8c6853b0d3f65b79843789861ac2359c9f7c7246797b357d3f4926587341",
+    "tests/fixtures/customer-link-browser.ts": "65a29c6c370c714a6e6093c84d52501ba49edb95e12b4e27c5c99f6304cfa739",
+    "tests/fixtures/customer-link-service.ts": "32f3ae8c15d97ea9f57afb2ba3444fb5c6237ba8d3c2fb4bc4b428f1c4ffc5c1",
+    "tests/fixtures/install-customer-links.mjs": "43dc7cb76cb93506591a2be8a7dcc4e3cd4167faf06ff2830f4b864c21594a3d",
+    "tests/fixtures/install-customer-links.d.mts": "a2c34012e6bac4cb02767300a2c940f8ddbe0371338c27f822edc702fc354548",
+    "tests/fixtures/customer-links-visual.mjs": "eb357c3693eef7be3fc29aaf337804753a1a62d941552ea2a245de240ab5f189",
+    "qa/configs/m33-customer-links.json": "b3c7e9bdac3278d8fe49520f4586471217dfa2b85e730f963a06cff40e25675e",
+    "scripts/qa-visual.mjs": "114da3975a3dfd333a52adfa9b460e4f25e1d7743dccc8c4885ce6c3fa54c424",
+    "docs/customer-links-delivery.md": "c7e0a9772a8de4895739234aaf14fcb110b717dec65511e2576810c2bb27e825",
+    "docs/configure-services.md": "4a7873742676c5bdf0ddc8312751cf28b426010f9c94395fd0843ba51fd3878b",
+    "docs/m30-delivery.md": "07b6bdeb055155d192531c8f9fc748acab98d6d565004ec599478522af321e55",
+    "CHANGELOG.md": "9b5734df59275a5f8d78b869aaf32ad658d86cc47736db1c7144995d6ffb617e",
+    "handover/docs/03-roadmap.md": "f9b1a05f2be4450906cb4ac46ccbcdbcf955a55778a84a71a74693b48dece8c5",
+    "handover/DECISIONS.md": "3eb3029b52b4e164e628efcbec52a62d3c6e4d8c402ecc9e9534e78ebf2cf66e",
+    "handover/QUESTIONS.md": "89352567f39b1bb77a6f653fc0573609480ccd678de5b0cd956cf92e1d573007",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55"
+  },
+  "local": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 178,
+      "diagnostics": 0
+    },
+    "focusedTests": 71,
+    "unitTests": 4497,
+    "unitFiles": 218,
+    "pagesBrowserTests": 568,
+    "rootBrowserTests": 59,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "referenceExports": 270,
+    "visual": {
+      "comparisons": 42,
+      "scenes": 8,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": 0,
+      "axeChecks": 40,
+      "axeViolations": 0,
+      "report": "qa/report.html",
+      "keyScreenshots": [
+        "qa/screens/customer-owner-order-detail-390.png",
+        "qa/screens/customer-order-page-390.png",
+        "qa/screens/customer-khata-page-390.png"
+      ]
+    }
+  },
+  "managed": {
+    "logicalMigrations": 67,
+    "tables": 90,
+    "forcedRls": 90,
+    "exactSourceBodies": 2,
+    "oldCapabilityBodiesAndConfigUnchanged": 16,
+    "edgeFunctions": {
+      "count": 17,
+      "unchanged": true
+    },
+    "roleChecks": 48,
+    "fixtureCleanup": {
+      "authUsers": 0,
+      "businesses": 0,
+      "links": 0,
+      "closures": 0,
+      "scheduler": false,
+      "cronJobs": 0
+    },
+    "endpointGrants": "authenticated only, both wrappers",
+    "keylessMissingCapabilityHttp": {
+      "status": 404,
+      "allowsConfiguredOrigin": true,
+      "missingCapability": true,
+      "keyless": true
+    },
+    "advisors": {
+      "security": {
+        "INFO": 1
+      },
+      "performance": {
+        "INFO": 2
+      }
+    },
+    "noProviderRequests": true
+  },
+  "remaining": [
+    "genuine signed-owner HTTP and installation phone-Auth commissioning",
+    "full M33 public order submission, honeypot/rate limits, ETA/delay, swaps/payment and table QR",
+    "full M35 entry authors, installer-owned wallet settings, pay/ask-for-time/entry-question flows",
+    "physical-device and held-publication acceptance"
+  ]
+}
