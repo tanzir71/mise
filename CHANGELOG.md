@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: owners and assigned managers can inspect and close an original customer-link issuance attempt without recovering its secret. A durable closure revokes an issued link and blocks a delayed original request before replacement; original audit identities and retry receipts are preserved. The owner interface and full M30 acceptance remain open.
+
 - In progress: customer order and khata capabilities gain a bounded, uncached HTTP read endpoint with installation-wide and per-link server budgets. Direct reader RPCs cannot bypass those limits. Original tokens, expiry, revocation, private projections and financial records are preserved; M30 stays open and customer pages remain gated.
 
 - Each installation configures its own backend, phone provider and other optional services. Cloud setup links to a configuration guide included in the site build; privileged credentials stay in the installation backend. Blank server templates and provider readiness checks keep unconfigured services off while local work remains available.

@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-22T19:59:26.021Z",
+  "sourceParentCommit": "300d8bcca477038c3a8ae28ceeda3b573de2f0a5",
+  "status": "increment verified; M30 remains open",
+  "publication": "GitHub workflows and Pages held",
+  "configuration": "end-user-owned; no new provider setting",
+  "sourceHashes": {
+    "supabase/migrations/20261122184132_public_link_attempt_recovery.sql": "5f6196190e4099840bc6b61f65b67d4e9fb3de1a678a8f0a41772f19d9c129dc",
+    "tests/public-link-attempts.test.ts": "9f4f92119f24b90ed013f555e3faaa14c714ff9702dd47f0baeb05ce29f25af8",
+    "tests/public-capabilities.test.ts": "d130e33baf63bf013c9bb5869a7318f3e348b9bfbd2037c0d945edbbc8662349",
+    "tests/public-read-fixture.ts": "7b7c2899422eeca84b38d79121c9478f642d896acd4c667cd337832da52ae1da",
+    "tests/public-read-sql.test.ts": "6ec8661562d635236cee43d73a0f49c847d672d2be346ec2ce25d3e2b95a7e47",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "docs/m30-public-link-recovery.md": "1d538e444a93a8c99fa570f61234e761f79594bb548fc66789b5461f3aec5951",
+    "docs/m30-delivery.md": "3cf0b6463e2c6a8076aa85fec448003728ffd798dd28435d6dd206dc71b00ce6",
+    "CHANGELOG.md": "5258fecf4b8b5c41546f41e70252768d8cd3f6ec4ccc00bbef8b1d3212495e79",
+    "handover/docs/03-roadmap.md": "f58f7d271b4005ff18b19049dcf9912c48ac2b3d785970608094018372e3a8a0",
+    "handover/DECISIONS.md": "265bad430d0686a0d57683156ef2f55b0fdb03fd0d0bb96007c74468939034ff",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55"
+  },
+  "local": {
+    "lint": true,
+    "typecheck": {
+      "astroFiles": 176,
+      "diagnostics": 0
+    },
+    "focusedTests": 88,
+    "unitTests": 4426,
+    "unitFiles": 215,
+    "unitDurationMs": 797992.1760253906,
+    "pagesBrowserTests": 551,
+    "rootBrowserTests": 42,
+    "buildBases": [
+      "/",
+      "/mise/"
+    ],
+    "referenceExports": 270,
+    "visual": {
+      "comparisons": 40,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": 0,
+      "appComponentsAndStylesChanged": false,
+      "report": "qa/report.html",
+      "keyScreenshots": [
+        "qa/screens/m32-kitchen-scheduled-phone-390.png",
+        "qa/screens/m32-kitchen-handoff-tablet-1440.png",
+        "qa/screens/m32-kitchen-cancelled-phone-390.png"
+      ]
+    }
+  },
+  "managed": {
+    "logicalMigrations": 66,
+    "tables": 90,
+    "forcedRls": 90,
+    "exactSourceBodies": 7,
+    "existingFunctions": {
+      "before": 11,
+      "after": 16,
+      "unchanged": 9,
+      "changed": 2,
+      "new": 5
+    },
+    "edgeFunctions": {
+      "count": 17,
+      "allVersionsAndAuthUnchanged": true
+    },
+    "privateTableApiGrants": 0,
+    "publicDefiners": 0,
+    "roleChecks": 28,
+    "concurrentRaces": [
+      {
+        "first": "create",
+        "firstResult": {
+          "closed": false,
+          "denied": false,
+          "first": true,
+          "issued": true,
+          "kind": "create",
+          "waiterObserved": true
+        },
+        "secondResult": {
+          "closed": true,
+          "denied": false,
+          "first": false,
+          "issued": false,
+          "kind": "close",
+          "waiterObserved": false
+        },
+        "state": {
+          "active": 0,
+          "authUsers": 0,
+          "closures": 1
+        }
+      },
+      {
+        "first": "close",
+        "firstResult": {
+          "closed": true,
+          "denied": false,
+          "first": true,
+          "issued": false,
+          "kind": "close",
+          "waiterObserved": true
+        },
+        "secondResult": {
+          "closed": false,
+          "denied": true,
+          "first": false,
+          "issued": false,
+          "kind": "create",
+          "waiterObserved": false
+        },
+        "state": {
+          "active": 0,
+          "authUsers": 0,
+          "closures": 1
+        }
+      }
+    ],
+    "fixtureCleanup": {
+      "authUsers": 0,
+      "businesses": 0,
+      "closures": 0,
+      "cronJobs": 0,
+      "links": 0,
+      "scheduler": false
+    },
+    "advisors": {
+      "security": {
+        "INFO": 1
+      },
+      "performance": {
+        "INFO": 2
+      }
+    },
+    "noProviderRequests": true
+  },
+  "remaining": [
+    "credential-free owner interface and original-account recovery",
+    "genuine signed-owner HTTP and installation phone-Auth commissioning",
+    "customer tracking pages and remaining M33 order/pricing/swap flows",
+    "physical-device and publication acceptance"
+  ]
+}

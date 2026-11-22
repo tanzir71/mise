@@ -40,7 +40,7 @@ async function readOrder(token:string|null){return (await asRole<{data:Record<st
 async function readKhata(token:string|null,after=0,limit=50){return (await asRole<{data:Record<string,unknown>|null}>(null,'anon','select public.read_khata_link($1,$2,$3) as data',[token,after,limit]))[0].data;}
 beforeAll(async()=>{
   db=await PGlite.create();
-  for(const path of ['./fixtures/supabase-auth.sql','../supabase/migrations/20261117081808_tenant_foundation.sql','../supabase/migrations/20261117085319_shop_records.sql','../supabase/migrations/20261117102312_public_capabilities.sql'])
+  for(const path of ['./fixtures/supabase-auth.sql','../supabase/migrations/20261117081808_tenant_foundation.sql','../supabase/migrations/20261117085319_shop_records.sql','../supabase/migrations/20261117102312_public_capabilities.sql','../supabase/migrations/20261122184132_public_link_attempt_recovery.sql'])
     await db.exec(readFileSync(new URL(path,import.meta.url),'utf8'));
   vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(Date.UTC(2026,10,17,6));
   try{source=await shopDataFixture();foreign=reportBackupFixture();}finally{vi.useRealTimers();}
