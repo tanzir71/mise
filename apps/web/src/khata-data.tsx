@@ -27,7 +27,7 @@ export function useKhata(setup: SetupSnapshot) {
 export const displayName = (customer: {name:string;nickname:string}) => customer.nickname || customer.name;
 export const errorText = (error: unknown) => error instanceof Error ? error.message : 'Could not save. Keep this browser’s data and try again.';
 export function khataDate(at: number, setup: SetupSnapshot, time = false) { return new Intl.DateTimeFormat('en-GB',{timeZone:setup.outlet.timezone,dateStyle:'medium',...(time ? {timeStyle:'short' as const} : {})}).format(at); }
-export function Avatar({name,large = false}: {name:string;large?:boolean}) { return <span className={`khata-avatar${large ? ' large' : ''}`} aria-hidden="true">{Array.from(name.trim().split(/\s+/).slice(0,2).map(part => Array.from(part)[0]).join('')).slice(0,2).join('').toLocaleUpperCase()}</span>; }
+export {Avatar} from '@mise/ui/Avatar.tsx';
 export function CreditMeter({account,balance}: {account:CreditAccount;balance:number}) {
   return <div className={`credit-meter${balance > account.limit ? ' over-limit' : ''}`} role="meter" aria-label="Credit used" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(account.limit ? Math.min(100,Math.max(0,balance/account.limit*100)) : balance > 0 ? 100 : 0)} aria-valuetext={`${formatMoney(balance,account.currency)} due; limit ${formatMoney(account.limit,account.currency)}`}><span style={{width:`${account.limit ? Math.min(100,Math.max(0,balance/account.limit*100)) : balance > 0 ? 100 : 0}%`}} /></div>;
 }

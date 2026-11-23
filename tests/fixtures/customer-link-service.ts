@@ -36,14 +36,20 @@ import {parseEstimateAction,parseEstimateOutcome} from '../../packages/core/orde
 import {customerViewerUrl} from '../../packages/core/customer-link-url';
 import type { Order, SetupSnapshot } from '../../packages/core/models';
 import {settleOrderCommand} from '../../packages/core/order-payments';
+import {createStaffLinkHandler} from '../../supabase/functions/_shared/staff-link-handler';
+import {emptyStaffProfile} from '../../packages/core/staff';
+import {parseStaffOwnerAction,parseStaffOwnerContext,parseStaffOwnerOutcome} from '../../packages/core/staff-protocol';
+import {parseStaffLinkAction,parseStaffLinkContext,staffViewerUrl} from '../../packages/core/staff-links';
+import {deviceSecretHash} from '../../packages/core/device-access';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
-export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean}={}) {
+export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
     origin = 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
+    ...(options.staffTeam?{read_staff_context:['p_outlet_id','p_member_id'],read_staff_board:['p_outlet_id','p_after','p_page_size'],change_staff_action:['p_outlet_id','p_action_json','p_operation'],read_staff_links:['p_outlet_id','p_member_id','p_after'],change_staff_link:['p_outlet_id','p_action_json','p_operation']}:{}),
     ...((options.ordering||options.estimates||options.checkout)?{read_checkout_policy:['p_outlet_id','p_order_id'],change_checkout_policy:['p_outlet_id','p_action','p_operation']}:{}),
     ...(options.estimates?{read_order_estimate:['p_order_id'],change_order_estimate:['p_order_id','p_action_id','p_order_revision','p_estimate_revision','p_change','p_operation']}:{}),
     ...(options.ordering?{read_public_shop_page:['p_outlet_id','p_after_id','p_page_size'],publish_public_shop:['p_id','p_event_id','p_outlet_id','p_source_url','p_payload_json','p_secret_hash','p_table','p_expiry'],revoke_public_shop:['p_id','p_event_id','p_outlet_id']}:{}),
@@ -250,7 +256,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
     records = resources();
     lose = null;
     await f.db.exec(
-      'update private.public_read_budget set window_at=0,requests=0;update private.public_order_budget set window_at=0,requests=0;',
+      'update private.public_read_budget set window_at=0,requests=0;update private.public_order_budget set window_at=0,requests=0;update private.staff_link_budget set window_at=0,requests=0;',
     );
     await f.db.transaction(async (tx) => {
       await tx.query(
@@ -318,6 +324,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
     prepare:(value,limits)=>f.asRole(null,'service_role','select public.prepare_order_confirmation($1,$2,$3,$4,$5) data',[value.token,value.intent?confirmationIntentJson(value.intent):null,value.action,limits.global,limits.link]),
     finish:(value,preparation,rows)=>f.asRole(null,'service_role','select public.finish_order_confirmation($1,$2,$3) data',[value.id,preparation.ticketToken,JSON.stringify(rows)]),
   }});
+  const staff=createStaffLinkHandler({origins:new Set([origin]),store:{visit:(value,limits)=>f.asRole(null,'service_role','select public.visit_staff_link($1,$2,$3,$4,$5,$6) data',[value.token,value.operation,value.intent===null?null:JSON.stringify(value.intent),value.after===null?null:JSON.stringify(value.after),limits.global,limits.link])}});
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
       status,
@@ -371,6 +378,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
           new Request(url, { method: req.method, headers, body: raw }),
         );
       else if(options.ordering&&url.pathname==='/functions/v1/public/orders')response=await publicOrder(new Request(url,{method:req.method,headers,body:raw}));
+      else if(options.staffTeam&&url.pathname==='/functions/v1/public/staff')response=await staff(new Request(url,{method:req.method,headers,body:raw}));
       else if(options.checkout&&['order-quote','order-confirmations','order-payment'].some(path=>url.pathname==='/functions/v1/public/'+path))response=await checkout(new Request(url,{method:req.method,headers,body:raw}));
       else if (url.pathname.startsWith('/rest/v1/rpc/')) {
         const rpc = url.pathname.split('/').at(-1)!,
@@ -393,7 +401,8 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
             );
           } catch (error) {
             const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
-            const status=['read_order_estimate','change_order_estimate','read_checkout_policy','change_checkout_policy'].includes(rpc)?code==='42501'?403:code==='PT409'||code==='23505'?409:code.startsWith('22')?400:503:403;
+            const staffRpc=['read_staff_context','read_staff_board','change_staff_action','read_staff_links','change_staff_link'].includes(rpc);
+            const status=(staffRpc||['read_order_estimate','change_order_estimate','read_checkout_policy','change_checkout_policy'].includes(rpc))?code==='42501'?403:code==='PT409'||code==='23505'||staffRpc&&code==='40001'?409:code.startsWith('22')?400:503:403;
             response = json({ error: status===403?'Access denied':'Review the original action' },status);
           }
       } else
@@ -403,7 +412,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       for (const [k, v] of response.headers) out.set(k, v);
       out.set('Content-Length', String(bytes.length));
       const drop =
-        lose !== null && url.pathname.endsWith('/' + lose) && response.ok;
+        lose !== null && url.pathname.endsWith('/' + lose) && response.ok && (lose!=='staff'||JSON.parse(raw).operation!=='read');
       if (drop) {
         lose = null;
         out.set('Connection', 'close');
@@ -461,9 +470,29 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       rpc:
         | 'create_public_link'
         | 'close_public_link_attempt'
-        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations',
+        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations' | 'change_staff_action' | 'change_staff_link' | 'staff',
     ) {
       lose = rpc;
+    },
+    async staffCounts(){return(await f.db.query<{checkIns:number;links:number;revoked:number;actions:number;closed:number}>("select (select count(*) from public.check_ins)::integer as \"checkIns\",(select count(*) from private.staff_links)::integer links,(select count(*) from private.staff_links where revoked_at is not null)::integer revoked,(select count(*) from private.staff_link_actions)::integer actions,(select count(*) from private.staff_link_actions where state='closed')::integer closed")).rows[0];},
+    async staffScene(base:string){
+      if(!options.staffTeam)throw Error('Staff fixture is not enabled');
+      // Initial synthetic roster, then only actual authenticated staff commands.
+      await f.db.query('update public.members set active=false where business_id=$1 and id<>$2',[setup.business.id,setup.owner.id]);
+      const scope={businessId:setup.business.id,outletId:setup.outlet.id,actorId:setup.owner.id,actorRole:'owner' as const};
+      const read=async(memberId:string)=>parseStaffOwnerContext(await f.asRole(1,'authenticated','select public.read_staff_context($1,$2) data',[scope.outletId,memberId]),scope,memberId);
+      const change=async(action:ReturnType<typeof parseStaffOwnerAction>)=>parseStaffOwnerOutcome(await f.asRole(1,'authenticated','select public.change_staff_action($1,$2,$3) data',[scope.outletId,JSON.stringify(action),'submit']),action);
+      for(const [n,name,nameLocal,role] of [[101,'Shop owner','দোকানের মালিক','owner'],[201,'Karim Uddin','করিম উদ্দিন','kitchen'],[202,'Nadia Akter','নাদিয়া আক্তার','staff'],[203,'Jamal Mia','জামাল মিয়া','rider'],[204,'Tuhin Ahmed','তুহিন আহমেদ','kitchen']] as const){
+        const c=await read(deviceId(n)),draft={...emptyStaffProfile(),name,nameLocal,role,active:true,phone:'+1415555'+String(n).padStart(4,'0'),methods:['link'] as const,language:'bn' as const,shift:{days:[0,1,2,3,4,5,6],start:0,end:1439}};
+        await change(parseStaffOwnerAction({...scope,v:1,id:newInboxId(),eventId:newInboxId(),memberId:c.memberId,kind:'save',expected:c.current,latest:null,draft,checkIn:null}));
+        if(n!==202&&n!==204){const current=await read(c.memberId),eventId=newInboxId();await change(parseStaffOwnerAction({...scope,v:1,id:newInboxId(),eventId,memberId:c.memberId,kind:'check-in',expected:current.current,latest:current.latest,draft:null,checkIn:{v:1,id:newInboxId(),eventId,memberId:c.memberId,outletId:scope.outletId,type:'in',occurredAt:Date.now(),expectedLastId:current.latest?.id??null}}));}
+      }
+      const memberId=deviceId(202),context=parseStaffLinkContext(await f.asRole(1,'authenticated','select public.read_staff_links($1,$2,null) data',[scope.outletId,memberId]),scope,memberId),token='J'.repeat(43);
+      const action=parseStaffLinkAction({...scope,v:1,id:newInboxId(),eventId:newInboxId(),memberId,linkId:newInboxId(),kind:'issue',expected:context.current,tokenHash:await deviceSecretHash(token),expiresAt:context.serverAt+30*86400000});
+      await f.asRole(1,'authenticated','select public.change_staff_link($1,$2,$3) data',[scope.outletId,JSON.stringify(action),'submit']);
+      const intent={v:1,id:newInboxId(),eventId:newInboxId(),memberId,outletId:scope.outletId,type:'in',occurredAt:Date.now(),expectedLastId:null};
+      const receipt=await f.asRole<{state:string}>(null,'service_role','select public.visit_staff_link($1,$2,$3,null,1000,1000) data',[token,'submit',JSON.stringify(intent)]);if(receipt.state!=='applied')throw Error('Synthetic shift must be actually recorded');
+      return {url:staffViewerUrl(origin,base,{v:1,apiUrl,token})};
     },
     async publishShop(table:string|null=null){
       if(!options.ordering)throw Error('Ordering fixture is not enabled');

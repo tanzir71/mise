@@ -13,6 +13,7 @@ import {captureCustomerLinks,closeCustomerLinksVisual} from '../tests/fixtures/c
 import {capturePublicOrdering,closePublicOrderingVisual} from '../tests/fixtures/public-ordering-visual.mjs';
 import {captureOrderEstimates,closeOrderEstimatesVisual} from '../tests/fixtures/order-estimates-visual.mjs';
 import {captureOrderCheckout,closeOrderCheckoutVisual} from '../tests/fixtures/order-checkout-visual.mjs';
+import {captureStaff,closeStaffVisual} from '../tests/fixtures/staff-visual.mjs';
 import {captureKitchenScreen,closeKitchenScreenVisual} from '../tests/fixtures/install-kitchen-ui.mjs';
 import {captureDeskNotifications,closeDeskNotificationsVisual} from '../tests/fixtures/install-desk-ui.mjs';
 import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyActionReview,capturePurchaseActionReview,captureStockActionReview,captureCustomerActionReview,captureClosingActionReview,captureMoneyCurrencyReview,capturePendingCurrencyRecovery,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
@@ -55,6 +56,11 @@ try {
   for (const target of targets) for (const width of target.widths) {
     const context = await browser.newContext({ viewport: { width, height: target.heights?.[width] || 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
     const page = await context.newPage();
+    if(!target.staffFixture)await closeStaffVisual();
+    else{
+      const closed=await Promise.allSettled([closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual()]);
+      const failed=closed.find(result=>result.status==='rejected');if(failed)throw failed.reason;
+    }
     if (target.phoneAuthFixture) await installPhoneAuthFixture(page);
     let clockInstalled = false,reviewFixtureInstalled=false;
     if ((target.actions || []).some(action => action.type === 'advance-time')) { await page.clock.install(); clockInstalled = true; }
@@ -68,6 +74,7 @@ try {
     if(target.orderCheckoutFixture){await Promise.all([closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual()]);await captureOrderCheckout(page,target.orderCheckoutFixture);}
     if(target.kitchenScreenFixture)await captureKitchenScreen(page,target.kitchenScreenFixture);
     if(target.deskNotificationsFixture)await captureDeskNotifications(page,target.deskNotificationsFixture);
+    if(target.staffFixture)await captureStaff(page,target.staffFixture);
     if(target.scopeRecoveryFixture)await captureRecoveryReview(page);
     if(target.ownerResumeFixture)await captureOwnerResumeReview(page);
     if(target.localInboxFixture)await captureLocalInboxReview(page,typeof target.localInboxFixture==='string'?target.localInboxFixture:'review');
@@ -122,6 +129,9 @@ try {
       }
       for (const strip of await element.locator('.day-shots').all()) await strip.evaluate(row => { row.scrollLeft = 0; });
       for (const panel of await element.locator('.order-detail-content').all()) await panel.evaluate(panel => { panel.scrollTop = 0; });
+      // Decoding an icon below the fold may scroll its native dialog. Capture
+      // the actual top of the open sheet, including its title and close control.
+      await element.evaluate(node=>{if(node instanceof HTMLDialogElement)node.scrollTop=0;for(const dialog of node.querySelectorAll('dialog[open]'))dialog.scrollTop=0;});
       const id = `${target.id}-${section.id}-${width}`;
       if (!/^[a-z0-9-]+$/.test(id) || captureIds.has(id)) throw new Error(`Invalid or duplicate capture id: ${id}`);
       captureIds.add(id);
@@ -146,7 +156,7 @@ try {
 } finally {
   try { await browser?.close(); }
   finally {
-    const closed=await Promise.allSettled([closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual()]);
+    const closed=await Promise.allSettled([closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual()]);
     server?.kill();const failed=closed.find(result=>result.status==='rejected');if(failed)throw failed.reason;
   }
 }

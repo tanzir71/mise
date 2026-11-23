@@ -26,6 +26,16 @@ The installer configures the installation's own alarm signing key, VAPID keys an
 
 Until notification setup is ready, the cached Inbox, visible warnings and manual controls remain the working path. Verify actual notification delivery on the intended device after opting in.
 
+## Staff shift links (opt-in preview)
+
+The `staffTeam` preview uses the installation’s existing phone sign-in for its owner or assigned manager. In Team, save a member with their own staff link enabled, reopen their editor and create a 30-day link. Contact numbers and staff links do not create phone sign-in accounts. Share the complete link privately with that member; it contains no administrator key or owner session. The member can use it in English or Bangla without signing in.
+
+The installer deploys the repository’s staff migrations and `public` Edge Function to its own backend. Staff links have an independent `MISE_STAFF_LINKS_ENABLED=false` default; enable this only for the available preview in that installation. The handler reuses that installation’s private `MISE_SERVICE_API_KEY` and exact `MISE_ALLOWED_ORIGINS`. It does not require a new SMS account or a maintainer phone number. The service key stays server-side. Optional `MISE_PUBLIC_STAFF_REQUESTS_PER_MINUTE` and `MISE_PUBLIC_STAFF_LINK_REQUESTS_PER_MINUTE` accept integers from 1 to 60,000, defaulting to 600 total requests and 60 per staff link per server minute. Reads, taps, original checks and closures all count. Invalid configuration keeps the endpoint unavailable.
+
+A staff link reveals only that member’s shift and recorded attendance at the selected outlet. A new tap keeps its complete original in that browser before it sends. After a connection failure, check that saved tap before retrying or closing it; a closure also stays saved while offline. If the link or browser storage cannot be used, copy the check-in message or tell the manager, who can log it by hand with their own name recorded. Revoking the link, removing the member or disabling their link method blocks fresh reads and taps. A genuine earlier receipt remains an acknowledgement of that exact original only.
+
+The browser that creates a link retains its secret privately; the backend stores its hash. On another owner device, revoke the old link and create a replacement there. Never include staff links, provider credentials or connection values in repository files or public build variables. The shared order-phone check-in path and task permission enforcement remain unfinished; this preview stays off by default.
+
 ## Customer link reads
 
 The installation's `public-read` function uses the existing backend server key and exact allowed origins. Optional private backend settings `MISE_PUBLIC_READS_PER_MINUTE` and `MISE_PUBLIC_LINK_READS_PER_MINUTE` control the installation-wide and per-link budgets. Empty values use 3,000 and 60 reads per server minute; valid configured values are integers from 1 to 60,000. Invalid values leave reads unavailable rather than silently weakening the limits. No additional provider account or secret is required. Deploy only the customer interfaces available in your release; configuring this endpoint does not enable unfinished tracking or khata pages.
