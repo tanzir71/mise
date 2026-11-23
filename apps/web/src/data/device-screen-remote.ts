@@ -5,10 +5,14 @@ import {parseKitchenPage,parseKitchenChanges,type KitchenCursor} from '@mise/cor
 import {parseKitchenAction,parseKitchenReceipt,type KitchenAction} from '@mise/core/kitchen';
 import type {StaffDeviceAccess} from '@mise/core/device-access';
 import {parseKitchenCloseIntent,parseKitchenTapRecovery,parseRetainedKitchenTap,type KitchenCloseIntent,type RetainedKitchenTap} from '@mise/core/kitchen-recovery';
+import {parseStaffDeviceView,parseStaffDeviceOutcome} from '@mise/core/staff-device';
+import {parseStaffDeviceBoard} from '@mise/core/staff-device-board';
+import {parseAttendanceIntent,type AttendanceIntent} from '@mise/core/staff-attendance';
+import {parseStaffCursor,type StaffHistoryCursor} from '@mise/core/staff-links';
 
 export class DeviceScreenRequestError extends Error {
  constructor(readonly kind:'auth'|'review'|'retry'|'backoff',readonly retryAt:number|null=null){
-  super(kind==='auth'?'Check this screen’s enrollment or sign in with your PIN again.':kind==='review'?'The screen changed. Reopen its current setup before continuing.':kind==='backoff'?'Too many PIN tries. Wait before trying again.':'This request is unconfirmed. Keep the original screen setup and try again.');
+  super(kind==='auth'?'Check this screen’s enrollment or sign in with your PIN again.':kind==='review'?'The screen changed. Reopen its current setup before continuing.':kind==='backoff'?'This screen has reached its request limit. Wait before trying again.':'This request is unconfirmed. Keep the original screen setup and try again.');
  }
 }
 const object=(v:unknown):v is Record<string,unknown>=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -24,7 +28,7 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
  function checked<T extends object>(value:T):T{current();return bindCommandReceipt(value,current);}
  function pinned(value:SharedDevice){const d=parseSharedDevice(value);if(d.id!==requestId||d.revokedAt!==null)throw new DeviceScreenRequestError('review');return d;}
  function session(value:StaffDeviceSession,device:SharedDevice){return parseStaffDeviceSession(value,{deviceId:device.id,memberId:value.memberId});}
- async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions'|'kitchen-recovery',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
+ async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions'|'kitchen-recovery'|'staff-device',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
   // Serialize before the first await, so form/selection mutations cannot alter
   // an already prepared request. No credential is ever added to the URL.
   const serialized=JSON.stringify(body),controller=new AbortController(),lifetime=signal?AbortSignal.any([controller.signal,signal]):controller.signal;
@@ -52,7 +56,7 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
    if(response.status===429){
     // Provider/error bodies never escape this boundary. Only a bounded time is
     // retained to disable PIN retries; it never grants a session.
-    const retryAt=object(value)&&typeof value.retryAt==='number'&&Number.isSafeInteger(value.retryAt)&&value.retryAt>=0&&value.retryAt<=8640000000000000?value.retryAt:null;
+    const retryHeader=response.headers.get('Retry-After'),retryAt=route==='staff-device'?Date.now()+((retryHeader&&/^[1-9]\d?$/.test(retryHeader)&&Number(retryHeader)<=60?Number(retryHeader):60)*1000):object(value)&&typeof value.retryAt==='number'&&Number.isSafeInteger(value.retryAt)&&value.retryAt>=0&&value.retryAt<=8640000000000000?value.retryAt:null;
     throw new DeviceScreenRequestError('backoff',retryAt);
    }
    return value;
@@ -60,6 +64,19 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
   finally{clearTimeout(timer);controller.abort();}
  }
  return {
+  async staffView(device:SharedDevice,input:StaffDeviceSession,after:StaffHistoryCursor|null=null,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original),cursor=parseStaffCursor(after);
+   return checked(parseStaffDeviceView(await call('staff-device',{sessionToken:saved.token,operation:'read',intent:null,after:cursor},signal),cursor,{device:original,session:saved}));
+  },
+  async staffBoard(device:SharedDevice,input:StaffDeviceSession,after:string|null=null,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original);if(after!==null&&!isDeviceId(after))throw new DeviceScreenRequestError('review');
+   return checked(parseStaffDeviceBoard(await call('staff-device',{sessionToken:saved.token,operation:'board',after},signal),after,{device:original,session:saved}));
+  },
+  async staffAttendance(device:SharedDevice,input:StaffDeviceSession,operation:'submit'|'inspect'|'close',source:AttendanceIntent,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original),intent=parseAttendanceIntent(source);
+   if(intent.memberId!==saved.memberId||intent.outletId!==original.outletId)throw new DeviceScreenRequestError('review');
+   return checked(parseStaffDeviceOutcome(await call('staff-device',{sessionToken:saved.token,operation,intent,after:null},signal),intent));
+  },
   async tickets(device:SharedDevice,input:StaffDeviceSession,after:KitchenCursor|null=null,signal?:AbortSignal){
    const original=pinned(device),saved=session(input,original),cursor=after===null?null:{...after};
    const value=await call('kitchen-tickets',{action:'page',sessionToken:saved.token,after:cursor,limit:50},signal);

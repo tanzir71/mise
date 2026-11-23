@@ -234,6 +234,7 @@ export function createDeviceAdminSession(
     async pin(...args: Parameters<typeof remote.pin>) {
       return checked(await remote.pin(...args));
     },
+    async pinContext(...args:Parameters<typeof remote.pinContext>){return checked(await remote.pinContext(...args));},
   };
 }
 export type DeviceAdminSession = ReturnType<typeof createDeviceAdminSession>;

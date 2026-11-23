@@ -1,0 +1,419 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T14:15:40.190Z",
+  "sourceParentCommit": "de2f210a08cc54889a43117dbcd760904c5793fd",
+  "status": "verified-shared-phone-controls-full-m34-open",
+  "publication": {
+    "workflows": "held-disabled",
+    "pages": "held",
+    "publicFunction": "undeployed",
+    "staffDeviceFunction": "undeployed",
+    "featureFlag": "staffTeam:false"
+  },
+  "configuration": {
+    "owner": "end-user",
+    "maintainerCredentialsRequired": false,
+    "serverDefault": "MISE_STAFF_DEVICE_ENABLED=false",
+    "credentialsInRepository": false
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "b0feea2c45705df9eb134a2a09919ef010b42c5dd37b4efd50dd2569a1c98621",
+    "apps/web/public/staff-device-assets/check.svg": "1e4f3d977ea9c73b62c4083b7e5fb01cc2fca1349a7da0bf7506256d7f0ba25c",
+    "apps/web/public/staff-device-assets/plus.svg": "34c29b9cef051952226085b7a1b3de05008e65f4a2474e05e0df7b06208e355c",
+    "apps/web/public/staff-device-assets/presence.svg": "1d2529b40286a8ba64a6fe4f6293acf2c8505ca2a44fbb93383a3bfd34106181",
+    "apps/web/src/DeviceAccessSettings.tsx": "ed36d3910edf098841e4f0626e44834c7fa6699e4a4eae21a8a27d2107887644",
+    "apps/web/src/SharedScreen.tsx": "ea9594ef0dd9a950ab34db7c5d392cb67548531ee8a29ab74d2b1dcd0b7e6dfa",
+    "apps/web/src/StaffDeviceScreen.tsx": "5270987b4d0df3c158eac1315886a2965bf64d8784994825838666863a4443bf",
+    "apps/web/src/StaffLinkView.tsx": "a23486bd656db69046969b12974ce0bb3a31070d96e1ac58033364880affa63e",
+    "apps/web/src/StaffShift.tsx": "217c8fc4cf6119e9066d44eb5a60326ecb7ca06d6a8ac27f695b08717fc7f375",
+    "apps/web/src/data/command-request.ts": "f9d1578eb8aa51c9066a3a7f0a749ee587b055f05c65f2d5f27e833a9fc0bc3e",
+    "apps/web/src/data/device-admin-remote.ts": "458dbb6d872fcf808dd107319b4378b57029266f1cce572cd7a3c7d43e545541",
+    "apps/web/src/data/device-admin-session.ts": "2b0ac5f9194ecc16a3f1a813aefbe32e545861528b724d39aaaf8ad52c25d38e",
+    "apps/web/src/data/device-screen-journal.ts": "2077ae412c16291d388784bb89f1a7e35519db677c474916e8d83399c2381986",
+    "apps/web/src/data/device-screen-remote.ts": "0bbe30510b1dfccdcff0e7fb07f18a4367d167840ee7c56a0b3ce7d7616bb3f5",
+    "apps/web/src/data/staff-device-session.ts": "821e1e8d40e0ffcf3d37a1a56bc4d4919860d6d1203c5993f1f4d6309a62dfc8",
+    "apps/web/src/main.tsx": "b014687765329d88c378874fe79a37dbe1283f713bfdab4cfafa1ab47e7e845b",
+    "apps/web/src/staff-device.css": "5c48ebd3812b4d2c0590c7ba4b581213f27a38850989081d16011e589d2b45c2",
+    "docs/configure-services.md": "7137890d8eed2d67878e2f1972e8d544c53f318be2f4d36134e75c4d3eeee525",
+    "docs/screenshots/m34-phone-board-1440.png": "4b7408cd4928175dc5db28b4e5fcf4fa81e7e0546e5b94f07713b73371ac676f",
+    "docs/screenshots/m34-phone-board-390.png": "13974bcbe161ed777e75dc795ade533ff2da0c73f964981a2bc95580afd6d912",
+    "docs/screenshots/m34-phone-shift-390.png": "0fa6b604f642db40b460d48e80e85dcdb24f1c886b88e9e2d32302d2761d65b9",
+    "docs/staff-device-assets.json": "2eb586cd10d55d04921e051e930e27ab063bfa1aff4bd92a19e4449bcdfb8597",
+    "docs/staff-device-screen.md": "910fa50c6de9ab782572ba8918def114b8da6bd02f9d2ef8661d6180a79160a5",
+    "handover/DECISIONS.md": "a9adeafe34bdec2322d59cfd5f1b271d057721b6e894cf97b6997e8b9ae27680",
+    "handover/docs/03-roadmap.md": "5a3dbfbff87acad1cdad9514ea26240a5b20f0d4ee4e521a1395348daff275fa",
+    "packages/core/device-screen-link.ts": "76667963826f34942c3d2fa981df9f022933b81c1ff7965ab955ee7fe234c544",
+    "packages/core/flags.ts": "8054e0437d8e95ccc52d2c5c5c00e65b57993aa8964378465a897868b040b83b",
+    "packages/core/staff-device-board.ts": "92486c51f696558500a694f0ac5b80a16ee40a04217e1481de8b8c3ee58db048",
+    "packages/core/staff-device-journal.ts": "4796d99600edf66ace91009396ac3c6fa2b2e94b5b9e7834f9ae51a10031f30f",
+    "qa/configs/m34-staff-device.json": "d16ec87b4891abc1d12ddb7fb35655210adc7a3355e07a8dc85461af4b9f38a9",
+    "scripts/qa-visual.mjs": "9b8e1a1590d229fad4206c231ae5735c511a7601b38d496e9fbb0a215c16a293",
+    "supabase/functions/.env.example": "c300e73c456bbfa0ffbb724285778e062487bada80da36302757ce25e643fcf1",
+    "supabase/functions/_shared/staff-device-handler.ts": "9abd30743514296eb702655f8f4f95e70a5d66e91371025cc73d869c30ac9e3e",
+    "supabase/functions/staff-device/index.ts": "a27e5b528293932bbb78f73ba859600f84e818515c0ad2ee82ef00260c21a60d",
+    "supabase/migrations/20261123113015_staff_device_attendance.sql": "b78e0bac53da86dd530c793ee7bd678715d7e182e1cddb5314b8a44720344246",
+    "supabase/migrations/20261123115132_staff_device_live_clock.sql": "8c005b194b9711fcf7440b654051a420c9aa2c622ed1b79374cacf349e5f0b33",
+    "supabase/migrations/20261123131811_staff_device_board.sql": "acd4270cad78a47857be38464f4a96c5c3be4c680d6b8f048992c47c4dfd9d3e",
+    "tests/device-admin-remote.test.ts": "25a3e4f190416f286aa4f5f6fce6ed69fe565baa631eea44098de001134c06d9",
+    "tests/device-screen-journal.test.ts": "54d0087d1e7eb8837be924454399b2162d6e10306e7680bddecaf2e55e9641c6",
+    "tests/device-screen-link.test.ts": "abe6cd66ac313502189bd4580acb89290f91e134271293030deb077d42006bb2",
+    "tests/e2e/device-access-ui.spec.ts": "34ad7c5d763e7134a1b1ba064adde0d09f7979d61c2f94a16c9284b44756a060",
+    "tests/e2e/staff-device.spec.ts": "83fae1c40569b1636405992e5ffb6bb2c22afe414b532925dad758861f18b7e7",
+    "tests/e2e/staff-links.spec.ts": "2a09eb3b4acdc8c7f3c0628e20de1de074c3110497835b62581cd76d334d6a4a",
+    "tests/fixtures/device-ui-service.ts": "581fe5a0792f36de8ac1adb4e51160427b8dcec58708d398be7b34931182b0e0",
+    "tests/fixtures/install-staff-device.d.mts": "dd60b1f64014cbfe0f42e9432d38d6ab1766ed4dfff919b5692a326cc7d2c293",
+    "tests/fixtures/install-staff-device.mjs": "84286e53a768d756a77c356efc8ba3749859a34ed87ba44e9bb59ff3ddc3ec07",
+    "tests/fixtures/staff-device-browser.ts": "06c9a85a2e744df39906f27faca1b9fcd69df853db7b259b55de9e68d287438e",
+    "tests/fixtures/staff-device-service.ts": "2636b0ef26357a91c351e989b6dad1b7e21ec4c13c1cb569db2c9008d11abfdc",
+    "tests/kitchen-screen.test.ts": "d733d55bf5f30bedf1c2b8d0c45239a3a07f54f4b0b968308e064ff3c9303e3b",
+    "tests/staff-device-board.test.ts": "f851b68707c5da60a3004da901c77957e61186968b70a3c0643908d679fb47c7",
+    "tests/staff-device-fixture.ts": "be0c523665e884a9d6a48e5d3394af1417926f4ce4c19cc069b5c6eb96974fa4",
+    "tests/staff-device-http.test.ts": "6f384ef9865a7048bf967277056279dca7ae763fe56de0b14773c25bcd6c8ab3",
+    "tests/staff-device-session.test.ts": "b2cd5753e5bfda9648985a7641c13c6df186c0f5bf8ee1628c7f4299b884a6c0",
+    "tests/staff-device-sql.test.ts": "0b7e813c3702f3af0bdad4183d532b1fa634cfa0efd5391b5cd699ba13d0345b"
+  },
+  "checks": {
+    "unitCasesVerified": 4801,
+    "unitFiles": 244,
+    "unitInitialRun": {
+      "passed": 4798,
+      "failed": 3,
+      "filesPassed": 241,
+      "filesFailed": 3,
+      "totalCases": 4801,
+      "totalFiles": 244
+    },
+    "unitFollowup": {
+      "cases": 83,
+      "files": 3,
+      "passed": true,
+      "deadlineChanges": false,
+      "applicationLogicChanges": false,
+      "note": "Updated the version-1 upgrade assertion to version 3 and checked its empty attendance store. Two original five-second timeouts passed in the complete focused suite rerun. All 4,801 unique cases are covered by passing final suite results."
+    },
+    "focusedNativeBoardAdminUpgradeAndQrCases": 54,
+    "pagesBrowserCases": 71,
+    "rootBrowserCases": 71,
+    "initialPagesNote": "Early Pages runs exposed a new form-selector mismatch and an immediate storage assertion that raced the existing Web Lock. Tests now use the actual combobox and wait for the committed offline closure before reconnecting; application behavior and original case deadlines are unchanged. The complete final run passes.",
+    "lint": true,
+    "typecheck": true,
+    "astroFiles": 195,
+    "astroDiagnostics": 0,
+    "basePaths": [
+      "/mise/",
+      "/"
+    ],
+    "finalBuildBase": "/mise/",
+    "exports": 270,
+    "visualComparisons": 95,
+    "visualBase": "/",
+    "visualReport": "qa/report.html",
+    "visualCountsByPage": {
+      "staff-device-board": 5,
+      "staff-device-own-shift": 5,
+      "staff-board": 5,
+      "staff-members": 5,
+      "staff-editor": 5,
+      "staff-shift": 5,
+      "m30-device-owner": 5,
+      "m30-screen-setup": 5,
+      "m30-screen-compare": 5,
+      "m30-screen-signin": 5,
+      "m30-screen-recovery": 5,
+      "m32-kitchen-board": 5,
+      "m32-kitchen-offline": 5,
+      "m32-kitchen-queued": 5,
+      "m32-kitchen-review": 5,
+      "m32-kitchen-undone": 5,
+      "m32-kitchen-cancelled": 5,
+      "m32-kitchen-scheduled": 5,
+      "m32-kitchen-handoff": 5
+    },
+    "newAttendanceAxeScenes": 10,
+    "newAttendanceAssetGeometry": [
+      {
+        "mode": "board",
+        "width": 360,
+        "assets": [
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "plus.svg",
+            "width": 16,
+            "height": 16
+          }
+        ]
+      },
+      {
+        "mode": "board",
+        "width": 390,
+        "assets": [
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "plus.svg",
+            "width": 16,
+            "height": 16
+          }
+        ]
+      },
+      {
+        "mode": "board",
+        "width": 768,
+        "assets": [
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "plus.svg",
+            "width": 16,
+            "height": 16
+          }
+        ]
+      },
+      {
+        "mode": "board",
+        "width": 1024,
+        "assets": [
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "plus.svg",
+            "width": 16,
+            "height": 16
+          }
+        ]
+      },
+      {
+        "mode": "board",
+        "width": 1440,
+        "assets": [
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "check.svg",
+            "width": 12,
+            "height": 12
+          },
+          {
+            "file": "plus.svg",
+            "width": 16,
+            "height": 16
+          }
+        ]
+      },
+      {
+        "mode": "shift",
+        "width": 360,
+        "assets": [
+          {
+            "file": "presence.svg",
+            "width": 8,
+            "height": 8
+          },
+          {
+            "file": "message.svg",
+            "width": 18,
+            "height": 18
+          }
+        ]
+      },
+      {
+        "mode": "shift",
+        "width": 390,
+        "assets": [
+          {
+            "file": "presence.svg",
+            "width": 8,
+            "height": 8
+          },
+          {
+            "file": "message.svg",
+            "width": 18,
+            "height": 18
+          }
+        ]
+      },
+      {
+        "mode": "shift",
+        "width": 768,
+        "assets": [
+          {
+            "file": "presence.svg",
+            "width": 8,
+            "height": 8
+          },
+          {
+            "file": "message.svg",
+            "width": 18,
+            "height": 18
+          }
+        ]
+      },
+      {
+        "mode": "shift",
+        "width": 1024,
+        "assets": [
+          {
+            "file": "presence.svg",
+            "width": 8,
+            "height": 8
+          },
+          {
+            "file": "message.svg",
+            "width": 18,
+            "height": 18
+          }
+        ]
+      },
+      {
+        "mode": "shift",
+        "width": 1440,
+        "assets": [
+          {
+            "file": "presence.svg",
+            "width": 8,
+            "height": 8
+          },
+          {
+            "file": "message.svg",
+            "width": 18,
+            "height": 18
+          }
+        ]
+      }
+    ],
+    "axeViolations": 0,
+    "overflowScenes": 0,
+    "ciArtifacts": "held; checks ran locally"
+  },
+  "managed": {
+    "migrations": 77,
+    "tables": 108,
+    "forcedRlsTables": 108,
+    "functions": 461,
+    "finalFunctionSourcesMatched": 3,
+    "unrelatedFunctionsPreserved": 458,
+    "unrelatedFunctionDigest": "d6aca9c27f4697d873aaaaa707b00e31",
+    "migrationHashes": {
+      "supabase/migrations/20261123131811_staff_device_board.sql": "acd4270cad78a47857be38464f4a96c5c3be4c680d6b8f048992c47c4dfd9d3e"
+    },
+    "roleAndClockChecks": 46,
+    "actualProbeCheckIns": 1,
+    "probeRolledBack": true,
+    "probeFinancialWrites": 0,
+    "probeProviderRequests": 0,
+    "authUsers": 0,
+    "businesses": 0,
+    "checkIns": 0,
+    "events": 0,
+    "edgeFunctions": 17,
+    "edgeDeployment": "none",
+    "scheduler": "off",
+    "activeCronJobs": 0,
+    "securityAdvisories": "informational rls_enabled_no_policy only"
+  },
+  "remaining": [
+    "actual staff task preference enforcement",
+    "full M34 acceptance",
+    "M35 and later handover milestones",
+    "owner-held CI artifacts and public deployment"
+  ],
+  "privacy": {
+    "historyAndArtifactsChecked": true,
+    "knownPrivateValuesChecked": 13,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "reviewedLegacyFindings": 22,
+    "blockedHistoricalFindings": 0,
+    "coverageFindings": 0,
+    "normalCommitAndPushGuards": "enabled"
+  }
+}

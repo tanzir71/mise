@@ -50,7 +50,9 @@ test('a lost anonymous reply and offline closure retain their originals across a
   await staff.reload();await staff.getByRole('button',{name:'Check saved tap',exact:true}).click();await expect(staff.getByLabel('Saved original tap',{exact:true})).toContainText('This original tap was recorded.');expect((await service.staffCounts()).checkIns).toBe(1);
   expect(await staff.evaluate(()=>JSON.parse(Object.entries(localStorage).find(([key])=>key.startsWith('mise.staff-public.v1:'))![1]).actions.at(-1).intent)).toEqual(original);
   await guest.setOffline(true);await staff.getByRole('button',{name:'Leaving',exact:true}).click();await expect(staff.getByLabel('Saved original tap',{exact:true})).toContainText('This tap is unconfirmed.');await staff.getByRole('button',{name:'Close unfinished tap',exact:true}).click();
-  expect(await staff.evaluate(()=>JSON.parse(Object.entries(localStorage).find(([key])=>key.startsWith('mise.staff-public.v1:'))![1]).actions.at(-1).closeRequested)).toBe(true);
+  // Web Locks finishes after the click event. Observe the actual saved closure
+  // before reconnecting; the original request and case deadline stay unchanged.
+  await expect.poll(()=>staff.evaluate(()=>JSON.parse(Object.entries(localStorage).find(([key])=>key.startsWith('mise.staff-public.v1:'))![1]).actions.at(-1).closeRequested)).toBe(true);
   await guest.setOffline(false);await staff.reload();await staff.getByRole('button',{name:'Close unfinished tap',exact:true}).click();await expect(staff.getByLabel('Saved original tap',{exact:true})).toContainText('This unfinished tap was closed.');expect((await service.staffCounts()).checkIns).toBe(1);expect((await service.staffCounts()).closed).toBe(1);
  }finally{await guest.close();}
 });

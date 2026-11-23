@@ -1,10 +1,10 @@
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import {
-  createPairingDatabase,
   deviceId,
   deviceUid,
 } from '../device-pairing-fixture';
+import {createStaffDeviceFixture} from '../staff-device-fixture';
 import { setupCommand } from '../../packages/core/setup';
 import { newInboxId } from '../../packages/core/inbox';
 import {
@@ -20,7 +20,7 @@ import {
 /** Real HTTP/SQL/roles/crypto, with explicitly synthetic verified Auth users.
  * No hosted project, provider, actual owner credential or SMS is involved. */
 export async function startDeviceUiService() {
-  const f = await createPairingDatabase(process.cwd());
+  const f = await createStaffDeviceFixture(process.cwd());
   await f.seed();
   const origin = 'http://127.0.0.1:4321',
     origins = new Set([origin]);
@@ -143,6 +143,7 @@ export async function startDeviceUiService() {
       },
     });
   const rpcs: Record<string, string[]> = {
+    staff_pin_context: ['p_outlet_id','p_member_id','p_action'],
     read_device_admin: ['p_outlet_id', 'p_kind', 'p_after_id', 'p_limit'],
     start_device_pairing: [
       'p_id',
@@ -325,6 +326,7 @@ export async function startDeviceUiService() {
   return {
     config,
     calls,
+    configureRider: (enabled:boolean) => f.configure(deviceId(111),{name:'Rider preview',role:'rider',methods:enabled?['order_phone']:[]}),
     reset: async () => {
       lose = null;
       await f.seed();

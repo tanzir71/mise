@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: shared-phone attendance now has a real outlet roster, own-PIN shift controls and a separate native original-action journal. Lost replies, offline closure, later PINs and member switching preserve scope and receipts. Owner setup supports explicitly opted-in riders and passes attendance preview flags through credential-free setup QR codes. All installation configuration remains end-user owned; staff task permission enforcement and full M34 stay open, with workflows and publication held.
+
 - In progress: paired-screen attendance now has a service-only backend transaction bound to the actual device and PIN member, with original receipts, closure, current-method checks and bounded requests. Riders and kitchen members on counters receive only explicitly enabled own-attendance access. The installer owns all configuration; the HTTP endpoint defaults off and is not deployed. Shared-device attendance UI and task permission enforcement remain open.
 
 - In progress: the default-off staff preview adds scoped member editing, a compact on-duty board, manual attendance with its actual recorder, and private English/Bangla shift links. Original changes and taps survive lost replies and offline closure; revocation blocks fresh access. Staff secrets are generated and saved locally before issuance, with only their hashes stored by the backend. Each installation supplies its own connection and service settings. Shared order-phone attendance and task permission enforcement remain unfinished; full M34 and publication stay open.

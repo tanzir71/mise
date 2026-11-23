@@ -18,18 +18,32 @@ test.beforeEach(async () => {
 test.afterAll(async () => {
   await service?.close();
 });
-async function owner(page: Page, role: 1 | 2 = 1) {
-  await page.goto('app/?flags=deviceAccess');
+async function owner(page: Page, role: 1 | 2 = 1, attendance=false) {
+  const flags=attendance?'deviceAccess,staffTeam':'deviceAccess';
+  await page.goto('app/?flags='+flags);
   await installDeviceUi(page);
   await page.evaluate(
     (config) => window.miseDeviceUiTest.initialize(config),
     service.config(role),
   );
-  await page.goto('app/settings/devices?flags=deviceAccess');
+  await page.goto('app/settings/devices?flags='+flags);
   await expect(
     page.getByRole('button', { name: 'Create pairing code' }),
   ).toBeEnabled();
 }
+test('owner can set a new opted-in rider PIN and the setup QR carries attendance preview without a staff credential',async({page})=>{
+  await service.configureRider(true);await owner(page,1,true);
+  await page.getByRole('combobox',{name:'Staff member',exact:true}).selectOption({label:'Rider preview · rider'});
+  await expect(page.getByText('Order-phone attendance is enabled for this rider at this outlet.',{exact:true})).toBeVisible();
+  await page.getByLabel('New four-digit PIN',{exact:true}).fill('0064');await page.getByLabel('Repeat PIN',{exact:true}).fill('0064');
+  await expect(page.getByRole('button',{name:'Save staff PIN',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Save staff PIN',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Clear staff PIN',exact:true})).toBeVisible();
+  const url=new URL(await invitation(page));expect(url.searchParams.get('flags')?.split(',')).toEqual(expect.arrayContaining(['staffTeam','kitchenScreen']));expect(Object.keys(JSON.parse(decodeURIComponent(url.hash.slice('#mise-screen='.length)))).sort()).toEqual(['code','connection','pairingId','v']);
+  await service.configureRider(false);await page.reload();await page.getByRole('combobox',{name:'Staff member',exact:true}).selectOption({label:'Rider preview · rider'});
+  await expect(page.getByText('Enable this rider’s order-phone check-in in Team before setting a PIN here. A former PIN can still be cleared.',{exact:true})).toBeVisible();
+  await page.getByLabel('New four-digit PIN',{exact:true}).fill('0064');await page.getByLabel('Repeat PIN',{exact:true}).fill('0064');
+  await expect(page.getByRole('button',{name:'Save staff PIN',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Clear staff PIN',exact:true})).toBeEnabled();
+});
 async function invitation(page: Page) {
   await page.getByLabel('Screen name', { exact: true }).fill('Kitchen tablet');
   await page.getByRole('button', { name: 'Create pairing code' }).click();

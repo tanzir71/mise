@@ -25,6 +25,7 @@ import { ConnectionForm } from './CloudAuthForms';
 import { installApp, useAppInstall } from './app-install';
 import './device-access.css';
 const KitchenScreen=lazy(()=>import('./KitchenScreen').then(module=>({default:module.KitchenScreen})));
+const StaffDeviceScreen=lazy(()=>import('./StaffDeviceScreen').then(module=>({default:module.StaffDeviceScreen})));
 
 type Session = ReturnType<typeof createDeviceScreenSession>;
 interface Runtime {
@@ -53,7 +54,7 @@ const problem = (error: unknown) =>
     ? error.message
     : 'This screen could not finish the step. Keep its saved setup and try again.';
 
-export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setupHash?: string; kitchenEnabled?: boolean }) {
+export function SharedScreen({ setupHash = '', kitchenEnabled = false,staffEnabled=false }: { setupHash?: string; kitchenEnabled?: boolean;staffEnabled?:boolean }) {
   const [incoming] = useState(() => setupLink(setupHash)),
     [connection, setConnection] = useState<CloudConnection | null>(
       incoming.link?.connection ?? null,
@@ -77,6 +78,7 @@ export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setup
     [retryAt, setRetryAt] = useState<number | null>(null),
     [remove, setRemove] = useState(false);
   const runtime = useRef<Runtime | null>(null),
+    preferredMember = useRef<string|null>(null),
     observer = useRef<Session | null>(null),
     poll = useRef<() => Promise<void>>(async () => {}),
     busy = useRef(false),
@@ -306,7 +308,7 @@ export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setup
         if (active && current.active) {
           setDirectory(page);
           setMembers(page.members);
-          setMemberId('');
+          setMemberId(preferredMember.current&&page.members.some(m=>m.id===preferredMember.current)?preferredMember.current:'');preferredMember.current=null;
         }
       });
     };
@@ -356,6 +358,7 @@ export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setup
       );
     });
   }
+  async function switchMember(id:string){preferredMember.current=id;await reset();}
   async function moreStaff() {
     await run(async (current, source) => {
       if (!directory?.next) return;
@@ -378,6 +381,7 @@ export function SharedScreen({ setupHash = '', kitchenEnabled = false }: { setup
     : enrolled
       ? 'Sign in on this screen'
       : 'Turn this device into a shared screen';
+  if(staffEnabled&&!blocked&&saved?.state.phase==='signed-in'&&runtime.current?.active)return <Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening attendance…</p></main>}><StaffDeviceScreen key={saved.revision} journal={runtime.current.journal} source={saved} kitchenEnabled={kitchenEnabled} onSignOut={()=>reset()} onSwitchMember={switchMember}/></Suspense>;
   if(kitchenEnabled&&!blocked&&saved?.state.phase==='signed-in'&&runtime.current?.active)return <Suspense fallback={<main className="coming-soon" aria-busy="true"><p>Opening kitchen tickets…</p></main>}><KitchenScreen key={saved.revision} journal={runtime.current.journal} source={saved} onSignOut={()=>reset()}/></Suspense>;
   return (
     <main className="shared-screen">

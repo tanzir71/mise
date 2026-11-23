@@ -4,6 +4,7 @@ export function screenSetupUrl(
   origin: string,
   base: string,
   input: ScreenSetupLink,
+  previews:{staffTeam?:boolean;kitchenScreen?:boolean}={},
 ): string {
   const root = new URL(origin);
   if (
@@ -25,7 +26,8 @@ export function screenSetupUrl(
     throw Error('Use this installation’s screen setup address.');
   const value = parseScreenSetupLink(input),
     url = new URL(base + 'screen/setup', root);
-  url.searchParams.set('flags', 'deviceAccess');
+  if(Object.entries(previews).some(([key,value])=>!['staffTeam','kitchenScreen'].includes(key)||typeof value!=='boolean'))throw Error('Use the installation’s selected screen features.');
+  url.searchParams.set('flags', ['deviceAccess',...(previews.staffTeam?['staffTeam']:[]),...(previews.kitchenScreen?['kitchenScreen']:[])].join(','));
   url.hash = 'mise-screen=' + encodeURIComponent(JSON.stringify(value));
   return url.href;
 }

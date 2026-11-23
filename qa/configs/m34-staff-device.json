@@ -1,0 +1,8 @@
+{
+ "title":"M34 — shared phone attendance with actual PIN and original recovery",
+ "widths":[360,390,768,1024,1440],
+ "pages":[
+  {"id":"staff-device-board","path":"app/screen/attendance?flags=staffTeam,kitchenScreen","staffDeviceFixture":"board","note":"M05's card roster uses actual assigned members and canonical attendance, with PIN verification before another member can act. No sample group automation, payroll or unauthorized absence decisions. Neutral avatars and 44px controls follow repository rules. Manual exception notes are copied for the manager and do not invent attendance.","sections":[{"id":"screen","selector":".staff-device-board","reference":"screens/mobile/M05 · Shop order phone — Who’s here (shift board).png"}]},
+  {"id":"staff-device-own-shift","path":"app/screen/attendance?flags=staffTeam,kitchenScreen","staffDeviceFixture":"shift","note":"The M07 presentation is shared with the link route; this screen uses the actual enrolled device and own PIN, separate native originals, real method/recorder history and manual copy. Unconfigured payroll/overtime figures and browser chrome are omitted.","sections":[{"id":"screen","selector":".staff-public","reference":"screens/mobile/M07 · Staff — My shift (link, Bangla mode).png"}]}
+ ]
+}

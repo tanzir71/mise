@@ -12,6 +12,10 @@ const source = {
   pairingId: '00000000000000000000000010',
   code: '123456',
 };
+it('carries the installer-selected shared attendance and kitchen previews without adding authentication fields',()=>{
+ const url=new URL(screenSetupUrl('https://shop.test','/mise/app/',source,{staffTeam:true,kitchenScreen:true}));expect(url.searchParams.get('flags')).toBe('deviceAccess,staffTeam,kitchenScreen');expect(decodeScreenSetupHash(url.hash)).toEqual(source);
+ expect(()=>screenSetupUrl('https://shop.test','/app/',source,{pin:true} as never)).toThrow();
+});
 it.each(['/app/', '/mise/app/'])(
   'setup links preserve the supplied runtime connection at portable base %s, with no device/session/PIN fields',
   (base) => {

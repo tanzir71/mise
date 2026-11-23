@@ -13,6 +13,7 @@ import {
 import { operatorAccountHash } from '@mise/core/operators';
 import { newInboxId } from '@mise/core/inbox';
 import { screenSetupUrl } from '@mise/core/device-screen-link';
+import {useStaffTeamEnabled} from './staff-context';
 import {
   parseDevicePairing,
   type DeviceAdminPage,
@@ -62,6 +63,7 @@ function ScreenSetupShare({
   pairing: DevicePairing;
   config: CloudConnection;
 }) {
+  const attendanceEnabled=useStaffTeamEnabled();
   const [qr, setQr] = useState(''),
     [copied, setCopied] = useState(false),
     [fallback, setFallback] = useState(false);
@@ -70,7 +72,7 @@ function ScreenSetupShare({
     connection: config,
     pairingId: pairing.id,
     code: pairing.code,
-  });
+  },{staffTeam:attendanceEnabled,kitchenScreen:attendanceEnabled&&pairing.mode==='kitchen'});
   useEffect(() => {
     let current = true;
     setQr('');
@@ -163,6 +165,7 @@ export function DeviceAccessSettings({
     [memberId, setMemberId] = useState(''),
     [pin, setPin] = useState(''),
     [repeat, setRepeat] = useState(''),
+    [pinEligibility,setPinEligibility]=useState<{memberId:string;ready:Ready;allowed:boolean}|null>(null),
     [discarding, setDiscarding] = useState(false),
     [now, setNow] = useState(Date.now());
   const holder = useRef<Ready | null>(null),
@@ -521,6 +524,14 @@ export function DeviceAccessSettings({
     selectedMember = members.find((m) => m.id === memberId),
     pairing = inspection?.pairing,
     expired = !!pairing && pairing.expiresAt <= now;
+  useEffect(()=>{
+    setPinEligibility(null);const captured=ready,target=selectedMember;let active=true;
+    if(!captured||!online||target?.role!=='rider'||!target.active||!target.assigned)return;
+    const controller=new AbortController();let reading=false;
+    const read=async()=>{if(reading)return;reading=true;try{await captured.session.pinContext(target.id,controller.signal);if(active&&captured.active&&holder.current===captured)setPinEligibility({memberId:target.id,ready:captured,allowed:true});}catch{if(active)setPinEligibility({memberId:target.id,ready:captured,allowed:false});}finally{reading=false;}};
+    void read();const timer=setInterval(()=>void read(),10000);return()=>{active=false;controller.abort();clearInterval(timer);};
+  },[ready,selectedMember?.id,selectedMember?.role,selectedMember?.active,selectedMember?.assigned,online]);
+  const pinAllowed=selectedMember&&(['staff','kitchen'].includes(selectedMember.role)||selectedMember.role==='rider'&&pinEligibility?.memberId===selectedMember.id&&pinEligibility.ready===ready&&pinEligibility.allowed);
   return (
     <div className="device-admin">
       <header className="app-page-heading">
@@ -928,6 +939,7 @@ export function DeviceAccessSettings({
                         : 'No PIN configured'}
                     </p>
                   ) : null}
+                  {selectedMember?.role==='rider'?<p>{pinAllowed?'Order-phone attendance is enabled for this rider at this outlet.':'Enable this rider’s order-phone check-in in Team before setting a PIN here. A former PIN can still be cleared.'}</p>:null}
                   <div className="device-pin-fields">
                     <label>
                       New four-digit PIN
@@ -963,7 +975,7 @@ export function DeviceAccessSettings({
                         !selectedMember ||
                         !selectedMember.active ||
                         !selectedMember.assigned ||
-                        !['staff', 'kitchen'].includes(selectedMember.role) ||
+                        !pinAllowed ||
                         pin.length !== 4 ||
                         repeat.length !== 4
                       }

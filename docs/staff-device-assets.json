@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "fileKey": "FVXWo2wVq4nPS3kdsR4TUv",
+  "frames": [
+    "58:118",
+    "59:59"
+  ],
+  "geometryVerification": "Actual browser bounds are checked at all five widths by the staff-device visual fixture.",
+  "assets": [
+    {
+      "file": "apps/web/public/staff-device-assets/check.svg",
+      "frame": "58:118",
+      "node": "58:135",
+      "url": "https://www.figma.com/api/mcp/asset/d20edff7-dc23-43a6-9c19-85524bded692/c0f24.svg",
+      "size": 12,
+      "callSite": "apps/web/src/StaffDeviceScreen.tsx",
+      "width": 12,
+      "height": 12,
+      "viewBox": "0 0 12 12",
+      "sha256": "1e4f3d977ea9c73b62c4083b7e5fb01cc2fca1349a7da0bf7506256d7f0ba25c"
+    },
+    {
+      "file": "apps/web/public/staff-device-assets/plus.svg",
+      "frame": "58:118",
+      "node": "58:185",
+      "url": "https://www.figma.com/api/mcp/asset/d20edff7-dc23-43a6-9c19-85524bded692/8ee36.svg",
+      "size": 16,
+      "callSite": "apps/web/src/StaffDeviceScreen.tsx",
+      "width": 16,
+      "height": 16,
+      "viewBox": "0 0 16 16",
+      "sha256": "34c29b9cef051952226085b7a1b3de05008e65f4a2474e05e0df7b06208e355c"
+    },
+    {
+      "file": "apps/web/public/staff-device-assets/presence.svg",
+      "frame": "59:59",
+      "node": "59:84",
+      "url": "https://www.figma.com/api/mcp/asset/d377b1da-c3ba-4882-893e-fc96086b15c1/58932.svg",
+      "size": 8,
+      "callSite": "apps/web/src/StaffShift.tsx",
+      "width": 8,
+      "height": 8,
+      "viewBox": "0 0 8 8",
+      "sha256": "1d2529b40286a8ba64a6fe4f6293acf2c8505ca2a44fbb93383a3bfd34106181"
+    },
+    {
+      "file": "apps/web/public/staff-assets/message.svg",
+      "frame": "59:59",
+      "node": "59:130",
+      "url": "https://www.figma.com/api/mcp/asset/d377b1da-c3ba-4882-893e-fc96086b15c1/d54b6.svg",
+      "size": 18,
+      "callSite": "apps/web/src/StaffShift.tsx",
+      "note": "Existing exact exported 18 px variant, reused from the staff-link implementation.",
+      "width": 18,
+      "height": 18,
+      "viewBox": "0 0 18 18",
+      "sha256": "7e43bba9fd7fac52533a64f49595160b037af4de7104be4fd0cd51dfb201d348"
+    }
+  ]
+}

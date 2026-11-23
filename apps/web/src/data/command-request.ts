@@ -38,9 +38,9 @@ export function assertLiveCommandReceipt(receipt:object):void {
 export function createAccountJsonRequest(config:CloudConnection,input:CommandAccount,route:'commands'|'migration-upload',send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/'+route,config.apiUrl+'/'),'POST',send);
 }
-export type DeviceAdminRpc='read_device_admin'|'start_device_pairing'|'inspect_device_pairing'|'approve_device_pairing'|'cancel_device_pairing'|'revoke_device';
+export type DeviceAdminRpc='read_device_admin'|'start_device_pairing'|'inspect_device_pairing'|'approve_device_pairing'|'cancel_device_pairing'|'revoke_device'|'staff_pin_context';
 export function createDeviceAdminRequest(config:CloudConnection,input:CommandAccount,rpc:DeviceAdminRpc,send:typeof fetch){
- if(!['read_device_admin','start_device_pairing','inspect_device_pairing','approve_device_pairing','cancel_device_pairing','revoke_device'].includes(rpc))throw new CommandRequestError('review');
+ if(!['read_device_admin','start_device_pairing','inspect_device_pairing','approve_device_pairing','cancel_device_pairing','revoke_device','staff_pin_context'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8000000);
 }
 export type CustomerLinkRpc='read_customer_link_page'|'create_public_link'|'revoke_public_link'|'read_public_link_attempt'|'close_public_link_attempt';

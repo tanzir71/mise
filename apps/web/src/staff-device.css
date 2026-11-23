@@ -1,0 +1,27 @@
+.staff-device-workspace{min-height:100dvh;background:var(--bg);color:var(--text);font:400 14px/20px var(--font-sans)}
+.staff-device-nav{display:flex;flex-wrap:wrap;gap:8px;max-width:800px;margin:auto;padding:16px;border-bottom:1px solid var(--border)}
+.staff-device-nav .button:last-child{margin-left:auto}
+.staff-device-board{max-width:800px;margin:auto;padding:16px;display:grid;gap:16px}
+.staff-device-board h1{font-size:24px;line-height:32px;font-weight:600;margin:0}
+.staff-device-board h2{font-size:14px;line-height:20px;font-weight:500;margin:0}
+.staff-device-board header p,.staff-device-board small{font-size:12px;line-height:16px;color:var(--text-secondary);margin:4px 0 0}
+.staff-device-read{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.staff-device-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.staff-device-person{padding:0;min-width:0;overflow:hidden}
+.staff-device-person-action{width:100%;height:100%;min-height:176px;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:transparent;color:var(--text);padding:12px;font:inherit;cursor:pointer;text-align:center}
+.staff-device-person-action:disabled{opacity:1;cursor:default}
+.staff-device-person-action strong{font-size:14px;line-height:20px;font-weight:500;overflow-wrap:anywhere}
+.staff-device-person-action>span:not(.staff-device-avatar){font-size:12px;line-height:16px;overflow-wrap:anywhere}
+.staff-device-person-action small{margin-top:auto;overflow-wrap:anywhere}
+.staff-device-person-action:focus-visible{outline:2px solid var(--text);outline-offset:-4px;border-radius:14px}
+.staff-device-avatar{width:56px;height:56px;flex-shrink:0;font-size:24px;line-height:32px;margin-bottom:4px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;background:var(--fill);color:var(--text-700)}
+.staff-device-presence{display:flex;align-items:center;justify-content:center;gap:4px}
+.staff-device-presence.in{color:var(--positive-text)}
+.staff-device-presence.due{color:var(--warning-600)}
+.staff-device-extra{justify-content:flex-start;border-style:dashed;text-align:left;white-space:normal}
+.staff-device-missing{display:grid;gap:8px;border-left:2px solid var(--warning-600)}
+.staff-device-missing h2{color:var(--warning-600)}
+.staff-device-missing>div{display:flex;gap:8px;flex-wrap:wrap}
+.staff-device-board textarea{display:block;width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text)}
+.staff-device-workspace .button{min-height:44px;white-space:normal;display:flex;align-items:center;justify-content:center;gap:8px;font:inherit}
+@media(min-width:768px){.staff-device-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}

@@ -10,6 +10,10 @@ export function createDeviceAdminRemote(input:CloudConnection,account:CommandAcc
  function checked<T extends object>(value:T,guard:()=>void):T{guard();return bindCommandReceipt(value,guard);}
  function pairing(value:unknown,id:string){const p=parseDevicePairing(value);if(p.id!==id||p.businessId!==expected.businessId||p.outletId!==expected.outletId)throw new CommandRequestError('review');return p;}
  return {
+  async pinContext(memberId:string,signal?:AbortSignal){
+   if(!isDeviceId(memberId))throw new CommandRequestError('review');const r=await call('staff_pin_context',{p_outlet_id:expected.outletId,p_member_id:memberId,p_action:'set'},signal),v=r.value;
+   if(!object(v)||!exact(v,'businessId,outletId,memberId,configured')||v.businessId!==expected.businessId||v.outletId!==expected.outletId||v.memberId!==memberId||typeof v.configured!=='boolean')throw new CommandRequestError('review');return checked({memberId,configured:v.configured,allowed:true as const},r.guard);
+  },
   async page(kind:DeviceAdminKind,after:string|null=null,limit=50,signal?:AbortSignal){
    if(!['devices','pairings','members'].includes(kind)||after!==null&&!isDeviceId(after)||!Number.isSafeInteger(limit)||limit<1||limit>100)throw new CommandRequestError('review');
    const r=await call('read_device_admin',{p_outlet_id:expected.outletId,p_kind:kind,p_after_id:after,p_limit:limit},signal);return checked(parseDeviceAdminPage(r.value,expected,kind,after,limit),r.guard);
