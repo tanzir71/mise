@@ -6,7 +6,7 @@ export interface SavedOwnerTask {intent:OwnerTaskIntent;closeRequested:boolean;r
 interface Journal {v:1;actions:SavedOwnerTask[]}
 const bad=()=>new CommandRequestError('review'),maximum=8*1024*1024,bytes=(raw:string)=>new TextEncoder().encode(raw).byteLength;
 export function createOwnerTaskSession(config:CloudConnection,account:CommandAccount,context:DeskPushContext,deps:{storage:KeyStorage;assertScope:()=>Promise<void>;assertDraftAccount:()=>void;locks?:Pick<LockManager,'request'>;send?:typeof fetch}){
- const scope=parseDeskPushContext(context),key=['mise.owner-tasks.v1',account.targetHash,account.accountHash,scope.businessId,scope.outletId,scope.memberId].join(':'),requests=new Map<OwnerTaskRpc,ReturnType<typeof createOwnerTaskRequest>>(),controller=new AbortController();let active=true;
+ const scope=parseDeskPushContext(context),key=['mise.owner-tasks.v1',account.targetHash,account.accountHash,scope.businessId,scope.outletId,scope.memberId].join(':'),requests=new Map<OwnerTaskRpc,ReturnType<typeof createOwnerTaskRequest>>(),controller=new AbortController(),listeners=new Set<()=>void>();let active=true;
  function current(){if(!active)throw new CommandRequestError('auth');deps.assertDraftAccount();}
  async function local(){current();await deps.assertScope();current();return current;}
  const sameOwner=(other:DeskPushContext)=>other.businessId===scope.businessId&&other.outletId===scope.outletId&&other.memberId===scope.memberId;
@@ -18,7 +18,7 @@ export function createOwnerTaskSession(config:CloudConnection,account:CommandAcc
  }
  async function persist(before:Journal,next:Journal,proof?:object){
   await local();if(proof)assertLiveCommandReceipt(proof);const raw=JSON.stringify(next);if(bytes(raw)>maximum||JSON.stringify(saved())!==JSON.stringify(before))throw bad();current();
-  try{deps.storage.setItem(key,raw);if(deps.storage.getItem(key)!==raw)throw bad();}catch{throw bad();}await local();if(proof)assertLiveCommandReceipt(proof);
+  try{deps.storage.setItem(key,raw);if(deps.storage.getItem(key)!==raw)throw bad();}catch{throw bad();}await local();if(proof)assertLiveCommandReceipt(proof);for(const listener of listeners)listener();
  }
  const exclusive=<T>(run:()=>Promise<T>)=>{const locks=deps.locks??globalThis.navigator?.locks;if(!locks)throw bad();return locks.request(key,{mode:'exclusive',ifAvailable:true},async lock=>{if(!lock)throw new CommandRequestError('retry');await local();return run();});};
  async function request<T extends object>(rpc:OwnerTaskRpc,body:Record<string,unknown>,parse:(v:unknown)=>T,signal?:AbortSignal){
@@ -49,6 +49,6 @@ export function createOwnerTaskSession(config:CloudConnection,account:CommandAcc
   const receipt=await request('act_owner_task',{p_outlet_id:scope.outletId,p_operation:effect,p_intent_json:JSON.stringify(intent)},v=>parseOwnerTaskReceipt(v,intent),signal);
   if(row.receipt&&row.receipt.state!=='pending'&&JSON.stringify(row.receipt)!==JSON.stringify(receipt))throw bad();const next=structuredClone(before);next.actions.at(-1)!.receipt=receipt;await persist(before,next,receipt);return receipt;
  });}
- return {key,saved,read,prepare,prepareCreate,call,assertCurrent:local,stop(){active=false;controller.abort();}};
+ return {key,saved,read,prepare,prepareCreate,call,assertCurrent:local,subscribe(listener:()=>void){listeners.add(listener);return()=>{listeners.delete(listener);};},stop(){active=false;controller.abort();listeners.clear();}};
 }
 export type OwnerTaskSession=ReturnType<typeof createOwnerTaskSession>;

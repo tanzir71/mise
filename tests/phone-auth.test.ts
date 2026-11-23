@@ -1,6 +1,8 @@
 import {afterEach,expect,it,vi} from 'vitest';
 import {cloudAuthStorageKey,cloudConnectionTarget,cloudConnectionStorageKey,normalisePhoneCode,parseCloudConnection,readCloudConnection,saveCloudConnection,type KeyStorage} from '../packages/core/cloud-connection';
 import {createPhoneAuth,type PhoneAuth} from '../apps/web/src/data/phone-auth';
+import {createOwnerTaskAccount} from '../apps/web/src/data/owner-task-account';
+import {operatorAccountHash} from '../packages/core/operators';
 const config={apiUrl:'https://cloud.test',publishableKey:'sb_publishable_test_only'},scope='/mise/app/shop',subject='00000000-0000-4000-8000-000000000001',p='+8801712345482';
 class MemoryStorage implements KeyStorage{values=new Map<string,string>();getItem(k:string){return this.values.get(k)??null;}setItem(k:string,v:string){this.values.set(k,v);}removeItem(k:string){this.values.delete(k);}}
 const clients:PhoneAuth[]=[];afterEach(async()=>{await Promise.all(clients.splice(0).map(c=>c.close(false)));});
@@ -44,3 +46,29 @@ it('reload can verify an already requested code without sending another SMS',asy
 it('an expired cached session refreshes through the original Auth connection',async()=>{const w=wire(),storage=new MemoryStorage(),key=await cloudAuthStorageKey(config,scope);storage.setItem(key,JSON.stringify({...w.session,access_token:jwt(Date.now()-60000),expires_at:Math.floor(Date.now()/1000)-60}));const {auth}=await boot(w,storage);expect(w.calls.some(c=>c.path==='token'&&c.body.refresh_token===w.session.refresh_token)).toBe(true);expect(auth.getSnapshot().phase).toBe('signed-in');expect(await auth.jwt()).toBe(w.access);});
 it('storage denial allows this visit without claiming a persistent sign-in',async()=>{const w=wire(),storage:KeyStorage={getItem:()=>{throw Error('PRIVATE');},setItem:()=>{throw Error('PRIVATE');},removeItem:()=>{throw Error('PRIVATE');}},auth=await createPhoneAuth(config,scope,{storage,send:w.send});clients.push(auth);await auth.check();await auth.sendCode(p);await auth.verifyCode('123456');expect(auth.getSnapshot()).toMatchObject({phase:'signed-in',persistent:false});expect(await auth.jwt()).toBe(w.access);});
 it('failed credential removal is reported and can be retried without reviving the client',async()=>{const w=wire(),saved=new MemoryStorage();let deny=false;const storage:KeyStorage={getItem:name=>saved.getItem(name),setItem:(name,value)=>saved.setItem(name,value),removeItem:name=>{if(deny)throw Error('PRIVATE STORAGE');saved.removeItem(name);}};const auth=await createPhoneAuth(config,scope,{storage,send:w.send});clients.push(auth);await auth.check();await auth.sendCode(p);await auth.verifyCode('123456');deny=true;await expect(auth.close()).rejects.toThrow('could not remove');expect(saved.getItem(auth.key)).not.toBeNull();await expect(auth.jwt()).rejects.toThrow('closed');deny=false;await auth.close();expect(saved.getItem(auth.key)).toBeNull();expect(auth.getSnapshot().phase).toBe('closed');});
+it('opens a saved actual SDK identity offline without granting command authority or sending an OTP',async()=>{
+ const {auth,w,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');await auth.dispose();
+ const send=vi.fn<typeof fetch>(async()=>new Response('{}',{status:503,headers:{'Content-Type':'application/json'}})),next=await createPhoneAuth(config,scope,{storage,send});clients.push(next);
+ const before=send.mock.calls.length,identity=next.journalIdentity();expect(send.mock.calls).toHaveLength(before);expect(identity).toEqual({userId:subject});expect(JSON.stringify(identity)).not.toContain(w.access);await next.check();expect(next.getSnapshot().phase).toBe('offline');expect(()=>next.assertJournalIdentity(identity)).not.toThrow();await expect(next.commandAuthorization()).rejects.toMatchObject({kind:'retry'});expect(()=>next.assertJournalIdentity(identity)).not.toThrow();expect(w.calls.filter(c=>c.path==='otp')).toHaveLength(1);
+});
+it('local journal identity cannot be serialized, forged or transferred to another SDK instance',async()=>{
+ const {auth,w,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');const identity=auth.journalIdentity();expect(()=>auth.assertJournalIdentity({...identity})).toThrow('saved account changed');const other=await createPhoneAuth(config,scope,{storage,send:w.send});clients.push(other);expect(()=>other.assertJournalIdentity(identity)).toThrow('saved account changed');expect(()=>other.assertJournalIdentity(other.journalIdentity())).not.toThrow();
+});
+it('damaged, anonymous or mismatched saved user claims cannot open a local task journal',async()=>{
+ const {auth,w,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');
+ for(const user of [{...w.user,id:subject+'junk'},{...w.user,id:'00000000-0000-4000-8000-000000000002'},{...w.user,is_anonymous:true},{...w.user,phone_confirmed_at:null},{...w.user,phone:'invalid'}]){storage.setItem(auth.key,JSON.stringify({...w.session,user}));expect(()=>auth.journalIdentity()).toThrow('original phone account');}
+ storage.setItem(auth.key,JSON.stringify(w.session));expect(auth.journalIdentity().userId).toBe(subject);
+});
+it('a removed then restored saved identity cannot revive a previously issued local proof',async()=>{
+ const {auth,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');const identity=auth.journalIdentity(),raw=storage.getItem(auth.key)!;storage.removeItem(auth.key);expect(()=>auth.assertJournalIdentity(identity)).toThrow('saved account changed');storage.setItem(auth.key,raw);expect(()=>auth.assertJournalIdentity(identity)).toThrow('saved account changed');expect(()=>auth.assertJournalIdentity(auth.journalIdentity())).not.toThrow();
+});
+it('disposing or forgetting the actual SDK client revokes its local journal proof',async()=>{
+ const {auth}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');const identity=auth.journalIdentity();await auth.dispose();expect(()=>auth.assertJournalIdentity(identity)).toThrow('closed');await expect(auth.commandAuthorization()).rejects.toThrow('closed');
+});
+it('the real task-account bridge keeps offline originals scoped to the native account hashes and still requires server authorization',async()=>{
+ const {auth,w,storage}=await boot();await auth.sendCode(p);await auth.verifyCode('123456');await auth.dispose();
+ const send:typeof fetch=async()=>new Response('{}',{status:503,headers:{'Content-Type':'application/json'}}),next=await createPhoneAuth(config,scope,{storage,send});clients.push(next);
+ const expected={authKey:next.key,accountHash:await operatorAccountHash(subject),targetHash:await cloudConnectionTarget(config,scope,subject),epoch:'original',scopeVersion:'original'};let active=true;const check=()=>{if(!active)throw Error('changed native scope');},bridge=await createOwnerTaskAccount(config,scope,next,expected,check);expect(()=>bridge.assertDraftAccount()).not.toThrow();await expect(bridge.account.getAuth()).rejects.toMatchObject({kind:'retry'});expect(()=>bridge.assertDraftAccount()).not.toThrow();
+ for(const wrong of [{...expected,authKey:'another'},{...expected,accountHash:'0'.repeat(64)},{...expected,targetHash:'0'.repeat(64)}])await expect(createOwnerTaskAccount(config,scope,next,wrong,check)).rejects.toMatchObject({kind:'auth'});
+ active=false;expect(()=>bridge.assertDraftAccount()).toThrow('native scope');await expect(bridge.account.getAuth()).rejects.toThrow('native scope');expect(w.calls.filter(c=>c.path==='otp')).toHaveLength(1);
+});

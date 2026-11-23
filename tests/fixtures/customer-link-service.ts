@@ -43,14 +43,16 @@ import {parseStaffLinkAction,parseStaffLinkContext,staffViewerUrl} from '../../p
 import {deviceSecretHash} from '../../packages/core/device-access';
 import {recordSaleCommand} from '../../packages/core/sales';
 import {saveStockItemCommand} from '../../packages/core/stock';
+import {createOwnerTaskIntent,type OwnerTaskKind,type OwnerTaskCreate} from '../../packages/core/owner-tasks';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
-export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean;liveStore?:boolean}={}) {
+export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean;liveStore?:boolean;ownerTasks?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
     origin = 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
+    ...(options.ownerTasks?{read_owner_task_page:['p_outlet_id','p_filter','p_after_at','p_after_id','p_version','p_limit'],act_owner_task:['p_outlet_id','p_operation','p_intent_json']}:{}),
     ...(options.liveStore?{read_live_store:['p_outlet_id','p_all_outlets','p_period','p_after_outlet','p_view_outlet_id']}:{}),
     ...(options.staffTeam?{read_staff_context:['p_outlet_id','p_member_id'],read_staff_board:['p_outlet_id','p_after','p_page_size'],change_staff_action:['p_outlet_id','p_action_json','p_operation'],read_staff_links:['p_outlet_id','p_member_id','p_after'],change_staff_link:['p_outlet_id','p_action_json','p_operation']}:{}),
     ...((options.ordering||options.estimates||options.checkout)?{read_checkout_policy:['p_outlet_id','p_order_id'],change_checkout_policy:['p_outlet_id','p_action','p_operation']}:{}),
@@ -354,7 +356,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       let size = 0;
       for await (const part of req) {
         size += part.length;
-        if (size > (options.ordering||options.checkout?65536:8192)) throw Error();
+        if (size > (options.ownerTasks?262144:options.ordering||options.checkout?65536:8192)) throw Error();
         chunks.push(Buffer.from(part));
       }
       const raw = Buffer.concat(chunks).toString('utf8'),
@@ -405,7 +407,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
             );
           } catch (error) {
             const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
-            const staffRpc=['read_staff_context','read_staff_board','change_staff_action','read_staff_links','change_staff_link'].includes(rpc);
+            const staffRpc=['read_staff_context','read_staff_board','change_staff_action','read_staff_links','change_staff_link','read_owner_task_page','act_owner_task'].includes(rpc);
             const status=(staffRpc||['read_order_estimate','change_order_estimate','read_checkout_policy','change_checkout_policy'].includes(rpc))?code==='42501'?403:code==='PT409'||code==='23505'||staffRpc&&code==='40001'?409:code.startsWith('22')?400:503:403;
             response = json({ error: status===403?'Access denied':'Review the original action' },status);
           }
@@ -444,7 +446,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       if(!options.liveStore)throw Error('Live fixture is not enabled');const branch={...setup,outlet:{...setup.outlet,id:deviceId(outlet),currency}},change=recordSaleCommand({expression,method:'cash'},{setup:branch,items:[],wallets:[]});await f.db.transaction(async tx=>{await insert(tx,encodeCommandRecord('sales',change.sale,setup.business.id));await insert(tx,encodeCommandRecord('events',change.event,setup.business.id));});return change.sale;
     },
     async liveQuestion(message='Please allow a little more time. আরও সময় দিন।'){
-      if(!options.liveStore)throw Error('Live fixture is not enabled');const link=await f.asRole<{id:string;token:string}>(1,'authenticated','select public.create_public_link($1,$2,\'khata\',$3,null) data',[newInboxId(),newInboxId(),records.account.id]),intent={v:1,id:newInboxId(),eventId:newInboxId(),taskId:newInboxId(),linkId:link.id,accountId:records.account.id,kind:'more-time',entryId:null,message,at:Date.now()};return f.asRole(null,'service_role','select public.visit_customer_khata($1,\'submit\',$2,0,3000,60) data',[link.token,JSON.stringify(intent)]);
+      if(!options.liveStore&&!options.ownerTasks)throw Error('Task fixture is not enabled');const link=await f.asRole<{id:string;token:string}>(1,'authenticated','select public.create_public_link($1,$2,\'khata\',$3,null) data',[newInboxId(),newInboxId(),records.account.id]),intent={v:1,id:newInboxId(),eventId:newInboxId(),taskId:newInboxId(),linkId:link.id,accountId:records.account.id,kind:'more-time',entryId:null,message,at:Date.now()};return f.asRole(null,'service_role','select public.visit_customer_khata($1,\'submit\',$2,0,3000,60) data',[link.token,JSON.stringify(intent)]);
     },
     async liveRevoke(){if(!options.liveStore)throw Error('Live fixture is not enabled');await f.db.query('update public.members set active=false where id=$1',[setup.owner.id]);},
     async liveOtherBusiness(){if(!options.liveStore)throw Error('Live fixture is not enabled');await f.db.query("insert into public.businesses(id,name,business_type,market_code,created_at,updated_at) values($1,'\"Second owned shop\"','online_shop','BD',1,1)",[deviceId(3)]);await f.db.query("insert into public.outlets(id,business_id,name,timezone,currency,created_at,updated_at) values($1,$2,'\"Gulshan shop\"','Asia/Dhaka','USD',1,1)",[deviceId(31),deviceId(3)]);await f.db.query("insert into public.members(id,business_id,auth_user_id,name,role,created_at,updated_at) values($1,$2,$3,'\"Same owner\"','owner',1,1)",[deviceId(301),deviceId(3),deviceUid(1)]);},
@@ -488,11 +490,16 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       rpc:
         | 'create_public_link'
         | 'close_public_link_attempt'
-        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations' | 'change_staff_action' | 'change_staff_link' | 'staff',
+        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations' | 'change_staff_action' | 'change_staff_link' | 'staff' | 'act_owner_task',
     ) {
       lose = rpc;
     },
     async staffCounts(){return(await f.db.query<{checkIns:number;links:number;revoked:number;actions:number;closed:number}>("select (select count(*) from public.check_ins)::integer as \"checkIns\",(select count(*) from private.staff_links)::integer links,(select count(*) from private.staff_links where revoked_at is not null)::integer revoked,(select count(*) from private.staff_link_actions)::integer actions,(select count(*) from private.staff_link_actions where state='closed')::integer closed")).rows[0];},
+    async ownerTaskCreate(draft:{title:string;body:string;kind?:OwnerTaskKind;mode?:OwnerTaskCreate['mode'];recipient?:string|null;prepared?:string},n:1|2=1){
+      if(!options.ownerTasks)throw Error('Owner tasks are not enabled');const scope={v:1 as const,businessId:setup.business.id,outletId:setup.outlet.id,memberId:n===1?setup.owner.id:records.members[1].id,role:n===1?'owner' as const:'manager' as const},intent=createOwnerTaskIntent(scope,{kind:'question',mode:'decision',...draft});await f.asRole(n,'authenticated','select public.act_owner_task($1,$2,$3) data',[scope.outletId,'submit',JSON.stringify(intent)]);return intent.taskId;
+    },
+    async ownerTaskFacts(){return(await f.db.query<{data:{tasks:number;open:number;resolved:number;actions:number;closed:number;sales:string;entries:string}}>("select json_build_object('tasks',(select count(*) from public.tasks),'open',(select count(*) from public.tasks where status in('open','waiting')),'resolved',(select count(*) from public.tasks where status='resolved'),'actions',(select count(*) from private.owner_task_actions),'closed',(select count(*) from private.owner_task_actions where state='closed'),'sales',(select md5(coalesce(string_agg(row_to_json(s)::text,',' order by s.id),'')) from public.sales s),'entries',(select md5(coalesce(string_agg(row_to_json(e)::text,',' order by e.id),'')) from public.credit_entries e)) data")).rows[0].data;},
+    async ownerTaskRevoke(n:1|2=1){await f.db.query('update public.members set active=false where id=$1',[n===1?setup.owner.id:records.members[1].id]);},
     async staffScene(base:string){
       if(!options.staffTeam)throw Error('Staff fixture is not enabled');
       // Initial synthetic roster, then only actual authenticated staff commands.

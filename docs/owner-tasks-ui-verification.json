@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T19:47:32.586Z",
+  "sourceParentCommit": "3ffd32e7f7a54978074cd6d93b7e3d64d6a75fdb",
+  "status": "verified-default-off-inbox-and-offline-original-preview-personal-cleanup-payment-matching-and-general-push-open",
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "ciArtifactUpload": "held",
+    "flag": {
+      "ownerTasks": false
+    },
+    "providerRequests": 0,
+    "newBackendDeployment": false,
+    "newScheduling": false
+  },
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsOrCredentialsRequired": false,
+    "connection": "Installation-owned Sync setup and original verified phone account",
+    "providerCredentials": "Private installation backend only; current task interface requires no new provider",
+    "existingKitchenSubscriptions": "Current purpose preserved; no silent general-topic subscription"
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "3425a60448296c744be6565cbd0868d26978640b64bfa6404c6a801e9480f3cf",
+    "apps/web/src/Inbox.tsx": "627ce39d6b7ca67e969a7028a1af3afa43623c7b6bec3aae6508427988d71801",
+    "apps/web/src/LocalApp.tsx": "21d6e3e2f558899e52e3d1fb01b425a455e6e93584accac2c5174270100a9adb",
+    "apps/web/src/OwnerTaskInbox.tsx": "7a5b4446c353999b2117669bf9c5bf6aa170368d534b6b2a9ba8b05dff364315",
+    "apps/web/src/assets/owner-tasks/inbox-imgIconMessage.svg": "2751bc6b982b514339ce1c1e2bb4bfe7c04dc66a61173c804d5cce55cb552a21",
+    "apps/web/src/assets/owner-tasks/inbox-imgIconUsers.svg": "5eeb44ad597774802dc466d17ad5149578f0f09be507816d64c7a8d3f900a2bc",
+    "apps/web/src/assets/owner-tasks/inbox-imgIconWifiOff.svg": "9c196c53862239787c28adb75967fb57110b16931b289eb915b93793e0bd6eb1",
+    "apps/web/src/assets/owner-tasks/task-imgIconUsers.svg": "fa99c4d1e1585aeb2da5459af3075e09a81e12ff8701aa4d1917e41bbd336106",
+    "apps/web/src/data/owner-task-account.ts": "00344c57487d054c4fb6bd146cdc12527b534c832af4a842f2bedd6ed2893d25",
+    "apps/web/src/data/owner-task-session.ts": "13c09150d88b5332cfbfd9939a1a6b88b0acda464c30219f0858411911660407",
+    "apps/web/src/data/phone-auth.ts": "beafce45c3493eba49fc73714ac920ae4a0596cdfd4d41da4e83d75efe6c04b5",
+    "apps/web/src/main.tsx": "4739f067a6ff0852aa48948d61698db36e801900fc58d70c4ea5a112152d1616",
+    "apps/web/src/owner-tasks-context.ts": "def65bb4ca1f8526e69e84e73756a6cd3674fcc7c1bf5cce3d7e3b611f1660ce",
+    "apps/web/src/owner-tasks.css": "334ff23e659455b1909d4d3be4d1bb50c17474ff08991a231ed13d63cd5ab518",
+    "apps/web/src/use-owner-tasks.ts": "c7277c678061b2d10d7428b8328d457f45268ad46b33d8a827e9a640126e0070",
+    "docs/configure-services.md": "301fc8a401429d1164a88b45c51a0f67048c767fb72e246202d0b4e55bdf49d1",
+    "docs/owner-tasks-assets.json": "47e15942abb8781b3e3b536b82eb6f07cb6a243a3fff8050785a848bf8618e3d",
+    "docs/owner-tasks.md": "4b738256df42d54d6885a91e1cb6049ce3ec12bb9498fc9924f0aed0f005b858",
+    "docs/screenshots/m37-owner-inbox-390.png": "5633019442cf6ae34f24e7e9b7d6c603cecc5ad1c6ab10ab41ace85bb26a3604",
+    "docs/screenshots/m37-owner-questions-390.png": "92dafb3b04cdadcfb1ae52df949d82f51479cf0ebe2f36624eb19aef0ac953fb",
+    "docs/screenshots/m37-owner-reply-390.png": "c38417e0627fba0286f855410c94756a6401f62daf587df009be026d05a5fc84",
+    "handover/DECISIONS.md": "948ba9fe34bfe41da0491270c58104ff02ec6ac32fae6f84e4de9dc13c232953",
+    "handover/docs/03-roadmap.md": "de4c01e5aa0bc838354290312970dfae1b3068c1cc2341cc9a964eae2a00fcee",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "qa/configs/m37-owner-tasks.json": "306a747f9238d9f04d6485fe6891d8c62c7db9e9c325bcbd21d8ba5514687ca6",
+    "scripts/qa-visual.mjs": "e1047193191b4f3261a58c11216d34f33c8fc885e14a3f8dc1b2f0ab56b3480e",
+    "tests/device-pairing-fixture.ts": "ab8b3a2e245fa282f1145cd42d0d8e661c8ae94264d644875edceefd3aace796",
+    "tests/e2e/owner-tasks.spec.ts": "06fcc3ae4c80a61a0e87eb76acef1f8ef82a076bf7967d7be6d7d3a28c249a49",
+    "tests/fixtures/customer-link-service.ts": "cddc20b6ca45daabc06b847d6baa8f2a45be026ee6ffb6ab3d1e7bfe5a1a98ce",
+    "tests/fixtures/owner-tasks-visual.mjs": "6fd165322263d7c2174046ae35b1a8e214b0792b407f414e08c1d0ff5cd834b3",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/owner-task-session.test.ts": "49565eb76318296df9609634549c6bc5743f60eadc5ec18fc79beda9021fb092",
+    "tests/phone-auth.test.ts": "2252e16fb9ce27080e0d48bf51e01a82dd2aa17b65b0a5af4d819bbb26bd06dd",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  },
+  "checks": {
+    "unit": {
+      "files": 251,
+      "cases": 4872,
+      "allCasesPassedAcrossRuns": true,
+      "singleFullInvocationPassed": false,
+      "workersMaximum": 2,
+      "fullInvocation": {
+        "passedFiles": 250,
+        "passedCases": 4871,
+        "setupFailedFiles": 1,
+        "testBodiesNotRun": 1,
+        "workerRPCError": true,
+        "durationSeconds": 1242.11
+      },
+      "unchangedIsolatedHistoryRetry": {
+        "passedFiles": 1,
+        "passedCases": 1,
+        "records": 5004,
+        "durationSeconds": 76.03,
+        "setupDeadlineMs": 120000,
+        "caseDeadlineMs": 60000,
+        "workers": 1,
+        "fixtureAndConfigurationUnchanged": true
+      },
+      "configurationSkippedCases": 0,
+      "workloadsAndDeadlinesUnchanged": true,
+      "scope": "Every original case ran successfully. One full-run history setup exceeded its 120-second deadline and reported a later worker RPC timeout; that same unchanged case passed in a fresh isolated worker. This does not claim the first full invocation succeeded.",
+      "logHashes": {
+        "fullInvocation": "bef2b489ba5dbd655ec1b1efa509683f69988e52730915981760df1f692db644",
+        "historyRetry": "f69bf3fca31a6f7e8c13f5f359de769ca4c4e24242de7b4cf25c78ac4e263f6d"
+      }
+    },
+    "browser": {
+      "rootRegression": {
+        "files": 10,
+        "cases": 100,
+        "passed": true
+      },
+      "finalCurrentRootOwnerFollowup": {
+        "files": 1,
+        "cases": 17,
+        "passed": true,
+        "reason": "The native selection is now checked before acquiring the SDK namespace; this final built-source followup covers the current hook."
+      },
+      "finalCurrentPagesRegression": {
+        "files": 10,
+        "cases": 100,
+        "passed": true
+      },
+      "workers": 2,
+      "scope": [
+        "Actual task choices, undo, literal customer source and manual Sent with unchanged money",
+        "Real SDK/PWA offline reload, durable original closure and reconnect without OTP",
+        "Lost committed receipt, quota-before-HTTP and real manager/outlet authorization",
+        "Immediate action/read/recipient denial and late clipboard outcome guards",
+        "Sign-in, local shared-source/backup, customer khata, Live, kitchen notifications and Team regressions"
+      ]
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/",
+      "guideExactlyExported": true
+    },
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 198,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "visual": {
+      "comparisons": 20,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "views": [
+        "inbox",
+        "questions",
+        "reply",
+        "recovery"
+      ],
+      "overflow": false,
+      "axeViolations": 0,
+      "originalSVGs": 4,
+      "renderedAssetSlots": 105,
+      "intrinsicGeometryChecked": true,
+      "report": "qa/report.html",
+      "ciArtifactUploaded": false,
+      "screenshots": [
+        "docs/screenshots/m37-owner-inbox-390.png",
+        "docs/screenshots/m37-owner-questions-390.png",
+        "docs/screenshots/m37-owner-reply-390.png"
+      ],
+      "interpretation": "The phone references are adapted to real recorded content and manual/recovery controls in the existing app shell; pixel differences are informational."
+    },
+    "secrets": {
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "reviewedFixedLegacyFindings": 22,
+      "newExceptions": 0,
+      "hooksEnabled": true
+    }
+  },
+  "backend": {
+    "unchangedThisIncrement": true,
+    "frozenMigration": "supabase/migrations/20261123180222_owner_inbox_tasks.sql",
+    "frozenMigrationSHA256": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "precedingManagedProof": "docs/owner-tasks-verification.json",
+    "precedingProofSHA256": "cb08926ea797df669a415af7f70497c6e0fee480cb16ce9cba27597cd8281e5c"
+  },
+  "remaining": [
+    "Independent personal recovery/archival for originals from unavailable native outlets",
+    "Actual payment-without-order source and authenticated matching workflow",
+    "Explicit installation-owned general notification topics, encrypted delivery and task target resolution",
+    "Genuine hosted/physical urgent-delivery acceptance and full M37 release",
+    "Other unchecked handover milestones and held publication gates"
+  ]
+}

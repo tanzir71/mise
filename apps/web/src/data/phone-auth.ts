@@ -4,6 +4,8 @@ import {operatorAccountHash} from '@mise/core/operators';
 import {publishOperatorAuth} from './operator-auth';
 import type {CommandAuthorization} from './command-request';
 export interface PhoneAuthState {phase:'checking'|'signed-out'|'code'|'signed-in'|'offline'|'closed';phone:string|null;userId:string|null;message:string;busy:boolean;resendAt:number;persistent:boolean}
+/** Local continuity for saved originals only. This carries no JWT or server authority. */
+export interface PhoneJournalIdentity {readonly userId:string}
 const initial:PhoneAuthState={phase:'checking',phone:null,userId:null,message:'',busy:false,resendAt:0,persistent:true};
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v);
 const phone=(v:unknown):v is string=>typeof v==='string'&&/^\+[1-9]\d{6,14}$/.test(v);
@@ -16,11 +18,25 @@ export async function createPhoneAuth(input:CloudConnection,scope:string,options
  let state=Object.freeze({...initial}),closed=false,memoryOnly=false,pendingPhone:string|null=null,verifiedToken:string|null=null,lastToken:string|null=null,checking:Promise<void>|null=null,working=false;
  const listeners=new Set<()=>void>(),memory=new Map<string,string>(),lifetime=new AbortController();
  let identityGeneration=0,authorizationGeneration=0,noticedAccount:string|null=null;
+ let journalGeneration=0,journalUser:string|null=null;
+ const journalProofs=new WeakMap<PhoneJournalIdentity,{generation:number;userId:string}>();
  const emit=(update:Partial<PhoneAuthState>,announce=true)=>{if(closed&&update.phase!=='closed')return;const previous=state;state=Object.freeze({...state,...update});
   if(previous.phase!==state.phase||previous.userId!==state.userId){authorizationGeneration++;const generation=++identityGeneration;if(state.phase==='signed-in'&&state.userId){void operatorAccountHash(state.userId).then(hash=>{if(generation===identityGeneration&&!closed&&announce)publishOperatorAuth(key,hash);}).catch(()=>{if(generation===identityGeneration&&!closed&&announce)publishOperatorAuth(key,null);});}else if(announce&&['signed-out','closed','code'].includes(state.phase))publishOperatorAuth(key,null);}
   for(const listener of listeners)listener();};
  const ensure=()=>{if(closed)throw new PhoneAuthProblem('This sign-in was closed. Open Sync setup again.');};
  const storage={getItem:(name:string)=>{if(closed)return null;if(memoryOnly)return memory.get(name)??null;try{const value=options.storage.getItem(name);if(value===null)memory.delete(name);else memory.set(name,value);return value;}catch{memoryOnly=true;emit({persistent:false});return memory.get(name)??null;}},setItem:(name:string,value:string)=>{if(closed)return;memory.set(name,value);if(memoryOnly)return;try{options.storage.setItem(name,value);}catch{memoryOnly=true;emit({persistent:false});}},removeItem:(name:string)=>{memory.delete(name);try{options.storage.removeItem(name);}catch{memoryOnly=true;emit({persistent:false});}}};
+ function journalAccount():string|null {
+  ensure();let id:string|null=null;
+  try{
+   const raw=storage.getItem(key);if(!raw||raw.length>32768)throw Error();const session:unknown=JSON.parse(raw);
+   if(!object(session)||!token(session.access_token)||!object(session.user))throw Error();const user=session.user;
+   if(typeof user.id!=='string'||!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(user.id)||typeof user.phone!=='string'||!phone('+'+user.phone.replace(/^\+/,''))||typeof user.phone_confirmed_at!=='string'||!user.phone_confirmed_at||user.is_anonymous===true)throw Error();
+   const payload:unknown=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))));
+   if(!object(payload)||payload.sub!==user.id)throw Error();id=user.id;
+  }catch{/* A damaged or missing saved SDK identity cannot open a journal. */}
+  if(id!==journalUser){journalGeneration++;journalUser=id;}return id;
+ }
+ journalAccount();
  try{const raw=storage.getItem(key+'.challenge'),saved=raw?JSON.parse(raw):null;if(object(saved)&&phone(saved.phone)&&typeof saved.sentAt==='number'&&Number.isSafeInteger(saved.sentAt)&&saved.sentAt<=now()+300000&&now()-saved.sentAt<=600000){pendingPhone=saved.phone;emit({phone:pendingPhone,resendAt:saved.sentAt+60000});}else if(raw)storage.removeItem(key+'.challenge');}catch{storage.removeItem(key+'.challenge');}
  const guardedFetch:typeof fetch=async(url,init)=>{ensure();const target=new URL(typeof url==='string'?url:url instanceof URL?url.href:url.url);if(target.origin!==config.apiUrl||!target.pathname.startsWith('/auth/v1/'))throw new PhoneAuthProblem('Use the configured sign-in connection.');return send(url,{...init,redirect:'error',cache:'no-store',credentials:'omit',signal:AbortSignal.any([AbortSignal.timeout(15000),lifetime.signal,...(init?.signal?[init.signal]:[])])});};
  const client=createClient(config.apiUrl,config.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:key,storage},global:{fetch:guardedFetch}});
@@ -38,8 +54,8 @@ export async function createPhoneAuth(input:CloudConnection,scope:string,options
   verifiedToken=session.access_token;pendingPhone=null;storage.removeItem(key+'.challenge');emit({phase:'signed-in',phone:p,userId:user.id,message:'Phone verified.',resendAt:0});
  }
  function check(){if(checking)return checking;checking=inspectSession().catch(()=>{if(!closed)emit({phase:'offline',message:'Connect to the internet to check your sign-in.'});}).finally(()=>{checking=null;});return checking;}
- const subscription=client.auth.onAuthStateChange((event,session)=>{if(closed)return;const account=session?.user.id??null;if(event==='SIGNED_OUT'||account!==noticedAccount)authorizationGeneration++;noticedAccount=account;if(event==='SIGNED_OUT'){verifiedToken=null;pendingPhone=null;emit({phase:'signed-out',phone:null,userId:null,message:'',resendAt:0});}else setTimeout(()=>{if(!closed)void check();},0);}).data.subscription;
- const storageChanged=(event:StorageEvent)=>{if(event.key===key||event.key===null){authorizationGeneration++;if(event.newValue===null){memory.delete(key);memory.delete(key+'-user');}verifiedToken=null;pendingPhone=null;void check();}};
+ const subscription=client.auth.onAuthStateChange((event,session)=>{if(closed)return;const account=session?.user.id??null;if(event==='SIGNED_OUT'||account!==noticedAccount)authorizationGeneration++;noticedAccount=account;if(event==='SIGNED_OUT'){journalGeneration++;journalUser=null;verifiedToken=null;pendingPhone=null;emit({phase:'signed-out',phone:null,userId:null,message:'',resendAt:0});}else {if(account!==null&&account!==journalUser){journalGeneration++;journalUser=account;}setTimeout(()=>{if(!closed)void check();},0);}}).data.subscription;
+ const storageChanged=(event:StorageEvent)=>{if(event.key===key||event.key===null){journalGeneration++;authorizationGeneration++;if(event.newValue===null){memory.delete(key);memory.delete(key+'-user');}verifiedToken=null;pendingPhone=null;void check();}};
  if(typeof window!=='undefined')window.addEventListener('storage',storageChanged);
  async function work(run:()=>Promise<void>){ensure();if(working)throw new PhoneAuthProblem('Wait for the current sign-in request.');working=true;emit({busy:true,message:''});try{await run();ensure();}catch(error){throw error instanceof PhoneAuthProblem?error:new PhoneAuthProblem('Phone sign-in could not finish. Keep your local copy and try again.');}finally{working=false;if(!closed)emit({busy:false});}}
  async function closeAuth(forget:boolean,announce:boolean){if(closed&&!forget)return;const wasClosed=closed;closed=true;const previous=lastToken;let removed=true;verifiedToken=null;pendingPhone=null;lifetime.abort();subscription.unsubscribe();if(typeof window!=='undefined')window.removeEventListener('storage',storageChanged);if(forget)for(const name of [key,key+'-user',key+'-code-verifier',key+'.challenge'])try{options.storage.removeItem(name);if(options.storage.getItem(name)!==null)removed=false;}catch{removed=false;}memory.clear();if(forget&&wasClosed)publishOperatorAuth(key,null);emit({phase:'closed',phone:null,userId:null,busy:false,message:removed?'Sign-in closed on this device.':'This browser could not remove its saved sign-in. Try again.',resendAt:0},announce);if(!wasClosed)await client.auth.dispose();if(forget&&previous&&!wasClosed)try{await send(new URL('auth/v1/logout?scope=local',config.apiUrl+'/'),{method:'POST',redirect:'error',cache:'no-store',credentials:'omit',headers:{apikey:config.publishableKey,Authorization:'Bearer '+previous},signal:AbortSignal.timeout(5000)});}catch{/* Local credentials are already forgotten; offline shop data stays available. */}if(!removed)throw new PhoneAuthProblem('This browser could not remove its saved sign-in. Try again.');}
@@ -50,10 +66,19 @@ export async function createPhoneAuth(input:CloudConnection,scope:string,options
    if(!object(settings)||!object(settings.external)||settings.external.phone!==true||settings.phone_autoconfirm===true)throw new PhoneAuthProblem('Phone sign-in is not ready for this connection. You can keep working on this device.');
    const result=await client.auth.signInWithOtp({phone:value,options:{channel:'sms',shouldCreateUser:true}});ensure();
    if(result.error){if(result.error.status===429)emit({resendAt:now()+60000});throw new PhoneAuthProblem(authMessage(result.error,'Could not send a code. Check the number and try again.'));}
-   const sentAt=now();pendingPhone=value;storage.setItem(key+'.challenge',JSON.stringify({phone:value,sentAt}));emit({phase:'code',phone:value,userId:null,resendAt:sentAt+60000,message:'Code requested. Enter it when your SMS arrives.'});
+   const sentAt=now();journalGeneration++;pendingPhone=value;storage.setItem(key+'.challenge',JSON.stringify({phone:value,sentAt}));emit({phase:'code',phone:value,userId:null,resendAt:sentAt+60000,message:'Code requested. Enter it when your SMS arrives.'});
   });},
   async verifyCode(value:string){const code=normalisePhoneCode(value),originalPhone=pendingPhone;if(!originalPhone)throw new PhoneAuthProblem('Request a code for your phone first.');await work(async()=>{const result=await client.auth.verifyOtp({phone:originalPhone,token:code,type:'sms'});ensure();if(result.error)throw new PhoneAuthProblem(authMessage(result.error,'The code was not accepted. Check it or request a new one.'));if(checking)await checking;await check();ensure();if(state.phase!=='signed-in')throw new PhoneAuthProblem(state.message||'Your phone sign-in could not be verified.');});},
   resetCode(){ensure();if(working||state.phase==='signed-in')return;pendingPhone=null;storage.removeItem(key+'.challenge');emit({phase:'signed-out',phone:null,userId:null,message:''});},
+  /** Does not refresh, verify, publish an operator or authorize any HTTP request. */
+  journalIdentity():PhoneJournalIdentity {
+   const userId=journalAccount();if(!userId||pendingPhone)throw new PhoneAuthProblem('Open saved requests with the original phone account.');
+   const value=Object.freeze({userId});journalProofs.set(value,{generation:journalGeneration,userId});return value;
+  },
+  assertJournalIdentity(value:PhoneJournalIdentity):void {
+   const proof=journalProofs.get(value),userId=journalAccount();
+   if(!proof||pendingPhone||proof.generation!==journalGeneration||proof.userId!==userId||value.userId!==userId)throw new PhoneAuthProblem('The saved account changed. Keep the original request.');
+  },
   async jwt(){ensure();const result=await client.auth.getSession();ensure();const session:Session|null=result.data.session;if(result.error||!session||!token(session.access_token))throw new PhoneAuthProblem('Sign in again to continue.');if(verifiedToken!==session.access_token)await check();ensure();if(state.phase!=='signed-in'||verifiedToken!==session.access_token)throw new PhoneAuthProblem('Verify your phone sign-in before continuing.');return session.access_token;},
   async commandAuthorization():Promise<CommandAuthorization>{
    try{

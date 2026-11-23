@@ -16,6 +16,7 @@ import {captureOrderCheckout,closeOrderCheckoutVisual} from '../tests/fixtures/o
 import {captureStaff,closeStaffVisual} from '../tests/fixtures/staff-visual.mjs';
 import {captureStaffDevice,closeStaffDeviceVisual} from '../tests/fixtures/install-staff-device.mjs';
 import {captureCustomerKhata,closeCustomerKhataVisual} from '../tests/fixtures/install-customer-khata.mjs';
+import {captureOwnerTasks,closeOwnerTasksVisual} from '../tests/fixtures/owner-tasks-visual.mjs';
 import {captureLiveStore,closeLiveStoreVisual} from '../tests/fixtures/live-store-visual.mjs';
 import {captureKitchenScreen,closeKitchenScreenVisual} from '../tests/fixtures/install-kitchen-ui.mjs';
 import {captureDeskNotifications,closeDeskNotificationsVisual} from '../tests/fixtures/install-desk-ui.mjs';
@@ -61,6 +62,7 @@ try {
     const page = await context.newPage();
     if(!target.staffFixture)await closeStaffVisual();
     if(!target.staffDeviceFixture)await closeStaffDeviceVisual();
+    if(!target.ownerTasksFixture)await closeOwnerTasksVisual();
     if(!target.liveStoreFixture)await closeLiveStoreVisual();
     if(!target.customerKhataFixture)await closeCustomerKhataVisual();
     else{
@@ -83,6 +85,7 @@ try {
     if(target.staffFixture)await captureStaff(page,target.staffFixture);
     if(target.staffDeviceFixture)await captureStaffDevice(page,target.staffDeviceFixture);
     if(target.customerKhataFixture)await captureCustomerKhata(page,target.customerKhataFixture);
+    if(target.ownerTasksFixture)await captureOwnerTasks(page,target.ownerTasksFixture);
     if(target.liveStoreFixture)await captureLiveStore(page,target.liveStoreFixture);
     if(target.scopeRecoveryFixture)await captureRecoveryReview(page);
     if(target.ownerResumeFixture)await captureOwnerResumeReview(page);
@@ -165,7 +168,7 @@ try {
 } finally {
   try { await browser?.close(); }
   finally {
-    const closed=await Promise.allSettled([closeLiveStoreVisual(),closeCustomerKhataVisual(),closeStaffDeviceVisual(),closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual(),]);
+    const closed=await Promise.allSettled([closeOwnerTasksVisual(),closeLiveStoreVisual(),closeCustomerKhataVisual(),closeStaffDeviceVisual(),closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual(),]);
     server?.kill();const failed=closed.find(result=>result.status==='rejected');if(failed)throw failed.reason;
   }
 }

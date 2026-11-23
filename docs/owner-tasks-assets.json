@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "figmaFile": "FVXWo2wVq4nPS3kdsR4TUv",
+  "assets": [
+    {
+      "frame": "103:900",
+      "file": "apps/web/src/assets/owner-tasks/inbox-imgIconUsers.svg",
+      "sha256": "5eeb44ad597774802dc466d17ad5149578f0f09be507816d64c7a8d3f900a2bc",
+      "width": 14,
+      "height": 14
+    },
+    {
+      "frame": "103:900",
+      "file": "apps/web/src/assets/owner-tasks/inbox-imgIconWifiOff.svg",
+      "sha256": "9c196c53862239787c28adb75967fb57110b16931b289eb915b93793e0bd6eb1",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "frame": "103:900",
+      "file": "apps/web/src/assets/owner-tasks/inbox-imgIconMessage.svg",
+      "sha256": "2751bc6b982b514339ce1c1e2bb4bfe7c04dc66a61173c804d5cce55cb552a21",
+      "width": 18,
+      "height": 18
+    },
+    {
+      "frame": "58:201",
+      "file": "apps/web/src/assets/owner-tasks/task-imgIconUsers.svg",
+      "sha256": "fa99c4d1e1585aeb2da5459af3075e09a81e12ff8701aa4d1917e41bbd336106",
+      "width": 14,
+      "height": 14
+    }
+  ],
+  "scope": "Original downloaded Figma SVG bytes. Rendered geometry is checked against intrinsic dimensions; no device status, agent or provider activity is invented."
+}
