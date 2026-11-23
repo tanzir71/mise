@@ -29,15 +29,18 @@ import {createPublicOrderHandler} from '../../supabase/functions/_shared/public-
 import {publicOrderHash,publicOrderIntentJson} from '../../packages/core/public-order-submission';
 import {decodeShopPayload} from '../../packages/core/public-shop-decode';
 import {publicOrderingUrl} from '../../packages/core/public-order-link';
+import {parseEstimateAction,parseEstimateOutcome} from '../../packages/core/order-estimates';
+import {customerViewerUrl} from '../../packages/core/customer-link-url';
 import type { Order, SetupSnapshot } from '../../packages/core/models';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
-export async function startCustomerLinkService(options:{ordering?:boolean}={}) {
+export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
     origin = 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
+    ...(options.estimates?{read_order_estimate:['p_order_id'],change_order_estimate:['p_order_id','p_action_id','p_order_revision','p_estimate_revision','p_change','p_operation']}:{}),
     ...(options.ordering?{read_public_shop_page:['p_outlet_id','p_after_id','p_page_size'],publish_public_shop:['p_id','p_event_id','p_outlet_id','p_source_url','p_payload_json','p_secret_hash','p_table','p_expiry'],revoke_public_shop:['p_id','p_event_id','p_outlet_id']}:{}),
     read_customer_link_page: [
       'p_kind',
@@ -375,11 +378,13 @@ export async function startCustomerLinkService(options:{ordering?:boolean}={}) {
                 who(headers.get('Authorization')?.slice(7) ?? ''),
                 'authenticated',
                 `select public.${rpc}(${keys.map((k, i) => k + '=>' + ('$' + (i + 1))).join(',')}) data`,
-                keys.map((k) => body[k]),
+                keys.map((k) => k==='p_change'?JSON.stringify(body[k]):body[k]),
               ),
             );
-          } catch {
-            response = json({ error: 'Access denied' }, 403);
+          } catch (error) {
+            const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
+            const status=options.estimates&&['read_order_estimate','change_order_estimate'].includes(rpc)?code==='42501'?403:code==='PT409'||code==='23505'?409:code.startsWith('22')?400:503:403;
+            response = json({ error: status===403?'Access denied':'Review the original action' },status);
           }
       } else
         response = json({ error: 'No provider endpoint in this fixture' }, 404);
@@ -425,11 +430,28 @@ export async function startCustomerLinkService(options:{ordering?:boolean}={}) {
       };
     },
     calls,
+    viewerUrl(token:string,basePath:string,kind:'order'|'khata'='order'){return customerViewerUrl(origin,basePath,{kind,apiUrl,token});},
+    async seedHistoricalEstimate(earlierCurrentWindow=false){
+      if(!options.estimates)throw Error('Estimate fixture is not enabled');
+      // A previously accepted promise, seeded as historical fixture data. The
+      // real owner RPC deliberately refuses newly publishing a past window.
+      const now=Date.now(),at=now-540000,id=newInboxId(),action=parseEstimateAction({v:1,id,orderId:order.id,orderRevision:order.revision,revision:0,change:{kind:'set',start:now+(earlierCurrentWindow?1500000:-480000),end:now+(earlierCurrentWindow?1800000:-360000),note:'The earlier shop estimate.',undoOf:null}}),
+        estimate={revision:1,start:action.change.start,end:action.change.end,firstEnd:action.change.end,note:action.change.note,updatedAt:at},receipt=parseEstimateOutcome({v:1,action,state:'applied',at,estimate},action);
+      const history=[{action,receipt,previous:null as typeof estimate|null}];
+      if(earlierCurrentWindow){const nextAction=parseEstimateAction({v:1,id:newInboxId(),orderId:order.id,orderRevision:order.revision,revision:1,change:{kind:'set',start:now-480000,end:now-360000,note:'The shop brought the estimate forward.',undoOf:null}}),nextAt=now-420000,nextEstimate={...estimate,revision:2,start:nextAction.change.start,end:nextAction.change.end,note:nextAction.change.note,updatedAt:nextAt};history.push({action:nextAction,receipt:parseEstimateOutcome({v:1,action:nextAction,state:'applied',at:nextAt,estimate:nextEstimate},nextAction),previous:estimate});}
+      if(history.some(row=>row.receipt.at!<order.updatedAt||row.receipt.estimate!.end!<=row.receipt.at!))throw Error('Historical estimates must follow the actual order and precede their deadlines');
+      const latest=history.at(-1)!;
+      await f.db.transaction(async tx=>{
+        for(const row of history)await tx.query("insert into private.order_estimate_actions values($1,$2,$3,$4,$5,$6,'applied',$7,$8,$9)",[row.action.id,setup.business.id,setup.outlet.id,order.id,setup.owner.id,JSON.stringify(row.action),JSON.stringify(row.receipt),row.previous===null?null:JSON.stringify(row.previous),row.receipt.at]);
+        const current=latest.receipt.estimate!;await tx.query('insert into private.order_estimates values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',[order.id,setup.business.id,setup.outlet.id,current.revision,current.start,current.end,current.firstEnd,current.note,current.updatedAt,latest.action.id]);
+      });return latest.receipt.estimate!;
+    },
+    async estimateCounts(){return(await f.db.query<{estimates:number;actions:number;closed:number}>("select (select count(*) from private.order_estimates) estimates,(select count(*) from private.order_estimate_actions) actions,(select count(*) from private.order_estimate_actions where state='closed') closed")).rows[0];},
     loseNext(
       rpc:
         | 'create_public_link'
         | 'close_public_link_attempt'
-        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders',
+        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate',
     ) {
       lose = rpc;
     },

@@ -13,6 +13,7 @@ import type { CustomerLink, CustomerOrder } from '@mise/core/customer-links';
 import type { PublicShop } from '@mise/core/public-shop';
 import { CustomerReadError, readCustomerLink } from './data/customer-link-read';
 import './customer-link-view.css';
+import {CustomerOrderEstimate} from './CustomerOrderEstimate';
 const words = {
   en: {
     order: 'Order',
@@ -493,18 +494,7 @@ export function CustomerLinkView() {
                     {when(data.order.scheduledFor, data.order.timezone)}
                   </p>
                 ) : null}
-                {![
-                  'cancelled',
-                  'delivered',
-                  'returned',
-                  'collected',
-                  'done',
-                ].includes(data.order.status) ? (
-                  <div className="customer-order-estimate">
-                    <strong>{c.estimate}</strong>
-                    <span>{c.estimateHelp}</span>
-                  </div>
-                ) : null}
+                <CustomerOrderEstimate order={data.order} language={language}/>
                 <ol
                   className="customer-order-steps"
                   aria-label={language === 'bn' ? 'অর্ডারের ধাপ' : 'Order steps'}

@@ -49,6 +49,11 @@ export function createCustomerLinkRequest(config:CloudConnection,input:CommandAc
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,131072);
 }
 export type PublicShopRpc='read_public_shop_page'|'publish_public_shop'|'revoke_public_shop';
+export type OrderEstimateRpc='read_order_estimate'|'change_order_estimate';
+export function createOrderEstimateRequest(config:CloudConnection,input:CommandAccount,rpc:OrderEstimateRpc,send:typeof fetch){
+ if(!['read_order_estimate','change_order_estimate'].includes(rpc))throw new CommandRequestError('review');
+ return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,65536);
+}
 export function createPublicShopRequest(config:CloudConnection,input:CommandAccount,rpc:PublicShopRpc,send:typeof fetch){
  if(!['read_public_shop_page','publish_public_shop','revoke_public_shop'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,131072);

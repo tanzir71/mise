@@ -2,12 +2,13 @@ import type {CreditEntry,Order,OrderLine} from './models';
 import {marketPacks,type MarketCode} from './packs';
 import {orderFlows} from './orders';
 import {orderLineTotal,orderPricing} from './order-lines';
+import {parseOrderEstimate,type OrderEstimate} from './order-estimates';
 
 export type CustomerLinkKind='order'|'khata';
 export interface CustomerLinkRequest {kind:CustomerLinkKind;token:string;afterSequence:number;pageSize:number}
 interface CustomerShop {name:string;outletName:string;url:string|null;market:MarketCode}
 export type CustomerOrder=Pick<Order,'id'|'number'|'businessType'|'type'|'status'|'statusChangedAt'|'currency'|'subtotal'|'deliveryFee'|'discount'|'total'|'timezone'> & {
- scheduledFor:number|null;lines:OrderLine[];paymentStatus:Order['payment']['status'];table?:string;
+ scheduledFor:number|null;lines:OrderLine[];paymentStatus:Order['payment']['status'];table?:string;estimate?:OrderEstimate;estimateObservedAt?:number;
 };
 export interface CustomerEntry {id:string;sequence:number;type:Exclude<CreditEntry['type'],'reminder'>;amount:number;delta:number;at:number;reversalOf:string|null;methodName:string|null}
 export type CustomerLink={v:1;kind:'order';shop:CustomerShop;order:CustomerOrder}|{v:1;kind:'khata';shop:CustomerShop;account:{id:string;customerName:string;currency:string;balance:number;entries:CustomerEntry[];nextSequence:number;hasMore:boolean;timezone:string}};
@@ -59,9 +60,10 @@ export function projectCustomerLink(value:unknown,request:CustomerLinkRequest):C
   if(new Set(lines.map(x=>x.id)).size!==lines.length)throw invalid();
   const pricing=orderPricing(lines,o.deliveryFee as number,o.discount as number);if(pricing.subtotal!==o.subtotal||pricing.total!==o.total)throw invalid();
   const table=o.tableJson===null||o.tableJson===undefined?undefined:literal(o.tableJson);if(table!==undefined&&(o.type!=='dine_in'||!table.trim()||table.length>40||/[\r\n\u0000-\u001f]/.test(table)))throw invalid();
+  if(o.estimate!==null&&o.estimate!==undefined&&!time(o.estimateObservedAt))throw invalid();
   return {v:1,kind:'order',shop,order:{id:o.id,number:o.number,businessType:o.businessType as Order['businessType'],type:o.type as Order['type'],status:o.status as Order['status'],
    statusChangedAt:o.statusChangedAt,scheduledFor:o.scheduledFor as number|null,currency:currency(o.currency),subtotal:o.subtotal as number,deliveryFee:o.deliveryFee as number,discount:o.discount as number,
-   total:o.total as number|null,lines,timezone:timezone(o.timezone),paymentStatus:o.paymentStatus as Order['payment']['status'],...(table===undefined?{}:{table})}};
+   total:o.total as number|null,lines,timezone:timezone(o.timezone),paymentStatus:o.paymentStatus as Order['payment']['status'],...(table===undefined?{}:{table}),...(o.estimate===null||o.estimate===undefined?{}:{estimate:parseOrderEstimate(o.estimate),estimateObservedAt:o.estimateObservedAt as number})}};
  }
  const a=value.account;if(!object(a)||!id(a.id)||!integer(a.balance)||!sequence(a.nextSequence)||a.nextSequence<request.afterSequence||typeof a.hasMore!=='boolean'||
   !Array.isArray(a.entries)||a.entries.length>request.pageSize)throw invalid();
