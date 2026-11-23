@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build && vite build --config vite.public.config.ts"
+    "build": "vite build && vite build --config vite.public.config.ts && vite build --config vite.orders.config.ts"
   },
   "dependencies": {
     "@fontsource/hind": "5.3.0",

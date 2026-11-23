@@ -25,15 +25,20 @@ import { publicShopUrl } from '../../packages/core/public-shop-codec';
 import { newInboxId } from '../../packages/core/inbox';
 import { normalizeBase } from '../../packages/core/paths';
 import { createPublicCapabilityHandler } from '../../supabase/functions/_shared/public-capability-handler';
+import {createPublicOrderHandler} from '../../supabase/functions/_shared/public-order-handler';
+import {publicOrderHash,publicOrderIntentJson} from '../../packages/core/public-order-submission';
+import {decodeShopPayload} from '../../packages/core/public-shop-decode';
+import {publicOrderingUrl} from '../../packages/core/public-order-link';
 import type { Order, SetupSnapshot } from '../../packages/core/models';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
-export async function startCustomerLinkService() {
+export async function startCustomerLinkService(options:{ordering?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
     origin = 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
+    ...(options.ordering?{read_public_shop_page:['p_outlet_id','p_after_id','p_page_size'],publish_public_shop:['p_id','p_event_id','p_outlet_id','p_source_url','p_payload_json','p_secret_hash','p_table','p_expiry'],revoke_public_shop:['p_id','p_event_id','p_outlet_id']}:{}),
     read_customer_link_page: [
       'p_kind',
       'p_resource_id',
@@ -195,8 +200,8 @@ export async function startCustomerLinkService() {
         code: 'BD-TRACK01',
         edition: newInboxId(),
         publishedAt: at,
-        name: setup.business.name,
-        address: 'Road 27, Dhanmondi',
+        name: options.ordering?setup.outlet.name:setup.business.name,
+        address: options.ordering?setup.outlet.address:'Road 27, Dhanmondi',
         hours: 'Open until 11 pm',
         phone: '+14155550199',
         deliveryNote: 'Contact the shop for delivery timing.',
@@ -237,7 +242,7 @@ export async function startCustomerLinkService() {
     records = resources();
     lose = null;
     await f.db.exec(
-      'update private.public_read_budget set window_at=0,requests=0;',
+      'update private.public_read_budget set window_at=0,requests=0;update private.public_order_budget set window_at=0,requests=0;',
     );
     await f.db.transaction(async (tx) => {
       await tx.query(
@@ -297,6 +302,10 @@ export async function startCustomerLinkService() {
         ),
     },
   });
+  const publicOrder=createPublicOrderHandler({origins:new Set([origin]),store:{
+    prepare:async(value,limits)=>f.asRole(null,'service_role','select public.prepare_public_order($1,$2,$3,$4,$5,$6) data',[value.shopToken,await publicOrderHash(value.trackingToken),publicOrderIntentJson(value.intent),value.action,limits.global,limits.shop]),
+    finish:(value,preparation,rows)=>f.asRole(null,'service_role','select public.finish_public_order($1,$2,$3) data',[value.intent.id,preparation.ticketToken,JSON.stringify(rows)]),
+  }});
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
       status,
@@ -322,7 +331,7 @@ export async function startCustomerLinkService() {
       let size = 0;
       for await (const part of req) {
         size += part.length;
-        if (size > 8192) throw Error();
+        if (size > (options.ordering?65536:8192)) throw Error();
         chunks.push(Buffer.from(part));
       }
       const raw = Buffer.concat(chunks).toString('utf8'),
@@ -349,6 +358,7 @@ export async function startCustomerLinkService() {
         response = await publicRead(
           new Request(url, { method: req.method, headers, body: raw }),
         );
+      else if(options.ordering&&url.pathname==='/functions/v1/public/orders')response=await publicOrder(new Request(url,{method:req.method,headers,body:raw}));
       else if (url.pathname.startsWith('/rest/v1/rpc/')) {
         const rpc = url.pathname.split('/').at(-1)!,
           keys = rpcs[rpc],
@@ -419,10 +429,17 @@ export async function startCustomerLinkService() {
       rpc:
         | 'create_public_link'
         | 'close_public_link_attempt'
-        | 'revoke_public_link',
+        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders',
     ) {
       lose = rpc;
     },
+    async publishShop(table:string|null=null){
+      if(!options.ordering)throw Error('Ordering fixture is not enabled');
+      const shop=decodeShopPayload(new URL(setup.outlet.shopLink!).hash.slice(1)),token='S'.repeat(43);
+      const metadata=await f.asRole<Record<string,unknown>>(1,'authenticated','select public.publish_public_shop($1,$2,$3,$4,$5,$6,$7,null) data',[newInboxId(),newInboxId(),setup.outlet.id,setup.outlet.shopLink,JSON.stringify(shop),await publicOrderHash(token),table]);
+      return {url:publicOrderingUrl({v:1,sourceUrl:setup.outlet.shopLink!,apiUrl,shopToken:token,table}),metadata};
+    },
+    async orderCounts(){return(await f.db.query<{orders:number;submitted:number;publications:number;sales:number;entries:number}>("select (select count(*) from public.orders) orders,(select count(*) from public.events where command='order.create' and actor_type='system' and actor_id='public-order') submitted,(select count(*) from private.public_shops where created_at is not null) publications,(select count(*) from public.sales) sales,(select count(*) from public.credit_entries) entries")).rows[0];},
     async issue(kind: 'order' | 'khata' = 'order') {
       return f.asRole<{ id: string; token: string }>(
         1,

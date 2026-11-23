@@ -41,11 +41,11 @@ export function decodeCustomerResponse(
   };
   try {
     if (request.kind === 'order') {
-      if (!object(v.order)) throw Error();
+      if (!object(v.order)||v.order.table!==undefined&&typeof v.order.table!=='string') throw Error();
       return projectCustomerLink(
         {
           ...shop,
-          order: { ...v.order, linesJson: JSON.stringify(v.order.lines) },
+          order: { ...v.order, linesJson: JSON.stringify(v.order.lines),tableJson:v.order.table===undefined?undefined:JSON.stringify(v.order.table) },
         },
         request,
       );

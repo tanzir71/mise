@@ -29,6 +29,8 @@ export interface PublicOrderSubmission {
   trackingToken: string;
   intent: PublicOrderIntent;
   website: string;
+  /** A display assertion, checked against the server grant before creation. */
+  expectedTable?: string | null;
 }
 const ulid = (v: unknown): v is string => typeof v === 'string' && /^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v);
 const token = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9_-]{43}$/.test(v);
@@ -90,10 +92,10 @@ export function publicSubmissionMessage(intent: PublicOrderIntent): string {
   return intent.text && !message.includes(intent.text) ? message + '\n\nOriginal customer text:\n' + intent.text : message;
 }
 export function parsePublicOrderSubmission(value: unknown): PublicOrderSubmission {
-  const r = exact(value,'v,action,shopToken,trackingToken,intent,website');
+  const keys='v,action,shopToken,trackingToken,intent,website',r = exact(value,typeof value==='object'&&value!==null&&Object.hasOwn(value,'expectedTable')?keys+',expectedTable':keys);
   if (r.v !== 1 || !['submit','inspect','close'].includes(r.action as string) || !token(r.shopToken) || !token(r.trackingToken)) throw bad();
   return {v:1,action:r.action as PublicOrderSubmission['action'],shopToken:r.shopToken,trackingToken:r.trackingToken,
-    intent:parsePublicOrderIntent(r.intent),website:publicText(r.website,512)};
+    intent:parsePublicOrderIntent(r.intent),website:publicText(r.website,512),...('expectedTable' in r?{expectedTable:r.expectedTable===null?null:publicText(r.expectedTable,40,false,true)}:{})};
 }
 export async function publicOrderHash(text: string): Promise<string> {
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),b => b.toString(16).padStart(2,'0')).join('');

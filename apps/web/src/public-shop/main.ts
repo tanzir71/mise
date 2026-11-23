@@ -4,7 +4,9 @@ import '@mise/ui/card.css';
 import '@mise/ui/public-fonts.css';
 import './public-shop.css';
 import {defaultFlags,flagValue} from '@mise/core/flags';
+import {decodePublicOrdering} from '@mise/core/public-order-link';
 import {decodeShopPayload} from '@mise/core/public-shop-decode';
+import type {PublicOrderIntent} from '@mise/core/public-order-submission';
 import {normalisePublicPhone} from '@mise/core/public-phone';
 import {formatMoney} from '@mise/core/money';
 import {orderMessage,type PublicOrderDraft} from '@mise/core/public-order';
@@ -17,6 +19,7 @@ import {publicHandOff,type PublicHandOff,publicAttemptProgress,type PublicAttemp
 import type {HandoffChoice} from '@mise/core/handoff-progress';
 
 declare const __PUBLIC_PAYMENTS__:Record<string,string[]>;
+declare const __PUBLIC_ORDERS__:boolean;
 type Voice={lang:string;interimResults:boolean;continuous:boolean;onresult:((event:{results:ArrayLike<ArrayLike<{transcript:string}>>})=>void)|null;onerror:(()=>void)|null;onend:(()=>void)|null;start:()=>void;stop:()=>void};
 type VoiceConstructor=new()=>Voice;
 const get=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('public-'+id)! as T;
@@ -29,11 +32,13 @@ try{boot();}catch(error){get('shop').hidden=true;get('opening').hidden=true;get(
 
 function boot(){
   let flags='';try{flags=localStorage.getItem('mise.flags')||'';}catch{/* Private storage is optional. */}
-  const shop=decodeShopPayload(location.hash.slice(1)),menu=shop.mode==='menu',quantities=new Map<string,number>();let memory:CustomerMemory;
+  const ordering=__PUBLIC_ORDERS__?decodePublicOrdering(location.hash,location.href):{shop:decodeShopPayload(location.hash.slice(1)),link:null},shop=ordering.shop,menu=shop.mode==='menu',quantities=new Map<string,number>();let memory:CustomerMemory;
   try{memory=readMemory(shop,localStorage);}catch{memory=emptyMemory();}
   const requested=new URLSearchParams(location.search).get('lang');let language:PublicLanguage=requested==='en'||requested==='bn'?requested:memory.language,fulfilment:'pickup'|'delivery'='delivery',when=0,payment='Cash',category='',query='',photo:string|null=null,photoLoading=false,recognition:Voice|null=null,recording=false,pending:PublicOrderDraft|null=null,timer:ReturnType<typeof setTimeout>|undefined;
   const w=()=>words[language],text=get<HTMLTextAreaElement>('list'),name=get<HTMLInputElement>('customer-name'),phone=get<HTMLInputElement>('customer-phone'),address=get<HTMLInputElement>('address'),time=get<HTMLInputElement>('custom-time'),timeSelect=get<HTMLSelectElement>('time-select'),file=get<HTMLInputElement>('photo-input'),message=get<HTMLTextAreaElement>('message'),review=get<HTMLDetailsElement>('review'),send=get<HTMLAnchorElement>('send'),retry=get<HTMLAnchorElement>('retry'),sent=get<HTMLButtonElement>('sent'),voice=get<HTMLButtonElement>('voice'),grid=get('menu-grid');
   let handoff:PublicHandOff|undefined,attempt:PublicAttempt|undefined,dirty=false;
+  let onlineOriginal:{intent:PublicOrderIntent;text:string}|null=null;
+  const onlineEnabled=__PUBLIC_ORDERS__&&Boolean(ordering.link&&flagValue('publicOrders',defaultFlags.publicOrders,location.search,flags));
   if(flagValue('handOffs',defaultFlags.handOffs,location.search,flags)){try{handoff=publicHandOff(shop,localStorage);}catch{handoff=publicHandOff(shop);}}
   const failed=get<HTMLButtonElement>('failed'),another=get<HTMLButtonElement>('another');failed.hidden=!handoff;get('manual').hidden=Boolean(handoff);
   name.value=memory.name;phone.value=memory.phone;address.value=memory.address;get('opening').hidden=true;get('shop').hidden=false;get('shop').classList.add(menu?'public-menu-shop':'public-list-shop');get('name').textContent=shop.name;get('summary').textContent=[shop.hours,shop.address].filter(Boolean).join(' · ');get('monogram').textContent=shop.name.trim().split(/\s+/).map(word=>Array.from(word)[0]).slice(0,2).join('').toUpperCase();get('contact').textContent=[shop.address,shop.phone].filter(Boolean).join(' · ');get<HTMLAnchorElement>('powered').href=import.meta.env.BASE_URL.replace(/app\/$/,'')+(shop.market==='BD'?'bd/':'intl/');document.title=shop.name+' — order on WhatsApp';
@@ -48,7 +53,7 @@ function boot(){
   function notice(value:string){notify(value+(handoff&&!handoff.durable?' '+w().unsaved:''));}
   function reviewDraft(value:PublicOrderDraft){pending=value;message.value=orderMessage(value);retry.href=`https://wa.me/${shop.phone.slice(1)}?text=${encodeURIComponent(message.value)}`;review.hidden=false;}
   function show(value:PublicAttempt){attempt=value;reviewDraft(value.draft);const done=publicAttemptProgress(value).sentAt!==undefined;sent.disabled=done;failed.disabled=done;another.hidden=!done;}
-  function record(choice:HandoffChoice,value=attempt){if(handoff&&value){const state=handoff.choose(value,choice);if(value===attempt){sent.disabled=state.sentAt!==undefined;failed.disabled=sent.disabled;another.hidden=!sent.disabled;}}}
+  function record(choice:HandoffChoice,value=attempt){if(onlineOriginal)return;if(handoff&&value){const state=handoff.choose(value,choice);if(value===attempt){sent.disabled=state.sentAt!==undefined;failed.disabled=sent.disabled;another.hidden=!sent.disabled;}}}
   function restore(value:PublicAttempt){const d=value.draft;name.value=d.name;phone.value=d.phone;address.value=d.address;fulfilment=d.fulfilment;payment=d.payment;text.value=value.form.text;quantities.clear();for(const [id,count] of value.form.quantities)quantities.set(id,count);time.value=value.form.customTime;chooseTime(value.form.when,false);pressed('[data-action=payment]',payment);pressed('[data-action=fulfilment]',fulfilment);get('address-row').hidden=fulfilment==='pickup';address.required=fulfilment==='delivery';translate();}
   function last(){const previous=memory.last;get<HTMLButtonElement>('last').disabled=!previous;get('last-hint').textContent=previous?new Intl.DateTimeFormat(language==='bn'?'bn-BD':'en',{day:'numeric',month:'short',timeZone:shop.timezone}).format(previous.at)+' · '+previous.draft.items.slice(0,3).join(', ').slice(0,90):w().noLast;get('greeting').textContent=memory.name?`${w().welcome}, ${memory.name}`:'';get('greeting').hidden=!memory.name;}
   function remember(completed?:CustomerMemory['last']){
@@ -63,6 +68,7 @@ function boot(){
     get('list-label').textContent=menu?w().notes:w().need;get('entry-help').textContent=menu?w().noteHelp:w().write;if(menu)text.placeholder=w().noteHelp;pressed('[data-action=language]',language);voice.setAttribute('aria-label',recording?w().stop:w().voice);last();renderMenu();
     const quick=get('quick-items');quick.replaceChildren();if(!menu)for(const item of shop.items.filter(item=>item.available&&item.oftenBought))quick.append(action(`+ ${item.name} ${formatMoney(item.price,shop.currency)}`,item.id,'quick'));get('suggestions').hidden=menu||!quick.children.length;
     if(get('offline').dataset.ready) get('offline').textContent=w().offline;else get('offline').textContent=w().preparing;
+    if(__PUBLIC_ORDERS__)root.dispatchEvent(new CustomEvent('mise-public-language'));
   }
   function money(item:PublicShopItem,count:number){const amount=BigInt(item.price)*BigInt(count);return amount<=BigInt(Number.MAX_SAFE_INTEGER)?formatMoney(Number(amount),shop.currency):w().price;}
   function renderMenu(){
@@ -81,7 +87,7 @@ function boot(){
     const items=[...shop.items.filter(item=>(quantities.get(item.id)||0)>0).map(item=>`${quantities.get(item.id)} × ${item.name}`),...(text.value.trim()?text.value.trim().split(/\r?\n/):[])];if(!items.length&&photo)items.push(w().photoOnly);
     const current:PublicOrderDraft={shopCode:shop.code,shopName:shop.name,name:who,phone:number,fulfilment,address:fulfilment==='pickup'?'':address.value.trim(),when:when===3?time.value.trim():[w().now,w().hour,w().tomorrow][when],items,payment,photo:Boolean(photo),language};sent.disabled=false;if(handoff)show(handoff.prepare(current,{text:text.value,quantities:[...quantities].filter(([,n])=>n>0),when,customTime:time.value},fresh));else reviewDraft(current);dirty=false;remember();return retry.href;
   }
-  function reviewed(){return !handoff||!attempt||dirty?prepare():retry.href;}
+  function reviewed(){if(onlineOriginal){message.value=onlineOriginal.text+'\n\n'+(language==='bn'?'আগের অনুরোধ যাচাই করুন, আরেকটি অর্ডার করার আগে। অনুরোধ: ':'Please check the original request before adding another order. Request: ')+onlineOriginal.intent.id;retry.href=`https://wa.me/${shop.phone.slice(1)}?text=${encodeURIComponent(message.value)}`;review.hidden=false;return retry.href;}return !handoff||!attempt||dirty?prepare():retry.href;}
   async function copy(){let captured:PublicAttempt|undefined;try{reviewed();captured=attempt;const value=message.value;let copied=true;try{await navigator.clipboard.writeText(value);}catch{copied=false;}if(handoff&&captured)record({type:copied?'copy':'copy-failed'},captured);if(captured!==attempt)return;if(!copied)select();notice(copied?'Message copied. Paste it into the shop’s chat.':'Message selected. Copy it with your browser.');}catch(error){if(captured&&captured!==attempt)return;if(attempt)select();notify(error instanceof Error?error.message:'Review the request.',true);}}
   function select(){review.open=true;message.focus();message.select();}
   function chooseTime(value:number,focus=true){when=value;pressed('[data-action=time]',String(when));timeSelect.value=String(when);time.hidden=when!==3;if(when===3&&focus)time.focus();}
@@ -123,7 +129,16 @@ function boot(){
   pressed('[data-action=payment]',payment);pressed('[data-action=fulfilment]',fulfilment);address.required=true;chooseTime(0);translate();
   if(handoff?.current){const saved=handoff.current,state=publicAttemptProgress(saved);if(state.sentAt===undefined){if(requested!=='en'&&requested!=='bn')language=saved.draft.language;restore(saved);dirty=language!==saved.draft.language;}show(saved);review.open=true;notice(state.sentAt!==undefined?'Marked as sent on this device. The shop will confirm your request.':state.status==='copied'?'Message copied. Mark sent after you finish.':state.status==='failed'?'Not confirmed. Copy or open WhatsApp again.':'Saved request. Review before sending.');if(saved.draft.photo)notice(get('status').textContent+' '+w().attach);}
   window.addEventListener('pagehide',()=>{clearTimeout(timer);recognition?.stop();});
+  if(onlineEnabled&&ordering.link){
+    if(ordering.link.table){fulfilment='pickup';pressed('[data-action=fulfilment]','pickup');get('fulfilment').hidden=true;get('address-row').hidden=true;address.required=false;}
+    void import('./order-controller').then(({mountPublicOrdering})=>mountPublicOrdering(ordering.link!,{
+      parent:document.querySelector<HTMLElement>('.public-request-actions')!,language:()=>language,
+      capture:()=>{prepare();return {photo:Boolean(photo)||photoLoading,fields:{name:name.value.trim(),phone:normalisePublicPhone(phone.value,shop.market)!,fulfilment:ordering.link!.table?'dine_in':fulfilment,address:fulfilment==='delivery'?address.value:'',when:pending!.when,scheduledFor:when===1?Date.now()+3600000:null,selections:[...quantities].filter(([,qty])=>qty>0).map(([itemId,qty])=>({itemId,qty})),text:text.value,paymentPreference:payment,language}};},
+      restore:intent=>{name.value=intent.name;phone.value=intent.phone;address.value=intent.address;fulfilment=intent.fulfilment==='delivery'?'delivery':'pickup';text.value=intent.text;payment=intent.paymentPreference;quantities.clear();for(const s of intent.selections)quantities.set(s.itemId,s.qty);const index=([w().now,w().hour,w().tomorrow] as string[]).indexOf(intent.when);time.value=intent.when;chooseTime(index<0?3:index,false);pressed('[data-action=payment]',payment);pressed('[data-action=fulfilment]',fulfilment);get('address-row').hidden=fulfilment!=='delivery';address.required=fulfilment==='delivery';translate();},
+      original:(intent,value)=>{onlineOriginal=intent?{intent,text:value??''}:null;},
+    })).catch(()=>notify(language==='bn'?'অনলাইন অর্ডার সম্ভব হচ্ছে না। মেসেজ ব্যবহার করুন।':'Online ordering is unavailable. Use the message option.',true));
+  }
   if('serviceWorker' in navigator)void navigator.serviceWorker.register(new URL('sw.js',location.href),{scope:new URL('./',location.href).pathname}).then(async registration=>{
-    const worker=registration.installing||registration.waiting||registration.active;if(worker&&worker.state!=='activated')await new Promise<void>((resolve,reject)=>worker.addEventListener('statechange',()=>{if(worker.state==='activated')resolve();else if(worker.state==='redundant')reject(new Error('Offline setup failed.'));}));if(!navigator.serviceWorker.controller?.scriptURL.includes('/s/sw.js'))await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));get('offline').dataset.ready='true';get('offline').textContent=w().offline;
+    const worker=registration.installing||registration.waiting||registration.active;if(worker&&worker.state!=='activated')await new Promise<void>((resolve,reject)=>worker.addEventListener('statechange',()=>{if(worker.state==='activated')resolve();else if(worker.state==='redundant')reject(new Error('Offline setup failed.'));}));if(navigator.serviceWorker.controller?.scriptURL!==new URL('sw.js',location.href).href)await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}));get('offline').dataset.ready='true';get('offline').textContent=w().offline;
   }).catch(()=>{get('offline').textContent='Reconnect and reload to prepare offline access.';});else get('offline').textContent='Keep this page open if your browser cannot save it offline.';
 }

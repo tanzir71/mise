@@ -1,0 +1,30 @@
+{
+  "title": "M33 — owner publication, original customer submission and table tracking (ETA, swaps and payment choices remain open)",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "ordering-owner", "path": "app/?flags=publicOrders,cloudSetup", "publicOrderingFixture": "owner",
+      "captureStyle": ".app-bottom-nav{position:static!important}",
+      "note": "Actual synthetic phone Auth, native owner selection and SQL-approved current M20 snapshot. Publication, live confirmation, private local original and owner metadata are real; the backend service stays installer configured. The Storefront frame guides the existing settings layout and control style; the new publication panel extends that layout.",
+      "sections": [
+        {"id": "page", "selector": ".app-shell", "reference": "screens/desktop/Settings › Storefront (link, look, zones, payments).png"},
+        {"id": "controls", "selector": ".public-shop-controls", "reference": "screens/desktop/Settings › Storefront (link, look, zones, payments).png"}
+      ]
+    },
+    {
+      "id": "ordering-entry", "path": "app/o/", "publicOrderingFixture": "entry",
+      "note": "The same C08 public form gains an account-free POST action, honeypot and one-tap message fallback. No price, delivery fee or payment is invented. The complete recovery bundle has its own offline cache; the original /s/ page retains its 60 KB limit.",
+      "sections": [{"id": "screen", "selector": ".public-shop", "reference": "screens/corner-shop/C08 · Customer — Scan the counter QR or open the link · just say what you need.png"}]
+    },
+    {
+      "id": "ordering-original", "path": "app/o/", "publicOrderingFixture": "original",
+      "note": "The actual HTTP response is lost after SQL commits one real order. Its complete original source, secret, IDs and unconfirmed state remain durable on the customer device; Check/Close and original-message Copy are available. A saved request is not displayed as a confirmed order.",
+      "sections": [{"id": "screen", "selector": ".public-shop", "reference": "screens/corner-shop/C08 · Customer — Scan the counter QR or open the link · just say what you need.png"}]
+    },
+    {
+      "id": "ordering-table", "path": "app/o/", "publicOrderingFixture": "table",
+      "note": "A real public table order automatically opens its purpose-bound tracker. Table 4 comes from the scoped SQL grant and order record. M01 guides the tracking layout; this fixture is newly received with unpriced requested items. No Cooking state, arrival estimate, paid money, loyalty feature or waiter task is fabricated.",
+      "sections": [{"id": "screen", "selector": ".customer-view", "reference": "screens/mobile/M01 · Guest — QR order becomes the tracker (dine-in).png"}]
+    }
+  ]
+}

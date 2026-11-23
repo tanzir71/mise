@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T01:44:14.229Z",
+  "sourceParentCommit": "bcd45af450286b68feb20d9aef90a698f944335a",
+  "status": "owner/customer ordering increment verified; full M33 remains open",
+  "publication": "All three workflows and Pages held; new public function undeployed",
+  "configuration": "all hosting, backend connections, providers, accounts, phone numbers and credentials are end-user configured",
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "40f682ceaba2250ab9fba5f90e2155060c93b575ba67788ba6d3717f7a8931bd",
+    "apps/web/o/index.html": "66c7218ddd8fa13ff350bd1c9ed3336202f66f8719fa6366eeca2300da354f93",
+    "apps/web/package.json": "db735da011e8263f3e4f2d5a59f6cd5b2ce70e07f384f0d941a366a85cacbd1c",
+    "apps/web/public-shop-build.ts": "a4367c70233e5de1fc68216a0070df76ea423bc40b1a25b9cc70db431cc528eb",
+    "apps/web/src/CustomerLinkView.tsx": "c95e488a6adfeb6b279ce5764c1dfe68554a369d3c23e4847fbeb5eedcae3446",
+    "apps/web/src/PublicShopControls.tsx": "7a90365fac47f45778fc2236ac2f51d22ce51da908301199660072e86979e122",
+    "apps/web/src/ShopLinkSettings.tsx": "99b52b72e763f932770f17aa4fcaa3e01c6ddfbcbc42194cacb4e983d560d81d",
+    "apps/web/src/customer-link-view.css": "13a66cbd49db62b0a666e1b1b56509918c7b02714f01b051482c484e13fc0f02",
+    "apps/web/src/data/command-request.ts": "b7cc116656b0db1fb3fa4514f0d1fb989951cb8829799d884f5f6a215fa3cc77",
+    "apps/web/src/data/customer-link-read.ts": "21879b2839ed91d536d7b76c80c79d9947667ae0fa8f4eb7033e6620eb94dc2b",
+    "apps/web/src/data/public-shop-session.ts": "927b4fec20ea9bdf22596e8efb27efb1de3f2f9687267365c3ff6459ad5ee0d1",
+    "apps/web/src/public-shop-controls.css": "1c37a0f61b2c9f1377567b0871865d9e1f6a2f5cafe107aa93afaffbf678c45a",
+    "apps/web/src/public-shop/main.ts": "77c4d74fc6152a2ae24e5539df50e354d25f271661318dda7197e96182082a84",
+    "apps/web/src/public-shop/order-controller.ts": "6958539ebad2299fbe8a56d4f82844c30e220b6e3c201aa77f7e7a32dbb9ae7f",
+    "apps/web/src/public-shop/order-controls.css": "d345cbc8b28756abe99550150416f626e46c6cc041975c34a2e440a462fac20b",
+    "apps/web/src/public-shop/order-remote.ts": "92e25a30ccaf711dd936b5944e3133b93fbe0d01f45db83014b032711656a564",
+    "apps/web/src/public-shop/order-session.ts": "67f7b623f9a8412eeaf927b7d2560eff946c305dce6b5585eba588987558c1e0",
+    "apps/web/src/sw.ts": "7c501723870e4c7dfaa45803d8d551c0019e1620280a94f96fc2c69a1be9e3c8",
+    "apps/web/src/use-public-shop-owner.ts": "8dd5d6599d4b09ed0ea32af6b7158cf604ca1e874be2561bb86034d8088f50e2",
+    "apps/web/vite.config.ts": "af8a5d38b026e5870b44089fbc03a2b10ed9414f92244f246c01facadf6f1718",
+    "apps/web/vite.orders.config.ts": "b7fd29e235a1dc971310c8fdb6bfbce763d55e45e89954eb4b6e8bf19d4501e7",
+    "apps/web/vite.public.config.ts": "29f30d213a087486dae7797536aeb3975bcf2bba4b555d19bf34e17f772c682b",
+    "docs/configure-services.md": "5e0c78f2c07a8aa915eb9aeb1525221949bbb1560768ee0449a388d7e3391436",
+    "docs/public-order-admission.md": "1859ae564e073eac43103633dd09d3a68079f56b7011456655f301ecc8940bec",
+    "docs/public-ordering-runtime.md": "e0d3fdef9a5cc900af3145d2e0889b50c02605cf602f90b7adb650b3937e014d",
+    "handover/AGENTS.md": "49aaeb9a8a80d02a374d82fe5ccfa9ed80312125aa4b9a2ebf0b944e7a7f9eff",
+    "handover/DECISIONS.md": "ff26503d08448f1978b1ec8300d006f9093f11bf8abc9ebc3cf11d94c0acecc2",
+    "handover/QUESTIONS.md": "e3f5ecebf1f03cde7c67d59362b8e9c499839b1e48e432f817d2c438c19729f5",
+    "handover/docs/03-roadmap.md": "6a0578540b34de66172d2c477892206c5da4c3b3a5aa55b989d4856b4407064e",
+    "handover/docs/packs.json": "9fabf0ff13454947074713817b6f6b3c15502841dd0169af9fa397b615004fe8",
+    "packages/core/cloud-records.ts": "a6c853a29c116c25c40e662d56933d28747e429eacaf0a91448809085bf322c8",
+    "packages/core/customer-links.ts": "1873cc7fe3d19eafbdb5becead1871d99c88236d77a17f4cd083e76aa4d2e78a",
+    "packages/core/flags.ts": "e170765a8f2f6de535a472ba797793add4820573cbb74e2da028b0f0f0cf6519",
+    "packages/core/order-limits.ts": "661ff0d6056d178f6c303e2b52e745bfab0c93011d6b3019a0539faf001ee0e4",
+    "packages/core/order-lines.ts": "d45aed0ad0ec62dd00c438ced216733cf252cc5ee5d51144fa72b950cd274471",
+    "packages/core/orders.ts": "3d6130b9bd42ba931e6eb38cb889da662b6e5f5636d90a1da02ef7b74c92c8b6",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "packages/core/phone.ts": "e1ec8d78648f8d3b626544aef7aa7fb22c3ece3d4419d4ce216455980d873c5d",
+    "packages/core/public-order-link.ts": "999f6c67d73c3b50e0f4a873abf08fafa181763d89e062515214e4ef82865d6e",
+    "packages/core/public-order-new.ts": "4751305f32a6a727b5904928d3eb193769792a5c93a51fc2ec0055462b50e6ff",
+    "packages/core/public-order-projection.ts": "3f511f95bab53f9f4f437a7ea67a97d873188c03987aee4c97fa82246bfacadb",
+    "packages/core/public-order-submission.ts": "50343bdcb6d3876c8d286c3fba195bbdecf529b72bdfde51ad23447069d9e244",
+    "packages/core/public-order.ts": "375ab89abd04cd26a2d05f22f6ee8ce487d013299ce30a9193b2408fe57417f6",
+    "packages/core/public-phone-lengths.json": "d37ad47cbc9756cde941e587d503508d0aea2797d603679eeec76e9518b5b587",
+    "packages/core/public-phone.ts": "868467794e2ad253029d1123fa80a37a082ace355086868d89b3a9f1ccdf87ed",
+    "packages/core/public-shop-admin.ts": "a646f784f9b1dc744ebab5c474b4da240b1fc459253940a38416add468d91a97",
+    "packages/core/public-shop.ts": "c1b0380b3f4504ee1ec47959c9743ad85886ab06c3be0d0f14749bf3da75c0dc",
+    "packages/core/shop-access.ts": "64cf9acadce32df5fb635472ed4b4e25ce08e1a249542a0e7efdd8631e1abf91",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55",
+    "qa/configs/m33-customer-links.json": "b3c7e9bdac3278d8fe49520f4586471217dfa2b85e730f963a06cff40e25675e",
+    "qa/configs/m33-ordering.json": "a6df7f656103f451105af504cdd706ea37dbc7bdd7ff77c2d5dab874834b73a1",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/edge-bundle.mjs": "57e590f8c30e77df170c6b582cc8ca7b57f19ffa0d0414837aa2ed4c6611a843",
+    "scripts/harden.mjs": "c851af32703be8dfa098f45a899110016057243c2dd7bdc071f24ad9cd4274bd",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "scripts/qa-visual.mjs": "771b6b0609e006c6708543c1835ae03f52638b08df8d3c5f5da1c00a12a09961",
+    "supabase/config.toml": "7b185e2d7443c6f7a20cd47567402f4c878d0c6ba6bb8a99173e18ce3e89cee2",
+    "supabase/functions/.env.example": "426a5eb76d5c6e71dc4717cd764951bd827fed8fd9acebd2a7f4b5536273f02d",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/public-capability-handler.ts": "de7e9e549548218ad55e965203e8262054a93458fbdc765284adceff207c3a5a",
+    "supabase/functions/_shared/public-order-handler.ts": "05454adc3b6d5c1b913ac28efc7c711d5e38f9589c327eba2b77325a2271e3c1",
+    "supabase/functions/public-read/index.ts": "81dc7e67fd77198f0cf6e95ce19cc77fa4a22643055f85bcb6b80cbb82caf13e",
+    "supabase/functions/public/index.ts": "796e1bed81391717f13abf8e9e1ae8268e78ceb67c6b743398fc6da9d8b382fb",
+    "supabase/migrations/20261122221346_public_shop_order_admission.sql": "6c226f342486357271b82cb5ca39058e57c1ea7ebd1f359cb5a5eab47c4562bc",
+    "supabase/migrations/20261123000717_public_shop_owner_directory.sql": "40ac8639a58cd6e2f00663fe9bcc1a0c94973ec29fe946b3a0a730b53ade72e5",
+    "tests/device-pairing-fixture.ts": "ab8b3a2e245fa282f1145cd42d0d8e661c8ae94264d644875edceefd3aace796",
+    "tests/e2e/public-ordering.spec.ts": "38c0e2329ed809f38a680a7c82dd24ad0a803e1562d37cdce0d9dc8d0efbfa4f",
+    "tests/fixtures/customer-link-service.ts": "44689dd8778e7ee1378c9d436d15890542dc329517c4a8cf0d50aee1479c58d8",
+    "tests/fixtures/install-customer-links.mjs": "5bd1fc2b46259df3113e0a0e7b4fc5f8e7baf9fde187b873a38a998d16f8452e",
+    "tests/fixtures/public-ordering-visual.mjs": "213f402072faec018a801087fb38c55a163471f0ec4d5d908d83a09745ee0339",
+    "tests/public-order-admission.test.ts": "c933402d23f3b11838377f2ef739306bac90e887b262ad536e4c6579ba39af30",
+    "tests/public-order-client.test.ts": "2ac5b651b3a2745a314890be0809f2b150e6e22461587010ece2793b89fa52c9",
+    "tests/public-order-fixture.ts": "5957c00f2e351e8ee1ade8dc55e6296fa87797adcdb2ca0e893f0e83a543e402",
+    "tests/public-order-http.test.ts": "f7308c0d8dec6e56f50026edd6bb8f221093656e352f22482188230b0097a724",
+    "tests/public-order-submission.test.ts": "e492476cddcbc934d4e4f66f9d6b37435d22a2e4c276751f5d4b810539538cf0",
+    "tests/public-shop-owner.test.ts": "2157de4728f2f59940e0f026049d61c11f3ebace73ca30d5ce562931bd01a16c",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  },
+  "local": {
+    "requiredChecks": [
+      "full-unit",
+      "lint",
+      "types",
+      "pages-build",
+      "full-pages-browser",
+      "root-build",
+      "root-browser",
+      "pages-restored",
+      "ordering-visual",
+      "history-artifact-guard"
+    ],
+    "unit": {
+      "passed": 4589,
+      "files": 223,
+      "failed": 0
+    },
+    "unitReuse": "All 4589 unit cases passed. Subsequent changes are only the public controller persisted-page lifecycle and its browser regression; no unit-tested source or fixtures changed. All UI/build/browser/visual checks rerun.",
+    "pagesBrowser": 580,
+    "rootBrowser": 71,
+    "bothBuildBases": true,
+    "pagesBuildRestored": true,
+    "focusedNativeCases": 47,
+    "historyRecoveryBrowserCase": true,
+    "compiledEndpointChecks": [
+      "mismatched-table-cannot-create",
+      "actual-core-order-and-original-tracker",
+      "exact-original-receipt-no-duplicate",
+      "own-recorded-table-only",
+      "actual-revocation-removes-next-read",
+      "no-sale-or-khata-write",
+      "default-off-no-provider-or-database-request"
+    ],
+    "compiledBundles": [
+      {
+        "name": "public",
+        "bytes": 193432,
+        "sha256": "9ed71214118688d65d88d065614cc33d4fe78445b8b87df00f8494ac0201f698"
+      },
+      {
+        "name": "public-read",
+        "bytes": 17530,
+        "sha256": "bf010e768b6b9bb85261c0484db80fe576e94e8d9cd8c658ca74e6aa9cf0bf02"
+      }
+    ],
+    "compiledCounts": {
+      "orders": 1,
+      "sales": 0,
+      "entries": 0
+    },
+    "runtimeImports": [],
+    "visualComparisons": 67,
+    "accessibility": {
+      "scenes": 60,
+      "violations": 0,
+      "horizontalOverflows": 0
+    },
+    "exportsPresent": 270,
+    "offlineBudgets": {
+      "existingForm": 60000,
+      "orderingForm": 75000
+    },
+    "secretGuard": {
+      "history": true,
+      "artifacts": true,
+      "protectedPrivateValues": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "unchangedReviewedLegacyFindings": 22
+    }
+  },
+  "managed": {
+    "sourceMigrations": 69,
+    "forcedRlsTables": 93,
+    "reviewedFunctionBodiesVerified": 3,
+    "oldFunctionsDigestPreservedAtMigration": true,
+    "oldEdgeFunctionsPreserved": 17,
+    "newPublicEndpointDeployed": false,
+    "migrationSha256": "40ac8639a58cd6e2f00663fe9bcc1a0c94973ec29fe946b3a0a730b53ade72e5",
+    "rollbackProbe": {
+      "checks": 35,
+      "rollback": true,
+      "ordersCreated": 1,
+      "financialWrites": 0,
+      "noProviderRequests": true
+    },
+    "retainedFixtures": {
+      "businesses": 0,
+      "authUsers": 0,
+      "shops": 0,
+      "attempts": 0,
+      "links": 0,
+      "closures": 0
+    },
+    "scheduler": false,
+    "cronJobs": 0,
+    "advisors": {
+      "security": {
+        "count": 1,
+        "levels": {
+          "INFO": 1
+        }
+      },
+      "performance": {
+        "count": 2,
+        "levels": {
+          "INFO": 2
+        }
+      }
+    }
+  }
+}

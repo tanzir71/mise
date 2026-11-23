@@ -36,7 +36,7 @@ export function createPublicOrderHandler(deps:{store:PublicOrderStore;origins:Re
         if(raw.state==='prepared'){
           if(input.action!=='submit')throw unavailable();
           let records:CloudRecord[];
-          try{records=publicOrderRecords(raw,input.intent);}catch{return reply(409,{error:'This request needs the shop’s review. Keep it and use the message option.'});}
+          try{if(input.expectedTable!==undefined&&JSON.parse(String(raw.contextJson)).table!==input.expectedTable)throw unavailable();records=publicOrderRecords(raw,input.intent);}catch{return reply(409,{error:'This request needs the shop’s review. Keep it and use the message option.'});}
           raw=await deps.store.finish(input,raw,records);created=true;
           if(!object(raw)||raw.v!==1)throw unavailable();
           if(raw.state==='conflict')continue;

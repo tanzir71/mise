@@ -10,6 +10,7 @@ import { installUploadReviewFixture } from '../tests/fixtures/install-upload-rev
 import { installOperatorsFixture } from '../tests/fixtures/install-operators.mjs';
 import {captureDeviceAccess,closeDeviceAccessVisual} from '../tests/fixtures/device-access-visual.mjs';
 import {captureCustomerLinks,closeCustomerLinksVisual} from '../tests/fixtures/customer-links-visual.mjs';
+import {capturePublicOrdering,closePublicOrderingVisual} from '../tests/fixtures/public-ordering-visual.mjs';
 import {captureKitchenScreen,closeKitchenScreenVisual} from '../tests/fixtures/install-kitchen-ui.mjs';
 import {captureDeskNotifications,closeDeskNotificationsVisual} from '../tests/fixtures/install-desk-ui.mjs';
 import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyActionReview,capturePurchaseActionReview,captureStockActionReview,captureCustomerActionReview,captureClosingActionReview,captureMoneyCurrencyReview,capturePendingCurrencyRecovery,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
@@ -60,6 +61,7 @@ try {
     await page.goto(targetUrl.href);
     if(target.deviceAccessFixture)await captureDeviceAccess(page,target.deviceAccessFixture);
     if(target.customerLinksFixture)await captureCustomerLinks(page,target.customerLinksFixture);
+    if(target.publicOrderingFixture)await capturePublicOrdering(page,target.publicOrderingFixture);
     if(target.kitchenScreenFixture)await captureKitchenScreen(page,target.kitchenScreenFixture);
     if(target.deskNotificationsFixture)await captureDeskNotifications(page,target.deskNotificationsFixture);
     if(target.scopeRecoveryFixture)await captureRecoveryReview(page);
@@ -139,5 +141,8 @@ try {
   if(configPaths.some(path=>path.endsWith('/m20.json')))await import('./proof-public-fonts.mjs');
 } finally {
   try { await browser?.close(); }
-  finally { try { await closeCustomerLinksVisual(); } finally { try { await closeRecoveryVisual(); } finally { try { await closeDeviceAccessVisual(); } finally { try { await closeKitchenScreenVisual(); } finally {try{await closeDeskNotificationsVisual();}finally{server?.kill();}} } } } }
+  finally {
+    const closed=await Promise.allSettled([closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual()]);
+    server?.kill();const failed=closed.find(result=>result.status==='rejected');if(failed)throw failed.reason;
+  }
 }

@@ -9,15 +9,18 @@ import { PUBLIC_SHOP_MAX_ITEMS,type PublicShop } from '@mise/core/public-shop';
 import { reviewShopLink,type ShopLinkContext,type ShopLinkInput } from '@mise/core/shop-links';
 import { db } from './data/db';
 import { MessageHandoff } from './MessageHandoff';
+import {flagEnabled} from '@mise/core/flags';
 import { useHandoffs } from './handoff-context';
 import './shop-link-settings.css';
 const ShopPoster=lazy(()=>import('./ShopPoster').then(module=>({default:module.ShopPoster})));
+const PublicShopControls=lazy(()=>import('./PublicShopControls').then(module=>({default:module.PublicShopControls})));
 
 function savedShop(link?:string):PublicShop|null {
   try {const url=new URL(link||'');return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password&&url.pathname.endsWith('/app/s/')?decodeShopPayload(url.hash.slice(1)):null;}
   catch {return null;}
 }
 export function ShopLinkSettings({setup,postersEnabled}:{setup:SetupSnapshot;postersEnabled:boolean}){
+  const [publicOrdersEnabled]=useState(()=>{let stored='';try{stored=localStorage.getItem('mise.flags')||'';}catch{/* Preview remains optional. */}return flagEnabled('publicOrders',location.search,stored);});
   const records=useLiveQuery(()=>db.transaction('r',[db.businesses,db.outlets,db.members,db.items,db.categories,db.events],async()=>{
     const [current,items,categories]=await Promise.all([db.setup(),db.items.where('outletId').equals(setup.outlet.id).toArray(),db.categories.where('outletId').equals(setup.outlet.id).toArray()]);
     if(!current||current.outlet.id!==setup.outlet.id)return null;
@@ -26,7 +29,7 @@ export function ShopLinkSettings({setup,postersEnabled}:{setup:SetupSnapshot;pos
   }),[setup.outlet.id]);
   if(records===undefined)return <p aria-busy="true">Opening shop link…</p>;
   if(!records)return <p role="alert">Your shop changed. Reopen Shop link from More.</p>;
-  return <ShopLinkForm key={records.context.setup.outlet.id} context={records.context} event={records.event} postersEnabled={postersEnabled}/>;
+  return <><ShopLinkForm key={records.context.setup.outlet.id} context={records.context} event={records.event} postersEnabled={postersEnabled}/>{publicOrdersEnabled?<Suspense fallback={<p aria-busy="true">Opening online ordering…</p>}><PublicShopControls setup={records.context.setup} sourceUrl={records.context.setup.outlet.shopLink||''}/></Suspense>:null}</>;
 }
 function ShopLinkForm({context,event,postersEnabled}:{context:ShopLinkContext;event?:AuditEvent;postersEnabled:boolean}){
   const handoffs=useHandoffs(),[sharing,setSharing]=useState(false);

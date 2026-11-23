@@ -21,7 +21,7 @@ self.addEventListener('push',event=>{let data:unknown;try{data=event.data?.json(
 self.addEventListener('notificationclick',event=>{event.waitUntil(deskWork(worker=>worker.click(event.notification)).catch(()=>{event.notification.close();}));});
 self.addEventListener('message',event=>{if(event.data?.type==='MISE_DESK_RECHECK'&&ownDeskClient(event.source))event.waitUntil(deskWork(worker=>worker.recheck()).catch(()=>{}));});
 clientsClaim();cleanupOutdatedCaches();precacheAndRoute(self.__WB_MANIFEST);
-registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}index.html`),{denylist:[new RegExp('^'+base.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'s(?:/|$)')]}));
+registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}index.html`),{denylist:[new RegExp('^'+base.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[so](?:/|$)')]}));
 registerRoute(({url,request})=>url.origin===self.location.origin&&url.pathname===`${base}inbox/receive`&&request.mode==='navigate'&&request.destination==='document',async({request})=>{
   const store=new LocalStore(`mise-local:${base}`);
   try{return await receiveSharedRequest(request,base,input=>captureDatabaseInbox(store,input));}finally{store.close();}

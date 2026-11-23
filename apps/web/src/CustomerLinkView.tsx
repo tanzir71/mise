@@ -23,6 +23,7 @@ const words = {
     items: 'Items',
     total: 'Total',
     subtotal: 'Subtotal',
+    pricedSubtotal: 'Priced items subtotal',
     delivery: 'Delivery',
     discount: 'Discount',
     price: 'The shop is checking prices.',
@@ -76,6 +77,7 @@ const words = {
     items: 'পণ্য',
     total: 'মোট',
     subtotal: 'পণ্যের দাম',
+    pricedSubtotal: 'দাম জানা পণ্যের উপমোট',
     delivery: 'ডেলিভারি',
     discount: 'ছাড়',
     price: 'দোকান দাম যাচাই করছে।',
@@ -480,6 +482,7 @@ export function CustomerLinkView() {
                   {c.order} {data.order.number}
                 </p>
                 <h1 aria-live="polite">{status(data.order.status)}</h1>
+                {data.order.type==='dine_in'&&data.order.table?<p>{data.order.table}</p>:null}
                 <p>
                   {c.updated}{' '}
                   {when(data.order.statusChangedAt, data.order.timezone)}
@@ -559,10 +562,10 @@ export function CustomerLinkView() {
                   ))}
                 </ul>
                 <dl>
-                  <div>
-                    <dt>{c.subtotal}</dt>
+                  {data.order.total!==null||data.order.lines.some(line=>!line.unavailable&&line.unitPrice!==null)?<div>
+                    <dt>{data.order.total===null?c.pricedSubtotal:c.subtotal}</dt>
                     <dd>{money(data.order.subtotal, data.order.currency)}</dd>
-                  </div>
+                  </div>:null}
                   {data.order.deliveryFee > 0 ? (
                     <div>
                       <dt>{c.delivery}</dt>

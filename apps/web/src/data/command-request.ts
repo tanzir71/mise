@@ -48,6 +48,11 @@ export function createCustomerLinkRequest(config:CloudConnection,input:CommandAc
  if(!['read_customer_link_page','create_public_link','revoke_public_link','read_public_link_attempt','close_public_link_attempt'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,131072);
 }
+export type PublicShopRpc='read_public_shop_page'|'publish_public_shop'|'revoke_public_shop';
+export function createPublicShopRequest(config:CloudConnection,input:CommandAccount,rpc:PublicShopRpc,send:typeof fetch){
+ if(!['read_public_shop_page','publish_public_shop','revoke_public_shop'].includes(rpc))throw new CommandRequestError('review');
+ return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,131072);
+}
 export function createOwnerPinRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/staff-pin',config.apiUrl+'/'),'POST',send);
 }
