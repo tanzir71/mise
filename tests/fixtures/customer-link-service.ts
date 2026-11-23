@@ -41,14 +41,17 @@ import {emptyStaffProfile} from '../../packages/core/staff';
 import {parseStaffOwnerAction,parseStaffOwnerContext,parseStaffOwnerOutcome} from '../../packages/core/staff-protocol';
 import {parseStaffLinkAction,parseStaffLinkContext,staffViewerUrl} from '../../packages/core/staff-links';
 import {deviceSecretHash} from '../../packages/core/device-access';
+import {recordSaleCommand} from '../../packages/core/sales';
+import {saveStockItemCommand} from '../../packages/core/stock';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
-export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean}={}) {
+export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean;liveStore?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
     origin = 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
+    ...(options.liveStore?{read_live_store:['p_outlet_id','p_all_outlets','p_period','p_after_outlet','p_view_outlet_id']}:{}),
     ...(options.staffTeam?{read_staff_context:['p_outlet_id','p_member_id'],read_staff_board:['p_outlet_id','p_after','p_page_size'],change_staff_action:['p_outlet_id','p_action_json','p_operation'],read_staff_links:['p_outlet_id','p_member_id','p_after'],change_staff_link:['p_outlet_id','p_action_json','p_operation']}:{}),
     ...((options.ordering||options.estimates||options.checkout)?{read_checkout_policy:['p_outlet_id','p_order_id'],change_checkout_policy:['p_outlet_id','p_action','p_operation']}:{}),
     ...(options.estimates?{read_order_estimate:['p_order_id'],change_order_estimate:['p_order_id','p_action_id','p_order_revision','p_estimate_revision','p_change','p_operation']}:{}),
@@ -259,6 +262,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       'update private.public_read_budget set window_at=0,requests=0;update private.public_order_budget set window_at=0,requests=0;update private.staff_link_budget set window_at=0,requests=0;',
     );
     await f.db.transaction(async (tx) => {
+      if(options.liveStore)await tx.query('insert into public.outlets(id,business_id,name,timezone,currency,created_at,updated_at) values($1,$2,\'"Third outlet"\',\'Asia/Dhaka\',\'BDT\',1,1)',[deviceId(13),setup.business.id]);
       await tx.query(
         'update public.businesses set name=$2,business_type=$3 where id=$1',
         [setup.business.id, JSON.stringify(setup.business.name),setup.business.businessType],
@@ -436,6 +440,20 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
   }
   return {
     reset,
+    async liveSale(expression='100',outlet=11,currency='BDT'){
+      if(!options.liveStore)throw Error('Live fixture is not enabled');const branch={...setup,outlet:{...setup.outlet,id:deviceId(outlet),currency}},change=recordSaleCommand({expression,method:'cash'},{setup:branch,items:[],wallets:[]});await f.db.transaction(async tx=>{await insert(tx,encodeCommandRecord('sales',change.sale,setup.business.id));await insert(tx,encodeCommandRecord('events',change.event,setup.business.id));});return change.sale;
+    },
+    async liveQuestion(message='Please allow a little more time. আরও সময় দিন।'){
+      if(!options.liveStore)throw Error('Live fixture is not enabled');const link=await f.asRole<{id:string;token:string}>(1,'authenticated','select public.create_public_link($1,$2,\'khata\',$3,null) data',[newInboxId(),newInboxId(),records.account.id]),intent={v:1,id:newInboxId(),eventId:newInboxId(),taskId:newInboxId(),linkId:link.id,accountId:records.account.id,kind:'more-time',entryId:null,message,at:Date.now()};return f.asRole(null,'service_role','select public.visit_customer_khata($1,\'submit\',$2,0,3000,60) data',[link.token,JSON.stringify(intent)]);
+    },
+    async liveRevoke(){if(!options.liveStore)throw Error('Live fixture is not enabled');await f.db.query('update public.members set active=false where id=$1',[setup.owner.id]);},
+    async liveOtherBusiness(){if(!options.liveStore)throw Error('Live fixture is not enabled');await f.db.query("insert into public.businesses(id,name,business_type,market_code,created_at,updated_at) values($1,'\"Second owned shop\"','online_shop','BD',1,1)",[deviceId(3)]);await f.db.query("insert into public.outlets(id,business_id,name,timezone,currency,created_at,updated_at) values($1,$2,'\"Gulshan shop\"','Asia/Dhaka','USD',1,1)",[deviceId(31),deviceId(3)]);await f.db.query("insert into public.members(id,business_id,auth_user_id,name,role,created_at,updated_at) values($1,$2,$3,'\"Same owner\"','owner',1,1)",[deviceId(301),deviceId(3),deviceUid(1)]);},
+    async liveScene(outlet=11){
+      if(!options.liveStore)throw Error('Live fixture is not enabled');const branch={...setup,outlet:{...setup.outlet,id:deviceId(outlet)}};
+      for(const[name,onHand,target,lowAt]of [['Chicken',2,12,3],['Yogurt',4,10,5]] as const){const change=saveStockItemCommand({name,unit:'kg',onHand,target,packSize:1,lowAt},{setup:branch,items:[],suppliers:[],moves:[]});await f.db.transaction(async tx=>{for(const item of change.items)await insert(tx,encodeCommandRecord('stockItems',item,setup.business.id));for(const move of change.moves)await insert(tx,encodeCommandRecord('stockMoves',move,setup.business.id));for(const event of change.events)await insert(tx,encodeCommandRecord('events',event,setup.business.id));});}
+      const change=saveOrderCommand({source:'table',sourceText:'Synthetic table order',name:'Table guest',phone:'',type:'dine_in',address:'',table:'T-1',lines:[{name:'Lunch',unit:'plate',qty:2,unitPrice:35000}],deliveryFee:0,discount:0,payment:{method:'cash'}},{setup:branch,items:[],sequence:2},null,0,Date.now()-900000);await f.db.transaction(async tx=>{await insert(tx,encodeCommandRecord('orders',change.order,setup.business.id));await insert(tx,encodeCommandRecord('events',change.event,setup.business.id));});
+    },
+    async liveFacts(){return (await f.db.query<{data:{sales:string;entries:string;tasks:number}}>("select json_build_object('sales',(select md5(coalesce(string_agg(row_to_json(s)::text,',' order by s.id),'')) from public.sales s),'entries',(select md5(coalesce(string_agg(row_to_json(e)::text,',' order by e.id),'')) from public.credit_entries e),'tasks',(select count(*) from public.tasks)) data")).rows[0].data;},
     config(n: 1 | 2 = 1) {
       return {
         apiUrl,
@@ -494,9 +512,9 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       const receipt=await f.asRole<{state:string}>(null,'service_role','select public.visit_staff_link($1,$2,$3,null,1000,1000) data',[token,'submit',JSON.stringify(intent)]);if(receipt.state!=='applied')throw Error('Synthetic shift must be actually recorded');
       return {url:staffViewerUrl(origin,base,{v:1,apiUrl,token})};
     },
-    async publishShop(table:string|null=null){
+    async publishShop(table:string|null=null,token='S'.repeat(43)){
       if(!options.ordering)throw Error('Ordering fixture is not enabled');
-      const shop=decodeShopPayload(new URL(setup.outlet.shopLink!).hash.slice(1)),token='S'.repeat(43);
+      const shop=decodeShopPayload(new URL(setup.outlet.shopLink!).hash.slice(1));
       const metadata=await f.asRole<Record<string,unknown>>(1,'authenticated','select public.publish_public_shop($1,$2,$3,$4,$5,$6,$7,null) data',[newInboxId(),newInboxId(),setup.outlet.id,setup.outlet.shopLink,JSON.stringify(shop),await publicOrderHash(token),table]);
       return {url:publicOrderingUrl({v:1,sourceUrl:setup.outlet.shopLink!,apiUrl,shopToken:token,table}),metadata};
     },

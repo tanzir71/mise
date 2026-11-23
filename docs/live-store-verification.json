@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T17:12:41.910Z",
+  "sourceParentCommit": "14b2e813327a2e4fa8e863bef8bcf1880c4c517a",
+  "status": "verified-live-store-preview-public-delivery-held",
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "publicFunction": "undeployed",
+    "staffDeviceFunction": "undeployed",
+    "featureFlag": "liveStore:false"
+  },
+  "configuration": {
+    "owner": "end-user",
+    "maintainerCredentialsRequired": false,
+    "newProviderRequired": false,
+    "credentialsInRepository": false,
+    "connection": "Existing installation Sync setup and verified phone sign-in"
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "a80a7f4e04224578a674cb4322e58ef3875e00f64964640f5fb7218387210f5d",
+    "apps/web/public/live-store-assets/all-outlets.svg": "3b58353e71340c823e9f2da30592423bfbfc5aad50797b9b24d6c385882d9e90",
+    "apps/web/public/live-store-assets/chevron-right.svg": "b03be4f6d1ff423eb8836c9f59bd538bc564ed2ea2d725138d1aefce78f60477",
+    "apps/web/public/live-store-assets/eye.svg": "8c17e7dcbfc018f03d33bf3c304cc7d6158193cbf94d685e7e04786be6fcda52",
+    "apps/web/public/live-store-assets/info.svg": "8b6f4da9e047b9423e9876f4459b3b597845c4c87da654692530c7b943ec39fc",
+    "apps/web/public/live-store-assets/negative.svg": "75670014d3126c669c20b4abe8accf90f1018d92907c4bdc6739e057f8c5c213",
+    "apps/web/public/live-store-assets/open-stock.svg": "47e2e4424940fe10d1ab080a20de59717e7477f154e67ceba2398d879b2a04b8",
+    "apps/web/public/live-store-assets/package-desktop.svg": "0dd180355f52547f04ff562504f88acc20865676f6d7dfb1ff8f1e0778b9116f",
+    "apps/web/public/live-store-assets/package-mobile.svg": "f43eb057121276067dc65caef5c3e936f040ad88ae19af9b8fe82feb04fbe800",
+    "apps/web/public/live-store-assets/pin-desktop.svg": "3b8b9fe75789d0c9285c2f0d78ac9c9fada108c3f034aebd8791d6ebce1e5089",
+    "apps/web/public/live-store-assets/pin-mobile.svg": "2fd8380b2d0dab47f806c1b1d1349144d83965cd75f03fc3b1174b756efb22bd",
+    "apps/web/public/live-store-assets/positive.svg": "149683730498ddda00ccc3305c5b217f68a4931ab56e99836e3ce55f5666fb9c",
+    "apps/web/public/live-store-assets/shield-desktop.svg": "790276b0e9902bc8b4f96d8510b768a7dfcaf19b7741565c1502f264f1e1c455",
+    "apps/web/public/live-store-assets/shield-mobile.svg": "76e3864c561865819f75eee0a57122885752cc812b373ba0dab586ee2cd7f0e9",
+    "apps/web/public/live-store-assets/sparkles-desktop.svg": "f7e005a691c2c9cc60394d673f7a834b18218e1feaa9142f694f53e68f0e21ae",
+    "apps/web/public/live-store-assets/sparkles-mobile.svg": "f04b58fa71aea523db13a32da15f8ca044ad3a89251bf39137525ebf32fd9821",
+    "apps/web/public/live-store-assets/store.svg": "ff72c1a633ac7cf279291cb292dd0bd033f4858097a5c14e0f41071e457857ad",
+    "apps/web/public/live-store-assets/utensils-desktop.svg": "93f1dec26af8cbcb68729450a4d74442d414b7640bf03b2c0d971c5c6963b8f7",
+    "apps/web/public/live-store-assets/utensils-mobile.svg": "132d6d49c255fe46f2f6bf58cc9483372795cd685724a49218d49e60b812cc01",
+    "apps/web/public/live-store-assets/wallet-desktop.svg": "a8856dcd15ac175650c0e1af283d40f34e98f299c65324380bf9ac40aff2ea0f",
+    "apps/web/public/live-store-assets/warning.svg": "1135ff4af86dd90a0f1d41aa2927a2e38ec54cf22d4a19ffcc6e9756412c3830",
+    "apps/web/src/LiveStore.tsx": "785ebac4be7bf7fd29ac9057569299ad7d16b021b37606f9ee1b0b97f27765d4",
+    "apps/web/src/LocalApp.tsx": "43c8b7ea5f34975043c13d0848c31beb5c4765ac00c9618b9422cc7ccadbbad0",
+    "apps/web/src/Today.tsx": "b62884f5403c55881b3038757fc366260be1ff4e8b044977c390055036f0bae3",
+    "apps/web/src/data/command-request.ts": "3840008fd4efc45b07557a7f984eb9e82a99ac2486f966c86d06430caf4459d1",
+    "apps/web/src/data/live-store-session.ts": "399847a3e1d05c5a435c5bfbbe1e7b209ffddd8c4b1d95c603ae3994b145474e",
+    "apps/web/src/live-store-context.ts": "f0123e0fa3592dd24b6f7e121c1c4f6cc2d89a95d31fea07263fcbcd72ef188d",
+    "apps/web/src/live-store.css": "16d4a0fa02634345bb5fc91fc45a84456763a89fcd343b8a66d94c807c48c352",
+    "apps/web/src/main.tsx": "59612727426d3ca4e87861ae86589bd946b97d9297fca8f944b8bfaad1ce5341",
+    "apps/web/src/use-live-owner.ts": "fb08c697ff97de2e131a11cc71d58e56243c4fd38b683bc017636975da80e8f8",
+    "docs/configure-services.md": "73a90e908c2a0f063ca91dbfed259506b8e3a56bf3c7c66a6655ef61e5793640",
+    "docs/live-store-assets.json": "e28d879497c84a1e07eb73d3a407d7fc4fa0bc1cbca60df5439283737a92c31b",
+    "docs/live-store.md": "6218658d277bb193972e1a03a3df6c9801e4b80825ac211f0703e2dd20bd65eb",
+    "docs/screenshots/m36-all-outlets-390.png": "6d9342eae3db2ae20507b4663c9783a888c9eaf0e0371a5d8730e7e835476608",
+    "docs/screenshots/m36-live-1440.png": "6ba6294638ea84a4a08dfbcf71ca017b4ffa5d62f222695c3fee793a23ac0247",
+    "docs/screenshots/m36-live-390.png": "a42fb629c45c50838c799ca70956428bd609c0e7b86fcadc6c9bfb0e5f1502c5",
+    "handover/DECISIONS.md": "e43eb0eeea7d3846be4a05d0838b6d9659469c8a6b0906da715bb5b1827dce52",
+    "handover/docs/03-roadmap.md": "29e1827f32f925c0acce345d8217e7f5dfc9db71357f638ee0b03aafe7981acd",
+    "packages/core/flags.ts": "85e03cde65aa8b40886c632101f923f469f51edc6e9734dd028ecd66513e08b9",
+    "packages/core/live-store.ts": "afdbc7bbd7f73dfacd3973aa2565fabeea995073e9a3636ff09111729e4d10fe",
+    "qa/configs/m36-live-store.json": "a999bc9596b00db16247d42ed3c7f33fd9e7d46637523f2218444e1644ccb14b",
+    "scripts/qa-visual.mjs": "1fbc79de455bad3d3844625ceb32cf5436b1f6c753ff675325aab5a7c91ebe8d",
+    "supabase/migrations/20261123162105_live_store_reads.sql": "1613b24e370bf27c9ee69b30d22742896c44c952d6d84c363a0ad3e0e713fd13",
+    "supabase/migrations/20261123164153_live_store_link_lifetime.sql": "5d60e4fefc84c6e16104b7a8a9a31f40eca7d0038a2af331a5d91b52e7b7b571",
+    "tests/e2e/live-store.spec.ts": "970d1e6e0148cb0772ad820ca2994f5cb09c3c4722b200b74d11a2318819c9d2",
+    "tests/fixtures/customer-link-service.ts": "609fab091cf14d36818c8a6fb4853e8afdecde3720ee4e1b0f610b7c7c719fb7",
+    "tests/fixtures/live-store-visual.mjs": "1cd2d45c715edbc93ec0062462818151cfbf0e2b7ba70766e674d419163723f0",
+    "tests/live-store-fixture.ts": "00e0d62d50754e25666c9eb0522402a49437f66fc571a3c15abed908d5668100",
+    "tests/live-store-link-lifetime.test.ts": "1e45c57ca5fb453c3a542bcab31f576aa6809e2feb2628af0da610d8b5655113",
+    "tests/live-store-managed.ts": "cb853155cb5e8dd25dbdea991e94eb847546207d6c82ce01d0ccd6cc39c8fe62",
+    "tests/live-store-session.test.ts": "898028125dad71a395c07f3ce513069e217555ff1ae544195a8ff2124a1f0368",
+    "tests/live-store.test.ts": "24ca952094535612872408b6e8096078324843db0904d76e643858b3e60c8894"
+  },
+  "checks": {
+    "unit": {
+      "files": 6,
+      "cases": 51,
+      "passed": true,
+      "scope": "Actual SQL Live, guarded native read session, indefinite link lifetime, existing customer khata SQL/native session and Today parity. This is an affected regression run, not a new full-suite claim."
+    },
+    "browser": {
+      "root": 72,
+      "pages": 72,
+      "files": 6,
+      "workers": 2,
+      "passed": true,
+      "scope": "Live, customer khata, customer links, priced checkout, staff team and default app/landing smoke.",
+      "rootLabelFollowup": {
+        "initialBroaderCasesPassed": 71,
+        "initialBroaderCasesAttempted": 72,
+        "finalFollowupCasesPassed": 14,
+        "uniqueCasesCovered": 72,
+        "scope": "The broader root run exposed the new selectable-copy label issue. After separating its label from its value, a fresh root build repeats all twelve Live cases and both default smoke cases. The other fifty-eight cases retain their successful broader-run evidence."
+      },
+      "finalCopyFollowup": {
+        "root": 14,
+        "pages": 14,
+        "passed": true,
+        "scope": "Fresh builds repeat all twelve Live cases plus two default smoke cases after keeping selectable copy inside an open detail dialog or on the page for a remote-outlet stock copy. The first case also verifies the actual remote stock copy and absence of a wrong-outlet order-entry link."
+      }
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/"
+    },
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 197,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "exportsPresent": 270,
+    "visual": {
+      "comparisons": 15,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "axeViolations": 0,
+      "horizontalOverflows": 0,
+      "svgDimensionsVerified": true,
+      "report": "qa/report.html",
+      "ciArtifactUpload": "held"
+    },
+    "reactReview": {
+      "lazyLiveModule": true,
+      "guardedAsyncReads": true,
+      "singleVisiblePoll": true,
+      "effectCleanup": true,
+      "existingPrimitives": true,
+      "keyboardExpandablePanels": true,
+      "focusedSelectableManualCopyInsideDialog": true
+    },
+    "secrets": {
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "reviewedFixedLegacyFindings": 22,
+      "newExceptions": 0,
+      "hooksEnabled": true
+    },
+    "configurationRegression": {
+      "files": 2,
+      "cases": 4,
+      "passed": true,
+      "scope": "Feature-flag opt-in and portable hosting paths"
+    }
+  },
+  "managed": {
+    "migrations": 80,
+    "tables": 109,
+    "forcedRLS": 109,
+    "functions": 470,
+    "functionBodiesExact": 7,
+    "preservationChain": {
+      "initialUnrelatedDefinitions": 463,
+      "initialDigest": "b78b57ee60d4ac23ea1a8f0ec4a50273",
+      "correctionUnrelatedDefinitions": 469,
+      "correctionDigest": "217a99400c60a28324eed520e5108767",
+      "correctionMatchesBefore": true
+    },
+    "rolledBackProof": {
+      "checks": 26,
+      "ownedBusinesses": 3,
+      "outlets": 3,
+      "syntheticSalesSeeded": 3,
+      "readFinancialWrites": 0,
+      "providerRequests": 0,
+      "rolledBack": true
+    },
+    "securityAdvisors": {
+      "infoNotices": 1,
+      "warnings": 0,
+      "errors": 0
+    },
+    "edgeVersionsPreserved": 17,
+    "publicFunction": "undeployed",
+    "staffDeviceFunction": "undeployed",
+    "remainingFixtureRows": 0
+  },
+  "screenshots": [
+    "docs/screenshots/m36-live-1440.png",
+    "docs/screenshots/m36-live-390.png",
+    "docs/screenshots/m36-all-outlets-390.png"
+  ],
+  "remaining": [
+    "Public deployment, CI artifact upload and full M36 hosted acceptance while publication is held",
+    "M30/M31 hosted and recovery acceptance",
+    "M34 staff task permission enforcement",
+    "M35 public delivery acceptance",
+    "M37 Inbox and notifications and other unchecked handover milestones"
+  ]
+}

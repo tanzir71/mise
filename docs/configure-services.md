@@ -70,6 +70,8 @@ The `customerKhata` app preview requires `customerLinks`. An owner or assigned m
 
 ## Other integrations
 
+The opt-in `liveStore` preview uses only the installation's existing Sync setup connection and verified phone sign-in. Apply both Live store migrations to that installation's backend. An owner can inspect every business they actually own; managers need a current assignment to the viewed outlet. No separate Live provider account, phone number, service secret or public function deployment is needed. The page checks recorded facts every five seconds while visible and offers Refresh now and Today on this device when the backend is unavailable. See [Live store](live-store.md).
+
 As capture, courier, payment and AI integrations are delivered, their account choices, connections, limits and tests belong in the installation's setup/settings or private backend environment. Keep privileged credentials on that backend. An unconfigured optional integration stays off and explains how to configure it; it does not silently use the maintainer's account.
 
 Use an integration's connection test after supplying its settings. If an external service is unavailable, keep the original work and use the provided manual fallback. Share only redacted diagnostics, never credentials, when reporting a problem.

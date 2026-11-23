@@ -15,9 +15,11 @@ import { ClosingCount } from './ClosingCount';
 import { ClosingSummary } from './ClosingSummary';
 import { closingTime, countLabel, durationLabel, paymentName, percentage, todayDate, useTodayClock } from './today-data';
 import './today.css';
+import {useLiveStore} from './live-store-context';
 
 type Sheet = {kind:'count'}|{kind:'summary';id:string}|{kind:'history'}|null;
 export function Today({setup}: {setup:SetupSnapshot}) {
+  const liveStoreEnabled=useLiveStore();
   const data = useLiveQuery(() => db.readToday(),[setup.outlet.id]), now = useTodayClock(), [sheet,setSheet] = useState<Sheet>(null), [countBusy,setCountBusy] = useState(false);
   if (!data) return <div className="today-page" aria-busy="true"><h1>Today</h1><p>Loading today’s records…</p></div>;
   let overview:ReturnType<typeof todayOverview>;
@@ -33,7 +35,7 @@ export function Today({setup}: {setup:SetupSnapshot}) {
   ];
   const people = new Map(data.customers.map(person => [person.id,person])), history = [...data.closings].sort((a,b) => b.createdAt-a.createdAt || b.id.localeCompare(a.id));
   return <div className={`today-page${corner ? ' today-counter-pack' : ''}${summary.orderCount || summary.completedOrders || waiting.length ? ' today-has-orders' : ''}`} aria-busy="false">
-    <header className="app-page-heading today-heading"><div><h1>Today</h1><p>{todayDate(now,data.setup)} · {summary.currency} · this device</p></div><Button kind="secondary" onClick={() => setSheet({kind:'history'})}><MiseIcon name="history" size={16} />Day summaries</Button></header>
+    <header className="app-page-heading today-heading"><div><h1>Today</h1><p>{todayDate(now,data.setup)} · {summary.currency} · this device</p></div>{liveStoreEnabled?<Link className="button button-secondary" to="/live">Live</Link>:null}<Button kind="secondary" onClick={() => setSheet({kind:'history'})}><MiseIcon name="history" size={16} />Day summaries</Button></header>
     {!corner ? <Card className="today-service"><StatusWord>On this device</StatusWord><p>Sales, orders, credit and stock stay available offline.</p><Button kind="secondary" onClick={() => setSheet(closing ? {kind:'summary',id:closing.id} : {kind:'count'})}><MiseIcon name="lock" size={14} />{closing ? 'View day summary' : 'Close day'}</Button></Card> : null}
     <div className="today-metrics" aria-label="Today totals">{metrics.map(metric => <Card className={`today-metric metric-${metric.id}`} key={metric.id} data-metric={metric.id}><p>{metric.label}</p><strong>{metric.value}</strong><small>{metric.detail}</small></Card>)}</div>
     <div className="today-dashboard">

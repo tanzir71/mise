@@ -52,6 +52,9 @@ export type PublicShopRpc='read_public_shop_page'|'publish_public_shop'|'revoke_
 export type OrderEstimateRpc='read_order_estimate'|'change_order_estimate';
 export type CheckoutPolicyRpc='read_checkout_policy'|'change_checkout_policy';
 export type StaffOwnerRpc='read_staff_context'|'read_staff_board'|'change_staff_action'|'read_staff_links'|'change_staff_link';
+export function createLiveStoreRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+ return accountRequest(config,input,new URL('rest/v1/rpc/read_live_store',config.apiUrl+'/'),'POST',send,8*1024*1024);
+}
 export function createStaffOwnerRequest(config:CloudConnection,input:CommandAccount,rpc:StaffOwnerRpc,send:typeof fetch){
  if(!['read_staff_context','read_staff_board','change_staff_action','read_staff_links','change_staff_link'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8*1024*1024);

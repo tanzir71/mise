@@ -1,0 +1,10 @@
+{
+ "title":"M36 — actual Live store and every owned outlet",
+ "pages":[
+  {"id":"live-store-desktop","path":"app/live?flags=liveStore","liveStoreFixture":"live","widths":[768,1024,1440],"note":"D Live store with actual Core sales, orders, stock, canonical staff attendance and a real customer khata task. Existing app shell is reused. Browser chrome, unconfigured provider/agent states and guessed occupancy are omitted. Controls are 44px.","sections":[{"id":"screen","selector":".live-store","reference":"screens/desktop/D · Live store (owner and manager view).png"}]},
+  {"id":"live-store-mobile","path":"app/live?flags=liveStore","liveStoreFixture":"live","widths":[360,390],"note":"M37 mobile Live; actual recorded facts and manual controls, with no fabricated capture health or payroll.","sections":[{"id":"screen","selector":".live-store","reference":"screens/mobile/M37 · Owner ∕ manager — Live store (everything happening now).png"}]},
+  {"id":"all-outlets-desktop","path":"app/outlets?flags=liveStore","liveStoreFixture":"all","widths":[768,1024,1440],"note":"D All outlets: complete owned-scope totals, actual comparison and role descriptions. Money stays grouped by currency; sample brand names and bars are replaced by data.","sections":[{"id":"screen","selector":".live-store","reference":"screens/desktop/D · All outlets (owner view).png"}]},
+  {"id":"all-outlets-mobile","path":"app/outlets?flags=liveStore","liveStoreFixture":"all","widths":[360,390],"note":"M38 mobile All outlets with actual hourly sales, three recorded outlets, exact chevron and role assets, and 44px links.","sections":[{"id":"screen","selector":".live-store","reference":"screens/mobile/M38 · Owner — All outlets (every place you own).png"}]},
+  {"id":"live-customer-question","path":"app/live?flags=liveStore","liveStoreFixture":"question","widths":[360,390,768,1024,1440],"note":"Real M35 khata question read and copied as literal data; no financial action or deadline change.","sections":[{"id":"screen","selector":".app-dialog[open]","reference":"screens/desktop/D · Live store (owner and manager view).png"}]}
+ ]
+}
