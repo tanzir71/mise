@@ -62,6 +62,12 @@ In the opt-in preview, generate and sync the public shop snapshot, refresh acces
 
 For a synced order, its owner or assigned manager can record a time range and an optional public note in the order detail. The first deadline remains visible after updates or withdrawal. Check or close an unconfirmed original before replacing it; reconnect with the original installation account after an offline reload. These controls use the same connection and phone sign-in, with no extra provider or credential. See [recorded estimates](https://github.com/tanzir71/mise/blob/main/docs/order-estimates.md).
 
+## Customer khata (opt-in preview)
+
+The installer applies the customer khata migration and deploys the repository's `public` function to the installation's own backend. `MISE_CUSTOMER_KHATA_ENABLED=false` keeps this endpoint off until that installation explicitly enables it. It reuses the private service key and exact allowed origins. Optional `MISE_PUBLIC_KHATA_REQUESTS_PER_MINUTE` and `MISE_PUBLIC_KHATA_LINK_REQUESTS_PER_MINUTE` accept integers from 1 to 60,000 and default to 3,000 installation-wide and 60 per link per server minute. Invalid configuration keeps it unavailable.
+
+The `customerKhata` app preview requires `customerLinks`. An owner or assigned manager creates the customer's own khata link from the synced account. Links carry the installation's public origin and capability, with no owner session or administrator key. The owner supplies their public wallet receiving accounts in Settings › Shop link › Payments; these start empty. Customers see only current accounts in the ledger's currency. No SMS account, maintainer phone or provider secret is required. Opening a wallet does not record a payment; the shop records the actual collection. Asking for more time or questioning an entry creates an owner task, with no automatic balance or deadline change. See [the implementation and verification notes](customer-khata.md).
+
 ## Other integrations
 
 As capture, courier, payment and AI integrations are delivered, their account choices, connections, limits and tests belong in the installation's setup/settings or private backend environment. Keep privileged credentials on that backend. An unconfigured optional integration stays off and explains how to configure it; it does not silently use the maintainer's account.

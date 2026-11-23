@@ -1,0 +1,31 @@
+import {beforeAll,beforeEach,afterAll,it,expect} from 'vitest';
+import {customerKhataFixture} from './customer-khata-fixture';
+import {createCustomerKhataSession} from '../apps/web/src/data/customer-khata-session';
+import type {KeyStorage} from '../packages/core/cloud-connection';
+let f:Awaited<ReturnType<typeof customerKhataFixture>>;
+beforeAll(async()=>{f=await customerKhataFixture();},30000);beforeEach(async()=>{await f.seed();});afterAll(async()=>{await f?.db.close();});
+function storage():KeyStorage {const values=new Map<string,string>();return {getItem:k=>values.get(k)??null,setItem:(k,v)=>{values.set(k,v);},removeItem:k=>{values.delete(k);}};}
+const locks={request:async(_name:string,_options:unknown,callback:(lock:Lock|null)=>Promise<unknown>)=>callback({} as Lock)} as Pick<LockManager,'request'>;
+function setup(input:{storage?:KeyStorage;send?:typeof fetch}={}){
+ const saved=input.storage??storage(),transport:typeof fetch=async(url,options)=>{const headers=new Headers(options?.headers);headers.set('Origin','https://shop.test');return f.handler()(new Request(String(url),{...options,headers}));};
+ const create=()=>createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:saved,locks,send:input.send??transport});return {saved,transport,create};
+}
+it('saves a complete own original before the real HTTP and SQL effect and retains its exact receipt',async()=>{
+ const t=setup();const s:Awaited<ReturnType<typeof createCustomerKhataSession>>=await createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:t.saved,locks,send:async(url,options)=>{const body=JSON.parse(options!.body as string);if(body.operation==='submit')expect(s.saved().actions.at(-1)?.intent).toEqual(body.intent);return t.transport(url,options);}});
+ await s.read();const i=await s.prepare('more-time',null,'Please allow more time.'),r=await s.call(i.id,'submit');expect(r.state).toBe('created');expect(s.saved().actions[0]).toMatchObject({intent:i,outcome:r});expect(t.saved.getItem(s.key)).not.toContain(f.token);s.stop();
+});
+it('reloads a lost committed reply and inspects the same original without a second task',async()=>{
+ const t=setup(),s=await createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:t.saved,locks,send:async(url,options)=>{const response=await t.transport(url,options);if(JSON.parse(options!.body as string).operation==='submit')throw Error('lost');return response;}});await s.read();const i=await s.prepare('question',f.entryId,'Which purchase is this?');await expect(s.call(i.id,'submit')).rejects.toThrow();s.stop();const fresh=await t.create();expect(fresh.saved().actions[0].intent).toEqual(i);expect((await fresh.call(i.id,'inspect')).state).toBe('created');expect((await f.db.query<{n:number}>('select count(*)::int n from public.tasks')).rows[0].n).toBe(1);fresh.stop();
+});
+it('persists closure while offline, then fences a delayed original after reload',async()=>{
+ const t=setup();let offline=false;const s=await createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:t.saved,locks,send:(u,o)=>offline?Promise.reject(Error('offline')):t.transport(u,o)});await s.read();const i=await s.prepare('more-time',null,'A little more time, please.');offline=true;await expect(s.call(i.id,'close')).rejects.toThrow();expect(s.saved().actions[0]).toMatchObject({intent:i,closeRequested:true,outcome:null});s.stop();const fresh=await t.create();expect((await fresh.call(i.id,'submit')).state).toBe('closed');expect((await t.transport('https://backend.test/functions/v1/public/khata',{method:'POST',body:JSON.stringify({token:f.token,operation:'submit',intent:i,after:0}),headers:{'Content-Type':'application/json'}})).status).toBe(200);expect((await f.db.query<{n:number}>('select count(*)::int n from public.tasks')).rows[0].n).toBe(0);fresh.stop();
+});
+it('keeps the whole original when a receipt write hits quota after the real task commits',async()=>{
+ const t=setup();let full=false;const saved={...t.saved,setItem:(k:string,v:string)=>{if(full)throw new DOMException('full','QuotaExceededError');t.saved.setItem(k,v);}},s=await createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:saved,locks,send:async(u,o)=>{const r=await t.transport(u,o);if(JSON.parse(o!.body as string).operation==='submit')full=true;return r;}});await s.read();const i=await s.prepare('more-time',null,'Saved before delivery.');await expect(s.call(i.id,'submit')).rejects.toThrow();expect(s.saved().actions[0]).toMatchObject({intent:i,outcome:null});s.stop();const fresh=await t.create();expect((await fresh.call(i.id,'inspect')).state).toBe('created');fresh.stop();
+});
+it('allows fresh read-only data with blocked storage, but no request can reach HTTP before an original is saved',async()=>{
+ const t=setup(),s=await createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:{getItem:()=>{throw Error('blocked');},setItem:()=>{throw Error('blocked');},removeItem:()=>{}},locks,send:t.transport});expect((await s.read()).balance).toBe(96000);expect(s.storageReady).toBe(false);await expect(s.prepare('more-time',null,'Cannot save')).rejects.toThrow();expect((await f.db.query<{n:number}>('select count(*)::int n from public.tasks')).rows[0].n).toBe(0);s.stop();
+});
+it('does not attach a late completed response after the route stops, leaving the original recoverable',async()=>{
+ const t=setup();let release!:()=>void;const pending=new Promise<void>(r=>{release=r;}),s=await createCustomerKhataSession({v:1,kind:'khata',apiUrl:'https://backend.test',token:f.token},{storage:t.saved,locks,send:async(u,o)=>{const r=await t.transport(u,o);if(JSON.parse(o!.body as string).operation==='submit')await pending;return r;}});await s.read();const i=await s.prepare('more-time',null,'Original route');const call=s.call(i.id,'submit');await new Promise(r=>setTimeout(r,50));s.stop();release();await expect(call).rejects.toThrow();const fresh=await t.create();expect(fresh.saved().actions[0]).toMatchObject({intent:i,outcome:null});expect((await fresh.call(i.id,'inspect')).state).toBe('created');fresh.stop();
+});

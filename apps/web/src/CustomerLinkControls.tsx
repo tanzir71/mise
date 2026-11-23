@@ -23,6 +23,7 @@ import {
 } from './use-customer-link-owner';
 import type { CustomerLinkAreaProps } from './CustomerLinkArea';
 import './customer-link-controls.css';
+import {useCustomerKhata} from './customer-links-context';
 const blank = (): CustomerLinkJournal => ({
   v: 1,
   lifecycle: null,
@@ -35,6 +36,7 @@ export function CustomerLinkControls({
   phone,
   label,
 }: CustomerLinkAreaProps) {
+  const khataEnabled=useCustomerKhata();
   const [online, setOnline] = useState(navigator.onLine),
     [working, setWorking] = useState(false),
     [error, setError] = useState(''),
@@ -205,7 +207,7 @@ export function CustomerLinkControls({
       apiUrl: value.config.apiUrl,
       kind,
       token: receipt.token,
-    });
+    },{khata:khataEnabled});
     assertLiveCommandReceipt(receipt);
     setShared({ owner: value, value: receipt, url });
     setJournal(value.session.saved());

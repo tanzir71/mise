@@ -1,0 +1,30 @@
+import {setupCommand} from '../packages/core/setup';
+import {saveCustomerCommand} from '../packages/core/customers';
+import {defaultCreditTerms,saveCreditTermsCommand,chargeCreditCommand} from '../packages/core/khata';
+import {emptyBackupTables} from '../packages/core/backup-tables';
+import {createBackup} from '../packages/core/backup';
+import {prepareCloudMigration} from '../packages/core/cloud-records';
+import {newInboxId} from '../packages/core/inbox';
+export async function customerKhataManagedProof(){
+ const uid='00000000-0000-4000-8000-000000009951',at=Date.now()-10000,setup=setupCommand({name:'Synthetic khata shop',outletName:'Synthetic outlet',marketCode:'BD',businessType:'corner_shop',phone:'+14155550951'},null,at).snapshot,c=saveCustomerCommand({name:'Synthetic customer',nickname:'',phone:'',address:'Private address',notes:'Private notes',tags:[]},setup,[],null,at),terms=saveCreditTermsCommand({...defaultCreditTerms,allowed:true,limit:150000},c.customer,setup,null,at),charge=chargeCreditCommand(96000,{setup,customer:c.customer,account:terms.account,entries:[]},{note:'Recorded purchase'},at);
+ const tables=emptyBackupTables();tables.businesses.push(setup.business);tables.outlets.push(setup.outlet);tables.members.push(setup.owner);tables.customers.push(c.customer);tables.creditAccounts.push(terms.account);tables.creditEntries.push(charge.entry);tables.events.push(c.event,terms.event,charge.event);
+ const records=(await prepareCloudMigration(createBackup(tables,at),uid)).records,q=(value:unknown)=>"'"+String(value).replaceAll("'","''")+"'",insert=records.map(r=>'insert into public.'+r.table+'('+Object.keys(r.values).join(',')+') values('+Object.values(r.values).map(v=>v===null?'null':q(v)).join(',')+');').join('\n');
+ const id=newInboxId(),intent={v:1,id:newInboxId(),eventId:newInboxId(),taskId:newInboxId(),linkId:id,accountId:terms.account.id,kind:'more-time',entryId:null,message:'Please allow more time. আরও সময় দিন।',at:Date.now()},closed={...intent,id:newInboxId(),eventId:newInboxId(),taskId:newInboxId()},source=JSON.stringify(intent),closeSource=JSON.stringify(closed),call=(operation:string,s:string|null=null)=>`public.visit_customer_khata(link->>'token',${q(operation)},${s===null?'null':q(s)},0,60000,60000)`,auth=`reset role;perform set_config('request.jwt.claim.sub',${q(uid)},true);perform set_config('request.jwt.claims',${q(JSON.stringify({sub:uid,role:'authenticated'}))},true);set local role authenticated;`,service="reset role;perform set_config('request.jwt.claim.sub','',true);set local role service_role;";
+ return `begin;insert into auth.users(id,phone,phone_confirmed_at,is_anonymous) values(${q(uid)},'14155550951',now(),false);\n${insert}\n`+
+ `do $proof$ declare link jsonb;r json;original json;checks integer:=0;role_name text;begin
+ ${auth}link:=public.create_public_link(${q(id)},${q(newInboxId())},'khata',${q(terms.account.id)},null);checks:=checks+1;
+ ${service}r:=${call('read')};if r->>'state'<>'view' or r->>'accountId'<>${q(terms.account.id)} or r->>'balance'<>'96000' or json_array_length(r->'entries')<>1 then raise exception 'Scoped ledger mismatch';end if;checks:=checks+1;
+ if (r->'entries'->0)->>'byJson'<>${q(JSON.stringify(setup.owner.name))} or r::text like '%Private address%' or r::text like '%Private notes%' then raise exception 'Author or privacy mismatch';end if;checks:=checks+1;
+ original:=${call('submit',source)};if original->>'state'<>'created' then raise exception 'Task was not created';end if;checks:=checks+1;
+ if ${call('submit',source)}::text<>original::text or ${call('inspect',source)}::text<>original::text then raise exception 'Original receipt changed';end if;checks:=checks+2;
+ r:=${call('inspect',JSON.stringify({...intent,message:'Altered'}))};if r->>'state'<>'changed' then raise exception 'Altered source accepted';end if;checks:=checks+1;
+ r:=${call('close',closeSource)};if r->>'state'<>'closed' or ${call('submit',closeSource)}::text<>r::text then raise exception 'Closure lost';end if;checks:=checks+2;
+ reset role;if not exists(select 1 from public.tasks where id=${q(intent.taskId)} and business_id=${q(setup.business.id)} and outlet_id=${q(setup.outlet.id)} and body::text=${q(JSON.stringify(intent.message))} and status='open' and assignee='owner') then raise exception 'Canonical owner task missing';end if;checks:=checks+1;
+ if not exists(select 1 from public.events where id=${q(intent.eventId)} and actor_type='system' and actor_id='customer-link:'||${q(id)} and customer_id=${q(c.customer.id)}) then raise exception 'Canonical customer audit missing';end if;checks:=checks+1;
+ if (select count(*) from public.credit_entries where business_id=${q(setup.business.id)})<>1 or (select amount from public.credit_entries where id=${q(charge.entry.id)})<>96000 or exists(select 1 from public.sales where business_id=${q(setup.business.id)}) then raise exception 'Unexpected financial effect';end if;checks:=checks+1;
+ ${auth}perform public.revoke_public_link(${q(id)},${q(newInboxId())});${service}r:=${call('read')};if r->>'state'<>'missing' or ${call('inspect',source)}::text<>original::text then raise exception 'Revocation or own history changed';end if;checks:=checks+2;
+ reset role;foreach role_name in array array['anon','authenticated','service_role'] loop execute 'set local role '||role_name;begin perform 1 from private.customer_khata_actions;raise exception 'Direct private table grant';exception when insufficient_privilege then checks:=checks+1;end;reset role;end loop;
+ foreach role_name in array array['anon','authenticated'] loop execute 'set local role '||role_name;begin perform ${call('read')};raise exception 'Direct RPC grant';exception when insufficient_privilege then checks:=checks+1;end;reset role;end loop;
+ perform set_config('mise.customer_khata_probe',jsonb_build_object('checks',checks,'tasks',1,'financialWrites',0,'providerRequests',0,'rolledBack',true)::text,true);
+ end $proof$;select current_setting('mise.customer_khata_probe')::jsonb proof;rollback;`;
+}

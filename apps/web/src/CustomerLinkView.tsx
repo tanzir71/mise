@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState,type ReactNode } from 'react';
+import { lazy,Suspense,useEffect, useMemo, useRef, useState,type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import {
@@ -15,7 +15,7 @@ import { CustomerReadError, readCustomerLink } from './data/customer-link-read';
 import './customer-link-view.css';
 import {CustomerOrderEstimate} from './CustomerOrderEstimate';
 import {CustomerCheckoutArea} from './CustomerCheckoutArea';
-import {useCustomerCheckout} from './customer-links-context';
+import {useCustomerCheckout,useCustomerKhata} from './customer-links-context';
 const words = {
   en: {
     order: 'Order',
@@ -202,7 +202,7 @@ interface ViewState {
   lastOrder?:CustomerOrder|null;
 }
 function TrackingDetails({collapsed,label,children}:{collapsed:boolean;label:string;children:ReactNode}){return collapsed?<details className="customer-tracking-details"><summary>{label}</summary>{children}</details>:children;}
-export function CustomerLinkView() {
+function LegacyCustomerLinkView() {
   const checkoutEnabled=useCustomerCheckout();
   const route = useLocation(),
     key = route.pathname + route.hash;
@@ -741,3 +741,6 @@ export function CustomerLinkView() {
     </main>
   );
 }
+
+const ModernCustomerKhata=lazy(()=>import('./CustomerKhataView').then(m=>({default:m.CustomerKhataView})));
+export function CustomerLinkView(){const route=useLocation(),khata=useCustomerKhata();return khata&&route.pathname.startsWith('/k/')?<Suspense fallback={<main className="customer-view" aria-busy="true"><p>Opening your khata…</p></main>}><ModernCustomerKhata key={route.pathname+route.hash}/></Suspense>:<LegacyCustomerLinkView/>;}

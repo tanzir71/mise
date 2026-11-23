@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: the default-off customer khata preview shows the actual scoped balance, every entry with its recorder and time, and installation-owned wallet accounts. Requests for time and entry questions create literal owner tasks without changing money. Original requests, receipts and offline closure survive reloads and lost replies; revocation blocks fresh access. Configuration remains end-user owned, with empty receiving accounts and manual copy available. Public publication and full M35 acceptance remain held.
+
 - In progress: shared-phone attendance now has a real outlet roster, own-PIN shift controls and a separate native original-action journal. Lost replies, offline closure, later PINs and member switching preserve scope and receipts. Owner setup supports explicitly opted-in riders and passes attendance preview flags through credential-free setup QR codes. All installation configuration remains end-user owned; staff task permission enforcement and full M34 stay open, with workflows and publication held.
 
 - In progress: paired-screen attendance now has a service-only backend transaction bound to the actual device and PIN member, with original receipts, closure, current-method checks and bounded requests. Riders and kitchen members on counters receive only explicitly enabled own-attendance access. The installer owns all configuration; the HTTP endpoint defaults off and is not deployed. Shared-device attendance UI and task permission enforcement remain open.

@@ -64,7 +64,7 @@ export function customerViewerUrl(
   origin: string,
   base: string,
   source: { apiUrl: string; kind: CustomerLinkKind; token: string },
-  options?:{checkout?:boolean},
+  options?:{checkout?:boolean;khata?:boolean},
 ): string {
   const site = customerApiOrigin(origin),
     apiUrl = customerApiOrigin(source.apiUrl);
@@ -79,7 +79,7 @@ export function customerViewerUrl(
     base + (source.kind === 'order' ? 't/' : 'k/') + source.token,
     site,
   );
-  url.searchParams.set('flags', options?.checkout&&source.kind==='order'?'customerLinks,publicOrders':'customerLinks');
+  url.searchParams.set('flags', options?.checkout&&source.kind==='order'?'customerLinks,publicOrders':options?.khata&&source.kind==='khata'?'customerLinks,customerKhata':'customerLinks');
   // This installation's public API origin is runtime link data. No publishable
   // key, owner JWT, service credential, private ID or phone enters the link.
   url.hash =

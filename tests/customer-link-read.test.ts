@@ -41,6 +41,11 @@ beforeAll(async () => {
 afterAll(async () => {
   await fixture?.db.close();
 });
+it.each(['/app/', '/mise/app/'])('only an opted-in khata URL carries its customer preview under %s',(base)=>{
+ const make=(kind:'order'|'khata',options?:{checkout?:boolean;khata?:boolean})=>new URL(customerViewerUrl('https://shop.example',base,{apiUrl,kind,token},options));
+ expect(make('khata').searchParams.get('flags')).toBe('customerLinks');expect(make('khata',{khata:true}).searchParams.get('flags')).toBe('customerLinks,customerKhata');expect(make('order',{khata:true}).searchParams.get('flags')).toBe('customerLinks');expect(make('khata',{checkout:true}).searchParams.get('flags')).toBe('customerLinks');expect(make('order',{checkout:true,khata:true}).searchParams.get('flags')).toBe('customerLinks,publicOrders');
+ const url=make('khata',{khata:true});expect(decodeCustomerViewer(url.pathname,url.hash,base)).toEqual({...viewer,kind:'khata'});
+});
 it.each(['/app/', '/mise/app/'])(
   'customer link round-trips under %s without a key, account, tenant or phone',
   (base) => {

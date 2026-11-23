@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T15:26:51.782Z",
+  "sourceParentCommit": "0cc3c11997a2d9c35ba2b9a8e84de21fd5398564",
+  "status": "verified-customer-khata-preview-public-delivery-held",
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "publicFunction": "undeployed",
+    "staffDeviceFunction": "undeployed",
+    "featureFlags": "customerLinks:false,customerKhata:false"
+  },
+  "configuration": {
+    "owner": "end-user",
+    "maintainerCredentialsRequired": false,
+    "serverDefault": "MISE_CUSTOMER_KHATA_ENABLED=false",
+    "credentialsInRepository": false,
+    "receivingAccountsInitially": []
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "1a6dbc1099e430c2958e75714d3842525a8209788e09e8a2baecf3d89d14d209",
+    "apps/web/public/khata-customer-assets/clock.svg": "d97d922bd5ebbb73a87440231672ed0b1b09be8d141aabd003125bab368197bc",
+    "apps/web/public/khata-customer-assets/copy.svg": "13fa76206d4ddab1e11bd062e2395b0bc63d6ae82b10679d00a9e90b768220c2",
+    "apps/web/public/khata-customer-assets/receipt.svg": "6d4fbd8728b975b61ac21be8e57f5fd46056edad8aa14ade7f9773c34c5662dc",
+    "apps/web/public/khata-customer-assets/wallet.svg": "8ca30042945a4164e951b17b2edb54e7de31bdf37a5333092d83753966394f61",
+    "apps/web/src/CustomerKhataView.tsx": "bc8ebc2175e2c0656f37fb479cf9125907b592fdcb093dde81f7daaba7450e61",
+    "apps/web/src/CustomerLinkControls.tsx": "1a4e8017fb357fa654741de2d968ed161adf1a8175a153b74446be82dbca7b00",
+    "apps/web/src/CustomerLinkView.tsx": "4f5bb0e839196022571dccb44f1f2a25e06e80ebb00327e75af1c78e4e26d9af",
+    "apps/web/src/customer-khata.css": "6bef09d03bf233e9cc25dc177911bd0a5c1165d1fd693aa755f29e5a7c9f4cb2",
+    "apps/web/src/customer-links-context.ts": "45481c8eeb3ec089e2a3bc44a38aa81f52d610fef4df85b657bde26d4e1b1b83",
+    "apps/web/src/data/customer-khata-session.ts": "8f7ec2666479ae87ede27c86f5169df3f13b4c8244e126766aa25ff6a55922b7",
+    "apps/web/src/main.tsx": "50e8e2589b66deba35fa4b5f6053cf805b47c54df73be6d85c992adf90448718",
+    "docs/configure-services.md": "2b12e4b3ff7f0812b8bba77bf40c0d6d2ed0cf8aee409c27d7db07969ee5e288",
+    "docs/customer-khata-assets.json": "92cdca8cbdcba5fbaba60deaf5cb1d3f69a8200e0ac4da74d4a0bd087a728c9e",
+    "docs/customer-khata.md": "cfa9451fe465239870bc5bdf94b3787422d82c41a48a779887d32c9f6e12445d",
+    "docs/screenshots/m35-khata-ledger-1440.png": "6e05ec6223aa4da69f3e0514a1b764a18b6cebacf5fbf313cfa868a0798fa9d6",
+    "docs/screenshots/m35-khata-ledger-390.png": "f76599a5991006ed17b6984b5846c93ac4d99a14549389b862e9623746868900",
+    "docs/screenshots/m35-khata-question-390.png": "c0f9710ddf0862eb235ca667d30cffab5cf56d1aa6ddb892f02f72b685c1697f",
+    "handover/DECISIONS.md": "15d21c5e1e78be73ee7f2bc208d6f2b4b36b1a35bcd16cf307a8d27be64af2b4",
+    "handover/docs/03-roadmap.md": "e5fb189900635465e90e9c407a22866a18be89d4cd4aa7a1d91335f98737866b",
+    "packages/core/customer-khata.ts": "aedaf2e8b21aef609cc2013f72893436449d89873908200689b0c8deaf53e9e3",
+    "packages/core/customer-link-url.ts": "c29d12bad04dd58967c6b51ba758cff7f611706da344409294c7633c6e3b113c",
+    "packages/core/flags.ts": "ddc023552b6b94f4458c7e8ca4042067275109e00b76b3f630666a5dc73da773",
+    "qa/configs/m35-khata.json": "b384974eb0ca5144eaa25b932f290084736e688c03cbc566303903eb849504f3",
+    "scripts/qa-visual.mjs": "4e17d45cd6a15b7392e088c2efaa811cc5c410f8849a07de3ce074f3ab949984",
+    "supabase/functions/.env.example": "9cf79dc705ad6344223d2c446a79f4c37ae878390d91b85e938c6e0fd68f86a4",
+    "supabase/functions/_shared/customer-khata-handler.ts": "9463669db4330c471651b879cecd9b5977e3a11f481c8cd98c4af3dc5e6d5563",
+    "supabase/functions/public/index.ts": "bf2819d6b2de789030d7fe61a74497aa635207d0944c25909b2e87ddc1e05d80",
+    "supabase/migrations/20261123150721_customer_khata.sql": "f2f1e891a782e1eefae9f275cd8951fd4d38f5b344bd151696b10d7ba81620a0",
+    "tests/customer-khata-fixture.ts": "94d3e619819e85b890a3303c82b160004a89c05afa9935841253e47c07dfe2ce",
+    "tests/customer-khata-managed.ts": "33ecfd0c0f6c1f760e4694add6d1a6b4665e3aad318677c8f0e886cefcd2b90b",
+    "tests/customer-khata-session.test.ts": "b9b50ccbd6dbdf36e9331bc9fa967e7b6bed962664a7f2a979522ef9ae6a02ef",
+    "tests/customer-khata.test.ts": "8b5c70b88061c71fb39e6b966d454976552218aa499f9a77928e0407145a9e4f",
+    "tests/customer-link-read.test.ts": "e137e85727aa99395ca365435790ad876aec1750e491c44e38ce928d41eb660b",
+    "tests/e2e/customer-khata.spec.ts": "e053219c0dd3150745fa635e82f951734d0e1d0776d7cc0b8281c2ea853df72c",
+    "tests/fixtures/customer-khata-service.ts": "b12bf44942ccb60293e0917916ba1bd73b70e145d899233f12774ce108f48366",
+    "tests/fixtures/install-customer-khata.d.mts": "a94ca74cfc6f0dd016e548fa3afe46eee8625d54a3d28c27b9451bb191bad463",
+    "tests/fixtures/install-customer-khata.mjs": "abe19fc9313ada23be5e170f51251f02d06c816b01222e1ccd903a9ca70f67af"
+  },
+  "checks": {
+    "unit": {
+      "files": 5,
+      "cases": 84,
+      "passed": true,
+      "scope": "Affected SQL, native journal and existing customer read/checkout regression; full prior unit suite is not claimed as a new full run."
+    },
+    "browser": {
+      "root": 64,
+      "pages": 64,
+      "workers": 2,
+      "passed": true,
+      "finalWordingFollowup": {
+        "root": 12,
+        "pages": 12,
+        "passed": true,
+        "note": "Changed only the English/Bangla pagination label to More entries after the broader 64-case runs; rebuilt both bases and repeated the complete new customer khata browser suite."
+      }
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/"
+    },
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 196,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "exportsPresent": 270,
+    "visual": {
+      "comparisons": 15,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "axeViolations": 0,
+      "horizontalOverflows": 0,
+      "svgDimensionsVerified": true,
+      "report": "qa/report.html",
+      "ciArtifactUpload": "held"
+    },
+    "reactReview": {
+      "lazyCustomerModule": true,
+      "routeCleanupAndLateRepliesGuarded": true,
+      "existingPrimitives": true,
+      "controlledLabelsAndKeyboardControls": true
+    },
+    "secrets": {
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "reviewedFixedLegacyFindings": 22,
+      "newExceptions": 0,
+      "hooksEnabled": true
+    }
+  },
+  "managed": {
+    "migration": "20261123150721_customer_khata",
+    "migrationSHA256": "f2f1e891a782e1eefae9f275cd8951fd4d38f5b344bd151696b10d7ba81620a0",
+    "migrations": 78,
+    "tables": 109,
+    "forcedRLS": 109,
+    "functions": 463,
+    "newFunctionBodiesExact": 2,
+    "unrelatedFunctionDefinitionsPreserved": 461,
+    "unrelatedDefinitionDigest": "bd09573773ce45d73937876d200cb273",
+    "rolledBackProof": {
+      "checks": 19,
+      "actualTasks": 1,
+      "financialWrites": 0,
+      "providerRequests": 0,
+      "rolledBack": true
+    },
+    "remainingFixtureRows": 0,
+    "remainingKhataRequestRows": 0,
+    "edgeVersionsPreserved": 17,
+    "securityAdvisors": {
+      "warnings": 0,
+      "errors": 0,
+      "infoPolicyFreePrivateTables": 79
+    },
+    "scheduler": "off",
+    "cronJobs": 0
+  },
+  "screenshots": [
+    "docs/screenshots/m35-khata-ledger-390.png",
+    "docs/screenshots/m35-khata-question-390.png",
+    "docs/screenshots/m35-khata-ledger-1440.png"
+  ],
+  "remaining": [
+    "Public deployment and full M35 delivery acceptance while publication is held",
+    "M34 staff task permission enforcement",
+    "M36 onward and other unchecked handover milestones"
+  ]
+}

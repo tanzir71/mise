@@ -1,0 +1,9 @@
+{
+ "title":"M35 — customer's own khata, payment handoff and literal questions",
+ "widths":[360,390,768,1024,1440],
+ "pages":[
+  {"id":"m35-ledger","path":"app/k/fixture?flags=customerLinks,customerKhata","customerKhataFixture":"ledger","note":"C10 with actual scoped ledger, note, author, currency and installation-owned wallet. No browser chrome, invented hours or provider matching. Controls are 44 px under repository accessibility rules; Copy and manual handoff never mark a payment.","sections":[{"id":"screen","selector":".customer-khata","reference":"screens/corner-shop/C10 · Customer — My khata at this shop (pay, ask for time, check every entry).png"}]},
+  {"id":"m35-copy","path":"app/k/fixture?flags=customerLinks,customerKhata","customerKhataFixture":"copy","note":"Same C10 screen with actual selectable fallback when the clipboard is unavailable.","sections":[{"id":"screen","selector":".customer-khata","reference":"screens/corner-shop/C10 · Customer — My khata at this shop (pay, ask for time, check every entry).png"}]},
+  {"id":"m35-question","path":"app/k/fixture?flags=customerLinks,customerKhata","customerKhataFixture":"question","note":"Same actual ledger with the requested entry-question interaction expanded in Bangla. The request creates a literal owner task and changes no financial record.","sections":[{"id":"screen","selector":".customer-khata","reference":"screens/corner-shop/C10 · Customer — My khata at this shop (pay, ask for time, check every entry).png"}]}
+ ]
+}
