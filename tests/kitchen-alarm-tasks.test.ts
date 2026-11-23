@@ -12,6 +12,7 @@ import type {Order,AuditEvent} from '../packages/core/models';
 import type {SharedDevice,StaffDeviceSession} from '../packages/core/device-access';
 import {createKitchenTicketsStore,projectKitchenRead} from '../supabase/functions/_shared/kitchen-tickets-handler';
 import {parseKitchenPage} from '../packages/core/kitchen-tickets';
+import {parseOwnerTaskPage,changeOwnerTaskIntent} from '../packages/core/owner-tasks';
 import {readFileSync} from 'node:fs';
 type Sql=Pick<PGlite,'exec'|'query'>;
 let f:PairingDatabase,order:Order,device:SharedDevice&{token:string},session:StaffDeviceSession,lastSqlError='';
@@ -85,6 +86,13 @@ beforeAll(async()=>{
 },30000);
 afterAll(async()=>{await f?.db.close();});
 
+it('the general Inbox reads a genuine alarm but preserves its actual Got it lifecycle',async()=>rollback(async sql=>{
+ await run(sql);const access={v:1 as const,businessId:scope.businessId,outletId:scope.outletId,memberId:deviceId(101),role:'owner' as const};
+ const read=async(filter:'active'|'resolved'='active')=>parseOwnerTaskPage(await role(sql,'authenticated',1,'select public.read_owner_task_page($1,$2) data',[scope.outletId,filter]),access,{filter,after:null,version:null});
+ const before=await read(),warning=before.tasks.find(t=>t.target?.kind==='order'&&t.target.orderId===order.id)!;expect(warning).toMatchObject({source:'kitchen',mode:'source',urgent:true,actions:[]});expect(JSON.stringify(warning)).not.toContain('PRIVATE CUSTOMER');expect(()=>changeOwnerTaskIntent(access,warning,'fixed')).toThrow();
+ const forged={v:1,id:newKitchenId(),eventId:newKitchenId(),scope:access,at:Date.now(),type:'act',task:warning,action:'fixed',replyJson:'""',undoOf:null};await sql.exec('savepoint owner_task_denial');await expect(role(sql,'authenticated',1,'select public.act_owner_task($1,\'submit\',$2) data',[scope.outletId,JSON.stringify(forged)])).rejects.toMatchObject({code:'PT409'});await sql.exec('rollback to savepoint owner_task_denial;release savepoint owner_task_denial');
+ expect((await read()).tasks.some(t=>t.id===warning.id)).toBe(true);await acknowledge(sql);expect((await read()).tasks.some(t=>t.id===warning.id)).toBe(false);expect((await read('resolved')).tasks.find(t=>t.id===warning.id)).toMatchObject({source:'kitchen',status:'resolved',actions:[]});
+}));
 it('closes a handed-off preparation warning immediately, fences a prepared worker and allows an actual owner undo',async()=>rollback(async sql=>{
  await run(sql);const first=(await tasks(sql))[0],before=await current(sql);
  await sql.query('update public.orders set updated_at=updated_at+1 where id=$1',[order.id]);const prepared=await store(sql).prepare(25);

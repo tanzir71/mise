@@ -6,6 +6,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: the general Inbox task foundation records scoped human choices, manual replies, undo and durable original-request recovery. Complete task reads retain literal khata source and the actual kitchen alarm lifecycle, with no financial or provider effects. The interface and general urgent notifications remain in development; all installation configuration stays end-user owned and publication remains held.
 - In progress: the default-off Live store preview reads actual sales, orders, attendance, stock and literal owner tasks, with five-second visible updates and manual refresh. All outlets covers every business owned by the verified phone account, retains currencies separately and opens other outlets without changing the native operator. Manager access follows actual assignments; removed access clears private details. Installation configuration remains end-user owned, and workflows/publication remain held.
 - In progress: the default-off customer khata preview shows the actual scoped balance, every entry with its recorder and time, and installation-owned wallet accounts. Requests for time and entry questions create literal owner tasks without changing money. Original requests, receipts and offline closure survive reloads and lost replies; revocation blocks fresh access. Configuration remains end-user owned, with empty receiving accounts and manual copy available. Public publication and full M35 acceptance remain held.
 

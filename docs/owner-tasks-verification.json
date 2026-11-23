@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T18:23:40.818Z",
+  "sourceParentCommit": "1dadfd8d274279e5bd7edb70be40d0f45286fb6c",
+  "status": "verified-task-backend-and-native-original-foundation-interface-and-general-push-pending",
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "publicFunction": "undeployed",
+    "staffDeviceFunction": "undeployed",
+    "newInboxInterface": "not-wired",
+    "newProviderRequests": 0
+  },
+  "configuration": {
+    "owner": "end-user",
+    "maintainerCredentialsRequired": false,
+    "newProviderRequiredForTaskAPI": false,
+    "credentialsInRepository": false,
+    "connection": "Existing installation connection and verified phone sign-in",
+    "futureNotificationTopics": "Explicit installation-owned choices; existing kitchen subscriptions retain their current purpose"
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "d4d223d5091532e5a172643c9abfc61fc892abd4858e92ec4dfefa83a175645d",
+    "apps/web/src/data/command-request.ts": "58359920ece4c18904c094cf09b877797d2b7915377422d8fc294cab89bc9cb2",
+    "apps/web/src/data/owner-task-session.ts": "c706afbdb56ee2af64d8adb83ba938d988f8ec8e0cd007528c3cdc43093e2d7b",
+    "docs/configure-services.md": "47c1840d0a3b676411916a1f5fc020bbfb82136cac5f2f34b31d77a41b4149e0",
+    "docs/owner-tasks.md": "8de0c58f5258baab42d6b7e314167bfd5e725a49f9e1dc24ab5dfc6608ee060a",
+    "handover/DECISIONS.md": "6ea1069a2d206f2cd01486b54ad64dfe2bed45f623fc71811330ad2cc1cbbaf2",
+    "handover/docs/03-roadmap.md": "a9749cd6f88f386e9c4d78e76b4fccac01b92f9253667d9a2e7a73fcfb366821",
+    "packages/core/owner-tasks.ts": "8d7a35c0229fe9449f010e7d5f2b412c23d060d789e2bc1d1a9063a8a6377c71",
+    "supabase/migrations/20261123180222_owner_inbox_tasks.sql": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "tests/kitchen-alarm-tasks.test.ts": "2ef599602d9e9b5c514056630821e14b423f5cb5205ebeaf56e4d3fbdba6c6a7",
+    "tests/owner-task-session.test.ts": "3051fe904ff9fefd5fa1125c35868436a7b7c4870e33fdd66125da050816402e",
+    "tests/owner-tasks-fixture.ts": "3d1aaf6adbc86dbd666bd291de1e9f984c88777708f2ec3b1bc5cbadd88e80e7",
+    "tests/owner-tasks-managed.ts": "b54d138bbb6e36d116c1f17cb9275941a6dda29f95a8f8b452ef06a9e7096882",
+    "tests/owner-tasks.test.ts": "8a5b80b97e97b80907efdf3e8fb0171772b47a8e34bb4a63eda382d4b25fe2b2"
+  },
+  "checks": {
+    "unit": {
+      "files": 251,
+      "cases": 4866,
+      "passed": true,
+      "durationSeconds": 953.97,
+      "workloads": "Existing 1000-item, 5000-record and maximum-text workloads and deadlines are unchanged.",
+      "finalProtocolFollowup": {
+        "files": 2,
+        "cases": 23,
+        "passed": true,
+        "scope": "Current SQL/native journal after the final strict-routing assertion and applied migration filename were verified."
+      }
+    },
+    "browser": {
+      "files": 5,
+      "root": 50,
+      "pages": 50,
+      "workers": 2,
+      "passed": true,
+      "scope": "Existing Live, customer khata, kitchen desk notification controls, staff team and default app/landing smoke. The new general Inbox UI is not implemented yet."
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/",
+      "currentInstallationGuideExported": true
+    },
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 198,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "visual": {
+      "changedProductViews": 0,
+      "newComparisons": 0,
+      "scope": "No product layout is changed by this foundation. New M37 visual acceptance remains pending with its interface."
+    },
+    "secrets": {
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "reviewedFixedLegacyFindings": 22,
+      "newExceptions": 0,
+      "hooksEnabled": true
+    }
+  },
+  "managed": {
+    "migration": "20261123180222_owner_inbox_tasks",
+    "migrationSHA256": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "migrations": 81,
+    "tables": 112,
+    "forcedRLS": 112,
+    "functions": 480,
+    "newFunctionBodiesExact": 10,
+    "unrelatedFunctionDefinitionsPreserved": 470,
+    "unrelatedDefinitionDigest": "e3cab8ad21595cf1c80e40e6e270a74b",
+    "rolledBackProof": {
+      "checks": 45,
+      "actualTasks": 1,
+      "actualChoices": 2,
+      "unknownClosures": 1,
+      "financialWrites": 0,
+      "providerRequests": 0,
+      "rolledBack": true
+    },
+    "remainingFixtureRows": 0,
+    "edgeVersionsPreserved": 17,
+    "securityAdvisors": {
+      "INFO": 1
+    },
+    "publicFunction": "undeployed",
+    "staffDeviceFunction": "undeployed",
+    "scheduling": {
+      "enabled": false,
+      "cron_jobs": 0
+    }
+  },
+  "remaining": [
+    "Figma Inbox/questions interfaces and usable manual reply/deep-link controls",
+    "Actual offline SDK initialization and real browser original-request UI recovery",
+    "Payment-without-order source, matching workflow and authenticated notification target",
+    "Explicit general notification choices, real encrypted delivery timing and target resolution",
+    "Full M37 hosted/physical acceptance and release while publication is held",
+    "M30/M31 hosted/recovery gates, M34 task permission enforcement, M35/M36 public delivery gates",
+    "Other unchecked handover milestones"
+  ]
+}
