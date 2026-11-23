@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T22:38:44.647Z",
+  "sourceParentCommit": "38114e88fd46f39ec8910e50f83b1a8ace7079c8",
+  "status": "verified-payment-source-core-and-sql-native-review-and-general-urgent-push-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsCredentialsOrNumbersRequired": false,
+    "newProviderRequired": false,
+    "newEnvironmentVariables": false,
+    "privilegedCredentials": "Installation backend only"
+  },
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "ciArtifactUpload": "held",
+    "ownerTasks": false,
+    "providerRequests": 0,
+    "cronJobs": 0,
+    "newEdgeDeployment": false
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 199,
+      "diagnostics": 0
+    },
+    "unit": {
+      "files": 253,
+      "cases": 4901,
+      "singleFullInvocationPassed": true,
+      "skipped": 0,
+      "workersMaximum": 2,
+      "originalCorporaAndDeadlinesUnchanged": true
+    },
+    "browser": {
+      "root": {
+        "cases": 141,
+        "passed": true,
+        "files": 11,
+        "workers": 2
+      },
+      "pages": {
+        "cases": 141,
+        "passed": true,
+        "files": 11,
+        "workers": 2
+      }
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/"
+    },
+    "visual": {
+      "newInterfaceOrAssetChanges": false,
+      "rerun": false,
+      "previousReport": "owner-task-recovery-verification.json",
+      "previousComparisons": 30,
+      "reason": "No UI/asset change; current browser regressions verify the existing preview and recovery."
+    }
+  },
+  "backend": {
+    "migrations": 82,
+    "latestMigration": "20261123220341",
+    "tables": 115,
+    "forcedRlsTables": 115,
+    "functions": 489,
+    "newFunctionBodies": 9,
+    "intentionallyReplacedTaskFunctions": 2,
+    "exactChangedBodiesMatchingSource": 11,
+    "unchangedPriorFunctionDefinitions": 478,
+    "missingPriorFunctions": 0,
+    "managedProof": {
+      "checks": 55,
+      "actualSources": 2,
+      "actualFinancialReceipts": 1,
+      "unknownClosures": 1,
+      "financialWritesBySource": 0,
+      "providerRequests": 0,
+      "rolledBack": true,
+      "remainingSyntheticAuthSourceAndActionRows": 0,
+      "exactManagedSqlVerifiedLocally": true,
+      "exactManagedSqlSha256": "713f675e126fad301d4c35f021cd9446732d3dda7bda5613c82caf3caa2103a0"
+    },
+    "edgeVersionsPreserved": 17,
+    "securityAdvisors": {
+      "INFO": 1,
+      "newWarnings": 0,
+      "newErrors": 0
+    },
+    "performanceAdvisors": {
+      "INFO": 2,
+      "newUnindexedForeignKeys": 0,
+      "newWarnings": 0,
+      "newErrors": 0
+    },
+    "cronJobs": 0
+  },
+  "semantics": {
+    "origin": "manual",
+    "matching": "Actual recorded counter/order/khata payment only; explicit current confirmation",
+    "financialWritesByMatchingOrUndo": 0,
+    "uniqueFinancialRecordPerSource": true,
+    "financialChangesReopenUrgentReview": true,
+    "immutableOriginalReceipts": true,
+    "personalClosureLimitPerUtcDay": 1000
+  },
+  "sourceHashes": {
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "fe0ef67d42483bf32236f627f768f494304137d70d9dd4ea4a19d912479fff11",
+    "handover/DECISIONS.md": "8ed450257f462372c4ba958ca9543e1aa85e038f1e42b0bc97a28f17945aa612",
+    "handover/docs/03-roadmap.md": "64327418e066f00e309fb3498cb783e91704b4357a7b3a3edfb7caf029dcc95f",
+    "docs/configure-services.md": "301fc8a401429d1164a88b45c51a0f67048c767fb72e246202d0b4e55bdf49d1",
+    "docs/payment-sources.md": "9333faf709216f38b7f9a1769c663b0a6894cf01d6f4c13a3aa740ca68c43f5b",
+    "packages/core/payment-sources.ts": "ed5624b3457f108e9f8514bda2a6a1b808bc68e6134f70707c39ad4b7278e03b",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "supabase/migrations/20261123180222_owner_inbox_tasks.sql": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "supabase/migrations/20261123220341_observed_payment_sources.sql": "29b484ed0bf28e519003086bca2f0c207219f682c183971cedc3eb36cc994f85",
+    "tests/payment-sources-fixture.ts": "541861450e2db2771c5cb87cbd6c1096ae58f2e372546075d711076d3d5a7391",
+    "tests/payment-sources-managed.ts": "24933bc10525a353be7d067eb3d9f577f5b6246df6ad3379fdddd601fa85b981",
+    "tests/payment-sources.test.ts": "e9c84307c5e5ae38772db83f2d953cee6d696abd64f5d3e7ece80d5874a9539a",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6"
+  },
+  "verificationLogHashes": {
+    "unit-full": "289f52b159cbdfdbdb23259d4fde17a5e5d00fada3945b7a3988d69608badded",
+    "proof-local": "f25fb750006456dc05671af17bedf592fb089ddeeef77178283ae935da0ee72f",
+    "lint": "004f2c7bc6ad5d59db3503569d3c7609f0f920ea84f0432d3adc5a7b68d59318",
+    "typecheck": "f535e40fc1b833e4d8bbeab6196dbdf0120af152e9e7de056e0402f89e6d866f",
+    "build-root": "928e48f389731102500c8677b94ae987f904d09dc5a026cf4cdff0f985a98c08",
+    "browser-root": "3faf06320010e98d8bdcc8dc7c162f98a77716f9f1abe186a86edd984bd5d8ac",
+    "build-pages": "31f0e8111ac936b46683b697f9de117d438f21f57e82137fe721bf4e165ba0f6",
+    "browser-pages": "34305d8ac84a8e3ae03a4a92630f2473b29404dec95834b3c5851a848f555c8a",
+    "exact-proof": "2f118b88af6d78a9432c586b9d710883706b2baf7fee067d5e6215b9b35c60ed",
+    "secrets-final": "2cd383a4105c855ea8d85540f21dfbdfa5bae01e2ed49aec082254774572099b"
+  },
+  "remaining": [
+    "Native payment capture/review target and durable original requests, recovery and archives",
+    "Explicit general urgent notification subscriptions, five-second delivery and authenticated target resolution",
+    "Any new financial posting must use the actual domain transaction and explicit human review",
+    "Full M37 and other unchecked handover milestones",
+    "Physical commissioning configured by the installation; publication held by owner"
+  ],
+  "security": {
+    "sourceHistoryArtifactsPassed": true,
+    "protectedPrivateValuesChecked": 13,
+    "credentialFindings": 0,
+    "newDeploymentIdentifiers": 0,
+    "fixedReviewedOlderNonsecretFindings": 22,
+    "newExceptions": 0,
+    "hooksEnabled": true
+  }
+}

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- M37 payment-source groundwork preserves manually observed text as an urgent Inbox source, with explicit matching to an existing counter, order or khata receipt. Matching and undo change only the source association; a reversed receipt reopens review. Original-account receipts and delayed-request closure remain recoverable. Installation configuration stays end-user owned; the native payment review interface and general urgent push remain open, with workflows/publication held.
+
 - M37 personal task recovery preview: original-account access from unavailable outlets, isolated recovery sign-in and shop connection, offline full private copies, and verified completed archives that retain pending originals. Each installation supplies its own configuration; general urgent push and payment matching remain open, with workflows/publication held.
 
 - In progress: the default-off Inbox and Questions preview records actual human choices, manual replies and undo, with complete source/copy controls and original-request recovery. The real Auth SDK can reopen the same journal offline and save closure before reconnecting; fresh server verification still protects every network result. Payment matching, personal recovery across unavailable outlets and general urgent notifications remain in development. All installation configuration stays end-user owned and publication remains held.
