@@ -1,0 +1,107 @@
+{
+  "title": "M33 — installation payment accounts, exact-order khata permission and customer swap/payment confirmation",
+  "widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "pages": [
+    {
+      "id": "checkout-settings",
+      "path": "app/?flags=publicOrders,customerLinks,cloudSetup",
+      "orderCheckoutFixture": "settings",
+      "captureStyle": ".app-bottom-nav{position:static!important}.app-skip{visibility:hidden!important}",
+      "note": "Actual owner Auth SDK and native operator configure an initially empty public receiving account through the real HTTP RPC and PostgreSQL role. Cash stays available. The supplied Settings Payments card guides the layout; receiving fields extend it for installation-owned configuration.",
+      "sections": [
+        {
+          "id": "panel",
+          "selector": ".checkout-policy-controls",
+          "reference": "screens/desktop/Settings › Storefront (link, look, zones, payments).png"
+        }
+      ]
+    },
+    {
+      "id": "checkout-permission",
+      "path": "app/?flags=publicOrders,customerLinks,cloudSetup",
+      "orderCheckoutFixture": "permission",
+      "captureStyle": ".app-bottom-nav,.order-detail-actions{position:static!important}.app-skip{visibility:hidden!important}",
+      "note": "The actual owner explicitly grants this exact linked customer, currency and order revision. Current ledger terms and a maximum are shown before allowing their disclosure on this order link. The separate metadata does not change order money or revision.",
+      "sections": [
+        {
+          "id": "panel",
+          "selector": ".checkout-policy-controls",
+          "reference": "screens/mobile/M14 · Manager — Order detail, tracking link, handled by.png"
+        }
+      ]
+    },
+    {
+      "id": "checkout-priced",
+      "path": "app/t/?flags=customerLinks,publicOrders",
+      "orderCheckoutFixture": "priced",
+      "captureStyle": ".customer-checkout-confirm{position:static!important;transform:none!important;width:100%!important}",
+      "note": "An actual anonymous public order is priced using the existing owner Core command, then reads its actual scoped quote. Explicit swap answers, totals, Cash, configured bKash and the separately permitted khata use C09. No browser/phone chrome or medicine-equivalence claim is fabricated. The fixed confirmation bar is placed at its real footer slot for the full-page comparison; 44px controls follow the repository rule.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".customer-view",
+          "reference": "screens/corner-shop/C09 · Customer — The shop priced it · agree, swap, pay (cash, bKash or khata).png"
+        }
+      ]
+    },
+    {
+      "id": "checkout-original",
+      "path": "app/t/?flags=customerLinks,publicOrders",
+      "orderCheckoutFixture": "original",
+      "captureStyle": ".customer-checkout-confirm{position:static!important;transform:none!important;width:100%!important}",
+      "note": "A deliberately lost completed HTTP response retains the entire original quote, swap decisions, payment choice and allocated identities. The screen does not claim success from its local journal. Actual check, retry and durable-close paths are offered with manual copy.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".customer-view",
+          "reference": "screens/corner-shop/C09 · Customer — The shop priced it · agree, swap, pay (cash, bKash or khata).png"
+        }
+      ]
+    },
+    {
+      "id": "checkout-unavailable",
+      "path": "app/t/?flags=customerLinks,publicOrders",
+      "orderCheckoutFixture": "unavailable",
+      "note": "After a saved original request fails, an unavailable current tracker hides its old prices and status while retaining the customer's own original choices, manual copy and durable closure. Cached metadata cannot enable new prices, wallet targets or a replacement confirmation.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".customer-view",
+          "reference": "screens/corner-shop/C09 · Customer — The shop priced it · agree, swap, pay (cash, bKash or khata).png"
+        }
+      ]
+    },
+    {
+      "id": "checkout-confirmed",
+      "path": "app/t/?flags=customerLinks,publicOrders",
+      "orderCheckoutFixture": "confirmed",
+      "note": "Actual Core and SQL confirmation accepts the original swap once, returns a verified receipt and refreshes the real tracker. Cash remains pending; no sale or credit entry is invented. Original-action recovery remains mounted after acceptance.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".customer-view",
+          "reference": "screens/corner-shop/C09 · Customer — The shop priced it · agree, swap, pay (cash, bKash or khata).png"
+        }
+      ]
+    },
+    {
+      "id": "checkout-finished",
+      "path": "app/t/?flags=customerLinks,publicOrders",
+      "orderCheckoutFixture": "finished",
+      "note": "The same accepted pickup advances through its actual packing, ready and done Core commands. The customer sees Done without an account. Earlier confirmation is retained as a historical result; feedback, stamps, provider payment and current money are not invented.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".customer-view",
+          "reference": "screens/mobile/M03 · Guest — delivered · feedback and stamp.png"
+        }
+      ]
+    }
+  ]
+}

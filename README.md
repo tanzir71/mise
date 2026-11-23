@@ -64,6 +64,8 @@ The [history guard](docs/security-history.md) permits only exact reviewed older 
 
 GitHub workflows are disabled at the owner’s request, so `main` can be ahead of the published Pages site.
 
+The optional [customer checkout preview](docs/order-checkout.md) adds price and swap review, cash, shop-configured wallet accounts and explicitly allowed khata. Each installation owns its configuration; receiving accounts start empty and cash remains available. The preview stays off by default, with publication held.
+
 ## Run locally
 
 Use **Node 22.12+** and **pnpm 10**; the repository pins its pnpm version.

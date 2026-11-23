@@ -1,0 +1,19 @@
+.checkout-policy-controls>header{padding:24px;border-bottom:1px solid var(--border)}
+.checkout-policy-controls h2,.checkout-policy-controls h3{font-size:18px;font-weight:400;margin:0 0 8px}
+.checkout-policy-controls p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.checkout-policy-controls header p,.checkout-policy-controls small,.checkout-payment-note,.checkout-cash span{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.checkout-policy-body{display:grid;gap:24px;padding:24px;min-width:0}
+.checkout-policy-body form,.checkout-policy-body label,.checkout-policy-body fieldset{display:grid;gap:8px;min-width:0}
+.checkout-policy-body form{gap:16px}
+.checkout-policy-body fieldset{border:1px solid var(--border);border-radius:12px;padding:16px;gap:16px;margin:0}
+.checkout-policy-body input,.checkout-policy-body select,.checkout-policy-body textarea{box-sizing:border-box;width:100%;min-width:0;min-height:44px;border:1px solid var(--border-strong);border-radius:12px;padding:8px 12px;background:var(--surface);color:var(--text);font:inherit}
+.checkout-policy-body textarea{resize:vertical}
+.checkout-policy-body .checkout-policy-check{display:flex;align-items:flex-start;gap:8px}
+.checkout-policy-check input{width:20px;min-width:20px;min-height:20px;height:20px;padding:0;accent-color:var(--text)}
+.checkout-policy-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.checkout-policy-actions>.button{flex:1 1 160px;white-space:normal;min-height:44px;height:auto;overflow-wrap:anywhere}
+.checkout-cash,.checkout-payment-note{display:flex;align-items:flex-start;gap:8px}
+.checkout-cash{display:grid;grid-template-columns:14px max-content minmax(0,1fr)}
+.checkout-cash span{margin-left:auto;text-align:right}
+.checkout-cash img,.checkout-payment-note img{flex-shrink:0;margin-top:4px}
+.checkout-policy-controls [role=alert]{color:var(--accent-strong)}

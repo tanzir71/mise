@@ -22,3 +22,4 @@
 .order-paste{max-width:740px}.order-paste>.card{gap:12px}.order-paste-actions{display:flex;flex-wrap:wrap;gap:8px}.order-source-note p{overflow-wrap:anywhere}
 
 .orders-page.has-paste .app-page-heading{flex-wrap:wrap}.order-heading-actions{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.order-original-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}

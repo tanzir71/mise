@@ -27,7 +27,7 @@ export async function mountPublicOrdering(link:PublicOrderingLink,deps:{parent:H
   check.hidden=!original||fresh;close.hidden=!original||fresh||Boolean(done||closed);copy.hidden=!original||fresh;another.hidden=!original||fresh||!done&&!closed;
   tracker.hidden=!original||fresh||!done||Boolean(original.outcome?.link?.revokedAt);text.hidden=!original||fresh;
   if(original&&!fresh){text.value=publicSubmissionMessage(original.submission.intent);status.textContent=closed?w.closed:done?w.created:original.closeRequested?w.closing:original.outcome?.state==='pending'?w.pending:w.saved;
-   if(done&&original.outcome?.link?.revokedAt===null)tracker.href=customerViewerUrl(source.url.origin,base,{apiUrl:link.apiUrl,kind:'order',token:original.submission.trackingToken});
+   if(done&&original.outcome?.link?.revokedAt===null)tracker.href=customerViewerUrl(source.url.origin,base,{apiUrl:link.apiUrl,kind:'order',token:original.submission.trackingToken},{checkout:true});
   }else status.textContent='';
   text.setAttribute('aria-label',w.source);deps.original(original&&!fresh&&!closed?original.submission.intent:null,original&&!fresh&&!closed?text.value:'');
   const fallback=document.getElementById('public-send');if(fallback){fallback.classList.replace('button-primary','button-secondary');const label=fallback.querySelector('[data-copy]');if(label)label.textContent=w.message;}

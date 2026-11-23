@@ -19,6 +19,7 @@ import {
 } from '../../packages/core/khata';
 import {
   encodeCommandRecord,
+  decodeCommandRecord,
   type CloudRecord,
 } from '../../packages/core/cloud-records';
 import { publicShopUrl } from '../../packages/core/public-shop-codec';
@@ -26,20 +27,24 @@ import { newInboxId } from '../../packages/core/inbox';
 import { normalizeBase } from '../../packages/core/paths';
 import { createPublicCapabilityHandler } from '../../supabase/functions/_shared/public-capability-handler';
 import {createPublicOrderHandler} from '../../supabase/functions/_shared/public-order-handler';
+import {createOrderCheckoutHandler} from '../../supabase/functions/_shared/order-checkout-handler';
+import {confirmationIntentJson} from '../../packages/core/order-confirmation-protocol';
 import {publicOrderHash,publicOrderIntentJson} from '../../packages/core/public-order-submission';
 import {decodeShopPayload} from '../../packages/core/public-shop-decode';
 import {publicOrderingUrl} from '../../packages/core/public-order-link';
 import {parseEstimateAction,parseEstimateOutcome} from '../../packages/core/order-estimates';
 import {customerViewerUrl} from '../../packages/core/customer-link-url';
 import type { Order, SetupSnapshot } from '../../packages/core/models';
+import {settleOrderCommand} from '../../packages/core/order-payments';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
-export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean}={}) {
+export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
     origin = 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
+    ...((options.ordering||options.estimates||options.checkout)?{read_checkout_policy:['p_outlet_id','p_order_id'],change_checkout_policy:['p_outlet_id','p_action','p_operation']}:{}),
     ...(options.estimates?{read_order_estimate:['p_order_id'],change_order_estimate:['p_order_id','p_action_id','p_order_revision','p_estimate_revision','p_change','p_operation']}:{}),
     ...(options.ordering?{read_public_shop_page:['p_outlet_id','p_after_id','p_page_size'],publish_public_shop:['p_id','p_event_id','p_outlet_id','p_source_url','p_payload_json','p_secret_hash','p_table','p_expiry'],revoke_public_shop:['p_id','p_event_id','p_outlet_id']}:{}),
     read_customer_link_page: [
@@ -111,7 +116,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
         {
           name: 'Shorshe Kitchen',
           outletName: 'Dhanmondi',
-          businessType: 'restaurant',
+          businessType: options.checkout?'corner_shop':'restaurant',
           marketCode: 'BD',
           phone: '+14155550101',
         },
@@ -150,7 +155,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
         at,
       ),
       opening = openingBalanceCommand(
-        96000,
+        options.checkout?40000:96000,
         at,
         {
           setup,
@@ -185,7 +190,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
     );
     order = created.order;
     const events = [customer.event, terms.event, opening.event, created.event];
-    while (order.status !== 'out') {
+    while (order.status !== (options.checkout?'delivering':'out')) {
       const change = changeOrderStatusCommand(
         order,
         nextOrderStatuses(order)[0],
@@ -249,8 +254,8 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
     );
     await f.db.transaction(async (tx) => {
       await tx.query(
-        "update public.businesses set name=$2,business_type='restaurant' where id=$1",
-        [setup.business.id, JSON.stringify(setup.business.name)],
+        'update public.businesses set name=$2,business_type=$3 where id=$1',
+        [setup.business.id, JSON.stringify(setup.business.name),setup.business.businessType],
       );
       await tx.query(
         'update public.outlets set name=$2,shop_link=$3 where id=$1',
@@ -309,6 +314,10 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
     prepare:async(value,limits)=>f.asRole(null,'service_role','select public.prepare_public_order($1,$2,$3,$4,$5,$6) data',[value.shopToken,await publicOrderHash(value.trackingToken),publicOrderIntentJson(value.intent),value.action,limits.global,limits.shop]),
     finish:(value,preparation,rows)=>f.asRole(null,'service_role','select public.finish_public_order($1,$2,$3) data',[value.intent.id,preparation.ticketToken,JSON.stringify(rows)]),
   }});
+  const checkout=createOrderCheckoutHandler({origins:new Set([origin]),store:{
+    prepare:(value,limits)=>f.asRole(null,'service_role','select public.prepare_order_confirmation($1,$2,$3,$4,$5) data',[value.token,value.intent?confirmationIntentJson(value.intent):null,value.action,limits.global,limits.link]),
+    finish:(value,preparation,rows)=>f.asRole(null,'service_role','select public.finish_order_confirmation($1,$2,$3) data',[value.id,preparation.ticketToken,JSON.stringify(rows)]),
+  }});
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
       status,
@@ -334,7 +343,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       let size = 0;
       for await (const part of req) {
         size += part.length;
-        if (size > (options.ordering?65536:8192)) throw Error();
+        if (size > (options.ordering||options.checkout?65536:8192)) throw Error();
         chunks.push(Buffer.from(part));
       }
       const raw = Buffer.concat(chunks).toString('utf8'),
@@ -362,6 +371,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
           new Request(url, { method: req.method, headers, body: raw }),
         );
       else if(options.ordering&&url.pathname==='/functions/v1/public/orders')response=await publicOrder(new Request(url,{method:req.method,headers,body:raw}));
+      else if(options.checkout&&['order-quote','order-confirmations','order-payment'].some(path=>url.pathname==='/functions/v1/public/'+path))response=await checkout(new Request(url,{method:req.method,headers,body:raw}));
       else if (url.pathname.startsWith('/rest/v1/rpc/')) {
         const rpc = url.pathname.split('/').at(-1)!,
           keys = rpcs[rpc],
@@ -378,12 +388,12 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
                 who(headers.get('Authorization')?.slice(7) ?? ''),
                 'authenticated',
                 `select public.${rpc}(${keys.map((k, i) => k + '=>' + ('$' + (i + 1))).join(',')}) data`,
-                keys.map((k) => k==='p_change'?JSON.stringify(body[k]):body[k]),
+                keys.map((k) => ['p_change','p_action'].includes(k)?JSON.stringify(body[k]):body[k]),
               ),
             );
           } catch (error) {
             const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
-            const status=options.estimates&&['read_order_estimate','change_order_estimate'].includes(rpc)?code==='42501'?403:code==='PT409'||code==='23505'?409:code.startsWith('22')?400:503:403;
+            const status=['read_order_estimate','change_order_estimate','read_checkout_policy','change_checkout_policy'].includes(rpc)?code==='42501'?403:code==='PT409'||code==='23505'?409:code.startsWith('22')?400:503:403;
             response = json({ error: status===403?'Access denied':'Review the original action' },status);
           }
       } else
@@ -451,7 +461,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       rpc:
         | 'create_public_link'
         | 'close_public_link_attempt'
-        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate',
+        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations',
     ) {
       lose = rpc;
     },
@@ -462,6 +472,19 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       return {url:publicOrderingUrl({v:1,sourceUrl:setup.outlet.shopLink!,apiUrl,shopToken:token,table}),metadata};
     },
     async orderCounts(){return(await f.db.query<{orders:number;submitted:number;publications:number;sales:number;entries:number}>("select (select count(*) from public.orders) orders,(select count(*) from public.events where command='order.create' and actor_type='system' and actor_id='public-order') submitted,(select count(*) from private.public_shops where created_at is not null) publications,(select count(*) from public.sales) sales,(select count(*) from public.credit_entries) entries")).rows[0];},
+    async priceOrder(id:string,swap=true){
+      if(!options.checkout)throw Error('Checkout fixture is not enabled');
+      const before=decodeCommandRecord('orders',(await f.db.query<{data:Record<string,unknown>}>('select row_to_json(o) data from public.orders o where id=$1',[id])).rows[0].data) as unknown as Order;
+      const change=saveOrderCommand({source:before.source,sourceText:before.sourceText,customerId:records.customer.id,name:before.customer.name,phone:before.customer.phone??'',type:before.type,address:before.address,table:before.table,lines:[{id:before.lines[0].id,name:'Miniket rice',unit:'kg',qty:2,unitPrice:10000,note:''},...(swap?[{name:'Soya milk',unit:'bottle',qty:1,unitPrice:5000,note:'Shop suggestion',substitution:{from:'Fresh milk',accepted:false}}]:[])],deliveryFee:0,discount:0,payment:{method:'cash'}},{setup,customer:records.customer,items:[],sequence:before.sequence},before,before.revision,Date.now());
+      await f.db.transaction(async tx=>{await insert(tx,encodeCommandRecord('events',change.event,setup.business.id));const row=encodeCommandRecord('orders',change.order,setup.business.id),keys=Object.keys(row.values).filter(k=>k!=='id');await tx.query(`update public.orders set ${keys.map((k,i)=>k+'=$'+(i+2)).join(',')} where id=$1`,[id,...keys.map(k=>row.values[k])]);});
+      order=change.order;records={...records,order,events:[...records.events,change.event]};return order;
+    },
+    async checkoutCounts(){return(await f.db.query<{actions:number;closed:number;settings:number;permissions:number}>("select (select count(*) from private.order_confirmation_actions) actions,(select count(*) from private.order_confirmation_actions where state='closed') closed,(select count(*) from private.outlet_checkout_settings) settings,(select count(*) from private.order_credit_permissions) permissions")).rows[0];},
+    async recordCashPayment(){
+      if(!options.checkout)throw Error('Checkout fixture is not enabled');
+      const current=decodeCommandRecord('orders',(await f.db.query<{data:Record<string,unknown>}>('select row_to_json(o) data from public.orders o where id=$1',[order.id])).rows[0].data) as unknown as Order,change=settleOrderCommand(current,{method:'cash'},{setup},current.revision,Date.now());
+      await f.db.transaction(async tx=>{for(const row of [...change.sales.map(v=>encodeCommandRecord('sales',v,setup.business.id)),...change.entries.map(v=>encodeCommandRecord('creditEntries',v,setup.business.id)),...change.events.map(v=>encodeCommandRecord('events',v,setup.business.id))])await insert(tx,row);const row=encodeCommandRecord('orders',change.order,setup.business.id),keys=Object.keys(row.values).filter(k=>k!=='id');await tx.query(`update public.orders set ${keys.map((k,i)=>k+'=$'+(i+2)).join(',')} where id=$1`,[order.id,...keys.map(k=>row.values[k])]);});order=change.order;return order;
+    },
     async issue(kind: 'order' | 'khata' = 'order') {
       return f.asRole<{ id: string; token: string }>(
         1,
@@ -484,6 +507,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       );
     },
     async status(next: Order['status']) {
+      if(options.checkout){order=decodeCommandRecord('orders',(await f.db.query<{data:Record<string,unknown>}>('select row_to_json(o) data from public.orders o where id=$1',[order.id])).rows[0].data) as unknown as Order;}
       const change = changeOrderStatusCommand(
         order,
         next,

@@ -14,6 +14,7 @@ import { useHandoffs } from './handoff-context';
 import './shop-link-settings.css';
 const ShopPoster=lazy(()=>import('./ShopPoster').then(module=>({default:module.ShopPoster})));
 const PublicShopControls=lazy(()=>import('./PublicShopControls').then(module=>({default:module.PublicShopControls})));
+const CheckoutPayments=lazy(()=>import('./CheckoutPolicyControls').then(module=>({default:module.CheckoutPolicyControls})));
 
 function savedShop(link?:string):PublicShop|null {
   try {const url=new URL(link||'');return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password&&url.pathname.endsWith('/app/s/')?decodeShopPayload(url.hash.slice(1)):null;}
@@ -29,7 +30,7 @@ export function ShopLinkSettings({setup,postersEnabled}:{setup:SetupSnapshot;pos
   }),[setup.outlet.id]);
   if(records===undefined)return <p aria-busy="true">Opening shop link…</p>;
   if(!records)return <p role="alert">Your shop changed. Reopen Shop link from More.</p>;
-  return <><ShopLinkForm key={records.context.setup.outlet.id} context={records.context} event={records.event} postersEnabled={postersEnabled}/>{publicOrdersEnabled?<Suspense fallback={<p aria-busy="true">Opening online ordering…</p>}><PublicShopControls setup={records.context.setup} sourceUrl={records.context.setup.outlet.shopLink||''}/></Suspense>:null}</>;
+  return <><ShopLinkForm key={records.context.setup.outlet.id} context={records.context} event={records.event} postersEnabled={postersEnabled}/>{publicOrdersEnabled?<Suspense fallback={<p aria-busy="true">Opening online ordering…</p>}><PublicShopControls setup={records.context.setup} sourceUrl={records.context.setup.outlet.shopLink||''}/><CheckoutPayments setup={records.context.setup}/></Suspense>:null}</>;
 }
 function ShopLinkForm({context,event,postersEnabled}:{context:ShopLinkContext;event?:AuditEvent;postersEnabled:boolean}){
   const handoffs=useHandoffs(),[sharing,setSharing]=useState(false);

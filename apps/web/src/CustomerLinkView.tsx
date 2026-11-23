@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState,type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import {
@@ -14,6 +14,8 @@ import type { PublicShop } from '@mise/core/public-shop';
 import { CustomerReadError, readCustomerLink } from './data/customer-link-read';
 import './customer-link-view.css';
 import {CustomerOrderEstimate} from './CustomerOrderEstimate';
+import {CustomerCheckoutArea} from './CustomerCheckoutArea';
+import {useCustomerCheckout} from './customer-links-context';
 const words = {
   en: {
     order: 'Order',
@@ -197,8 +199,11 @@ interface ViewState {
   loading: boolean;
   checked: number;
   expanded: boolean;
+  lastOrder?:CustomerOrder|null;
 }
+function TrackingDetails({collapsed,label,children}:{collapsed:boolean;label:string;children:ReactNode}){return collapsed?<details className="customer-tracking-details"><summary>{label}</summary>{children}</details>:children;}
 export function CustomerLinkView() {
+  const checkoutEnabled=useCustomerCheckout();
   const route = useLocation(),
     key = route.pathname + route.hash;
   const decoded = useMemo(() => {
@@ -229,6 +234,7 @@ export function CustomerLinkView() {
     } | null>(null),
     c = words[language];
   const data = state.key === key ? state.data : null,
+    lastOrder=state.key===key?state.lastOrder??null:null,
     error = state.key === key ? state.error : null,
     loading = state.key !== key || state.loading;
   useEffect(() => {
@@ -242,6 +248,7 @@ export function CustomerLinkView() {
     let active = true,
       inflight = false,
       currentData: CustomerLink | null = null,
+      lastReadOrder:CustomerOrder|null=null,
       expanded = false,
       retryAt = 0,
       missing = false;
@@ -324,6 +331,7 @@ export function CustomerLinkView() {
           };
         } else expanded = false;
         currentData = next;
+        lastReadOrder=next.kind==='order'?next.order:null;
         missing = false;
         setState({
           key,
@@ -332,6 +340,7 @@ export function CustomerLinkView() {
           loading: false,
           checked: Date.now(),
           expanded,
+          lastOrder:lastReadOrder,
         });
       } catch (e) {
         if (active) {
@@ -346,6 +355,7 @@ export function CustomerLinkView() {
           setState({
             key,
             data: null,
+            lastOrder:lastReadOrder,
             error: failure,
             loading: false,
             checked: 0,
@@ -414,7 +424,7 @@ export function CustomerLinkView() {
     if (value?.key === key) void value.read(more);
   };
   return (
-    <main className="customer-view" lang={language === 'bn' ? 'bn' : 'en'}>
+    <main className={'customer-view'+(checkoutEnabled&&data?.kind==='order'&&data.order.businessType==='corner_shop'?' customer-view-checkout':'')} lang={language === 'bn' ? 'bn' : 'en'}>
       <header className="customer-view-header">
         <span className="customer-view-mark" aria-hidden="true">
           m
@@ -442,7 +452,7 @@ export function CustomerLinkView() {
           </button>
         </div>
       </header>
-      {!data ? (
+      {!data ? (<>
         <Card className="customer-view-error">
           <h1>
             {loading
@@ -459,6 +469,9 @@ export function CustomerLinkView() {
             </Button>
           ) : null}
         </Card>
+        {decoded&&lastOrder?<CustomerCheckoutArea source={decoded} order={lastOrder} connected={false} language={language} onConfirmed={()=>refresh()}>{null}</CustomerCheckoutArea>:null}
+        {!loading?<p className="customer-view-help">{c.contactMissing}</p>:null}
+        </>
       ) : (
         <>
           <div className="customer-view-check">
@@ -483,6 +496,7 @@ export function CustomerLinkView() {
                   {c.order} {data.order.number}
                 </p>
                 <h1 aria-live="polite">{status(data.order.status)}</h1>
+                <TrackingDetails collapsed={checkoutEnabled&&data.order.businessType==='corner_shop'} label={language==='bn'?'সময় ও বিস্তারিত':'Timing and details'}>
                 {data.order.type==='dine_in'&&data.order.table?<p>{data.order.table}</p>:null}
                 <p>
                   {c.updated}{' '}
@@ -495,6 +509,7 @@ export function CustomerLinkView() {
                   </p>
                 ) : null}
                 <CustomerOrderEstimate order={data.order} language={language}/>
+                </TrackingDetails>
                 <ol
                   className="customer-order-steps"
                   aria-label={language === 'bn' ? 'অর্ডারের ধাপ' : 'Order steps'}
@@ -511,13 +526,13 @@ export function CustomerLinkView() {
                           step === data.order.status ? 'step' : undefined
                         }
                       >
-                        <span>{status(step)}</span>
+                        <span>{checkoutEnabled&&data.order.businessType==='corner_shop'&&step==='requested'?(language==='bn'?'পাঠানো হয়েছে':'Sent'):status(step)}</span>
                       </li>
                     );
                   })}
                 </ol>
               </Card>
-              <Card className="customer-order-lines">
+              <CustomerCheckoutArea source={decoded} order={data.order} language={language} onConfirmed={()=>refresh()}><Card className="customer-order-lines">
                 <h2>{c.items}</h2>
                 <ul>
                   {data.order.lines.map((line) => (
@@ -593,7 +608,7 @@ export function CustomerLinkView() {
                 {data.order.status === 'cancelled' ? (
                   <p>{c.cancelled}</p>
                 ) : null}
-              </Card>
+              </Card></CustomerCheckoutArea>
             </>
           ) : (
             <>
@@ -674,7 +689,7 @@ export function CustomerLinkView() {
                   className="button button-secondary"
                   href={'tel:' + publicShop.phone}
                 >
-                  {c.call}
+                  {checkoutEnabled?<img src={import.meta.env.BASE_URL+'checkout-assets/phone.svg'} width="16" height="16" alt=""/>:null}{c.call}
                 </a>
                 <Button
                   kind="secondary"
@@ -693,7 +708,7 @@ export function CustomerLinkView() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {c.message}
+                  {checkoutEnabled?<img src={import.meta.env.BASE_URL+'checkout-assets/message.svg'} width="16" height="16" alt=""/>:null}{c.message}
                 </a>
                 <Button kind="secondary" onClick={() => void copy(question)}>
                   {c.copyMessage}
@@ -722,6 +737,7 @@ export function CustomerLinkView() {
       <p className="customer-view-notice" role="status">
         {notice}
       </p>
+      {checkoutEnabled&&data?.kind==='order'&&data.order.businessType==='corner_shop'?<div id="customer-checkout-footer"/>:null}
     </main>
   );
 }
