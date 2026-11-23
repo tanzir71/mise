@@ -1,6 +1,6 @@
 import {customerApiOrigin} from './customer-link-url';
 import {parseStaffRecord,parseUsualShift,staffExact,staffId,staffObject,staffTime,type StaffRecord,type StaffScope,type UsualShift} from './staff';
-import {parseAttendanceIntent,parseStaffCheckIn,type AttendanceIntent,type StaffCheckIn} from './staff-attendance';
+import {parseAttendanceIntent,parseStaffCheckIn,parseOwnAttendanceOutcome,type OwnAttendanceOutcome,type AttendanceIntent,type StaffCheckIn} from './staff-attendance';
 import type {MemberRole} from './models';
 
 export const staffToken=(v:unknown):v is string=>typeof v==='string'&&/^[A-Za-z0-9_-]{43}$/.test(v);
@@ -16,7 +16,7 @@ export interface StaffView {
  role:Exclude<MemberRole,'agent'>;language:'en'|'bn';shift:UsualShift|null;latest:StaffCheckIn|null;entries:StaffHistoryEntry[];next:StaffHistoryCursor|null;serverAt:number;
 }
 export interface StaffPublicRequest {token:string;operation:'read'|'submit'|'inspect'|'close';intent:AttendanceIntent|null;after:StaffHistoryCursor|null}
-export interface StaffPublicOutcome {v:1;id:string;state:'pending'|'closed'|'applied';intentJson:string;checkIn:StaffCheckIn|null;at:number|null}
+export type StaffPublicOutcome=OwnAttendanceOutcome;
 const bad=()=>Error('Keep the complete original staff link and check-in.');
 const literal=(v:unknown):string=>{if(typeof v!=='string'||v.length>4096)throw bad();const value:unknown=JSON.parse(v);if(typeof value!=='string'||value.length>160)throw bad();return value;};
 const sameScope=(a:StaffScope,b:StaffScope)=>a.businessId===b.businessId&&a.outletId===b.outletId&&a.actorId===b.actorId&&a.actorRole===b.actorRole;
@@ -94,13 +94,7 @@ export function projectStaffView(v:unknown,after:StaffHistoryCursor|null):StaffV
   name:literal(v.nameJson),nameLocal:literal(v.nameLocalJson),role:v.role as StaffView['role'],language:v.language as StaffView['language'],shift:parseUsualShift(v.shift),latest,entries,next,serverAt:v.serverAt};
 }
 export function parseStaffPublicOutcome(v:unknown,intent:AttendanceIntent):StaffPublicOutcome {
- if(!staffObject(v)||!staffExact(v,'v,id,state,intentJson,checkIn,at')||v.v!==1||v.id!==intent.id||!['pending','closed','applied'].includes(v.state as string)||
-  typeof v.intentJson!=='string'||v.intentJson.length>4096||JSON.stringify(parseAttendanceIntent(JSON.parse(v.intentJson)))!==JSON.stringify(parseAttendanceIntent(intent))||
-  (v.state==='pending'?v.at!==null:!staffTime(v.at)))throw bad();
- const checkIn=v.checkIn===null?null:parseStaffCheckIn(v.checkIn);
- if(v.state==='applied'?(!checkIn||checkIn.id!==intent.id||checkIn.memberId!==intent.memberId||checkIn.outletId!==intent.outletId||checkIn.at!==intent.occurredAt||
-   checkIn.type!==intent.type||checkIn.method!=='link'||checkIn.recordedBy!==intent.memberId):checkIn!==null)throw bad();
- return {v:1,id:intent.id,state:v.state as StaffPublicOutcome['state'],intentJson:v.intentJson,checkIn,at:v.at as number|null};
+ return parseOwnAttendanceOutcome(v,intent,'link');
 }
 /** Decode the named HTTP projection again without importing owner Auth or DB. */
 export function parseStaffView(v:unknown,after:StaffHistoryCursor|null):StaffView {

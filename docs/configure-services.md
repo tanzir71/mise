@@ -36,6 +36,12 @@ A staff link reveals only that member’s shift and recorded attendance at the s
 
 The browser that creates a link retains its secret privately; the backend stores its hash. On another owner device, revoke the old link and create a replacement there. Never include staff links, provider credentials or connection values in repository files or public build variables. The shared order-phone check-in path and task permission enforcement remain unfinished; this preview stays off by default.
 
+## Shared-screen attendance backend (in development)
+
+The repository includes a separate `staff-device` service for own attendance on an enrolled browser screen. Its installer-owned setting `MISE_STAFF_DEVICE_ENABLED` defaults to false. Browser attendance controls are still in development; keep this service disabled until those controls are delivered. This increment does not deploy the service.
+
+When available, it will reuse that installation's existing device pairing, owner-configured staff PINs, private service key and exact allowed origins. No additional provider account, maintainer credential or verification phone number is required. Optional `MISE_STAFF_DEVICE_REQUESTS_PER_MINUTE` accepts 1–60,000 requests per device/server minute and defaults to 600. The owner must enable the member's order-phone attendance method at the selected outlet; that setting grants only own attendance to riders or kitchen members on counters. It grants no cash or order access. Manual attendance remains available in Team.
+
 ## Customer link reads
 
 The installation's `public-read` function uses the existing backend server key and exact allowed origins. Optional private backend settings `MISE_PUBLIC_READS_PER_MINUTE` and `MISE_PUBLIC_LINK_READS_PER_MINUTE` control the installation-wide and per-link budgets. Empty values use 3,000 and 60 reads per server minute; valid configured values are integers from 1 to 60,000. Invalid values leave reads unavailable rather than silently weakening the limits. No additional provider account or secret is required. Deploy only the customer interfaces available in your release; configuring this endpoint does not enable unfinished tracking or khata pages.

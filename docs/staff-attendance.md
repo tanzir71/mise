@@ -2,6 +2,8 @@
 
 Status: M34 implementation in progress. `staffTeam` remains off by default. GitHub workflows, Pages publication and the public service remain held. The complete milestone is unchecked; shared order-phone attendance and task permission enforcement still need their actual runtime paths. M35 and subsequent milestones remain required.
 
+The next increment adds the [paired-screen attendance backend](staff-device-attendance.md). Its device/PIN transaction is implemented and verified independently; browser attendance controls remain unfinished, and the new HTTP service stays disabled and undeployed. The verification checkpoint below describes the earlier committed link/manual preview.
+
 ## Working preview
 
 An installation’s signed-in owner or assigned manager can add, edit and remove members in Team. A contact phone never creates or links an Auth account. Removal keeps recorded history. Managers cannot promote themselves or expand someone’s wider outlet access.

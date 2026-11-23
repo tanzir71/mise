@@ -10,6 +10,7 @@ export interface AttendanceContext {
  recorder:{memberId:string;method:CheckInMethod;kind:'member'|'system';id:string};serverAt:number;
 }
 export interface AttendanceCommand {checkIn:StaffCheckIn;event:AuditEvent}
+export interface OwnAttendanceOutcome {v:1;id:string;state:'pending'|'closed'|'applied';intentJson:string;checkIn:StaffCheckIn|null;at:number|null}
 const bad=()=>Error('Review the current check-in. Your original choice is retained.');
 export function parseStaffCheckIn(v:unknown):StaffCheckIn {
  if(!staffObject(v)||!staffExact(v,'id,outletId,memberId,at,type,method,recordedBy')||
@@ -25,6 +26,17 @@ export function parseAttendanceIntent(v:unknown):AttendanceIntent {
   !['in','out','break'].includes(v.type as string)||!staffTime(v.occurredAt))throw bad();
  return {v:1,id:v.id as string,eventId:v.eventId as string,memberId:v.memberId as string,outletId:v.outletId as string,
   type:v.type as CheckInType,occurredAt:v.occurredAt,expectedLastId:v.expectedLastId as string|null};
+}
+/** A receipt confirms the complete original own-member tap, including its real
+ * transport method. It does not constitute a fresh permission or presence read. */
+export function parseOwnAttendanceOutcome(v:unknown,intent:AttendanceIntent,method:'link'|'order_phone'):OwnAttendanceOutcome {
+ if(!staffObject(v)||!staffExact(v,'v,id,state,intentJson,checkIn,at')||v.v!==1||v.id!==intent.id||!['pending','closed','applied'].includes(v.state as string)||
+  typeof v.intentJson!=='string'||v.intentJson.length>4096||JSON.stringify(parseAttendanceIntent(JSON.parse(v.intentJson)))!==JSON.stringify(parseAttendanceIntent(intent))||
+  (v.state==='pending'?v.at!==null:!staffTime(v.at)))throw bad();
+ const checkIn=v.checkIn===null?null:parseStaffCheckIn(v.checkIn);
+ if(v.state==='applied'?(!checkIn||checkIn.id!==intent.id||checkIn.memberId!==intent.memberId||checkIn.outletId!==intent.outletId||checkIn.at!==intent.occurredAt||
+   checkIn.type!==intent.type||checkIn.method!==method||checkIn.recordedBy!==intent.memberId):checkIn!==null)throw bad();
+ return {v:1,id:intent.id,state:v.state as OwnAttendanceOutcome['state'],intentJson:v.intentJson,checkIn,at:v.at as number|null};
 }
 export function attendanceCommand(value:AttendanceIntent,context:AttendanceContext):AttendanceCommand {
  const intent=parseAttendanceIntent(value),record=parseStaffRecord(context.member),latest=context.latest===null?null:parseStaffCheckIn(context.latest),r=context.recorder;

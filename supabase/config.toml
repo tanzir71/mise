@@ -97,6 +97,9 @@ verify_jwt = false
 # Short pairing codes can request approval; they cannot enroll a screen alone.
 [functions.device-access]
 verify_jwt = false
+# Enrolled device and current staff PIN session; disabled by default server-side.
+[functions.staff-device]
+  verify_jwt = false
 
 [functions.inbox-image]
 verify_jwt = true
