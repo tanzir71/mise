@@ -65,9 +65,17 @@ async function initialize(config: CustomerLinkFixtureConfig) {
     db.close();
   }
 }
-window.miseCustomerLinkTest = { initialize };
+async function taskOperatorUnavailable(){
+ const db=new MiseDatabase('mise-local:'+location.pathname.replace(/\/app\/.*$/, '/app/'));try{const selection=await db.operatorState.get('active');if(!selection)throw Error('Missing native selection');await db.members.update(selection.actorId,{active:false});return JSON.stringify(await db.operatorState.get('active'));}finally{db.close();}
+}
+async function taskOperatorSnapshot(){const db=new MiseDatabase('mise-local:'+location.pathname.replace(/\/app\/.*$/, '/app/'));try{return JSON.stringify(await db.operatorState.get('active'));}finally{db.close();}}
+async function taskRecoverySignIn(config:CustomerLinkFixtureConfig,separate:boolean){
+ const connection={apiUrl:config.apiUrl,publishableKey:config.publishableKey},base=location.pathname.replace(/\/app\/.*$/, '/app/'),scope=separate?base+'task-recovery':base+config.records.setup.business.id;
+ const key=await cloudAuthStorageKey(connection,scope);localStorage.setItem(key,JSON.stringify({access_token:config.jwt,refresh_token:'synthetic-customer-link-refresh',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user:config.user}));return key;
+}
+window.miseCustomerLinkTest = { initialize,taskOperatorUnavailable,taskOperatorSnapshot,taskRecoverySignIn };
 declare global {
   interface Window {
-    miseCustomerLinkTest: { initialize: typeof initialize };
+    miseCustomerLinkTest: { initialize: typeof initialize;taskOperatorUnavailable:typeof taskOperatorUnavailable;taskOperatorSnapshot:typeof taskOperatorSnapshot;taskRecoverySignIn:typeof taskRecoverySignIn };
   }
 }

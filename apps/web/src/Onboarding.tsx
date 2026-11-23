@@ -5,8 +5,11 @@ import { businessPacks, marketPacks, defaultMarket, type BusinessType, type Mark
 import c from '../../../handover/copy/app.en.json';
 import { db } from './data/db';
 import {SavedShareNotice} from './SavedShareNotice';
+import {Link} from 'react-router-dom';
+import {useOwnerTasksEnabled} from './owner-tasks-context';
 
 export function Onboarding({onRestore,onJoin,showInstall=false}:{onRestore?:()=>void;onJoin?:()=>void;showInstall?:boolean}) {
+  const ownerTasksEnabled=useOwnerTasksEnabled();
   const [step, setStep] = useState(0);
   const [business, setBusiness] = useState<BusinessType>('corner_shop');
   const [market, setMarket] = useState<MarketCode>(() => defaultMarket(Intl.DateTimeFormat().resolvedOptions().timeZone));
@@ -25,6 +28,7 @@ export function Onboarding({onRestore,onJoin,showInstall=false}:{onRestore?:()=>
   return <main id="main" className="onboarding">
     <a className="app-wordmark" href={import.meta.env.BASE_URL}><img src={`${import.meta.env.BASE_URL}mise-mark.svg`} width="24" height="24" alt="" />mise</a>
     <header><h1>{c.gettingStarted}</h1><p>{c.step} {step + 1} {c.of} 3 · {c.minute}</p></header>
+    {ownerTasksEnabled?<p><Link to="/settings/tasks/recovery">Saved task requests from any outlet</Link></p>:null}
     <SavedShareNotice purpose="setup"/>
     <progress max="3" value={step + 1} aria-label={`${c.step} ${step + 1} ${c.of} 3`} />
     <form onSubmit={submit} aria-label={c.gettingStarted}>

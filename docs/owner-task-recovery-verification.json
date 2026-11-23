@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-23T21:13:10.383Z",
+  "sourceParentCommit": "854207ad2caf18a99863bedfd51f419dbe96dc43",
+  "status": "verified-personal-original-recovery-and-completed-archive-preview-payment-matching-and-general-push-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsOrCredentialsRequired": false,
+    "recoveryConnection": "Separate private browser setting; original shop HTTPS URL and publishable key",
+    "phoneAuth": "Original remembered SDK account or isolated recovery sign-in configured by the installation",
+    "providerCredentials": "Private installation backend only; no provider credentials in task copies or shop backups"
+  },
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "ciArtifactUpload": "held",
+    "flag": {
+      "ownerTasks": false
+    },
+    "providerRequests": 0,
+    "newBackendDeployment": false,
+    "newScheduling": false
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 198,
+      "diagnostics": 0
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/"
+    },
+    "unit": {
+      "files": 252,
+      "cases": 4883,
+      "passedCases": 4883,
+      "singleFullInvocationPassed": true,
+      "workersMaximum": 2,
+      "configurationSkippedCases": 0,
+      "originalWorkloadsAndDeadlinesUnchanged": true
+    },
+    "browser": {
+      "root": {
+        "files": 11,
+        "cases": 110,
+        "passed": true
+      },
+      "pages": {
+        "files": 11,
+        "cases": 110,
+        "passed": true
+      },
+      "finalCurrentReadableSource": {
+        "rootCases": 10,
+        "pagesCases": 10,
+        "passed": true,
+        "reason": "Complete human text replaces internal JSON only; no account/lifetime/command logic changes after the broader110-case regressions"
+      },
+      "workers": 2
+    },
+    "visual": {
+      "comparisons": 30,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "views": [
+        "inbox",
+        "questions",
+        "reply",
+        "recovery",
+        "personal-recovery",
+        "personal-archive"
+      ],
+      "axeViolations": 0,
+      "overflow": false,
+      "renderedOriginalAssetSlots": 105,
+      "report": "qa/report.html",
+      "ciArtifactUploaded": false,
+      "screenshots": [
+        "docs/screenshots/m37-personal-recovery-390.png",
+        "docs/screenshots/m37-personal-archive-390.png",
+        "docs/screenshots/m37-recovery-entry-390.png"
+      ],
+      "interpretation": "M20/M06 reference comparisons adapt the original Inbox type/cards and existing setup controls to actual records and explicit personal recovery/file verification. Differences are informational."
+    },
+    "backend": {
+      "changed": false,
+      "frozenMigrationSha256": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb"
+    },
+    "secrets": {
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "reviewedFixedLegacyFindings": 22,
+      "newExceptions": 0,
+      "hooksEnabled": true
+    }
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "83b0095f3f5da3b1f287805d55f8062559f559b59c8f2db3284d70d40ca8db93",
+    "apps/web/src/Onboarding.tsx": "2253fa3eb0e1aa15c6e76babc7bebc806eb1959530df0664292a4ac1a6e57639",
+    "apps/web/src/OperatorPicker.tsx": "1ec6944ef86848bee0d0734c90c2bed9287e9f9f912cf241b408b05d8c2452bb",
+    "apps/web/src/OwnerTaskInbox.tsx": "1abdc5989dc0e2b79ae9a14d53e528cf90576c2729c67af137e12f9590f03dba",
+    "apps/web/src/OwnerTaskRecovery.tsx": "f51964cb92969e260f5d69f3dcfc7363218ba9c18d3a790170410252c3c8b7a1",
+    "apps/web/src/data/cloud-auth-scope.ts": "437a81f5475eeef86f11ade20ceb307a81f211c599994679038416c97c4e4626",
+    "apps/web/src/data/command-request.ts": "58359920ece4c18904c094cf09b877797d2b7915377422d8fc294cab89bc9cb2",
+    "apps/web/src/data/owner-task-account.ts": "00344c57487d054c4fb6bd146cdc12527b534c832af4a842f2bedd6ed2893d25",
+    "apps/web/src/data/owner-task-archive.ts": "1d6dedd4b98d493ee76701ef0317f91fc77691b8d0ac32a5bab898d23f01ff7d",
+    "apps/web/src/data/owner-task-journal.ts": "cd35ff97e200c851bb5d081a8e51679c136eec9b1314d21fa41b78f09773f36c",
+    "apps/web/src/data/owner-task-recovery.ts": "a21b378994c1f3f5952c58130e8b2bba8c47dd7bc780ebda08c0406b5da09214",
+    "apps/web/src/data/owner-task-session.ts": "c9d0602f43997dbe13b9480cc43d8d0a578fc81781d55c505f8239c60dc658d7",
+    "apps/web/src/data/phone-auth.ts": "beafce45c3493eba49fc73714ac920ae4a0596cdfd4d41da4e83d75efe6c04b5",
+    "apps/web/src/main.tsx": "52dfb446ccad00f89a75381895b6e0fce09da236a6694dcb50a39bb047385e59",
+    "apps/web/src/owner-task-recovery.css": "be724cc44d4c165d44dcb72790c8e366bbec1048e766c15f280885a67598f7d3",
+    "docs/owner-task-recovery.md": "77fe0dc0792fcc6e9f64455f461a8e85fd910e2e79b0ac48b89467b21811edea",
+    "docs/owner-tasks.md": "0af4893b3b887daab59ee1947b53e66785885a0a32934a5fc7e4b6db03e12cd9",
+    "docs/screenshots/m37-personal-archive-390.png": "e728e64355205b9702861280608c443279ea9c9291cc494763c175f4fe3352ae",
+    "docs/screenshots/m37-personal-recovery-390.png": "431fc049a6d7edf07e2cc09d2f34517a8362331f9808f08d76b60d6c57c488e6",
+    "docs/screenshots/m37-recovery-entry-390.png": "d029f6d2d4fd45234ff0634da442f7e11bc16a8679ccc3d9bd33d693cda701bb",
+    "handover/DECISIONS.md": "78a50a5c1e4d27175580b8779c68ac9c34cc2e1aa166f9cb28941f61b955e309",
+    "handover/docs/03-roadmap.md": "7da6a67e910eedf843272b1508627d89db49de60a44792dfbb30f192f67121b4",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "qa/configs/m37-owner-tasks.json": "f93164c6167c695d9539d2aa78b54b9e1607b6d459d487246a0de05cffaef006",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "supabase/migrations/20261123180222_owner_inbox_tasks.sql": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "tests/e2e/owner-task-recovery.spec.ts": "716ca98ec918585d8bfda5555f19913680cf39d20e6f141dc000b67df1823bfa",
+    "tests/fixtures/customer-link-browser.ts": "9a6b836c646749e27785f40fe9a1bee22d95576005406f794f96408cb8187887",
+    "tests/fixtures/owner-tasks-visual.mjs": "af7ff5dce883775d548663f8ecfe5f12b3789fd027232823c956c2f92e510cb3",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/owner-task-recovery.test.ts": "ffa63428660138f72163a5cc0972b29117840db27a63f183f0c9a25a6cc7443c",
+    "tests/owner-task-session.test.ts": "a3779d6a3466d014c0da8ba96473ef4aca79087963f8dcada483e5d605ee6c4a",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  },
+  "verificationLogHashes": {
+    "m37-recovery-build-root-readable.log": "edcc3916e62be795b0846102ef57a691712e2f2ef2d042ccfb5b1a13d5cef58c",
+    "m37-recovery-root-readable.log": "69afad85a3250b1a8e04035c9e3c6eba15299c880caef60520910ea05f74ab4b",
+    "m37-recovery-build-pages-readable.log": "b7e1d0fba8609a596f3eab5ab421c7596a6b3a9536972a9221a06b8e0450e315",
+    "m37-recovery-pages-readable.log": "1599a178b0d8dc60742dc3ec7eacd8a431dafc94cd92fa6ee19eabc157c81e12",
+    "m37-recovery-visual-readable.log": "ba66b4e45ea9541878e353837e5c362a773c0e08dd963379445f50d5e5dcd75e",
+    "m37-recovery-build-root-verified.log": "77f8e6d04e730e31e85651020078f94fa8f9a6c71e7d655bf5e2a62f45f897fa",
+    "m37-recovery-root-verified.log": "098a5fb5516bf1892818236b519559ca69e02b2efda66e62b64dd085de30a0cf",
+    "m37-recovery-build-pages.log": "41f59583339ee2e941e800e595a4e7d00decd22980d6822796f9ca1dfd931732",
+    "m37-recovery-pages-browser.log": "f879d13dc81d0f0b8d7b5d83abcf1c81950eaf5d9588c9f8900f0fd6c17cff5a",
+    "m37-recovery-visual.log": "5df3587a9b4996a5ba1ac7f494d2435841f63b8c01ac2515550d5e194161fcb3",
+    "m37-recovery-lint-final.log": "e47bc14793fcd3fb86a66ca2838fa17258944f59e69bd1d3edf24f818253660d",
+    "m37-recovery-types-final.log": "89f3f30712027216b028eb94d817ec9d5c0f4178c1b8fe8829317713b48bccbf",
+    "m37-recovery-unit.log": "eb59dc5c001a39a6bfc2f28d30e09fc2cf83b8074c15d59ddbbe736121594a30",
+    "m37-recovery-secrets-final.log": "39e7cd2dc80f7787a39d89a300f59503da72b0192c3b158d6dabb9e6603d5b28"
+  },
+  "remaining": [
+    "Actual unmatched-payment source and guarded matching",
+    "Explicit general urgent topics, five-second notification timing and authenticated target resolution",
+    "Hosted/physical commissioning by each installation",
+    "CI artifact upload and publication held by owner"
+  ]
+}

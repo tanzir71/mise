@@ -1,0 +1,82 @@
+.owner-task-recovery {
+  padding: 32px 24px;
+}
+.owner-task-recovery > .owner-task-field {
+  max-width: 480px;
+  margin: 24px 0;
+}
+.owner-task-recovery .owner-task-original h2 {
+  font-size: 16px;
+  line-height: 24px;
+}
+.owner-task-recovery .owner-task-original p {
+  font-size: 14px;
+  line-height: 24px;
+}
+.owner-task-recovery .form-fields {
+  min-width: 0;
+}
+.owner-task-recovery .form-fields input {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+.owner-task-recovery footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.owner-task-saved-source dd {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  font: 14px/24px var(--font-sans);
+  margin: 0;
+}
+.owner-task-saved-source {
+  display: grid;
+  gap: 16px;
+  margin: 16px 0 0;
+}
+.owner-task-saved-source dt {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.owner-task-recovery details summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+.owner-task-history {
+  margin-top: 24px;
+}
+.owner-task-history > .owner-task-grid {
+  margin-top: 24px;
+}
+.owner-task-recovery .owner-task-field input[type='file'] {
+  white-space: normal;
+  overflow: hidden;
+}
+.owner-task-recovery .cloud-phone-form {
+  min-width: 0;
+}
+.owner-task-recovery .cloud-phone-form p {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  .owner-task-recovery {
+    padding: 24px 16px;
+  }
+  .owner-task-recovery .owner-task-original {
+    padding: 16px;
+  }
+  .owner-task-recovery .owner-task-field input[type='file'] {
+    font-size: 12px;
+  }
+}

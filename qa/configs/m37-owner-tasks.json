@@ -1,10 +1,90 @@
 {
- "title":"M37 — recorded human tasks, manual replies and original recovery",
- "widths":[360,390,768,1024,1440],
- "pages":[
-  {"id":"owner-inbox","path":"app/inbox?flags=ownerTasks","ownerTasksFixture":"inbox","note":"M20 Inbox hierarchy, monochrome cards, literal real khata source and four exact Figma icons. Records are created through Core and authenticated SQL, without fictional provider/agent activity. Actual manual setup and recovery controls adapt the supplied phone design for all widths.","sections":[{"id":"screen","selector":".owner-tasks","reference":"screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"}]},
-  {"id":"owner-questions","path":"app/inbox/questions?flags=ownerTasks","ownerTasksFixture":"questions","note":"M06 Questions for you, with current question counts and actual human choices. Future payment matching, attendance/invoice automation and voice actions are not fabricated; generic task decisions change no money or order.","sections":[{"id":"screen","selector":".owner-tasks","reference":"screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"}]},
-  {"id":"owner-task-reply","path":"app/inbox?flags=ownerTasks","ownerTasksFixture":"reply","note":"Actual customer khata request and explicit manual reply. Copy, installation-owned recipient checking and I sent it are separate controls; no external message or payment is sent.","sections":[{"id":"screen","selector":".app-dialog[open]","reference":"screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"}]},
-  {"id":"owner-task-recovery","path":"app/inbox?flags=ownerTasks","ownerTasksFixture":"recovery","note":"A real committed choice with its HTTP reply lost. The original source is retained, the old task becomes read-only and actual-result inspection/retry/closure remains explicit.","sections":[{"id":"screen","selector":".owner-tasks","reference":"screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"}]}
- ]
+  "title": "M37 — recorded human tasks, manual replies and original recovery",
+  "widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "pages": [
+    {
+      "id": "owner-inbox",
+      "path": "app/inbox?flags=ownerTasks",
+      "ownerTasksFixture": "inbox",
+      "note": "M20 Inbox hierarchy, monochrome cards, literal real khata source and four exact Figma icons. Records are created through Core and authenticated SQL, without fictional provider/agent activity. Actual manual setup and recovery controls adapt the supplied phone design for all widths.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".owner-tasks",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "owner-questions",
+      "path": "app/inbox/questions?flags=ownerTasks",
+      "ownerTasksFixture": "questions",
+      "note": "M06 Questions for you, with current question counts and actual human choices. Future payment matching, attendance/invoice automation and voice actions are not fabricated; generic task decisions change no money or order.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".owner-tasks",
+          "reference": "screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"
+        }
+      ]
+    },
+    {
+      "id": "owner-task-reply",
+      "path": "app/inbox?flags=ownerTasks",
+      "ownerTasksFixture": "reply",
+      "note": "Actual customer khata request and explicit manual reply. Copy, installation-owned recipient checking and I sent it are separate controls; no external message or payment is sent.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-dialog[open]",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "owner-task-recovery",
+      "path": "app/inbox?flags=ownerTasks",
+      "ownerTasksFixture": "recovery",
+      "note": "A real committed choice with its HTTP reply lost. The original source is retained, the old task becomes read-only and actual-result inspection/retry/closure remains explicit.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".owner-tasks",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "owner-personal-recovery",
+      "path": "app/settings/tasks/recovery?flags=ownerTasks",
+      "ownerTasksFixture": "personal-recovery",
+      "note": "M20 Inbox type, controls and monochrome cards reused for personal original recovery. Personal recovery and saved-file verification are deliberate additions to the supplied phone reference; original account proof opens literal source without native selection or new task execution. No provider activity is fabricated.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".owner-task-recovery",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "owner-personal-archive",
+      "path": "app/settings/tasks/recovery?flags=ownerTasks",
+      "ownerTasksFixture": "personal-archive",
+      "note": "M20 Inbox type, controls and monochrome cards reused for verified completed archive. Personal recovery and saved-file verification are deliberate additions to the supplied phone reference; original account proof opens literal source without native selection or new task execution. No provider activity is fabricated.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".owner-task-recovery",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    }
+  ]
 }
