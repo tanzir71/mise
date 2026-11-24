@@ -1,6 +1,8 @@
 import {createServer,type IncomingMessage} from 'node:http';
 import {once} from 'node:events';
 import {createPairingDatabase,deviceId} from '../device-pairing-fixture';
+import {emptyStaffProfile} from '../../packages/core/staff';
+import {parseStaffOwnerAction,parseStaffOwnerContext} from '../../packages/core/staff-protocol';
 import {orderFixture} from '../order-fixture';
 import {encodeCommandRecord,decodeCommandRecord} from '../../packages/core/cloud-records';
 import {newKitchenId,prepareKitchenAction,type KitchenReceipt} from '../../packages/core/kitchen';
@@ -115,6 +117,13 @@ export async function startKitchenUiService(){
  return {
   prepare,
   prepareBoard,
+  async setTeamConfirmation(enabled:boolean){
+   const scope={businessId:deviceId(1),outletId:deviceId(11),actorId:deviceId(101),actorRole:'owner' as const},memberId=currentScreen!.session.memberId;
+   const c=parseStaffOwnerContext(await f.asRole(1,'authenticated','select public.read_staff_context($1,$2) data',[scope.outletId,memberId]),scope,memberId),profile=c.current?.profile??emptyStaffProfile();
+   const draft={...profile,name:'Member 105',phone:null,role:'kitchen',active:true,permissions:{...profile.permissions,confirmOrders:enabled}};
+   const action=parseStaffOwnerAction({...scope,v:1,id:newKitchenId(),eventId:newKitchenId(),memberId,kind:'save',expected:c.current,latest:null,draft,checkIn:null});
+   await f.asRole(1,'authenticated','select public.change_staff_action($1,$2,$3) data',[scope.outletId,JSON.stringify(action),'submit']);
+  },
   async handoffFromDesk(){let order=await ownedOrder();while(order.status!=='delivering'){const next=nextOrderStatuses(order)[0];if(!next)throw Error('Cannot hand off this fixture order');order=await persistDesk(changeOrderStatusCommand(order,next,deskSetup,order.revision));}return order;},
   async scheduleFromDesk(scheduledFor:number){const before=await ownedOrder();return persistDesk(saveOrderCommand({source:before.source,sourceText:before.sourceText,name:before.customer.name,phone:before.customer.phone??'',type:before.type,address:before.address,table:before.table,scheduledFor,lines:before.lines,deliveryFee:before.deliveryFee,discount:before.discount,payment:{method:before.payment.method}},{...deskSeed.context,setup:deskSetup,sequence:before.sequence},before,before.revision));},
   loseNext(){lose=true;},

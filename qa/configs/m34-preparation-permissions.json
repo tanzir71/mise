@@ -1,0 +1,30 @@
+{
+  "title": "M34 — actual Team preparation permission and own original review",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "team-preparation-no", "path": "app/screen/kitchen?flags=kitchenScreen", "kitchenScreenFixture": "permission-no",
+      "note": "Actual outlet Team No removes preparation actions. The existing focused kitchen layout remains readable under legacy read permission, with Copy and original-review fallbacks. The supplied kitchen frames guide this new read-only state; no dedicated permission-withdrawal frame is supplied.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "team-preparation-original", "path": "app/screen/kitchen?flags=kitchenScreen", "kitchenScreenFixture": "permission-original",
+      "note": "An actual native offline original remains complete after Team No. The current member can copy, inspect or close the exact original without permission to prepare an order. Reuses the existing original-tap review primitives; source data is synthetic.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "team-preparation-restored", "path": "app/screen/kitchen?flags=kitchenScreen", "kitchenScreenFixture": "permission-restored",
+      "note": "An actual new Team Yes restores scoped preparation and the real Got it/Ready transaction. Current order/payment facts and immutable original receipts are checked; no money is posted or counter/stock/performance authority granted.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    }
+  ]
+}

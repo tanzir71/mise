@@ -33,13 +33,13 @@ export function parseKitchenCloseRequest(value:unknown,action:KitchenAction):Kit
       !time(value.occurredAt)||[action.id,action.orderId,action.outletId,...action.transitionEventIds,action.parentAckId].includes(value.id as string))throw invalid();
   return {id:value.id as string,sessionId:value.sessionId as string,memberId:value.memberId as string,occurredAt:value.occurredAt};
 }
-export function parseKitchenCloseIntent(value:unknown,action:KitchenAction,scope:StaffDeviceAccess):KitchenCloseIntent {
-  if(!object(value)||!exact(value,'id,access,occurredAt')||!isDeviceId(value.id)||!time(value.occurredAt)||
+export function parseKitchenCloseIntent(value:unknown,action:KitchenAction,scope:StaffDeviceAccess,originalMemberId:string):KitchenCloseIntent {
+  if(!object(value)||!exact(value,'id,access,occurredAt')||!isDeviceId(value.id)||!isDeviceId(originalMemberId)||!time(value.occurredAt)||
       [action.id,action.orderId,action.outletId,...action.transitionEventIds,action.parentAckId].includes(value.id))throw invalid();
   const access=parseStaffDeviceAccess(value.access);
   if(access.deviceId!==scope.deviceId||access.businessId!==scope.businessId||access.outletId!==scope.outletId||
-      !access.permissions.includes('orders.read')||!access.permissions.includes(action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready')||
-      value.occurredAt>=access.expiresAt)throw invalid();
+      (access.memberId!==originalMemberId&&(!access.permissions.includes('orders.read')||
+        !access.permissions.includes(action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready')||value.occurredAt>=access.expiresAt)))throw invalid();
   return {id:value.id,access,occurredAt:value.occurredAt};
 }
 export function parseKitchenTapClosure(value:unknown,original:RetainedKitchenTap,scope:StaffDeviceAccess):KitchenTapClosure {
@@ -60,7 +60,7 @@ export function parseKitchenTapRecovery(value:unknown,original:RetainedKitchenTa
   if(!object(value)||!exact(value,'v,access,at,original,outcome,receipt,closure')||value.v!==1||!time(value.at)||
       !['pending','accepted','closed'].includes(value.outcome as string))throw invalid();
   const access=parseStaffDeviceAccess(value.access,expected),reported=parseRetainedKitchenTap(value.original);
-  if(!access.permissions.includes('orders.read')||value.at>=access.expiresAt||access.outletId!==original.action.outletId||
+  if((!access.permissions.includes('orders.read')&&access.memberId!==original.memberId)||value.at>=access.expiresAt||access.outletId!==original.action.outletId||
       reported.sessionId!==original.sessionId||reported.memberId!==original.memberId||!sameAction(reported.action,original.action))throw invalid();
   let receipt:KitchenReceipt|null=null,closure:KitchenTapClosure|null=null;
   if(value.outcome==='accepted') {

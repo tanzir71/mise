@@ -97,7 +97,7 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
    let resolution;
    if(inputResolution!==null){
     const actor=parseStaffDeviceAccess(inputResolution.access,{device:originalDevice,session:saved});
-    const intent=parseKitchenCloseIntent(inputResolution,original.action,actor);
+      const intent=parseKitchenCloseIntent(inputResolution,original.action,actor,original.memberId);
     resolution={id:intent.id,sessionId:actor.sessionId,memberId:actor.memberId,occurredAt:intent.occurredAt};
    }
    const value=await call('kitchen-recovery',resolution?{action:'close',sessionToken:saved.token,original,resolution}:{action:'lookup',sessionToken:saved.token,original},signal);

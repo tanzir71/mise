@@ -1,0 +1,31 @@
+# M34 · Team permission on preparation screens
+
+The default-off Team and kitchen previews now connect the outlet's **Confirm orders** choice to the existing Got it and Ready actions. This is preparation permission: it does not accept a customer quote, post money, change stock or grant owner/manager access. Each installation supplies its own connection, device pairing, member PIN and private backend environment. No maintainer account, key, phone number or verification code is required.
+
+## Current authorization
+
+The actual device/PIN reader computes rights from the member's current role, assignment, device mode and profile at that outlet. A Team Yes grants the supported preparation rights to staff and to a kitchen member on a kitchen device. An existing explicit denial for an individual action still wins, and preparation requires order-read access. A No removes Got it and Ready even when older grants allowed them. Unprofiled legacy members keep their earlier behavior. Creating or editing a Team profile makes its explicit choice effective; it does not silently convert No into Yes.
+
+Attendance keeps its separate outlet method. Riders, and kitchen members on a counter configured for attendance, receive no preparation permission. A profile at one outlet cannot grant work at another. Stock and own-performance choices remain saved preferences for their actual later runtime paths; they do not manufacture capabilities on a preparation screen. Other pre-existing legacy counter capabilities are unchanged by this preparation-specific increment.
+
+The server checks these current rights for the original preparation request and again before committing its actual effect. Its existing member lock serializes the final write with a Team edit. A prepared ticket is not permission to finish after a committed No. No client-supplied role, cached switch, contact phone or Auth metadata grants a preparation action.
+
+## Saved requests and manual work
+
+Losing preparation rights does not turn an unconfirmed tap into success or discard its original source. With current order-read access, the existing kitchen screen becomes read-only: Got it/Ready are disabled, Copy stays available, and the current member can inspect or close their own exact saved tap. The current permission projection also stops background delivery of a known-denied action. A local close is retained before HTTP, including offline; its later actual receipt remains separate from the original tap. A genuine already-accepted receipt remains historical and is not described as undone.
+
+The recovery backend and strict client protocol can also inspect and close the same member's original after all work-read rights are removed. Actual current device/PIN identity, original session/device/member, outlet, action bytes and closure identities are still checked. Another member without the action right cannot use this own-original exception. It cannot read a fresh order or acknowledge preparation. The separate recovery interface for a staff member who loses all order-read access remains to be connected; their stored originals stay intact. Full M34, stock permission enforcement and later own-performance work remain open.
+
+## Verification and delivery
+
+Verification exercises the actual Core/SQL preparation handler, Team changes, native saved taps and existing kitchen controls. It covers a Yes for a staff member without old grants, No before and after preparation, current legacy denials, outlet separation, attendance-only roles, original inspection/closure and unchanged financial facts.
+
+The [verification record](staff-preparation-permissions-verification.json) binds the source to all 5,084 unit tests in 264 files, lint and strict types, both production builds and 110 browser regressions at each hosting path. The original workloads and deadlines are unchanged. The final Pages run waits for the actual visible native-save state before inspecting that saved original; it does not assume that a click synchronously commits IndexedDB. An interrupted earlier run and a generated-output corruption were resolved by rebuilding and rerunning the browser checks. Their incomplete or failed results are excluded from the passing counts.
+
+All 75 visual comparisons pass accessibility and horizontal-overflow checks at 360, 390, 768, 1024 and 1440 px. Three inspected synthetic captures show [read-only preparation](screenshots/m34-preparation-no-390.png), [the retained original and its manual review](screenshots/m34-preparation-original-390.png) and [actual restored preparation](screenshots/m34-preparation-restored-390.png). The complete report is retained locally at `.private/m34-permissions-visual/report.html`. Regenerate it with `pnpm qa:visual qa/configs/m34-preparation-permissions.json qa/configs/m32-kitchen.json qa/configs/m34-staff.json` after building.
+
+Applied migration [20261124045724_staff_preparation_permissions.sql](../supabase/migrations/20261124045724_staff_preparation_permissions.sql) matches both reviewed function bodies. All 515 unrelated function definitions and the existing access settings are preserved. All 122 application tables still force row-level security, scheduling remains off, and the managed installation has no Cron jobs. Fifty-six actual SQL-role checks pass in one rolled-back transaction with no remaining fixture users, businesses, devices, taps or check-ins and no financial or provider writes.
+
+The exact `kitchen-recovery` bundle is deployed as version 3, with explicit device/PIN authorization and the earlier gateway setting preserved. Its 14,613-byte source matches the reviewed SHA256; all 18 other Edge versions are unchanged. Missing device credentials, an untrusted origin and malformed credentials return 401, 403 and 401 respectively without credential diagnostics. Current advisors contain only the reviewed informational categories for deny-all tables and supporting indexes; no new table, index, provider setting or credential is introduced.
+
+The new utility state uses the supplied kitchen phone and tablet references and the existing saved-tap review primitives. No dedicated permission-withdrawal frame is supplied; the visual comparison notes state that adaptation. GitHub workflows, CI uploads and Pages publication remain held, and the preview remains off.

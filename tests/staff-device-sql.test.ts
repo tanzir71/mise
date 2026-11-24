@@ -12,9 +12,9 @@ import {createStaffDeviceHandler} from '../supabase/functions/_shared/staff-devi
 let f:PairingDatabase;
 const scope={businessId:deviceId(1),outletId:deviceId(11),actorId:deviceId(101),actorRole:'owner' as const};
 beforeAll(async()=>{f=await createPairingDatabase();},30000);beforeEach(async()=>{await f.seed();});afterAll(async()=>{await f?.db.close();});
-async function configure(target=deviceId(105),role:StaffDraft['role']='kitchen',methods:StaffDraft['methods']=['order_phone']){
+async function configure(target=deviceId(105),role:StaffDraft['role']='kitchen',methods:StaffDraft['methods']=['order_phone'],confirmOrders=false){
  const c=parseStaffOwnerContext(await f.asRole(1,'authenticated','select public.read_staff_context($1,$2) data',[scope.outletId,target]),scope,target);
- const draft:StaffDraft={...emptyStaffProfile(),name:'Karim Uddin',nameLocal:'করিম উদ্দিন',phone:null,role,active:true,methods};
+ const draft:StaffDraft={...emptyStaffProfile(),name:'Karim Uddin',nameLocal:'করিম উদ্দিন',phone:null,role,active:true,methods,permissions:{confirmOrders,updateStock:false,viewOwnPerformance:false}};
  const action=parseStaffOwnerAction({...scope,v:1,id:newInboxId(),eventId:newInboxId(),memberId:target,kind:'save',expected:c.current,latest:null,draft,checkIn:null});
  return parseStaffOwnerOutcome(await f.asRole(1,'authenticated','select public.change_staff_action($1,$2,$3) data',[scope.outletId,JSON.stringify(action),'submit']),action).member!;
 }
@@ -47,14 +47,33 @@ it('uses the actual paired screen and PIN member for the same Core attendance an
  expect((await f.db.query<{n:number}>('select count(*)::integer n from public.check_ins')).rows[0].n).toBe(1);
  expect((await f.db.query<{n:number}>('select count(*)::integer n from public.sales')).rows[0].n).toBe(0);
 });
-it('only offers explicitly enabled attendance and leaves original kitchen work rights unchanged',async()=>{
+it('keeps unprofiled kitchen rights and applies the explicit Team No independently of attendance',async()=>{
  const screen=await enrol(),session=await login(screen);
  expect(parseStaffDeviceAccess(await access(screen,session)).permissions).toEqual(['orders.acknowledge','orders.read','orders.ready']);expect((await visit(screen,session)).state).toBe('missing');
- await configure();expect(parseStaffDeviceAccess(await access(screen,session)).permissions).toEqual(['orders.acknowledge','orders.read','orders.ready','staff.check-in']);
+ await configure();expect(parseStaffDeviceAccess(await access(screen,session)).permissions).toEqual(['orders.read','staff.check-in']);
  await configure(deviceId(105),'kitchen',[]);expect((await visit(screen,session)).state).toBe('missing');
 });
+it.each([['staff','kitchen'],['staff','counter'],['kitchen','kitchen']] as const)('actual Team Yes grants bounded preparation to %s on %s without legacy grants',async(role,mode)=>{
+ const member=role==='staff'?deviceId(104):deviceId(105);await f.db.query("update public.members set permissions='{}' where id=$1",[member]);await configure(member,role,['order_phone'],true);
+ const screen=await enrol(mode),session=await login(screen,member),current=parseStaffDeviceAccess(await access(screen,session));
+ expect(current.permissions).toEqual(['orders.acknowledge','orders.read','orders.ready','staff.check-in']);
+ expect(current.permissions).not.toContain('counter.sell');expect(current.permissions).not.toContain('stock.update');
+ await configure(member,role,['order_phone'],false);const no=parseStaffDeviceAccess(await access(screen,session));
+ expect(no.permissions).toEqual(role==='kitchen'?['orders.read','staff.check-in']:['staff.check-in']);
+ expect(parseStaffDeviceView(await visit(screen,session),null,undefined,true).access.permissions).toEqual(no.permissions);
+});
+it.each(['orders.read','orders.acknowledge','orders.ready'] as const)('preserves an explicit legacy %s denial when the Team switch is Yes',async denied=>{
+ await f.db.query('update public.members set permissions=$1 where id=$2',[JSON.stringify({[denied]:false}),deviceId(104)]);await configure(deviceId(104),'staff',['order_phone'],true);
+ const screen=await enrol(),session=await login(screen,deviceId(104)),current=parseStaffDeviceAccess(await access(screen,session));expect(current.permissions).not.toContain(denied);
+ if(denied==='orders.read')expect(current.permissions).toEqual(['staff.check-in']);
+});
+it('does not project an outlet Team grant into another assigned outlet',async()=>{
+ const first=await enrol(),second=await enrol('kitchen',deviceId(12)),a=await login(first,deviceId(104)),b=await login(second,deviceId(104));
+ await f.db.query("update public.members set permissions='{}' where id=$1",[deviceId(104)]);await configure(deviceId(104),'staff',['order_phone'],true);
+ expect(parseStaffDeviceAccess(await access(first,a)).permissions).toContain('orders.acknowledge');expect(parseStaffDeviceAccess(await access(second,b)).permissions).toEqual([]);
+});
 it.each(['kitchen','counter'] as const)('gives a rider only own attendance on a %s screen despite forged work flags',async mode=>{
- await configure(deviceId(104),'rider');const c=await createStaffPin('0042',{businessId:scope.businessId,memberId:deviceId(104)},f.pepper);
+ await configure(deviceId(104),'rider',['order_phone'],true);const c=await createStaffPin('0042',{businessId:scope.businessId,memberId:deviceId(104)},f.pepper);
  await f.asRole(1,'authenticated','select public.set_staff_pin($1,$2,$3,$4,$5,$6) data',[scope.outletId,deviceId(104),newInboxId(),c.salt,c.verifier,c.pepperVersion]);
  await f.db.query('update public.members set permissions=$1 where id=$2',[JSON.stringify({'orders.read':true,'orders.ready':true,'counter.sell':true,'owner':true,'staff.check-in':true}),deviceId(104)]);
  const screen=await enrol(mode),session=await login(screen,deviceId(104)),a=parseStaffDeviceAccess(await access(screen,session));expect(a).toMatchObject({role:'rider',mode,permissions:['staff.check-in']});

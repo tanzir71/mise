@@ -19,6 +19,8 @@ import type {SharedDevice,StaffDeviceSession} from '../packages/core/device-acce
 import {orderFixture, ORDER_AT} from './order-fixture';
 import {createKitchenRecoveryHandler,createKitchenRecoveryStore} from '../supabase/functions/_shared/kitchen-recovery-handler';
 import {parseKitchenTapRecovery,type RetainedKitchenTap} from '../packages/core/kitchen-recovery';
+import {emptyStaffProfile} from '../packages/core/staff';
+import {parseStaffOwnerContext,parseStaffOwnerAction,parseStaffOwnerOutcome} from '../packages/core/staff-protocol';
 
 type Sql = Pick<PGlite, 'query' | 'exec'>;
 type Device = SharedDevice & {token: string};
@@ -171,6 +173,50 @@ beforeAll(async () => {
   }
 }, 30000);
 afterAll(async () => {await db?.close();});
+
+async function teamConfirmation(sql:Sql,shop:Shop,enabled:boolean){
+ const uid=`00000000-0000-4000-8000-${String(shops.indexOf(shop)+1).padStart(12,'0')}`;
+ const scope={businessId:shop.businessId,outletId:shop.outletId,actorId:shop.order.createdBy,actorRole:'owner' as const};
+ const context=parseStaffOwnerContext((await role<{data:unknown}>(sql,'authenticated',uid,'select public.read_staff_context($1,$2) data',[shop.outletId,shop.memberId]))[0].data,scope,shop.memberId);
+ const profile=context.current?.profile??emptyStaffProfile();
+ const draft={...profile,name:'Preparation staff',phone:null,role:'staff',active:true,permissions:{...profile.permissions,confirmOrders:enabled}};
+ const action=parseStaffOwnerAction({...scope,v:1,id:newKitchenId(),eventId:newKitchenId(),kind:'save',memberId:shop.memberId,expected:context.current,latest:null,draft,checkIn:null});
+ const result=parseStaffOwnerOutcome((await role<{data:unknown}>(sql,'authenticated',uid,'select public.change_staff_action($1,$2,$3) data',[shop.outletId,JSON.stringify(action),'submit']))[0].data,action);
+ expect(result.state).toBe('applied');await sql.exec('reset role');return result;
+}
+
+it('an actual Team No blocks a fresh preparation despite earlier dotted grants and preserves money',async()=>rollback(async sql=>{
+ const shop=shops[0],before=await current(sql,shop),action=await prepareKitchenAction(before,'kitchen.acknowledge');
+ await teamConfirmation(sql,shop,false);
+ expect((await gateway(sql)(request(shop,action))).status).toBe(401);
+ expect(await current(sql,shop)).toEqual(before);
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts')).rows[0].n).toBe(0);
+}));
+it('an explicit Team Yes gives a real staff member preparation through the production handler without financial effects',async()=>rollback(async sql=>{
+ const shop=shops[0],before=await current(sql,shop);await sql.query("update public.members set permissions='{}' where id=$1",[shop.memberId]);
+ await teamConfirmation(sql,shop,true);const ack=await gotIt(sql,shop),ready=await prepareKitchenAction(await current(sql,shop),'kitchen.ready',ack.receipt.id);
+ const reply=await gateway(sql)(request(shop,ready));expect(reply.status,lastRpcError).toBe(200);expect((await reply.json()).type).toBe('kitchen.ready');
+ const actual=await current(sql,shop);expect(actual.status).toBe('ready');expect(actual.payment).toEqual(before.payment);expect(actual.total).toBe(before.total);
+ expect((await sql.query<{n:number}>('select count(*)::int n from public.sales')).rows[0].n).toBe(0);
+}));
+it('a Team No committed between actual preparation and completion denies the original effect',async()=>rollback(async sql=>{
+ const shop=shops[0],before=await current(sql,shop),action=await prepareKitchenAction(before,'kitchen.acknowledge');await teamConfirmation(sql,shop,true);
+ const response=await gateway(sql,{afterPrepare:()=>teamConfirmation(sql,shop,false).then(()=>undefined)})(request(shop,action));expect(response.status).toBe(401);
+ expect(await current(sql,shop)).toEqual(before);expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_action_receipts')).rows[0].n).toBe(0);
+}));
+it('a former preparer can inspect and close only their exact original after Team No removes all work rights',async()=>rollback(async sql=>{
+ const shop=shops[0],before=await current(sql,shop),action=await prepareKitchenAction(before,'kitchen.acknowledge'),original={action,sessionId:shop.session.id,memberId:shop.memberId};
+ await sql.query("update public.members set permissions='{}' where id=$1",[shop.memberId]);await teamConfirmation(sql,shop,true);await teamConfirmation(sql,shop,false);
+ const lookup=await recoveryGateway(sql)(recoveryRequest(shop,original));expect(lookup.status).toBe(200);const pending=parseKitchenTapRecovery(await lookup.json(),original,shop);expect(pending.access.permissions).toEqual([]);expect(pending.outcome).toBe('pending');
+ const close=await recoveryGateway(sql)(recoveryRequest(shop,original,newKitchenId()));expect(close.status).toBe(200);expect(parseKitchenTapRecovery(await close.json(),original,shop).outcome).toBe('closed');
+ await teamConfirmation(sql,shop,true);expect((await gateway(sql)(request(shop,action))).status).toBe(409);expect(await current(sql,shop)).toEqual(before);
+}));
+it('an already accepted original remains an immutable actual receipt after Team No',async()=>rollback(async sql=>{
+ const shop=shops[0],accepted=await gotIt(sql,shop),original={action:accepted.action,sessionId:shop.session.id,memberId:shop.memberId};
+ await sql.query("update public.members set permissions='{}' where id=$1",[shop.memberId]);await teamConfirmation(sql,shop,false);
+ for(const closeId of [null,newKitchenId()]){const response=await recoveryGateway(sql)(recoveryRequest(shop,original,closeId));expect(response.status).toBe(200);expect(parseKitchenTapRecovery(await response.json(),original,shop).receipt).toEqual(accepted.receipt);}
+ expect((await sql.query<{n:number}>('select count(*)::int n from private.kitchen_tap_closures')).rows[0].n).toBe(0);
+}));
 
 it.each([0,1,2,3])('pack %s keeps the cancellation until actual Understood, removes only current work and preserves the original feed and money',async index=>rollback(async sql=>{
  const shop=shops[index],cancelled=await cancelForScreen(sql,shop),handler=ticketGateway(sql);

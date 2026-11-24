@@ -13,6 +13,19 @@ async function enterNextPin(page:Page){
  await expect(page.getByRole('heading',{name:'Kitchen',exact:true})).toBeVisible();await installKitchenUi(page);
 }
 
+test('actual Team permission changes disable and restore preparation without granting money access',async({page})=>{
+ await initialize(page);const before=await service.inspect();await service.setTeamConfirmation(false);await page.getByRole('button',{name:'Check now',exact:true}).click();
+ await expect(page.getByText('Preparation is read-only.',{exact:false})).toBeVisible();await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeDisabled();expect(await service.inspect()).toMatchObject({status:before.status,receipts:0,payment:before.payment,total:before.total});
+ await service.setTeamConfirmation(true);await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByRole('button',{name:'Ready',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Ready',exact:true}).click();
+ await expect.poll(()=>service.inspect()).toMatchObject({status:'ready',receipts:2,payment:before.payment,total:before.total});
+});
+test('an offline original survives Team No and can be closed from its saved review without a preparation request',async({page,context})=>{
+ await initialize(page);const before=await service.inspect();await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toBeVisible();
+ const original=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0];await service.setTeamConfirmation(false);await context.setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByText('Preparation is read-only.',{exact:false})).toBeVisible();
+ await page.getByRole('button',{name:/Saved taps ·/}).click();await page.getByRole('button',{name:'Close saved tap',exact:true}).click();await expect(page.getByText('Closed after review. The original ticket is kept.',{exact:true})).toBeVisible();
+ expect(await service.inspect()).toMatchObject({status:before.status,receipts:0,closures:1,actionCalls:0,payment:before.payment,total:before.total});const saved=(await page.evaluate(()=>window.miseKitchenUiTest.inspect()))!.taps[0];expect(saved.id).toBe(original.id);expect(saved.source).toEqual(original.source);
+});
+
 test('owner handoff and undo update the focused board while offline original taps and cached history stay intact',async({page,context})=>{
  await initialize(page);const before=await service.inspect();await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await context.setOffline(true);
  await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByRole('button',{name:'Ready',exact:true})).toBeEnabled();

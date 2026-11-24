@@ -119,7 +119,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
       const original=structuredClone(inputTap),occurredAt=now(),id=newKitchenId(occurredAt),before=await read();
       if(!before)throw new DeviceScreenRequestError('review');
       const access=actor(before);
-      if(access.expiresAt<=occurredAt||!access.permissions.includes(original.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready'))throw new DeviceScreenRequestError('auth');
+      if(access.memberId!==original.access.memberId&&(access.expiresAt<=occurredAt||!access.permissions.includes(original.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready')))throw new DeviceScreenRequestError('auth');
       const saved=await edit(latest=>{
         if(!latest)throw new ScreenStorageError('changed');
         return beginKitchenTapClose(latest,original,{id,access,occurredAt},newKitchenId());
@@ -132,8 +132,9 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
         const state=await read();if(!state)return;
         const access=actor(state);if(access.expiresAt<=now())throw new DeviceScreenRequestError('auth');
         for(const tap of state.taps){
-          if(tap.receipt||tap.closure||sameKitchenSession(tap.access,access)&&!tap.review&&!tap.closeIntents?.length)continue;
-          const canClose=access.permissions.includes(tap.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready');
+          const canAct=access.permissions.includes(tap.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready');
+          if(tap.receipt||tap.closure||canAct&&sameKitchenSession(tap.access,access)&&!tap.review&&!tap.closeIntents?.length)continue;
+          const canClose=access.memberId===tap.access.memberId||canAct;
           const intent=canClose?tap.closeIntents?.find(intent=>sameKitchenSession(intent.access,access))??null:null;
           // A previous reviewer's missing reply is looked up, never sent as
           // the newly signed-in member. A fresh close needs their own click.
@@ -156,6 +157,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
           try {access = actor(state);} catch {return;}
           if (access.expiresAt <= now()) throw new DeviceScreenRequestError('auth');
           const next = state.taps.find(tap => !tap.receipt && !tap.review && !tap.closure && !tap.closeIntents?.length && sameKitchenSession(tap.access, access) &&
+            access.permissions.includes(tap.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready') &&
             (tap.action.type === 'kitchen.acknowledge' || tap.source.acknowledgement?.id === tap.action.parentAckId ||
               state.taps.some(parent => parent.action.id === tap.action.parentAckId && parent.receipt?.type === 'kitchen.acknowledge')));
           if (!next) return;

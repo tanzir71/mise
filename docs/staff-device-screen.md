@@ -16,4 +16,4 @@ The [verification record](staff-device-screen-verification.json) records final c
 
 The additive roster migration matches all three final managed function bodies, preserves 458 unrelated functions and leaves all 108 application tables forcing row-level security. Forty-six rolled-back role, eligibility, receipt and clock checks pass, with one actual check-in, no financial or provider writes and no remaining fixture data. The 17 existing Edge Functions remain unchanged; `staff-device` and `public` remain undeployed. Scheduling stays off with zero Cron jobs.
 
-Actual staff task preference enforcement, full M34 acceptance, and the later handover milestones remain open. No maintainer account, key, phone number or verification code is required to continue them.
+The [preparation-permission follow-up](staff-preparation-permissions.md) connects the actual Team choice to Got it/Ready and own-original recovery. Full M34, recovery controls after complete order-read removal, stock permission enforcement and later own-performance work remain open. No maintainer account, key, phone number or verification code is required to continue them.

@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-24T06:13:56.580Z",
+  "sourceParentCommit": "f701e8d8f512eb643e006077da1d71fad41e670a",
+  "status": "verified-current-Team-preparation-permission-and-own-original-recovery-M34-still-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsCredentialsPhonesOrOtpRequired": false,
+    "newEnvironmentValues": 0,
+    "newProviderAccounts": 0,
+    "staffTeam": false,
+    "kitchenScreen": false
+  },
+  "behavior": {
+    "explicitOutletTeamYesGrantsSupportedPreparation": true,
+    "explicitLegacyDenialsPreserved": true,
+    "teamNoRemovesPreparationWrites": true,
+    "unprofiledLegacyMembersPreserved": true,
+    "currentChecksBeforeAndAfterPreparation": true,
+    "ownOriginalInspectionAndClosureAfterWorkReadLoss": true,
+    "existingReadCapableKitchenReviewConnected": true,
+    "fullWorkReadLossRecoveryInterface": false,
+    "stockAndOwnPerformanceRuntime": false,
+    "financialEffects": 0
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 200,
+      "diagnostics": 0
+    },
+    "unit": {
+      "files": 264,
+      "cases": 5084,
+      "durationSeconds": 915.68,
+      "passed": true,
+      "skipped": 0,
+      "workersMaximum": 2,
+      "originalCorporaAndDeadlinesUnchanged": true,
+      "originalKitchenRecords": 5004,
+      "originalKitchenDurationMs": 51353,
+      "sourceState": "All behavior code final for the full invocation. The new migration filename was aligned afterward to its assigned managed version with identical SQL bytes."
+    },
+    "build": {
+      "root": true,
+      "pages": true,
+      "generatedHtmlAndAssetsChecked": true,
+      "rebuildAfterInterruptedArtifactCorruption": true
+    },
+    "browser": {
+      "root": {
+        "files": 9,
+        "cases": 110,
+        "passed": true
+      },
+      "pages": {
+        "files": 9,
+        "cases": 110,
+        "passed": true
+      },
+      "workers": 2,
+      "earlierInterruptedAndCorruptArtifactInvocationsExcluded": true
+    },
+    "visualQa": {
+      "comparisons": 75,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "accessibilityViolations": 0,
+      "overflow": false,
+      "utilityFrameAdaptationsDocumented": true,
+      "generatedAt": "2026-11-24T05:52:34.489Z",
+      "report": "qa/report.html",
+      "reportSha256": "3cdbef4ec629d5b841182eb440873357c685dc9c2bbf2b00a21a2cb625d2767a",
+      "resultsSha256": "0ebcf8ed57e9954919d78377f75d1198a9c1825ba4e507ff49aaf02907acb20e",
+      "screenshots": [
+        "docs/screenshots/m34-preparation-no-390.png",
+        "docs/screenshots/m34-preparation-original-390.png",
+        "docs/screenshots/m34-preparation-restored-390.png"
+      ],
+      "screenshotHashes": {
+        "docs/screenshots/m34-preparation-no-390.png": "546dd6c9c8a2c766701757a9b8b17305b81ef4b1c0e4dc89d91761186ffb2b6b",
+        "docs/screenshots/m34-preparation-original-390.png": "cc7c0f466ff9b08d4af779214c24c83c3f402c3a12f14746be63ba4f2aecaa2d",
+        "docs/screenshots/m34-preparation-restored-390.png": "79822ddb3fdb93e194f1ba14c3e4702447e283d4f43f48304dc066c784b1c2a0"
+      }
+    },
+    "secrets": {
+      "knownPrivateValues": 13,
+      "currentCredentialFindings": 0,
+      "newDeploymentFindings": 0,
+      "olderReviewedNonsecretFindings": 22,
+      "exceptionsAdded": 0,
+      "historyAndArtifactsChecked": true
+    }
+  },
+  "backend": {
+    "checkedAt": "2026-11-24T05:53:20.605Z",
+    "migration": "20261124045724",
+    "migrationSha256": "967e62a3fd9364ea0c27d82a224fb0902cfd2c9148b7824d372054851e9f577b",
+    "migrations": 87,
+    "functions": 517,
+    "forcedRlsTables": 122,
+    "cronJobs": 0,
+    "currentFunctionDigest": "084312a1c62df88be533511688b74b71",
+    "unchangedEarlierFunctions": 515,
+    "priorInitialApplyComparisonVerified": true,
+    "changedFunctions": [
+      "device_staff_permissions",
+      "recover_kitchen_tap"
+    ],
+    "accessSettingsPreserved": true,
+    "functionBodiesMatched": true,
+    "managedRollbackChecks": 56,
+    "actualFixtureCheckIns": 1,
+    "financialWrites": 0,
+    "providerRequests": 0,
+    "fixtureCleanupVerified": true,
+    "recovery": {
+      "checkedAt": "2026-11-24T05:41:23.628Z",
+      "edgeVersion": 3,
+      "deployedContentMatches": true,
+      "verifyJwt": false,
+      "explicitDevicePinAuthorization": true,
+      "otherEdgeVersionsPreserved": 18,
+      "bytes": 14613,
+      "sha256": "0f77e12a15b4a0f77332660c835be57068bc24e4059b2cd897a1b8eb9f638f1d"
+    },
+    "advisors": {
+      "security": {
+        "count": 1,
+        "groups": {
+          "INFO:rls_enabled_no_policy": 1
+        }
+      },
+      "performance": {
+        "count": 2,
+        "groups": {
+          "INFO:unindexed_foreign_keys": 1,
+          "INFO:unused_index": 1
+        }
+      }
+    },
+    "managedProbeSha256": "43f6b915b3c71cd60e9818aa29649db6d9c4b9a29ac4f6ebc41d6b0bcc314af5"
+  },
+  "liveHttp": {
+    "requests": 3,
+    "completedDeniedRequests": 3,
+    "checks": [
+      {
+        "name": "missing-device",
+        "status": 401,
+        "noCredentialDiagnostics": true
+      },
+      {
+        "name": "wrong-origin",
+        "status": 403,
+        "noCredentialDiagnostics": true
+      },
+      {
+        "name": "malformed-device",
+        "status": 401,
+        "noCredentialDiagnostics": true
+      }
+    ],
+    "authenticatedRequests": 0
+  },
+  "delivery": {
+    "milestoneComplete": false,
+    "defaultPreviewsOff": true,
+    "workflowsHeld": true,
+    "ciArtifactUploadHeld": true,
+    "publicationHeld": true,
+    "schedulingHeld": true,
+    "providerRequests": 0
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "apps/web/src/KitchenScreen.tsx": "4ab49493a16651aaa96252264ab13cdf9c2436f098318d87f8d6d4c70769b3fb",
+    "apps/web/src/KitchenTapReview.tsx": "1758cb6b59f057f61cf228e7a6b5be50e93b86f452ca6b7b74c82cadfcf5464d",
+    "apps/web/src/StaffMemberEditor.tsx": "9e076d79ed37b4e1e4054c21db0a5c971ab025bba189ed06d140fc6aa1fe2ae5",
+    "apps/web/src/data/device-screen-remote.ts": "2e8d574a9dd512daf6e68f0d9faaf4947851414b345c10dd65e208ef98c98867",
+    "apps/web/src/data/kitchen-screen-session.ts": "b0a76af0c2b4d41fb04bddae1a64f2f33061712e7f6b19fe458c89eadd7c9cd9",
+    "packages/core/device-access.ts": "883d4d5ef4c050fd1471988f15870c556460a45e7665afef1d6907759c26983e",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "packages/core/kitchen-recovery.ts": "99766638344863dbb46709ba1ffb6690b3770e245d4abc942bbb0283063e8292",
+    "packages/core/kitchen-screen.ts": "49e3c4859ebe3efd3afa9014ec6ed046bd62a51c2be81b2a1ff8477046ad0c05",
+    "packages/core/kitchen.ts": "5260cf4ef1051e12502de2db8c7880f6616ed8e6f691db37f50d347dcf582c21",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "qa/configs/m34-preparation-permissions.json": "06193c3cf6260a73de61d463a34aceb0003469b2ab3a26082b8feae381e28dc6",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/kitchen-recovery-handler.ts": "e3d4093abbc73ff3edd64e1bc5ab73a4b51c2ce9c9b425a7dc310ad4f3b0d2e9",
+    "supabase/functions/kitchen-recovery/index.ts": "6f9ef3ab904ee39821d6201d4c142212ba6f5b6b369845ea149073fa269118b7",
+    "supabase/migrations/20261124045724_staff_preparation_permissions.sql": "967e62a3fd9364ea0c27d82a224fb0902cfd2c9148b7824d372054851e9f577b",
+    "tests/e2e/kitchen-screen-ui.spec.ts": "10852251c20c1bf5ddf3126ad247bcbf7cecce13fb143c52493a6fc0e92b24f4",
+    "tests/fixtures/install-kitchen-ui.mjs": "f57f3fd7b3624f838c232aa252695c1f19b9eb30d6a4f3587d97c7903ded4fbd",
+    "tests/fixtures/kitchen-ui-service.ts": "e4b1126e6daf19b3827dd7bd807a75f6cccba7df966fa80eba9805e969df1e46",
+    "tests/kitchen-actions.test.ts": "8bd1b3326779ee16626cea530a04a986ff268eeaab7eeb84acb6de62111a17fe",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/kitchen-recovery-handler.test.ts": "5edf40abb3741236d37c4d6e7db3fbf0cdbb8b70b8c4b78bd3122aaa7c41ee01",
+    "tests/staff-device-sql.test.ts": "200a4a266169a06f32ceffe218059d8ff16027820a1099ca1486c666ec39dce3",
+    "tests/staff-preparation-recovery.test.ts": "3001fe486d54ba3238675c7dfe0edf91cd76e4ea156af820395638b8fdf8698b",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  }
+}

@@ -18,7 +18,7 @@ export function KitchenTapReview({state,now,online,busy,onCheck,onClose,onCopy}:
       <h2>Saved taps</h2><p>Check the original confirmation before recording a new tap on the current ticket.</p>
       <ul className="kitchen-review-list">{rows.map(tap=>{
         const kind=tap.action.type==='kitchen.acknowledge'?(tap.source.status==='cancelled'?'Understood':'Got it'):'Ready',current=state.tickets.find(ticket=>ticket.id===tap.action.orderId);
-        const allowed=now<state.access.expiresAt&&state.access.permissions.includes(tap.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready');
+        const allowed=state.access.memberId===tap.access.memberId||now<state.access.expiresAt&&state.access.permissions.includes(tap.action.type==='kitchen.acknowledge'?'orders.acknowledge':'orders.ready');
         return <li key={tap.action.id} className="kitchen-review-item">
           <h3>{tap.source.number} · {kind}</h3><p>{sameKitchenSession(tap.access,state.access)?'This PIN session':'Earlier PIN session'} · {savedTime(tap)}</p>
           <p>{tap.receipt?`${kind} was accepted. The original confirmation is saved.`:tap.closure?'Closed after review. The original ticket is kept.':tap.closeIntents?.length?'Close request saved on this screen · waiting for confirmation.':'Confirmation is still needed. The original tap is kept.'}</p>

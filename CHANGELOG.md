@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: Team's Confirm orders choice now gates actual paired-screen Got it/Ready actions per outlet, including revocation after preparation. Explicit legacy denials remain effective. Current members retain inspection and closure of their own original requests without posting money or inventing permission. All setup stays end-user configured; broader staff recovery controls, stock/performance permission paths and full M34 acceptance remain open, with workflows/publication held.
+
 - In progress: urgent Inbox controls now connect explicit consent, offline No, original-account recovery and the built service worker to current task and payment-source targets. Manual tasks have an explicit urgent choice. Invalid or outdated alerts cannot select another outlet, execute source text or post money. Each installation owns all setup; genuine provider/device commissioning, full M37 acceptance and publication remain held, with the preview off.
 
 - In progress: urgent alert browser groundwork preserves separate original consent through offline withdrawal, lost replies, competing tabs and native outlet changes. A generic notification handler checks the actual browser and confirmed choice before presentation. The follow-up above connects its settings, recovery, worker and current targets. Every installation owns its configuration; flags stay off and workflows/publication remain held.

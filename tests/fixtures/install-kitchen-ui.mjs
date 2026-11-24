@@ -11,11 +11,25 @@ export async function installKitchenUi(page){bundle??=build({lib:{entry:resolve(
 let visualService;
 export async function captureKitchenScreen(page,mode='board'){
  visualService??=await startKitchenUiService();
- const config=mode==='queued'||mode==='review'||mode==='undone'?await visualService.prepare():await visualService.prepareBoard();
+ const config=mode==='queued'||mode==='review'||mode==='undone'||mode.startsWith('permission-')?await visualService.prepare():await visualService.prepareBoard();
  await installKitchenUi(page);await page.evaluate(screen=>window.miseKitchenUiTest.initialize(screen),config.screen);await page.reload();
  await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();
  if(mode==='cancelled'){
   await visualService.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();
+ }
+ if(mode.startsWith('permission-')){
+  if(mode==='permission-original'){
+   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await page.context().setOffline(true);await page.getByRole('button',{name:'Got it',exact:true}).click();
+  }
+  await visualService.setTeamConfirmation(false);await page.context().setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByText('Preparation is read-only.',{exact:false})).toBeVisible();
+  if(mode==='permission-original'){
+   await page.getByRole('button',{name:/Saved taps ·/}).click();await expect(page.getByRole('button',{name:'Close saved tap',exact:true})).toBeEnabled();await page.getByText('Original ticket',{exact:true}).click();
+  }else if(mode==='permission-restored'){
+   await visualService.setTeamConfirmation(true);await page.getByRole('button',{name:'Check now',exact:true}).click();await page.getByRole('button',{name:'Got it',exact:true}).click();
+   if(page.viewportSize().width<640)await page.getByRole('button',{name:/^Cooking\s/}).click();
+   await page.getByRole('button',{name:'Ready',exact:true}).click();await expect.poll(()=>visualService.inspect()).toMatchObject({receipts:2,status:'ready'});
+   if(page.viewportSize().width<640)await page.getByRole('button',{name:/^Ready\s/}).click();
+  }else await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeDisabled();
  }
  if(mode==='scheduled'){
   const start=Date.now()+3600000;await visualService.ageOrder();await visualService.scheduleFromDesk(start);await installKitchenUi(page);

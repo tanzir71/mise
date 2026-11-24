@@ -46,7 +46,11 @@ it('a live denial returns no original source or provider diagnostics',async()=>{
 });
 it('a malformed or mismatched backend outcome cannot confirm or close the original tap',async()=>{
  const f=await fixture();for(const patch of [{token:'PRIVATE'},{outcome:'accepted',receipt:{}},{original:{...f.original,sessionId:newKitchenId()}},
-  {access:{...f.access,permissions:[]}}, {receipt:{id:f.action.id}}]){f.recover.mockResolvedValue({...f.pending,...patch});const response=await f.handler(f.request());expect(response.status).toBe(503);expect(await response.text()).not.toContain('PRIVATE');}
+  {access:{...f.access,memberId:newKitchenId(),permissions:[]}}, {receipt:{id:f.action.id}}]){f.recover.mockResolvedValue({...f.pending,...patch});const response=await f.handler(f.request());expect(response.status).toBe(503);expect(await response.text()).not.toContain('PRIVATE');}
+});
+it('returns only the exact own original when fresh preparation permission is absent',async()=>{
+ const f=await fixture();f.recover.mockResolvedValue({...f.pending,access:{...f.access,permissions:[]}});
+ const response=await f.handler(f.request());expect(response.status).toBe(200);expect(await response.json()).toEqual({...f.pending,access:{...f.access,permissions:[]}});
 });
 it('network diagnostics and server-key values stay out of handler errors',async()=>{
  const f=await fixture();f.recover.mockRejectedValue(Error('sb_secret_private_example https://private-provider.test'));

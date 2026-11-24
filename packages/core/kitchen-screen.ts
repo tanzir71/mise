@@ -86,7 +86,7 @@ export async function parseKitchenScreenState(value: unknown): Promise<KitchenSc
     if(value.v===2){
       if(!Array.isArray(raw.closeIntents))throw invalid();
       tap.closeIntents=raw.closeIntents.map(value=>{
-        const intent=parseKitchenCloseIntent(value,action,access);if(closeIds.has(intent.id))throw invalid();closeIds.add(intent.id);return intent;
+        const intent=parseKitchenCloseIntent(value,action,access,actor.memberId);if(closeIds.has(intent.id))throw invalid();closeIds.add(intent.id);return intent;
       });
       tap.closure=raw.closure===null?null:parseKitchenTapClosure(raw.closure,retainedKitchenTap(tap),access);
       if(receipt&&tap.closure)throw invalid();
@@ -179,7 +179,7 @@ export function beginKitchenTapClose(state:KitchenScreenState,original:KitchenTa
   const saved=state.taps.find(tap=>tap.action.id===original.action.id);
   if(!saved||!sameTapSource(saved,original)||!sameKitchenSession(intent.access,state.access))throw invalid();
   if(saved.receipt||saved.closure)return state;
-  intent=parseKitchenCloseIntent(intent,saved.action,state.access);
+  intent=parseKitchenCloseIntent(intent,saved.action,state.access,saved.access.memberId);
   if(saved.closeIntents?.some(value=>sameKitchenSession(value.access,intent.access)))return state;
   const next=upgradeReviews(state);
   return {...next,revision,taps:next.taps.map(tap=>tap.action.id===saved.action.id?{...tap,closeIntents:[...tap.closeIntents!,intent]}:tap)};
