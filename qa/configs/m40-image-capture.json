@@ -1,0 +1,54 @@
+{
+  "title": "M40 \u2014 original images and human-reviewed local capture",
+  "widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "pages": [
+    {
+      "id": "m40-invoice",
+      "path": "app/?flags=ocr",
+      "imageCaptureFixture": "invoice",
+      "note": "M26 layout with the actual selected original and real eng+ben read. Editable total is in its tap target; explicit count confirmation and original-reader/recovery controls are necessary additions. The source is a synthetic printed test invoice; no camera or OS status is fabricated.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".capture-page",
+          "reference": "screens/mobile/M26 \u00b7 Manager \u2014 Snap a supplier invoice.png"
+        }
+      ],
+      "captureStyle": ".app-skip{visibility:hidden}"
+    },
+    {
+      "id": "m40-pricing",
+      "path": "app/?flags=ocr",
+      "imageCaptureFixture": "pricing",
+      "note": "C07 layout with an actual synthetic prescription file, human-entered draft, two entered prices and one explicitly unavailable line. The complete working keypad and a review-details step preserve manual controls; this creates no sale or order.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".order-pricing-capture",
+          "reference": "screens/corner-shop/C07 \u00b7 Owner \u2014 Price a typed or photo order (calculator per line).png"
+        }
+      ],
+      "captureStyle": ".app-skip{visibility:hidden}"
+    },
+    {
+      "id": "m40-confirmation",
+      "path": "app/?flags=ocr",
+      "imageCaptureFixture": "confirmation",
+      "note": "Required final seller confirmation adapts existing OrderForm primitives, with the original image and individual name/quantity/price checks. C07 is a visual token reference; it does not specify this extra final safety form.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".capture-page",
+          "reference": "screens/corner-shop/C07 \u00b7 Owner \u2014 Price a typed or photo order (calculator per line).png"
+        }
+      ],
+      "captureStyle": ".app-skip{visibility:hidden}"
+    }
+  ]
+}

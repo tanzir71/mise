@@ -1,0 +1,1494 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "0a8c8fed9d7df230ce9e5cd968789fff9816f30e",
+  "verifiedAt": "2026-11-24T20:51:04.890Z",
+  "scope": "M40 saved original images to human-reviewed invoice/stock, unpaid order and separate Inbox text; publication remains held",
+  "sourceFingerprint": "67c321b2b56cd21c02cd8d10694552dcce2fc35d024ac1535c0e1feac84eb91e",
+  "sources": [
+    {
+      "path": ".gitignore",
+      "sha256": "f191deeb74452f9fb28106458a9ff34d17638b43cbe006febdf3ba75504f3d96"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "7a94b43d59ef25b5c2b5c2cee259e4564f176f73d0e55247af58ce5672ab1938"
+    },
+    {
+      "path": "apps/web/package.json",
+      "sha256": "6e507b2e9191e91645250d6d2f0274dafc11153183ea0c45e5fbe82657ae4ca0"
+    },
+    {
+      "path": "apps/web/prepare-ocr-assets.ts",
+      "sha256": "34c0e5f35fd224b04cef03d457280f2e88b707ee32f7416d2cf4e1a16b6a6a03"
+    },
+    {
+      "path": "apps/web/src/CaptureSource.tsx",
+      "sha256": "52009f973ffa2b7b0bbee61af32afc9809f9ee238fd87ddd5c0f5218108cf84d"
+    },
+    {
+      "path": "apps/web/src/ImageCapture.tsx",
+      "sha256": "56abd51e4d5c4c7b12c930f29f9b7c7eab89fa920ada79a17cc2df2890684ebe"
+    },
+    {
+      "path": "apps/web/src/ImageInvoice.tsx",
+      "sha256": "cc76b17974ce9d931e7fd65cd765babb7fae528362d28346197a77e2fea7b56c"
+    },
+    {
+      "path": "apps/web/src/Inbox.tsx",
+      "sha256": "911583886e00b71856208af8998140376be3af7e654b27aaa13e40598cd0a6c1"
+    },
+    {
+      "path": "apps/web/src/LocalApp.tsx",
+      "sha256": "ead61a83ccc92df5dff990c2594696464045c68a9be86c1d16a6767110f78525"
+    },
+    {
+      "path": "apps/web/src/OrderForm.tsx",
+      "sha256": "cf782b21ed5b7767d368de6862884d75eb6da49377605b29854e3c7dc3d3bad3"
+    },
+    {
+      "path": "apps/web/src/OrderPricing.tsx",
+      "sha256": "5d952d2c46910cb334d6143566210058ea7d8e921f5a57ab4902b2b13e04731e"
+    },
+    {
+      "path": "apps/web/src/Stock.tsx",
+      "sha256": "ed02859a258091d677cfffca73b06079c0a38eccac5c529449f5f025dd332d8a"
+    },
+    {
+      "path": "apps/web/src/assets/capture/backspace.svg",
+      "sha256": "40912dd87892408be1ce8b79980cb78aa89416b52e7eef6c0733b4e45a9eaccf"
+    },
+    {
+      "path": "apps/web/src/assets/capture/camera.svg",
+      "sha256": "07da17bb39794a8f761a1273700dec3ea65f982fd93931c2e5d7f9bfec01c47b"
+    },
+    {
+      "path": "apps/web/src/assets/capture/edit.svg",
+      "sha256": "e0b191f9684896c5ac8bd811689e1311714d50cb15e72b59bbb74c7c2e2aa12e"
+    },
+    {
+      "path": "apps/web/src/assets/capture/package.svg",
+      "sha256": "61112cab7872f78fef80543c4c00df48e90e4a8c88bac44b228b1cf0cb9db355"
+    },
+    {
+      "path": "apps/web/src/assets/capture/send.svg",
+      "sha256": "5e62c94abac9496c5f2972a02f9e0b95e2638fbffe4518708f7a3c77c194905b"
+    },
+    {
+      "path": "apps/web/src/assets/capture/success.svg",
+      "sha256": "b7a1992e6f13730dcd61c8e35facc7c8e0cb6ee8ceaf2feb582c6fbc600689d7"
+    },
+    {
+      "path": "apps/web/src/assets/capture/warning.svg",
+      "sha256": "1135ff4af86dd90a0f1d41aa2927a2e38ec54cf22d4a19ffcc6e9756412c3830"
+    },
+    {
+      "path": "apps/web/src/data/db.ts",
+      "sha256": "6877e95dff06227a037620595c3b34e90947f2843fc2e4cedf07ea6ab65c1a6d"
+    },
+    {
+      "path": "apps/web/src/data/image-capture.ts",
+      "sha256": "ce0c3a46b113cd92a332a5ed79ed7c045bf478ae058da7fd1a7fbc8fecb7b1e0"
+    },
+    {
+      "path": "apps/web/src/data/inbox.ts",
+      "sha256": "e1e46309091a818ce6c72b5624abae3d10fde41c83b37550dc76a2a465c0d094"
+    },
+    {
+      "path": "apps/web/src/image-capture.css",
+      "sha256": "87ffd7787e4a83d25af9e2d4ed2e02ccaf2d8078959cbe1ead1d8990381cfe72"
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sha256": "f190636393560968bc5e8a73fd13cd8124ba1c9840cd3067acef8977f8a4f001"
+    },
+    {
+      "path": "apps/web/src/ocr-context.tsx",
+      "sha256": "c44ea8fce805be3384ce87cc457e60cd8a3ab99a278fa0c15f524958c7b1e479"
+    },
+    {
+      "path": "apps/web/src/ocr/NOTICE.txt",
+      "sha256": "b7a35fdc5dc0c01ddf932a48d0269c21dc3016618bd37ed4f1e50fd63ef4c623"
+    },
+    {
+      "path": "apps/web/src/ocr/assets.json",
+      "sha256": "153c60b465ac4001c4c5fcd67ee57886d1f075c1ccf79587abf9604cab922926"
+    },
+    {
+      "path": "apps/web/src/ocr/assets.ts",
+      "sha256": "0136cd668ee03b72fc09f280cda794d9f4c3d1dae39607cbb8ab4b6a83f168b2"
+    },
+    {
+      "path": "apps/web/src/ocr/raster.ts",
+      "sha256": "3284823c3e08e1a35978c9fc1eb46cd44c599d9e7c911cb93308a9236262a0ad"
+    },
+    {
+      "path": "apps/web/src/ocr/worker.ts",
+      "sha256": "83a6073c439bc2666e702a609b776b937b3f2a48c7441eaa95f48e594b2a3126"
+    },
+    {
+      "path": "apps/web/src/sw.ts",
+      "sha256": "1f71b3044f8d2f220354d6b22f09cf329a283e30311ad84c9856712cda9194df"
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "sha256": "3423ccdff42bcf2e4b59527825f636df825836866d1af8f84688803b5f70c3fc"
+    },
+    {
+      "path": "docs/image-capture.md",
+      "sha256": "ec105c168a49a4b49827b3aed552f62078bdc5829f8196427ccf64736d375308"
+    },
+    {
+      "path": "docs/on-device-ocr.md",
+      "sha256": "c5991cc27c5525db532164817093eb1ea38063f5debcee3cc1e05452abb68723"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "45a1d15dffcbf1faac5918dc7363911e563c909a8c2d44e9ea4062c166907f71"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "509e3885ad3ef1585c93bc061c5076ea4b6a6acf43df8849ce349da60734f88a"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "a58feb58202b1e07611d82249d44564007d316322d62e5a2986303feb040c5b2"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "130313f40b15a119ee17e109d701e15d63770fa536028a45f6c2151bfad63c63"
+    },
+    {
+      "path": "handover/docs/phases/phase-4-capture.md",
+      "sha256": "028354f6d146c5810d56475976650f0533880de405985761d398eca41bef0d58"
+    },
+    {
+      "path": "handover/exports/screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+      "sha256": "2a6410b158e152ad9d921475fdbef903d2832789d7756a8e8778ef4eb665c73b"
+    },
+    {
+      "path": "handover/exports/screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+      "sha256": "b6f779233403b74b169b732f998d0e77d3a48236000c07723c67c94afdbe7354"
+    },
+    {
+      "path": "package.json",
+      "sha256": "55086c9e6207275584e1a7553ef08d43919edb4d957e73adb577ebea30d9c2cf"
+    },
+    {
+      "path": "packages/core/capture-invoice.ts",
+      "sha256": "a95faa21d33d79bc8c8936a8addaa0a80b1dfee8bac2560485a932d14b837809"
+    },
+    {
+      "path": "packages/core/capture-order.ts",
+      "sha256": "5dd1d453e464e27d21a137d38b4afa90d7a44c1cc34620c9518f3ff8ecda72cf"
+    },
+    {
+      "path": "packages/core/flags.ts",
+      "sha256": "f934e22df8676272bf0e8e13c9892193db0b69fd8b4cddffdb85b4dd7e3c2055"
+    },
+    {
+      "path": "packages/core/ocr-invoice.ts",
+      "sha256": "0ee090175bc3cfaf440e3f0d66a197d9fdbd9ece0081bcf5fa5432e66144cb60"
+    },
+    {
+      "path": "packages/core/ocr.ts",
+      "sha256": "783647ffb7f4d96834b378f93721236697bd0fcd275a0c1b0dc07d9e7cf8bda9"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha256": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "96f0e88060c8058dfb43de109b7cc9712fb50669d8d9c2cc48a6f3ca14cde126"
+    },
+    {
+      "path": "qa/configs/m40-image-capture.json",
+      "sha256": "18c7c261e9a03527c8879bf7f3841e12cd72c08dc681c322ba5438006c0652e6"
+    },
+    {
+      "path": "scripts/generate-ocr-fixtures.mjs",
+      "sha256": "5e6905f3ee49a4ee148e8fc45b2f196418f1bf21786bbad085a3a69555065fbf"
+    },
+    {
+      "path": "scripts/harden.mjs",
+      "sha256": "b7ee62d254005aef992b2c90a8c45c121f25e60fb68ca92e35f06bb7024b4dda"
+    },
+    {
+      "path": "scripts/qa-visual.mjs",
+      "sha256": "934e3321fc2b56fc7fc13daf4659873904180602edb059e64b7edc09685e3b8a"
+    },
+    {
+      "path": "tests/cloud-csp.test.ts",
+      "sha256": "fcb779fa2c579af6c394aa902ace7cd6f90fc60b95ac966ca9d9b71e0acc0313"
+    },
+    {
+      "path": "tests/e2e/image-capture-sync.spec.ts",
+      "sha256": "c7db3a13e32c7e1537dd99cbcba3ae06ec3cf5fee6a51464a19d7ef1cf83de79"
+    },
+    {
+      "path": "tests/e2e/image-capture.spec.ts",
+      "sha256": "ea243b2b5d9c706073c502a1bb91ec63468185a9872c6c82f0becd135be361ef"
+    },
+    {
+      "path": "tests/e2e/ocr-engine.spec.ts",
+      "sha256": "1f284c6ea0a870a5c562ac384ce3f6f1c056d23a4fbb645a829522c5e2bca7e3"
+    },
+    {
+      "path": "tests/fixtures/image-capture-visual.mjs",
+      "sha256": "1f86bca243269e604ca83306ba16ac92097f12f29b6b762ba812788d9dfdfca3"
+    },
+    {
+      "path": "tests/fixtures/ocr-browser.mjs",
+      "sha256": "aaa7944e0d87f636134912761dae36858ed8f6fb0b9adb62f4e6bd401dcdba48"
+    },
+    {
+      "path": "tests/fixtures/ocr/bangla-list.png",
+      "sha256": "7ef696c3357655c4223396c6a0eb6cdb8a06c7cba3d7e506657d0458d0d072f6"
+    },
+    {
+      "path": "tests/fixtures/ocr/expected.json",
+      "sha256": "71141a47bef2fe49dce4e11c9325e6536b082b47f052741930fc8b914817da51"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-01.png",
+      "sha256": "54d3ec01fca369e2c9693eb00daf1375943b019c6b18e0bb778105e38fbfa276"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-02.jpg",
+      "sha256": "b456e3a38c1b311676d05b170bbb8036cc5e07e480c2eb27aeb860c917adf625"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-03.png",
+      "sha256": "391fc626d1fb12a8e4848bd91dda60064e233c69f0faf85866c4d37322412b9f"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-04.png",
+      "sha256": "d7567fc9b0d6f2cbb778e90c8034d6707888d60d3c9033cbeaf9aa0b98071880"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-05.jpg",
+      "sha256": "76eac08b7d79919aea2a930d3713bdaa3a18b60578c8ee03499054560b5650e1"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-06.png",
+      "sha256": "b8b490cad5893e31787f61c7096e9bdefdc700edee3e469d476963a878a68481"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-07.png",
+      "sha256": "1efd138d974a02663c7f7ea36a4f790322effc6f71ea1ceee3f3181acfb6a57a"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-08.jpg",
+      "sha256": "d905ffcf9d924407fb3a8d7054eacf4ed408ad642e85e0c849e63cf7db7dadc2"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-09.png",
+      "sha256": "222f9f3acf1e53bd4403e6f1e0e116bed2b6660e5930798448ef1088ef658d47"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-10.png",
+      "sha256": "5d35cfbaeef4f34850b86b1d6bd2e9ee3bd94e327c5c8a0654a1a86a7d4ce83c"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-11.jpg",
+      "sha256": "a8a21511c08c134a296584c7bb13e64f72ad3348b6ddda5cd6ce729d8a3810c5"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-12.png",
+      "sha256": "81ad2032b7a029ddcd4c54dabf51a6eaa029aa1b46282dbb76eec65785c2fa4a"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-13.png",
+      "sha256": "4c0b3651e4e3cc4c4a799ab9e5d17b2640d1d040b6e0feeed33bfdb188f46271"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-14.jpg",
+      "sha256": "f63a8ef125c8499a4a00694b9467e976262574101c591e196593038cc235e162"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-15.png",
+      "sha256": "7caff1b42ceed23a4b0d8d8f828254c91971042bd8c536b7e372d68bbdc054cb"
+    },
+    {
+      "path": "tests/fixtures/ocr/request-prescription.png",
+      "sha256": "623e4b42187d2facbec951bc10ecd01bdf68c97ac65edd097551b598cc348be0"
+    },
+    {
+      "path": "tests/fixtures/ocr/request-prescription.svg",
+      "sha256": "29ba17fa7266cff39c9215c20e2bd31b0ae9f1cd03751f4a7d441a924804cc9c"
+    },
+    {
+      "path": "tests/image-capture.test.ts",
+      "sha256": "b02d344eab773f250978799c6637e5b2f27f5740648d48e9705d2a0b38b1827f"
+    },
+    {
+      "path": "tests/ocr-assets.test.ts",
+      "sha256": "0f8b511599ae4cd082c3ccf526a34b1e6f56a10ccb0d3bf1be0ad4de644a3af5"
+    },
+    {
+      "path": "tests/ocr-invoice.test.ts",
+      "sha256": "3770211494c835e2ee067a16feabf98c50513f22a7f101a0d236a256f1423cc0"
+    },
+    {
+      "path": "tests/ocr-raster.test.ts",
+      "sha256": "e7a9c60622f3c9fc7139ecd50bdda6f9710bae23391aba6853a8c8164da4d646"
+    },
+    {
+      "path": "tests/ocr-worker.test.ts",
+      "sha256": "5065e5a58f1e259ae866e2e91b6b0b153c2e0ca0d5aa8c5ce216eac49c00a610"
+    },
+    {
+      "path": "tests/ocr.test.ts",
+      "sha256": "9c79d4cb259d59bbdd2f71c4abe61613ffd0b169aad4ae1c5c6f635d0bb82ead"
+    },
+    {
+      "path": "tests/sync-convergence-server.ts",
+      "sha256": "4dbe2883457b55584e8b0bb1d45f2473b7f31cc8d9b68a2d5fd33ff589582a3c"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+    }
+  ],
+  "tests": {
+    "unit": {
+      "cases": 5283,
+      "files": 279,
+      "workers": 2,
+      "originalCorporaAndDeadlinesPreserved": true,
+      "newNativeCaptureCases": 19
+    },
+    "browser": {
+      "rootCapture": {
+        "cases": 8,
+        "files": 2,
+        "workers": 2
+      },
+      "rootRegression": {
+        "cases": 87,
+        "files": 14,
+        "workers": 2
+      },
+      "pages": {
+        "cases": 95,
+        "files": 16,
+        "workers": 2
+      }
+    },
+    "accuracy": {
+      "root": {
+        "fixtures": 15,
+        "literalCorrect": 115,
+        "literalTotal": 120,
+        "exactItems": 45,
+        "itemTotal": 45
+      },
+      "pages": {
+        "fixtures": 15,
+        "literalCorrect": 115,
+        "literalTotal": 120,
+        "exactItems": 45,
+        "itemTotal": 45
+      }
+    },
+    "visual": {
+      "root": {
+        "comparisons": 15,
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "assetGeometryComparisons": 10,
+        "automatedAaViolations": 0,
+        "differences": "Informational; actual sources, working controls and OS chrome differ",
+        "rows": [
+          {
+            "id": "m40-invoice-screen-360",
+            "width": 360,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-360.png",
+            "percent": 19.43,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-390",
+            "width": 390,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-390.png",
+            "percent": 16.96,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-768",
+            "width": 768,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-768.png",
+            "percent": 31.51,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-1024",
+            "width": 1024,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-1024.png",
+            "percent": 31.61,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-1440",
+            "width": 1440,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-1440.png",
+            "percent": 28.03,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-360",
+            "width": 360,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-360.png",
+            "percent": 9.3,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-390",
+            "width": 390,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-390.png",
+            "percent": 9.35,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-768",
+            "width": 768,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-768.png",
+            "percent": 8.35,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-1024",
+            "width": 1024,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-1024.png",
+            "percent": 8.5,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-1440",
+            "width": 1440,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-1440.png",
+            "percent": 8.5,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-confirmation-screen-360",
+            "width": 360,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-360.png",
+            "percent": 13.16,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-390",
+            "width": 390,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-390.png",
+            "percent": 13.69,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-768",
+            "width": 768,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-768.png",
+            "percent": 16.14,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-1024",
+            "width": 1024,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-1024.png",
+            "percent": 21.1,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-1440",
+            "width": 1440,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-1440.png",
+            "percent": 20.55,
+            "assetGeometry": []
+          }
+        ]
+      },
+      "pages": {
+        "comparisons": 15,
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "assetGeometryComparisons": 10,
+        "automatedAaViolations": 0,
+        "differences": "Informational; actual sources, working controls and OS chrome differ",
+        "rows": [
+          {
+            "id": "m40-invoice-screen-360",
+            "width": 360,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-360.png",
+            "percent": 19.43,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-390",
+            "width": 390,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-390.png",
+            "percent": 16.96,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-768",
+            "width": 768,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-768.png",
+            "percent": 31.51,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-1024",
+            "width": 1024,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-1024.png",
+            "percent": 31.61,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-invoice-screen-1440",
+            "width": 1440,
+            "referenceFile": "screens/mobile/M26 · Manager — Snap a supplier invoice.png",
+            "screen": "screens/m40-invoice-screen-1440.png",
+            "percent": 28.03,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%230E8A5F'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/package'%20clip-path='url(%23clip0_0_65)'%3e%3cpath%20id='Vector'%20d='M12.25%204.66667L7%201.75L1.75%204.66667V9.33333L7%2012.25L12.25%209.33333V4.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3cpath%20id='Vector_2'%20d='M1.75%204.66667L7%207.58333M7%207.58333L12.25%204.66667M7%207.58333V12.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%236F6F6C'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_65'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M13.3333%204L6%2011.3333L2.66667%208'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 16,
+                "height": 16
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M5.25%201.16667H8.75C9.07217%201.16667%209.33333%201.42783%209.33333%201.75V2.91667C9.33333%203.23883%209.07217%203.5%208.75%203.5H5.25C4.92783%203.5%204.66667%203.23883%204.66667%202.91667V1.75C4.66667%201.42783%204.92783%201.16667%205.25%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M9.33333%202.33333H10.5C10.8094%202.33333%2011.1062%202.45625%2011.325%202.67504C11.5437%202.89383%2011.6667%203.19058%2011.6667%203.5V11.6667C11.6667%2011.9761%2011.5437%2012.2728%2011.325%2012.4916C11.1062%2012.7104%2010.8094%2012.8333%2010.5%2012.8333H3.5C3.19058%2012.8333%202.89383%2012.7104%202.67504%2012.4916C2.45625%2012.2728%202.33333%2011.9761%202.33333%2011.6667V3.5C2.33333%203.19058%202.45625%202.89383%202.67504%202.67504C2.89383%202.45625%203.19058%202.33333%203.5%202.33333H4.66667'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%3e%3cpath%20id='Vector'%20d='M8.45833%202.33333H5.54167L4.08333%204.08333H2.33333C2.02391%204.08333%201.72717%204.20625%201.50838%204.42504C1.28958%204.64383%201.16667%204.94058%201.16667%205.25V10.5C1.16667%2010.8094%201.28958%2011.1062%201.50838%2011.325C1.72717%2011.5437%202.02391%2011.6667%202.33333%2011.6667H11.6667C11.9761%2011.6667%2012.2728%2011.5437%2012.4916%2011.325C12.7104%2011.1062%2012.8333%2010.8094%2012.8333%2010.5V5.25C12.8333%204.94058%2012.7104%204.64383%2012.4916%204.42504C12.2728%204.20625%2011.9761%204.08333%2011.6667%204.08333H9.91667L8.45833%202.33333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3cpath%20id='Vector_2'%20d='M8.75%207.58333C8.75%208.54983%207.9665%209.33333%207%209.33333C6.0335%209.33333%205.25%208.54983%205.25%207.58333C5.25%206.61684%206.0335%205.83333%207%205.83333C7.9665%205.83333%208.75%206.61684%208.75%207.58333Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-360",
+            "width": 360,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-360.png",
+            "percent": 9.3,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-390",
+            "width": 390,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-390.png",
+            "percent": 9.35,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-768",
+            "width": 768,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-768.png",
+            "percent": 8.35,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-1024",
+            "width": 1024,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-1024.png",
+            "percent": 8.5,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-pricing-screen-1440",
+            "width": 1440,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-pricing-screen-1440.png",
+            "percent": 8.5,
+            "assetGeometry": [
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/chevronLeft'%3e%3cpath%20id='Vector'%20d='M11.25%204.5L6.75%209L11.25%2013.5'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/bell'%3e%3cpath%20id='Vector'%20d='M8.58333%2017.5C8.72282%2017.7537%208.92787%2017.9653%209.17708%2018.1127C9.42628%2018.26%209.71048%2018.3378%2010%2018.3378C10.2895%2018.3378%2010.5737%2018.26%2010.8229%2018.1127C11.0721%2017.9653%2011.2772%2017.7537%2011.4167%2017.5M5%206.66667C5%205.34058%205.52678%204.06881%206.46447%203.13113C7.40215%202.19345%208.67392%201.66667%2010%201.66667C11.3261%201.66667%2012.5979%202.19345%2013.5355%203.13113C14.4732%204.06881%2015%205.34058%2015%206.66667C15%2012.5%2017.5%2014.1667%2017.5%2014.1667H2.5C2.5%2014.1667%205%2012.5%205%206.66667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%233F3F3D'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 20,
+                "height": 20
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='6'%20height='6'%20viewBox='0%200%206%206'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20id='Ellipse'%20cx='3'%20cy='3'%20r='3'%20fill='%23B45309'/%3e%3c/svg%3e",
+                "width": 6,
+                "height": 6
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='18'%20height='18'%20viewBox='0%200%2018%2018'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='icon/arrowLeft'%3e%3cpath%20id='Vector'%20d='M14.25%209H3.75M9%203.75L3.75%209L9%2014.25'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='%23141414'/%3e%3c/g%3e%3c/svg%3e",
+                "width": 18,
+                "height": 18
+              },
+              {
+                "src": "data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='14'%20height='14'%20viewBox='0%200%2014%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Icon'%20clip-path='url(%23clip0_0_37)'%3e%3cpath%20id='Vector'%20d='M12.8333%201.16667L8.75%2012.8333L6.41667%207.58333L1.16667%205.25L12.8333%201.16667Z'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3cpath%20id='Vector_2'%20d='M12.8333%201.16667L6.41667%207.58333'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke='white'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_0_37'%3e%3crect%20width='14'%20height='14'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e",
+                "width": 14,
+                "height": 14
+              }
+            ]
+          },
+          {
+            "id": "m40-confirmation-screen-360",
+            "width": 360,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-360.png",
+            "percent": 13.16,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-390",
+            "width": 390,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-390.png",
+            "percent": 13.69,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-768",
+            "width": 768,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-768.png",
+            "percent": 16.14,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-1024",
+            "width": 1024,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-1024.png",
+            "percent": 21.1,
+            "assetGeometry": []
+          },
+          {
+            "id": "m40-confirmation-screen-1440",
+            "width": 1440,
+            "referenceFile": "screens/corner-shop/C07 · Owner — Price a typed or photo order (calculator per line).png",
+            "screen": "screens/m40-confirmation-screen-1440.png",
+            "percent": 20.55,
+            "assetGeometry": []
+          }
+        ]
+      }
+    }
+  },
+  "checks": {
+    "lint": true,
+    "strictTypecheck": true,
+    "astroErrors": 0,
+    "astroWarnings": 0,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "exportsPresent": 270,
+    "secretChecks": {
+      "buildArtifacts": true,
+      "privateComparisons": 13,
+      "finalCommand": "pnpm check:secrets --history --artifacts",
+      "requiredAfterThisRecord": true,
+      "commitAndPushGuardsEnabled": true
+    }
+  },
+  "engine": {
+    "release": "tesseract-7.0.0-eng-ben-1.0.0-v1",
+    "versions": {
+      "worker": "7.0.0",
+      "core": "7.0.0",
+      "eng": "1.0.0",
+      "ben": "1.0.0"
+    },
+    "runtimeFiles": 6,
+    "runtimeBytes": 16139332,
+    "fileHashes": [
+      {
+        "name": "worker.min.js",
+        "bytes": 111307,
+        "sha256": "576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d"
+      },
+      {
+        "name": "tesseract-core-lstm.wasm.js",
+        "bytes": 3896484,
+        "sha256": "eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680"
+      },
+      {
+        "name": "tesseract-core-simd-lstm.wasm.js",
+        "bytes": 3899472,
+        "sha256": "c58b46a4c796c0b8afccf77591d5b875b6896b45d402bbce8caa6f5362447b38"
+      },
+      {
+        "name": "tesseract-core-relaxedsimd-lstm.wasm.js",
+        "bytes": 3905767,
+        "sha256": "861a536cf9ef8e63cb644d57bab39c388f37f7d6b6f60024b741c5f6b39a59b3"
+      },
+      {
+        "name": "eng.traineddata.gz",
+        "bytes": 2952873,
+        "sha256": "45b4cb346724ac1774f1c36f42f182b887bcdb28ebe63e6fff90ac41f3fcff91"
+      },
+      {
+        "name": "ben.traineddata.gz",
+        "bytes": 1373429,
+        "sha256": "a7c1fd170b796d6b8d01b401d4bfcc54409f47b313a200e9e3756ce20d742725"
+      }
+    ],
+    "noticesIncluded": true,
+    "originalImageByteLimit": 5242880,
+    "decodedPixelLimit": 16000000,
+    "dimensionLimit": 16384,
+    "fullRawTextRetained": true,
+    "unknownConfidenceNeverPromoted": true
+  },
+  "unchangedAccuracyCorpus": [
+    {
+      "file": "bangla-list.png",
+      "sha256": "7ef696c3357655c4223396c6a0eb6cdb8a06c7cba3d7e506657d0458d0d072f6"
+    },
+    {
+      "file": "expected.json",
+      "sha256": "71141a47bef2fe49dce4e11c9325e6536b082b47f052741930fc8b914817da51"
+    },
+    {
+      "file": "invoice-01.png",
+      "sha256": "54d3ec01fca369e2c9693eb00daf1375943b019c6b18e0bb778105e38fbfa276"
+    },
+    {
+      "file": "invoice-02.jpg",
+      "sha256": "b456e3a38c1b311676d05b170bbb8036cc5e07e480c2eb27aeb860c917adf625"
+    },
+    {
+      "file": "invoice-03.png",
+      "sha256": "391fc626d1fb12a8e4848bd91dda60064e233c69f0faf85866c4d37322412b9f"
+    },
+    {
+      "file": "invoice-04.png",
+      "sha256": "d7567fc9b0d6f2cbb778e90c8034d6707888d60d3c9033cbeaf9aa0b98071880"
+    },
+    {
+      "file": "invoice-05.jpg",
+      "sha256": "76eac08b7d79919aea2a930d3713bdaa3a18b60578c8ee03499054560b5650e1"
+    },
+    {
+      "file": "invoice-06.png",
+      "sha256": "b8b490cad5893e31787f61c7096e9bdefdc700edee3e469d476963a878a68481"
+    },
+    {
+      "file": "invoice-07.png",
+      "sha256": "1efd138d974a02663c7f7ea36a4f790322effc6f71ea1ceee3f3181acfb6a57a"
+    },
+    {
+      "file": "invoice-08.jpg",
+      "sha256": "d905ffcf9d924407fb3a8d7054eacf4ed408ad642e85e0c849e63cf7db7dadc2"
+    },
+    {
+      "file": "invoice-09.png",
+      "sha256": "222f9f3acf1e53bd4403e6f1e0e116bed2b6660e5930798448ef1088ef658d47"
+    },
+    {
+      "file": "invoice-10.png",
+      "sha256": "5d35cfbaeef4f34850b86b1d6bd2e9ee3bd94e327c5c8a0654a1a86a7d4ce83c"
+    },
+    {
+      "file": "invoice-11.jpg",
+      "sha256": "a8a21511c08c134a296584c7bb13e64f72ad3348b6ddda5cd6ce729d8a3810c5"
+    },
+    {
+      "file": "invoice-12.png",
+      "sha256": "81ad2032b7a029ddcd4c54dabf51a6eaa029aa1b46282dbb76eec65785c2fa4a"
+    },
+    {
+      "file": "invoice-13.png",
+      "sha256": "4c0b3651e4e3cc4c4a799ab9e5d17b2640d1d040b6e0feeed33bfdb188f46271"
+    },
+    {
+      "file": "invoice-14.jpg",
+      "sha256": "f63a8ef125c8499a4a00694b9467e976262574101c591e196593038cc235e162"
+    },
+    {
+      "file": "invoice-15.png",
+      "sha256": "7caff1b42ceed23a4b0d8d8f828254c91971042bd8c536b7e372d68bbdc054cb"
+    }
+  ],
+  "configuration": {
+    "owner": "Each installation",
+    "maintainerAccountsCredentialsOrPhoneRequired": false,
+    "newProvider": false,
+    "newEnvironmentVariable": false,
+    "newBackendOrMigration": false
+  },
+  "delivery": {
+    "milestoneComplete": false,
+    "defaultFlag": false,
+    "mainDirectCommit": true,
+    "ciWorkflows": "Three manually disabled; no dispatch or artifact upload",
+    "pagesPublication": "Held; last observed deployed source remains 9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "releaseTagCreated": false,
+    "remaining": [
+      "Held CI/artifact-upload and Pages/release delivery acceptance"
+    ]
+  }
+}

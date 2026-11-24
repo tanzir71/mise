@@ -2,7 +2,7 @@
 
 M40 now has a real English/Bangla reader and a conservative invoice proposal parser. The reader runs Tesseract.js 7 in a dedicated browser worker. It needs no OCR account, API key, provider or maintainer phone number. Hosting remains each installation’s choice.
 
-M40 remains unchecked. The next increment must connect the saved-image Inbox entry to the M26 invoice review and C07 order review, including atomic stock/purchase recording, editable lines, and seller confirmation of every prescription line. The `ocr` flag defaults off. This internal reader is not yet a new user-facing capture flow.
+The follow-up [reviewed image flows](image-capture.md) now connects saved Inbox images to M26 invoice review and C07 order pricing, including atomic local stock/purchase recording, editable source/lines and mandatory seller confirmation of each final image-order line. The `ocr` flag defaults off. M40 remains unchecked while delivery requirements are held. This document records the earlier engine checkpoint; its verification record is historical evidence for that checkpoint.
 
 ## Engine and original source
 
@@ -36,4 +36,4 @@ The convergence HTTP fixture uses the explicit `MISE_E2E_ORIGIN` override, with 
 
 ## Delivery boundary
 
-Installation configuration, backend/provider credentials and verification numbers remain end-user owned. This increment provisions no external service. GitHub workflows, Pages publication and release tags remain held under the owner’s instructions. There is no new UI screen in this checkpoint, so the M26/C07 visual comparisons belong to the upcoming review-flow increment. Full M40 acceptance, including editable review before recording and mandatory per-line pharmacy confirmation, is still open.
+Installation configuration, backend/provider credentials and verification numbers remain end-user owned. This increment provisions no external service. GitHub workflows, Pages publication and release tags remain held under the owner’s instructions. The earlier engine checkpoint added no new screen. The follow-up review-flow implementation and its M26/C07 comparisons are documented in [reviewed images](image-capture.md). Full milestone delivery remains open under the publication hold.

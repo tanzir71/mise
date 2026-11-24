@@ -407,6 +407,7 @@ export async function startConvergenceServer(
     });
   let apiUrl = '',
     loseCommand = false,
+    loseCommandType: string | undefined,
     loseResolution = false,
     losePage = false,
     loseImage = false,
@@ -506,8 +507,9 @@ export async function startConvergenceServer(
           });
           releaseCommand = null;
         }
-        if ((loseCommand||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve','closing-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
+        if ((loseCommand||loseCommandType!==undefined&&JSON.parse(body.toString()).type===loseCommandType||loseResolution&&['resolve','money-resolve','purchase-resolve','stock-resolve','customer-resolve','closing-resolve'].includes(new URL(request.url).searchParams.get('review')??'')) && response.ok) {
           loseCommand = false;
+          loseCommandType = undefined;
           loseResolution = false;
           await truncate(response);
           return;
@@ -653,8 +655,9 @@ export async function startConvergenceServer(
     releaseCommandReply() {
       releaseCommand?.();
     },
-    loseNextCommand() {
-      loseCommand = true;
+    loseNextCommand(type?: string) {
+      if(type)loseCommandType=type;
+      else loseCommand = true;
     },
     loseNextResolution() {loseResolution=true;},
     loseNextPage() {

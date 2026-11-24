@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M40 image capture now saves the original before reading, supports editable invoice-to-stock/purchase review, list/prescription pricing with individual final-line checks, and separate screenshot text in Inbox. Native scope/source/revision guards, atomic local rollback, original receipt recovery, undo and ordinary backups preserve actual records. All 5,283 unit tests, 95 browser cases per hosting path and 30 visual comparisons pass. All configuration stays installation-owned; the preview defaults off and workflows/publication remain held. See [reviewed image flows](docs/image-capture.md).
+
 - In progress: M40 now has an actual on-device English/Bangla worker, verified same-origin lazy engine downloads, offline recognition, cancellable initialization, complete source/confidence retention and conservative invoice proposals with integer-money checks. Fifteen fixed printed fixtures and separate Bangla coverage exercise the real engine. The image-to-review/recording flows and full M40 acceptance remain open; the preview defaults off and installation setup stays end-user owned. Workflows and publication remain held.
 
 - In progress: staff stock history now supports verified private archives, atomic fingerprint retention and explicit removal of completed local copies. Reopening and actual own-receipt checks restore the exact original without changing quantities, preserve pending work/read denial and keep reviewed undo available. Full M34 remains open; all installation setup stays end-user owned, with services, workflows and publication held.

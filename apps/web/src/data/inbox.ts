@@ -5,10 +5,15 @@ import {withOutboxIntent} from './outbox-capture';
 import Dexie from 'dexie';
 import {OperatorContextError,resolveOperator,parseLocalOperatorState} from '@mise/core/operators';
 import {syncDownloadToken} from '@mise/core/sync-download';
+import type {LocalCloudState} from '@mise/core/local-outbox';
 
 export interface StoredInboxImage extends InboxImage { blob:Blob }
 export type StoredInboxItem = InboxItem<StoredInboxImage>;
 export interface SharedInboxInput { title?:string;text?:string;url?:string;files?:readonly File[] }
+export interface InboxDestination {businessId:string;outletId:string;actorId:string;selectionToken?:string;bindingToken?:string}
+/** Identity/authority fields only; normal delivery progress does not retarget a
+ * saved-image review or force its unsaved edits to restart. */
+export function captureBindingToken(state:LocalCloudState|undefined):string{return syncDownloadToken(state?{uploadId:state.uploadId,businessId:state.businessId,outletId:state.outletId,actorId:state.ownerId,targetHash:state.targetHash,manifestHash:state.manifestHash,accountHash:state.join?.accountHash??null,role:state.join?.role??null,epoch:state.join?.epoch??null,scopeVersion:state.join?.scopeVersion??null,recovery:state.recovery?.scope??null}:null);}
 
 /** Validate sizes before allocating buffers; never fetch a shared URL or interpret text. */
 export async function prepareInboxContent(input:SharedInboxInput):Promise<InboxContent<StoredInboxImage>> {
@@ -26,9 +31,11 @@ async function captureImageHashes(images:readonly StoredInboxImage[]):Promise<st
     return Array.from(new Uint8Array(await subtle.digest('SHA-256',bytes)),byte=>byte.toString(16).padStart(2,'0')).join('');
   }));
 }
-export async function captureDatabaseInbox(db:LocalStore,input:SharedInboxInput):Promise<StoredInboxItem> {
+export async function captureDatabaseInbox(db:LocalStore,input:SharedInboxInput,destination?:InboxDestination):Promise<StoredInboxItem> {
+  input={...input,files:input.files?[...input.files]:undefined};destination=destination?structuredClone(destination):undefined;
+  const selection=destination?await db.transaction('r',db.tables,async()=>{const setup=await db.setup(),token=syncDownloadToken(await db.operatorState.get('active')??null),binding=captureBindingToken(await db.cloudState.get('binding'));if(!setup||setup.business.id!==destination!.businessId||setup.outlet.id!==destination!.outletId||setup.owner.id!==destination!.actorId||destination!.selectionToken!==undefined&&destination!.selectionToken!==token||destination!.bindingToken!==undefined&&destination!.bindingToken!==binding)throw new Error('The selected outlet or member changed. Review this image again.');return {token,binding};}):undefined;
   const content=await prepareInboxContent(input),hashes=await captureImageHashes(content.images);
-  return db.transaction('rw',db.inboxItems,db.businesses,db.outlets,db.members,db.events,async()=>{
+  return db.transaction('rw',[db.inboxItems,db.businesses,db.outlets,db.members,db.events,db.cloudState],async()=>{
     // A pending cloud selection on an empty device grants no shop authority.
     // Keep incoming shares unassigned while its canonical join is in flight.
     let setup:Awaited<ReturnType<LocalStore['setup']>>=null;
@@ -36,6 +43,7 @@ export async function captureDatabaseInbox(db:LocalStore,input:SharedInboxInput)
     // Catch the pure selection error here: a rejected nested Dexie transaction
     // would abort this receiving writer even when its caller handles the error.
     try{setup=resolveOperator(businesses,outlets,members,saved===undefined?null:parseLocalOperatorState(saved));}catch(error){if(!(error instanceof OperatorContextError))throw error;}
+    if(destination&&(!setup||setup.business.id!==destination.businessId||setup.outlet.id!==destination.outletId||setup.owner.id!==destination.actorId||syncDownloadToken(saved??null)!==selection!.token||captureBindingToken(await db.cloudState.get('binding'))!==selection!.binding))throw new Error('The selected outlet, member or connection changed. Review this image again.');
     const command=captureInboxCommand(content,setup);
     const write=async()=>{await db.inboxItems.add(command.item);if(command.event)await db.events.add(command.event);return command.item;};
     return command.event&&hashes!==null?withOutboxIntent(db,inboxCaptureIntent(command.item,command.event,hashes),write):write();

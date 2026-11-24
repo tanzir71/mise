@@ -2,7 +2,7 @@ import {supplierMessageIntent} from '@mise/core/supplier-message-commands';
 import Dexie from 'dexie';
 import type { HandoffCompletion,HandoffDraft,HandoffSession } from '@mise/core/handoff';
 import type { InboxKind } from '@mise/core/inbox';
-import type { SharedInboxInput,StoredInboxItem } from './inbox';
+import type { SharedInboxInput,StoredInboxItem,InboxDestination } from './inbox';
 import { claimDatabaseInbox } from './inbox';
 import type { HandoffChoice } from '@mise/core/handoff-progress';
 import { LocalStore } from './local-store';
@@ -38,7 +38,7 @@ import type { ExportAuditInput } from '@mise/core/export-audit';
 import type { ShopLinkInput,ShopLinkReview } from '@mise/core/shop-links';
 
 export class MiseDatabase extends LocalStore {
-  async captureInbox(input:SharedInboxInput):Promise<StoredInboxItem> {return (await import('./inbox')).captureDatabaseInbox(this,input);}
+  async captureInbox(input:SharedInboxInput,destination?:InboxDestination):Promise<StoredInboxItem> {return (await import('./inbox')).captureDatabaseInbox(this,input,destination);}
   async claimInbox(id:string,destination:{businessId:string;outletId:string;actorId:string}):Promise<StoredInboxItem> {return (await import('./inbox')).claimDatabaseInboxItem(this,id,destination);}
   async changeInbox(id:string,revision:number,change:{kind:InboxKind}|{archived:boolean}):Promise<StoredInboxItem> {return (await import('./inbox')).changeDatabaseInbox(this,id,revision,change);}
   async prepareHandoff(input:HandoffDraft,fresh=false):Promise<HandoffSession> {return (await import('./handoff')).prepareDatabaseHandoff(this,input,fresh);}

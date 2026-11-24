@@ -1,3 +1,4 @@
+import {captureImageReview} from '../tests/fixtures/image-capture-visual.mjs';
 import { chromium } from '@playwright/test';
 import { spawn } from 'node:child_process';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
@@ -80,6 +81,7 @@ try {
     const targetUrl = new URL(target.path, origin);
     if (target.publicShop) targetUrl.hash = Buffer.from(LZString.compressToUint8Array(JSON.stringify(target.publicShop))).toString('base64url');
     await page.goto(targetUrl.href);
+    if(target.imageCaptureFixture)await captureImageReview(page,target.imageCaptureFixture);
     if(target.deviceAccessFixture)await captureDeviceAccess(page,target.deviceAccessFixture);
     if(target.customerLinksFixture)await captureCustomerLinks(page,target.customerLinksFixture);
     if(target.publicOrderingFixture)await capturePublicOrdering(page,target.publicOrderingFixture);
@@ -132,7 +134,7 @@ try {
       else throw new Error(`Unknown capture action: ${action.type}`);
     }
     await page.evaluate(() => document.fonts.ready);
-    const pageMetrics = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth }));
+    const pageMetrics = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth, ...(document.querySelector('[data-asset-geometry]')?{assetGeometry:JSON.parse(document.querySelector('[data-asset-geometry]').dataset.assetGeometry)}:{}) }));
     if (pageMetrics.overflow) throw new Error(`${target.id} overflows at ${width}px.`);
     for (const section of target.sections) {
       if (section.widths && !section.widths.includes(width)) continue;
