@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "2c301268f951a642951d743d193a8ad6c44db9bf",
+  "verifiedAt": "2026-11-24T22:07:16.802Z",
+  "scope": "M41 read-only payment-text extraction and current candidate planning; native persisted Payment and review/recovery remain required in M41",
+  "sourceFingerprint": "282973f3b98e25b723972c3af6b5248bf7f1818364306574bede617121bdddf3",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "f40dbe2dcf3fe309a7df21220a04e1f8306b09d9993109f4fcf12dcc4f2dafe8"
+    },
+    {
+      "path": "docs/payment-text.md",
+      "sha256": "6ce89be38b63a1b502dc44cabd61c0160173b7f3d4f07c6071252ce4e1bb670c"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "397c0993a777abbe5bc503211621e402dd27df868e4f7715a01877910468c11d"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "5262a903fb45fbee80acf924642c5ab3bd6496972d57c611fff5dd2bbe69187c"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "145804bac807831286aea56ff61a6540216f3b1315cac2c752ee4595b1ad613e"
+    },
+    {
+      "path": "package.json",
+      "sha256": "55086c9e6207275584e1a7553ef08d43919edb4d957e73adb577ebea30d9c2cf"
+    },
+    {
+      "path": "packages/core/fixtures/payments/messages.json",
+      "sha256": "f3b79283890017fa88b5b2682bd99848b27e0ded234a3c3734cf74a07ad0516a"
+    },
+    {
+      "path": "packages/core/payment-matches.ts",
+      "sha256": "307d9e7f566b4397163da073a2aecb427c275af9c07bb99af7cf6a7138f62222"
+    },
+    {
+      "path": "packages/core/payments.ts",
+      "sha256": "8462ce7e6bc45adb7580ca3fd5c508f9344622cfae4a74dfe87776f9e41d455b"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha256": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "96f0e88060c8058dfb43de109b7cc9712fb50669d8d9c2cc48a6f3ca14cde126"
+    },
+    {
+      "path": "tests/e2e/payment-text.spec.ts",
+      "sha256": "ed542b86058c6a1546c55498493386e044f150c0874dcf4f075f1b2718126015"
+    },
+    {
+      "path": "tests/fixtures/customer-khata-service.ts",
+      "sha256": "3ebe6090d92fcc9fff12c629bd4a7210f97774b2388aaa91d8af1683beae6764"
+    },
+    {
+      "path": "tests/fixtures/payment-text-browser.mjs",
+      "sha256": "4621624610fd15ffd3b2d81102a11002235ad5bb913c2ea2c97ddabf177c95a9"
+    },
+    {
+      "path": "tests/fixtures/payment-text-browser.ts",
+      "sha256": "981f2d55a80358edaedff8228123d2b479147b03ebc62e18b4005370cb00260b"
+    },
+    {
+      "path": "tests/payment-matches.test.ts",
+      "sha256": "30037ce5db3b81c1a49be9542e3804ed1162eab6a8c475b586f619ec9a5b4809"
+    },
+    {
+      "path": "tests/payments.test.ts",
+      "sha256": "04c446bd7f27b65c8da2cf141ecce8815e0e7eaa735bdb1e370561fa753cb8c2"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+    }
+  ],
+  "tests": {
+    "unit": {
+      "files": 281,
+      "passed": 5378,
+      "failed": 0,
+      "newParserCases": 77,
+      "newCandidateCases": 18,
+      "originalKitchenHistoryRecords": 5004,
+      "originalHistoryDeadlinesUnchanged": true,
+      "finalFocused": {
+        "files": 2,
+        "passed": 95,
+        "failed": 0,
+        "reason": "Rechecked the final parser/matcher source after correcting the warning for an unknown format with exactly one amount; the final browser checks also cover that amount hint."
+      }
+    },
+    "browser": {
+      "root": {
+        "basePath": "/",
+        "passed": 58,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 146437.83000000002,
+        "tests": [
+          "counter.spec.ts",
+          "khata.spec.ts",
+          "orders.spec.ts",
+          "payment-text.spec.ts",
+          "customer-khata.spec.ts"
+        ],
+        "sourceVerificationCases": 2,
+        "fixtureMessages": 30
+      },
+      "pages": {
+        "basePath": "/mise/",
+        "passed": 58,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 128378.338,
+        "tests": [
+          "counter.spec.ts",
+          "khata.spec.ts",
+          "orders.spec.ts",
+          "payment-text.spec.ts",
+          "customer-khata.spec.ts"
+        ],
+        "sourceVerificationCases": 2,
+        "fixtureMessages": 30
+      }
+    },
+    "fixtures": {
+      "messages": 30,
+      "bkash": 10,
+      "nagad": 10,
+      "bank": 10,
+      "provenance": "Synthetic messages with independent expected amount/currency/reference/phone/time and complete unchanged raw text; not live provider certification."
+    }
+  },
+  "checks": {
+    "lint": true,
+    "strictTypecheck": true,
+    "astroFiles": 211,
+    "astroErrors": 0,
+    "astroWarnings": 0,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "secretChecks": {
+      "buildArtifacts": true,
+      "privateComparisons": 13,
+      "finalCommand": "pnpm check:secrets --history --artifacts",
+      "requiredAfterThisRecord": true,
+      "commitAndPushGuardsEnabled": true
+    },
+    "browserFixtureOrigin": "The customer-khata test service uses MISE_E2E_ORIGIN, defaulting to the existing 4321 preview. Its one-origin allowlist and all production CORS/authorization rules are unchanged. An initial 4332 run exposed the hardcoded origin; both complete groups were rerun after fixing the fixture.",
+    "priorOutputComparison": {
+      "equal": false,
+      "beforeFiles": 236,
+      "afterFiles": 236,
+      "beforeFingerprint": "6830ad2f8cc9d19e692be4c9761d27b03dc6fd3787521d5ea407abf6c2e84266",
+      "afterFingerprint": "ca4abd88c401712f2ab547fe84def82d78427a6e9a2c07175a5fc72430795717",
+      "disposition": "The older saved artifact is not a reproducible byte baseline. No byte-parity claim is made. This increment changes no product UI source, and a fresh isolated production build proves that the parser, matcher and tests are absent from its rendered module graph."
+    },
+    "productionModuleGraph": {
+      "basePath": "/mise/",
+      "renderedModules": 734,
+      "firstPartyModules": 558,
+      "paymentModules": [],
+      "testModules": [],
+      "moduleIdFingerprint": "c2a736a15e55d9aa7e98a473800c0b2926f1a1a72eea034f529f489efa525e44"
+    }
+  },
+  "visualQA": {
+    "changedProductScreens": 0,
+    "reason": "There is no product UI source or import change. A fresh isolated production build contains neither payment groundwork module nor any test module. No new UI, route, byte-parity or visual acceptance is claimed.",
+    "previousProductVerification": "docs/image-capture-verification.json",
+    "productionUISourceChanged": false
+  },
+  "limitations": [
+    "Native Payment persistence, complete saved-source review and manual entry are still required in M41.",
+    "Checked financial linkage, exact allocation, ordinary backup/restore, sync boundary, original-action retry/receipt and undo recovery remain required before enabling the interface.",
+    "Automatic candidate selection is read-only and never settles an order, creates a sale or collects debt.",
+    "M37 backend-only observations retain their existing recorded-receipt semantics.",
+    "All backend/provider/source accounts, credentials, phone numbers, hosting and later device settings are end-user configured.",
+    "Workflows, CI uploads, publication, service/migration deployment and tags remain held."
+  ],
+  "milestoneComplete": false
+}

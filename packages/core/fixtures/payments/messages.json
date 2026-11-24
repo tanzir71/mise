@@ -1,0 +1,666 @@
+{
+  "version": 1,
+  "provenance": "Synthetic grammar fixtures with fictional identities and references. bKash receiver structure is documented by bKash; Nagad and bank cases are supported grammar examples, not a provider certification or universal live-format catalogue.",
+  "fixtures": [
+    {
+      "id": "bk01",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "You have received Tk 1,500.00 from 01712345482. Ref groceries. Fee Tk 0.00. Balance Tk 9,000.00. TrxID TESTBK01 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 150000,
+        "currency": "BDT",
+        "reference": "TESTBK01",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk02",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "BKASH"
+      },
+      "text": "You have received BDT 1,12,840.25 from +8801712345482. TrxID TESTBK02 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 11284025,
+        "currency": "BDT",
+        "reference": "TESTBK02",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk03",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "You received Tk 910 from 01712345482. TrxID TESTBK03 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 91000,
+        "currency": "BDT",
+        "reference": "TESTBK03",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk04",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "You have received ৳25.50 from 01712345482. TrxID TESTBK04 at 25-11-2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 2550,
+        "currency": "BDT",
+        "reference": "TESTBK04",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk05",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "You have received Tk. 240.00 from Test Merchant 01712345482.\nRef lunch.\nFee Tk. 0.00. Balance Tk. 900.00.\nTrxID TESTBK05 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 24000,
+        "currency": "BDT",
+        "reference": "TESTBK05",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk06",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "You have received Tk ১,২৩৪.৫০ from ০১৭১২৩৪৫৪৮২. TrxID TESTBK06 at ২৫/১১/২০২৬ ১৪:৩০",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 123450,
+        "currency": "BDT",
+        "reference": "TESTBK06",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk07",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": ""
+      },
+      "text": "bKash: You have received Tk 0.25 from 01712345482. TrxID TESTBK07 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 25,
+        "currency": "BDT",
+        "reference": "TESTBK07",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk08",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "you have RECEIVED tk 3,100.99 from 01712345482. trxid TESTBK08 at 25/11/2026 02:30 PM",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 310099,
+        "currency": "BDT",
+        "reference": "TESTBK08",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk09",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "You have received Tk 50 from 017•••482. TrxID TESTBK09 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 5000,
+        "currency": "BDT",
+        "reference": "TESTBK09",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bk10",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "bKash"
+      },
+      "text": "Payment received Tk 60.00. TrxID TESTBK10 at 2026-11-25T14:30:00+06:00",
+      "expected": {
+        "status": "recognized",
+        "channel": "bkash",
+        "direction": "incoming",
+        "amount": 6000,
+        "currency": "BDT",
+        "reference": "TESTBK10",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng01",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "NAGAD"
+      },
+      "text": "Money received. Amount: Tk 1500.00 From: 01712345482. TxnID: TESTNG01 Date: 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 150000,
+        "currency": "BDT",
+        "reference": "TESTNG01",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng02",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "Nagad"
+      },
+      "text": "Payment received Tk 3,500.75 from 01712345482. TxnID TESTNG02 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 350075,
+        "currency": "BDT",
+        "reference": "TESTNG02",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng03",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "Nagad"
+      },
+      "text": "Money received. Amount: BDT 2,00,000 from +8801712345482. Transaction ID: TESTNG03 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 20000000,
+        "currency": "BDT",
+        "reference": "TESTNG03",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng04",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": ""
+      },
+      "text": "Nagad: Money received Tk 10 from 01712345482. TxID TESTNG04 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 1000,
+        "currency": "BDT",
+        "reference": "TESTNG04",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng05",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "নগদ"
+      },
+      "text": "আপনি ১,৫০০.২৫ টাকা পেয়েছেন। TxnID TESTNG05 Date: ২৫/১১/২০২৬ ১৪:৩০",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 150025,
+        "currency": "BDT",
+        "reference": "TESTNG05",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng06",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "নগদ"
+      },
+      "text": "পেমেন্ট পেয়েছেন ৳৯১০। TxnID TESTNG06 Date: ২৫/১১/২০২৬ ১৪:৩০",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 91000,
+        "currency": "BDT",
+        "reference": "TESTNG06",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng07",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "Nagad"
+      },
+      "text": "Money received! Amount: Tk. 40.50\nFrom: 01712345482\nTxnID: TESTNG07\nDate: 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 4050,
+        "currency": "BDT",
+        "reference": "TESTNG07",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng08",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "Nagad"
+      },
+      "text": "Money received Tk 1,234.00 from 017***482. TxnID TESTNG08 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 123400,
+        "currency": "BDT",
+        "reference": "TESTNG08",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng09",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "Nagad"
+      },
+      "text": "Money received Tk 55 from 01712345482. TxnID TESTNG09 at 2026-11-25T08:30:00Z",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 5500,
+        "currency": "BDT",
+        "reference": "TESTNG09",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "ng10",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "Nagad"
+      },
+      "text": "Payment received BDT 101.01 from 01712345482. TxnID TESTNG10 Balance BDT 5,001.01 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "nagad",
+        "direction": "incoming",
+        "amount": 10101,
+        "currency": "BDT",
+        "reference": "TESTNG10",
+        "fromPhone": "+8801712345482",
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank01",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "DBBL"
+      },
+      "text": "Your A/C ****1234 has been credited with BDT 500.00. Transaction ID TESTBANK01 on 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 50000,
+        "currency": "BDT",
+        "reference": "TESTBANK01",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank02",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "BRAC Bank"
+      },
+      "text": "Your account XX1234 credited by Tk 2,300.25. TxnID TESTBANK02 on 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 230025,
+        "currency": "BDT",
+        "reference": "TESTBANK02",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank03",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": ""
+      },
+      "text": "EBL: BDT 75.00 has been credited to your account XXXX1234. RefID TESTBANK03 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 7500,
+        "currency": "BDT",
+        "reference": "TESTBANK03",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank04",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "CityBank"
+      },
+      "text": "Credit alert: BDT 1,12,840.50. A/C ***1234. Transaction ID TESTBANK04 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 11284050,
+        "currency": "BDT",
+        "reference": "TESTBANK04",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank05",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "MTB"
+      },
+      "text": "Dear customer, your A/C 1234 is credited with BDT 40.10. TrxID TESTBANK05 at 25-11-2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 4010,
+        "currency": "BDT",
+        "reference": "TESTBANK05",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank06",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "UCB"
+      },
+      "text": "Your account ****1234 was credited BDT 125.00. Transaction Number TESTBANK06 at 25/11/2026 02:30 PM",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 12500,
+        "currency": "BDT",
+        "reference": "TESTBANK06",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank07",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "BANK"
+      },
+      "text": "Credit alert: USD 1,234.56. Transaction ID TESTBANK07 at 2026-11-25T08:30:00Z",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 123456,
+        "currency": "USD",
+        "reference": "TESTBANK07",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank08",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "DBBL"
+      },
+      "text": "Your A/C ****1234 credited Tk ১,০০০.৯৯. RefID TESTBANK08 at ২৫/১১/২০২৬ ১৪:৩০",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 100099,
+        "currency": "BDT",
+        "reference": "TESTBANK08",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank09",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": ""
+      },
+      "text": "Bank: Credit alert: BDT 33.33. Transaction ID TESTBANK09 at 2026-11-25T14:30:00+0600",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 3333,
+        "currency": "BDT",
+        "reference": "TESTBANK09",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    },
+    {
+      "id": "bank10",
+      "context": {
+        "receivedAt": 1795597200000,
+        "timeZone": "Asia/Dhaka",
+        "currency": "BDT",
+        "market": "BD",
+        "sender": "DBBL"
+      },
+      "text": "Your account XXXX1234 has been credited by Tk 50. Balance Tk 9,500. Transaction ID TESTBANK10 at 25/11/2026 14:30",
+      "expected": {
+        "status": "recognized",
+        "channel": "bank",
+        "direction": "incoming",
+        "amount": 5000,
+        "currency": "BDT",
+        "reference": "TESTBANK10",
+        "fromPhone": null,
+        "receivedAt": 1795595400000,
+        "timeSource": "message"
+      }
+    }
+  ]
+}
