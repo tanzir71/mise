@@ -11,9 +11,17 @@ export async function installKitchenUi(page){bundle??=build({lib:{entry:resolve(
 let visualService;
 export async function captureKitchenScreen(page,mode='board'){
  visualService??=await startKitchenUiService();
- const config=mode==='queued'||mode==='review'||mode==='undone'||mode.startsWith('permission-')?await visualService.prepare():await visualService.prepareBoard();
+ const config=mode==='queued'||mode==='review'||mode==='undone'||mode.startsWith('permission-')||mode.startsWith('saved-')?await visualService.prepare():await visualService.prepareBoard();
  await installKitchenUi(page);await page.evaluate(screen=>window.miseKitchenUiTest.initialize(screen),config.screen);await page.reload();
  await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();
+ if(mode.startsWith('saved-')){
+  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await page.context().setOffline(true);await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toBeVisible();
+  await visualService.setTeamConfirmation(false);await visualService.denyOrderRead();await page.context().setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Sign in with your PIN again.'})).toBeVisible();
+  await page.getByRole('button',{name:'My saved taps',exact:true}).click();await expect(page.getByRole('heading',{name:'My saved taps',exact:true})).toBeVisible();
+  if(mode==='saved-close'){await page.context().setOffline(true);await page.getByRole('button',{name:'Close saved tap',exact:true}).click();await expect(page.getByText('Close request saved on this screen · waiting for confirmation.',{exact:true})).toBeVisible();}
+  if(mode==='saved-confirmed'){await page.getByRole('button',{name:'Close saved tap',exact:true}).click();await expect(page.getByText('Closed after review. The original ticket is kept.',{exact:true})).toBeVisible();}
+  await page.getByText('Original ticket',{exact:true}).click();
+ }
  if(mode==='cancelled'){
   await visualService.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();
  }

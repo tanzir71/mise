@@ -10,6 +10,26 @@ import {createStaffPin,deriveStaffPin} from '../supabase/functions/_shared/staff
 import {decodeCommandRecord} from '../packages/core/cloud-records';
 import {createStaffDeviceHandler} from '../supabase/functions/_shared/staff-device-handler';
 let f:PairingDatabase;
+it('retains an eligible prior PIN member in the bounded directory after all work and attendance rights disappear',async()=>{
+ const screen=await enrol(),session=await login(screen,deviceId(104));
+ await f.asRole(null,'service_role','select public.end_device_session($1,$2,$3) data',[screen.secret,session.token,newInboxId()]);
+ await f.db.query("update public.members set permissions='{}' where id=$1",[deviceId(104)]);await configure(deviceId(104),'staff',[],false);
+ const directory=await f.directoryRead(screen.secret) as {members:{id:string}[]};expect(directory.members.map(row=>row.id)).toContain(deviceId(104));
+ const fresh=await login(screen,deviceId(104));expect(parseStaffDeviceAccess(await access(screen,fresh)).permissions).toEqual([]);
+ expect(await f.asRole(null,'service_role','select public.read_kitchen_page($1,$2,null,null,50) data',[screen.secret,fresh.token])).toBeNull();
+ const sibling=await enrol();expect((await f.directoryRead(sibling.secret) as {members:{id:string}[]}).members.map(row=>row.id)).not.toContain(deviceId(104));
+ const bounded=await f.directoryRead(screen.secret,null,1) as {members:{id:string}[];next:string|null};expect(bounded.members).toHaveLength(1);expect(bounded.next).toBe(deviceId(104));
+ expect((await f.directoryRead(screen.secret,bounded.next,1) as {members:{id:string}[]}).members.every(row=>row.id!==deviceId(104))).toBe(true);
+ await f.db.query('delete from public.member_outlets where member_id=$1 and outlet_id=$2',[deviceId(104),scope.outletId]);
+ expect((await f.directoryRead(screen.secret) as {members:{id:string}[]}).members.map(row=>row.id)).not.toContain(deviceId(104));expect(await access(screen,fresh)).toBeNull();
+});
+it.each(['inactive','pin removed','revoked device'] as const)('prior PIN history does not bypass current %s eligibility',async kind=>{
+ const screen=await enrol(),session=await login(screen,deviceId(104));await f.db.query("update public.members set permissions='{}' where id=$1",[deviceId(104)]);
+ if(kind==='inactive')await f.db.query('update public.members set active=false where id=$1',[deviceId(104)]);
+ else if(kind==='pin removed')await f.db.query('delete from private.staff_pins where member_id=$1',[deviceId(104)]);
+ else await f.db.query('update private.devices set revoked_at=created_at where id=$1',[screen.device.id]);
+ const directory=await f.directoryRead(screen.secret) as {members:{id:string}[]}|null;expect(directory?.members.map(row=>row.id)??[]).not.toContain(deviceId(104));expect(await access(screen,session)).toBeNull();
+});
 const scope={businessId:deviceId(1),outletId:deviceId(11),actorId:deviceId(101),actorRole:'owner' as const};
 beforeAll(async()=>{f=await createPairingDatabase();},30000);beforeEach(async()=>{await f.seed();});afterAll(async()=>{await f?.db.close();});
 async function configure(target=deviceId(105),role:StaffDraft['role']='kitchen',methods:StaffDraft['methods']=['order_phone'],confirmOrders=false){

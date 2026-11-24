@@ -67,7 +67,7 @@ function Ticket({ticket,state,now,busy,phoneHidden,onTap,onCopy}: {ticket: Kitch
   </article>;
 }
 
-export function KitchenScreen({journal,source,onSignOut}: {journal: ScreenJournal; source: ScreenJournalRecord; onSignOut: () => Promise<void>}) {
+export function KitchenScreen({journal,source,onSignOut,onSavedTaps}: {journal: ScreenJournal; source: ScreenJournalRecord; onSignOut: () => Promise<void>;onSavedTaps?:()=>void}) {
   const [updateReady,applyUpdate]=useAppUpdate();
   const [state,setState] = useState<KitchenScreenState | null>(null), [error,setError] = useState(''), [notice,setNotice] = useState('');
   const [online,setOnline] = useState(navigator.onLine), [live,setLive] = useState(false), [now,setNow] = useState(Date.now()), [stage,setStage] = useState<Stage>('New');
@@ -209,7 +209,7 @@ export function KitchenScreen({journal,source,onSignOut}: {journal: ScreenJourna
   const pending = state?.taps.filter(tap => !tap.receipt&&!tap.closure).length ?? 0;
   return <main className="kitchen-screen">
     <a className="app-skip" href="#kitchen-tickets">Skip to tickets</a>
-    <header className="kitchen-top"><a href="#kitchen-tickets" className="wordmark">mise <span>Kitchen</span></a><p>{state?.outletName ?? 'Shared preparation screen'}</p><Button kind="ghost" disabled={busy!==null} onClick={()=>void signOut()}>Sign out</Button></header>
+    <header className="kitchen-top"><a href="#kitchen-tickets" className="wordmark">mise <span>Kitchen</span></a><p>{state?.outletName ?? 'Shared preparation screen'}</p>{onSavedTaps?<Button kind="ghost" disabled={busy!==null} onClick={onSavedTaps}>My saved taps</Button>:null}<Button kind="ghost" disabled={busy!==null} onClick={()=>void signOut()}>Sign out</Button></header>
     {updateReady ? <div className="kitchen-notice" role="status">An update is ready. Your saved taps stay on this screen. <Button kind="secondary" disabled={busy!==null} onClick={applyUpdate}>Reload</Button></div> : null}
     <div className="kitchen-heading"><div><h1>Kitchen</h1><p>Big tickets. Got it, then Ready.</p></div><div className="kitchen-screen-controls"><Button kind="secondary" aria-pressed={sound} onClick={() => void toggleSound()}>Sound {sound ? 'on' : 'off'}</Button><Button kind="secondary" aria-pressed={awake} onClick={() => {if (!navigator.wakeLock) setNotice('Keep this screen open and adjust the device’s sleep setting if needed.'); else setAwake(value => !value);}}>Keep awake {awake ? 'on' : 'off'}</Button></div></div>
     <div className="kitchen-connection"><p>{online ? live ? 'Live updates connected' : 'Reconnecting live updates · checking saved tickets' : 'Offline · showing saved tickets'}{state ? ` · last checked ${new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(state.at)}` : ''}</p><Button kind="ghost" onClick={() => void refresh.current()}>Check now</Button></div>

@@ -24,7 +24,7 @@ import { watchScreenProfile } from './data/screen-profile';
 import { ConnectionForm } from './CloudAuthForms';
 import { installApp, useAppInstall } from './app-install';
 import './device-access.css';
-const KitchenScreen=lazy(()=>import('./KitchenScreen').then(module=>({default:module.KitchenScreen})));
+const KitchenScreen=lazy(()=>import('./KitchenSavedTaps').then(module=>({default:module.KitchenWorkspace})));
 const StaffDeviceScreen=lazy(()=>import('./StaffDeviceScreen').then(module=>({default:module.StaffDeviceScreen})));
 
 type Session = ReturnType<typeof createDeviceScreenSession>;

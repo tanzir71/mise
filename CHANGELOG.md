@@ -6,7 +6,9 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
-- In progress: Team's Confirm orders choice now gates actual paired-screen Got it/Ready actions per outlet, including revocation after preparation. Explicit legacy denials remain effective. Current members retain inspection and closure of their own original requests without posting money or inventing permission. All setup stays end-user configured; broader staff recovery controls, stock/performance permission paths and full M34 acceptance remain open, with workflows/publication held.
+- In progress: personal preparation recovery now remains reachable after all order access is removed. Own original tickets survive offline closure, later PIN sessions and lost replies without live-order or preparation authority. Eligible previous members can still use their own PIN on the same device, with empty current permissions. Configuration stays installation-owned; full M34 and stock/performance work remain open, with workflows/publication held.
+
+- In progress: Team's Confirm orders choice now gates actual paired-screen Got it/Ready actions per outlet, including revocation after preparation. Explicit legacy denials remain effective. Current members retain inspection and closure of their own original requests without posting money or inventing permission. All setup stays end-user configured; stock/performance permission paths and full M34 acceptance remain open, with workflows/publication held.
 
 - In progress: urgent Inbox controls now connect explicit consent, offline No, original-account recovery and the built service worker to current task and payment-source targets. Manual tasks have an explicit urgent choice. Invalid or outdated alerts cannot select another outlet, execute source text or post money. Each installation owns all setup; genuine provider/device commissioning, full M37 acceptance and publication remain held, with the preview off.
 

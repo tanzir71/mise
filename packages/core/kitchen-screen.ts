@@ -176,8 +176,18 @@ export function finishKitchenTap(state: KitchenScreenState, original: KitchenTap
 /** Persist the exact explicit close request before HTTP. Reopening with a new
  * PIN retains earlier requests rather than changing their actor or time. */
 export function beginKitchenTapClose(state:KitchenScreenState,original:KitchenTap,intent:KitchenCloseIntent,revision:string):KitchenScreenState {
+  if(!sameKitchenSession(intent.access,state.access))throw invalid();
+  return saveKitchenTapClose(state,original,intent,revision);
+}
+/** Personal history can be closed from a later PIN session without promoting
+ * the historical board's permissions into the current member's authority. */
+export function beginOwnKitchenTapClose(state:KitchenScreenState,original:KitchenTap,intent:KitchenCloseIntent,revision:string):KitchenScreenState {
+  if(intent.access.memberId!==original.access.memberId)throw invalid();
+  return saveKitchenTapClose(state,original,intent,revision);
+}
+function saveKitchenTapClose(state:KitchenScreenState,original:KitchenTap,intent:KitchenCloseIntent,revision:string):KitchenScreenState {
   const saved=state.taps.find(tap=>tap.action.id===original.action.id);
-  if(!saved||!sameTapSource(saved,original)||!sameKitchenSession(intent.access,state.access))throw invalid();
+  if(!saved||!sameTapSource(saved,original))throw invalid();
   if(saved.receipt||saved.closure)return state;
   intent=parseKitchenCloseIntent(intent,saved.action,state.access,saved.access.memberId);
   if(saved.closeIntents?.some(value=>sameKitchenSession(value.access,intent.access)))return state;

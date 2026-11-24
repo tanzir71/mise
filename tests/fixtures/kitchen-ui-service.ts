@@ -117,6 +117,7 @@ export async function startKitchenUiService(){
  return {
   prepare,
   prepareBoard,
+  async denyOrderRead(){await f.db.query('update public.members set permissions=permissions||$1::jsonb where id=$2',[JSON.stringify({'orders.read':false}),currentScreen!.session.memberId]);},
   async setTeamConfirmation(enabled:boolean){
    const scope={businessId:deviceId(1),outletId:deviceId(11),actorId:deviceId(101),actorRole:'owner' as const},memberId=currentScreen!.session.memberId;
    const c=parseStaffOwnerContext(await f.asRole(1,'authenticated','select public.read_staff_context($1,$2) data',[scope.outletId,memberId]),scope,memberId),profile=c.current?.profile??emptyStaffProfile();

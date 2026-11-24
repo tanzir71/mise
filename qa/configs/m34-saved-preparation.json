@@ -1,0 +1,30 @@
+{
+  "title": "M34 — personal preparation recovery after loss of all order access",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "saved-preparation-original", "path": "app/screen/kitchen?flags=kitchenScreen", "kitchenScreenFixture": "saved-original",
+      "note": "Personal recovery reuses the supplied kitchen frame and existing saved-original controls. No dedicated recovery-only frame is supplied. Only this PIN member's immutable original is shown; no live ticket or preparation capability is inferred.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "saved-preparation-offline-close", "path": "app/screen/kitchen?flags=kitchenScreen", "kitchenScreenFixture": "saved-close",
+      "note": "An explicit offline close choice is committed natively before any HTTP request. The original action, actor, time and full source remain retained without current order-read authority. The supplied frames guide the existing review primitives.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    },
+    {
+      "id": "saved-preparation-confirmed-close", "path": "app/screen/kitchen?flags=kitchenScreen", "kitchenScreenFixture": "saved-confirmed",
+      "note": "An actual device/PIN recovery receipt confirms the closure while preserving the original source. Closing cannot undo accepted preparation or change orders or money. This is an adaptation using existing review primitives, not a supplied exact recovery frame.",
+      "sections": [
+        {"id": "phone", "selector": ".kitchen-screen", "widths": [360, 390], "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"},
+        {"id": "tablet", "selector": ".kitchen-screen", "widths": [768, 1024, 1440], "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"}
+      ]
+    }
+  ]
+}
