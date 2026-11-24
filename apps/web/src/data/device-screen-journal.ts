@@ -6,6 +6,7 @@ import {kitchenScreenWire,parseKitchenScreenState,type KitchenScreenState} from 
 import {kitchenReadScope,parseKitchenReadStatus,type KitchenReadStatus} from '@mise/core/kitchen-read-status';
 import {parseStaffDeviceJournal,staffDeviceJournalId,type StaffDeviceJournal,type StaffDeviceScope} from '@mise/core/staff-device-journal';
 import {assertLiveCommandReceipt} from './command-request';
+import {parseStaffStockJournal,staffStockJournalId,staffStockJournalTransition,type StaffStockJournal} from '@mise/core/staff-stock-journal';
 
 export class ScreenStorageError extends Error {
  constructor(readonly kind:'changed'|'unavailable'|'owner'|'damaged'){
@@ -21,9 +22,9 @@ function openDatabase(factory:IDBFactory,name:string):Promise<IDBDatabase>{
   let settled=false;const timer=setTimeout(()=>fail(),5000);
   const fail=()=>{if(settled)return;settled=true;clearTimeout(timer);reject(new ScreenStorageError('unavailable'));};
   try{
-   const request=factory.open(name,3);
+   const request=factory.open(name,4);
    request.onblocked=fail;request.onerror=fail;
-   request.onupgradeneeded=()=>{if(settled){request.transaction?.abort();return;}for(const name of ['state','kitchen','attendance'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:'id'});};
+   request.onupgradeneeded=()=>{if(settled){request.transaction?.abort();return;}for(const name of ['state','kitchen','attendance','stock'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:'id'});};
    request.onsuccess=()=>{if(settled){request.result.close();return;}settled=true;clearTimeout(timer);resolve(request.result);};
   }catch{fail();}
  });
@@ -64,7 +65,7 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
   if(value.state.phase==='pairing'&&await deviceSecretHash(value.state.source.token)!==value.state.source.tokenHash)throw new ScreenStorageError('damaged');
   return value;
  }
- function scopedTransaction(storeName:'kitchen'|'attendance',cacheId:string,original:ScreenJournalRecord,expected?:unknown,replacement?:{id:string},guard?:()=>void,signal?:AbortSignal,readFence?:{observed:KitchenReadStatus|null;next:KitchenReadStatus|null}):Promise<unknown>{
+ function scopedTransaction(storeName:'kitchen'|'attendance'|'stock',cacheId:string,original:ScreenJournalRecord,expected?:unknown,replacement?:{id:string},guard?:()=>void,signal?:AbortSignal,readFence?:{observed:KitchenReadStatus|null;next:KitchenReadStatus|null}):Promise<unknown>{
   return new Promise((resolve,reject)=>{
    if(original.state.phase!=='signed-in'||signal?.aborted){reject(new ScreenStorageError('changed'));return;}
    let tx:IDBTransaction;try{if(closed)throw Error();tx=database.transaction(['state',storeName],'readwrite');}catch{reject(new ScreenStorageError('unavailable'));return;}
@@ -147,6 +148,18 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
   async replaceAttendance(input:ScreenJournalRecord,expected:StaffDeviceJournal|null,next:StaffDeviceJournal,options:{assertCurrent?:()=>void;signal?:AbortSignal}={}){
    const original=parseScreenJournalRecord(input),scope=attendanceScope(original),before=expected===null?null:parseStaffDeviceJournal(expected,scope),after=parseStaffDeviceJournal(next,scope);
    const saved=await scopedTransaction('attendance',staffDeviceJournalId(scope),original,before,after,options.assertCurrent,options.signal);return parseStaffDeviceJournal(saved,scope);
+  },
+  async readStock(input:ScreenJournalRecord){
+   const original=parseScreenJournalRecord(input),scope=attendanceScope(original),raw=await scopedTransaction('stock',staffStockJournalId(scope),original);
+   const result=raw===null?null:await parseStaffStockJournal(raw,scope);await transaction(original);return result;
+  },
+  async replaceStock(input:ScreenJournalRecord,expected:StaffStockJournal|null,next:StaffStockJournal,options:{assertCurrent?:()=>void;signal?:AbortSignal;authorization?:object}={}){
+   const original=parseScreenJournalRecord(input),scope=attendanceScope(original),before=expected===null?null:await parseStaffStockJournal(expected,scope),after=await parseStaffStockJournal(next,scope);
+   const transition=staffStockJournalTransition(before,after);if(original.state.phase!=='signed-in')throw new ScreenStorageError('changed');
+   if(JSON.stringify(before?.readStatus??null)!==JSON.stringify(after.readStatus)&&after.readStatus?.sessionId!==original.state.session.id)throw new ScreenStorageError('changed');
+   if(transition.append){const intent=after.actions.at(-1)!.intent;if(intent.origin.sessionId!==original.state.session.id||intent.screenRevision!==original.revision||after.readStatus?.denied!==false||after.readStatus.sessionId!==original.state.session.id)throw new ScreenStorageError('changed');}
+   const guard=()=>{const value:unknown=options.assertCurrent?.();if(value!==undefined){void Promise.resolve(value).catch(()=>{});throw new ScreenStorageError('changed');}if(transition.append||transition.outcome||transition.restoreRead){if(!options.authorization)throw new ScreenStorageError('changed');assertLiveCommandReceipt(options.authorization);}};
+   guard();const saved=await scopedTransaction('stock',staffStockJournalId(scope),original,before,after,guard,options.signal);return parseStaffStockJournal(saved,scope);
   },
   close(){closed=true;database.close();},
  };

@@ -1,11 +1,28 @@
 import {afterEach,expect,it,vi} from 'vitest';
 import {createDeviceScreenRemote,DeviceScreenRequestError} from '../apps/web/src/data/device-screen-remote';
-import {assertCommandReceipt} from '../apps/web/src/data/command-request';
+import {assertCommandReceipt,assertLiveCommandReceipt} from '../apps/web/src/data/command-request';
 import {deviceLifetime,deviceSessionLifetime,deviceSecretHash,deviceVerification} from '../packages/core/device-access';
 const id=(n:number)=>String(n).padStart(26,'0'),token='D'.repeat(43),connection={apiUrl:'https://screen.test',publishableKey:'sb_publishable_test_only'},device={id:id(5),businessId:id(1),outletId:id(2),name:'Kitchen',mode:'kitchen' as const,createdAt:1000,expiresAt:1000+deviceLifetime,revokedAt:null},session={id:id(8),token:'S'.repeat(43),deviceId:id(5),memberId:id(7),createdAt:1001,expiresAt:1001+deviceSessionLifetime};
 const response=(value:unknown)=>new Response(JSON.stringify(value));
 function boot(value:unknown){let active=true;const send=vi.fn<typeof fetch>(async()=>response(value)),remote=createDeviceScreenRemote({connection,requestId:device.id,token},()=>{if(!active)throw Error('PRIVATE CHANGE');},send);return {remote,send,stop:()=>{active=false;}};}
 afterEach(()=>vi.useRealTimers());
+function stockPage(){return {v:1,state:'stock',access:{v:1,businessId:device.businessId,outletId:device.outletId,deviceId:device.id,sessionId:session.id,memberId:session.memberId,role:'kitchen',mode:'kitchen',permissions:['stock.adjust','stock.read','stock.undo'],expiresAt:session.expiresAt},outletName:'Shop',serverAt:2000,items:[{id:id(301),outletId:device.outletId,revision:1,name:'চাল',nameLocal:'Rice',unit:'kg',category:'Dry',aliases:['rice'],onHand:10.005,target:20,packSize:1,lowAt:2,lastCountedAt:null,eventId:id(10301),createdAt:1,updatedAt:2}],next:null};}
+it('stock pages use fixed device-only transport and require an ephemeral live response proof',async()=>{
+ const value=stockPage(),f=boot(value),page=await f.remote.stockPage(device,session);expect(page).toEqual(value);expect(()=>assertLiveCommandReceipt(page)).not.toThrow();expect(()=>assertLiveCommandReceipt(structuredClone(page))).toThrow();
+ expect(String(f.send.mock.calls[0][0])).toBe('https://screen.test/functions/v1/staff-stock');expect(f.send.mock.calls[0][1]).toMatchObject({credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer'});expect(JSON.parse(String(f.send.mock.calls[0][1]?.body))).toEqual({operation:'read',sessionToken:session.token,after:null,limit:100});f.stop();expect(()=>assertLiveCommandReceipt(page)).toThrow();
+});
+it.each(['fetch','body'])('stock transport keeps the full sixty-second deadline for stalled %s without trusting abort cooperation',async phase=>{
+ vi.useFakeTimers();const f=boot(null);let cancelled=false;f.send.mockImplementation(phase==='fetch'?()=>new Promise(()=>{}):async()=>new Response(new ReadableStream({cancel(){cancelled=true;}})));
+ const checked=expect(f.remote.stockPage(device,session)).rejects.toMatchObject({kind:'retry'});await vi.advanceTimersByTimeAsync(59999);expect(cancelled).toBe(false);await vi.advanceTimersByTimeAsync(1);await checked;if(phase==='body')expect(cancelled).toBe(true);
+});
+it('stock transport preserves a full imported payload larger than the old eight-million-byte limit and rejects an oversized declaration',async()=>{
+ const value=stockPage();value.items[0].name='\u0000'.repeat(1000000);value.items[0].unit='\ud800'.repeat(1000000);const f=boot(value),page=await f.remote.stockPage(device,session);expect(page.items[0].name).toBe(value.items[0].name);expect(page.items[0].unit).toBe(value.items[0].unit);
+ f.send.mockImplementation(async()=>new Response('null',{headers:{'Content-Length':String(64*1024*1024+1)}}));await expect(f.remote.stockPage(device,session)).rejects.toMatchObject({kind:'retry'});
+});
+it('stock throttling retains only a bounded retry delay and never leaks provider or credential details',async()=>{
+ const f=boot(null),at=Date.now();f.send.mockImplementation(async()=>new Response('{"error":"PRIVATE credential"}',{status:429,headers:{'Retry-After':'5'}}));await expect(f.remote.stockPage(device,session)).rejects.toMatchObject({kind:'backoff',retryAt:expect.any(Number)});
+ const error=await f.remote.stockPage(device,session).catch(e=>e);expect(error.retryAt).toBeGreaterThanOrEqual(at+5000);expect(error.retryAt).toBeLessThanOrEqual(Date.now()+5000);expect(error.message).not.toContain('PRIVATE');
+});
 it('uses only the enrolled device secret and fixed credential-free URLs, with no owner Auth/cookies/redirects/cache',async()=>{
  const page={v:1,device,outletNameJson:JSON.stringify('বাংলা\0shop'),members:[{id:id(7),nameJson:'"Staff"'}],next:null},f=boot(page);expect(await f.remote.directory(device)).toEqual(page);
  const [url,options]=f.send.mock.calls[0];expect(String(url)).toBe('https://screen.test/functions/v1/device-access');expect(options).toMatchObject({method:'POST',redirect:'error',credentials:'omit',cache:'no-store',headers:{apikey:connection.publishableKey,Authorization:'Bearer '+token}});expect(JSON.parse(options?.body as string)).toEqual({action:'directory',after:null,limit:50});expect(options?.body).not.toContain(token);

@@ -1,6 +1,6 @@
 import {openScreenJournal,assertBlankScreenProfile,screenJournalDatabaseName} from '../../apps/web/src/data/device-screen-journal';
 import {createDeviceScreenSession} from '../../apps/web/src/data/device-screen-session';
-import {deviceVerification} from '../../packages/core/device-access';
+import {deviceVerification,deviceSecretHash} from '../../packages/core/device-access';
 const base='/mise/app/',ownerName='mise-local:'+base,connection={apiUrl:'https://screen.test',publishableKey:'sb_publishable_test_only'},parent='00000000000000000000000010';
 let requests=0;
 async function open(){return openScreenJournal(base);}
@@ -40,10 +40,18 @@ async function ownerGuard(){
 async function authGuard(){
  localStorage.setItem('mise.cloud.auth.original','Private runtime sign-in');try{let blocked=false;try{await prepare();}catch{blocked=true;}return {blocked,kept:localStorage.getItem('mise.cloud.auth.original')==='Private runtime sign-in',requests};}finally{localStorage.removeItem('mise.cloud.auth.original');}
 }
+async function upgradeStockStorage(){
+ const name=screenJournalDatabaseName(base),token='D'.repeat(43),state={v:1,id:'current',revision:'00000000000000000000900001',state:{phase:'pairing',source:{connection,requestId:'00000000000000000000000005',token,tokenHash:await deviceSecretHash(token),code:'123456',pairingId:parent},receipt:null}};
+ const kitchen={id:'00000000000000000000000005',original:'পূর্ণ\u0000\ud800 original kitchen history'},attendance={id:'device:member',original:['own attendance',0,'কর্মী'],outcome:null};
+ const old=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name,3);r.onupgradeneeded=()=>{for(const table of ['state','kitchen','attendance'])r.result.createObjectStore(table,{keyPath:'id'});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+ await new Promise<void>((resolve,reject)=>{const tx=old.transaction(['state','kitchen','attendance'],'readwrite');tx.objectStore('state').put(state);tx.objectStore('kitchen').put(kitchen);tx.objectStore('attendance').put(attendance);tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error);});old.close();
+ const journal=await open(),saved=await journal.read(),raw=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+ try{const kept=await Promise.all([['kitchen',kitchen.id],['attendance',attendance.id]].map(([table,id])=>new Promise<unknown>((resolve,reject)=>{const tx=raw.transaction(table),r=tx.objectStore(table).get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);})));return {version:raw.version,tables:Array.from(raw.objectStoreNames),statePreserved:JSON.stringify(saved)===JSON.stringify(state),kitchenPreserved:JSON.stringify(kept[0])===JSON.stringify(kitchen),attendancePreserved:JSON.stringify(kept[1])===JSON.stringify(attendance)};}finally{raw.close();journal.close();}
+}
 async function cleanup(){
  // Only the two explicit, synthetic fixture databases; never discover/delete
  // other databases or any filesystem path.
  for(const name of [screenJournalDatabaseName(base),ownerName])await new Promise<void>((resolve,reject)=>{const request=indexedDB.deleteDatabase(name);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error);request.onblocked=()=>reject(Error('Fixture database still open'));});
 }
-window.miseDeviceScreenTest={prepare,inspect,competingTabs,quota,stoppedWrite,staleResponse,ownerGuard,authGuard,cleanup};
-declare global {interface Window {miseDeviceScreenTest:{prepare:typeof prepare;inspect:typeof inspect;competingTabs:typeof competingTabs;quota:typeof quota;stoppedWrite:typeof stoppedWrite;staleResponse:typeof staleResponse;ownerGuard:typeof ownerGuard;authGuard:typeof authGuard;cleanup:typeof cleanup}}}
+window.miseDeviceScreenTest={prepare,inspect,competingTabs,quota,stoppedWrite,staleResponse,ownerGuard,authGuard,upgradeStockStorage,cleanup};
+declare global {interface Window {miseDeviceScreenTest:{prepare:typeof prepare;inspect:typeof inspect;competingTabs:typeof competingTabs;quota:typeof quota;stoppedWrite:typeof stoppedWrite;staleResponse:typeof staleResponse;ownerGuard:typeof ownerGuard;authGuard:typeof authGuard;upgradeStockStorage:typeof upgradeStockStorage;cleanup:typeof cleanup}}}

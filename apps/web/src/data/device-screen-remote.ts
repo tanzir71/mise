@@ -9,6 +9,8 @@ import {parseStaffDeviceView,parseStaffDeviceOutcome} from '@mise/core/staff-dev
 import {parseStaffDeviceBoard} from '@mise/core/staff-device-board';
 import {parseAttendanceIntent,type AttendanceIntent} from '@mise/core/staff-attendance';
 import {parseStaffCursor,type StaffHistoryCursor} from '@mise/core/staff-links';
+import {parseStaffStockPage,parseStaffStockRequest} from '@mise/core/staff-stock';
+import {parseStaffStockIntent,parseStaffStockActionRequest,staffStockIntentHash,parseStaffStockPrepared,parseOwnStaffStockOutcome,staffStockActionBodyLimit,type StaffStockIntent,type StaffStockPrepared} from '@mise/core/staff-stock-actions';
 
 export class DeviceScreenRequestError extends Error {
  constructor(readonly kind:'auth'|'review'|'retry'|'backoff',readonly retryAt:number|null=null){
@@ -28,11 +30,13 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
  function checked<T extends object>(value:T):T{current();return bindCommandReceipt(value,current);}
  function pinned(value:SharedDevice){const d=parseSharedDevice(value);if(d.id!==requestId||d.revokedAt!==null)throw new DeviceScreenRequestError('review');return d;}
  function session(value:StaffDeviceSession,device:SharedDevice){return parseStaffDeviceSession(value,{deviceId:device.id,memberId:value.memberId});}
- async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions'|'kitchen-recovery'|'staff-device',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
+ async function call(route:'device-access'|'device-pin'|'kitchen-tickets'|'kitchen-actions'|'kitchen-recovery'|'staff-device'|'staff-stock'|'staff-stock-actions',body:Record<string,unknown>,signal?:AbortSignal):Promise<unknown>{
   // Serialize before the first await, so form/selection mutations cannot alter
   // an already prepared request. No credential is ever added to the URL.
   const serialized=JSON.stringify(body),controller=new AbortController(),lifetime=signal?AbortSignal.any([controller.signal,signal]):controller.signal;
-  const timer=setTimeout(()=>controller.abort(),30000);let response:Response|undefined;
+  const stock=route==='staff-stock'||route==='staff-stock-actions';
+  if(stock&&new TextEncoder().encode(serialized).byteLength>staffStockActionBodyLimit)throw new DeviceScreenRequestError('review');
+  const timer=setTimeout(()=>controller.abort(),stock?60000:30000);let response:Response|undefined;
   const abortable=<T>(promise:Promise<T>)=>new Promise<T>((resolve,reject)=>{
    const stop=()=>{lifetime.removeEventListener('abort',stop);reject(new DeviceScreenRequestError('retry'));};
    if(lifetime.aborted){void promise.catch(()=>{});stop();return;}lifetime.addEventListener('abort',stop,{once:true});
@@ -40,12 +44,12 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
   });
   try{
    if(lifetime.aborted)throw new DeviceScreenRequestError('retry');current();
-   response=await abortable(send(new URL('functions/v1/'+route,config.apiUrl+'/'),{method:'POST',redirect:'error',credentials:'omit',cache:'no-store',signal:lifetime,headers:{apikey:config.publishableKey,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:serialized}));
+   response=await abortable(send(new URL('functions/v1/'+route,config.apiUrl+'/'),{method:'POST',redirect:'error',credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:lifetime,headers:{apikey:config.publishableKey,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:serialized}));
    current();
    if([401,403].includes(response.status))throw new DeviceScreenRequestError('auth');
    if([400,409,413,415].includes(response.status))throw new DeviceScreenRequestError('review');
    if(!response.ok&&response.status!==429)throw new DeviceScreenRequestError('retry');
-   const maximum=route==='kitchen-tickets'?32*1024*1024:responseLimit;
+   const maximum=stock?staffStockActionBodyLimit:route==='kitchen-tickets'?32*1024*1024:responseLimit;
    const declared=response.headers.get('Content-Length');if(declared!==null&&(!/^\d+$/.test(declared)||Number(declared)>maximum))throw new DeviceScreenRequestError('retry');
    const reader=response.body?.getReader();if(!reader)throw new DeviceScreenRequestError('retry');const chunks:Uint8Array[]=[];let size=0;
    try{for(;;){const part=await abortable(reader.read());if(part.done)break;size+=part.value.byteLength;if(size>maximum)throw new DeviceScreenRequestError('retry');chunks.push(part.value);}}
@@ -56,7 +60,7 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
    if(response.status===429){
     // Provider/error bodies never escape this boundary. Only a bounded time is
     // retained to disable PIN retries; it never grants a session.
-    const retryHeader=response.headers.get('Retry-After'),retryAt=route==='staff-device'?Date.now()+((retryHeader&&/^[1-9]\d?$/.test(retryHeader)&&Number(retryHeader)<=60?Number(retryHeader):60)*1000):object(value)&&typeof value.retryAt==='number'&&Number.isSafeInteger(value.retryAt)&&value.retryAt>=0&&value.retryAt<=8640000000000000?value.retryAt:null;
+    const retryHeader=response.headers.get('Retry-After'),retryAt=route==='staff-device'||stock?Date.now()+((retryHeader&&/^[1-9]\d?$/.test(retryHeader)&&Number(retryHeader)<=60?Number(retryHeader):60)*1000):object(value)&&typeof value.retryAt==='number'&&Number.isSafeInteger(value.retryAt)&&value.retryAt>=0&&value.retryAt<=8640000000000000?value.retryAt:null;
     throw new DeviceScreenRequestError('backoff',retryAt);
    }
    return value;
@@ -64,6 +68,24 @@ export function createDeviceScreenRemote(input:{connection:CloudConnection;reque
   finally{clearTimeout(timer);controller.abort();}
  }
  return {
+  async stockPage(device:SharedDevice,input:StaffDeviceSession,after:string|null=null,limit=100,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original),request=parseStaffStockRequest({operation:'read',sessionToken:saved.token,after,limit});
+   return checked(parseStaffStockPage(await call('staff-stock',{...request},signal),after,limit,{device:original,session:saved}));
+  },
+  async stockAction(device:SharedDevice,input:StaffDeviceSession,source:StaffStockIntent,operation:'prepare'|'inspect'|'close'|'commit',prepared?:StaffStockPrepared,signal?:AbortSignal){
+   const original=pinned(device),saved=session(input,original),intent=parseStaffStockIntent(source),a=intent.origin;
+   if(a.deviceId!==original.id||a.businessId!==original.businessId||a.outletId!==original.outletId||a.memberId!==saved.memberId)throw new DeviceScreenRequestError('review');
+   const captured=prepared===undefined?undefined:structuredClone(prepared),hash=await staffStockIntentHash(intent);current();
+   const chosen=operation==='commit'?parseStaffStockPrepared(captured,intent,hash):null;if(chosen)parseStaffDeviceAccess(chosen.review.access,{device:original,session:saved});
+   const request=parseStaffStockActionRequest(chosen?{operation:'commit',sessionToken:saved.token,intent,ticketId:chosen.review.id,token:chosen.token,reviewHash:chosen.reviewHash}:{operation,sessionToken:saved.token,intent});
+   const value=await call('staff-stock-actions',{...request},signal);
+   if(operation==='prepare'&&object(value)&&value.state==='review'){
+    const quote=parseStaffStockPrepared(value,intent,hash);parseStaffDeviceAccess(quote.review.access,{device:original,session:saved});return checked(quote);
+   }
+   const outcome=parseOwnStaffStockOutcome(value,intent,hash);
+   if((operation==='commit'||operation==='close')&&outcome.state==='pending')throw new DeviceScreenRequestError('retry');
+   return checked(outcome);
+  },
   async staffView(device:SharedDevice,input:StaffDeviceSession,after:StaffHistoryCursor|null=null,signal?:AbortSignal){
    const original=pinned(device),saved=session(input,original),cursor=parseStaffCursor(after);
    return checked(parseStaffDeviceView(await call('staff-device',{sessionToken:saved.token,operation:'read',intent:null,after:cursor},signal),cursor,{device:original,session:saved}));

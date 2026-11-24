@@ -13,12 +13,12 @@ async function write(database:IDBDatabase,table:string,value:unknown){await new 
 it('upgrades an actual version-two screen without replacing its complete state or kitchen bytes',async()=>{
  const factory=new IDBFactory(),name=screenJournalDatabaseName(base),old=await new Promise<IDBDatabase>((resolve,reject)=>{const r=factory.open(name,2);r.onupgradeneeded=()=>{for(const store of ['state','kitchen'])r.result.createObjectStore(store,{keyPath:'id'});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
  const state={v:1,id:'current',revision:id(90),state:await pairing()},kitchen={id:id(5),legacy:['intact',0,'কর্মী'],original:'Do not replace during schema upgrade'};await write(old,'state',state);await write(old,'kitchen',kitchen);old.close();
- const upgraded=await openScreenJournal(base,factory);expect(await upgraded.read()).toEqual(state);const raw=await db(factory,name);expect(raw.version).toBe(3);expect(Array.from(raw.objectStoreNames)).toEqual(['attendance','kitchen','state']);const kept=await new Promise<unknown>(resolve=>{const r=raw.transaction('kitchen').objectStore('kitchen').get(id(5));r.onsuccess=()=>resolve(r.result);});expect(kept).toEqual(kitchen);raw.close();upgraded.close();
+ const upgraded=await openScreenJournal(base,factory);expect(await upgraded.read()).toEqual(state);const raw=await db(factory,name);expect(raw.version).toBe(4);expect(Array.from(raw.objectStoreNames)).toEqual(['attendance','kitchen','state','stock']);const kept=await new Promise<unknown>(resolve=>{const r=raw.transaction('kitchen').objectStore('kitchen').get(id(5));r.onsuccess=()=>resolve(r.result);});expect(kept).toEqual(kitchen);raw.close();upgraded.close();
 });
 afterEach(()=>vi.restoreAllMocks());
 it('persists the original pairing secret and identity across close/reopen, separate from every owner store',async()=>{
  const factory=new IDBFactory(),journal=await openScreenJournal(base,factory),empty=await journal.read(),state=await pairing(),saved=await journal.replace(empty,state);journal.close();
- const reopened=await openScreenJournal(base,factory);expect(await reopened.read()).toEqual(saved);expect(saved.revision).not.toBe(empty.revision);expect(await factory.databases()).toEqual([{name:screenJournalDatabaseName(base),version:3}]);reopened.close();
+ const reopened=await openScreenJournal(base,factory);expect(await reopened.read()).toEqual(saved);expect(saved.revision).not.toBe(empty.revision);expect(await factory.databases()).toEqual([{name:screenJournalDatabaseName(base),version:4}]);reopened.close();
 });
 it('two tabs competing for one empty screen cannot install different credentials',async()=>{
  const factory=new IDBFactory(),a=await openScreenJournal(base,factory),b=await openScreenJournal(base,factory),old=await a.read(),source=await pairing();

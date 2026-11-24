@@ -125,7 +125,7 @@ it('quota failure and stopped route leave complete tickets and saved taps untouc
 it('upgrades the real version-1 journal without replacing its pairing source or revision',async()=>{
  const factory=new IDBFactory(),f=await kitchenScreenFixture(),original={v:1,id:'current',revision:newKitchenId(),state:f.screen};
  await new Promise<void>((resolve,reject)=>{const request=factory.open(screenJournalDatabaseName(base),1);request.onupgradeneeded=()=>request.result.createObjectStore('state',{keyPath:'id'}).put(original);request.onsuccess=()=>{request.result.close();resolve();};request.onerror=()=>reject(request.error);});
- const journal=await openScreenJournal(base,factory);opened.push(journal);expect(await journal.read()).toEqual(original);expect(await journal.readKitchen(await journal.read())).toBeNull();expect(await journal.readAttendance(await journal.read())).toBeNull();expect((await factory.databases())[0].version).toBe(3);
+ const journal=await openScreenJournal(base,factory);opened.push(journal);expect(await journal.read()).toEqual(original);expect(await journal.readKitchen(await journal.read())).toBeNull();expect(await journal.readAttendance(await journal.read())).toBeNull();expect(await journal.readStock(await journal.read())).toBeNull();expect((await factory.databases())[0].version).toBe(4);
 });
 it('delivers queued acknowledgement before Ready and retries the same saved tap after a lost reply',async()=>{
  const f=await fixture(),sent:string[]=[],accepted=new Map<string,KitchenReceipt>();let lose=true;
