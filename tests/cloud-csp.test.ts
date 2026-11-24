@@ -37,6 +37,8 @@ it('limits runtime cloud connections to owner pages and preserves public page is
       expect(html).toContain("object-src 'none'");
       expect(html).toContain("form-action 'self'");
       expect(html).toContain("script-src 'self' 'sha256-");
+      expect(html).toContain("'wasm-unsafe-eval'");
+      expect(html).not.toContain("'unsafe-eval'");
     }
     for (const path of [
       'app/s/index.html',
@@ -50,6 +52,7 @@ it('limits runtime cloud connections to owner pages and preserves public page is
       expect(html).not.toContain('wss:');
       expect(html).not.toContain('ws://');
       expect(html).not.toContain(' blob:');
+      expect(html).not.toContain("'wasm-unsafe-eval'");
       expect(html).toContain("script-src 'self' 'sha256-");
     }
   } finally {

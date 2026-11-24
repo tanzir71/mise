@@ -1,0 +1,612 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "a51f22032df0c9fef50212700bf0d00facc441dc",
+  "verifiedAt": "2026-11-24T18:59:26.891Z",
+  "scope": "M40 on-device OCR engine and conservative invoice proposals; review/recording flows and full milestone acceptance remain open",
+  "sourceFingerprint": "fb58def38100f896efdd448ac885a5986ca137415f847af76910852d09c39e27",
+  "sources": [
+    {
+      "path": ".gitignore",
+      "sha256": "f191deeb74452f9fb28106458a9ff34d17638b43cbe006febdf3ba75504f3d96"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "677c561a2f2152fdf278daea7f12ad802cc2f5c263eae2a04efd5bcab08eeb8b"
+    },
+    {
+      "path": "apps/web/package.json",
+      "sha256": "6e507b2e9191e91645250d6d2f0274dafc11153183ea0c45e5fbe82657ae4ca0"
+    },
+    {
+      "path": "apps/web/prepare-ocr-assets.ts",
+      "sha256": "34c0e5f35fd224b04cef03d457280f2e88b707ee32f7416d2cf4e1a16b6a6a03"
+    },
+    {
+      "path": "apps/web/src/ocr/NOTICE.txt",
+      "sha256": "b7a35fdc5dc0c01ddf932a48d0269c21dc3016618bd37ed4f1e50fd63ef4c623"
+    },
+    {
+      "path": "apps/web/src/ocr/assets.json",
+      "sha256": "153c60b465ac4001c4c5fcd67ee57886d1f075c1ccf79587abf9604cab922926"
+    },
+    {
+      "path": "apps/web/src/ocr/assets.ts",
+      "sha256": "0136cd668ee03b72fc09f280cda794d9f4c3d1dae39607cbb8ab4b6a83f168b2"
+    },
+    {
+      "path": "apps/web/src/ocr/raster.ts",
+      "sha256": "3284823c3e08e1a35978c9fc1eb46cd44c599d9e7c911cb93308a9236262a0ad"
+    },
+    {
+      "path": "apps/web/src/ocr/worker.ts",
+      "sha256": "83a6073c439bc2666e702a609b776b937b3f2a48c7441eaa95f48e594b2a3126"
+    },
+    {
+      "path": "apps/web/src/sw.ts",
+      "sha256": "1f71b3044f8d2f220354d6b22f09cf329a283e30311ad84c9856712cda9194df"
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "sha256": "3423ccdff42bcf2e4b59527825f636df825836866d1af8f84688803b5f70c3fc"
+    },
+    {
+      "path": "docs/on-device-ocr.md",
+      "sha256": "cefd203a19eab17a67bb05935355cf2249615e8772dfa7209dd9f5712a8f39e6"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "45a1d15dffcbf1faac5918dc7363911e563c909a8c2d44e9ea4062c166907f71"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "25ada6a2556ca4e5f20c282a2cbbda92eba7000052d5e7eed8afd6ea4855cfa0"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "a58feb58202b1e07611d82249d44564007d316322d62e5a2986303feb040c5b2"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "318c581ee0574a2473b8294f25b2798a4c6e605309393b9e4ac99efea26ed6f3"
+    },
+    {
+      "path": "package.json",
+      "sha256": "55086c9e6207275584e1a7553ef08d43919edb4d957e73adb577ebea30d9c2cf"
+    },
+    {
+      "path": "packages/core/flags.ts",
+      "sha256": "f934e22df8676272bf0e8e13c9892193db0b69fd8b4cddffdb85b4dd7e3c2055"
+    },
+    {
+      "path": "packages/core/ocr-invoice.ts",
+      "sha256": "0ee090175bc3cfaf440e3f0d66a197d9fdbd9ece0081bcf5fa5432e66144cb60"
+    },
+    {
+      "path": "packages/core/ocr.ts",
+      "sha256": "783647ffb7f4d96834b378f93721236697bd0fcd275a0c1b0dc07d9e7cf8bda9"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "96f0e88060c8058dfb43de109b7cc9712fb50669d8d9c2cc48a6f3ca14cde126"
+    },
+    {
+      "path": "scripts/generate-ocr-fixtures.mjs",
+      "sha256": "5e6905f3ee49a4ee148e8fc45b2f196418f1bf21786bbad085a3a69555065fbf"
+    },
+    {
+      "path": "scripts/harden.mjs",
+      "sha256": "b7ee62d254005aef992b2c90a8c45c121f25e60fb68ca92e35f06bb7024b4dda"
+    },
+    {
+      "path": "tests/cloud-csp.test.ts",
+      "sha256": "fcb779fa2c579af6c394aa902ace7cd6f90fc60b95ac966ca9d9b71e0acc0313"
+    },
+    {
+      "path": "tests/e2e/ocr-engine.spec.ts",
+      "sha256": "1f284c6ea0a870a5c562ac384ce3f6f1c056d23a4fbb645a829522c5e2bca7e3"
+    },
+    {
+      "path": "tests/fixtures/ocr-browser.mjs",
+      "sha256": "aaa7944e0d87f636134912761dae36858ed8f6fb0b9adb62f4e6bd401dcdba48"
+    },
+    {
+      "path": "tests/fixtures/ocr/bangla-list.png",
+      "sha256": "7ef696c3357655c4223396c6a0eb6cdb8a06c7cba3d7e506657d0458d0d072f6"
+    },
+    {
+      "path": "tests/fixtures/ocr/expected.json",
+      "sha256": "71141a47bef2fe49dce4e11c9325e6536b082b47f052741930fc8b914817da51"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-01.png",
+      "sha256": "54d3ec01fca369e2c9693eb00daf1375943b019c6b18e0bb778105e38fbfa276"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-02.jpg",
+      "sha256": "b456e3a38c1b311676d05b170bbb8036cc5e07e480c2eb27aeb860c917adf625"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-03.png",
+      "sha256": "391fc626d1fb12a8e4848bd91dda60064e233c69f0faf85866c4d37322412b9f"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-04.png",
+      "sha256": "d7567fc9b0d6f2cbb778e90c8034d6707888d60d3c9033cbeaf9aa0b98071880"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-05.jpg",
+      "sha256": "76eac08b7d79919aea2a930d3713bdaa3a18b60578c8ee03499054560b5650e1"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-06.png",
+      "sha256": "b8b490cad5893e31787f61c7096e9bdefdc700edee3e469d476963a878a68481"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-07.png",
+      "sha256": "1efd138d974a02663c7f7ea36a4f790322effc6f71ea1ceee3f3181acfb6a57a"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-08.jpg",
+      "sha256": "d905ffcf9d924407fb3a8d7054eacf4ed408ad642e85e0c849e63cf7db7dadc2"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-09.png",
+      "sha256": "222f9f3acf1e53bd4403e6f1e0e116bed2b6660e5930798448ef1088ef658d47"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-10.png",
+      "sha256": "5d35cfbaeef4f34850b86b1d6bd2e9ee3bd94e327c5c8a0654a1a86a7d4ce83c"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-11.jpg",
+      "sha256": "a8a21511c08c134a296584c7bb13e64f72ad3348b6ddda5cd6ce729d8a3810c5"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-12.png",
+      "sha256": "81ad2032b7a029ddcd4c54dabf51a6eaa029aa1b46282dbb76eec65785c2fa4a"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-13.png",
+      "sha256": "4c0b3651e4e3cc4c4a799ab9e5d17b2640d1d040b6e0feeed33bfdb188f46271"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-14.jpg",
+      "sha256": "f63a8ef125c8499a4a00694b9467e976262574101c591e196593038cc235e162"
+    },
+    {
+      "path": "tests/fixtures/ocr/invoice-15.png",
+      "sha256": "7caff1b42ceed23a4b0d8d8f828254c91971042bd8c536b7e372d68bbdc054cb"
+    },
+    {
+      "path": "tests/ocr-assets.test.ts",
+      "sha256": "0f8b511599ae4cd082c3ccf526a34b1e6f56a10ccb0d3bf1be0ad4de644a3af5"
+    },
+    {
+      "path": "tests/ocr-invoice.test.ts",
+      "sha256": "3770211494c835e2ee067a16feabf98c50513f22a7f101a0d236a256f1423cc0"
+    },
+    {
+      "path": "tests/ocr-raster.test.ts",
+      "sha256": "e7a9c60622f3c9fc7139ecd50bdda6f9710bae23391aba6853a8c8164da4d646"
+    },
+    {
+      "path": "tests/ocr-worker.test.ts",
+      "sha256": "5065e5a58f1e259ae866e2e91b6b0b153c2e0ca0d5aa8c5ce216eac49c00a610"
+    },
+    {
+      "path": "tests/ocr.test.ts",
+      "sha256": "9c79d4cb259d59bbdd2f71c4abe61613ffd0b169aad4ae1c5c6f635d0bb82ead"
+    },
+    {
+      "path": "tests/sync-convergence-server.ts",
+      "sha256": "317313c3c1054addb7e28fb1a1e52bf4e699bebea89e8608015bc49e804b18ca"
+    }
+  ],
+  "tests": {
+    "fullUnitPassed": 5264,
+    "fullUnitFiles": 278,
+    "newUnitTests": 18,
+    "originalCorporaAndDeadlinesUnchanged": true,
+    "rootBrowser": {
+      "basePath": "/",
+      "passed": 89,
+      "files": 13,
+      "workers": 2,
+      "durationMs": 185068.379
+    },
+    "pagesBrowser": {
+      "basePath": "/mise/",
+      "passed": 89,
+      "files": 13,
+      "workers": 2,
+      "durationMs": 205785.06399999998
+    },
+    "browserSelection": "landing, smoke, PWA/control/persistence, shared/local/claimed Inbox, notification controls, urgent targets, actual OCR",
+    "initialRootFailure": "Three convergence-fixture cases used port 4321. The fixture now uses the explicit single MISE_E2E_ORIGIN; the full selected set then passed with its original budgets.",
+    "rootActualOcr": {
+      "fixtures": 15,
+      "literalCorrect": 115,
+      "literalLines": 120,
+      "itemCorrect": 45,
+      "itemLines": 45,
+      "perFixture": [
+        {
+          "id": "invoice-1",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-2",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-3",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-4",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-5",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-6",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-7",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-8",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-9",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-10",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-11",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-12",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-13",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-14",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-15",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        }
+      ],
+      "rawResultSha256": "7987530b7159e218b6f066ed60790ea34e316d6869e20c9aa3f4a4b78b689644"
+    },
+    "pagesActualOcr": {
+      "fixtures": 15,
+      "literalCorrect": 115,
+      "literalLines": 120,
+      "itemCorrect": 45,
+      "itemLines": 45,
+      "perFixture": [
+        {
+          "id": "invoice-1",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-2",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-3",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-4",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-5",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-6",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-7",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-8",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-9",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-10",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-11",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-12",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-13",
+          "correct": 8,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-14",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        },
+        {
+          "id": "invoice-15",
+          "correct": 7,
+          "total": 8,
+          "itemCorrect": 3,
+          "itemTotal": 3
+        }
+      ],
+      "rawResultSha256": "7987530b7159e218b6f066ed60790ea34e316d6869e20c9aa3f4a4b78b689644"
+    },
+    "realBanglaRead": true,
+    "realInitializationCancellationAndNextRead": true,
+    "engineAndModelRequestsSameOriginGetOnly": true,
+    "engineNotDownloadedOnAppInstallation": true,
+    "offlineReadAfterReloadBothHostingPaths": true
+  },
+  "checks": {
+    "lint": true,
+    "strictTypecheck": true,
+    "astroFiles": 207,
+    "astroErrors": 0,
+    "astroWarnings": 0,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "exportsPresent": 270,
+    "changedProductScreens": 0,
+    "reviewFlowVisualQa": "Pending M26/C07 integration; no new product screen is shipped in this checkpoint.",
+    "buildArtifactSecretChecks": true,
+    "privateValueComparisons": 13,
+    "finalHistoryAndArtifactScan": "Required after this record and enforced again by normal commit/push guards; no exception or guard changes."
+  },
+  "engine": {
+    "release": "tesseract-7.0.0-eng-ben-1.0.0-v1",
+    "versions": {
+      "worker": "7.0.0",
+      "core": "7.0.0",
+      "eng": "1.0.0",
+      "ben": "1.0.0"
+    },
+    "runtimeFiles": 6,
+    "runtimeBytes": 16139332,
+    "fileHashes": [
+      {
+        "name": "worker.min.js",
+        "bytes": 111307,
+        "sha256": "576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d"
+      },
+      {
+        "name": "tesseract-core-lstm.wasm.js",
+        "bytes": 3896484,
+        "sha256": "eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680"
+      },
+      {
+        "name": "tesseract-core-simd-lstm.wasm.js",
+        "bytes": 3899472,
+        "sha256": "c58b46a4c796c0b8afccf77591d5b875b6896b45d402bbce8caa6f5362447b38"
+      },
+      {
+        "name": "tesseract-core-relaxedsimd-lstm.wasm.js",
+        "bytes": 3905767,
+        "sha256": "861a536cf9ef8e63cb644d57bab39c388f37f7d6b6f60024b741c5f6b39a59b3"
+      },
+      {
+        "name": "eng.traineddata.gz",
+        "bytes": 2952873,
+        "sha256": "45b4cb346724ac1774f1c36f42f182b887bcdb28ebe63e6fff90ac41f3fcff91"
+      },
+      {
+        "name": "ben.traineddata.gz",
+        "bytes": 1373429,
+        "sha256": "a7c1fd170b796d6b8d01b401d4bfcc54409f47b313a200e9e3756ce20d742725"
+      }
+    ],
+    "noticesIncluded": true,
+    "originalImageByteLimit": 5242880,
+    "decodedPixelLimit": 16000000,
+    "dimensionLimit": 16384,
+    "fullRawTextRetained": true,
+    "unknownConfidenceNeverPromoted": true
+  },
+  "corpus": [
+    {
+      "file": "bangla-list.png",
+      "sha256": "7ef696c3357655c4223396c6a0eb6cdb8a06c7cba3d7e506657d0458d0d072f6"
+    },
+    {
+      "file": "expected.json",
+      "sha256": "71141a47bef2fe49dce4e11c9325e6536b082b47f052741930fc8b914817da51"
+    },
+    {
+      "file": "invoice-01.png",
+      "sha256": "54d3ec01fca369e2c9693eb00daf1375943b019c6b18e0bb778105e38fbfa276"
+    },
+    {
+      "file": "invoice-02.jpg",
+      "sha256": "b456e3a38c1b311676d05b170bbb8036cc5e07e480c2eb27aeb860c917adf625"
+    },
+    {
+      "file": "invoice-03.png",
+      "sha256": "391fc626d1fb12a8e4848bd91dda60064e233c69f0faf85866c4d37322412b9f"
+    },
+    {
+      "file": "invoice-04.png",
+      "sha256": "d7567fc9b0d6f2cbb778e90c8034d6707888d60d3c9033cbeaf9aa0b98071880"
+    },
+    {
+      "file": "invoice-05.jpg",
+      "sha256": "76eac08b7d79919aea2a930d3713bdaa3a18b60578c8ee03499054560b5650e1"
+    },
+    {
+      "file": "invoice-06.png",
+      "sha256": "b8b490cad5893e31787f61c7096e9bdefdc700edee3e469d476963a878a68481"
+    },
+    {
+      "file": "invoice-07.png",
+      "sha256": "1efd138d974a02663c7f7ea36a4f790322effc6f71ea1ceee3f3181acfb6a57a"
+    },
+    {
+      "file": "invoice-08.jpg",
+      "sha256": "d905ffcf9d924407fb3a8d7054eacf4ed408ad642e85e0c849e63cf7db7dadc2"
+    },
+    {
+      "file": "invoice-09.png",
+      "sha256": "222f9f3acf1e53bd4403e6f1e0e116bed2b6660e5930798448ef1088ef658d47"
+    },
+    {
+      "file": "invoice-10.png",
+      "sha256": "5d35cfbaeef4f34850b86b1d6bd2e9ee3bd94e327c5c8a0654a1a86a7d4ce83c"
+    },
+    {
+      "file": "invoice-11.jpg",
+      "sha256": "a8a21511c08c134a296584c7bb13e64f72ad3348b6ddda5cd6ce729d8a3810c5"
+    },
+    {
+      "file": "invoice-12.png",
+      "sha256": "81ad2032b7a029ddcd4c54dabf51a6eaa029aa1b46282dbb76eec65785c2fa4a"
+    },
+    {
+      "file": "invoice-13.png",
+      "sha256": "4c0b3651e4e3cc4c4a799ab9e5d17b2640d1d040b6e0feeed33bfdb188f46271"
+    },
+    {
+      "file": "invoice-14.jpg",
+      "sha256": "f63a8ef125c8499a4a00694b9467e976262574101c591e196593038cc235e162"
+    },
+    {
+      "file": "invoice-15.png",
+      "sha256": "7caff1b42ceed23a4b0d8d8f828254c91971042bd8c536b7e372d68bbdc054cb"
+    }
+  ],
+  "delivery": {
+    "milestoneComplete": false,
+    "featureDefault": false,
+    "providerOrMaintainerCredentialsRequired": false,
+    "configurationOwner": "Each installation",
+    "workflows": "Three manually disabled; no dispatch or artifact upload",
+    "pagesPublication": "Held; last observed deployment remains at 9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "releaseTagCreated": false,
+    "externalServiceOrMigrationDeployed": false,
+    "remaining": [
+      "Saved-image to editable invoice/order/Inbox review flows",
+      "Atomic stock and purchase recording with original-source guards",
+      "Seller confirmation of every prescription line",
+      "M26/C07 visual comparisons and full M40 acceptance"
+    ]
+  }
+}

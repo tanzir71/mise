@@ -9,6 +9,7 @@ import { claimOwnerClient } from './pwa-control-worker';
 import {DeskCache} from './data/desk-cache';
 import {deskPushSource} from './data/desk-browser-push';
 import {createNotificationWorker} from './notification-worker';
+import {ocrAssetForUrl,verifiedOcrAsset} from './ocr/assets';
 
 declare const self:ServiceWorkerGlobalScope & {__WB_MANIFEST:(string|{url:string;revision?:string|null})[]};
 const base=new URL(self.registration.scope).pathname;
@@ -21,6 +22,10 @@ self.addEventListener('push',event=>{let data:unknown;try{data=event.data?.json(
 self.addEventListener('notificationclick',event=>{event.waitUntil(deskWork(worker=>worker.click(event.notification)).catch(()=>{event.notification.close();}));});
 self.addEventListener('message',event=>{if(event.data?.type==='MISE_DESK_RECHECK'&&ownDeskClient(event.source))event.waitUntil(deskWork(worker=>worker.recheck()).catch(()=>{}));});
 clientsClaim();cleanupOutdatedCaches();precacheAndRoute(self.__WB_MANIFEST);
+registerRoute(({url})=>!!ocrAssetForUrl(url,base,self.location.origin),async({url})=>{
+ try{return await verifiedOcrAsset(ocrAssetForUrl(url,base,self.location.origin)!,base,self.location.origin);}
+ catch{return new Response('On-device reader unavailable. Enter the saved image details by hand.',{status:503,headers:{'Content-Type':'text/plain'}});}
+});
 registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}index.html`),{denylist:[new RegExp('^'+base.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[so](?:/|$)')]}));
 registerRoute(({url,request})=>url.origin===self.location.origin&&url.pathname===`${base}inbox/receive`&&request.mode==='navigate'&&request.destination==='document',async({request})=>{
   const store=new LocalStore(`mise-local:${base}`);

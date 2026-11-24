@@ -1,0 +1,19 @@
+Mise on-device OCR
+
+The worker and embedded WebAssembly LSTM cores are unmodified files from
+Tesseract.js 7.0.0 and tesseract.js-core 7.0.0 (Apache-2.0).
+https://github.com/naptha/tesseract.js/tree/v7.0.0
+https://github.com/naptha/tesseract.js-core
+The adjacent TESSERACT-LICENSE.txt, CORE-LICENSE.txt and WORKER-NOTICES.txt
+are copied without modification from those installed packages.
+
+English (eng) and Bengali (ben) compressed traineddata are the unmodified
+4.0.0_best_int files from @tesseract.js-data/eng and @tesseract.js-data/ben
+1.0.0. The packaging declares MIT; the upstream traineddata repository
+distributes the model data under Apache-2.0 (text in CORE-LICENSE.txt).
+https://github.com/naptha/tessdata/tree/gh-pages
+https://github.com/naptha/tessdata/blob/gh-pages/LICENSE
+
+Exact installed versions, filenames, full byte sizes and SHA-256 digests
+are recorded in apps/web/src/ocr/assets.json. Mise does not modify these
+engine or model files. Images and OCR results are not included in this cache.

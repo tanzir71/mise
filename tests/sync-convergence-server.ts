@@ -345,7 +345,8 @@ export async function startConvergenceServer(
       );
     }
   };
-  const origins = new Set(['http://127.0.0.1:4321']),
+  const browserOrigin = process.env.MISE_E2E_ORIGIN || 'http://127.0.0.1:4321',
+    origins = new Set([browserOrigin]),
     read = createSyncReadHandler({
       origins,
       store: createSyncReadStore(
@@ -457,7 +458,7 @@ export async function startConvergenceServer(
         if (value !== undefined)
           headers.set(key, Array.isArray(value) ? value.join(',') : value);
       const cors = {
-        'Access-Control-Allow-Origin': 'http://127.0.0.1:4321',
+        'Access-Control-Allow-Origin': browserOrigin,
         'Access-Control-Allow-Methods': 'POST,GET,PUT,OPTIONS',
         'Access-Control-Allow-Headers':
           ['authorization','apikey','content-type','x-mise-sync-outlet','x-client-info','x-supabase-api-version',stockBatchHeader,purchaseBodyHeader,orderBodyHeader,savedCurrencyHeader,savedClosingParentHeader,handoffBodyHeader,inboxBodyHeader,linkBodyHeader,commandReviewHeader].join(','),

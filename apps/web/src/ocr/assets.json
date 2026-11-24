@@ -1,0 +1,59 @@
+{
+  "release": "tesseract-7.0.0-eng-ben-1.0.0-v1",
+  "versions": {
+    "worker": "7.0.0",
+    "core": "7.0.0",
+    "eng": "1.0.0",
+    "ben": "1.0.0"
+  },
+  "files": [
+    {
+      "name": "worker.min.js",
+      "package": "worker",
+      "source": "dist/worker.min.js",
+      "type": "text/javascript",
+      "bytes": 111307,
+      "sha256": "576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d"
+    },
+    {
+      "name": "tesseract-core-lstm.wasm.js",
+      "package": "core",
+      "source": "tesseract-core-lstm.wasm.js",
+      "type": "text/javascript",
+      "bytes": 3896484,
+      "sha256": "eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680"
+    },
+    {
+      "name": "tesseract-core-simd-lstm.wasm.js",
+      "package": "core",
+      "source": "tesseract-core-simd-lstm.wasm.js",
+      "type": "text/javascript",
+      "bytes": 3899472,
+      "sha256": "c58b46a4c796c0b8afccf77591d5b875b6896b45d402bbce8caa6f5362447b38"
+    },
+    {
+      "name": "tesseract-core-relaxedsimd-lstm.wasm.js",
+      "package": "core",
+      "source": "tesseract-core-relaxedsimd-lstm.wasm.js",
+      "type": "text/javascript",
+      "bytes": 3905767,
+      "sha256": "861a536cf9ef8e63cb644d57bab39c388f37f7d6b6f60024b741c5f6b39a59b3"
+    },
+    {
+      "name": "eng.traineddata.gz",
+      "package": "eng",
+      "source": "4.0.0_best_int/eng.traineddata.gz",
+      "type": "application/octet-stream",
+      "bytes": 2952873,
+      "sha256": "45b4cb346724ac1774f1c36f42f182b887bcdb28ebe63e6fff90ac41f3fcff91"
+    },
+    {
+      "name": "ben.traineddata.gz",
+      "package": "ben",
+      "source": "4.0.0_best_int/ben.traineddata.gz",
+      "type": "application/octet-stream",
+      "bytes": 1373429,
+      "sha256": "a7c1fd170b796d6b8d01b401d4bfcc54409f47b313a200e9e3756ce20d742725"
+    }
+  ]
+}

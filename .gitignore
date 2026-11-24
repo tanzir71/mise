@@ -24,3 +24,5 @@ qa/diffs/
 qa/report.html
 qa/results.json
 qa/pdfs/
+# Reproducible OCR binaries are copied from the pinned packages during Vite setup.
+apps/web/public/ocr/
