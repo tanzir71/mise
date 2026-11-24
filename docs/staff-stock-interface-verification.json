@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "ed29fe968ec4c35298503c569bf08f60927bfcea",
+  "verifiedAt": "2026-11-24T16:18:02.141Z",
+  "scope": "Default-off shared-screen stock quantity interface, physical count, explicit comparison and original recovery; full M34 remains open",
+  "tests": {
+    "unitPassed": 5228,
+    "files": 272,
+    "fullUnitSingleRun": true,
+    "originalCorporaAndDeadlinesUnchanged": true,
+    "completeOneThousandCountLinesThroughUiNativeAndSql": true,
+    "completeMillionCharacterNameAndUnitThroughUiNativeAndSql": true,
+    "normalStartupAndCaseDeadlinesUnchanged": true,
+    "newHeavyUiCasesWithinExistingSixtySecondTransportBudget": true
+  },
+  "checks": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 204,
+    "exportsPresent": 270,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "generatedArtifactsReadable": true,
+    "browserFiles": [
+      "tests/e2e/kitchen-screen-ui.spec.ts",
+      "tests/e2e/staff-team.spec.ts",
+      "tests/e2e/staff-device.spec.ts",
+      "tests/e2e/staff-links.spec.ts",
+      "tests/e2e/device-access-ui.spec.ts",
+      "tests/e2e/desk-notifications-ui.spec.ts",
+      "tests/e2e/desk-storage.spec.ts",
+      "tests/e2e/urgent-inbox-ui.spec.ts",
+      "tests/e2e/smoke.spec.ts",
+      "tests/e2e/device-screen-storage.spec.ts",
+      "tests/e2e/staff-stock-ui.spec.ts"
+    ],
+    "browserRoot": {
+      "passed": 137,
+      "failed": 0,
+      "new": 13
+    },
+    "visualRoot": {
+      "comparisons": 15,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "axeViolations": 0,
+      "pageOverflow": false,
+      "exactIconGeometry": true,
+      "pixelDifferencesInformational": true
+    },
+    "browserPages": {
+      "passed": 137,
+      "failed": 0,
+      "new": 13
+    },
+    "visualPages": {
+      "comparisons": 15,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "axeViolations": 0,
+      "pageOverflow": false,
+      "exactIconGeometry": true,
+      "pixelDifferencesInformational": true
+    },
+    "pagesArtifactFiles": 602
+  },
+  "gates": [
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T15:44:13.4307406Z",
+      "endedAt": "2026-11-24T15:44:57.0854441Z"
+    },
+    {
+      "name": "types",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T15:44:57.1242231Z",
+      "endedAt": "2026-11-24T15:45:40.2007867Z"
+    },
+    {
+      "name": "unit",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T15:45:40.2052680Z",
+      "endedAt": "2026-11-24T16:04:20.5781254Z"
+    },
+    {
+      "name": "build-root",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:04:20.5950666Z",
+      "endedAt": "2026-11-24T16:05:08.3237823Z"
+    },
+    {
+      "name": "artifacts-root",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:05:08.3271211Z",
+      "endedAt": "2026-11-24T16:05:08.4188020Z"
+    },
+    {
+      "name": "browser-root",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:05:08.4225719Z",
+      "endedAt": "2026-11-24T16:10:05.4124201Z"
+    },
+    {
+      "name": "visual-root",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:10:06.1092266Z",
+      "endedAt": "2026-11-24T16:10:57.8464717Z"
+    },
+    {
+      "name": "build-pages",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:10:57.8687618Z",
+      "endedAt": "2026-11-24T16:11:42.8915166Z"
+    },
+    {
+      "name": "artifacts-pages",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:11:42.8945997Z",
+      "endedAt": "2026-11-24T16:11:42.9860042Z"
+    },
+    {
+      "name": "browser-pages",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:11:42.9893451Z",
+      "endedAt": "2026-11-24T16:16:46.2642363Z"
+    },
+    {
+      "name": "visual-pages",
+      "exitCode": 0,
+      "startedAt": "2026-11-24T16:16:46.8074335Z",
+      "endedAt": "2026-11-24T16:17:32.6668256Z"
+    }
+  ],
+  "design": {
+    "file": "FVXWo2wVq4nPS3kdsR4TUv",
+    "mobile": "103:213",
+    "desktopCount": "77:2732",
+    "exactExportedAssets": [
+      {
+        "name": "count.svg",
+        "width": "14",
+        "height": "14",
+        "bytes": 1036,
+        "sha256": "1053cd9ea79a23de76f44b7576897dd5282aa54ea273784e6a24299ffb7afa85"
+      },
+      {
+        "name": "mic.svg",
+        "width": "18",
+        "height": "18",
+        "bytes": 775,
+        "sha256": "018528a7975dc62111770803996e8d0f60cf17c4e84b7525d401253684fadb92"
+      },
+      {
+        "name": "low-dot.svg",
+        "width": "6",
+        "height": "6",
+        "bytes": 227,
+        "sha256": "1135ff4af86dd90a0f1d41aa2927a2e38ec54cf22d4a19ffcc6e9756412c3830"
+      },
+      {
+        "name": "minus.svg",
+        "width": "14",
+        "height": "14",
+        "bytes": 325,
+        "sha256": "16e7899475cf68ff140d1bb328c4cfd22123113ece7c4b4fa44334c26aadaa92"
+      },
+      {
+        "name": "plus.svg",
+        "width": "14",
+        "height": "14",
+        "bytes": 342,
+        "sha256": "79dc95ac01359142a51c76a7e99a73f820a4b61330b306b4f3b11cdae453bebd"
+      },
+      {
+        "name": "history.svg",
+        "width": "14",
+        "height": "14",
+        "bytes": 887,
+        "sha256": "201ccd455c741486e5a81b85892f7f755d772c19a07aecd1705012422b4ac626"
+      }
+    ],
+    "scopeAdaptations": [
+      "Enrolled shared-screen PIN navigation instead of owner navigation",
+      "Actual quantities and actual current permissions; no supplier contacts, financial access or unconfigured automation",
+      "Separate explicit current comparison and confirmation; native originals and manual copy"
+    ]
+  },
+  "backend": {
+    "newManagedMigration": false,
+    "servicesDeployed": false,
+    "quantityContract": "supabase/migrations/20261124131222_staff_stock_quantity_actions.sql",
+    "quantityContractSha256": "8247dca9c5af367b5ec6322ce2f71949ec8cdab77e16c2ccd45598c6c51d0c92",
+    "previousManagedVerification": "staff-stock-quantity-verification.json"
+  },
+  "delivery": {
+    "configurationEndUserOwned": true,
+    "newConfigurationInputs": 0,
+    "credentialGuardsEnabled": true,
+    "directMainCommit": true,
+    "workflowsHeld": true,
+    "pagesHeld": true,
+    "ciUploadHeld": true,
+    "releaseTagCreated": false,
+    "open": [
+      "Explicit verified archive controls at the existing 200-original native journal limit",
+      "Own-performance permission path and complete M34 acceptance",
+      "Genuine end-user commissioning and public delivery"
+    ]
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "CHANGELOG.md": "e4c9aa0c2781db0522b72c2502a5fdc92d6a835da91b3617b39fe497a41de860",
+    "apps/web/public/staff-stock-assets/count.svg": "1053cd9ea79a23de76f44b7576897dd5282aa54ea273784e6a24299ffb7afa85",
+    "apps/web/public/staff-stock-assets/history.svg": "201ccd455c741486e5a81b85892f7f755d772c19a07aecd1705012422b4ac626",
+    "apps/web/public/staff-stock-assets/low-dot.svg": "1135ff4af86dd90a0f1d41aa2927a2e38ec54cf22d4a19ffcc6e9756412c3830",
+    "apps/web/public/staff-stock-assets/mic.svg": "018528a7975dc62111770803996e8d0f60cf17c4e84b7525d401253684fadb92",
+    "apps/web/public/staff-stock-assets/minus.svg": "16e7899475cf68ff140d1bb328c4cfd22123113ece7c4b4fa44334c26aadaa92",
+    "apps/web/public/staff-stock-assets/plus.svg": "79dc95ac01359142a51c76a7e99a73f820a4b61330b306b4f3b11cdae453bebd",
+    "apps/web/src/StaffDeviceScreen.tsx": "852ab98d42eee77111e61403112e775cee26d64a2edcd3abc970de84edf7ad11",
+    "apps/web/src/StaffStockScreen.tsx": "958ff66c26c8d851d34e2711da2669b351c56a63165faf9caaea6313add4f573",
+    "apps/web/src/data/command-request.ts": "acd295a43d59fd0ba68570cdccdd1f66dac278258917ab1713477ef597f2ddec",
+    "apps/web/src/data/device-screen-journal.ts": "ab065aaaea77e0af3e25884b75359f901bef2aa35af8dba130da81d80013a6b4",
+    "apps/web/src/data/device-screen-remote.ts": "94b576eba11bd6f6fabca7cf059458bcc520c23b9899bee14156e22828f17f5b",
+    "apps/web/src/data/device-screen-session.ts": "0eab587780d2a8471fab415dedc1474483ed7dd39d14bb02663c36a1a2c7ae20",
+    "apps/web/src/data/staff-stock-session.ts": "bc3642ef261e31c200d487109aaa1a63adee6c53221c2b90fd13530a1a6a85c1",
+    "apps/web/src/staff-stock.css": "537d8a94d2aa3dee3c56a66b2b140b731b2d574ff362cebaea572c85ab34d398",
+    "docs/configure-services.md": "60e70587a8c2171a8611b0cfc4443ca6f17f2232fa57bc90fd14960e7636d8f7",
+    "docs/staff-stock-interface.md": "344e365beb4586cc72f495876b95c92ab17bfe400460d2711711e9efde9191d9",
+    "docs/staff-stock-native.md": "c82fff68d32d5380920d41891a1a0219ae5f3c16050c664773116dcf01c87185",
+    "docs/staff-stock-quantity.md": "66d12288c63e8b31466cff02c5b00194466b45c020b16581ec19b42379c46aa7",
+    "handover/DECISIONS.md": "e49963c4664858ffdeaf436bdb81c75911d2e8d8b30e1327aff147c500b5ef2b",
+    "handover/QUESTIONS.md": "5e9e68d15c7acf0baa5c0ec7ddd54969293fdddb90854f7097d5674e445448e5",
+    "handover/docs/03-roadmap.md": "35a8f8e5ea6186ebfe4b4f00846838cb45617e4e3ce3bbac6c48045f34c2203b",
+    "packages/core/cloud-records.ts": "a6c853a29c116c25c40e662d56933d28747e429eacaf0a91448809085bf322c8",
+    "packages/core/device-access.ts": "5ef57065c31f49b5e8ca6762f4ba3978f48388afeaf7fa4cf6cbf441a3629404",
+    "packages/core/device-screen-state.ts": "114d456517f12643d81cf61b62f7471c9d02af3735ca429389a4b9fc27eec1b7",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "packages/core/quickUpdate.ts": "d92757a2842065d875b2d0fbdb130e692c6e146b33cbf084b8016d445a9eb3b9",
+    "packages/core/shop-access.ts": "64cf9acadce32df5fb635472ed4b4e25ce08e1a249542a0e7efdd8631e1abf91",
+    "packages/core/staff-stock-actions.ts": "fa518363629d2355b528c44fb92f893fdd1cb1045f800cfe986c28430f5dd9c3",
+    "packages/core/staff-stock-journal.ts": "1e104067028973945b266233a48b17d46d1577fd6024b1069a37c10e77dcff9b",
+    "packages/core/staff-stock.ts": "e03a07634a69ef8bc581052de20a37df26e438828361b60ab3b324c74af1ec1a",
+    "packages/core/stock-commands.ts": "34ffd826deb251ce4f44591182235ac57e811acf337c02a5c450933688f09fa7",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "packages/core/stock-replay.ts": "033df4bf0febd408470eb8cae0fafdec4343b959d76f00faa9243301e3343dfa",
+    "packages/core/stock.ts": "6b39429785573e595c092133c228264710d6f936d7af2f5ea4a929085e4cc84d",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55",
+    "qa/configs/m34-staff-stock.json": "69d4affc231a4c45890120ce82cfbea9ae8ff88e30ae0a6b26bf5c2d4c9409de",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "scripts/qa-visual.mjs": "3c38a4e4bd7d0dfff41511efeaf4920777c3a8653ae55772df28e3c988d42652",
+    "scripts/serve.mjs": "bc7013b3766813432b48cb8e44385cc892373c9f3ee9debc9c9a33e5fb99c8ab",
+    "supabase/config.toml": "8e2f17c7826e37860f7a73fc3b02de7336ee5d5791781ddb5f1b8e1ed044e3ad",
+    "supabase/functions/.env.example": "ab5d73eb7099fe84552dc868bf35057bd6c343bb04534d49db07cf1a14e4f683",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/staff-stock-actions-handler.ts": "8fb6ca2e89fb6d8ba46bf925d529c13214cf3fee08085882ce9263341f0f55b8",
+    "supabase/functions/_shared/staff-stock-handler.ts": "047b962f5a8bd7f5ad5462de6a59d4f9ef0135b80a2fab8272e01f3ba977a8dc",
+    "supabase/functions/staff-stock-actions/index.ts": "5534fdb8f8a460bc78cc39ac53af66dae47abd800bb6fcfb74f9456a728d53ce",
+    "supabase/migrations/20261124131222_staff_stock_quantity_actions.sql": "8247dca9c5af367b5ec6322ce2f71949ec8cdab77e16c2ccd45598c6c51d0c92",
+    "tests/device-pairing-fixture.ts": "ab8b3a2e245fa282f1145cd42d0d8e661c8ae94264d644875edceefd3aace796",
+    "tests/device-screen-journal.test.ts": "9ea87e8765e2c204b0b67ccb6b3b9f7135f7ee4d4b3aefea13c47a73c81091b4",
+    "tests/device-screen-remote.test.ts": "21a1cb079f886db082f96da872389eb61f5d2bc6f99ed7b5dc8096a47c8ffb0f",
+    "tests/e2e/desk-notifications-ui.spec.ts": "31cadc562bb1d960fc52e2bd6b383f7bdc258660815e179574d53008bb09fbc2",
+    "tests/e2e/desk-storage.spec.ts": "bf64734da24dca7f5da7700f7da40c9bea0933a588f0aac4f122ead4641feaca",
+    "tests/e2e/device-access-ui.spec.ts": "6142930e04deac7897b8716f47d411b476d02ad07dbeb127573b85b8b6dd8276",
+    "tests/e2e/device-screen-storage.spec.ts": "2fbfd7cbbc475a0c379f8a1c96355e6353bca2acd742f08cb6daffef1379ffc5",
+    "tests/e2e/kitchen-screen-ui.spec.ts": "a1cddaeeaf61f6bf9075d9307bb7162139b86c68935ddfc3e4db9452dd8f524a",
+    "tests/e2e/smoke.spec.ts": "1768e813a88daa92c04bdbc8a76d8e3376c7a73c34f0cd87abe1ed0b14f49bf7",
+    "tests/e2e/staff-device.spec.ts": "a4aeb81b07a1d5d84f6e39324da899bff06de08d699ca2da658d6b66fff2998e",
+    "tests/e2e/staff-links.spec.ts": "2a09eb3b4acdc8c7f3c0628e20de1de074c3110497835b62581cd76d334d6a4a",
+    "tests/e2e/staff-stock-ui.spec.ts": "a63a8ab6cd8a7a661f25f1012838cb35a38f77866c4a7622aec72b9da40a30e3",
+    "tests/e2e/staff-team.spec.ts": "4ca8e31b12a17c089b3604db911a93e909c697616da1aeb193c979fc8e2e1262",
+    "tests/e2e/urgent-inbox-ui.spec.ts": "1e5e2396f87025c3f304c11b4649d278263e91c2e48ee1f26dcf4ecd7ba01159",
+    "tests/fixtures/device-screen-browser.ts": "02f2ebef0b0576729fa414052760630aec3ee9a9aeaf6a726fe87bf1f00e137c",
+    "tests/fixtures/install-staff-stock.d.mts": "6a1e889cde55db8ea6bd8fd70c7e1b7b1bd581fdfdc5fa7d8f132a9324952f31",
+    "tests/fixtures/install-staff-stock.mjs": "fc1e9af1f0f229739f956b5de3b6bcb67ddee78aca175deb6a582c7c2e3cb749",
+    "tests/fixtures/staff-device-browser.ts": "48769e3b75d229aa9590648e99d7e4561ab6d3dc22e6cab4ab48e02a9e716863",
+    "tests/fixtures/staff-stock-service.ts": "83c4620f2646f64b3f0e2b9411275e712b312f42da09c292bf74fcf28584141f",
+    "tests/kitchen-current-tickets.test.ts": "2aad3d66017ab5aca870360614018e41148eb301f730c89fcab69e711b9dae12",
+    "tests/kitchen-screen.test.ts": "af3e990f38a185f467dba5888f1fcdae5c36e39424311e1a4e827b5465fb497f",
+    "tests/staff-device-fixture.ts": "be0c523665e884a9d6a48e5d3394af1417926f4ce4c19cc069b5c6eb96974fa4",
+    "tests/staff-device-session.test.ts": "b2cd5753e5bfda9648985a7641c13c6df186c0f5bf8ee1628c7f4299b884a6c0",
+    "tests/staff-stock-actions-handler.test.ts": "1a39985a1488bc48e5ff098b3ff0c8db3c444ec3bc20fc0b9fab75be1a813fb7",
+    "tests/staff-stock-actions-sql.test.ts": "4ad910324b3fad196bf2d4b9555e185c4b75b44c3c4bac30f30d11577fb81990",
+    "tests/staff-stock-actions.test.ts": "113b3337c2f7f6c5bb6c09538092c605dd0c4a23536e97d5984a0282f2330973",
+    "tests/staff-stock-native-fixture.ts": "0e6abc8c4b9ecf6210457d1d44770be64d1b78f9f80cc1062e7100419528db18",
+    "tests/staff-stock-session.test.ts": "4de00ff6050af84609814807df3f8edfdd8c18788087a31ad4a02f58076758de",
+    "tests/staff-stock-sql.test.ts": "fd01c0f76d7bba26fd922852e144e872ecd4ec91b859daaa87a5de232b992bfe",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  }
+}

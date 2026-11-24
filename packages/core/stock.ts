@@ -27,7 +27,7 @@ function move(item:StockItem,before:number,reason:StockReason,source:StockMove['
   return {id:newId('move',item.id),outletId:item.outletId,stockItemId:item.id,revision:item.revision,name:item.name,unit:item.unit,before,after:item.onHand,delta:stockNumber(stockAtoms(item.onHand)-stockAtoms(before),true),reason,source,note:note.trim(),createdBy:setup.owner.id,eventId:item.eventId,countBatchId,undoOf,createdAt:at,updatedAt:at};
 }
 export const activeStockMoves = (moves:StockMove[]) => {const reversed = new Set(moves.map(move => move.undoOf).filter(Boolean));return moves.filter(move => !move.undoOf && !reversed.has(move.id));};
-export const stockIsLow = (item:StockItem) => item.archivedAt === undefined && item.target > 0 && stockAtoms(item.onHand) <= stockAtoms(item.lowAt);
+export const stockIsLow = (item:Pick<StockItem,'archivedAt'|'target'|'onHand'|'lowAt'>) => item.archivedAt === undefined && item.target > 0 && stockAtoms(item.onHand) <= stockAtoms(item.lowAt);
 function saveStockValue(input:StockInput,context:StockWriteContext,before:StockItem|null,revision:number,at:number,newId:StockIds,metadataOnly=false,forceCount=false):StockChange {
   const {setup} = context;validateShop(setup);if (before) validateStockItem(before,setup,revision,!metadataOnly);
   const name = text(input.name,120,'the stock name'), nameLocal = text(input.nameLocal || '',120,'the local name'), unit = text(stockUnit(input.unit),24,'the unit'), category = text(input.category || '',80,'the category');

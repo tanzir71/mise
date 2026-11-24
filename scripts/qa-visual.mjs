@@ -15,6 +15,7 @@ import {captureOrderEstimates,closeOrderEstimatesVisual} from '../tests/fixtures
 import {captureOrderCheckout,closeOrderCheckoutVisual} from '../tests/fixtures/order-checkout-visual.mjs';
 import {captureStaff,closeStaffVisual} from '../tests/fixtures/staff-visual.mjs';
 import {captureStaffDevice,closeStaffDeviceVisual} from '../tests/fixtures/install-staff-device.mjs';
+import {captureStaffStock,closeStaffStockVisual} from '../tests/fixtures/install-staff-stock.mjs';
 import {captureCustomerKhata,closeCustomerKhataVisual} from '../tests/fixtures/install-customer-khata.mjs';
 import {captureOwnerTasks,closeOwnerTasksVisual} from '../tests/fixtures/owner-tasks-visual.mjs';
 import {capturePaymentSources,closePaymentSourcesVisual} from '../tests/fixtures/payment-sources-visual.mjs';
@@ -64,6 +65,7 @@ try {
     const page = await context.newPage();
     if(!target.staffFixture)await closeStaffVisual();
     if(!target.staffDeviceFixture)await closeStaffDeviceVisual();
+    if(!target.staffStockFixture)await closeStaffStockVisual();
     if(!target.ownerTasksFixture)await closeOwnerTasksVisual(); if(!target.urgentInboxFixture)await closeUrgentInboxVisual();
     if(!target.paymentSourcesFixture)await closePaymentSourcesVisual();
     if(!target.liveStoreFixture)await closeLiveStoreVisual();
@@ -87,6 +89,7 @@ try {
     if(target.deskNotificationsFixture)await captureDeskNotifications(page,target.deskNotificationsFixture); if(target.urgentInboxFixture)await captureUrgentInbox(page,target.urgentInboxFixture);
     if(target.staffFixture)await captureStaff(page,target.staffFixture);
     if(target.staffDeviceFixture)await captureStaffDevice(page,target.staffDeviceFixture);
+    if(target.staffStockFixture)await captureStaffStock(page,target.staffStockFixture);
     if(target.customerKhataFixture)await captureCustomerKhata(page,target.customerKhataFixture);
     if(target.ownerTasksFixture)await captureOwnerTasks(page,target.ownerTasksFixture);
     if(target.paymentSourcesFixture)await capturePaymentSources(page,target.paymentSourcesFixture);
@@ -174,7 +177,7 @@ try {
 } finally {
   try { await browser?.close(); }
   finally {
-    const closed=await Promise.allSettled([closePaymentSourcesVisual(),closeOwnerTasksVisual(),closeLiveStoreVisual(),closeCustomerKhataVisual(),closeStaffDeviceVisual(),closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual(),closeUrgentInboxVisual(),]);
+    const closed=await Promise.allSettled([closeStaffStockVisual(),closePaymentSourcesVisual(),closeOwnerTasksVisual(),closeLiveStoreVisual(),closeCustomerKhataVisual(),closeStaffDeviceVisual(),closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual(),closeUrgentInboxVisual(),]);
     server?.kill();const failed=closed.find(result=>result.status==='rejected');if(failed)throw failed.reason;
   }
 }

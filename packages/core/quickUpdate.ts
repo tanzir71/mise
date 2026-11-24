@@ -5,19 +5,20 @@ import { convertStockQuantity, stockAtoms, stockNameKey, stockNumber, stockText,
 export interface QuickStockChange extends StockAdjustment {name:string;unit:string;before:number;after:number;clause:string}
 export interface QuickStockIssue {clause:string;message:string;candidates:string[]}
 export interface QuickStockPreview {changes:QuickStockChange[];issues:QuickStockIssue[]}
+export type QuickStockItem=Pick<StockItem,'id'|'outletId'|'archivedAt'|'name'|'nameLocal'|'aliases'|'unit'|'packSize'|'onHand'|'revision'>;
 const actions:Record<string,StockAdjustment['reason']> = {used:'used',consumed:'used',sold:'used',got:'received',received:'received',bought:'received',added:'received',wasted:'waste',waste:'waste',spoiled:'waste',counted:'count',count:'count',have:'count',set:'count',left:'count'};
 const verbs = Object.keys(actions).join('|'), prefix = new RegExp(`^(${verbs})\\s+`,'i'), infix = new RegExp(`\\s+(${verbs})\\s+`,'i');
 const knownUnits = new Set(['kg','g','L','ml','pcs','hali','dozen','strip','pack']);
 const errorText = (error:unknown) => error instanceof Error ? error.message : 'Edit this stock update.';
 
 /** A local, deterministic preview. Caller must review every clause before an atomic save. */
-export function quickUpdate(input:string,items:StockItem[],outletId:string):QuickStockPreview {
+export function quickUpdate(input:string,items:readonly QuickStockItem[],outletId:string):QuickStockPreview {
   const result:QuickStockPreview = {changes:[],issues:[]}, active = items.filter(item => item.outletId === outletId && item.archivedAt === undefined);
   if (input.length > 8000) return {changes:[],issues:[{clause:'',message:'Keep a quick update within 8,000 characters.',candidates:[]}]};
   const clauses = stockText(input).split(new RegExp(`[,;\\n]+|\\s+and\\s+(?=(?:${verbs})\\s)`,'i')).map(value => value.trim()).filter(Boolean);
   if (!clauses.length || clauses.length > 100) return {changes:[],issues:[{clause:'',message:'Enter between one and 100 stock changes.',candidates:[]}]};
   for (const clause of clauses) {
-    let candidates:StockItem[] = [];
+    let candidates:QuickStockItem[] = [];
     try {
       let body = clause, reason:StockAdjustment['reason'] = 'count';
       const start = body.match(prefix), middle = body.match(infix);
@@ -35,7 +36,7 @@ export function quickUpdate(input:string,items:StockItem[],outletId:string):Quic
         if (!end) throw new Error('Enter an item and a positive quantity, such as used 2 kg chicken.');
         [,name,quantityText,unit] = end;name = name.replace(/\s+(?:to|at)$/i,'').trim();unit = unit.trim();
       }
-      const key = stockNameKey(name), names = (item:StockItem) => [item.name,item.nameLocal,...item.aliases].map(stockNameKey).filter(Boolean);
+      const key = stockNameKey(name), names = (item:QuickStockItem) => [item.name,item.nameLocal,...item.aliases].map(stockNameKey).filter(Boolean);
       candidates = active.filter(item => names(item).includes(key));
       if (!candidates.length && key.length >= 2) candidates = active.filter(item => names(item).some(name => name.includes(key)));
       if (!candidates.length) throw new Error(`No active stock item matches “${name}”. Choose an item or edit its name.`);

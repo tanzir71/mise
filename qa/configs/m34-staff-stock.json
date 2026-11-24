@@ -1,0 +1,27 @@
+{
+  "title": "M34 — shared-screen stock quantities and original requests",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "staff-stock",
+      "path": "app/screen/attendance?flags=staffTeam,kitchenScreen",
+      "staffStockFixture": "stock",
+      "note": "M16 quantity layout and exact Figma icons use actual device/PIN-scoped SQL pages. The paired staff screen has no owner navigation, supplier contacts, money or unconfigured AI. Current comparisons and manual handoff preserve physical originals.",
+      "sections": [{"id": "quantities", "selector": ".staff-stock", "reference": "screens/mobile/M16 · Manager — Stock (quick update, on hand, target, to order).png"}]
+    },
+    {
+      "id": "staff-stock-count",
+      "path": "app/screen/attendance?flags=staffTeam,kitchenScreen",
+      "staffStockFixture": "count",
+      "note": "The desktop count table adapts to a paired-screen PIN, with one actual entered count, blank items skipped and explicit comparison before a quantity write. It omits owner-only purchasing and financial controls.",
+      "sections": [{"id": "physical", "selector": ".staff-stock", "reference": "screens/desktop/Desktop 04b · Mise — Stock · count & quick updates.png"}]
+    },
+    {
+      "id": "staff-stock-review",
+      "path": "app/screen/attendance?flags=staffTeam,kitchenScreen",
+      "staffStockFixture": "review",
+      "note": "A real prepared comparison of one original stock request extends the M16 layout using shared primitives. Preparing alone posts no movement; confirmation is a separate action.",
+      "sections": [{"id": "comparison", "selector": ".staff-stock", "reference": "screens/mobile/M16 · Manager — Stock (quick update, on hand, target, to order).png"}]
+    }
+  ]
+}
