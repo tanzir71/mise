@@ -21,6 +21,7 @@ import {capturePaymentSources,closePaymentSourcesVisual} from '../tests/fixtures
 import {captureLiveStore,closeLiveStoreVisual} from '../tests/fixtures/live-store-visual.mjs';
 import {captureKitchenScreen,closeKitchenScreenVisual} from '../tests/fixtures/install-kitchen-ui.mjs';
 import {captureDeskNotifications,closeDeskNotificationsVisual} from '../tests/fixtures/install-desk-ui.mjs';
+import {captureUrgentInbox,closeUrgentInboxVisual} from '../tests/fixtures/urgent-inbox-visual.mjs';
 import {captureRecoveryReview,captureOwnerResumeReview,captureLocalInboxReview,capturePendingJoinShare,captureOrderActionReview,captureMoneyActionReview,capturePurchaseActionReview,captureStockActionReview,captureCustomerActionReview,captureClosingActionReview,captureMoneyCurrencyReview,capturePendingCurrencyRecovery,closeRecoveryVisual} from '../tests/fixtures/install-recovery-visual.mjs';
 
 const configPaths = process.argv.length>2 ? process.argv.slice(2) : readdirSync('qa/configs').filter(file => file.endsWith('.json')).sort().map(file => `qa/configs/${file}`);
@@ -63,7 +64,7 @@ try {
     const page = await context.newPage();
     if(!target.staffFixture)await closeStaffVisual();
     if(!target.staffDeviceFixture)await closeStaffDeviceVisual();
-    if(!target.ownerTasksFixture)await closeOwnerTasksVisual();
+    if(!target.ownerTasksFixture)await closeOwnerTasksVisual(); if(!target.urgentInboxFixture)await closeUrgentInboxVisual();
     if(!target.paymentSourcesFixture)await closePaymentSourcesVisual();
     if(!target.liveStoreFixture)await closeLiveStoreVisual();
     if(!target.customerKhataFixture)await closeCustomerKhataVisual();
@@ -83,7 +84,7 @@ try {
     if(target.orderEstimatesFixture){await Promise.all([closeOrderCheckoutVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual()]);await captureOrderEstimates(page,target.orderEstimatesFixture);}
     if(target.orderCheckoutFixture){await Promise.all([closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual()]);await captureOrderCheckout(page,target.orderCheckoutFixture);}
     if(target.kitchenScreenFixture)await captureKitchenScreen(page,target.kitchenScreenFixture);
-    if(target.deskNotificationsFixture)await captureDeskNotifications(page,target.deskNotificationsFixture);
+    if(target.deskNotificationsFixture)await captureDeskNotifications(page,target.deskNotificationsFixture); if(target.urgentInboxFixture)await captureUrgentInbox(page,target.urgentInboxFixture);
     if(target.staffFixture)await captureStaff(page,target.staffFixture);
     if(target.staffDeviceFixture)await captureStaffDevice(page,target.staffDeviceFixture);
     if(target.customerKhataFixture)await captureCustomerKhata(page,target.customerKhataFixture);
@@ -171,7 +172,7 @@ try {
 } finally {
   try { await browser?.close(); }
   finally {
-    const closed=await Promise.allSettled([closePaymentSourcesVisual(),closeOwnerTasksVisual(),closeLiveStoreVisual(),closeCustomerKhataVisual(),closeStaffDeviceVisual(),closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual(),]);
+    const closed=await Promise.allSettled([closePaymentSourcesVisual(),closeOwnerTasksVisual(),closeLiveStoreVisual(),closeCustomerKhataVisual(),closeStaffDeviceVisual(),closeStaffVisual(),closeOrderCheckoutVisual(),closeOrderEstimatesVisual(),closePublicOrderingVisual(),closeCustomerLinksVisual(),closeRecoveryVisual(),closeDeviceAccessVisual(),closeKitchenScreenVisual(),closeDeskNotificationsVisual(),closeUrgentInboxVisual(),]);
     server?.kill();const failed=closed.find(result=>result.status==='rejected');if(failed)throw failed.reason;
   }
 }

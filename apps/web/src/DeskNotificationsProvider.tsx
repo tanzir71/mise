@@ -31,6 +31,20 @@ import {
 } from './desk-context';
 import type { DeskAlarmSettings } from '@mise/core/desk-tasks';
 import { closeResolvedDeskNotifications } from './desk-notification-worker';
+import {
+  createUrgentInboxSession,
+  type UrgentInboxSession,
+} from './data/urgent-inbox-session';
+import {
+  createUrgentInboxCache,
+  parseUrgentInboxProfile,
+} from './data/urgent-inbox-cache';
+import {
+  urgentInboxProfileId,
+  parseUrgentInboxOperation,
+} from './data/urgent-inbox-operation';
+import { UrgentInboxProvider } from './UrgentInboxProvider';
+import { useOwnerTasksEnabled } from './owner-tasks-context';
 import './desk-notifications.css';
 
 /** One browser-owned cache; ordinary route changes never close its database or
@@ -86,6 +100,7 @@ interface Runtime {
   config: string;
   userId: string | null;
   session: DeskSession;
+  urgent: UrgentInboxSession | null;
   key: string | null;
 }
 export function DeskNotificationsProvider({
@@ -95,6 +110,7 @@ export function DeskNotificationsProvider({
   setup: SetupSnapshot;
   children: ReactNode;
 }) {
+  const urgentEnabled = useOwnerTasksEnabled();
   const selected = useLiveQuery(() => db.operatorState.get('active'), []),
     [configToken, setConfigToken] = useState(connectionToken),
     [online, setOnline] = useState(() => navigator.onLine),
@@ -171,7 +187,7 @@ export function DeskNotificationsProvider({
     const changed = () => {
       setConfigToken(connectionToken());
       setOnline(navigator.onLine);
-      if(!navigator.onLine)setReadFresh('');
+      if (!navigator.onLine) setReadFresh('');
     };
     window.addEventListener('storage', changed);
     window.addEventListener('online', changed);
@@ -329,6 +345,17 @@ export function DeskNotificationsProvider({
             config: configToken,
             userId: auth.state.userId,
             session,
+            urgent: urgentEnabled
+              ? createUrgentInboxSession({
+                  cache: deskCache,
+                  native,
+                  account,
+                  config,
+                  check,
+                  subscription: () =>
+                    latest.current.port?.read() ?? Promise.resolve(null),
+                })
+              : null,
             key: null,
           };
         setRuntime(ready);
@@ -352,7 +379,7 @@ export function DeskNotificationsProvider({
     return () => {
       current = false;
     };
-  }, [bindingToken, configToken, manager, scope, phase, userId]);
+  }, [bindingToken, configToken, manager, scope, phase, userId, urgentEnabled]);
   const activeRuntime =
     runtime?.binding === bindingToken &&
     runtime.config === configToken &&
@@ -476,10 +503,66 @@ export function DeskNotificationsProvider({
         )
           throw new CommandRequestError('review');
       });
-    await native.commit((guard) => deskCache.disable(original, guard));
+    await native.commit((guard) =>
+      deskCache.transaction(
+        'rw',
+        [
+          deskCache.active,
+          deskCache.profiles,
+          deskCache.operations,
+          deskCache.urgentProfiles,
+          deskCache.urgentOperations,
+        ],
+        async () => {
+          const id = urgentInboxProfileId(binding),
+            [profile, operations] = await Promise.all([
+              deskCache.urgentProfiles.get(id),
+              deskCache.urgentOperations
+                .where('profileId')
+                .equals(id)
+                .toArray(),
+            ]);
+          let readable = true;
+          try {
+            if (profile !== undefined) parseUrgentInboxProfile(profile);
+            operations.map(parseUrgentInboxOperation);
+          } catch {
+            readable = false;
+          }
+          const urgent = createUrgentInboxCache(deskCache),
+            saved = readable ? await urgent.read(binding) : null;
+          if (saved) await urgent.disable(saved, guard);
+          // Retain unreadable urgent originals. The healthy base No still
+          // blocks both handlers and its revoke invalidates that capability.
+          await deskCache.disable(original, guard);
+        },
+      ),
+    );
     recheckNotifications();
-    if (activeRuntime && navigator.onLine)
+    if (activeRuntime && navigator.onLine) {
       await activeRuntime.session.cleanup();
+      await activeRuntime.urgent?.cleanup();
+    }
+  }
+  async function disableUrgentLocal() {
+    if (!binding) throw new CommandRequestError('review');
+    const source = bindingToken,
+      connection = configToken,
+      native = createDeskNativeScope(db, binding, () => {
+        if (
+          latest.current.binding !== source ||
+          latest.current.config !== connection ||
+          connectionToken() !== connection
+        )
+          throw new CommandRequestError('review');
+      }),
+      journal = createUrgentInboxCache(deskCache);
+    await native.commit(async (guard) => {
+      const saved = await journal.read(binding);
+      if (!saved) throw new CommandRequestError('review');
+      await journal.disable(saved, guard);
+    });
+    recheckNotifications();
   }
   async function retry() {
     const current = ready();
@@ -530,7 +613,20 @@ export function DeskNotificationsProvider({
   };
   return (
     <DeskNotificationsContext.Provider value={view}>
-      {children}
+      {urgentEnabled ? (
+        <UrgentInboxProvider
+          cache={deskCache}
+          binding={binding}
+          session={activeRuntime?.urgent ?? null}
+          online={online}
+          permission={view.permission}
+          disableLocal={disableUrgentLocal}
+        >
+          {children}
+        </UrgentInboxProvider>
+      ) : (
+        children
+      )}
     </DeskNotificationsContext.Provider>
   );
 }

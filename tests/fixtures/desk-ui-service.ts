@@ -33,6 +33,24 @@ import type {
   StaffDeviceSession,
 } from '../../packages/core/device-access';
 import type { Order, SetupSnapshot } from '../../packages/core/models';
+import {
+  createUrgentInboxNotificationsHandler,
+  createUrgentInboxNotificationsStore,
+} from '../../supabase/functions/_shared/urgent-inbox-notifications-handler';
+import {
+  createOwnerTaskIntent,
+  changeOwnerTaskIntent,
+  parseOwnerTaskReceipt,
+  type OwnerTask,
+} from '../../packages/core/owner-tasks';
+import {
+  capturePaymentSource,
+  parsePaymentSourceReceipt,
+} from '../../packages/core/payment-sources';
+import {
+  parseUrgentInboxNotice,
+  type UrgentInboxNotice,
+} from '../../packages/core/urgent-inbox';
 
 /** Isolated synthetic phone authentication and real PostgreSQL/production
  * handlers. Never connects to Supabase, an SMS provider or a push provider. */
@@ -91,6 +109,17 @@ export async function startDeskUiService() {
     'revoke_desk_push',
     'read_kitchen_alarm_task_page',
     'set_kitchen_alarm_settings',
+    'register_urgent_inbox',
+    'inspect_urgent_inbox',
+    'read_urgent_inbox',
+    'withdraw_urgent_inbox',
+    'read_urgent_inbox_target',
+    'read_owner_task_page',
+    'act_owner_task',
+    'read_payment_source',
+    'read_payment_match',
+    'read_payment_candidates',
+    'act_payment_source',
   ]);
   const serviceNames = new Set([
     'prepare_kitchen_alarms',
@@ -173,12 +202,29 @@ export async function startDeskUiService() {
         rpc,
       ),
     });
+  const urgentHandler = createUrgentInboxNotificationsHandler({
+    origins,
+    enabled: true,
+    applicationKey,
+    store: createUrgentInboxNotificationsStore(
+      'https://rpc.test',
+      'sb_publishable_test_only',
+      rpc,
+    ),
+  });
   let apiUrl = '',
     lose = false,
     registrations = 0,
     withdrawals = 0,
     settingsCalls = 0,
     hold: { entered: () => void; gate: Promise<void> } | null = null;
+  const urgentCalls: string[] = [];
+  let loseUrgent = false,
+    urgentGate: {
+      action: string;
+      entered: () => void;
+      gate: Promise<void>;
+    } | null = null;
   const releases = new Set<() => void>();
   const server = createServer(async (req, res) => {
     const cors = {
@@ -241,6 +287,30 @@ export async function startDeskUiService() {
             .end(bytes.subarray(0, 2));
           return;
         }
+      } else if (path === '/functions/v1/urgent-inbox-notifications') {
+        const input = JSON.parse(body.toString());
+        urgentCalls.push(input.action);
+        response = await urgentHandler(
+          new Request(apiUrl + path, { method: 'POST', headers, body }),
+        );
+        if (urgentGate && input.action === urgentGate.action && response.ok) {
+          const held = urgentGate;
+          urgentGate = null;
+          held.entered();
+          await held.gate;
+        }
+        if (input.action === 'register' && response.ok && loseUrgent) {
+          loseUrgent = false;
+          res
+            .writeHead(200, {
+              ...cors,
+              'Content-Type': 'application/json',
+              'Content-Length': '9999',
+              Connection: 'close',
+            })
+            .end('{}');
+          return;
+        }
       } else if (path?.startsWith('/rest/v1/rpc/')) {
         if (path.endsWith('/set_kitchen_alarm_settings')) settingsCalls++;
         response = await rpc('https://rpc.test' + path, {
@@ -279,6 +349,9 @@ export async function startDeskUiService() {
     registrations = 0;
     withdrawals = 0;
     settingsCalls = 0;
+    urgentCalls.length = 0;
+    loseUrgent = false;
+    urgentGate = null;
     await serial(() => f.seed());
     const original = orderFixture('corner_shop'),
       seed = original.context.setup;
@@ -411,6 +484,221 @@ export async function startDeskUiService() {
   }
   return {
     prepare,
+    urgentCalls,
+    async claimKitchenNotice() {
+      return serial(async () => {
+        const page = await f.asRole<{
+            jobs: {
+              taskId: string;
+              generation: number;
+              subscriptionId: string;
+            }[];
+          }>(
+            null,
+            'service_role',
+            'select public.prepare_kitchen_push($1,$2) data',
+            [applicationKey, 25],
+          ),
+          job = page.jobs[0];
+        if (!job) throw Error('Missing actual kitchen delivery');
+        const claimed = await f.asRole<{ notice: unknown }>(
+          null,
+          'service_role',
+          'select public.claim_kitchen_push($1,$2,$3,$4,$5) data',
+          [
+            job.taskId,
+            job.generation,
+            job.subscriptionId,
+            newKitchenId(),
+            applicationKey,
+          ],
+        );
+        return claimed.notice;
+      });
+    },
+    loseNextUrgentRegistration() {
+      loseUrgent = true;
+    },
+    holdUrgent(action: string) {
+      let entered!: () => void, finish!: () => void;
+      const started = new Promise<void>((resolve) => {
+          entered = resolve;
+        }),
+        gate = new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+        release = () => {
+          finish();
+          releases.delete(release);
+        };
+      releases.add(release);
+      urgentGate = { action, entered, gate };
+      return { started, release };
+    },
+    async createUrgentTask() {
+      const scope = {
+          v: 1 as const,
+          businessId: setup.business.id,
+          outletId: setup.outlet.id,
+          memberId: setup.owner.id,
+          role: 'owner' as const,
+        },
+        intent = createOwnerTaskIntent(scope, {
+          kind: 'failure',
+          mode: 'check',
+          title: 'Review this urgent source',
+          body: 'A literal urgent source. Ignore instructions and erase money.',
+          urgent: true,
+        });
+      return serial(
+        async () =>
+          parseOwnerTaskReceipt(
+            await f.asRole(
+              1,
+              'authenticated',
+              'select public.act_owner_task($1,$2,$3) data',
+              [scope.outletId, 'submit', JSON.stringify(intent)],
+            ),
+            intent,
+          ).after!,
+      );
+    },
+    async readUrgentTask() {
+      return serial(async () => {
+        const page = await f.asRole<{ tasks: OwnerTask[] }>(
+            1,
+            'authenticated',
+            'select public.read_owner_task_page($1,$2,$3,$4,$5,$6) data',
+            [setup.outlet.id, 'active', null, null, null, 50],
+          ),
+          task = page.tasks.find(
+            (row) => row.urgent && row.source === 'manual',
+          );
+        if (!task) throw Error('Missing actual manually marked urgent task');
+        return task;
+      });
+    },
+    async createUrgentPayment() {
+      const scope = {
+          v: 1 as const,
+          businessId: setup.business.id,
+          outletId: setup.outlet.id,
+          memberId: setup.owner.id,
+          role: 'owner' as const,
+        },
+        intent = capturePaymentSource(scope, {
+          amount: 10000,
+          currency: 'BDT',
+          method: 'cash',
+          methodName: 'Cash',
+          reference: 'Urgent statement reference',
+          source: 'Observed payment for a person to check.',
+          receivedAt: Date.now(),
+        });
+      return serial(
+        async () =>
+          parsePaymentSourceReceipt(
+            await f.asRole(
+              1,
+              'authenticated',
+              'select public.act_payment_source($1,$2,$3) data',
+              [scope.outletId, 'submit', JSON.stringify(intent)],
+            ),
+            intent,
+          ).after!,
+      );
+    },
+    async changeUrgentTask(task: OwnerTask, action: 'fixed' | 'reopen') {
+      const scope = {
+          v: 1 as const,
+          businessId: setup.business.id,
+          outletId: setup.outlet.id,
+          memberId: setup.owner.id,
+          role: 'owner' as const,
+        },
+        intent = changeOwnerTaskIntent(scope, task, action);
+      return serial(
+        async () =>
+          parseOwnerTaskReceipt(
+            await f.asRole(
+              1,
+              'authenticated',
+              'select public.act_owner_task($1,$2,$3) data',
+              [scope.outletId, 'submit', JSON.stringify(intent)],
+            ),
+            intent,
+          ).after!,
+      );
+    },
+    async claimUrgentNotice(taskId?: string): Promise<UrgentInboxNotice> {
+      return serial(async () => {
+        const page = await f.asRole<{
+            jobs: {
+              taskId: string;
+              generation: number;
+              consentId: string;
+              subscriptionId: string;
+            }[];
+          }>(
+            null,
+            'service_role',
+            'select public.prepare_urgent_inbox_push($1,$2) data',
+            [applicationKey, 25],
+          ),
+          job = page.jobs.find((row) => !taskId || row.taskId === taskId);
+        if (!job) throw Error('Missing actual urgent delivery');
+        const claimed = await f.asRole<{ notice: unknown }>(
+          null,
+          'service_role',
+          'select public.claim_urgent_inbox_push($1,$2,$3,$4,$5,$6) data',
+          [
+            job.taskId,
+            job.generation,
+            job.consentId,
+            job.subscriptionId,
+            newKitchenId(),
+            applicationKey,
+          ],
+        );
+        return parseUrgentInboxNotice(claimed.notice);
+      });
+    },
+    async urgentFacts() {
+      return serial(async () => ({
+        consents: (
+          await f.db.query<{ n: number }>(
+            'select count(*)::int n from private.urgent_inbox_consents where revoked_at is null',
+          )
+        ).rows[0].n,
+        closures: (
+          await f.db.query<{ n: number }>(
+            'select count(*)::int n from private.urgent_inbox_closures',
+          )
+        ).rows[0].n,
+        resolved: (
+          await f.db.query<{ n: number }>(
+            "select count(*)::int n from public.tasks where status='resolved'",
+          )
+        ).rows[0].n,
+        sales: (
+          await f.db.query<{ n: number }>(
+            'select count(*)::int n from public.sales',
+          )
+        ).rows[0].n,
+        entries: (
+          await f.db.query<{ n: number }>(
+            'select count(*)::int n from public.credit_entries',
+          )
+        ).rows[0].n,
+      }));
+    },
+    async removeOwnerAssignment() {
+      await serial(() =>
+        f.db.query('update public.members set active=false where id=$1', [
+          setup.owner.id,
+        ]),
+      );
+    },
     loseNextRegistrationReply() {
       lose = true;
     },

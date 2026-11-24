@@ -1,6 +1,6 @@
 # M37 · Urgent alert browser groundwork
 
-The browser now has a separate private consent journal, account-bound transport, recovery session and notification handler for general urgent Inbox alerts. These are tested building blocks: the settings controls, earlier-setup interface, service-worker event wiring and authenticated task-opening screen remain to be connected. Existing kitchen consent never enrolls a browser in general alerts. `ownerTasks` remains off and full M37 acceptance stays open.
+This groundwork checkpoint supplies the private consent journal, account-bound transport, recovery session and notification handler for general urgent Inbox alerts. The follow-up [controls and current targets](urgent-inbox-ui.md) now connect those modules to the app and built service worker. Existing kitchen consent never enrolls a browser in general alerts. `ownerTasks` remains off and full M37 acceptance stays open.
 
 ## Original consent and offline withdrawal
 
@@ -22,13 +22,13 @@ The new handler requires the actual native binding and setup, active original ba
 
 Notifications use a generic title and body. Routing contains only closed consent, subscription, business, outlet, task and generation identifiers. The click destination is a fixed same-origin Inbox path under the installed app base. Another app base or origin cannot receive navigation or refresh messages. A caller-supplied URL, source text or extra payload field is rejected.
 
-The account-bound session can request the actual current task target after rechecking the original native/browser/consent scope. The backend separately requires current role and assignment, the original consent and an actual attempted delivery, and distinguishes current task generation from the original alert. The application must still connect this result to the existing Inbox or payment-source review. The handler is not yet registered in the production service worker, so these modules do not enable live delivery or new navigation.
+The account-bound session can request the actual current task target after rechecking the original native/browser/consent scope. The backend separately requires current role and assignment, the original consent and an actual attempted delivery, and distinguishes current task generation from the original alert. At this groundwork checkpoint, app and service-worker wiring remained open. The [follow-up interface](urgent-inbox-ui.md) now connects them to the existing Inbox and payment-source review; default-off delivery and genuine commissioning remain unchanged.
 
 ## Installation-owned configuration and delivery limits
 
 All connections, accounts, phone verification, provider configuration and private backend settings belong to each installation. The transport reads the end user's saved connection and the existing phone Auth account; it contains no maintainer deployment details or alternate privileged RPC. The [backend guide](urgent-inbox-notifications.md) describes the empty private server template and default-off delivery configuration. Manual Inbox and payment review remain available independently.
 
-Focused checks cover original-event HTTP contracts against the production Edge handler, native IndexedDB reload and rollback, offline No, lost replies, removed assignment, competing tabs, storage limits, native selection changes, generic presentation and fixed-path navigation. These tests do not establish installed-browser/provider delivery timing. Controls, recovery UI, event wiring, authenticated click resolution, responsive visual QA and genuine five-second commissioning remain required before full M37 acceptance. Workflows, scheduling, CI uploads and publication remain held.
+Focused groundwork checks cover original-event HTTP contracts against the production Edge handler, native IndexedDB reload and rollback, offline No, lost replies, removed assignment, competing tabs, storage limits, native selection changes, generic presentation and fixed-path navigation. These tests do not establish installed-browser/provider delivery timing. The [follow-up](urgent-inbox-ui.md) supplies the controls, recovery UI, event wiring, authenticated targets and their responsive verification. Genuine five-second commissioning remains required before full M37 acceptance. Workflows, scheduling, CI uploads and publication remain held.
 
 ## Verification checkpoint
 

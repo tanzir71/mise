@@ -50,7 +50,7 @@ The longer-term goal is an AI operator that can help run the shift through the s
 
 ## Where the build stands
 
-The landing pages and the app for one device are implemented, along with public shop links and paste-to-order review. Android sharing into a local Inbox and printable QR tools are staged behind feature flags while their device checks remain open.
+The landing pages and the app for one device are implemented, along with public shop links and paste-to-order review. The default-off [Inbox preview](docs/urgent-inbox-ui.md) adds human task controls, observed-payment review, explicit urgent alerts and original-account recovery; real provider/device commissioning remains open. Android sharing into a local Inbox and printable QR tools are staged behind feature flags while their device checks remain open.
 
 Accounts, sync, kitchen/staff screens, automatic capture and AI operators are on the [milestone roadmap](handover/docs/03-roadmap.md). The [changelog](CHANGELOG.md) and delivery notes record the implementation and its verification.
 

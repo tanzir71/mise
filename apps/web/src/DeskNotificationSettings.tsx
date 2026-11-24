@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { Button, Card } from '@mise/ui/primitives.tsx';
 import type { DeskAlarmSettings } from '@mise/core/desk-tasks';
 import { useDeskNotifications } from './desk-context';
+import { UrgentInboxSettings } from './UrgentInboxSettings';
+import { useOwnerTasksEnabled } from './owner-tasks-context';
 import './desk-notifications.css';
 
 export function DeskNotificationSettings() {
+  const general = useOwnerTasksEnabled();
   const view = useDeskNotifications(),
     [busy, setBusy] = useState(''),
     [message, setMessage] = useState(''),
@@ -72,7 +75,11 @@ export function DeskNotificationSettings() {
       <header className="app-page-heading">
         <div>
           <h1>Notifications</h1>
-          <p>Kitchen warnings for this browser and outlet.</p>
+          <p>
+            {general
+              ? 'Notifications for this browser and outlet.'
+              : 'Kitchen warnings for this browser and outlet.'}
+          </p>
         </div>
         <Link className="button button-secondary" to="/inbox">
           Open Inbox
@@ -84,8 +91,9 @@ export function DeskNotificationSettings() {
           <span className="desk-caption">{state}</span>
         </header>
         <p>
-          Get a notification when the kitchen has not confirmed an order. You
-          can open the order or copy its warning from Inbox.
+          Get a notification when the kitchen has not confirmed an order.{' '}
+          {general ? 'Urgent Inbox alerts have their own choice below. ' : ''}
+          You can open the order or copy its warning from Inbox.
         </p>
         {!effective ? (
           <Button
@@ -167,6 +175,7 @@ export function DeskNotificationSettings() {
           </Link>
         </div>
       </Card>
+      {general ? <UrgentInboxSettings /> : null}
       <Card className="desk-setting-card">
         <header>
           <h2>Kitchen acknowledgement</h2>

@@ -1,5 +1,5 @@
 import { lazy,Suspense,useEffect,useRef,useState } from 'react';
-import { Link,useNavigate,useParams } from 'react-router-dom';
+import { Link,useNavigate,useParams,useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Button,Card } from '@mise/ui/primitives.tsx';
 import { Modal } from '@mise/ui/Modal.tsx';
@@ -14,6 +14,7 @@ import bellAsset from './assets/inbox/bell.svg';
 import checkAsset from './assets/inbox/check.svg';
 import './inbox.css';
 import {useOwnerTasksEnabled} from './owner-tasks-context';
+const UrgentInboxTarget=lazy(()=>import('./UrgentInboxTarget').then(module=>({default:module.UrgentInboxTarget})));
 const OwnerTaskInbox=lazy(()=>import('./OwnerTaskInbox').then(module=>({default:module.OwnerTaskInbox})));
 const PaymentSourceReview=lazy(()=>import('./PaymentSourceReview').then(module=>({default:module.PaymentSourceReview})));
 
@@ -33,9 +34,10 @@ function Source({item,setup}:{item:StoredInboxItem;setup:SetupSnapshot}) {
   return <section className="inbox-source" aria-label="Shared source"><p className="inbox-caption">{item.images.length?`${item.images.length} image${item.images.length===1?'':'s'}`:'Text'} · {khataDate(item.createdAt,setup,true)}</p>{item.title?<p className="inbox-source-title">{item.title}</p>:null}{item.text?<p className="inbox-source-text" dir="auto">{item.text}</p>:null}{item.url?<p className="inbox-source-text inbox-source-url" dir="auto">{item.url}</p>:null}{item.images.map(image=><InboxImage key={image.id} image={image}/>)}</section>;
 }
 export function Inbox({setup,online,captureEnabled=true}:{setup:SetupSnapshot;online:boolean;captureEnabled?:boolean}) {
-  const {'*':rawPath=''}=useParams(),path=rawPath==='shared'?'':rawPath,navigate=useNavigate(),[archived,setArchived]=useState(false),ownerTasks=useOwnerTasksEnabled();
+  const {'*':rawPath=''}=useParams(),path=rawPath==='shared'?'':rawPath,navigate=useNavigate(),[archived,setArchived]=useState(false),ownerTasks=useOwnerTasksEnabled(),location=useLocation();
   const items=useLiveQuery(()=>db.inboxItems.where('outletId').equals(setup.outlet.id).reverse().sortBy('createdAt'),[setup.outlet.id]);
   const unassigned=useLiveQuery(()=>db.inboxItems.filter(item=>item.outletId===null).reverse().sortBy('createdAt'),[]);
+  if(ownerTasks&&rawPath===''&&new URLSearchParams(location.search).has('urgent'))return <Suspense fallback={<p aria-busy="true">Checking the urgent item…</p>}><UrgentInboxTarget setup={setup}/></Suspense>;
   if(ownerTasks&&/^payments\/(?:new|[0-9A-HJKMNP-TV-Z]{26})$/.test(rawPath))return <Suspense fallback={<p aria-busy="true">Opening payment review…</p>}><PaymentSourceReview setup={setup} paymentId={rawPath==='payments/new'?undefined:rawPath.slice(9)}/></Suspense>;
   if(ownerTasks&&(rawPath===''||rawPath==='questions'))return <><Suspense fallback={<p aria-busy="true">Opening tasks…</p>}><OwnerTaskInbox setup={setup} questions={rawPath==='questions'}/></Suspense>{captureEnabled?<section className="owner-task-sources"><Link to="/inbox/shared" className="button button-secondary">Shared text and images on this device</Link></section>:null}</>;
   if(!captureEnabled)return <DeskInboxPage setup={setup}/>;

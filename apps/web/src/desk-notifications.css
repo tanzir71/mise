@@ -4,6 +4,9 @@
   display: grid;
   gap: 16px;
 }
+.urgent-target-status {
+  margin-bottom: 16px;
+}
 .desk-setting-card {
   padding: 24px;
   border-radius: 16px;

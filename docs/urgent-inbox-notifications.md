@@ -1,6 +1,6 @@
 # M37 · General urgent notification backend
 
-This increment adds a separate server protocol for urgent Inbox tasks. Existing kitchen subscriptions keep their original purpose: they are not silently enrolled in other alerts. Follow-up [browser groundwork](urgent-inbox-native.md) supplies private original-consent storage, recovery methods and a notification handler. The settings controls, service-worker wiring and notification-click interface still need integration. `ownerTasks` stays off, delivery defaults off, and full M37 acceptance remains open.
+This increment adds a separate server protocol for urgent Inbox tasks. Existing kitchen subscriptions keep their original purpose: they are not silently enrolled in other alerts. Follow-up [browser groundwork](urgent-inbox-native.md) and [controls and current targets](urgent-inbox-ui.md) connect private consent, recovery and the built service worker to the app. Actual installed-browser/provider commissioning and full M37 acceptance remain open. `ownerTasks` stays off and delivery defaults off.
 
 ## Consent and original requests
 
@@ -38,7 +38,7 @@ The scheduler uses the existing reviewed privileged Cron/Net/Vault dependency ch
 
 Supabase supports sub-minute Cron intervals; see [the official quickstart](https://supabase.com/docs/guides/cron/quickstart). No job is installed or enabled by either migration. Cron metadata contains no origin, key or header. Net receives only a short-lived, body-bound HMAC and exact one-use SQL grant; the reusable key never enters its HTTP queue, even where platform defaults allow queued headers to be read. Disable/reconfiguration invalidates earlier grants. Errors and status remain generic and contain no decrypted configuration.
 
-The local verification path models transactional Net/Cron behavior and uses an independent browser key to decrypt a real encrypted packet. Its timing budget includes one scheduling second. It is not hosted/browser/provider delivery acceptance. Full M37 still requires native consent/recovery, service-worker presentation, authenticated click resolution and genuine five-second commissioning on the end user's installed browser. Workflows, scheduling, CI uploads and publication remain held.
+The local verification path models transactional Net/Cron behavior and uses an independent browser key to decrypt a real encrypted packet. Its timing budget includes one scheduling second. It is not hosted/browser/provider delivery acceptance. The [interface follow-up](urgent-inbox-ui.md) supplies native consent/recovery, service-worker presentation and authenticated current targets. Full M37 still requires genuine five-second commissioning on the end user's installed browser. Workflows, scheduling, CI uploads and publication remain held.
 
 ## Verification checkpoint
 

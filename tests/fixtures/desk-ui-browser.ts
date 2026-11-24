@@ -72,6 +72,8 @@ async function inspect() {
       setups,
       profiles: await cache.profiles.toArray(),
       operations: await cache.operations.toArray(),
+      urgentProfiles: await cache.urgentProfiles.toArray(),
+      urgentOperations: await cache.urgentOperations.toArray(),
       orders: await db.orders.toArray(),
       sales: await db.sales.toArray(),
       creditEntries: await db.creditEntries.toArray(),
@@ -89,15 +91,35 @@ async function lock() {
     phase: 'locked',
   });
 }
-async function removeLocalOrder(id:string){await db.orders.delete(id);}
-window.miseDeskUiTest = { initialize, inspect, lock,removeLocalOrder };
+async function removeLocalOrder(id: string) {
+  await db.orders.delete(id);
+}
+async function damageUrgent() {
+  const cache = new DeskCache(base());
+  try {
+    await cache.urgentProfiles.toCollection().modify((row) => {
+      if (row && typeof row === 'object')
+        Object.assign(row, { unreadable: true });
+    });
+  } finally {
+    cache.close();
+  }
+}
+window.miseDeskUiTest = {
+  initialize,
+  inspect,
+  lock,
+  removeLocalOrder,
+  damageUrgent,
+};
 declare global {
   interface Window {
     miseDeskUiTest: {
       initialize: typeof initialize;
       inspect: typeof inspect;
       lock: typeof lock;
-      removeLocalOrder:typeof removeLocalOrder;
+      removeLocalOrder: typeof removeLocalOrder;
+      damageUrgent: typeof damageUrgent;
     };
   }
 }

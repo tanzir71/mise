@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-24T04:19:06.217Z",
+  "sourceParentCommit": "650955f243b564ea07a7a78c2dde7e2c5269d2d7",
+  "status": "verified-urgent-controls-original-recovery-and-built-worker-targets-genuine-commissioning-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsCredentialsPhonesOrOtpRequired": false,
+    "installationCredentialsGeneratedOrConfigured": 0,
+    "ownerTasks": false,
+    "kitchenAlarms": false,
+    "deliveryEnabled": false
+  },
+  "implementation": {
+    "separateExplicitConsent": true,
+    "manualUrgencyUncheckedByDefault": true,
+    "offlineNoBeforeConfigurationReturns": true,
+    "atomicBrowserWideDisable": true,
+    "unreadableUrgentOriginalsRetainedWithHealthyBaseNo": true,
+    "originalAccountRecoveryWithoutNativeSelection": true,
+    "actualSdkNamespaceIsolation": true,
+    "productionServiceWorkerEventWiring": true,
+    "settingsAndRecoveryInterface": true,
+    "authenticatedCurrentTargetInterface": true,
+    "historyEviction": false
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 200,
+      "diagnostics": 0
+    },
+    "unit": {
+      "fullInvocation": {
+        "files": 263,
+        "cases": 5068,
+        "durationSeconds": 876.9,
+        "passed": true,
+        "skipped": 0
+      },
+      "sourceState": "Full invocation followed by final UI-only manual urgency and unreadable-urgent base Disable changes; final 111 browser regressions per hosting path include these changes. No later domain, SQL, cache or SDK change.",
+      "workersMaximum": 2,
+      "originalCorporaAndDeadlinesUnchanged": true,
+      "originalKitchenRecords": 5004,
+      "originalKitchenDurationMs": 51246,
+      "actualRecoverySdkCases": 3
+    },
+    "build": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "root": {
+        "files": 8,
+        "cases": 111,
+        "passed": true,
+        "workers": 2
+      },
+      "pages": {
+        "files": 8,
+        "cases": 111,
+        "passed": true,
+        "workers": 2
+      }
+    },
+    "visualQa": {
+      "comparisons": 55,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "overflow": false,
+      "accessibilityViolations": 0,
+      "utilityFrameAdaptationsDocumented": true,
+      "report": "qa/report.html",
+      "generatedAt": "2026-11-24T04:10:19.378Z",
+      "screenshots": [
+        "docs/screenshots/m37-urgent-settings-390.png",
+        "docs/screenshots/m37-urgent-target-390.png",
+        "docs/screenshots/m37-urgent-originals-390.png"
+      ],
+      "reportSha256": "c0d319a43b9e3ebc52b705e24f9c64490889b6bffd2f655e39dc39e32ece8f3d",
+      "resultsSha256": "b413298cee572a60b6bdd0f3f59779390cdde4d5eeab2cc685128e22023d01f5",
+      "screenshotHashes": {
+        "docs/screenshots/m37-urgent-settings-390.png": "20d5277a7dbb5c80270784f7b319f9d1262da2bb8df1cdcb2c8dd1a4409cdd66",
+        "docs/screenshots/m37-urgent-target-390.png": "687025ffe2194c668f381033fd304570d5a6a5165e52b539ea013ee843467e3f",
+        "docs/screenshots/m37-urgent-originals-390.png": "f2b4cad4e203b108994c5c59f2401d9883f9c0147a0e3d9929ebf681c80998ff"
+      }
+    },
+    "secrets": {
+      "knownPrivateValues": 13,
+      "currentCredentialFindings": 0,
+      "newDeploymentFindings": 0,
+      "olderReviewedNonsecretFindings": 22,
+      "exceptionsAdded": 0,
+      "historyAndArtifactsChecked": true
+    }
+  },
+  "delivery": {
+    "milestoneComplete": false,
+    "defaultPreviewOff": true,
+    "workflowsHeld": true,
+    "publicationHeld": true,
+    "ciArtifactUploadHeld": true,
+    "cronHeld": true,
+    "providerRequests": 0,
+    "hostedSchemaOrFunctionChanges": 0,
+    "installedBrowserFiveSecondAcceptance": false,
+    "syntheticBrowserEdges": [
+      "PushManager subscription",
+      "notification presentation",
+      "notification click gesture"
+    ],
+    "actualBrowserPaths": [
+      "compiled service-worker event dispatch",
+      "native IndexedDB consent and originals",
+      "existing-window same-origin navigation",
+      "fresh target authorization",
+      "current SQL task read and explicit human resolution"
+    ]
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "apps/web/src/DeskNotificationSettings.tsx": "216e6ef84e823be951376cab798f810f48a5d13f81af273b96d6908bb9700ed6",
+    "apps/web/src/DeskNotificationsProvider.tsx": "28258815b0f52501f6496ba1408dcba9630fc8a1c0ad0bc413c5689e1b77ef8a",
+    "apps/web/src/Inbox.tsx": "92f3f0f2f760e898196be864e69c94fd55897f5d7ac04aaa7698d26993bbb4be",
+    "apps/web/src/LocalApp.tsx": "148b59ac0fbff2eece2d77fd1010742923ce2f157eb30360d8c9894d44d2a0b1",
+    "apps/web/src/OwnerTaskInbox.tsx": "ca47a2a9701a15f5caf376e7c1f7ec99cc2fd778b0c1a066491bb14b60c4a47f",
+    "apps/web/src/UrgentInboxCleanup.tsx": "691c17e62f47bda5da0d5fbdcdc6e6094e9c010b92cf73d8f62e21ba7fd6e9e2",
+    "apps/web/src/UrgentInboxProvider.tsx": "4405119afd7d34ec2099707b7ec020fadfb360a5635a6f1663d1327f64929aa6",
+    "apps/web/src/UrgentInboxSettings.tsx": "abc22c695780ee5fe5687d0f233113a6feb594b6a3af468d16513dd234da2454",
+    "apps/web/src/UrgentInboxTarget.tsx": "cefc36910e008aad221da8af8da6cd3b5488697cd70aaf0193594a756a1956f7",
+    "apps/web/src/data/urgent-inbox-cache.ts": "b1ff2d6c4fd4c56324ec6268e376c324aa46e8d6855a7648e11641d59dfa05f2",
+    "apps/web/src/data/urgent-inbox-recovery.ts": "bc3f8b4a13946dad562754fbb521f21c7d76e7df1e96970ece36bcb9f9e2967a",
+    "apps/web/src/data/urgent-inbox-session.ts": "565b19fdbde3da896f641d495e986936f36dd652ebbdd1b5a5ec01669a194bde",
+    "apps/web/src/desk-notification-worker.ts": "c931d98ff9092962920591854dc1d26e67febd58c35712008494508ae6bc62d2",
+    "apps/web/src/desk-notifications.css": "6ffbbe69faec7ef3b2832a7501f4ad32f104fe44e97c31635175a5022862cb8a",
+    "apps/web/src/main.tsx": "058f5a9d78fa9278997b17d701416c9773bfcee5441e4340830b8eeeaf4704b9",
+    "apps/web/src/notification-worker.ts": "1eaab5b41265158d72e44ce7d92be822b652527618b9c4831c16b972689dee8e",
+    "apps/web/src/sw.ts": "1c306d08cd00996fa33d066356114e6953a46f67ef17f4ae283ee48f87bdc016",
+    "apps/web/src/urgent-inbox-context.tsx": "22cd1dcedbb56af83a0ce42e403569830cca5e890ff9131da19211cd82059d08",
+    "apps/web/src/urgent-inbox-worker.ts": "5c57fe911d355673bcf909b158a45b35ca731c29402e6b7f49a072adbd4127ad",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "qa/configs/m37-urgent-inbox.json": "35a35d720207e248dc96fd11f9cdf5e4619b9feae3ad9299295e23ab277f99e4",
+    "scripts/qa-visual.mjs": "aeac63db41a056e41aed3b4a72e26d701280dad3e0643667c151990085d2e119",
+    "supabase/migrations/20261124013707_urgent_inbox_notifications.sql": "5f6bc5bf71b474c7fcf4769cd8c74b9b2bc676c94b1de55d22bc4c8fe75becad",
+    "supabase/migrations/20261124013801_urgent_inbox_dispatch.sql": "afacad33eb354cbcb3680857f75308e3e01c2716014cb63c7228ef602f6d4256",
+    "tests/e2e/desk-storage.spec.ts": "98665ea7b9c73ca5b1ba9a0d32f6ecb4bb9c47cb8274be98445b708d33330749",
+    "tests/e2e/urgent-inbox-ui.spec.ts": "1e5e2396f87025c3f304c11b4649d278263e91c2e48ee1f26dcf4ecd7ba01159",
+    "tests/fixtures/desk-ui-browser.ts": "838e5ae5ee917edeb54dc9f447cff01f96a62bb8fea660cbf7974fc0dea723d0",
+    "tests/fixtures/desk-ui-service.ts": "89e4587971c0eaf7cc19fb1952d838289ad7e5614618445d465770e5e8c9db7a",
+    "tests/fixtures/install-urgent-worker.d.mts": "65c344a6cd4bb1b6d88850b8c597293954bb8aab2b3aa0178c24d0b49aeb6eb2",
+    "tests/fixtures/install-urgent-worker.mjs": "8bfb82d765466e85a0c706bc82035fd2bef715a33b26e09b88b0c5c53b13eeda",
+    "tests/fixtures/urgent-inbox-visual.mjs": "059cee49215faa3e75395550c123847331811458454bf71cb17e2cabb6edb2b1",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/urgent-inbox-recovery.test.ts": "88fa2a2e446949bcf5e088d63ad32fe6d05b2e80bb78806b35a497aee9bfe3a2",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  }
+}

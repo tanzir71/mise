@@ -1,0 +1,71 @@
+{
+  "title": "M37 — explicit urgent consent, personal originals and authenticated targets",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "urgent-settings",
+      "path": "app/settings/notifications?flags=ownerTasks",
+      "urgentInboxFixture": "settings",
+      "note": "Explicit general consent adapts the existing notification settings cards. M20 is the monochrome/card/type reference, not a claim of a supplied notification-settings frame or identical content.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".desk-settings",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "urgent-originals",
+      "path": "app/settings/notifications/urgent-cleanup?flags=ownerTasks",
+      "urgentInboxFixture": "cleanup",
+      "note": "Personal original-account recovery uses the existing settings/recovery primitives and M20 visual tokens. No Figma frame specifically depicts these extra original-request controls.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".desk-cleanup",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "urgent-target",
+      "path": "app/inbox?flags=ownerTasks",
+      "urgentInboxFixture": "target",
+      "note": "M20 hierarchy, actual Core/SQL urgent manual task, current original-account target verification and the existing inline human action. Notification source text never executes instructions or posts money.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": "#workspace",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "urgent-payment",
+      "path": "app/inbox?flags=ownerTasks",
+      "urgentInboxFixture": "payment",
+      "note": "The recorded unmatched-payment target opens existing source review, adapted from the M06 payment/source hierarchy. It offers actual checked receipts and manual choices, not an invented payment or automatic match.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".payment-review",
+          "reference": "screens/mobile/M06 · Owner ∕ manager phone — Questions for you.png"
+        }
+      ]
+    },
+    {
+      "id": "urgent-offline",
+      "path": "app/settings/notifications?flags=ownerTasks",
+      "urgentInboxFixture": "offline",
+      "note": "Durable offline No and original withdrawal metadata use the same settings cards and M20 visual tokens. General consent remains separate from kitchen warnings and no provider send is performed.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".desk-settings",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    }
+  ]
+}
