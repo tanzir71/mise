@@ -72,19 +72,21 @@ export function KitchenScreen({journal,source,onSignOut,onSavedTaps}: {journal: 
   const [state,setState] = useState<KitchenScreenState | null>(null), [error,setError] = useState(''), [notice,setNotice] = useState('');
   const [online,setOnline] = useState(navigator.onLine), [live,setLive] = useState(false), [now,setNow] = useState(Date.now()), [stage,setStage] = useState<Stage>('New');
   const [loading,setLoading] = useState(true), [busy,setBusy] = useState<string | null>(null), [sound,setSound] = useState(false), [awake,setAwake] = useState(false);
+  const [readStopped,setReadStopped]=useState(false);
   const [leaving,setLeaving]=useState(false),leavingNow=useRef(false),mounted=useRef(true),pause=useRef<()=>void>(()=>{});
   const board = useRef<Board | null>(null), audio = useRef<AudioContext | null>(null), wake = useRef<WakeLockSentinel | null>(null), soundOn = useRef(false), oldTickets = useRef<Set<string> | null>(null);
   const refresh = useRef<() => Promise<void>>(async () => {});
   useEffect(() => {
     if(leavingNow.current)return;
     let active = true, checking = false, repeat = false, denied = false, stopLive: (() => void) | undefined;
-    const controller = createKitchenScreenSession(journal,source,{changed: value => {if (active) setState(value);}});
+    const controller = createKitchenScreenSession(journal,source,{changed: value => {if (active&&!denied) setState(value);}});
     board.current = controller;
     mounted.current=true;
     pause.current=()=>{denied=true;stopLive?.();stopLive=undefined;setLive(false);controller.dispose();board.current=null;};
     const authDenied = () => {
       denied = true; stopLive?.(); stopLive = undefined;
-      if (active) {setLive(false); setState(null); setError('Sign in with your PIN again. Saved tickets and taps stay on this device.');}
+      if (active) {setReadStopped(true);setLive(false); setState(null);setError('Access stopped. Saving this check on the screen…');}
+      void controller.blockRead().then(()=>{if(active)setError('Sign in with your PIN again. Saved tickets and taps stay on this device. You can check access again after the manager changes it.');},()=>{if(active)setError('Access stopped. This browser could not save that check. Keep your saved data and sign in again before preparing work.');});
     };
     const failed = (error: unknown) => {
       if (!active) return;
@@ -99,23 +101,23 @@ export function KitchenScreen({journal,source,onSignOut,onSavedTaps}: {journal: 
       if(!active||denied||!navigator.onLine)return;
       try{await controller.recover();}catch(error){failed(error);}
     };
-    const update = async () => {
-      if (!active || denied) return;
+    const update = async (explicit=false) => {
+      if (!active || denied&&!explicit) return;
       if (checking) {repeat = true; return;}
       checking = true;
       try {
         do {
           repeat = false;
-          const cached = await controller.load();
-          if (active && cached) setState(cached);
-          if (navigator.onLine) {await controller.pull(); void deliver();void recover();}
+          try{const cached = await controller.load();if(active&&!denied&&cached)setState(cached);}
+          catch(error){if(!(error instanceof DeviceScreenRequestError)||error.kind!=='auth'||!navigator.onLine)throw error;if(active)setState(null);}
+          if (navigator.onLine) {await controller.pull();denied=false;const fresh=await controller.load();if(active){setReadStopped(false);setState(fresh);}startLive();void deliver();void recover();}
           if (active) setError('');
         } while (repeat && active && !denied);
       } catch (error) {
         failed(error);
       } finally {checking = false; if (active) setLoading(false);}
     };
-    refresh.current = update;
+    refresh.current = ()=>update(true);
     const startLive = () => {
       if (!active || denied || !navigator.onLine || stopLive) return;
       stopLive = watchKitchenLive(journal,source,{wake:() => void update(),state:value => {if(active)setLive(value);},denied:authDenied});
@@ -123,7 +125,7 @@ export function KitchenScreen({journal,source,onSignOut,onSavedTaps}: {journal: 
     const changed = () => {
       setOnline(navigator.onLine);
       if (!navigator.onLine) {stopLive?.(); stopLive = undefined; setLive(false);} else startLive();
-      void update();
+      void update(navigator.onLine);
     };
     window.addEventListener('online',changed); window.addEventListener('offline',changed);
     const visible = () => {if (document.visibilityState === 'visible') void update();};
@@ -211,8 +213,8 @@ export function KitchenScreen({journal,source,onSignOut,onSavedTaps}: {journal: 
     <a className="app-skip" href="#kitchen-tickets">Skip to tickets</a>
     <header className="kitchen-top"><a href="#kitchen-tickets" className="wordmark">mise <span>Kitchen</span></a><p>{state?.outletName ?? 'Shared preparation screen'}</p>{onSavedTaps?<Button kind="ghost" disabled={busy!==null} onClick={onSavedTaps}>My saved taps</Button>:null}<Button kind="ghost" disabled={busy!==null} onClick={()=>void signOut()}>Sign out</Button></header>
     {updateReady ? <div className="kitchen-notice" role="status">An update is ready. Your saved taps stay on this screen. <Button kind="secondary" disabled={busy!==null} onClick={applyUpdate}>Reload</Button></div> : null}
-    <div className="kitchen-heading"><div><h1>Kitchen</h1><p>Big tickets. Got it, then Ready.</p></div><div className="kitchen-screen-controls"><Button kind="secondary" aria-pressed={sound} onClick={() => void toggleSound()}>Sound {sound ? 'on' : 'off'}</Button><Button kind="secondary" aria-pressed={awake} onClick={() => {if (!navigator.wakeLock) setNotice('Keep this screen open and adjust the device’s sleep setting if needed.'); else setAwake(value => !value);}}>Keep awake {awake ? 'on' : 'off'}</Button></div></div>
-    <div className="kitchen-connection"><p>{online ? live ? 'Live updates connected' : 'Reconnecting live updates · checking saved tickets' : 'Offline · showing saved tickets'}{state ? ` · last checked ${new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(state.at)}` : ''}</p><Button kind="ghost" onClick={() => void refresh.current()}>Check now</Button></div>
+    <div className="kitchen-heading"><div><h1>Kitchen</h1><p>{readStopped?'Your original taps stay available in My saved taps.':'Big tickets. Got it, then Ready.'}</p></div><div className="kitchen-screen-controls"><Button kind="secondary" aria-pressed={sound} onClick={() => void toggleSound()}>Sound {sound ? 'on' : 'off'}</Button><Button kind="secondary" aria-pressed={awake} onClick={() => {if (!navigator.wakeLock) setNotice('Keep this screen open and adjust the device’s sleep setting if needed.'); else setAwake(value => !value);}}>Keep awake {awake ? 'on' : 'off'}</Button></div></div>
+    <div className="kitchen-connection"><p>{readStopped?(online?'Work access stopped · saved taps kept':'Offline · work access stopped'):online ? live ? 'Live updates connected' : 'Reconnecting live updates · checking saved tickets' : 'Offline · showing saved tickets'}{state ? ` · last checked ${new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(state.at)}` : ''}</p><Button kind="ghost" onClick={() => void refresh.current()}>Check now</Button></div>
     {pending ? <p className="kitchen-notice">{pending} saved {pending === 1 ? 'tap needs' : 'taps need'} confirmation. Keep this browser’s saved data.</p> : null}
     {state&&!state.access.permissions.includes('orders.acknowledge')&&!state.access.permissions.includes('orders.ready')?<p className="kitchen-notice">Preparation is read-only. Ask the manager to review Confirm orders in Team. You can still copy a ticket and check or close your own saved taps.</p>:null}
     {state?<KitchenTapReview state={state} now={now} online={online} busy={busy!==null||leaving} onCheck={tap=>void reviewTap(tap,false)} onClose={tap=>void reviewTap(tap,true)} onCopy={ticket=>void copy(ticket)}/>:null}
@@ -223,7 +225,7 @@ export function KitchenScreen({journal,source,onSignOut,onSavedTaps}: {journal: 
     </section>
     {state&&!tickets.length ? <p className="kitchen-empty">No open tickets.</p> : null}
     {state&&tickets.length>0&&!tickets.some(ticket=>ticketStage(state,ticket)===stage) ? <p className="kitchen-empty kitchen-phone-empty">{stage==='New'?'No new tickets.':stage==='Cooking'?'Nothing in preparation.':'Nothing ready yet.'}</p> : null}
-    {!state ? <p className="kitchen-empty">{loading ? 'Opening saved tickets…' : online ? 'No tickets loaded. Check the connection or sign in with your PIN again.' : 'Connect once to load this staff session’s tickets. Saved taps remain on this device.'}</p> : null}
-    <nav className="kitchen-phone-tabs" aria-label="Preparation stage">{stages.map(column => <button key={column} type="button" aria-current={stage === column ? 'page' : undefined} onClick={() => setStage(column)}>{column} {state?tickets.filter(ticket=>ticketStage(state,ticket)===column).length:0}</button>)}</nav>
+    {!state ? <p className="kitchen-empty">{readStopped?'Open My saved taps to inspect or close your own original work.':loading ? 'Opening saved tickets…' : online ? 'No tickets loaded. Check the connection or sign in with your PIN again.' : 'Connect once to load this staff session’s tickets. Saved taps remain on this device.'}</p> : null}
+    {!readStopped?<nav className="kitchen-phone-tabs" aria-label="Preparation stage">{stages.map(column => <button key={column} type="button" aria-current={stage === column ? 'page' : undefined} onClick={() => setStage(column)}>{column} {state?tickets.filter(ticket=>ticketStage(state,ticket)===column).length:0}</button>)}</nav>:null}
   </main>;
 }

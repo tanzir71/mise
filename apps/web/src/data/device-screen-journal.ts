@@ -3,7 +3,9 @@ import {deviceSecretHash} from '@mise/core/device-access';
 import {cloudConnectionStorageKey} from '@mise/core/cloud-connection';
 import {parseScreenJournalRecord,parseScreenState,type ScreenJournalRecord,type ScreenState} from '@mise/core/device-screen-state';
 import {kitchenScreenWire,parseKitchenScreenState,type KitchenScreenState} from '@mise/core/kitchen-screen';
+import {kitchenReadScope,parseKitchenReadStatus,type KitchenReadStatus} from '@mise/core/kitchen-read-status';
 import {parseStaffDeviceJournal,staffDeviceJournalId,type StaffDeviceJournal,type StaffDeviceScope} from '@mise/core/staff-device-journal';
+import {assertLiveCommandReceipt} from './command-request';
 
 export class ScreenStorageError extends Error {
  constructor(readonly kind:'changed'|'unavailable'|'owner'|'damaged'){
@@ -62,7 +64,7 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
   if(value.state.phase==='pairing'&&await deviceSecretHash(value.state.source.token)!==value.state.source.tokenHash)throw new ScreenStorageError('damaged');
   return value;
  }
- function scopedTransaction(storeName:'kitchen'|'attendance',cacheId:string,original:ScreenJournalRecord,expected?:unknown,replacement?:{id:string},guard?:()=>void,signal?:AbortSignal):Promise<unknown>{
+ function scopedTransaction(storeName:'kitchen'|'attendance',cacheId:string,original:ScreenJournalRecord,expected?:unknown,replacement?:{id:string},guard?:()=>void,signal?:AbortSignal,readFence?:{observed:KitchenReadStatus|null;next:KitchenReadStatus|null}):Promise<unknown>{
   return new Promise((resolve,reject)=>{
    if(original.state.phase!=='signed-in'||signal?.aborted){reject(new ScreenStorageError('changed'));return;}
    let tx:IDBTransaction;try{if(closed)throw Error();tx=database.transaction(['state',storeName],'readwrite');}catch{reject(new ScreenStorageError('unavailable'));return;}
@@ -72,21 +74,23 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
    signal?.addEventListener('abort',stop,{once:true});
    const cleanup=()=>{clearTimeout(timer);signal?.removeEventListener('abort',stop);};
    function current(){try{if(signal?.aborted)throw Error();const value:unknown=guard?.();if(value!==undefined){void Promise.resolve(value).catch(()=>{});throw Error();}}catch{throw new ScreenStorageError('changed');}}
-   const setup=tx.objectStore('state').get('current'),cache=tx.objectStore(storeName).get(cacheId);
+   const setup=tx.objectStore('state').get('current'),cache=tx.objectStore(storeName).get(cacheId),status=readFence?tx.objectStore('kitchen').get(kitchenReadScope(original).id):null;
    let read=0;
    const loaded=()=>{
-    if(++read!==2)return;
+    if(++read!==(status?3:2))return;
     try{
      let enrolled:ScreenJournalRecord;try{enrolled=parseScreenJournalRecord(setup.result);}catch{throw new ScreenStorageError('damaged');}
      if(JSON.stringify(enrolled)!==JSON.stringify(original))throw new ScreenStorageError('changed');
      const raw:unknown=cache.result??null;
      if(expected!==undefined&&JSON.stringify(raw)!==JSON.stringify(expected))throw new ScreenStorageError('changed');
+     if(readFence&&JSON.stringify(status!.result??null)!==JSON.stringify(readFence.observed))throw new ScreenStorageError('changed');
      current();
-     if(replacement!==undefined){if(replacement.id!==cacheId)throw new ScreenStorageError('changed');tx.objectStore(storeName).put(replacement);result=replacement;}
+     if(replacement!==undefined){if(replacement.id!==cacheId)throw new ScreenStorageError('changed');tx.objectStore(storeName).put(replacement);if(readFence?.next)tx.objectStore('kitchen').put(readFence.next);result=replacement;}
      else result=raw;
     }catch(error){failure=error instanceof ScreenStorageError?error:new ScreenStorageError('unavailable');tx.abort();}
    };
    setup.onsuccess=loaded;cache.onsuccess=loaded;
+   if(status)status.onsuccess=loaded;
    tx.onerror=()=>{failure??=new ScreenStorageError('unavailable');};
    tx.onabort=()=>{cleanup();reject(failure??new ScreenStorageError('unavailable'));};
    tx.oncomplete=()=>{cleanup();try{current();resolve(result);}catch(error){reject(error);}};
@@ -115,12 +119,25 @@ export async function openScreenJournal(base:string,factory:IDBFactory=indexedDB
    await transaction(original);
    return parsed;
   },
-  async replaceKitchen(input:ScreenJournalRecord,expected:KitchenScreenState|null,next:KitchenScreenState,options:{assertCurrent?:()=>void;signal?:AbortSignal}={}){
+  async readKitchenReadStatus(input:ScreenJournalRecord){
+   const original=parseScreenJournalRecord(input),scope=kitchenReadScope(original),raw=await scopedTransaction('kitchen',scope.id,original);
+   await transaction(original);
+   try{return raw===null?null:parseKitchenReadStatus(raw,original);}catch{throw new ScreenStorageError('damaged');}
+  },
+  async denyKitchenRead(input:ScreenJournalRecord,options:{assertCurrent?:()=>void;signal?:AbortSignal}={}){
+   const original=parseScreenJournalRecord(input),next=parseKitchenReadStatus({v:1,...kitchenReadScope(original),revision:newInboxId(),denied:true},original);
+   return parseKitchenReadStatus(await scopedTransaction('kitchen',next.id,original,undefined,next,options.assertCurrent,options.signal),original);
+  },
+  async replaceKitchen(input:ScreenJournalRecord,expected:KitchenScreenState|null,next:KitchenScreenState,options:{assertCurrent?:()=>void;signal?:AbortSignal;readFence?:{observed:KitchenReadStatus|null;clear:boolean;authorization?:object}}={}){
    // Hashing and strict decoding finish before the native transaction opens.
    // Both the complete enrollment and complete cache are compared atomically.
    const original=parseScreenJournalRecord(input),before=expected===null?null:await parseKitchenScreenState(kitchenScreenWire(expected)),after=await parseKitchenScreenState(kitchenScreenWire(next));
    if(original.state.phase!=='signed-in')throw new ScreenStorageError('changed');
-   const saved=await scopedTransaction('kitchen',original.state.credential.device.id,original,before===null?null:kitchenScreenWire(before),kitchenScreenWire(after),options.assertCurrent,options.signal);
+   const fence=options.readFence,observed=fence?(fence.observed===null?null:parseKitchenReadStatus(fence.observed,original)):null;
+   const guard=()=>{const value:unknown=options.assertCurrent?.();if(value!==undefined){void Promise.resolve(value).catch(()=>{});throw new ScreenStorageError('changed');}if(fence?.clear){if(!fence.authorization)throw new ScreenStorageError('changed');assertLiveCommandReceipt(fence.authorization);}};
+   try{guard();}catch{throw new ScreenStorageError('changed');}
+   const readFence=fence?{observed,next:fence.clear&&observed?.denied?parseKitchenReadStatus({...observed,revision:newInboxId(),denied:false},original):null}:undefined;
+   const saved=await scopedTransaction('kitchen',original.state.credential.device.id,original,before===null?null:kitchenScreenWire(before),kitchenScreenWire(after),guard,options.signal,readFence);
    return parseKitchenScreenState(saved);
   },
   async readAttendance(input:ScreenJournalRecord){

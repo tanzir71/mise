@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: preparation screens retain known read denial across offline reloads while preserving own originals. Late authorized replies cannot erase a newer denial; only a fresh authorized read and atomic native page commit restore the ordinary board. Installation configuration stays end-user owned, with no new service or credential. Staff stock/performance paths and full M34 acceptance remain open; workflows/publication stay held.
+
 - In progress: personal preparation recovery now remains reachable after all order access is removed. Own original tickets survive offline closure, later PIN sessions and lost replies without live-order or preparation authority. Eligible previous members can still use their own PIN on the same device, with empty current permissions. Configuration stays installation-owned; full M34 and stock/performance work remain open, with workflows/publication held.
 
 - In progress: Team's Confirm orders choice now gates actual paired-screen Got it/Ready actions per outlet, including revocation after preparation. Explicit legacy denials remain effective. Current members retain inspection and closure of their own original requests without posting money or inventing permission. All setup stays end-user configured; stock/performance permission paths and full M34 acceptance remain open, with workflows/publication held.

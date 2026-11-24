@@ -1,10 +1,11 @@
 import {parseScreenJournalRecord, type ScreenJournalRecord} from '@mise/core/device-screen-state';
 import {parseStaffDeviceAccess} from '@mise/core/device-access';
+import type {KitchenReadStatus} from '@mise/core/kitchen-read-status';
 import {kitchenReadyPath, newKitchenId, prepareKitchenAction, type KitchenActionKind} from '@mise/core/kitchen';
 import {appendKitchenTap,beginKitchenTapClose,finishKitchenTapClose,finishKitchenTap,kitchenTapAcknowledges, receiveKitchenChanges, receiveKitchenPage, sameKitchenSession, type KitchenScreenState,type KitchenTap} from '@mise/core/kitchen-screen';
 import {retainedKitchenTap,type KitchenCloseIntent} from '@mise/core/kitchen-recovery';
 import type {KitchenTicket} from '@mise/core/kitchen-tickets';
-import {assertCommandReceipt} from './command-request';
+import {assertCommandReceipt,assertLiveCommandReceipt} from './command-request';
 import {assertBlankScreenProfile, ScreenStorageError, type ScreenJournal} from './device-screen-journal';
 import {createDeviceScreenRemote, DeviceScreenRequestError} from './device-screen-remote';
 
@@ -13,24 +14,39 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
   const original = parseScreenJournalRecord(input);
   if (original.state.phase !== 'signed-in') throw new ScreenStorageError('changed');
   const {credential, session} = original.state, blank = deps.blank ?? assertBlankScreenProfile, now = deps.now ?? Date.now;
-  let disposed = false, pulling = false, delivering = false, recovering=false, local: Promise<unknown> = Promise.resolve();
+  let disposed = false, pulling = false, delivering = false, recovering=false, denied=false,denialEpoch=0,local: Promise<unknown> = Promise.resolve();
   const controller = new AbortController();
   const current = () => {if (disposed) throw new ScreenStorageError('changed');};
   const expected = {device: credential.device, session};
   const api = createDeviceScreenRemote({connection: credential.connection, requestId: credential.device.id, token: credential.token}, current, deps.send ?? fetch);
   async function verify() {current(); await blank(); current(); await journal.assertCurrent(original); current();}
   async function read() {await verify(); const saved = await journal.readKitchen(original); current(); return saved;}
+  async function readStatus(){await verify();const value=await journal.readKitchenReadStatus(original);current();return value;}
+  async function requireRead(){const status=await readStatus();if(denied||status?.denied)throw new DeviceScreenRequestError('auth');return status;}
+  async function blockRead(){
+    current();denied=true;denialEpoch++;
+    // Queue this negative fact immediately. Opening personal recovery may
+    // dispose the view, but must not cancel a denial already observed here.
+    // The native transaction still compares the complete original PIN record.
+    await journal.denyKitchenRead(original);
+  }
+  type ReadFence={observed:KitchenReadStatus|null;clear:boolean;epoch:number};
   function actor(state: KitchenScreenState) {return parseStaffDeviceAccess(state.access, expected);}
-  function edit(change: (state: KitchenScreenState | null) => KitchenScreenState, proof?: object) {
+  function edit(change: (state: KitchenScreenState | null) => KitchenScreenState, proof?: object,fence?:ReadFence) {
     const saving = local.catch(() => {}).then(async () => {
       // A sibling tab can append while HTTP is in flight. Reload and merge the
       // complete queue; never replace it with an earlier network snapshot.
       for (let attempt = 0; attempt < 4; attempt++) {
         const before = await read(), next = change(before);
         try {
-          const saved = await journal.replaceKitchen(original, before, next, {signal: controller.signal, assertCurrent: () => {current(); if (proof) assertCommandReceipt(proof);}});
+          if(fence?.clear){if(!proof)throw new DeviceScreenRequestError('review');assertLiveCommandReceipt(proof);}
+          const saved = await journal.replaceKitchen(original, before, next, {signal: controller.signal,readFence:fence?{...fence,authorization:proof}:undefined, assertCurrent: () => {current();if(fence&&fence.epoch!==denialEpoch)throw new DeviceScreenRequestError('auth'); if (proof) assertCommandReceipt(proof);}});
+          if(fence?.clear)denied=false;
           current(); deps.changed?.(saved); return saved;
         } catch (error) {
+          if(fence){const status=await readStatus();if(fence.epoch!==denialEpoch||JSON.stringify(status)!==JSON.stringify(fence.observed)){
+            if(denied||status?.denied)throw new DeviceScreenRequestError('auth');throw new ScreenStorageError('changed');
+          }}
           if (!(error instanceof ScreenStorageError) || error.kind !== 'changed' || attempt === 3) throw error;
           await verify();
         }
@@ -53,7 +69,9 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
   }
   return {
     async load() {
+      await requireRead();
       const state = await read();
+      await requireRead();
       if (!state) return null;
       // Another staff member's saved preparation screen is not shown before
       // a fresh authorized read. Their original pending taps remain retained.
@@ -66,6 +84,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
       try {
         await verify();
         for (;;) {
+          const observed=await readStatus(),epoch=denialEpoch;
           const state = await read();
           let same = false;
           if (state) try {actor(state); same = true;} catch {/* Fresh read below. */}
@@ -80,7 +99,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
               }
               if (!latest || latest.cursor !== null || JSON.stringify(latest.after) !== JSON.stringify(after)) throw new ScreenStorageError('changed');
               return receiveKitchenPage(latest, page, newKitchenId());
-            }, page);
+            }, page,{observed,clear:true,epoch});
             if (saved.cursor === null) continue;
           } else {
             const page = await api.ticketChanges(credential.device, session, state!.cursor!, state!.until, controller.signal);
@@ -88,17 +107,19 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
             const saved = await edit(latest => {
               if (!latest || latest.cursor !== state!.cursor || latest.until !== state!.until) throw new ScreenStorageError('changed');
               return receiveKitchenChanges(latest, page, newKitchenId());
-            }, page);
+            }, page,{observed,clear:true,epoch});
             if (saved.until === null) return;
           }
         }
-      } finally {pulling = false;}
+      } catch(error){if(error instanceof DeviceScreenRequestError&&error.kind==='auth'){try{await blockRead();}catch{/* Memory denial remains authoritative for this controller if persistence fails. */}}throw error;}
+      finally {pulling = false;}
     },
     async tap(inputTicket: KitchenTicket, kind: KitchenActionKind) {
       // Capture the displayed ticket and gesture clock before ANY asynchronous
       // profile/cache work. Changed preparation content needs review; the
       // known Got it may advance while this original Ready gesture is saved.
       const source = structuredClone(inputTicket), occurredAt = now();
+      const observed=await requireRead(),epoch=denialEpoch;
       const before = await read();
       if (!before) throw new DeviceScreenRequestError('review');
       const access = actor(before);
@@ -110,7 +131,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
       return edit(latest => {
         if (!latest || !sameKitchenSession(latest.access, access)) throw new ScreenStorageError('changed');
         return appendKitchenTap(latest, source, action, newKitchenId());
-      });
+      },undefined,{observed,clear:false,epoch});
     },
     async recoverTap(inputTap:KitchenTap){return recoverOriginal(structuredClone(inputTap));},
     async closeTap(inputTap:KitchenTap){
@@ -151,6 +172,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
       delivering = true;
       try {
         for (;;) {
+          await requireRead();
           const state = await read();
           if (!state) return;
           let access;
@@ -179,6 +201,7 @@ export function createKitchenScreenSession(journal: ScreenJournal, input: Screen
         }
       } finally {delivering = false;}
     },
+    blockRead,
     dispose() {disposed = true; controller.abort();},
   };
 }

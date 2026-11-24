@@ -1,0 +1,96 @@
+{
+  "title": "M34 — durable current-PIN read denial with original recovery",
+  "widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "pages": [
+    {
+      "id": "cached-read-denied",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "denial-online",
+      "note": "An actual read denial hides cached tickets and work controls while leaving My saved taps available. Current-PIN negative metadata remains separate from historical source and permissions. No exact denial frame is supplied; the existing kitchen shell follows the supplied references.",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".kitchen-screen",
+          "widths": [
+            360,
+            390
+          ],
+          "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+        },
+        {
+          "id": "tablet",
+          "selector": ".kitchen-screen",
+          "widths": [
+            768,
+            1024,
+            1440
+          ],
+          "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+        }
+      ],
+      "fullPage": true
+    },
+    {
+      "id": "cached-read-denied-offline",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "denial-offline",
+      "note": "Offline reload retains the known current-PIN denial. Historical tickets and original taps remain native, but old work buttons and the ordinary cached board are not shown. My saved taps retains own-member recovery. This is a documented utility-state adaptation of the supplied kitchen frames.",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".kitchen-screen",
+          "widths": [
+            360,
+            390
+          ],
+          "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+        },
+        {
+          "id": "tablet",
+          "selector": ".kitchen-screen",
+          "widths": [
+            768,
+            1024,
+            1440
+          ],
+          "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+        }
+      ],
+      "fullPage": true
+    },
+    {
+      "id": "cached-read-restored",
+      "path": "app/screen/kitchen?flags=kitchenScreen",
+      "kitchenScreenFixture": "denial-restored",
+      "note": "Only a newly authorized server read and an atomic native commit clear the known denial. The actual earlier close is recovered without sending preparation or changing money; a new gesture is then available. The original source and historical closure remain visible through the existing review primitives.",
+      "sections": [
+        {
+          "id": "phone",
+          "selector": ".kitchen-screen",
+          "widths": [
+            360,
+            390
+          ],
+          "reference": "screens/mobile/M36 · Kitchen on a phone (small kitchens and stalls, same PWA).png"
+        },
+        {
+          "id": "tablet",
+          "selector": ".kitchen-screen",
+          "widths": [
+            768,
+            1024,
+            1440
+          ],
+          "reference": "screens/desktop/Kitchen screen · PWA (mise.app∕k) on a tablet · 1280×840.png"
+        }
+      ],
+      "fullPage": true
+    }
+  ]
+}

@@ -153,7 +153,9 @@ try {
       captureIds.add(id);
       const screen = `screens/${id}.png`;
       const captureStyle = section.captureStyle || target.captureStyle || '';
-      await element.screenshot({ path: `${output}/${screen}`, animations: 'disabled', style: '.skip-link{visibility:hidden}' + (section.selector !== '.site-header' && section.selector !== 'body' ? '.site-header{visibility:hidden}' : '') + captureStyle });
+      const screenshotOptions={path:`${output}/${screen}`,animations:'disabled',style:'.skip-link{visibility:hidden}' + (section.selector !== '.site-header' && section.selector !== 'body' ? '.site-header{visibility:hidden}' : '') + captureStyle};
+      if(section.fullPage||target.fullPage)await page.screenshot({...screenshotOptions,fullPage:true});
+      else await element.screenshot(screenshotOptions);
       const result = await compareImages(`${output}/${screen}`, referencePath, section.clip);
       const reference = `references/${id}.png`;
       const diff = `diffs/${id}.png`;

@@ -11,7 +11,7 @@ export async function installKitchenUi(page){bundle??=build({lib:{entry:resolve(
 let visualService;
 export async function captureKitchenScreen(page,mode='board'){
  visualService??=await startKitchenUiService();
- const config=mode==='queued'||mode==='review'||mode==='undone'||mode.startsWith('permission-')||mode.startsWith('saved-')?await visualService.prepare():await visualService.prepareBoard();
+ const config=mode==='queued'||mode==='review'||mode==='undone'||mode.startsWith('permission-')||mode.startsWith('saved-')||mode.startsWith('denial-')?await visualService.prepare():await visualService.prepareBoard();
  await installKitchenUi(page);await page.evaluate(screen=>window.miseKitchenUiTest.initialize(screen),config.screen);await page.reload();
  await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toBeVisible();await expect(page.getByText('Live updates connected',{exact:false})).toBeVisible();
  if(mode.startsWith('saved-')){
@@ -24,6 +24,16 @@ export async function captureKitchenScreen(page,mode='board'){
  }
  if(mode==='cancelled'){
   await visualService.cancelFromDesk();await expect(page.getByRole('button',{name:'Understood',exact:true})).toBeVisible();
+ }
+ if(mode.startsWith('denial-')){
+  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));await page.context().setOffline(true);await page.getByRole('button',{name:'Got it',exact:true}).click();await expect(page.getByText('1 saved tap needs confirmation.',{exact:false})).toBeVisible();
+  await visualService.setTeamConfirmation(false);await visualService.denyOrderRead();await page.context().setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Sign in with your PIN again.'})).toBeVisible();
+  if(mode==='denial-offline'){await page.context().setOffline(true);await page.reload();await expect(page.getByRole('alert').filter({hasText:'Sign in with your PIN again.'})).toBeVisible();}
+  if(mode==='denial-restored'){
+   await page.getByRole('button',{name:'My saved taps',exact:true}).click();await page.context().setOffline(true);await page.getByRole('button',{name:'Close saved tap',exact:true}).click();await expect(page.getByText('Close request saved on this screen · waiting for confirmation.',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Back to Kitchen',exact:true}).click();
+   await visualService.restoreOrderRead();await visualService.setTeamConfirmation(true);await page.context().setOffline(false);await page.getByRole('button',{name:'Check now',exact:true}).click();await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeEnabled();await expect.poll(()=>visualService.inspect()).toMatchObject({closures:1,actionCalls:0,receipts:0});
+   await page.getByRole('button',{name:'Saved taps · 1',exact:true}).click();await expect(page.getByText('Closed after review. The original ticket is kept.',{exact:true})).toBeVisible();
+  }else{await expect(page.getByRole('button',{name:'Got it',exact:true})).toHaveCount(0);await expect(page.getByRole('heading',{name:'A-2041',exact:true})).toHaveCount(0);}
  }
  if(mode.startsWith('permission-')){
   if(mode==='permission-original'){
@@ -68,6 +78,7 @@ export async function captureKitchenScreen(page,mode='board'){
   await visualService.undoLastStatus();await expect(page.getByRole('button',{name:'Got it',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'Saved taps · 1',exact:true}).click();await page.getByText('Original ticket',{exact:true}).click();
  }
+ await page.evaluate(()=>window.scrollTo(0,0));
  const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();if(result.violations.length)throw Error('Kitchen visual fixture has accessibility violations: '+result.violations.map(v=>v.id).join(', '));
 }
 export async function closeKitchenScreenVisual(){await visualService?.close();visualService=undefined;}

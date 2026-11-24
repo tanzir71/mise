@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-24T09:15:45.535Z",
+  "sourceParentCommit": "3af27b075b1f7e2431c4bee70a4ff9af694d2a44",
+  "status": "Durable current-PIN read denial implemented; full M34 remains in progress",
+  "configuration": {
+    "endUserOwned": true,
+    "newEnvironmentValues": 0,
+    "maintainerCredentialsRequired": false,
+    "featureFlagsRemainOff": true
+  },
+  "behavior": [
+    "Known actual read denial survives native offline reload",
+    "Separate negative metadata retains historical access and complete originals in schema3",
+    "Local gesture and page commits compare the exact current pre-request status revision",
+    "A newer local or sibling denial blocks stale authorized replies",
+    "Only a fresh verified HTTP response and atomic native page/status commit clear denial",
+    "Current controller remains stopped and reports native-save failure",
+    "Live-stream denial uses the same durable path",
+    "Current PIN/member/native scope changes cannot move or clear another session status",
+    "Own original inspection and offline closure remain available without fresh preparation permission",
+    "Real restored access and an explicit new gesture leave prior source, actors and financial facts intact"
+  ],
+  "validation": {
+    "unit": {
+      "files": 266,
+      "uniqueTests": 5119,
+      "passed": true,
+      "targetedFinalRerun": 82,
+      "originalWorkloadsAndDeadlinesUnchanged": true,
+      "maxWorkers": 2
+    },
+    "lint": true,
+    "typecheck": true,
+    "builds": [
+      "/",
+      "/mise/"
+    ],
+    "generatedHtmlAndAssetsReadable": true,
+    "browser": {
+      "root": 116,
+      "pages": 116,
+      "workers": 2,
+      "pagesEvidence": {
+        "completeRunPassed": 115,
+        "completeRunFailed": 1,
+        "focusedRerunPassed": 1,
+        "uniqueCasesPassed": 116,
+        "correction": "Wait for the original native receipt rather than inferring it from disappearance of the cancellation card",
+        "deadlinesUnchanged": true
+      }
+    },
+    "visual": {
+      "comparisons": 105,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "accessibilityViolations": 0,
+      "horizontalOverflowFailures": 0,
+      "referenceAdaptation": "Existing kitchen shell and original-review primitives; no exact denial frame supplied",
+      "localReport": ".private/m34-denial-visual/report.html",
+      "screenshotHashes": {
+        "docs/screenshots/m34-read-denied-390.png": "9fefc083880ff46656ffc0733b999fac13efe1279044a998a39ad73691a70ce0",
+        "docs/screenshots/m34-read-denied-offline-390.png": "186b5ed3635dc0c16f10253d4dd501b7fcdba4f32a69cf31d67b445437847d86",
+        "docs/screenshots/m34-read-restored-390.png": "3eedb0eec13ce1b0df26caa0540d357b81c565cb273504c66315f81e11e05a35"
+      }
+    },
+    "secrets": {
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "legacyDeploymentFindings": 22
+    }
+  },
+  "backend": {
+    "changesMade": false,
+    "ddlApplied": false,
+    "edgeDeployments": 0,
+    "providerRequests": 0
+  },
+  "delivery": {
+    "directMainCommit": true,
+    "workflowsHeld": true,
+    "pagesHeld": true,
+    "ciUploadHeld": true,
+    "releaseTagCreated": false,
+    "open": [
+      "Actual staff stock permission/runtime and later own-performance work",
+      "Full M34 and public delivery"
+    ]
+  },
+  "sourceHashes": {
+    "apps/web/src/KitchenSavedTaps.tsx": "3a675d5ad1bf14610e0c2eb13ab11fa262e125e6210d2f1fefeea23495acd509",
+    "apps/web/src/KitchenScreen.tsx": "fd7b7ad284753640d1283d2b73e81cda1025adaf37cc3e48ccc953d8c04a6539",
+    "apps/web/src/KitchenTapReview.tsx": "1758cb6b59f057f61cf228e7a6b5be50e93b86f452ca6b7b74c82cadfcf5464d",
+    "apps/web/src/SharedScreen.tsx": "adc7bff4bb801de4cb33207cc378c5d019ba08319655be407aa9c0e8a223c396",
+    "apps/web/src/StaffDeviceScreen.tsx": "4827e2ecba347a69a4a1bfef39de689c74df6b69bf520b8a6b0dc2928a0f0bea",
+    "apps/web/src/StaffMemberEditor.tsx": "9e076d79ed37b4e1e4054c21db0a5c971ab025bba189ed06d140fc6aa1fe2ae5",
+    "apps/web/src/data/device-screen-journal.ts": "8c614f6f1fcf065c569b184e8f8bd7c0fcc164c8b3e075f849b7de5347766043",
+    "apps/web/src/data/device-screen-remote.ts": "2e8d574a9dd512daf6e68f0d9faaf4947851414b345c10dd65e208ef98c98867",
+    "apps/web/src/data/kitchen-saved-session.ts": "1ee8c49e6fcb688980de031233d2508fb4e57f1d94569b525ead5db33d362732",
+    "apps/web/src/data/kitchen-screen-session.ts": "dbcc29fae478867c179290bced1c4b7373fa64bf6518729454f2218e07f831f9",
+    "packages/core/device-access.ts": "883d4d5ef4c050fd1471988f15870c556460a45e7665afef1d6907759c26983e",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "packages/core/kitchen-read-status.ts": "61e1edcfcdcfe8beebe77fb66acfc949170cc8404b62ea3fb99a055171bf83f5",
+    "packages/core/kitchen-recovery.ts": "99766638344863dbb46709ba1ffb6690b3770e245d4abc942bbb0283063e8292",
+    "packages/core/kitchen-screen.ts": "acc5322475bc5a0299f464f01886818d22e23f7aa0af6a0de8ff7a8154621b18",
+    "packages/core/kitchen.ts": "5260cf4ef1051e12502de2db8c7880f6616ed8e6f691db37f50d347dcf582c21",
+    "packages/core/packs.ts": "e0fc5c8f75c512c7bc749d5d489ed931949f0e65f6f02a17a028b3deae2573e7",
+    "qa/configs/m34-cached-read-denial.json": "d178d7fe265e8efab8c7aa8009022242d0d4e28f95c6ba37bbab7b82e2705352",
+    "qa/configs/m34-preparation-permissions.json": "06193c3cf6260a73de61d463a34aceb0003469b2ab3a26082b8feae381e28dc6",
+    "qa/configs/m34-saved-preparation.json": "1bc5b2c06fa955b85e55e119ee5ca5f4a7e0b1580554a0971aabe9d6123f136b",
+    "scripts/qa-visual.mjs": "86c27f35f624078d80f9e2bb8493925b3d7f5d2e4de28874de2f122d9ac4f6e2",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/kitchen-recovery-handler.ts": "e3d4093abbc73ff3edd64e1bc5ab73a4b51c2ce9c9b425a7dc310ad4f3b0d2e9",
+    "supabase/functions/kitchen-recovery/index.ts": "6f9ef3ab904ee39821d6201d4c142212ba6f5b6b369845ea149073fa269118b7",
+    "supabase/migrations/20261124045724_staff_preparation_permissions.sql": "967e62a3fd9364ea0c27d82a224fb0902cfd2c9148b7824d372054851e9f577b",
+    "supabase/migrations/20261124063518_staff_saved_preparation_directory.sql": "fc0659a1d9006f7f29c69a45875d928d2f698513c73a33949818149f2668b5a8",
+    "tests/e2e/kitchen-screen-ui.spec.ts": "a1cddaeeaf61f6bf9075d9307bb7162139b86c68935ddfc3e4db9452dd8f524a",
+    "tests/e2e/staff-device.spec.ts": "a4aeb81b07a1d5d84f6e39324da899bff06de08d699ca2da658d6b66fff2998e",
+    "tests/fixtures/install-kitchen-ui.d.mts": "b6e815521b890e8c888b0217990ae16b01a49874dfa66a07035b52e27043c8fb",
+    "tests/fixtures/install-kitchen-ui.mjs": "cee905e0f4660640bbf2fcd66db7d102f98f5956c8480f249fe467b44f3c85fc",
+    "tests/fixtures/kitchen-ui-service.ts": "8ecd5c7f337a6579b03f5d3d75302735877efa22b0c8be566df99d51f848df7f",
+    "tests/kitchen-actions.test.ts": "8bd1b3326779ee16626cea530a04a986ff268eeaab7eeb84acb6de62111a17fe",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/kitchen-read-status.test.ts": "76e13cae4cf4b8b3c5dbef1cd8868c5603015932f55ef6cb835281dd7ac70fcc",
+    "tests/kitchen-recovery-handler.test.ts": "5edf40abb3741236d37c4d6e7db3fbf0cdbb8b70b8c4b78bd3122aaa7c41ee01",
+    "tests/kitchen-saved-session.test.ts": "ea8af5874bee07e1c9b82fdd8f20beecb7f4a5579f1cdf6ddf05b9fa156d43cd",
+    "tests/staff-device-sql.test.ts": "88371cb3a8ed3b886fbf849648fce8fd1c7024f642b478ae858756ff49880340",
+    "tests/staff-preparation-recovery.test.ts": "3001fe486d54ba3238675c7dfe0edf91cd76e4ea156af820395638b8fdf8698b",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463",
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6"
+  }
+}
