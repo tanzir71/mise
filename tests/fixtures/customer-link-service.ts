@@ -49,7 +49,7 @@ import {capturePaymentSource,changePaymentSource,parsePaymentSourcePage} from '.
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
 export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean;liveStore?:boolean;ownerTasks?:boolean}={}) {
   const f = await createPairingDatabase(process.cwd()),
-    origin = 'http://127.0.0.1:4321';
+    origin = process.env.MISE_E2E_ORIGIN || 'http://127.0.0.1:4321';
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {

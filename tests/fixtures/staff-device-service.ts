@@ -8,7 +8,7 @@ import {deriveStaffPin} from '../../supabase/functions/_shared/staff-pin';
 import type {AttendanceIntent} from '../../packages/core/staff-attendance';
 import type {ScreenState} from '../../packages/core/device-screen-state';
 export async function startStaffDeviceService(){
- const f=await createStaffDeviceFixture(process.cwd()),origins='http://127.0.0.1:4321',h=f.handlers(origins);let lose=false,prepared:ScreenState|null=null;
+ const f=await createStaffDeviceFixture(process.cwd()),origins=process.env.MISE_E2E_ORIGIN||'http://127.0.0.1:4321',h=f.handlers(origins);let lose=false,prepared:ScreenState|null=null;
  const server=createServer(async(req:IncomingMessage,res)=>{try{
   const pieces:Buffer[]=[];let size=0;for await(const piece of req){const b=Buffer.from(piece);size+=b.length;if(size>8192)throw Error('Fixture body too large');pieces.push(b);}
   const path=new URL(req.url??'/',apiUrl).pathname,headers=new Headers();for(const[k,v]of Object.entries(req.headers))if(v!==undefined)headers.set(k,Array.isArray(v)?v.join(','):v);

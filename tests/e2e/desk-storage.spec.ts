@@ -11,7 +11,7 @@ test.beforeAll(async()=>{
 async function install(page:Page){
  // Intercepted native-storage harness only; no fixture route/asset is published.
  await page.route('**/__mise_desk_storage_test/**',route=>route.fulfill({contentType:route.request().url().endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8',body:route.request().url().endsWith('.js')?script:'<!doctype html><meta charset="utf-8"><title>Desk journal verification</title><script src="/__mise_desk_storage_test/harness.js"></script>'}));
- await page.goto('http://127.0.0.1:4321/__mise_desk_storage_test/');await page.waitForFunction(()=>!!window.miseDeskBrowserTest);
+ await page.goto((process.env.MISE_E2E_ORIGIN||'http://127.0.0.1:4321')+'/__mise_desk_storage_test/');await page.waitForFunction(()=>!!window.miseDeskBrowserTest);
 }
 test.beforeEach(async({page})=>{await install(page);});
 test.afterEach(async({page})=>{await page.evaluate(()=>window.miseDeskBrowserTest.cleanup()).catch(()=>{});});

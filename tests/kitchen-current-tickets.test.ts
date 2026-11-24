@@ -16,9 +16,11 @@ type Row=Record<string,unknown>;
 type CurrentPage={orders:{id:string}[];next:{createdAt:number;id:string}|null};
 let opening:PairingDatabase|undefined;
 async function insert(sql:Pick<PGlite,'query'>,table:string,rows:Row[]){
- if(!rows.length)return;const keys=Object.keys(rows[0]),args:unknown[]=[];
- const values=rows.map(row=>'('+keys.map(key=>{args.push(row[key]);return '$'+args.length;}).join(',')+')');
- await sql.query(`insert into ${table}(${keys.join(',')}) values${values.join(',')}`,args);
+ if(!rows.length)return;const keys=Object.keys(rows[0]);
+ // COPY still executes PostgreSQL's row triggers and constraints. Only this
+ // fixture's transport changes; every Core-generated source row is retained.
+ const csv=rows.map(row=>keys.map(key=>row[key]===null||row[key]===undefined?'':'"'+String(row[key]).replaceAll('"','""')+'"').join(',')).join('\n')+'\n';
+ await sql.query(`copy ${table}(${keys.join(',')}) from '/dev/blob' with(format csv)`,[],{blob:new Blob([csv])});
 }
 
 // Building the original 5,004 orders and their complete audit/receipt history
@@ -26,7 +28,8 @@ async function insert(sql:Pick<PGlite,'query'>,table:string,rows:Row[]){
 async function historicalFixture(){
  const f=await createPairingDatabase(undefined,false,migration);
  opening=f;
- const started=performance.now(),progress=(stage:string,count?:number)=>console.info(JSON.stringify({stage,count,elapsedMs:Math.round(performance.now()-started)}));
+ let insertMs=0,analyzeMs=0;
+ const started=performance.now(),progress=(stage:string,count?:number)=>console.info(JSON.stringify({stage,count,elapsedMs:Math.round(performance.now()-started),insertMs:Math.round(insertMs),analyzeMs:Math.round(analyzeMs)}));
  try{
   await f.seed();
   progress('seeded');
@@ -36,12 +39,16 @@ async function historicalFixture(){
   const session=await f.asRole<StaffDeviceSession>(null,'service_role','select public.finish_staff_pin($1,$2,$3,$4,$5) data',[device.token,attempt.attemptId,proof,newKitchenId(),newKitchenId()]);
   const access=parseStaffDeviceAccess(await f.asRole(null,'service_role','select public.read_device_session($1,$2) data',[device.token,session.token]));
   progress('authorized');
+  const counts=async()=>(await f.db.query<{orders:number;events:number;receipts:number}>('select (select count(*)::integer from public.orders) orders,(select count(*)::integer from public.events) events,(select count(*)::integer from private.kitchen_action_receipts) receipts')).rows[0];
+  const initialCounts=await counts();let generatedEvents=0,generatedReceipts=0;
   const seed=orderFixture('corner_shop').context.setup,setup={business:{...seed.business,id:deviceId(1)},outlet:{...seed.outlet,id:deviceId(11),businessId:deviceId(1)},owner:{...seed.owner,id:deviceId(101),businessId:deviceId(1),outletIds:[deviceId(11)]}};
   const context={setup,items:[],sequence:0},createdAt=Date.now()-600000,current:string[]=[],history:string[]=[];
   let recancelled:{orderId:string;contentHash:string;revision:number}|undefined;
   let orders:Row[]=[],events:Row[]=[],receipts:Row[]=[];
   const flush=async()=>{
+   const beforeInsert=performance.now();
    await f.db.transaction(async sql=>{await insert(sql,'public.events',events);await insert(sql,'public.orders',orders);await insert(sql,'private.kitchen_action_receipts',receipts);});
+   insertMs+=performance.now()-beforeInsert;
    orders=[];events=[];receipts=[];
   };
   // Validate the four operational cases first; all 5,000 earlier original
@@ -57,6 +64,7 @@ async function historicalFixture(){
     const action=await prepareKitchenAction(order,'kitchen.acknowledge'),result=await applyKitchenAction({order,shop:setup,access,action,admittedAt:Date.now(),acknowledgement:null});
     expect(result.order).toEqual(order);audit.push(...result.events);
     receipts.push({id:action.id,business_id:setup.business.id,outlet_id:setup.outlet.id,order_id:order.id,device_id:access.deviceId,session_id:access.sessionId,member_id:access.memberId,action:JSON.stringify(action),receipt:JSON.stringify(result.receipt),accepted_at:result.receipt.acceptedAt});
+    generatedReceipts++;
     if(i===5003){
      const cancel=audit.find(event=>event.id===order.statusEventId)!;
      const undone=undoOrderStatusCommand(order,cancel,setup,order.revision);audit.push(undone.event);
@@ -65,10 +73,12 @@ async function historicalFixture(){
     }
    }
    (i<5000?history:current).push(order.id);orders.push(encodeCommandRecord('orders',order,setup.business.id).values);
+   generatedEvents+=audit.length;
    events.push(...audit.map(event=>encodeCommandRecord('events',event,setup.business.id).values));if(orders.length===250)await flush();
-   if((i+1)%1000===0){await f.db.exec('analyze');progress('original-records',i+1);}
+   if((i+1)%1000===0){const beforeAnalyze=performance.now();await f.db.exec('analyze');analyzeMs+=performance.now()-beforeAnalyze;progress('original-records',i+1);}
   }
   await flush();
+  expect(await counts()).toEqual({orders:initialCounts.orders+5004,events:initialCounts.events+generatedEvents,receipts:initialCounts.receipts+generatedReceipts});
   progress('source-complete',5004);
   const digest=async()=>{
    const result:Record<string,string>={};for(const table of ['public.orders','public.events','private.kitchen_action_receipts'])result[table]=(await f.db.query<{hash:string}>(`select encode(sha256(convert_to(coalesce(string_agg(encode(sha256(convert_to(row_to_json(x)::text,'UTF8')),'hex'),'' order by x.id),''),'UTF8')),'hex') hash from ${table} x`)).rows[0].hash;return result;

@@ -24,7 +24,7 @@ import {createDevicePinHandler,createDevicePinStore} from '../../supabase/functi
  * accounts and credentials are synthetic; no provider or hosted service. */
 export async function startKitchenUiService(){
  const f=await createPairingDatabase(process.cwd());await f.seed();
- const origin='http://127.0.0.1:4321',origins=new Set([origin]);
+ const origin=process.env.MISE_E2E_ORIGIN||'http://127.0.0.1:4321',origins=new Set([origin]);
  const broker=new WebSocketServer({port:0,host:'127.0.0.1',maxPayload:16384,verifyClient:(info:{req:IncomingMessage})=>info.req.headers.apikey==='sb_secret_test_only'&&!info.req.url?.includes('apikey=')});
  await once(broker,'listening');
  const subscriptions=new Map<Socket,string>();let broadcasts=0;

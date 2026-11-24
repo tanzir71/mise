@@ -56,7 +56,7 @@ import {
  * handlers. Never connects to Supabase, an SMS provider or a push provider. */
 export async function startDeskUiService() {
   const f = await createPairingDatabase(process.cwd()),
-    origin = 'http://127.0.0.1:4321',
+    origin = process.env.MISE_E2E_ORIGIN || 'http://127.0.0.1:4321',
     origins = new Set([origin]),
     applicationKey = generateVAPIDKeys().publicKey;
   let tail = Promise.resolve();

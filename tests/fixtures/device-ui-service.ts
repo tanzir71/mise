@@ -22,7 +22,7 @@ import {
 export async function startDeviceUiService() {
   const f = await createStaffDeviceFixture(process.cwd());
   await f.seed();
-  const origin = 'http://127.0.0.1:4321',
+  const origin = process.env.MISE_E2E_ORIGIN || 'http://127.0.0.1:4321',
     origins = new Set([origin]);
   const tokens = [1, 2].map((n) =>
     [

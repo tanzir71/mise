@@ -8,7 +8,7 @@ import {
 } from '../fixtures/install-device-ui.mjs';
 import type { startDeviceUiService as ServiceFactory } from '../fixtures/device-ui-service';
 let service: Awaited<ReturnType<typeof ServiceFactory>>;
-const fixtureOrigin = 'http://127.0.0.1:4321';
+const fixtureOrigin = process.env.MISE_E2E_ORIGIN || 'http://127.0.0.1:4321';
 test.beforeAll(async () => {
   service = await startDeviceUiService();
 });

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: staff stock reads now use the actual outlet Team choice and enrolled-device PIN. Complete quantity-only pages preserve maximum imported literal labels, page by count and bytes, respect current denials and expiry, and exclude supplier contacts, customer data and money. The separate service remains undeployed and disabled by default, with installation-owned configuration. Reviewed quantity changes, original-request recovery, the stock interface and full M34 acceptance remain open; workflows/publication stay held.
+
 - In progress: preparation screens retain known read denial across offline reloads while preserving own originals. Late authorized replies cannot erase a newer denial; only a fresh authorized read and atomic native page commit restore the ordinary board. Installation configuration stays end-user owned, with no new service or credential. Staff stock/performance paths and full M34 acceptance remain open; workflows/publication stay held.
 
 - In progress: personal preparation recovery now remains reachable after all order access is removed. Own original tickets survive offline closure, later PIN sessions and lost replies without live-order or preparation authority. Eligible previous members can still use their own PIN on the same device, with empty current permissions. Configuration stays installation-owned; full M34 and stock/performance work remain open, with workflows/publication held.

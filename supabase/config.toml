@@ -101,6 +101,10 @@ verify_jwt = false
 [functions.staff-device]
   verify_jwt = false
 
+# Enrolled device plus its live staff PIN; installation opt-in defaults off.
+[functions.staff-stock]
+verify_jwt = false
+
 [functions.inbox-image]
 verify_jwt = true
 

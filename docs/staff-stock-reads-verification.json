@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "9bfb9bb1ec179f900967166861a6fe4efdbbde3c",
+  "verifiedAt": "2026-11-24T11:26:37.384Z",
+  "scope": "Actual Team-gated device/PIN stock read prerequisite with complete imported labels; quantity writes, durable originals and shared-screen interface remain open",
+  "tests": {
+    "files": 268,
+    "uniqueUnitPassed": 5154,
+    "new": 35,
+    "focused": 85,
+    "fullRun": {
+      "exitCode": 1,
+      "passed": 5153,
+      "skipped": 1,
+      "reason": "Original kitchen-history setup exceeded its unchanged 120-second deadline"
+    },
+    "historyRetest": {
+      "exitCode": 0,
+      "passed": 1,
+      "freshWorker": true,
+      "nativeCopyFixtureLoad": true,
+      "allOriginalGeneratedRowsAndAssertionsPreserved": true,
+      "rowCardinalityVerified": true,
+      "originalCorpusAndDeadlinesUnchanged": true
+    },
+    "originalCorporaAndDeadlinesUnchanged": true
+  },
+  "checks": {
+    "lint": true,
+    "strictTypes": true,
+    "astroFiles": 202,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "generatedArtifactsReadable": true,
+    "browserRoot": 116,
+    "rootBrowserEvidence": {
+      "verifiedAt": "2026-11-24T11:18:18.495Z",
+      "mode": "fresh full run",
+      "fullRun": {
+        "passed": 116,
+        "failed": 0
+      },
+      "focusedRetest": null,
+      "uniquePassed": 116
+    },
+    "browserPages": 116,
+    "exportsPresent": 270,
+    "newUiOrVisualCapture": false
+  },
+  "backend": {
+    "initialMigration": "supabase/migrations/20261124093831_staff_stock_reads.sql",
+    "initialMigrationSha256": "e314024fbbd927ddc7eb036b82777624b5c2d9f4dce95667b82e51b516d34511",
+    "nativeMigration": "supabase/migrations/20261124102804_staff_stock_literal_pages.sql",
+    "nativeMigrationSha256": "b21ed5985d6fc1677c1274fded0916e9f4c7459fc3ddf32975b14789a3ec0db8",
+    "functionBodies": [
+      {
+        "schema": "private",
+        "name": "device_staff_permissions",
+        "source": "519fa56527f5d79cc58ec455a744727e"
+      },
+      {
+        "schema": "private",
+        "name": "read_staff_stock_page",
+        "returnType": "json",
+        "source": "deec682bd0a9c4a374edc66fb9fa1a51"
+      },
+      {
+        "schema": "public",
+        "name": "read_staff_stock_page",
+        "returnType": "json",
+        "source": "70a148bdf55816c487b9d71a9c46eb9f"
+      }
+    ],
+    "proposedRollbackChecks": 31,
+    "appliedRollbackChecks": 31,
+    "activeSmallFixtureItemsRead": 124,
+    "largeItemsRead": 5,
+    "largePages": [
+      4,
+      1
+    ],
+    "maximumFieldCharacters": 1000000,
+    "pageItemBytes": 52428800,
+    "transportBytes": 67108864,
+    "fixtureCleanupVerified": true,
+    "authAccountsCreated": 0,
+    "quantityWrites": 0,
+    "providerRequests": 0,
+    "migrations": 90,
+    "functions": 519,
+    "unrelatedDefinitionsPreserved": 516,
+    "forcedRls": 123,
+    "cron": 0,
+    "edgeCount": 19,
+    "edgeVersionsUnchanged": 19,
+    "stockServiceDeployed": false,
+    "advisorLevels": [
+      "INFO",
+      "INFO",
+      "INFO"
+    ],
+    "advisorCategories": [
+      "rls_enabled_no_policy",
+      "unindexed_foreign_keys",
+      "unused_index"
+    ]
+  },
+  "delivery": {
+    "configurationEndUserOwned": true,
+    "privateTemplatesEmpty": true,
+    "directMainCommit": true,
+    "workflowsHeld": true,
+    "pagesHeld": true,
+    "ciUploadHeld": true,
+    "releaseTagCreated": false,
+    "open": [
+      "Reviewed staff quantity commands with actual actor/source/count barriers",
+      "Native originals, offline closure, lost-reply recovery and own undo",
+      "Shared-screen stock interface using supplied reference",
+      "Later own-performance milestone and full M34/public delivery"
+    ]
+  },
+  "sourceHashes": {
+    "packages/core/device-access.ts": "94b047456792ad1d081f3aadedb76980f096d8b688966242d7c37198fd3181be",
+    "packages/core/staff-stock.ts": "e03a07634a69ef8bc581052de20a37df26e438828361b60ab3b324c74af1ec1a",
+    "packages/core/stock-quantity.ts": "ec3c593b77b5b0fa4cc0fe3264db2238c42c0249c3514f19a6285b718e09c896",
+    "supabase/functions/_shared/auth-http.ts": "ba878a965cc5b5f2cac77805f712a8ebb4bbdf62485759fd7bd1e9d46c735af2",
+    "supabase/functions/_shared/staff-stock-handler.ts": "047b962f5a8bd7f5ad5462de6a59d4f9ef0135b80a2fab8272e01f3ba977a8dc",
+    "supabase/functions/staff-stock/index.ts": "2b24bdf8cff67682fef613f30318623ec2e422fd3dd4f151da00ce83e1bb0278",
+    "supabase/config.toml": "7fca6a977c84e0b3d6e9f25a70c2e1ae773297d601c23f5f39bf387ce34d0bc1",
+    "supabase/functions/.env.example": "2dfb3025ad4822356a2c9efccb620a5732e1de210829d2930a1e5c3b700d5d09",
+    "supabase/migrations/20261124093831_staff_stock_reads.sql": "e314024fbbd927ddc7eb036b82777624b5c2d9f4dce95667b82e51b516d34511",
+    "supabase/migrations/20261124102804_staff_stock_literal_pages.sql": "b21ed5985d6fc1677c1274fded0916e9f4c7459fc3ddf32975b14789a3ec0db8",
+    "tests/staff-stock.test.ts": "a936b616b25cc35ea26428ba3d53a020309fe0dee4570a018560aa3b9bbb2303",
+    "tests/staff-stock-sql.test.ts": "1c1b5cfbe5757509a425990d3352cf3f35e30a08cd70d2c77869462ace4f1cfc",
+    "tests/staff-device-sql.test.ts": "88371cb3a8ed3b886fbf849648fce8fd1c7024f642b478ae858756ff49880340",
+    "tests/device-access.test.ts": "cb6143eb367f182804e8bb20197b9511102ac31b43b7ff3d5b667edf37d58af3",
+    "tests/staff-device-fixture.ts": "be0c523665e884a9d6a48e5d3394af1417926f4ce4c19cc069b5c6eb96974fa4",
+    "tests/device-pairing-fixture.ts": "ab8b3a2e245fa282f1145cd42d0d8e661c8ae94264d644875edceefd3aace796",
+    "tests/kitchen-current-tickets.test.ts": "2aad3d66017ab5aca870360614018e41148eb301f730c89fcab69e711b9dae12",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463",
+    "playwright.config.ts": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55",
+    "tests/fixtures/desk-ui-service.ts": "52f7e49d258636174410fd2b05069b0464790a0922275b7585a2a8329ac419b2",
+    "tests/fixtures/device-ui-service.ts": "e5e802e3f702a860a88bd6c088552aafaa6acc5b2d63f5c9a5e6a0be817af471",
+    "tests/fixtures/kitchen-ui-service.ts": "2e1d3a8fab1b526dbad94ae0961f73086c9869479d23fc2b657b82c0e914606a",
+    "tests/fixtures/staff-device-service.ts": "cd9e4c0b3ccade99591ca486ceadc546a113d00896c69e5a5fcf97a874ae7f97",
+    "tests/fixtures/customer-link-service.ts": "70fa4cc7f021e7fd69bbcee698c608ebbe7b99ceed7e5e0fba2a86f950effd4b",
+    "tests/e2e/device-access-ui.spec.ts": "6142930e04deac7897b8716f47d411b476d02ad07dbeb127573b85b8b6dd8276",
+    "tests/e2e/desk-storage.spec.ts": "bf64734da24dca7f5da7700f7da40c9bea0933a588f0aac4f122ead4641feaca"
+  }
+}
