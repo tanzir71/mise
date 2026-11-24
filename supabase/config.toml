@@ -117,6 +117,14 @@ verify_jwt = false
 [functions.desk-notifications]
 verify_jwt = true
 
+# Separate explicit urgent Inbox consent; original phone JWT guards owner reads.
+[functions.urgent-inbox-notifications]
+verify_jwt = true
+
+# Internal queue worker with its own installation-owned credential, default off.
+[functions.urgent-inbox-push]
+verify_jwt = false
+
 # Database-selected due work only. The handler checks its dedicated internal key.
 [functions.kitchen-dispatch]
 verify_jwt = false

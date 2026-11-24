@@ -6,6 +6,7 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: urgent Inbox delivery has separate opt-in support from kitchen alerts and preserves original choices after lost replies or removed access. Alerts refer to actual current tasks. Each installation owns all setup; native notification controls remain unfinished, delivery stays off, and workflows/publication remain held.
 - M37 native payment review preview: manual observations, actual backend receipt pages, explicit current matching, reasoned dismissal and metadata undo. Full source snapshots and exact original requests survive lost replies, offline closure and account/outlet changes. Personal recovery and verified archives retain pending originals. All configuration belongs to each installation; general urgent push and full M37 delivery remain open, with workflows/publication held.
 
 - M37 payment-source groundwork preserves manually observed text as an urgent Inbox source, with explicit matching to an existing counter, order or khata receipt. Matching and undo change only the source association; a reversed receipt reopens review. Original-account receipts and delayed-request closure remain recoverable. The native preview above now supplies its interface and durable originals; general urgent push remains open, with installation-owned configuration and workflows/publication held.

@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-24T01:50:46.412Z",
+  "sourceParentCommit": "d27e07ebf1f931750a616e226bb9078d0947ac64",
+  "status": "verified-general-urgent-inbox-backend-native-consent-and-notification-integration-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsCredentialsPhonesOrOtpRequired": false,
+    "newProviderRequired": false,
+    "privilegedSettings": "Private installation backend and Vault only",
+    "template": {
+      "MISE_URGENT_INBOX_ENABLED": false,
+      "MISE_URGENT_INBOX_KEY": ""
+    },
+    "ownerTasks": false,
+    "readiness": "Private worker key, VAPID settings and service key must be present and structurally valid before public configuration advertises readiness; original cleanup remains available",
+    "installationCredentialsGeneratedOrConfigured": 0
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 200,
+      "diagnostics": 0
+    },
+    "unit": {
+      "fullInvocation": {
+        "files": 259,
+        "cases": 4996,
+        "passed": true,
+        "skipped": 0,
+        "durationSeconds": 901.22,
+        "sourceState": "Before the final account-cleanup refinement and runtime-readiness refinement"
+      },
+      "finalFollowup": {
+        "files": 8,
+        "cases": 166,
+        "passed": true,
+        "skipped": 0,
+        "newUrgentCases": 79,
+        "existingDeskAndKitchenRegressions": 87,
+        "addedCasesAfterFullInvocation": 4
+      },
+      "uniqueCasesCovered": 5000,
+      "singleFullFinalSourceInvocationPassed": false,
+      "workersMaximum": 2,
+      "originalCorporaAndDeadlinesUnchanged": true,
+      "originalKitchenRecords": 5004,
+      "originalKitchenDurationMs": 62688,
+      "originalKitchenSetupDeadlineSeconds": 120,
+      "originalKitchenCaseDeadlineSeconds": 60
+    },
+    "browser": {
+      "root": {
+        "files": 6,
+        "cases": 85,
+        "workers": 2,
+        "passed": true
+      },
+      "pages": {
+        "files": 6,
+        "cases": 85,
+        "workers": 2,
+        "passed": true
+      }
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/"
+    },
+    "visual": {
+      "appLayoutsChanged": false,
+      "newVisualComparisons": 0,
+      "previousUiCheckpoint": "d27e07ebf1f931750a616e226bb9078d0947ac64",
+      "previousComparisons": 50,
+      "scope": "Backend-only increment; existing app layouts and marketing exports are unchanged. Selected browser regressions include responsive and axe checks."
+    }
+  },
+  "backend": {
+    "migrations": 86,
+    "tables": 122,
+    "forcedRlsTables": 122,
+    "functions": 517,
+    "priorDefinitionsPreserved": 491,
+    "newFunctionBodiesMatch": 26,
+    "newFunctionBodyHashes": {
+      "private.claim_urgent_inbox_dispatch": "3b49864edd3632b75d02126fd992b737502d72edc3e6b3c58367b273c4c30548",
+      "public.claim_urgent_inbox_dispatch": "2d4a05caaa4b9cb370bb7c65b309c347dd559b0db8519bb46bd565b7022a4146",
+      "private.urgent_inbox_metadata": "47d6dc5718e2a1e6a3c02f9109de0d5a20c56a65d4a944ffe51d7cc145f756df",
+      "private.register_urgent_inbox": "b53842bf7294907b7bb4d42dc2a659a074d8083b7b7dc50ec8f8cea080cf0311",
+      "private.read_urgent_inbox": "035b6c29ce87d01b7781eefc62b44680619fafb759e409cf24f86d64ca935e69",
+      "private.withdraw_urgent_inbox": "958c8261b51a1fc2a8470006d465ca2df4007e25f58ee8325a4ab4dfac8bac26",
+      "public.register_urgent_inbox": "c9235292e618e4d16c9d29d03c79f9f257cab66b1d3f84291ee8d0a607368b9c",
+      "public.read_urgent_inbox": "bc9423ded78b4783fa0f050501a95df2c140144f125d55d58eacb8d29d4999eb",
+      "public.withdraw_urgent_inbox": "c77560c4f52f6aac5de7aaa4b95d6ad1ceb9a3bf1525dc41ed9990d8609d25af",
+      "private.urgent_inbox_eligible": "4bfd41f00ecca1fd8ef396b8242fe9f757ab75604a76e81284e273ff753888e1",
+      "private.note_urgent_inbox": "f254766eeecab17854df9168e86875b92e0861bb4584c9b0e6797beba45d7152",
+      "private.urgent_inbox_task_changed": "31c1b605aedb3d0a0d78ab18cbd6975babfc5f0ecf2c062dc4d8c455bd749b2c",
+      "private.prepare_urgent_inbox_push": "7aa0c1c855b0877885e32c1f333e37f4ae0729ecef099d5464decd3410d7879d",
+      "private.claim_urgent_inbox_push": "5a63569e1b801b3ea3083aa0610e984b85571b56fe0cb91a6c4b35e353f3f29f",
+      "private.finish_urgent_inbox_push": "c40fd66c8f5cbbe2cd926b3f86701ccfd373b04427c9a8f28050970e7da75eb7",
+      "public.prepare_urgent_inbox_push": "47345b7d1a079fd0b09863fec694674b00316d625970c7eaa17d5904c5b5c2a4",
+      "public.claim_urgent_inbox_push": "ab50b790ce7e0277e3bd09997b9c0fba3a8edf1e1e5ab6051bcf3cc6235a8ceb",
+      "public.finish_urgent_inbox_push": "8376f3c16ceba46b30cd68fc52a6594e2343efb25dd06bda43e66d31e1e48df9",
+      "private.read_urgent_inbox_target": "0d8c40cffdcbe31e7b8ea069542e5c98f7000ed8ab279ed49eafaeace72d3942",
+      "public.read_urgent_inbox_target": "9ac8d2a0cbc48454ea7bdfe0f122547777c5577ab6f2f3add434c2e8c6f8ecff",
+      "private.inspect_urgent_inbox": "ea4d4ec17f562f6f2de292d58e2c8a4af2949a57e5cd8dc81fdba10106c84568",
+      "public.inspect_urgent_inbox": "95e1cea125b377d12adc9581661abad4f533035a81a9405ac6bbf24b00febcaa",
+      "private.urgent_inbox_due_signature": "3bef6ae1e25084cced5e84a3e1dbca812c366de2c477daf79ce749659b7409d3",
+      "private.configure_urgent_inbox_dispatch": "afb9f57a06287977a19b5c4949d15b0770aa92ee74def3c6883a70673730d9cd",
+      "private.dispatch_urgent_inbox_work": "f45e626f3827e87ee32385c588be17d01957658e46ce8c8ecb4cdfc14e873520",
+      "private.read_urgent_inbox_dispatch_status": "aa4a2d8ce828bb1b264fba6a5cf4dadde98061895080f6ecb813a8a23e4ca3aa"
+    },
+    "frozenMigrations": {
+      "20261124013707_urgent_inbox_notifications.sql": "5f6bc5bf71b474c7fcf4769cd8c74b9b2bc676c94b1de55d22bc4c8fe75becad",
+      "20261124013801_urgent_inbox_dispatch.sql": "afacad33eb354cbcb3680857f75308e3e01c2716014cb63c7228ef602f6d4256"
+    },
+    "managedProof": {
+      "checks": 91,
+      "actualUrgentSources": 2,
+      "actualConsents": 1,
+      "providerRequests": 0,
+      "financialWrites": 0,
+      "schedulerJobsCreated": 0,
+      "rolledBack": true,
+      "exactSqlSha256": "12798a591bb22cf455a99c7799796a68f41cf0fd8d8c727bd48f8cd8c9e43b00",
+      "remainingSyntheticRows": 0
+    },
+    "scheduler": {
+      "cronJobs": 0,
+      "enabled": false
+    },
+    "edge": {
+      "total": 19,
+      "priorVersionsPreserved": 17,
+      "newFunctions": [
+        {
+          "name": "urgent-inbox-notifications",
+          "version": 1,
+          "verifyJwt": true,
+          "status": "ACTIVE",
+          "sha256": "34ce5fa5ae6a4a14c9830bc21c7be9dc8f7e8ad4c65a090909c2d68532de6740"
+        },
+        {
+          "name": "urgent-inbox-push",
+          "version": 1,
+          "verifyJwt": false,
+          "status": "ACTIVE",
+          "sha256": "332d56a193962f8f3afb1a4c53b13b2c400e8b84d9747cc5b28b883eb4fd5746"
+        }
+      ]
+    },
+    "advisors": {
+      "security": [
+        {
+          "name": "rls_enabled_no_policy",
+          "level": "INFO"
+        }
+      ],
+      "performance": [
+        {
+          "name": "unindexed_foreign_keys",
+          "level": "INFO"
+        },
+        {
+          "name": "unused_index",
+          "level": "INFO"
+        }
+      ],
+      "newWarnings": 0,
+      "newErrors": 0
+    }
+  },
+  "http": {
+    "checkedAt": "2026-11-24T01:45:12.179Z",
+    "cases": [
+      {
+        "name": "worker-default-off-get",
+        "status": 503,
+        "expected": 503,
+        "passed": true
+      },
+      {
+        "name": "worker-default-off-post",
+        "status": 503,
+        "expected": 503,
+        "passed": true
+      },
+      {
+        "name": "owner-unsigned",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      }
+    ],
+    "providerRequests": 0,
+    "privateOwnerDataRequests": 0,
+    "configuredCredentialsChanged": false
+  },
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "ciArtifactUpload": "held",
+    "scheduling": "disabled, zero jobs",
+    "providerRequests": 0,
+    "physicalAndHostedDeliveryAcceptance": false
+  },
+  "semantics": {
+    "kitchenConsentInheritsGeneralUrgent": false,
+    "exactOriginalInspectionCannotEnable": true,
+    "permanentUnknownWithdrawalFence": true,
+    "unknownClosureBudgetPerAccountServerDay": 1000,
+    "originalHistorySurvivesRemovedRoleOrBaseCapability": true,
+    "removedBaseCannotSilentlyReattach": true,
+    "permanentAccountDeletionRemovesPrivateCapabilities": true,
+    "publicTaskAndAuditRetained": true,
+    "recipientExpansionPage": 50,
+    "recipientBoundary": "Private consent sequence fixed before the first page",
+    "laterConsentCannotEnterOriginalExpansion": true,
+    "discardedRemainingRecipients": 0,
+    "claimRechecksActualCurrentRightsAndSource": true,
+    "financialWritesByNotificationActions": 0,
+    "concurrency": 4,
+    "maximumAttempts": 8,
+    "leaseMs": 10000,
+    "sqlDeadlineMs": 1500,
+    "providerDeadlineMs": 2500,
+    "claimAdmissionWindowMs": 4000,
+    "providerTopic": "Separate stable SHA-256-derived topic per original consent/task/generation",
+    "payload": "Routing identifiers only, no customer text/money/endpoint/credential/URL",
+    "reusableKeyInCronOrNetQueue": false,
+    "authorization": "Short-lived body-bound HMAC plus exact one-use SQL grant",
+    "inFlightTransportHistoryCannotReopenTask": true,
+    "localTimingScope": "Synthetic Net/provider admission includes a one-second polling budget; not hosted browser delivery acceptance"
+  },
+  "findings": {
+    "initialSql": {
+      "passed": 28,
+      "failed": 1,
+      "cause": "New test expected revoked base metadata; existing reader intentionally returns null. Corrected assertion checks actual revoked database state."
+    },
+    "literalSource": {
+      "passed": 31,
+      "failed": 1,
+      "cause": "Test read a decoded body property instead of the preserved bodyJson field; corrected without changing production literal handling."
+    },
+    "initialDispatch": {
+      "passed": 9,
+      "failed": 15,
+      "causes": [
+        "Nested Cron-presence guard required before parsing a missing platform relation",
+        "Invalid qualification of a PL/pgSQL local variable; renamed failure_count",
+        "Fixture parameter needed explicit bigint casts and isolated mock reset"
+      ]
+    },
+    "initialPackaging": {
+      "failed": true,
+      "skipped": 5,
+      "cause": "Added the new worker to the exact pinned Web Push runtime allowlist"
+    },
+    "accountCleanup": {
+      "baselineFailed": 2,
+      "finalPassed": 2,
+      "cause": "Original foreign keys blocked capability/account deletion. Retain immutable original ID separately from nullable active capability; consent/account cleanup cascades private delivery while preserving public history."
+    },
+    "allFinalRelevantChecksPassed": true
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "576b8372ff82359f00cf713a14e642e445c8a7789eb94e5e5d12d86d4a817eca",
+    "docs/configure-services.md": "327a1c51abb8e636b131995e51ff34ccebf7b1d50fd9fb818c3c1707e1282b4e",
+    "docs/urgent-inbox-notifications.md": "4e6a7a56b0b5048e5aa0f30ad94c6115fb18df0b158b01d6c4adb196f49e1bfc",
+    "handover/DECISIONS.md": "8bd840dffe8d7e6c1346df2b069c3b978b4f229398caaa0b04a2e97f69152ea2",
+    "handover/QUESTIONS.md": "21792fa727243a2fdb8efe3c6b5755ed465e573b62c64d8d71c81e72224b71fa",
+    "handover/docs/03-roadmap.md": "8ea8c075c1c26e3f428235c87bf62f95407b31de68918cdb54c0963a2098845b",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "packages/core/urgent-inbox.ts": "0f9bdde2376c3bfc91157611638ee2f4afd1ba545da6216ef062d5702d7fb0ff",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/edge-bundle.mjs": "dfeea2975b88db6de45901f800433755b1d7dd4efac3f3e90724733b44f1ed19",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "supabase/config.toml": "f9cbdd85949132236c4cf474b87e894b4b494c1b9eac6cd8f0cbe14e61c47c61",
+    "supabase/functions/.env.example": "9af124d90badd73cadc1a61b4a7e0dfd432081720ec50b37458f98a2e853da9f",
+    "supabase/functions/_shared/urgent-inbox-authorization.ts": "4b359be47ccb80b89a1bec93a2b016dd4ce1b6bea7644748535bdd5e294b735f",
+    "supabase/functions/_shared/urgent-inbox-notifications-handler.ts": "34ae20e069c06bbeb5c301a77f100c7a9f27f6e7f663f52c2cb3a28fbdef252e",
+    "supabase/functions/_shared/urgent-inbox-push-handler.ts": "def7faa2b40f91fc84b04ddbadfd4481bd4746e4fb2817cb5b823099d12dcd06",
+    "supabase/functions/_shared/urgent-inbox-push-sender.ts": "7fdd9287fedc775882a5bf121dd609e69eb9aabc0c15c1835dd85dc98bdea0a8",
+    "supabase/functions/_shared/urgent-inbox-runtime.ts": "1cd3434d76d12c2629bce223b33381224f401cc6a46b5fbd4b0282bf922b78a2",
+    "supabase/functions/urgent-inbox-notifications/index.ts": "36f530e8d7a2cf298921d6e6984c3522ced627598ca5ca398f03982bcb86d249",
+    "supabase/functions/urgent-inbox-push/index.ts": "6768e2f6fe3c64466cefae724f97d63d0a1ffaaa4f72cfab107aed20e73482a2",
+    "supabase/migrations/20261123180222_owner_inbox_tasks.sql": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "supabase/migrations/20261123220341_observed_payment_sources.sql": "29b484ed0bf28e519003086bca2f0c207219f682c183971cedc3eb36cc994f85",
+    "supabase/migrations/20261124013707_urgent_inbox_notifications.sql": "5f6bc5bf71b474c7fcf4769cd8c74b9b2bc676c94b1de55d22bc4c8fe75becad",
+    "supabase/migrations/20261124013801_urgent_inbox_dispatch.sql": "afacad33eb354cbcb3680857f75308e3e01c2716014cb63c7228ef602f6d4256",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "tests/urgent-inbox-bundles.test.ts": "928d5599ab174156a04ba00462cf583f9f21196dbdaf94e92742cb598099ab0e",
+    "tests/urgent-inbox-dispatch-fixture.ts": "f2a89ce540e374dead081d006cc927b5427db2fc4f754b97a230c46263f78e6b",
+    "tests/urgent-inbox-dispatch.test.ts": "a635fcc91f8a512610d713fa61bdfbf509100d1d0aac65ff16d8136e3a847681",
+    "tests/urgent-inbox-managed.ts": "959c59cdc4142e66989d40334f27a3b4b8e63d742048d055bb02c4adadc7a4ba",
+    "tests/urgent-inbox-sender.test.ts": "864cbcfafc600f23ec46b58607f6e9df6a97f27fdb0bfdaa247d79dd1b68f38e",
+    "tests/urgent-inbox.test.ts": "87697264c9dcdc802fd7219ea70d1c569f6508fa60a6d6057daf357259834d6e",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  },
+  "verificationLogHashes": {
+    "lint-final": "a05f396829eb4aa33fbe5a6f2af5a77255f96b356247c7168fa1753ed830082a",
+    "types-final": "120df806b768e36d4061433695d6b5cfd138e4b6a1525ca16a612769533c57d1",
+    "unit-full": "f7495ed5f0b67d06cf093596bf8307d89394a7166e0bac930597e4010bb37321",
+    "final-focused": "00489c2ba275c2141923c862b85fd2e1b0c438dc8619574e887ff245ab3dab50",
+    "exact-proof": "0e1488a43d46aba6e43d4fc154b1784fe6ace92a2d1ee6802114a84a789ff401",
+    "build-root": "73d1a01cd605eb9bdb1ab89b2fd1bc35a00910d3e4ee45a1b97da6921372fbb5",
+    "browser-root": "0a6d3810aeda94cb413fa3def6dfbdcc52ac71ed7109437567abaf9e5ee5cb01",
+    "build-pages": "33cacf7f16f3a8683bdb2a78a5d3560a493b01f9af387333909d30fdf41953ef",
+    "browser-pages": "088660c2d2bbf59e355ff55ec9ddad7543ec71cd60f16c1360ae2bc008b0020f",
+    "initial-sql": "9c2c9fdd370d0782f24c4ede9f6d2f8edb48bfba5db2e6371225644797c0ff54",
+    "literal-fix": "88dec6ac5d7413d3ebcbced90771e4b63feaf3879dc571ff368523800237f358",
+    "initial-dispatch": "32157aff1c5be09e9c22f5c3adce029a93ef531d8a5c1a75528d96d985af33ae",
+    "cleanup-before-fix": "40a77076c231092ab2d7691a92c5607f501ab243f0270af9365456e4289e99ff"
+  },
+  "remaining": [
+    "Native consent journal and controls with durable offline Disable and original recovery",
+    "Service-worker presentation and authenticated native notification-click integration",
+    "Genuine installed-browser/provider five-second commissioning and full M37 release",
+    "Other unchecked handover milestones; publication remains held"
+  ],
+  "security": {
+    "knownValuesChecked": 13,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalDeploymentFindings": 22,
+    "legacyDeploymentFindings": 22,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "history": true,
+    "artifacts": true,
+    "newExceptions": 0,
+    "hooksEnabled": true,
+    "fullHistory": true,
+    "scanLogSha256": "961994cfc34e6243742f13e6466fd77392941597fd3944daf716507f7d37b1cf"
+  }
+}
