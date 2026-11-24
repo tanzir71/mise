@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-24T02:44:57.803Z",
+  "sourceParentCommit": "03d22005946173d99ea48ebb01ec159c77c14adc",
+  "status": "verified-urgent-alert-browser-groundwork-ui-and-service-worker-wiring-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsCredentialsPhonesOrOtpRequired": false,
+    "installationCredentialsGeneratedOrConfigured": 0,
+    "ownerTasks": false,
+    "deliveryEnabled": false
+  },
+  "implementation": {
+    "deskCacheSchema": 4,
+    "earlierKitchenFormatsPreserved": true,
+    "separateExplicitConsent": true,
+    "originalRegistrationVerifiedThroughInspection": true,
+    "atomicOfflineMuteAndOriginalWithdrawals": true,
+    "historyEviction": false,
+    "originalSetupsPerProfile": 500,
+    "withdrawalCapacityReserved": true,
+    "closedIdsOnlyGenericNotificationHandler": true,
+    "productionServiceWorkerEventWiring": false,
+    "settingsAndRecoveryInterface": false,
+    "authenticatedTaskOpeningInterface": false
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "astroFiles": 200,
+      "diagnostics": 0
+    },
+    "unit": {
+      "fullInvocation": {
+        "files": 262,
+        "cases": 5060,
+        "durationSeconds": 924.26,
+        "passed": true,
+        "skipped": 0
+      },
+      "finalFocused": {
+        "files": 3,
+        "cases": 65,
+        "durationSeconds": 5.34,
+        "passed": true,
+        "skipped": 0
+      },
+      "fullInvocationFollowedByFinalReviewChecks": true,
+      "singleFullFinalSourceInvocationPassed": false,
+      "addedCasesAfterFullInvocation": 5,
+      "uniqueCasesCovered": 5065,
+      "sourceState": "Full 5060 before final target lifetime and pre-journal Off checks; final 65 focused cases include five added regressions",
+      "workersMaximum": 2,
+      "originalCorporaAndDeadlinesUnchanged": true,
+      "originalKitchenRecords": 5004,
+      "originalKitchenDurationMs": 60245
+    },
+    "build": {
+      "root": true,
+      "pages": true
+    },
+    "browser": {
+      "root": {
+        "files": 7,
+        "cases": 92,
+        "passed": true,
+        "workers": 2
+      },
+      "pages": {
+        "files": 7,
+        "cases": 92,
+        "passed": true,
+        "workers": 2
+      }
+    },
+    "visualQa": {
+      "newLayout": false,
+      "newComparisons": 0,
+      "reason": "No UI or production service-worker event wiring changed"
+    },
+    "secrets": {
+      "knownPrivateValues": 13,
+      "currentCredentialFindings": 0,
+      "newDeploymentFindings": 0,
+      "olderReviewedNonsecretFindings": 22,
+      "exceptionsAdded": 0,
+      "historyAndArtifactsChecked": true
+    }
+  },
+  "delivery": {
+    "milestoneComplete": false,
+    "defaultPreviewOff": true,
+    "workflowsHeld": true,
+    "publicationHeld": true,
+    "cronHeld": true,
+    "providerRequests": 0,
+    "hostedSchemaOrFunctionChanges": 0,
+    "installedBrowserFiveSecondAcceptance": false
+  },
+  "sourceHashes": {
+    "apps/web/src/data/command-request.ts": "acd295a43d59fd0ba68570cdccdd1f66dac278258917ab1713477ef597f2ddec",
+    "apps/web/src/data/desk-cache.ts": "46532fa9ccb8e0f624f9747335f008cb38719455a46acd626d8ac2429ea671c9",
+    "apps/web/src/data/urgent-inbox-operation.ts": "0da3977c86b9c1f0520fbbdea00f006d9cde9251c2e1b449e6ed94a401dca46b",
+    "apps/web/src/data/urgent-inbox-remote.ts": "d3482d8abbd472d960dffc2bf8c2fa6f48b1fc25dfc4eb6cbd2777189acc208e",
+    "apps/web/src/data/urgent-inbox-cache.ts": "b1ff2d6c4fd4c56324ec6268e376c324aa46e8d6855a7648e11641d59dfa05f2",
+    "apps/web/src/data/urgent-inbox-session.ts": "565b19fdbde3da896f641d495e986936f36dd652ebbdd1b5a5ec01669a194bde",
+    "apps/web/src/urgent-inbox-worker.ts": "5c57fe911d355673bcf909b158a45b35ca731c29402e6b7f49a072adbd4127ad",
+    "apps/web/src/sw.ts": "7c501723870e4c7dfaa45803d8d551c0019e1620280a94f96fc2c69a1be9e3c8",
+    "apps/web/src/desk-notification-worker.ts": "c931d98ff9092962920591854dc1d26e67febd58c35712008494508ae6bc62d2",
+    "apps/web/src/DeskNotificationsProvider.tsx": "b2a948c47b62cfadbcb90eccc81232d3f10286ac0b2c9b99b4d7d1f3a3e5925a",
+    "apps/web/src/DeskNotificationSettings.tsx": "49d3b0f43db3d41c6c9c2e54beb959f08769ce0fd61a56066aec2377e58370aa",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "tests/urgent-inbox-native-fixture.ts": "016372f167ba6a2a4b395f6fcdd0bdf86a0d28d3b044f55318bc3e976dcdc720",
+    "tests/urgent-inbox-native.test.ts": "3d8c153bec5b74c36379b96b7b007508177f04fab19b86ed81fea2d9bd5d24f9",
+    "tests/urgent-inbox-remote.test.ts": "1019bf3a9b4ca567b73ead709330fb204e4cff6cada0888e178556166b017357",
+    "tests/urgent-inbox-worker.test.ts": "1ca82aec9854e2f771c786391005b3a39b343b57aad2e6771e313e29a1d2ad4c",
+    "tests/desk-operation.test.ts": "223af6ddb3b18608558d06bc55d1445fa196bf75ce0096b2a742588b9fcfd8b0",
+    "tests/e2e/desk-storage.spec.ts": "98665ea7b9c73ca5b1ba9a0d32f6ecb4bb9c47cb8274be98445b708d33330749",
+    "tests/kitchen-current-tickets.test.ts": "5ef18f983100239b13c5fdd89871ac6f27a28df5e352127290ca4649bfed089d",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463",
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "supabase/migrations/20261124013707_urgent_inbox_notifications.sql": "5f6bc5bf71b474c7fcf4769cd8c74b9b2bc676c94b1de55d22bc4c8fe75becad",
+    "supabase/migrations/20261124013801_urgent_inbox_dispatch.sql": "afacad33eb354cbcb3680857f75308e3e01c2716014cb63c7228ef602f6d4256"
+  }
+}

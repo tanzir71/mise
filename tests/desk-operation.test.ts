@@ -31,7 +31,7 @@ afterEach(()=>{for(const cache of opened)cache.close();opened.length=0;vi.restor
 it('preserves a version-one private profile and active pointer when adding the durable journal',async()=>{
  const f=await fixture(),factory=new IDBFactory(),old=new Dexie(deskDatabaseName(base),{indexedDB:factory,IDBKeyRange});opened.push(old);old.version(1).stores({profiles:'&id',active:'&id'});
  const {choiceRevision:unused,...legacy}=f.saved.profile;void unused;await old.table('profiles').put({...legacy,v:1,tasks:deskTaskListWire(f.saved.profile.tasks)});await old.table('active').put(f.saved.pointer);old.close();
- const upgraded=new DeskCache(base,{indexedDB:factory,IDBKeyRange});opened.push(upgraded);expect(await upgraded.read(original)).toEqual({...f.saved,profile:{...f.saved.profile,choiceRevision:f.saved.profile.revision}});expect(await upgraded.operations.count()).toBe(0);expect(upgraded.verno).toBe(3);
+ const upgraded=new DeskCache(base,{indexedDB:factory,IDBKeyRange});opened.push(upgraded);expect(await upgraded.read(original)).toEqual({...f.saved,profile:{...f.saved.profile,choiceRevision:f.saved.profile.revision}});expect(await upgraded.operations.count()).toBe(0);expect(upgraded.verno).toBe(4);
 });
 it('upgrades a version-two journal without changing its original pending registration or preventing its genuine confirmation',async()=>{
  const f=await fixture(),operation=await f.cache.queueOperation(f.saved,f.register()),saved=(await f.cache.read(original))!,factory=new IDBFactory(),old=new Dexie(deskDatabaseName(base),{indexedDB:factory,IDBKeyRange});opened.push(old);old.version(1).stores({profiles:'&id',active:'&id'});old.version(2).stores({operations:'&id,profileId,&[profileId+sequence]'});

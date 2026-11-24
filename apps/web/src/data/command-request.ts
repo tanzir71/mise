@@ -87,6 +87,9 @@ export function createOwnerPinRequest(config:CloudConnection,input:CommandAccoun
 export function createDeskNotificationsRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
  return accountRequest(config,input,new URL('functions/v1/desk-notifications',config.apiUrl+'/'),'POST',send);
 }
+export function createUrgentInboxNotificationsRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+ return accountRequest(config,input,new URL('functions/v1/urgent-inbox-notifications',config.apiUrl+'/'),'POST',send);
+}
 export type DeskAlarmRpc='read_kitchen_alarm_task_page'|'set_kitchen_alarm_settings';
 export function createDeskAlarmRequest(config:CloudConnection,input:CommandAccount,rpc:DeskAlarmRpc,send:typeof fetch){
  if(!['read_kitchen_alarm_task_page','set_kitchen_alarm_settings'].includes(rpc))throw new CommandRequestError('review');

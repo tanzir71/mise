@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: urgent alert browser groundwork preserves separate original consent through offline withdrawal, lost replies, competing tabs and native outlet changes. A generic notification handler checks the actual browser and confirmed choice before presentation. Settings controls, service-worker wiring and task-opening UI remain unfinished. Every installation owns its configuration; flags stay off and workflows/publication remain held.
+
 - In progress: urgent Inbox delivery has separate opt-in support from kitchen alerts and preserves original choices after lost replies or removed access. Alerts refer to actual current tasks. Each installation owns all setup; native notification controls remain unfinished, delivery stays off, and workflows/publication remain held.
 - M37 native payment review preview: manual observations, actual backend receipt pages, explicit current matching, reasoned dismissal and metadata undo. Full source snapshots and exact original requests survive lost replies, offline closure and account/outlet changes. Personal recovery and verified archives retain pending originals. All configuration belongs to each installation; general urgent push and full M37 delivery remain open, with workflows/publication held.
 

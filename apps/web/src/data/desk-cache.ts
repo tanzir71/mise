@@ -63,10 +63,11 @@ async function queueProfileWithdrawals(cache:DeskCache,original:DeskProfile,fall
  * exports and contains no owner JWT, endpoint or browser encryption material. */
 export class DeskCache extends Dexie {
  profiles!:Table<unknown,string>;active!:Table<unknown,string>;operations!:Table<unknown,string>;
+ urgentProfiles!:Table<unknown,string>;urgentOperations!:Table<unknown,string>;
  constructor(base:string,options?:ConstructorParameters<typeof Dexie>[1]){super(deskDatabaseName(base),options);this.version(1).stores({profiles:'&id',active:'&id'});this.version(2).stores({operations:'&id,profileId,&[profileId+sequence]'});this.version(3).stores({}).upgrade(async tx=>{
   const operations=(await tx.table('operations').toArray()).map(parseDeskOperation);
   await tx.table('profiles').toCollection().modify(raw=>{const saved=profile(raw),latest=operations.filter(row=>row.profileId===saved.id&&row.binding.connection.accountHash===saved.binding.connection.accountHash&&row.request.kind!=='settings').sort((a,b)=>b.sequence-a.sequence)[0];Object.assign(raw,wire({...saved,choiceRevision:latest?.id??saved.choiceRevision}));});
- });}
+ });this.version(4).stores({urgentProfiles:'&id',urgentOperations:'&id,profileId,&[profileId+sequence]'});}
  async pointer():Promise<DeskPointer>{
   return this.transaction('rw',this.active,async()=>{const saved=await this.active.get('active');if(saved!==undefined)return pointer(saved);const empty:DeskPointer={v:1,id:'active',revision:newKitchenId(),profileId:null};await this.active.add(empty);return empty;});
  }

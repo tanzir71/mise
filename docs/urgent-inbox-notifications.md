@@ -1,6 +1,6 @@
 # M37 · General urgent notification backend
 
-This increment adds a separate server protocol for urgent Inbox tasks. Existing kitchen subscriptions keep their original purpose: they are not silently enrolled in other alerts. The native consent controls, service-worker presentation and notification-click interface still need integration. `ownerTasks` stays off, delivery defaults off, and full M37 acceptance remains open.
+This increment adds a separate server protocol for urgent Inbox tasks. Existing kitchen subscriptions keep their original purpose: they are not silently enrolled in other alerts. Follow-up [browser groundwork](urgent-inbox-native.md) supplies private original-consent storage, recovery methods and a notification handler. The settings controls, service-worker wiring and notification-click interface still need integration. `ownerTasks` stays off, delivery defaults off, and full M37 acceptance remains open.
 
 ## Consent and original requests
 
