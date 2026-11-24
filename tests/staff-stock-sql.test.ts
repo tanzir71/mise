@@ -30,7 +30,7 @@ async function seedStock(n=1,outlet=id(11),business=id(1),base=300){
 it('uses actual Team stock permission, keeps preparation/attendance separate, and infers no legacy stock grant',async()=>{
  const s=await screen();await seedStock();expect(await read(s)).toEqual({v:1,state:'missing'});
  await f.db.query('update public.members set permissions=$1 where id=$2',[JSON.stringify({'stock.read':true,'orders.read':false}),id(105)]);expect(await read(s)).toEqual({v:1,state:'missing'});
- await f.configure(id(105),{methods:[],permissions});const page=parseStaffStockPage(await read(s),null,50,s);expect(page.items).toHaveLength(1);expect(page.access.permissions).toEqual(['stock.read']);
+ await f.configure(id(105),{methods:[],permissions});const page=parseStaffStockPage(await read(s),null,50,s);expect(page.items).toHaveLength(1);expect(page.access.permissions).toEqual(['stock.adjust','stock.read','stock.undo']);
  expect((await f.directoryRead(s.secret) as {members:{id:string}[]}).members.some(m=>m.id===id(105))).toBe(true);
  await f.configure(id(105),{methods:[],permissions:{...permissions,updateStock:false}});expect(await read(s)).toEqual({v:1,state:'missing'});
 });
