@@ -1,0 +1,8 @@
+{
+  "title":"M34 — verified shared-screen stock archives",
+  "widths":[360,390,768,1024,1440],
+  "pages":[
+    {"id":"staff-stock-archive","path":"app/screen/attendance?flags=staffTeam,kitchenScreen","staffStockFixture":"archive","note":"The stock history extends M16 with shared primitives and exact existing icons. A real PIN-scoped SQL movement is inspected before preparing its complete private archive; the file must be selected and verified before explicit local removal. Quantities and server history remain unchanged by archive operations.","sections":[{"id":"verification","selector":".staff-stock","reference":"screens/mobile/M16 · Manager — Stock (quick update, on hand, target, to order).png"}]},
+    {"id":"staff-stock-archive-open","path":"app/screen/attendance?flags=staffTeam,kitchenScreen","staffStockFixture":"archive-open","note":"A real downloaded archive is verified, removed locally and reopened against the native fingerprint bound to its original backend and device enrollment. Historical source is separate from current quantities; restoring still requires the actual own receipt. This recovery extension uses the M16 stock presentation without owner purchasing, financial authority or unconfigured automation.","sections":[{"id":"historical","selector":".staff-stock","reference":"screens/mobile/M16 · Manager — Stock (quick update, on hand, target, to order).png"}]}
+  ]
+}

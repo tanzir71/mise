@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: staff stock history now supports verified private archives, atomic fingerprint retention and explicit removal of completed local copies. Reopening and actual own-receipt checks restore the exact original without changing quantities, preserve pending work/read denial and keep reviewed undo available. Full M34 remains open; all installation setup stays end-user owned, with services, workflows and publication held.
+
 - In progress: the shared-screen stock interface connects actual PIN-scoped quantity pages to physical counts, typed/spoken previews, separate current comparison/confirmation, own undo and saved-request recovery. Complete imported text, offline closure and manual copy survive without owner financial access. Explicit archives and full M34 remain open. All configuration stays installation-owned; services, workflows and publication stay held.
 
 - In progress: paired-screen stock originals now have a separate native journal, actual-page capture, explicit in-memory comparison/confirmation and own-request recovery after lost replies or later PINs. Offline closure, current read withdrawal, competing tabs and the version-four upgrade preserve complete source and existing enrollment/kitchen/attendance data. The shared-screen stock interface and full M34 remain open. Configuration stays end-user owned; services, workflows and publication remain held.

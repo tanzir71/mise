@@ -14,7 +14,7 @@ Each saved request shows its original member/session, physical time, source and 
 
 Imported names, local names and units remain complete. Values over 4,096 characters have an explicit expansion control, and oversized item labels also show the item's actual ID. Search uses the full name/local name/aliases when a search term is entered. Nothing is shortened in the saved original, native audit or backend hash. A large imported category has a compact numbered filter and a separate control for its full text.
 
-Copy complete original copies the exact saved request. If clipboard access fails, a selected readonly field exposes the whole note for manual copying. Copy note for manager and I told the manager provide the manual path; neither posts stock or money. At the native journal's 200-original capacity, retain the complete history and use this manual path. Explicit verified archive controls remain open.
+Copy complete original copies the exact saved request. If clipboard access fails, a selected readonly field exposes the whole note for manual copying. Copy note for manager and I told the manager provide the manual path; neither posts stock or money. At the native journal's 200-original capacity, retain the complete history and use this manual path or the [verified archive controls](staff-stock-archives.md). Those controls retain exact file fingerprints and keep own-original recovery and reviewed undo available.
 
 ## Installation and delivery
 
@@ -30,4 +30,4 @@ The actual rendered editor, native journal, HTTP handlers and SQL preserve all 1
 
 The reproducible visual configuration is [m34-staff-stock.json](../qa/configs/m34-staff-stock.json). It uses real local SQL, pairing, PIN issuance, HTTP handlers and native storage. All 15 comparisons per hosting path pass accessibility, page-overflow and exact icon-geometry checks at 360, 390, 768, 1024 and 1440 px. Pixel differences remain informational because these owner/manager references are adapted to the shared PIN workspace described above. Key generated local captures are the [mobile quantities](../qa/screens/staff-stock-quantities-390.png), [desktop count](../qa/screens/staff-stock-count-physical-1440.png) and [mobile comparison](../qa/screens/staff-stock-review-comparison-390.png), with the [comparison report](../qa/report.html). These generated artifacts are ignored; CI upload and public deployment remain held, so this increment has no CI run or new live deployment to link.
 
-No managed migration, deployed service, provider request or configuration input is added. Explicit verified archives, the own-performance permission path, genuine installation commissioning and complete M34 acceptance remain open.
+No managed migration, deployed service, provider request or configuration input is added. Verified archives are supplied by the linked follow-up. The own-performance permission path, genuine installation commissioning and complete M34 acceptance remain open.

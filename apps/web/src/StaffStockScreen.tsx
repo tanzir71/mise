@@ -34,6 +34,12 @@ import {
 } from './data/device-screen-journal';
 import './staff-stock.css';
 import { useStockSpeech } from './useStockSpeech';
+import { staffStockArchiveLimit } from '@mise/core/staff-stock-archive';
+import type {
+  StaffStockArchiveFile,
+  OpenedStaffStockArchive,
+} from './data/staff-stock-archive';
+import { CommandRequestError } from './data/command-request';
 
 const sizes = {
   count: 14,
@@ -82,6 +88,25 @@ function StockValue({
 }
 const itemLabel = (item: StaffStockItem) =>
   item.name.length <= 4096 ? item.name : 'stock item ' + item.id;
+const StockSourceDetails = memo(function StockSourceDetails({
+  label,
+  value,
+}: {
+  label: string;
+  value: unknown;
+}) {
+  const [open, setOpen] = useState(false);
+  const text = useMemo(
+    () => (open ? JSON.stringify(value, null, 2) : ''),
+    [open, value],
+  );
+  return (
+    <details onToggle={(event) => setOpen(event.currentTarget.open)}>
+      <summary>{label}</summary>
+      {open ? <pre>{text}</pre> : null}
+    </details>
+  );
+});
 const isPending = (row: StaffStockOriginal) =>
   !row.outcome || row.outcome.state === 'pending';
 const stamp = (at: number) =>
@@ -91,7 +116,8 @@ const stamp = (at: number) =>
   }).format(at);
 const failure = (error: unknown) =>
   error instanceof DeviceScreenRequestError ||
-  error instanceof ScreenStorageError
+  error instanceof ScreenStorageError ||
+  error instanceof CommandRequestError
     ? error.message
     : 'This stock request is unconfirmed. Keep the original or tell the manager by hand.';
 const need = (item: StaffStockItem) => {
@@ -176,7 +202,13 @@ export function StaffStockScreen({
       id: string;
       packet: StaffStockPrepared;
     } | null>(null),
-    [expanded, setExpanded] = useState<string | null>(null);
+    [expanded, setExpanded] = useState<string | null>(null),
+    [archivePlan, setArchivePlan] = useState<StaffStockArchiveFile | null>(
+      null,
+    ),
+    [archiveVerified, setArchiveVerified] = useState(false),
+    [openedArchive, setOpenedArchive] =
+      useState<OpenedStaffStockArchive | null>(null);
   const items = useMemo(() => pages.flatMap((p) => p.items), [pages]),
     byId = useMemo(
       () => new Map(items.map((item) => [item.id, item])),
@@ -309,6 +341,23 @@ export function StaffStockScreen({
     } catch {
       setManualText(text);
       setNotice('Select and copy the complete note below.');
+    }
+  }
+  function downloadArchive(
+    reader: StaffStockSession,
+    file: StaffStockArchiveFile,
+  ) {
+    reader.archives.assertFile(file);
+    const url = URL.createObjectURL(
+      new Blob([file.contents], { type: 'application/json' }),
+    );
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.filename;
+      link.click();
+    } finally {
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   }
   async function review(reader: StaffStockSession, id: string) {
@@ -661,7 +710,8 @@ export function StaffStockScreen({
           <h2>Keep the saved history</h2>
           <p>
             This screen has reached its saved-request capacity. Keep the
-            complete originals and tell the manager the next change by hand.
+            complete originals. Open My requests to save and verify an archive,
+            or tell the manager the next change by hand.
           </p>
         </Card>
       ) : null}
@@ -1044,6 +1094,246 @@ export function StaffStockScreen({
           className="staff-stock-history"
           aria-label="My saved stock requests"
         >
+          <Card
+            className="staff-stock-original"
+            role="region"
+            aria-label="Stock archive files"
+          >
+            <h2>Keep your stock history</h2>
+            <p>
+              Save complete recorded or closed originals to a private file.
+              Nothing is removed until you select that saved file and explicitly
+              remove its verified copies. Unconfirmed requests stay here.
+            </p>
+            <p>
+              Each file holds up to 64 MiB of complete originals. You can reopen
+              it on this enrolled screen with your own PIN, check the actual
+              receipt and restore an original for review or undo.
+            </p>
+            <Button
+              kind="secondary"
+              disabled={
+                busy || !ready || !originals.some((row) => !isPending(row))
+              }
+              onClick={() =>
+                void run(async (reader) => {
+                  const file = await reader.archives.prepare();
+                  setArchivePlan(file);
+                  setArchiveVerified(false);
+                  downloadArchive(reader, file);
+                  setNotice(
+                    'Archive prepared. Select the saved file to verify every byte before removing its completed copies.',
+                  );
+                })
+              }
+            >
+              Save completed stock archive
+            </Button>
+            <label>
+              Open a stock archive
+              <input
+                type="file"
+                accept="application/json,.json"
+                disabled={busy || !ready}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = '';
+                  if (!file) return;
+                  setOpenedArchive(null);
+                  void run(async (reader) => {
+                    if (file.size > staffStockArchiveLimit)
+                      throw new CommandRequestError('review');
+                    setOpenedArchive(
+                      await reader.archives.open(
+                        new Uint8Array(await file.arrayBuffer()),
+                      ),
+                    );
+                    setNotice(
+                      'Archive opened. Saved requests are historical; we will check the recorded result before restoring one.',
+                    );
+                  });
+                }}
+              />
+            </label>
+          </Card>
+          {archivePlan ? (
+            <Card
+              className="staff-stock-original"
+              role="region"
+              aria-label="Verify saved stock archive"
+            >
+              <h2>Verify your saved stock archive</h2>
+              <p>
+                {archivePlan.count} completed{' '}
+                {archivePlan.count === 1 ? 'original' : 'originals'} in this
+                file · {archivePlan.retained} retained on this screen after
+                removal.
+              </p>
+              <code>{archivePlan.filename}</code>
+              <p>
+                Keep this file private. Selecting the downloaded file verifies
+                its complete contents before you can remove those local copies.
+              </p>
+              <label>
+                Select the saved stock archive file
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  disabled={busy}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    setArchiveVerified(false);
+                    if (!file) return;
+                    void run(async (reader) => {
+                      if (file.size > staffStockArchiveLimit)
+                        throw new CommandRequestError('review');
+                      await reader.archives.verifyFile(
+                        archivePlan,
+                        new Uint8Array(await file.arrayBuffer()),
+                      );
+                      setArchiveVerified(true);
+                      setNotice(
+                        'The saved stock archive matches every byte. Its originals remain here until you explicitly remove them.',
+                      );
+                    });
+                  }}
+                />
+              </label>
+              <div className="staff-stock-buttons">
+                <Button
+                  disabled={busy || !archiveVerified}
+                  onClick={() =>
+                    void run(async (reader) => {
+                      const result = await reader.archives.finish(
+                        archivePlan,
+                        true,
+                      );
+                      setArchivePlan(null);
+                      setArchiveVerified(false);
+                      setExpanded(null);
+                      setComparison(null);
+                      setNotice(
+                        result.removed +
+                          ' completed copies removed from this screen; ' +
+                          result.retained +
+                          ' originals retained. Keep the saved archive. Stock quantities and server history are unchanged.',
+                      );
+                    })
+                  }
+                >
+                  Remove verified stock copies
+                </Button>
+                <Button
+                  kind="secondary"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async (reader) =>
+                      downloadArchive(reader, archivePlan),
+                    )
+                  }
+                >
+                  Download archive again
+                </Button>
+                <Button
+                  kind="secondary"
+                  disabled={busy}
+                  onClick={() => void copy(archivePlan.contents)}
+                >
+                  Copy archive text
+                </Button>
+                <Button
+                  kind="secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    setArchivePlan(null);
+                    setArchiveVerified(false);
+                  }}
+                >
+                  Keep copies here
+                </Button>
+              </div>
+            </Card>
+          ) : null}
+          {openedArchive ? (
+            <Card
+              className="staff-stock-original"
+              role="region"
+              aria-label="Opened stock archive"
+            >
+              <h2>Archived originals</h2>
+              <p>
+                {openedArchive.actions.length} complete historical{' '}
+                {openedArchive.actions.length === 1 ? 'original' : 'originals'}.
+                These are not current stock quantities.
+              </p>
+              <p>
+                {openedArchive.verified
+                  ? 'This is the exact file saved by this screen. We will check the original recorded result before restoring it.'
+                  : 'This screen cannot verify this file as its saved archive. Keep it as historical source or copy it for the manager; it cannot restore local history.'}
+              </p>
+              {openedArchive.actions.map((row) => (
+                <div
+                  key={row.intent.command.id}
+                  className="staff-stock-original-line"
+                >
+                  <p>
+                    {stamp(row.intent.command.occurredAt)} ·{' '}
+                    {row.outcome?.state === 'applied' ? 'Recorded' : 'Closed'} ·{' '}
+                    {row.intent.items.length}{' '}
+                    {row.intent.items.length === 1 ? 'item' : 'items'}
+                  </p>
+                  <code>{row.intent.command.id}</code>
+                  <div className="staff-stock-buttons">
+                    <Button
+                      kind="secondary"
+                      disabled={busy || !openedArchive.verified}
+                      onClick={() =>
+                        void run(async (reader) => {
+                          const result = await reader.archives.restore(
+                            openedArchive,
+                            row.intent.command.id,
+                          );
+                          setExpanded(row.intent.command.id);
+                          setComparison(null);
+                          setNotice(
+                            result.restored
+                              ? 'Own original restored after checking its actual receipt. Review current stock separately before undo.'
+                              : 'This complete original is already saved on this screen.',
+                          );
+                        })
+                      }
+                    >
+                      Check and restore original{' '}
+                      {row.intent.command.id.slice(-8)}
+                    </Button>
+                    <Button
+                      kind="secondary"
+                      onClick={() =>
+                        void copy(JSON.stringify(row.intent, null, 2))
+                      }
+                    >
+                      Copy archived original {row.intent.command.id.slice(-8)}
+                    </Button>
+                  </div>
+                  <StockSourceDetails
+                    label={
+                      'Complete archived source ' +
+                      row.intent.command.id.slice(-8)
+                    }
+                    value={row}
+                  />
+                </div>
+              ))}
+              <Button
+                kind="secondary"
+                disabled={busy}
+                onClick={() => setOpenedArchive(null)}
+              >
+                Close archive view
+              </Button>
+            </Card>
+          ) : null}
           {!originals.length ? (
             <Card>
               <p>No saved stock requests for your PIN on this screen.</p>
@@ -1164,10 +1454,10 @@ export function StaffStockScreen({
                         ) : null}
                       </div>
                     ))}
-                    <details>
-                      <summary>Complete original source</summary>
-                      <pre>{JSON.stringify(row.intent, null, 2)}</pre>
-                    </details>
+                    <StockSourceDetails
+                      label="Complete original source"
+                      value={row.intent}
+                    />
                   </>
                 ) : null}
               </Card>

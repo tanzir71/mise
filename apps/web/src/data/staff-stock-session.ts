@@ -7,6 +7,8 @@ import type {StaffStockPage,StaffStockItem} from '@mise/core/staff-stock';
 import {assertBlankScreenProfile,ScreenStorageError,type ScreenJournal} from './device-screen-journal';
 import {createDeviceScreenRemote,DeviceScreenRequestError} from './device-screen-remote';
 import {assertLiveCommandReceipt} from './command-request';
+import {createStaffStockArchives} from './staff-stock-archive';
+import {staffStockArchiveBinding,type StaffStockArchiveIndex} from '@mise/core/staff-stock-archive';
 
 export async function createStaffStockSession(journal:ScreenJournal,input:ScreenJournalRecord,deps:{blank?:()=>Promise<void>;send?:typeof fetch;now?:()=>number}={}){
  const original=parseScreenJournalRecord(input);if(original.state.phase!=='signed-in')throw new ScreenStorageError('changed');
@@ -22,8 +24,9 @@ export async function createStaffStockSession(journal:ScreenJournal,input:Screen
  const allowed=()=>{current();if(now()>=Math.min(device.expiresAt,session.expiresAt))throw new DeviceScreenRequestError('auth');};
  const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
  async function readNative(){await verify();snapshot=await journal.readStock(original);current();return snapshot;}
+ function exclusive<T>(run:()=>Promise<T>):Promise<T>{const work=local.catch(()=>{}).then(run);local=work;return work;}
  function edit(change:(before:StaffStockJournal)=>StaffStockJournal,proof?:object){
-  const saving=local.catch(()=>{}).then(async()=>{
+  const saving=exclusive(async()=>{
    for(let attempt=0;attempt<4;attempt++){
     const before=await readNative(),base=before??{v:1 as const,id,revision:newInboxId(),readStatus:null,actions:[]};
     const next=await parseStaffStockJournal({...change(base),revision:newInboxId()},scope);
@@ -98,6 +101,12 @@ export async function createStaffStockSession(journal:ScreenJournal,input:Screen
   if(result.receipt&&result.receipt.reviewHash===chosen.reviewHash)parseStaffStockReceipt(result.receipt,row.intent,row.intentHash,{value:chosen.review,hash:chosen.reviewHash});
   return retain(actionId,result);
  }
- return {saved,read,capture,review,confirm,recover,get storageReady(){return storageReady;},stop(){active=false;quote=null;generation++;controller.abort();}};
+ let archiveIndex:StaffStockArchiveIndex|null=null;
+ const binding=await staffStockArchiveBinding(original);
+ const archives=createStaffStockArchives({source:original,scope,binding,current,local:async()=>{await readNative();archiveIndex=await journal.readStockArchives(original);current();},saved:()=>snapshot,index:()=>archiveIndex,exclusive,
+  inspect:async(intent,signal)=>{const result=await api.stockAction(device,session,intent,'inspect',undefined,lifetime(signal));await verify();if(result.state==='review')throw new DeviceScreenRequestError('review');return result;},
+  persist:async(before,after,beforeIndex,afterIndex,proof)=>{quote=null;try{snapshot=await journal.replaceStockArchive(original,before,after,beforeIndex,afterIndex,proof,{signal:controller.signal,assertCurrent:current});archiveIndex=afterIndex;storageReady=true;}catch(error){storageReady=false;throw error;}}
+ });
+ return {saved,read,capture,review,confirm,recover,archives,get storageReady(){return storageReady;},stop(){active=false;quote=null;generation++;controller.abort();}};
 }
 export type StaffStockSession=Awaited<ReturnType<typeof createStaffStockSession>>;
