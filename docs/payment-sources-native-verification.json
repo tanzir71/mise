@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-24T00:28:37.933Z",
+  "sourceParentCommit": "0531928c4dea60a6c3b0b1579a3f36bce3ae11b2",
+  "status": "verified-native-payment-review-and-original-recovery-general-urgent-push-open",
+  "configuration": {
+    "owner": "end-user",
+    "maintainerAccountsCredentialsOrNumbersRequired": false,
+    "newProviderRequired": false,
+    "newEnvironmentVariables": false,
+    "connectionAndSignIn": "Installation-owned runtime settings and original confirmed phone account",
+    "providerCredentials": "Private backend only",
+    "phoneInput": "Market defaults, E.164 storage"
+  },
+  "publication": {
+    "workflows": "held-disabled-manually",
+    "pages": "held",
+    "ciArtifactUpload": "held",
+    "ownerTasks": false,
+    "providerRequests": 0,
+    "newEdgeDeployment": false,
+    "cronJobs": 0
+  },
+  "validation": {
+    "lint": true,
+    "typecheck": {
+      "passed": true,
+      "checkedFiles": 199,
+      "diagnostics": 0
+    },
+    "unit": {
+      "files": 255,
+      "cases": 4921,
+      "passed": true,
+      "singleFullInvocationPassed": true,
+      "skipped": 0,
+      "workersMaximum": 2,
+      "originalCorporaAndDeadlinesUnchanged": true,
+      "originalKitchenRecords": 5004,
+      "originalKitchenDurationMs": 68937,
+      "originalKitchenSetupDeadlineSeconds": 120,
+      "originalKitchenCaseDeadlineSeconds": 60
+    },
+    "browser": {
+      "root": {
+        "cases": 154,
+        "files": 12,
+        "workers": 2,
+        "passed": true,
+        "singleFullInvocationPassed": false,
+        "broadInvocation": {
+          "passed": 153,
+          "failed": 1
+        },
+        "targetedFollowup": {
+          "file": "tests/e2e/staff-device.spec.ts",
+          "cases": 11,
+          "passed": true
+        },
+        "coverage": "All 154 unique root cases passed across the broad invocation and corrected staff regression follow-up"
+      },
+      "pages": {
+        "cases": 154,
+        "files": 12,
+        "workers": 2,
+        "passed": true,
+        "singleFullInvocationPassed": true
+      }
+    },
+    "builds": {
+      "root": true,
+      "pages": true,
+      "finalBase": "/mise/"
+    },
+    "visual": {
+      "comparisons": 50,
+      "views": 10,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "axeViolations": 0,
+      "horizontalOverflows": 0,
+      "references": [
+        "M20 103:900",
+        "M06 58:201"
+      ],
+      "scope": "30 current Inbox/task-recovery comparisons and 20 payment detail/capture/receipt/personal-recovery comparisons; payment-specific controls are explicit adaptations beyond the supplied phone frame",
+      "reviewed390Captures": [
+        "docs/screenshots/m37-payment-native-source-390.png",
+        "docs/screenshots/m37-payment-native-receipt-390.png",
+        "docs/screenshots/m37-payment-native-recovery-390.png"
+      ]
+    }
+  },
+  "backend": {
+    "migrations": 84,
+    "tables": 115,
+    "forcedRlsTables": 115,
+    "functions": 491,
+    "newGuardedFunctions": 2,
+    "unchangedPriorDefinitions": 489,
+    "exactFinalCandidateBodiesMatchingSource": 2,
+    "candidateIndexes": 2,
+    "frozenMigrations": {
+      "20261123231242_payment_match_candidates.sql": "6f42da35964c497c49454390531641d466f264a6092a90312a77ac56edceae53",
+      "20261123231648_payment_candidates_exact_receipt.sql": "5c5332535aebfb5de3f65b17a4e39d33844e2fcc6530026b4a1c4d298b62fccf"
+    },
+    "managedProof": {
+      "checks": 63,
+      "actualSources": 2,
+      "actualFinancialReceipts": 1,
+      "unknownClosures": 1,
+      "financialWritesBySource": 0,
+      "providerRequests": 0,
+      "rolledBack": true,
+      "exactManagedSqlVerifiedLocally": true,
+      "exactManagedSqlSha256": "bda598b6e47ab0c4ab3f5ecfc2dbd82b978b39f5017fea4a080816da03b59731",
+      "remainingSyntheticAuthSourceAndActionRows": 0
+    },
+    "edgeVersionsPreserved": 17,
+    "securityAdvisors": {
+      "INFO": 1,
+      "newWarnings": 0,
+      "newErrors": 0
+    },
+    "performanceAdvisors": {
+      "INFO": 2,
+      "newWarnings": 0,
+      "newErrors": 0
+    },
+    "cronJobs": 0
+  },
+  "semantics": {
+    "captureOrigin": "manual",
+    "sourceSnapshotSavedBeforeHttp": true,
+    "unconfirmedChoiceCannotBeReplaced": true,
+    "offlineClosureBeforeHttp": true,
+    "sourceAndSelectedTargetRequireOwnUnmodifiedHttpProof": true,
+    "finalReceiptRecheckedBeforePreparingMatch": true,
+    "transactionStillRechecksActualCurrentFacts": true,
+    "financialWritesByMatchingDismissalOrUndo": 0,
+    "sourceChangeRetainsDraftButRequiresExplicitReview": true,
+    "personalRecoveryCannotSubmitNewChoicesOrSwitchOperator": true,
+    "archiveRequiresExactSavedFileAndServerReceipts": true,
+    "pendingOriginalsRetained": true
+  },
+  "initialFindings": {
+    "browser": {
+      "passed": 9,
+      "failed": 2,
+      "causes": [
+        "Manual-copy label association around a filled textarea; fixed with a separate label",
+        "Archive test revoked access before match completion; fixed by observing actual committed action before revocation"
+      ],
+      "currentAllCasesPassed": true
+    },
+    "visual": {
+      "firstAttemptFailed": true,
+      "cause": "New fixture used a relative URL without the QA page baseURL; fixed with an explicit origin",
+      "currentAllComparisonsPassed": true
+    },
+    "lint": {
+      "firstAttemptFailed": true,
+      "cause": "Unused fixture import removed",
+      "currentPassed": true
+    },
+    "rootDraftFollowup": {
+      "passed": 153,
+      "failed": 1,
+      "cause": "Filled dismissal textarea needed an explicit separate label; draft retention and action lock already behaved correctly",
+      "currentAllCasesPassed": true
+    },
+    "rootCaptureFollowup": {
+      "passed": 153,
+      "failed": 1,
+      "cause": "The lost-reply test reloaded after local intent persistence but before observing the actual server commit; it now waits for the committed original action before reload",
+      "currentAllCasesPassed": true
+    },
+    "staffClosureFollowup": {
+      "passed": 153,
+      "failed": 1,
+      "cause": "Existing staff browser test read IndexedDB immediately after clicking Close; now waits for the actual durable closeRequested value before reloading",
+      "currentCorrectedStaffCasesPassed": 11,
+      "productCodeChanged": false
+    }
+  },
+  "sourceHashes": {
+    ".githooks/pre-commit": "557feae3b57c2c1774a2b9f3904228fafa72bd056c6f29bfeb03104ecfceca92",
+    ".githooks/pre-push": "e46e6da639f42e7f39415365a562042de060e97d39ac8e7247990d90118c98e6",
+    "AGENTS.md": "2005fbbbb57158f801899b51156c145080169ec899673c724c08e29927e9bb90",
+    "CHANGELOG.md": "bc14cfa4f25e92f43877725ae0c2916f92061df4fcfd1ac2fb5431b45b75b8cc",
+    "apps/web/src/Inbox.tsx": "2ef73a4bfc875fd12ca63f2da3b07bd8fa4446c77d178d60eb41b0aea70f3563",
+    "apps/web/src/OwnerTaskInbox.tsx": "8ff500cd9b2b5a2a842fdb2b02fd16ca8e4f7edd02a41ddb9c2206b144785865",
+    "apps/web/src/OwnerTaskRecovery.tsx": "7f62abc5c43f26c7ab3dddf9c9646ee594b2f32e14979f8a82919edfb15297e2",
+    "apps/web/src/PaymentRequestSource.tsx": "92a058c30a747f7b71044217c58dd7214686e9855a7e8ac675351234495f80d8",
+    "apps/web/src/PaymentSourceReview.tsx": "7bc70b5c57624af7d53e3600fb08738e7b24313942caaada9ccbbc64f846f81f",
+    "apps/web/src/data/command-request.ts": "c37e2de31414b1c2165c662207fc4e8f82c66d67cc13bdbea87eb49ab1fdcffe",
+    "apps/web/src/data/payment-source-archive.ts": "f9bde1c39b183470b24be8ff9f48503f401db9a6171926d35205baf01576f795",
+    "apps/web/src/data/payment-source-journal.ts": "8745292ba4ee9bc7f98e89fa8f0ff75440f7190ec03cc5edce2c23964f8782c2",
+    "apps/web/src/data/payment-source-recovery.ts": "0ac81082e670d958b64d3e491cc880f6b2699e4d6bfdf9b49d18fe972cdba993",
+    "apps/web/src/data/payment-source-session.ts": "518296e9ad367f4410c3181b77ecc0c53ac82f54337efbaf857eff5834aea003",
+    "apps/web/src/main.tsx": "6108f9044fc4d8d602261d276cc54cb35461d40bf7df9dfc229067f5a7ffdf5b",
+    "apps/web/src/payment-sources.css": "4b81833e97faf5f02f578ce54bb1f00d92f2e1efaf665f324f62a5dbee390fad",
+    "apps/web/src/use-payment-sources.ts": "98f4a49e5ee1870994420508e966074ca69bff03691eecae68bfee575ff4f7bc",
+    "docs/configure-services.md": "24d29cdffac3aeaaae1a8e0a9cecce41dd62819a83141c7fb13ae355adb8f1e2",
+    "docs/payment-sources-native.md": "d31fdf7cb2203b69fa959bcf1736cf497864f52ee874ad841f9255db53f57fd3",
+    "docs/payment-sources.md": "4c987db7b14386f7a6571663b8c0e52ba2d556a2efd08f6470f6dcc6ad57a5c7",
+    "docs/screenshots/m37-payment-native-receipt-390.png": "96f92014db7e897eff1a21b1b5f033a0d0bd3f98043de5dd30edb08061281a9e",
+    "docs/screenshots/m37-payment-native-recovery-390.png": "b83399066751e82bd7d40ac34ca6dd4f527ee3c4ba2ff8ec5fb8fe1052bf48be",
+    "docs/screenshots/m37-payment-native-source-390.png": "c3f4fd57afc568d292da6f0cb7177c8ece764af9712b61618684cb2dd4b2451f",
+    "handover/DECISIONS.md": "5d85d8d8f28d7898411159d68ff846cf515aade975c9482737c8a62f82f25f62",
+    "handover/QUESTIONS.md": "f9421c8ccf6220ea4a78f48c3cc4e5c236a997a635b10edb76a4d4abbda1bd95",
+    "handover/docs/03-roadmap.md": "2957e347397ae28cd752eee214d1ec2b182c92cdcfed0bcc07592aefc80d0a2d",
+    "packages/core/flags.ts": "37349fe07b8f8f458f2945ec4966ed3293ee0f40eb638fed9aa0a5c285f9fb39",
+    "packages/core/payment-sources.ts": "1dc83c5eee5c5d186c5b00d85d498d5a6be87295c3a82d354c611d63f3c76e7a",
+    "qa/configs/m37-owner-tasks.json": "c4f8402e117f967a9e4b84617a3b12f9c8644e59e008cdaa772fb328e5bca196",
+    "qa/configs/m37-payment-sources.json": "fed5698328d902ff3af05f23e3f29028bab2639c92cc5a800d4720482d29cca0",
+    "scripts/check-secrets.mjs": "90c06a294980af5f839b892163a976f3db0c9490008a285a5547af193feb00bd",
+    "scripts/legacy-deployment-findings.json": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+    "scripts/qa-visual.mjs": "8907f42d2c3c26a6292bfd1910e0e6943d4bdb0add6a6342e18029ce94700338",
+    "supabase/migrations/20261123180222_owner_inbox_tasks.sql": "9186bddcc9c33fd4518371ec4ab8b1aae5cc2e46dc8afb369cc621d37cca7beb",
+    "supabase/migrations/20261123220341_observed_payment_sources.sql": "29b484ed0bf28e519003086bca2f0c207219f682c183971cedc3eb36cc994f85",
+    "supabase/migrations/20261123231242_payment_match_candidates.sql": "6f42da35964c497c49454390531641d466f264a6092a90312a77ac56edceae53",
+    "supabase/migrations/20261123231648_payment_candidates_exact_receipt.sql": "5c5332535aebfb5de3f65b17a4e39d33844e2fcc6530026b4a1c4d298b62fccf",
+    "tests/e2e/payment-sources.spec.ts": "ec7e592dedcb3b9834f9bfe9629a83e21eef01c97990df9c9fec74c1258a9ce9",
+    "tests/e2e/staff-device.spec.ts": "528445b88a6c2771fd58ed25cd52b95da18f9f75679ce170081e4f851d0d2681",
+    "tests/fixtures/customer-link-service.ts": "7c074e7af9c82c8d01cf7d50878877e87b55c5b837aa913f7d78828b80f2e923",
+    "tests/fixtures/payment-sources-visual.mjs": "97c6c7b97175cb6bcea077e5f54ed073ef0842f8de30b2898622b43371e1ce08",
+    "tests/payment-source-recovery.test.ts": "a4135645f71d0c1c435c9b6ebb97038d6c19a7195865a2dabed8f85a0e33c915",
+    "tests/payment-source-session.test.ts": "444114975f86c4ac63db7c4dc6d4f2761efbec9a77703942d8eb8cbe4fc162c6",
+    "tests/payment-sources-fixture.ts": "f22965f689250507a37a79e042770d920352c0d2fe26698cae1ff38d734e11d2",
+    "tests/payment-sources-managed.ts": "4cfcb8db7d5d4668fe91a9e69dbe80d4021d026b880808dad4501ceadc4d40b4",
+    "tests/payment-sources.test.ts": "7167b0d00dc14c093b112a7d8fa1e6d197781c05eb8b9bf8617ff8eccda2351a",
+    "vitest.config.ts": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+  },
+  "verificationLogHashes": {
+    "unit-full": "2002342e70e9d15d79aec89999cc7b029974dfcbaa72d73c7ed34826c5e5e2dc",
+    "lint-current": "c17c5ec1a45a2c625fc36cc0c760e43f9459f2eea3a9d3f57be9ed6afa8b2375",
+    "types-current": "cecd8b0c7f13c0b152764dd96bed52e7b17f8e5f313f7de0d5ad00b8e3fd2420",
+    "build-root-final": "a8c1290d50d3da00162ca7ed95f93169297ddc710a23d84c6bed60fd3d819c96",
+    "browser-root-final": "5333bd4dd4a19c60a4b31bfa3138da9d3ee2e54aeaecd4a2f402aab4917eb803",
+    "build-pages-final": "ccb10dd6f12c5877f46590ee9aade85c029abc8558c0fff1efcaccec94f1ff04",
+    "browser-pages-final": "1a4b305e76afc77463d6e813ac4ac651203727f82c020ffd99158f23163a48cb",
+    "visual-current-final": "b46067278ac0ee45f791abc86535b7043b8d4032d5e646929ef45ce7b639eebc",
+    "exact-proof": "b21a7cfb0188c1e4776297b337f306b1193d2c126290a2b9de8b2ce70d3d6096",
+    "browser-first": "01f874051bff0acfbe0579f443795af33c692f22836a3b54414bc883f5ea4b57",
+    "root-before-label-fix": "5e01565f0ac4ddb5f8ff9702f7875c9f23d4eaff88a2a323d7e64793c517daf7",
+    "root-before-capture-race-fix": "139047b4987363a74e211c007d479b3d135e8555aa4b29cdac1e59c523b919ca",
+    "browser-root-staff-followup": "0296b3fc1082f3369e49eed936f425d21dbbcfe31fab9b2ea12d76d363fbe26a",
+    "staff-race-lint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "remaining": [
+    "Explicit general urgent notification choices and authenticated target resolution within five seconds",
+    "Full M37 commissioning and release; owner publication hold remains",
+    "Other unchecked handover milestones; physical/provider commissioning belongs to each installation"
+  ],
+  "security": {
+    "knownValuesChecked": 13,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "historicalDeploymentFindings": 22,
+    "legacyDeploymentFindings": 22,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "history": true,
+    "artifacts": true,
+    "newExceptions": 0,
+    "hooksEnabled": true,
+    "fullHistory": true,
+    "scanLogSha256": "29b95aadaad68a0d70fcf57d95407fb26040d6971b2c9e4018392366e81d2e30"
+  }
+}

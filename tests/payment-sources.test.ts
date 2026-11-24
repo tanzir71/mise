@@ -579,3 +579,103 @@ it('runs the exact installation role proof and rolls back all synthetic source a
     ).rows[0].n,
   ).toBe(0);
 });
+it('pages actual counter, paid-order and khata receipts without duplicates across tied timestamps', async () => {
+  const at = Date.now() - 1000;
+  for (let n = 0; n < 43; n++) await f.sale('100', 11, 'BDT', at);
+  await f.paidOrder();
+  await f.paidCredit();
+  const source = (await f.call(f.capture())).after!,
+    seen: string[] = [];
+  let after = null as
+    import('../packages/core/payment-sources').PaymentCandidateCursor | null;
+  do {
+    const page = await f.candidates(source, after, 1, 11, 7);
+    seen.push(...page.targets.map((t) => t.financialId));
+    after = page.next;
+  } while (after);
+  expect(seen).toHaveLength(45);
+  expect(new Set(seen).size).toBe(45);
+});
+it('candidate pages exclude reversed, claimed, wrong-amount/currency/method and other-outlet receipts', async () => {
+  const valid = await f.sale(),
+    claimed = await f.sale(),
+    voided = await f.sale(),
+    card = await f.sale();
+  await f.sale('200');
+  await f.sale('100', 12);
+  await f.sale('100', 11, 'USD');
+  await f.db.query(
+    "update public.sales set voided_at=$1,void_reason='undo',updated_at=$1 where id=$2",
+    [Date.now(), voided.id],
+  );
+  await f.db.query(
+    "update public.sales set method='card',method_name='\"Card\"' where id=$1",
+    [card.id],
+  );
+  const credit = await f.paidCredit();
+  await f.reverseCredit(credit);
+  const one = (await f.call(f.capture())).after!,
+    candidate = (await f.match(one.id, 'sale', claimed.id)).target!;
+  await f.call(
+    changePaymentSource(f.scope(), one, {
+      type: 'link',
+      target: candidate,
+      confirmed: true,
+    }),
+  );
+  const two = (await f.call(f.capture())).after!,
+    page = await f.candidates(two);
+  expect(page.targets.map((t) => t.id)).toEqual([valid.id]);
+});
+it('candidate reads require actual scope and current source, including partial cursor and role bypass rejection', async () => {
+  await f.sale();
+  const source = (await f.call(f.capture())).after!;
+  expect((await f.candidates(source, null, 2)).targets).toHaveLength(1);
+  await expect(f.candidates(source, null, 3)).rejects.toMatchObject({
+    code: '42501',
+  });
+  for (const role of ['anon', 'service_role'] as const)
+    await expect(
+      f.asRole(
+        1,
+        role,
+        'select public.read_payment_candidates($1,$2,$3) data',
+        [deviceId(11), source.id, source.fingerprint],
+      ),
+    ).rejects.toMatchObject({ code: '42501' });
+  await expect(
+    f.asRole(
+      1,
+      'authenticated',
+      'select public.read_payment_candidates($1,$2,$3,$4,null,$5) data',
+      [deviceId(11), source.id, source.fingerprint, Date.now(), newInboxId()],
+    ),
+  ).rejects.toMatchObject({ code: '22023' });
+  await f.call(
+    changePaymentSource(f.scope(), source, {
+      type: 'dismiss',
+      reason: 'Reviewed',
+    }),
+  );
+  await expect(f.candidates(source)).rejects.toMatchObject({ code: 'PT409' });
+});
+it('runs the installation candidate proof against actual Core money and guarded source pages, with fixtures rolled back', async () => {
+  const result = await f.db.exec(await paymentSourcesManagedProof(true)),
+    proof = result
+      .flatMap((r) => r.rows)
+      .find((row) => Object.hasOwn(row, 'proof'))?.proof as {
+      checks: number;
+      rolledBack: boolean;
+      financialWritesBySource: number;
+    };
+  expect(proof).toMatchObject({
+    checks: 63,
+    rolledBack: true,
+    financialWritesBySource: 0,
+  });
+});
+it('offers only the actual current order receipt when an older retained sale still names that order',async()=>{
+ const order=await f.paidOrder(),older=await f.sale();await f.db.query('update public.sales set order_id=$1 where id=$2',[order.id,older.id]);
+ const first=(await f.call(f.capture())).after!,page=await f.candidates(first);expect(page.targets).toHaveLength(1);expect(page.targets[0]).toMatchObject({kind:'order',financialId:order.payment.saleId});
+ await f.call(changePaymentSource(f.scope(),first,{type:'link',target:page.targets[0],confirmed:true}));const second=(await f.call(f.capture())).after!;expect((await f.candidates(second)).targets).toEqual([]);
+});

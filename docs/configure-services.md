@@ -20,6 +20,12 @@ Follow [Supabase's phone-login setup](https://supabase.com/docs/guides/auth/phon
 
 Provider billing and delivery settings belong to the installation's account. Test an actual code from the installation after configuring it; an automated local test does not establish real SMS delivery.
 
+## Observed payments (opt-in preview)
+
+The `ownerTasks` preview uses the installation's existing connection and confirmed owner/assigned-manager phone sign-in. Apply the repository's payment-source and receipt-picker migrations to that installation's backend. No additional provider, credential, receiving number or environment variable is required for manual observation review. **Add payment by hand** records literal source for a person; it does not verify a provider or record money. Select an actual eligible backend receipt and explicitly confirm its match. If no receipt exists, record the actual collection through the normal order, counter or khata flow first.
+
+Saved payment requests keep their full source and original identity on this device. After a lost reply, check or close that original before replacing it. **Saved payment requests from any outlet** can reopen the original account after outlet access is removed, with a separate recovery connection/sign-in supplied by the installation. Offline private copies and verified completed archives contain originals and receipts, without Auth tokens or provider credentials. They are separate from the shop backup. See [native payment review](https://github.com/tanzir71/mise/blob/main/docs/payment-sources-native.md).
+
 ## Desk notifications and device setup
 
 The installer configures the installation's own alarm signing key, VAPID keys and HTTPS contact page in its backend. Scheduler configuration and Vault references stay private. An owner chooses the outlet warning settings; each desk explicitly enables browser notifications. Staff screens are paired to that installation and signed in with a staff PIN.

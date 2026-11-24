@@ -28,7 +28,37 @@ import {
 } from './data/owner-task-recovery';
 import type { PhoneAuth, PhoneAuthState } from './data/phone-auth';
 import type { OwnerTaskFile } from './data/owner-task-archive';
+import {
+  listPaymentSourceLocators,
+  type SavedPaymentSource,
+} from './data/payment-source-journal';
+import {
+  openPaymentSourceRecoveryAuth,
+  openPaymentSourceRecovery,
+  readPaymentSourceRecoveryConnection,
+  savePaymentSourceRecoveryConnection,
+  type PaymentSourceRecovery,
+} from './data/payment-source-recovery';
+import { PaymentRequestSource } from './PaymentRequestSource';
 import './owner-tasks.css';
+type RecoveryKind = 'task' | 'payment';
+type AnyRecovery = Recovery | PaymentSourceRecovery;
+const recoveryTools = (kind: RecoveryKind) =>
+  kind === 'task'
+    ? {
+        list: listOwnerTaskLocators,
+        readConnection: readOwnerTaskRecoveryConnection,
+        saveConnection: saveOwnerTaskRecoveryConnection,
+        openAuth: openOwnerTaskRecoveryAuth,
+        open: openOwnerTaskRecovery,
+      }
+    : {
+        list: listPaymentSourceLocators,
+        readConnection: readPaymentSourceRecoveryConnection,
+        saveConnection: savePaymentSourceRecoveryConnection,
+        openAuth: openPaymentSourceRecoveryAuth,
+        open: openPaymentSourceRecovery,
+      };
 import './owner-task-recovery.css';
 
 const base = import.meta.env.BASE_URL;
@@ -47,11 +77,11 @@ interface Selection {
   config: CloudConnection | null;
   error: string;
 }
-function selection(): Selection {
+function selection(kind: RecoveryKind): Selection {
   try {
     return {
-      ...listOwnerTaskLocators(localStorage),
-      config: readOwnerTaskRecoveryConnection(localStorage),
+      ...recoveryTools(kind).list(localStorage),
+      config: recoveryTools(kind).readConnection(localStorage),
       error: '',
     };
   } catch {
@@ -64,8 +94,10 @@ function selection(): Selection {
     };
   }
 }
-export function OwnerTaskRecovery() {
-  const [view, setView] = useState(selection),
+export function OwnerTaskRecovery({
+  kind = 'task',
+}: { kind?: RecoveryKind } = {}) {
+  const [view, setView] = useState(() => selection(kind)),
     [chosen, setChosen] = useState(''),
     [attempt, setAttempt] = useState(0),
     [connection, setConnection] = useState(false),
@@ -73,7 +105,7 @@ export function OwnerTaskRecovery() {
     [saving, setSaving] = useState(false);
   const refresh = () => {
     setChosen('');
-    setView(selection());
+    setView(selection(kind));
     setAttempt((v) => v + 1);
     setError('');
   };
@@ -81,7 +113,9 @@ export function OwnerTaskRecovery() {
     const changed = (event: StorageEvent) => {
       if (
         event.key === null ||
-        event.key.startsWith('mise.owner-tasks.') ||
+        event.key.startsWith(
+          kind === 'task' ? 'mise.owner-tasks.' : 'mise.payment-sources.',
+        ) ||
         event.key === 'mise.cloud.connection.v1'
       )
         refresh();
@@ -95,7 +129,7 @@ export function OwnerTaskRecovery() {
     setSaving(true);
     setError('');
     try {
-      saveOwnerTaskRecoveryConnection(localStorage, value);
+      recoveryTools(kind).saveConnection(localStorage, value);
       refresh();
       setConnection(false);
     } catch {
@@ -111,7 +145,9 @@ export function OwnerTaskRecovery() {
       <header className="owner-task-heading">
         <div>
           <p className="eyebrow">MISE · THIS BROWSER</p>
-          <h1>Saved task requests</h1>
+          <h1>
+            {kind === 'task' ? 'Saved task requests' : 'Saved payment requests'}
+          </h1>
           <p>
             Review originals from any outlet, including one you can no longer
             open.
@@ -120,6 +156,15 @@ export function OwnerTaskRecovery() {
         <div>
           <Link to="/inbox" className="button button-secondary">
             Back to Inbox
+          </Link>
+          <Link
+            to={
+              kind === 'task'
+                ? '/settings/payments/recovery'
+                : '/settings/tasks/recovery'
+            }
+          >
+            {kind === 'task' ? 'Saved payment requests' : 'Saved task requests'}
           </Link>
           <Button kind="secondary" onClick={refresh}>
             Refresh saved groups
@@ -182,10 +227,19 @@ export function OwnerTaskRecovery() {
         </select>
       </div>
       {!view.error && !view.groups.length ? (
-        <p>No task requests are saved in this browser.</p>
+        <p>
+          {kind === 'task'
+            ? 'No task requests are saved in this browser.'
+            : 'No payment requests are saved in this browser.'}
+        </p>
       ) : null}
       {group && config && !connection ? (
-        <RecoveryGroup key={chosen + attempt} locator={group} config={config} />
+        <RecoveryGroup
+          key={chosen + attempt}
+          locator={group}
+          config={config}
+          kind={kind}
+        />
       ) : (
         <p>
           Choose a group, then use its original phone account to open the saved
@@ -198,9 +252,11 @@ export function OwnerTaskRecovery() {
 function RecoveryGroup({
   locator,
   config,
+  kind,
 }: {
   locator: OwnerTaskLocator;
   config: CloudConnection;
+  kind: RecoveryKind;
 }) {
   const [auth, setAuth] = useState<{
       manager: PhoneAuth;
@@ -229,10 +285,11 @@ function RecoveryGroup({
     const ticket = ++generation.current;
     setAuth(null);
     setError('');
-    void openOwnerTaskRecoveryAuth(config, base, locator.key, {
-      storage: localStorage,
-      separate,
-    })
+    void recoveryTools(kind)
+      .openAuth(config, base, locator.key, {
+        storage: localStorage,
+        separate,
+      })
       .then((opened) => {
         manager = opened.manager;
         if (!alive) {
@@ -305,6 +362,7 @@ function RecoveryGroup({
           manager={auth.manager}
           locator={locator}
           config={config}
+          kind={kind}
         />
       ) : null}
     </section>
@@ -314,13 +372,17 @@ function RecoveryHistory({
   manager,
   locator,
   config,
+  kind,
 }: {
   manager: PhoneAuth;
   locator: OwnerTaskLocator;
   config: CloudConnection;
+  kind: RecoveryKind;
 }) {
-  const [session, setSession] = useState<Recovery | null>(null),
-    [rows, setRows] = useState<SavedOwnerTask[] | null>(null),
+  const [session, setSession] = useState<AnyRecovery | null>(null),
+    [rows, setRows] = useState<(SavedOwnerTask | SavedPaymentSource)[] | null>(
+      null,
+    ),
     [error, setError] = useState(''),
     [message, setMessage] = useState(''),
     [busy, setBusy] = useState(false),
@@ -330,7 +392,7 @@ function RecoveryHistory({
     active = useRef(false);
   useEffect(() => {
     let alive = true,
-      opened: Recovery | null = null,
+      opened: AnyRecovery | null = null,
       unsubscribe: (() => void) | undefined;
     active.current = true;
     setSession(null);
@@ -341,7 +403,7 @@ function RecoveryHistory({
     const check = () => {
       if (
         !alive ||
-        JSON.stringify(readOwnerTaskRecoveryConnection(localStorage)) !==
+        JSON.stringify(recoveryTools(kind).readConnection(localStorage)) !==
           JSON.stringify(config)
       )
         throw Error('changed recovery connection');
@@ -356,10 +418,11 @@ function RecoveryHistory({
         setError(kept);
       }
     };
-    void openOwnerTaskRecovery(config, base, locator.key, manager, {
-      storage: localStorage,
-      assertLocal: check,
-    })
+    void recoveryTools(kind)
+      .open(config, base, locator.key, manager, {
+        storage: localStorage,
+        assertLocal: check,
+      })
       .then((value) => {
         opened = value;
         if (!alive) {
@@ -392,7 +455,7 @@ function RecoveryHistory({
       opened?.stop();
     };
   }, [manager, locator.key, config]);
-  async function work(run: (s: Recovery) => Promise<void>) {
+  async function work(run: (s: AnyRecovery) => Promise<void>) {
     if (running.current || !session) return;
     running.current = true;
     setBusy(true);
@@ -417,7 +480,7 @@ function RecoveryHistory({
       }
     }
   }
-  async function download(s: Recovery, file: OwnerTaskFile) {
+  async function download(s: AnyRecovery, file: OwnerTaskFile) {
     await s.assertCurrent();
     s.assertFile(file);
     const url = URL.createObjectURL(
@@ -491,8 +554,9 @@ function RecoveryHistory({
             <Card className="owner-task-original">
               <h2>Verify your saved archive</h2>
               <p>
-                The archive contains complete private task sources and replies.
-                Keep it somewhere private. Pending requests stay on this device.
+                The archive contains complete private sources and recorded
+                choices. Keep it somewhere private. Pending requests stay on
+                this device.
               </p>
               <p>
                 {plan.count} completed original{plan.count === 1 ? '' : 's'} ·{' '}
@@ -562,7 +626,7 @@ function RecoveryHistory({
               <p>
                 {last.closeRequested
                   ? 'Closure saved on this device. Retry sends only that closure.'
-                  : 'Check whether the original was accepted, or close it. Recovery never submits a new task choice.'}
+                  : 'Check whether the original was accepted, or close it. Recovery never submits a new choice.'}
               </p>
               <div className="owner-task-actions">
                 <Button
@@ -607,6 +671,14 @@ function RecoveryHistory({
           ) : null}
           <div className="owner-task-grid">
             {rows.map((row, n) => {
+              if ('source' in row)
+                return (
+                  <PaymentRequestSource
+                    key={row.intent.id}
+                    row={row}
+                    index={n}
+                  />
+                );
               const intent = row.intent,
                 task = intent.type === 'create' ? intent : intent.task;
               return (

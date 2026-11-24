@@ -12,7 +12,7 @@ import { capturePaymentSource } from '../packages/core/payment-sources';
 /** One rollback-only commissioning proof, executed unchanged locally and on the
  * installation. Fixtures have their own business and confirmed synthetic Auth
  * identities; no provider, phone verification or external service is invoked. */
-export async function paymentSourcesManagedProof() {
+export async function paymentSourcesManagedProof(withCandidates = false) {
   const uid = '00000000-0000-4000-8000-000000009975';
   const managerUid = '00000000-0000-4000-8000-000000009976';
   const at = Date.now() - 1000;
@@ -124,6 +124,12 @@ export async function paymentSourcesManagedProof() {
   const deny = (expression: string, code = '42501') =>
     `begin perform ${expression};raise exception 'Expected source denial';exception when sqlstate '${code}' then checks:=checks+1;end;`;
   const money = `(select md5(coalesce(string_agg(row_to_json(s)::text,',' order by s.id),'')) from public.sales s where s.business_id=${q(setup.business.id)})`;
+  const candidates = (
+    id = original.paymentId,
+    fp = "first_receipt->'after'->>'fingerprint'",
+    outlet = setup.outlet.id,
+  ) =>
+    `public.read_payment_candidates(${q(outlet)},${q(id)},${fp},null,null,null,1)`;
   return `begin;
 insert into auth.users(id,phone,phone_confirmed_at,is_anonymous) values(${q(uid)},'14155550975',now(),false),(${q(managerUid)},'14155550976',now(),false);
 ${inserts}
@@ -133,6 +139,7 @@ ${auth(uid)}r:=${act(q(JSON.stringify(original)))};first_receipt:=r;
 ${check("r->>'state'='applied' and r->'after'->>'origin'='manual' and r->'after'->>'status'='unmatched' and r->'after'->>'sourceJson'=" + q(JSON.stringify(text)), 'Source provenance or literal text changed')}
 ${check(act(q(JSON.stringify(original))) + '::jsonb=first_receipt::jsonb', 'Retry changed the original receipt')}
 ${check(source() + "->>'fingerprint'=first_receipt->'after'->>'fingerprint'", 'Actual source read differs')}
+${withCandidates ? `r:=${candidates()};${check("json_array_length(r->'targets')=1 and r->'targets'->0->>'financialId'=" + q(sale.sale.id) + " and json_typeof(r->'next')='null'", 'Actual candidate receipt page differs')}${deny(`public.read_payment_candidates(${q(setup.outlet.id)},${q(original.paymentId)},first_receipt->'after'->>'fingerprint',1,null,${q(sale.sale.id)},1)`, '22023')}` : ''}
 r:=${tasks()};
 ${check("r->'counts'->>'urgent'='1' and r->'counts'->>'total'='1' and r->'tasks'->0->>'mode'='source' and r->'tasks'->0->>'source'='payment' and json_array_length(r->'tasks'->0->'actions')=0", 'Source task missing or generic actions allowed')}
 r:=${target()};actual_target:=r->'target';
@@ -142,11 +149,13 @@ ${check("r->'after'->>'status'='matched' and " + tasks() + "->'counts'->>'total'
 ${check(money + '=baseline', 'Source match posted or rewrote money')}
 ${check(act('intent::text', 'inspect') + '::jsonb=linked::jsonb', 'Original match inspection differs')}
 r:=${act(q(JSON.stringify(second)))};current_source:=r->'after';
+${withCandidates ? check('json_array_length(' + candidates(second.paymentId, "current_source->>'fingerprint'") + "->'targets')=0", 'Claimed receipt remains a candidate') + deny(candidates(), 'PT409') : ''}
 ${check('json_typeof(' + target(second.paymentId) + "->'target')='null'", 'Already claimed financial receipt disclosed as eligible')}
 intent:=${change('link')};${deny(act('intent::text'), 'PT409')}
 ${auth(managerUid)}r:=${tasks()};
 ${check("r->'access'->>'memberId'=" + q(manager.id) + " and r->'access'->>'role'='manager'", 'Actual manager access missing')}
 ${deny(tasks(extra.id))}
+${withCandidates ? deny(candidates(original.paymentId, "linked->'after'->>'fingerprint'", extra.id)) : ''}
 ${deny(act(q(JSON.stringify(original))))}
 ${auth(uid)}current_source:=linked->'after';intent:=${change('undo')};r:=${act('intent::text')};
 ${check("r->'after'->>'status'='unmatched' and json_typeof(r->'after'->'match')='null'", 'Undo did not retain the unmatched source')}
@@ -156,6 +165,7 @@ reset role;update public.sales set voided_at=${Date.now()},void_reason='undo',up
 after_void:=${money};
 ${auth(uid)}current_source:=${source()};
 ${check("current_source->>'status'='review' and current_source->'match'->>'valid'='false' and json_typeof(current_source->'match'->'current')='null'", 'Financial reversal did not reopen review')}
+${withCandidates ? check('json_array_length(' + candidates(original.paymentId, "current_source->>'fingerprint'") + "->'targets')=0", 'Reversed receipt remains a candidate') : ''}
 ${check(tasks() + "->'counts'->>'urgent'='2'", 'Financial reversal did not reopen the actual urgent task')}
 ${check(act('intent::text', 'inspect') + '::jsonb=linked::jsonb', 'Financial reversal rewrote the immutable original receipt')}
 intent:=${change('dismiss')};r:=${act('intent::text')};
@@ -186,6 +196,7 @@ foreach role_name in array array['anon','service_role'] loop
  execute 'set local role '||role_name;
  ${deny('public.read_payment_source(' + q(setup.outlet.id) + ',' + q(original.paymentId) + ')')}
  ${deny(act(q(JSON.stringify(original)), 'inspect'))}
+ ${withCandidates ? deny(candidates()) : ''}
  reset role;
 end loop;
 ${check("(select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and c.relname in('payment_sources','payment_source_states','payment_source_actions') and c.relrowsecurity and c.relforcerowsecurity)=3", 'Source tables do not force RLS')}

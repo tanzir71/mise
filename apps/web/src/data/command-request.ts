@@ -53,6 +53,11 @@ export type OrderEstimateRpc='read_order_estimate'|'change_order_estimate';
 export type CheckoutPolicyRpc='read_checkout_policy'|'change_checkout_policy';
 export type StaffOwnerRpc='read_staff_context'|'read_staff_board'|'change_staff_action'|'read_staff_links'|'change_staff_link';
 export type OwnerTaskRpc='read_owner_task_page'|'act_owner_task';
+export type PaymentSourceRpc='read_payment_source'|'read_payment_match'|'read_payment_candidates'|'act_payment_source';
+export function createPaymentSourceRequest(config:CloudConnection,input:CommandAccount,rpc:PaymentSourceRpc,send:typeof fetch){
+ if(!['read_payment_source','read_payment_match','read_payment_candidates','act_payment_source'].includes(rpc))throw new CommandRequestError('review');
+ return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8*1024*1024);
+}
 export function createOwnerTaskRequest(config:CloudConnection,input:CommandAccount,rpc:OwnerTaskRpc,send:typeof fetch){
  if(!['read_owner_task_page','act_owner_task'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8*1024*1024);

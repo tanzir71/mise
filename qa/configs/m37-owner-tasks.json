@@ -25,7 +25,7 @@
       "id": "owner-questions",
       "path": "app/inbox/questions?flags=ownerTasks",
       "ownerTasksFixture": "questions",
-      "note": "M06 Questions for you, with current question counts and actual human choices. Future payment matching, attendance/invoice automation and voice actions are not fabricated; generic task decisions change no money or order.",
+      "note": "M06 Questions for you, with current question counts and actual human choices. Generic task decisions change no money or order; payment observations have their own explicit receipt review.",
       "sections": [
         {
           "id": "screen",

@@ -8,6 +8,9 @@ import {
   type PaymentSourceIntent,
   type PaymentSourceCapture,
   type PaymentMatchTarget,
+  parsePaymentCandidatePage,
+  type ObservedPayment,
+  type PaymentCandidateCursor,
 } from '../packages/core/payment-sources';
 import {
   decodeCommandRecord,
@@ -206,6 +209,35 @@ export async function paymentSourcesFixture() {
     call,
     source,
     match,
+    async candidates(
+      source: ObservedPayment,
+      after: PaymentCandidateCursor | null = null,
+      n = 1,
+      outlet = 11,
+      limit = 20,
+    ) {
+      return parsePaymentCandidatePage(
+        await f.asRole(
+          n,
+          'authenticated',
+          'select public.read_payment_candidates($1,$2,$3,$4,$5,$6,$7) data',
+          [
+            deviceId(outlet),
+            source.id,
+            source.fingerprint,
+            after?.at ?? null,
+            after?.kind ?? null,
+            after?.id ?? null,
+            limit,
+          ],
+        ),
+        f.scope(n, outlet),
+        source.id,
+        source.fingerprint,
+        after,
+        limit,
+      );
+    },
     facts,
     records,
     paidOrder,

@@ -1,0 +1,58 @@
+{
+  "title": "M37 — manual payment sources, checked receipts and original recovery",
+  "widths": [360, 390, 768, 1024, 1440],
+  "pages": [
+    {
+      "id": "payment-source",
+      "path": "app/inbox?flags=ownerTasks",
+      "paymentSourcesFixture": "source",
+      "note": "M20 Inbox cards, type and controls reused for actual payment observations. The source-specific detail/picker is an explicit adaptation beyond the supplied phone reference. Actual Core receipts and authenticated SQL are used; observations do not post money.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".payment-review",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "payment-capture",
+      "path": "app/inbox?flags=ownerTasks",
+      "paymentSourcesFixture": "capture",
+      "note": "Manual entry using existing setup/review primitives and M20 Inbox visual language. All values are entered by the installation's user, with no provider confirmation or invented account. This form is an adaptation, not a matching Figma payment form.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".payment-review",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "payment-receipt",
+      "path": "app/inbox?flags=ownerTasks",
+      "paymentSourcesFixture": "receipt",
+      "note": "Actual receipt selection and explicit confirmation reuse the existing review sheet. Current amount/currency/method must match; source text is literal. New payment-specific controls are reported as adaptations beyond M20.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".app-dialog[open]",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    },
+    {
+      "id": "payment-recovery",
+      "path": "app/settings/payments/recovery?flags=ownerTasks",
+      "paymentSourcesFixture": "recovery",
+      "note": "Original-account recovery retains a lost match's full original source and receipt selection without native outlet selection or fresh execution. It shares the established task-recovery controls and M20 cards; personal recovery is an explicit addition to the supplied reference.",
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".owner-task-recovery",
+          "reference": "screens/mobile/M20 · Manager — Inbox (questions, things that didn’t work, chats).png"
+        }
+      ]
+    }
+  ]
+}

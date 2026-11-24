@@ -44,6 +44,7 @@ import {deviceSecretHash} from '../../packages/core/device-access';
 import {recordSaleCommand} from '../../packages/core/sales';
 import {saveStockItemCommand} from '../../packages/core/stock';
 import {createOwnerTaskIntent,type OwnerTaskKind,type OwnerTaskCreate} from '../../packages/core/owner-tasks';
+import {capturePaymentSource,changePaymentSource,parsePaymentSourcePage} from '../../packages/core/payment-sources';
 /** Synthetic phone accounts with actual Core commands, HTTP, Auth SDK clients,
  * SQL roles, scope checks and one-time capabilities. No provider/hosted account. */
 export async function startCustomerLinkService(options:{ordering?:boolean;estimates?:boolean;checkout?:boolean;staffTeam?:boolean;liveStore?:boolean;ownerTasks?:boolean}={}) {
@@ -52,7 +53,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
   let apiUrl = '',
     lose: string | null = null;
   const rpcs: Record<string, string[]> = {
-    ...(options.ownerTasks?{read_owner_task_page:['p_outlet_id','p_filter','p_after_at','p_after_id','p_version','p_limit'],act_owner_task:['p_outlet_id','p_operation','p_intent_json']}:{}),
+    ...(options.ownerTasks?{read_owner_task_page:['p_outlet_id','p_filter','p_after_at','p_after_id','p_version','p_limit'],act_owner_task:['p_outlet_id','p_operation','p_intent_json'],read_payment_source:['p_outlet_id','p_payment_id'],read_payment_match:['p_outlet_id','p_payment_id','p_kind','p_target_id'],read_payment_candidates:['p_outlet_id','p_payment_id','p_fingerprint','p_after_at','p_after_kind','p_after_id','p_limit'],act_payment_source:['p_outlet_id','p_operation','p_intent_json']}:{}),
     ...(options.liveStore?{read_live_store:['p_outlet_id','p_all_outlets','p_period','p_after_outlet','p_view_outlet_id']}:{}),
     ...(options.staffTeam?{read_staff_context:['p_outlet_id','p_member_id'],read_staff_board:['p_outlet_id','p_after','p_page_size'],change_staff_action:['p_outlet_id','p_action_json','p_operation'],read_staff_links:['p_outlet_id','p_member_id','p_after'],change_staff_link:['p_outlet_id','p_action_json','p_operation']}:{}),
     ...((options.ordering||options.estimates||options.checkout)?{read_checkout_policy:['p_outlet_id','p_order_id'],change_checkout_policy:['p_outlet_id','p_action','p_operation']}:{}),
@@ -258,6 +259,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
   }
   async function reset() {
     await f.seed();
+    if(options.ownerTasks)await f.db.exec('truncate private.payment_source_actions');
     records = resources();
     lose = null;
     await f.db.exec(
@@ -356,7 +358,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       let size = 0;
       for await (const part of req) {
         size += part.length;
-        if (size > (options.ownerTasks?262144:options.ordering||options.checkout?65536:8192)) throw Error();
+        if (size > (options.ownerTasks?524288:options.ordering||options.checkout?65536:8192)) throw Error();
         chunks.push(Buffer.from(part));
       }
       const raw = Buffer.concat(chunks).toString('utf8'),
@@ -407,7 +409,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
             );
           } catch (error) {
             const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
-            const staffRpc=['read_staff_context','read_staff_board','change_staff_action','read_staff_links','change_staff_link','read_owner_task_page','act_owner_task'].includes(rpc);
+            const staffRpc=['read_staff_context','read_staff_board','change_staff_action','read_staff_links','change_staff_link','read_owner_task_page','act_owner_task','read_payment_source','read_payment_match','read_payment_candidates','act_payment_source'].includes(rpc);
             const status=(staffRpc||['read_order_estimate','change_order_estimate','read_checkout_policy','change_checkout_policy'].includes(rpc))?code==='42501'?403:code==='PT409'||code==='23505'||staffRpc&&code==='40001'?409:code.startsWith('22')?400:503:403;
             response = json({ error: status===403?'Access denied':'Review the original action' },status);
           }
@@ -490,7 +492,7 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       rpc:
         | 'create_public_link'
         | 'close_public_link_attempt'
-        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations' | 'change_staff_action' | 'change_staff_link' | 'staff' | 'act_owner_task',
+        | 'revoke_public_link' | 'publish_public_shop' | 'revoke_public_shop' | 'orders' | 'change_order_estimate' | 'change_checkout_policy' | 'order-confirmations' | 'change_staff_action' | 'change_staff_link' | 'staff' | 'act_owner_task' | 'act_payment_source',
     ) {
       lose = rpc;
     },
@@ -499,6 +501,14 @@ export async function startCustomerLinkService(options:{ordering?:boolean;estima
       if(!options.ownerTasks)throw Error('Owner tasks are not enabled');const scope={v:1 as const,businessId:setup.business.id,outletId:setup.outlet.id,memberId:n===1?setup.owner.id:records.members[1].id,role:n===1?'owner' as const:'manager' as const},intent=createOwnerTaskIntent(scope,{kind:'question',mode:'decision',...draft});await f.asRole(n,'authenticated','select public.act_owner_task($1,$2,$3) data',[scope.outletId,'submit',JSON.stringify(intent)]);return intent.taskId;
     },
     async ownerTaskFacts(){return(await f.db.query<{data:{tasks:number;open:number;resolved:number;actions:number;closed:number;sales:string;entries:string}}>("select json_build_object('tasks',(select count(*) from public.tasks),'open',(select count(*) from public.tasks where status in('open','waiting')),'resolved',(select count(*) from public.tasks where status='resolved'),'actions',(select count(*) from private.owner_task_actions),'closed',(select count(*) from private.owner_task_actions where state='closed'),'sales',(select md5(coalesce(string_agg(row_to_json(s)::text,',' order by s.id),'')) from public.sales s),'entries',(select md5(coalesce(string_agg(row_to_json(e)::text,',' order by e.id),'')) from public.credit_entries e)) data")).rows[0].data;},
+    async paymentSourceCreate(text='bKash received 100. Keep this source for a person. বাংলা'){
+      const scope={v:1 as const,businessId:setup.business.id,outletId:setup.outlet.id,memberId:setup.owner.id,role:'owner' as const},intent=capturePaymentSource(scope,{amount:10000,currency:'BDT',method:'cash',methodName:'Cash',reference:'Statement reference',source:text,receivedAt:Date.now()});
+      await f.asRole(1,'authenticated','select public.act_payment_source($1,$2,$3) data',[scope.outletId,'submit',JSON.stringify(intent)]);return intent;
+    },
+    async paymentReceipt(){const change=recordSaleCommand({expression:'100',method:'cash'},{setup,items:[],wallets:[]});await f.db.transaction(async tx=>{await insert(tx,encodeCommandRecord('sales',change.sale,setup.business.id));await insert(tx,encodeCommandRecord('events',change.event,setup.business.id));});return change.sale;},
+    async paymentVoid(id:string){await f.db.query("update public.sales set voided_at=$1,void_reason='undo',updated_at=$1 where id=$2",[Date.now(),id]);},
+    async paymentManagerReview(id:string){const scope={v:1 as const,businessId:setup.business.id,outletId:setup.outlet.id,memberId:records.members[1].id,role:'manager' as const},page=parsePaymentSourcePage(await f.asRole(2,'authenticated','select public.read_payment_source($1,$2) data',[scope.outletId,id]),scope,id),intent=changePaymentSource(scope,page.source,{type:'dismiss',reason:'Checked by another person'});return f.asRole(2,'authenticated','select public.act_payment_source($1,$2,$3) data',[scope.outletId,'submit',JSON.stringify(intent)]);},
+    async paymentFacts(){return(await f.db.query<{data:{payments:number;actions:number;closed:number;sales:string;entries:string}}>("select json_build_object('payments',(select count(*) from public.payments),'actions',(select count(*) from private.payment_source_actions),'closed',(select count(*) from private.payment_source_actions where state='closed'),'sales',(select md5(coalesce(string_agg(row_to_json(s)::text,',' order by s.id),'')) from public.sales s),'entries',(select md5(coalesce(string_agg(row_to_json(e)::text,',' order by e.id),'')) from public.credit_entries e)) data")).rows[0].data;},
     async ownerTaskRevoke(n:1|2=1){await f.db.query('update public.members set active=false where id=$1',[n===1?setup.owner.id:records.members[1].id]);},
     async staffScene(base:string){
       if(!options.staffTeam)throw Error('Staff fixture is not enabled');

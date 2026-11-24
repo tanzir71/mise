@@ -1,6 +1,6 @@
 # M37 · Observed payment sources
 
-This increment supplies Core contracts and guarded database operations for observed payments. It does not yet expose a native capture/matching form, client request journal or general notification subscription. `ownerTasks` remains off by default; M37 remains unchecked.
+This checkpoint supplied Core contracts and guarded database operations for observed payments. The subsequent [native payment preview](payment-sources-native.md) now supplies capture, specific receipt review, durable originals and personal recovery. General urgent notification subscriptions remain open. `ownerTasks` stays off by default; M37 remains unchecked.
 
 An observation preserves the complete source, reference, amount in integer minor units, currency, payment method, received time and actual recorder. Manual capture records its origin as `manual`; customer text cannot claim to be a verified provider notification. Bangla, NUL and unpaired UTF-16 code units survive encoded literal fields unchanged. Text is data, including any instructions it contains.
 
@@ -22,4 +22,4 @@ All 4,901 unit cases across 253 files pass in one full invocation. The original 
 
 Verification results and source hashes are recorded in [the evidence file](payment-sources-verification.json). There are no interface or asset changes in this increment, so visual comparisons were not rerun. The previous 30 Inbox/recovery comparisons remain available; native payment review and its visual verification are subsequent required work.
 
-Remaining M37 work includes a usable native payment review target with durable original requests and recovery, explicit general urgent subscriptions, notification delivery within five seconds and resolution from the authenticated target. This groundwork matches already-recorded money; any future financial posting must use the actual domain commands and an explicit human review. GitHub Actions, CI artifact uploads, public Pages publication and scheduling remain held by the owner's instruction.
+The [native payment follow-up](payment-sources-native.md) supplies the review target and durable originals described above. Remaining M37 work includes explicit general urgent subscriptions, notification delivery within five seconds and resolution from the authenticated target. Matching uses already-recorded money; any new collection uses the actual domain commands and explicit human review. GitHub Actions, CI artifact uploads, public Pages publication and scheduling remain held by the owner's instruction.

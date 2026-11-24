@@ -15,6 +15,7 @@ import checkAsset from './assets/inbox/check.svg';
 import './inbox.css';
 import {useOwnerTasksEnabled} from './owner-tasks-context';
 const OwnerTaskInbox=lazy(()=>import('./OwnerTaskInbox').then(module=>({default:module.OwnerTaskInbox})));
+const PaymentSourceReview=lazy(()=>import('./PaymentSourceReview').then(module=>({default:module.PaymentSourceReview})));
 
 import {DeskAlarmTasks,DeskInboxPage} from './DeskAlarmInbox';
 const PasteOrder=lazy(()=>import('./PasteOrder').then(m=>({default:m.PasteOrder})));
@@ -35,6 +36,7 @@ export function Inbox({setup,online,captureEnabled=true}:{setup:SetupSnapshot;on
   const {'*':rawPath=''}=useParams(),path=rawPath==='shared'?'':rawPath,navigate=useNavigate(),[archived,setArchived]=useState(false),ownerTasks=useOwnerTasksEnabled();
   const items=useLiveQuery(()=>db.inboxItems.where('outletId').equals(setup.outlet.id).reverse().sortBy('createdAt'),[setup.outlet.id]);
   const unassigned=useLiveQuery(()=>db.inboxItems.filter(item=>item.outletId===null).reverse().sortBy('createdAt'),[]);
+  if(ownerTasks&&/^payments\/(?:new|[0-9A-HJKMNP-TV-Z]{26})$/.test(rawPath))return <Suspense fallback={<p aria-busy="true">Opening payment review…</p>}><PaymentSourceReview setup={setup} paymentId={rawPath==='payments/new'?undefined:rawPath.slice(9)}/></Suspense>;
   if(ownerTasks&&(rawPath===''||rawPath==='questions'))return <><Suspense fallback={<p aria-busy="true">Opening tasks…</p>}><OwnerTaskInbox setup={setup} questions={rawPath==='questions'}/></Suspense>{captureEnabled?<section className="owner-task-sources"><Link to="/inbox/shared" className="button button-secondary">Shared text and images on this device</Link></section>:null}</>;
   if(!captureEnabled)return <DeskInboxPage setup={setup}/>;
   if(path==='new')return <InboxAdd onDone={item=>navigate(`/inbox/${item.id}`)}/>;

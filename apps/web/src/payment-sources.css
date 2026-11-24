@@ -1,0 +1,105 @@
+.payment-review {
+  display: grid;
+  gap: 24px;
+}
+.payment-review-grid {
+  display: grid;
+  gap: 24px;
+}
+.payment-review .owner-task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.payment-review h2,
+.payment-review h3,
+.payment-review p {
+  margin: 0;
+}
+.payment-review h2 {
+  font-size: 20px;
+  font-weight: 500;
+}
+.payment-review h3 {
+  font-size: 16px;
+  font-weight: 500;
+}
+.payment-review .payment-amount {
+  font-size: 32px;
+}
+.payment-review footer {
+  margin-top: auto;
+  display: grid;
+  gap: 16px;
+}
+.payment-candidates {
+  display: grid;
+  gap: 16px;
+}
+.payment-candidates > div {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+.payment-receipt {
+  display: grid;
+  gap: 8px;
+}
+.payment-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 44px;
+}
+.payment-confirm input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+.payment-saved-request .owner-task-saved-source dd {
+  overflow-wrap: anywhere;
+}
+.payment-review .owner-task-literal {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.payment-review fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.payment-review section[aria-label='Saved payment request'] {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .payment-review-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.payment-review .owner-task-saved-source,
+.payment-saved-request .owner-task-saved-source {
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.payment-review .owner-task-saved-source > div,
+.payment-saved-request .owner-task-saved-source > div {
+  display: grid;
+  gap: 8px;
+}
+.payment-review .payment-amount {
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.payment-review .owner-task-saved-source dd,
+.payment-review .payment-receipt,
+.payment-review .payment-amount {
+  overflow-wrap: anywhere;
+}

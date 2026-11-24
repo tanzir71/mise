@@ -98,6 +98,94 @@ export interface PaymentMatchPage {
   target: PaymentMatchTarget | null;
   eligible: boolean;
 }
+export interface PaymentCandidateCursor {
+  at: number;
+  kind: PaymentMatchTarget['kind'];
+  id: string;
+}
+export interface PaymentCandidatePage extends PaymentSourcePage {
+  targets: PaymentMatchTarget[];
+  next: PaymentCandidateCursor | null;
+}
+export function parsePaymentCandidateCursor(
+  value: unknown,
+): PaymentCandidateCursor {
+  if (
+    !object(value) ||
+    !exact(value, 'at,kind,id') ||
+    !time(value.at) ||
+    !['order', 'sale', 'credit'].includes(value.kind as string) ||
+    !isDeviceId(value.id)
+  )
+    throw bad();
+  return {
+    at: value.at,
+    kind: value.kind as PaymentMatchTarget['kind'],
+    id: value.id,
+  };
+}
+export function comparePaymentCandidates(
+  a: PaymentCandidateCursor,
+  b: PaymentCandidateCursor,
+) {
+  return (
+    b.at - a.at || b.kind.localeCompare(a.kind) || b.id.localeCompare(a.id)
+  );
+}
+export function parsePaymentCandidatePage(
+  value: unknown,
+  scope: DeskPushContext,
+  paymentId: string,
+  fingerprint: string,
+  after: PaymentCandidateCursor | null = null,
+  limit = 20,
+): PaymentCandidatePage {
+  if (
+    !object(value) ||
+    !exact(value, 'v,access,at,source,targets,next') ||
+    !Array.isArray(value.targets) ||
+    !Number.isInteger(limit) ||
+    limit < 1 ||
+    limit > 50 ||
+    value.targets.length > limit
+  )
+    throw bad();
+  const page = parsePaymentSourcePage(
+    { v: value.v, access: value.access, at: value.at, source: value.source },
+    scope,
+    paymentId,
+  );
+  if (page.source.fingerprint !== fingerprint) throw bad();
+  const targets = value.targets.map((t) => parsePaymentMatchTarget(t, scope)),
+    cursors = targets.map((t) => ({
+      at: t.at,
+      kind: t.kind,
+      id: t.financialId,
+    }));
+  if (
+    new Set(
+      targets.map(
+        (t) => (t.kind === 'credit' ? 'credit:' : 'sale:') + t.financialId,
+      ),
+    ).size !== targets.length ||
+    targets.some((t) => !paymentMatchEligible(page.source, t)) ||
+    cursors.some((c, n) =>
+      n
+        ? comparePaymentCandidates(cursors[n - 1], c) >= 0
+        : after !== null && comparePaymentCandidates(after, c) >= 0,
+    )
+  )
+    throw bad();
+  const next =
+    value.next === null ? null : parsePaymentCandidateCursor(value.next);
+  if (
+    next &&
+    (targets.length !== limit ||
+      JSON.stringify(next) !== JSON.stringify(cursors.at(-1)))
+  )
+    throw bad();
+  return { ...page, targets, next };
+}
 const object = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === 'object' && !Array.isArray(v);
 const exact = (v: Record<string, unknown>, keys: string) =>
