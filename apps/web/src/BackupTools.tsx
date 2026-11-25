@@ -18,7 +18,7 @@ export function BackupTools({setup,recovery=false}:{setup?:SetupSnapshot;recover
     if (busy.current) return;busy.current=true;setSaving(true);setError('');setMessage('');setReady(null);setBackupFallback(false);
     let prepared:File|undefined,historySaved=false;
     try {
-      const snapshot=await db.readBackup(),file=backupFile(snapshot);
+      const {current:snapshot,portable}=await db.readPortableBackup(),file=backupFile(portable);
       prepared=file;setReady(file);
       if (setup) await db.recordPreparedExport({outletId:setup.outlet.id,actorId:setup.owner.id,format:'json',datasets:[],rows:Object.values(backupCounts(snapshot)).reduce((a,b)=>a+b,0),filename:file.name,capturedAt:snapshot.exportedAt,from:null,to:null,includePhones:true});
       historySaved=true;

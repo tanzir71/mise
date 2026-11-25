@@ -1,0 +1,330 @@
+{
+  "milestone": "M41",
+  "increment": "Durable independent local payment originals and complete portable backup/restore",
+  "complete": false,
+  "baseCommit": "2df0e481973c18e05f8d480f856a846c278f416e",
+  "scope": {
+    "nativeSchema": 30,
+    "frozenOriginalGraphVersion": 1,
+    "ordinaryCurrentSchema": 13,
+    "ordinaryDomainTables": 22,
+    "legacyEmptyArchiveFormatVersion": 1,
+    "nonemptyArchivePortableFormatVersion": 2,
+    "actualBackupAndRecoveryControlsIntegrated": true,
+    "originalCurrentFinancialValidationSeparate": true,
+    "originalImageAndTextComplete": true,
+    "physicalBackupLimitBytes": 52428800,
+    "aggregateOriginalSnapshotLimitBytes": 209715200,
+    "maxOriginalBases": 512,
+    "archiveEviction": false,
+    "liveBindingUploadCanonicalFencesRetained": true,
+    "productionConnectedAdapterEnabled": false,
+    "paymentTextDefault": false,
+    "allInstallationConfigurationEndUserOwned": true,
+    "noHostedMigrationServiceWorkflowOrPublicationChanges": true
+  },
+  "unit": {
+    "uniqueCasesVerified": 5559,
+    "files": 293,
+    "singleCleanFullSuiteInvocation": false,
+    "fullRun": {
+      "passed": 5558,
+      "failed": 1,
+      "durationSeconds": 1420.01,
+      "log": ".private/m41-archive-full-unit.log",
+      "report": ".private/m41-archive-full-unit.json",
+      "failure": "upgrades schema 20 with all 34 original stores, complete images, queue and canonical evidence unchanged",
+      "cause": "The reconstructed schema-20 fixture accidentally included the three later archive stores."
+    },
+    "fixtureCorrection": {
+      "file": "tests/scope-recovery-db.test.ts",
+      "passed": 18,
+      "failed": 0,
+      "log": ".private/m41-archive-recovery-fixture-recheck.log",
+      "durationSeconds": 12.48,
+      "selection": "Exclude only the later paymentOriginal* stores; preserve the original 34-store count and all existing data/behavior assertions.",
+      "productionChanged": false,
+      "corporaAndDeadlinesChanged": false,
+      "sha256": "ee685ed179fcf57496c4f9ddd70a516760de5dc33fe6d4cc0c5feebd4803bf2d"
+    },
+    "allFrozenProductionAndPriorTestsUnchanged": true,
+    "newArchiveCases": 20,
+    "log": ".private/m41-archive-full-unit.log",
+    "report": ".private/m41-archive-full-unit.json",
+    "startTime": 1795617084833,
+    "durationSeconds": 1419.975,
+    "maxWorkers": 2,
+    "originalCorporaAndDeadlinesUnchanged": true,
+    "oldBehaviorAssertionsPreserved": true,
+    "nativeVersionFixture": "Schema-28/schema-20 fixtures exclude later archive stores; the current native version assertion advances to30.",
+    "measuredScale": {
+      "stage": "archive-wire-size",
+      "wireBytes": 28780917,
+      "expandedJsonBytes": 55781689,
+      "charges": 5000,
+      "noteCodeUnits": 1000000,
+      "bases": 3
+    }
+  },
+  "checks": {
+    "types": {
+      "passed": true,
+      "astroFiles": 225,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-archive-final-types.log"
+    },
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-archive-final-lint.log"
+    },
+    "initialArchiveUiProbe": {
+      "passed": 2,
+      "widths": [
+        390,
+        1440
+      ],
+      "log": ".private/m41-archive-ui-probe.log"
+    },
+    "newProductMarkupOrStyles": false,
+    "newVisualComparisonRun": false,
+    "ownPort": 4332,
+    "neverTouchPort": 4321,
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "log": ".private/m41-archive-root-final-build.log"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "log": ".private/m41-archive-pages-build.log"
+      }
+    ],
+    "productionSourcesUnchangedThroughVerification": true,
+    "priorVisualEvidence": [
+      "docs/payment-inspection-verification.json",
+      "docs/payment-native-backend-verification.json"
+    ]
+  },
+  "remainingM41": [
+    "Authenticated connected archive transport and original receipts",
+    "Original-versus-canonical immutable financial outcomes and original undo handling",
+    "Actual native app outbox delivery/inspection/closure",
+    "Initial historical native registration without replaying old money",
+    "Complete canonical projection and same-milestone acceptance"
+  ],
+  "delivery": {
+    "directMain": true,
+    "skipCi": true,
+    "workflowsHeld": true,
+    "publicationHeld": true,
+    "providerCommissioningHeld": true,
+    "migrationServiceDeploymentHeld": true,
+    "tagsHeld": true,
+    "observedBeforeCommit": {
+      "disabledWorkflows": 3,
+      "runCount": 77,
+      "latestRun": 43927944995,
+      "latestDeployment": 7832852111
+    },
+    "postPushRecheck": ".private/m41-archive-delivered.json"
+  },
+  "browser": {
+    "root": {
+      "report": ".private/m41-archive-root-browser.json",
+      "startTime": "2026-11-25T14:59:02.711Z",
+      "duration": 266794.589,
+      "expected": 49,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "pages": {
+      "report": ".private/m41-archive-pages-browser.json",
+      "startTime": "2026-11-25T15:04:37.605Z",
+      "duration": 267195.228,
+      "expected": 49,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "distinctPerBase": 49,
+    "workers": 1,
+    "retries": 0,
+    "newArchiveCasesPerBase": 2,
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "axeAssertedImpacts": [
+      "serious",
+      "critical"
+    ],
+    "assertedAxeViolations": 0,
+    "providerAccountRequired": false,
+    "ordinaryBackupUiRestoreTestedOffline": true,
+    "connectedOriginalsTransportEnabled": false,
+    "ordinaryFileArchiveTransportImplemented": true
+  },
+  "secretScan": {
+    "status": "passed",
+    "command": "pnpm check:secrets --history --artifacts",
+    "observedBeforeFinalRecord": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0
+    },
+    "firstLog": ".private/m41-archive-first-secrets.log",
+    "finalSameSourceRecordRecheck": ".private/m41-archive-final-secrets.log",
+    "newExceptions": 0,
+    "legacyBaselineChanged": false,
+    "commitPushGuardsRemainEnabled": true
+  },
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "718e304488e213ad7563fd53e3d8b8ecf12c6ce26983c1f86c4ebe92f3332511"
+    },
+    {
+      "path": "apps/web/src/BackupTools.tsx",
+      "sha256": "1a168cdef95a374afd7fc6c86bc1a22eb58ac29fc4a61fda9fd279cf2f6efe2a"
+    },
+    {
+      "path": "apps/web/src/CloudJoin.tsx",
+      "sha256": "e94b9f7d85cc865e0f07d3bf8b825f36d50b3175ab4d9f37fb330c7a27c435ba"
+    },
+    {
+      "path": "apps/web/src/CloudRecovery.tsx",
+      "sha256": "b01bc18c13d81856d2040fb2e2a9045c2d6d7b4efdc804135a83511eeff4048e"
+    },
+    {
+      "path": "apps/web/src/OwnerResume.tsx",
+      "sha256": "c0d27b27443f547e6ebf169ab3c61b0280522517ec400ade8dde4b18af0a45b8"
+    },
+    {
+      "path": "apps/web/src/data/backup.ts",
+      "sha256": "ad0ab7034fcddb26f52e0b01bcdc50d863a286078fef67743822168b793304e5"
+    },
+    {
+      "path": "apps/web/src/data/cloud-scope-apply.ts",
+      "sha256": "d37acff120a0fb9280c5222170228398ee69f73b342bce07ff53adf5e851870b"
+    },
+    {
+      "path": "apps/web/src/data/cloud-sync-apply.ts",
+      "sha256": "e44818b5fe3d0c3d35f47c5ebb1fb76f10a3d4087e971b9a593c312f1e0ab1e8"
+    },
+    {
+      "path": "apps/web/src/data/cloud-sync-join.ts",
+      "sha256": "af16ce88b8bcf755328e02fb407d1f0cd07e2febf2aca774de97caec590a3d6a"
+    },
+    {
+      "path": "apps/web/src/data/cloud-upload.ts",
+      "sha256": "f2b65af718d53a4f8ef58628385fbcfaddea5eeca1c562bb757e9b152c203437"
+    },
+    {
+      "path": "apps/web/src/data/db.ts",
+      "sha256": "d08661850da574f4ed0504753d75536f11e6603cafe5272b0663c6a24145292f"
+    },
+    {
+      "path": "apps/web/src/data/export-files.ts",
+      "sha256": "18e90c5f27a0f0e946db0d16539c0942baa5d71c252c636f7c4f4536adce50b6"
+    },
+    {
+      "path": "apps/web/src/data/local-outbox.ts",
+      "sha256": "11ec8419e91d25ba88156587436a95f7ae48a895cc96bbef59e298ca69e3a6e3"
+    },
+    {
+      "path": "apps/web/src/data/local-store.ts",
+      "sha256": "9b84260c8e9c9ee91a044febd90a3c9ad422be6809b9eed15796f15de9890eb6"
+    },
+    {
+      "path": "apps/web/src/data/payment-original-retention.ts",
+      "sha256": "e38fa48609ed820e0235cacd88695d19741acd90b93fff92424ef7e1a0a056a3"
+    },
+    {
+      "path": "docs/payment-native-backend.md",
+      "sha256": "c2b8b64d66a7514d6b40ddf1d6d653c4224d8d827720e1ba04426c8945ca249c"
+    },
+    {
+      "path": "docs/payment-original-archive.md",
+      "sha256": "6711cfcdced228b9a323b82a6024008e3315cce48f3e6ae90b62233a6741f2e2"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "76492b217ed7e7967e1d02be8238deab03e14e1846797200d9594f8d8686cc92"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "80f48839a39fb502f7949895c92d8bc59a0ff75c9c76172ae7529ced8f550e8a"
+    },
+    {
+      "path": "packages/core/backup-tables.ts",
+      "sha256": "caede070500fec0f790c73b84f53522e0fe8f5b61cec1f82b929109853ed4489"
+    },
+    {
+      "path": "packages/core/backup.ts",
+      "sha256": "0e7463d606a3d88476bbf775e160c9fbc62f977f6c6ec86b5b7344c0204d5685"
+    },
+    {
+      "path": "packages/core/local-outbox.ts",
+      "sha256": "fa32ebe8ecdcb2b378406cad17a7db0aae46768929b1dcae7b1ade8d37d7dc12"
+    },
+    {
+      "path": "packages/core/local-schema.ts",
+      "sha256": "d1ff48de8d06fd80d707dea4307a115ebb44edfc2b185c7f0aff99ed71f51323"
+    },
+    {
+      "path": "packages/core/payment-archive.ts",
+      "sha256": "69d72f2abe2ce492ceb382b1dca39938df7ec90638b813568a5e0a0b15b7c0e6"
+    },
+    {
+      "path": "packages/core/payment-originals.ts",
+      "sha256": "971f96b45357c0c0a0e29df26eee8a0b36d4973f02a451bc0f9744bd73966fe5"
+    },
+    {
+      "path": "packages/core/shared-json.ts",
+      "sha256": "41f0848dc0b01e684d95317b18c6215f0ae5e9f6d489a87b4c3ac4a4168a801d"
+    },
+    {
+      "path": "tests/e2e/payment-archive.spec.ts",
+      "sha256": "25f8085201f1e584499fd51addef597100876574fd6087c926dc475b3a8a1408"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "8fd4f818c1ef7374c5a1ad4bd58a6ef9af6458563edf0431061c2cfdad52c93e"
+    },
+    {
+      "path": "tests/fixtures/payment-storage.ts",
+      "sha256": "9af16f22181f2e50e58d4fec140f3ed2325fb9280741c6b1904a69d23e5d0418"
+    },
+    {
+      "path": "tests/payment-archive.test.ts",
+      "sha256": "6c2baa09d644bd6d0c9fe930fa876151f2de6e438f6ea8a1ee79148a9bdb030e"
+    },
+    {
+      "path": "tests/payment-capture.test.ts",
+      "sha256": "980bc1590060c93b321241031c12bdd74c0201b6325de80aa8c3a26bb40f7676"
+    },
+    {
+      "path": "tests/scope-recovery-db.test.ts",
+      "sha256": "ee685ed179fcf57496c4f9ddd70a516760de5dc33fe6d4cc0c5feebd4803bf2d"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "b8e2135f322f5a76d280d0e6532d401fe121b9fff9391f2556754253bf003510"
+    }
+  ],
+  "sourceFingerprint": "dc96fe0d4f88e194a4d9b6b581ed6885c8cd3d871049112fe8dd817cafa720d6"
+}

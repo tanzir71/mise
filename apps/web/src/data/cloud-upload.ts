@@ -30,6 +30,7 @@ export class CloudUploadJournal extends Dexie {
   constructor(name='mise-cloud-uploads'){super(name);this.version(1).stores({uploads:'id,businessId'});this.version(2).stores({reviews:'id'});}
   async prepare(db:MiseDatabase,id:string):Promise<StoredCloudUpload>{
     const current=await this.review(db);if(current.phase!=='review')return current.snapshot!;
+    if(await db.paymentOriginalBases.count())throw Error('Native payment archive sync is not enabled yet. Keep a complete JSON backup.');
     const plan=await prepareCloudUpload(await readDatabaseBackup(db),id);await this.addSnapshot(plan);
     // A second tab may have armed an older review while compression was pending.
     // Neither snapshot is discarded; the shop's original binding wins selection.

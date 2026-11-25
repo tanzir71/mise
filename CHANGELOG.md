@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 now retains complete independent local payment originals in shared native stores, and the existing backup controls export/restore them with an explicit version-two portable file. Legacy schema-13 files stay unchanged; stale reviews, corrupt graphs and quota failures preserve every native record. Original text/images remain complete, with no archive eviction. Connected outcome/outbox/upload work remains fenced; installation configuration stays end-user owned. See [retained payment originals](docs/payment-original-archive.md).
+
 - In progress: M41 now has authenticated native payment admission, current-context execution and atomic private completion with genuine financial children and immutable retry receipts. Live role/phone/outlet checks, literal-source preservation, server-timed undo and audit-ID reservations protect the original invocation. The app outbox, archive transport and canonical/upload integration remain fenced. All installation configuration stays end-user owned; no hosted service or workflow is enabled. See [native payment backend](docs/payment-native-backend.md).
 
 - In progress: M41 native payment actions now atomically retain their exact invocation, effective matching controls, financial confirmations and original identities through one shared native executor. Ordinary restore and independent originals retain those choices; older actions receive no invented consent. The connected backend/outcome/canonical adapter remains open and the preview stays off. All configuration remains end-user owned. See [native payment commands](docs/payment-native-commands.md).

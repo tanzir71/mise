@@ -22,8 +22,13 @@ import type {LocalCustomerReview} from '@mise/core/customer-review-journal';
 import type {LocalClosingReview} from '@mise/core/closing-review-journal';
 import type {Payment} from '@mise/core/models';
 
+import type {StoredPaymentOriginalBasis,StoredPaymentOriginalNode} from '@mise/core/payment-archive';
+import type {SharedJsonNode} from '@mise/core/shared-json';
 /** Shared schema and read-only setup lookup; safe to import in the receiving worker. */
 export class LocalStore extends Dexie {
+  paymentOriginalBases!:EntityTable<StoredPaymentOriginalBasis,'id'>;
+  paymentOriginalNodes!:EntityTable<StoredPaymentOriginalNode,'digest'>;
+  paymentOriginalValues!:EntityTable<SharedJsonNode,'digest'>;
   payments!:EntityTable<Payment,'id'>;
   closingReviews!:EntityTable<LocalClosingReview,'id'>;
   customerReviews!:EntityTable<LocalCustomerReview,'id'>;
@@ -98,6 +103,7 @@ export class LocalStore extends Dexie {
     this.version(27).stores({customerReviews:'id,uploadId,entryId,identityHash'});
     this.version(28).stores({closingReviews:'id,uploadId,entryId,identityHash'});
     this.version(29).stores({payments:'id,outletId,inboxId,&[outletId+inboxId],&[outletId+referenceKey],&[outletId+matchKey]',events:'id,outletId,at,command,customerId,orderId,[orderId+orderRevision],stockItemId,supplierId,[stockItemId+stockRevision],closingId,handoffId,handoffTopic,&[handoffId+handoffRevision],inboxId,&[inboxId+inboxRevision],paymentId,&[paymentId+paymentRevision]'});
+    this.version(30).stores({paymentOriginalBases:'id',paymentOriginalNodes:'digest,value',paymentOriginalValues:'digest'});
     // Expand the public transaction scope before Dexie validates nested reads.
     // DBCore expansion alone cannot make a store visible to a parent wrapper.
     // Identity reads and operator changes share the same native transaction lock.

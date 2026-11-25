@@ -98,6 +98,7 @@ export async function applyScopeRecoveryReview(db:MiseDatabase,review:ScopeRecov
  const controls:CanonicalRowChange[]=[...(rootCopy?[{table:'syncCanonical',key:rootCopy.id,before:null,after:rootCopy}]:[]),{table:'syncCanonical',key:recoveryCopy.id,before:null,after:recoveryCopy},{table:'syncApplications',key:application.id,before:null,after:application},{table:'scopeRecoveries',key:admission.id,before:null,after:admission},{table:'scopeRecoveries',key:'active',before:session,after:next},{table:'syncCanonical',key:'active',before:origin.base,after:base},{table:'operatorState',key:'active',before:source.operator,after:operator},{table:'cloudState',key:'binding',before:source.binding,after:binding}];
  const writePlan=await prepareCanonicalWrites([...operations,...controls],source.binding);await fresh(session,access);
  return db.transaction('rw',db.tables,()=>withCanonicalWrites(db,writePlan,async()=>{
+  if(await db.paymentOriginalBases.count())throw new ScopeRecoveryError();
   active(access);await assertCanonicalState(db,origin);assertCanonicalTransaction(db,writePlan,'recovery-origin');await originalSession(db,session);
   const latest=await readRecoveryWorkingSource(db,origin,session.expectedOperatorRevision);assertCanonicalTransaction(db,writePlan,'recovery-source');
   if(!equal(latest.binding,source.binding)||latest.queueToken!==source.queueToken||backupToken(latest.working)!==backupToken(source.working))throw new ScopeRecoveryError();

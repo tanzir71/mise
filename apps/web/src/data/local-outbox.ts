@@ -51,6 +51,7 @@ export async function beginLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targ
  const manifest=plan.manifest,manifestHash=await cloudUploadManifestHash(manifest);
  return db.transaction('rw',db.tables,async()=>{
   const saved=await db.cloudState.get('binding');if(saved){const state=parseLocalCloudState(saved);if(state.version!==1)throw new Error('This device joined an existing outlet. Keep its original sync admission.');if(state.phase!=='cancelled'){bound(state,manifest.id,targetHash,manifestHash,manifest);return state;}if(state.uploadId===manifest.id)throw new Error('Prepare a fresh review after cancelling this upload.');}
+  if(await db.paymentOriginalBases.count())throw Error('Native payment archive sync is not enabled yet. Keep a complete JSON backup.');
   await Dexie.waitFor(assertCloudUploadCurrent(manifest,await readDatabaseBackup(db)));
   const state:LocalCloudState={id:'binding',version:1,uploadId:manifest.id,businessId:manifest.businessId,outletId:manifest.outletId,ownerId:manifest.ownerId,targetHash,manifestHash,phase:'uploading',sequence:0,receipt:null};
   await db.cloudState.put(state);return state;

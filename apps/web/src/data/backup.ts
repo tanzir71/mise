@@ -1,3 +1,5 @@
+import {parsePortableBackup,paymentArchiveToken} from '@mise/core/payment-archive';
+import {readRetainedPaymentOriginals,replaceRetainedPaymentOriginals} from './payment-original-retention';
 import Dexie from 'dexie';
 import { portableInboxItems,storedInboxItems } from './inbox';
 import type { MiseDatabase } from './db';
@@ -6,7 +8,7 @@ import { backupTableNames, emptyBackupTables, type MiseBackup } from '@mise/core
 import {localSchemaVersion,parseLocalCloudState} from '@mise/core/local-outbox';
 import {localTableNames} from '@mise/core/local-schema';
 import {readLocalWorkspace} from './operator-state';
-import { createBackup, parseBackup, previewBackup, restoreBackupCommand, type BackupPreview, type RestoreReview } from '@mise/core/backup';
+import { createBackup, previewBackup, restoreBackupCommand, type BackupPreview, type RestoreReview } from '@mise/core/backup';
 
 async function snapshot(db:MiseDatabase):Promise<MiseBackup> {
   const expected=localTableNames;
@@ -19,21 +21,28 @@ async function snapshot(db:MiseDatabase):Promise<MiseBackup> {
 export async function readDatabaseBackup(db:MiseDatabase):Promise<MiseBackup> {
   return db.transaction('r',db.tables,() => snapshot(db));
 }
+function bindArchivePreview(preview:BackupPreview,sourceBases:Parameters<typeof paymentArchiveToken>[0],currentBases:Parameters<typeof paymentArchiveToken>[0]):BackupPreview {
+ return {...preview,sourceToken:sourceBases.length?JSON.stringify([preview.sourceToken,paymentArchiveToken(sourceBases)]):preview.sourceToken,currentToken:currentBases.length?JSON.stringify([preview.currentToken,paymentArchiveToken(currentBases)]):preview.currentToken};
+}
 export async function previewDatabaseRestore(db:MiseDatabase,input:unknown):Promise<BackupPreview> {
-  const source = parseBackup(typeof input==='string'?input:structuredClone(input));
-  return previewBackup(source,await readDatabaseBackup(db));
+ const source=parsePortableBackup(input);
+ return db.transaction('r',db.tables,async()=>{
+  const current=await snapshot(db),archive=await readRetainedPaymentOriginals(db,current);
+  return bindArchivePreview(previewBackup(source.current,current),source.bases,archive.bases);
+ });
 }
 export async function restoreDatabaseBackup(db:MiseDatabase,input:unknown,review:RestoreReview):Promise<SetupSnapshot|null> {
-  const source = parseBackup(typeof input==='string'?input:structuredClone(input));
-  const images=storedInboxItems(source.tables.inboxItems);
-  return db.transaction('rw',db.tables,async () => {
-    const binding=await db.cloudState.get('binding');if(binding&&parseLocalCloudState(binding).phase!=='cancelled')throw new Error('Finish or cancel cloud setup before replacing the local shop. Keep a JSON backup.');
-    const actor=(await readLocalWorkspace(db)).setup;
-    const command = restoreBackupCommand(source,await snapshot(db),review,Date.now(),actor?{id:actor.owner.id,name:actor.owner.name}:null);
-    await Promise.all(backupTableNames.map(name => db.table(name).clear()));
-    await Promise.all(backupTableNames.map(name => db.table(name).bulkAdd(name==='inboxItems'?images:command.tables[name])));
-    await db.events.add(command.event);
-    await db.operatorState.clear();
-    return (await readLocalWorkspace(db)).setup;
-  });
+ const source=parsePortableBackup(input),images=storedInboxItems(source.current.tables.inboxItems);
+ return db.transaction('rw',db.tables,async()=>{
+  const binding=await db.cloudState.get('binding');if(binding&&parseLocalCloudState(binding).phase!=='cancelled')throw new Error('Finish or cancel cloud setup before replacing the local shop. Keep a JSON backup.');
+  const actor=(await readLocalWorkspace(db)).setup,current=await snapshot(db),archive=await readRetainedPaymentOriginals(db,current),plain=previewBackup(source.current,current),latest=bindArchivePreview(plain,source.bases,archive.bases);
+  if(review.sourceToken!==latest.sourceToken)throw Error('The selected backup changed. Preview it again.');
+  if(review.currentToken!==latest.currentToken)throw Error('This browser’s data changed after the preview. Review the latest data before restoring.');
+  const command=restoreBackupCommand(source.current,current,plain,Date.now(),actor?{id:actor.owner.id,name:actor.owner.name}:null);
+  await Promise.all(backupTableNames.map(name=>db.table(name).clear()));
+  await Promise.all(backupTableNames.map(name=>db.table(name).bulkAdd(name==='inboxItems'?images:command.tables[name])));
+  await replaceRetainedPaymentOriginals(db,source);
+  await db.events.add(command.event);await db.operatorState.clear();
+  return (await readLocalWorkspace(db)).setup;
+ });
 }

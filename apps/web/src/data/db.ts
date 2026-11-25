@@ -409,6 +409,7 @@ export class MiseDatabase extends LocalStore {
       await withOutboxIntent(this,closingIntent(change,true),async()=>{await this.dayClosings.put(change.closing);if(change.sale)await this.sales.put(change.sale);await this.events.bulkAdd(change.events);});
     });
   }
+  async readPortableBackup() {return (await import('./payment-original-retention')).readDatabasePortableBackup(this);}
   async readBackup():Promise<MiseBackup> {
     return (await import('./backup')).readDatabaseBackup(this);
   }

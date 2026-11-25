@@ -321,7 +321,8 @@ export async function joinCanonicalDevice(
       (await db.syncCanonical.count()) ||
       (await db.syncApplications.count()) ||
       (await db.syncAdmissions.count()) ||
-      (await db.outbox.count())
+      (await db.outbox.count()) ||
+      (await db.paymentOriginalBases.count())
     )
       throw fail();
     const current = await Dexie.waitFor(
