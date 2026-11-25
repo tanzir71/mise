@@ -2,7 +2,7 @@ import {cloudRecordMaps,decodeCommandRecord} from './cloud-records';
 import type {BackupTable} from './backup-tables';
 import {parseSyncSnapshot} from './sync-snapshot';
 export const syncReadHeader='X-Mise-Sync-Outlet',syncReadBodyLimit=256000,syncPartBudget=196608,syncPageLimit=524288,syncWireLimit=786432;
-export type SyncTable=typeof cloudRecordMaps[BackupTable]['table']|'member_outlets'|'customer_outlets'|'inbox_images'|'member_refs';
+export type SyncTable=typeof cloudRecordMaps[keyof typeof cloudRecordMaps]['table']|'member_outlets'|'customer_outlets'|'inbox_images'|'member_refs';
 export const syncRecordColumns:Readonly<Record<SyncTable,readonly string[]>>=Object.freeze({
  ...Object.fromEntries(Object.entries(cloudRecordMaps).map(([key,map])=>[map.table,Object.freeze([...new Set([...Object.keys(map.fields),...(key==='businesses'?[]:['business_id'])])])])),
  member_refs:Object.freeze(['id','business_id','created_at','updated_at','name','role']),

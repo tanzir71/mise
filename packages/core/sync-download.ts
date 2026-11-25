@@ -1,4 +1,6 @@
 import {decodeSyncBase64,parseSyncWindow,syncPartBudget,syncRecordColumns,type SyncReadPart,type SyncReadPage,type SyncReadWindow} from './sync-read';
+import {literalToken as syncDownloadToken} from './literal-token';
+export {literalToken as syncDownloadToken} from './literal-token';
 export const localDownloadTableNames=['syncReads','syncPages','syncRecords'] as const;
 
 export interface SyncDownloadTarget {targetHash:string;businessId:string;outletId:string;actorId:string;accountHash:string;role:'owner'|'manager'}
@@ -17,11 +19,6 @@ const id=(v:unknown):v is string=>typeof v==='string'&&/^[0-7][0-9A-HJKMNP-TV-Z]
 const hash=(v:unknown):v is string=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
 const count=(v:unknown,max=Number.MAX_SAFE_INTEGER):v is number=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=0&&v<=max;
 export const syncDownloadError=()=>new Error('The original download needs recovery. Keep local work and its saved pages.');
-/** Stable integrity tokens, not authorization or credentials. */
-export function syncDownloadToken(v:unknown):string {
- const sorted=(v:unknown):unknown=>Array.isArray(v)?v.map(sorted):object(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,sorted(v[k])])):v;
- return JSON.stringify(sorted(v));
-}
 export function parseSyncDownloadTarget(v:unknown):SyncDownloadTarget {
  if(!object(v)||!exact(v,'targetHash,businessId,outletId,actorId,accountHash,role')||!hash(v.targetHash)||!hash(v.accountHash)||![v.businessId,v.outletId,v.actorId].every(id)||!['owner','manager'].includes(v.role as string))throw syncDownloadError();
  return {targetHash:v.targetHash,businessId:v.businessId as string,outletId:v.outletId as string,actorId:v.actorId as string,accountHash:v.accountHash,role:v.role as SyncDownloadTarget['role']};

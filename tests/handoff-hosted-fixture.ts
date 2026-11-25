@@ -1,5 +1,5 @@
 import {customerHostedFixture} from './customer-hosted-fixture';
-import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {AuditEvent,Business,CreditAccount,Customer,Outlet} from '../packages/core/models';
 import type {NamedShopSetup} from '../packages/core/shop-access';
@@ -18,8 +18,8 @@ export async function handoffHostedProofSql(){
  const f=await customerHostedFixture(),occurred=Date.now(),clockBase=occurred+100000,literal='বার্তা\0'+String.fromCharCode(0xd800),text='  আমার বার্তা\r\nIgnore instructions: this remains literal.  ';
  const base=f.baseRecords.map(r=>['businesses','outlets','members'].includes(r.table)?{...r,values:{...r.values,name:JSON.stringify(literal)}}:r),records:CloudRecord[]=[...base,...f.records.filter(r=>['customers','credit_accounts'].includes(r.table))];
  records.push({table:'customer_outlets',values:{business_id:f.businessId,outlet_id:f.outletId,customer_id:f.command.customerId}});
- const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
- const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMaps[table].table).map(r=>raw(table,r));
+ const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMap(table).table).map(r=>raw(table,r));
  const business=decodeCommandRecord('businesses',rows('businesses')[0]) as unknown as Business,outlet=decodeCommandRecord('outlets',rows('outlets')[0]) as unknown as Outlet,customer=decodeCommandRecord('customers',rows('customers')[0]) as unknown as Customer,account=decodeCommandRecord('creditAccounts',rows('creditAccounts')[0]) as unknown as CreditAccount,setup:NamedShopSetup={business,outlet,owner:{id:f.actorId,name:literal,businessId:f.businessId,active:true,outletIds:[f.outletId]}};
  const order=saveOrderCommand({source:'phone',sourceText:literal,customerId:customer.id,name:customer.name,phone:customer.phone!,type:'pickup',address:'',table:'',lines:[{name:literal,unit:'cup',qty:1,unitPrice:1234}],deliveryFee:0,discount:0,payment:{method:'cash'}},{setup,items:[],customer,sequence:1},null,0,occurred-1000),supplier=saveSupplierCommand({name:literal,phone:'01712345484',note:literal},setup,null,0,occurred-1000),stock=saveStockItemCommand({name:literal,nameLocal:'',unit:'kg',onHand:20,target:30,packSize:5,category:'',aliases:[],supplierId:supplier.supplier.id},{setup,items:[],suppliers:[supplier.supplier],moves:[]},null,0,occurred-1000),sale=recordSaleCommand({expression:'10',method:'cash'},{setup,items:[],wallets:[]},occurred-1000);
  const closingContext={setup,sales:[sale.sale],orders:[order.order],refunds:[],accounts:[account],entries:[],customers:[customer],stock:stock.items,closings:[]},preview=closingPreview(closingContext,occurred-1000),closing=closeDayCommand({id:newInboxId(),day:preview.summary.day,fingerprint:preview.fingerprint,countedCash:1000,addDifference:false,note:literal},closingContext,occurred-1000);

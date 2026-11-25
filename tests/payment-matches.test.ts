@@ -62,7 +62,7 @@ it('excludes finished, cancelled, unpriced, credited and already-paid orders fro
  order(r).total=null;order(r).payment.status='credited';order(r).payment.status='paid';expect(findPaymentTextMatches(source(),r).selection).toBe('none');
 });
 it('matches only the actual recorded method, including installation-selected bank labels',()=>{
- const r=fixture();sale(r,at-minute,'cash');sale(r,at-minute,'card');sale(r,at-minute,'wallet','Nagad');const bk=sale(r),bank=sale(r,at-minute,'wallet','Configured bank');
+ const r=fixture();sale(r,at-minute,'cash');sale(r,at-minute,'card');sale(r,at-minute,'wallet','Nagad');const inconsistent=sale(r,at-minute,'cash');inconsistent.methodName='bKash';const bk=sale(r),bank=sale(r,at-minute,'wallet','Configured bank');
  expect(findPaymentTextMatches(source(),r).candidates.map(c=>c.id)).toEqual([bk.id]);const p={...source(),channel:'bank' as const};expect(findPaymentTextMatches(p,r).selection).toBe('none');expect(findPaymentTextMatches(p,r,{methodNames:{bank:['Configured bank']}}).candidates.map(c=>c.id)).toEqual([bank.id]);
 });
 it('does not offer voided counter receipts or money already associated with another confirmed source',()=>{

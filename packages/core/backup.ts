@@ -18,13 +18,13 @@ export function parseBackup(input:unknown):MiseBackup {
   }
   const backup = backupRecord(value,'file');
   if (backup.format !== 'mise-backup' || backup.formatVersion !== BACKUP_FORMAT_VERSION) throw new Error('Choose a supported Mise JSON backup.');
-  if ([7,8,9].includes(backup.schemaVersion as number)) {
+  if ([7,8,9,10].includes(backup.schemaVersion as number)) {
     const version=backup.schemaVersion,oldTables=backupRecord(backup.tables,'tables');
-    const expected=backupTableNames.filter(name=>name!=='inboxItems'&&(version!==7||name!=='purchases'));
+    const expected=backupTableNames.filter(name=>name!=='payments'&&(version===10||name!=='inboxItems')&&(version!==7||name!=='purchases'));
     if(Object.keys(oldTables).length!==expected.length||Object.keys(oldTables).some(name=>!(expected as readonly string[]).includes(name)))throw new Error(`The schema-${String(version)} backup has unsupported tables.`);
-    return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION,tables:{...oldTables,...(version===7?{purchases:[]}:{}),inboxItems:[]}});
+    return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION,tables:{...oldTables,...(version===7?{purchases:[]}:{}),...(version!==10?{inboxItems:[]}:{}),payments:[]}});
   }
-  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
+  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9, 10 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
   if (Object.keys(backup).some(k => !['format','formatVersion','schemaVersion','exportedAt','tables'].includes(k))) throw new Error('The backup has unsupported metadata.');
   backupTime(backup.exportedAt,'exportedAt');
   const tables = backupRecord(backup.tables,'tables');
@@ -53,7 +53,11 @@ function canonical(value:unknown):unknown {
 }
 /** Exact comparison, not a lossy hash. Capture time and IndexedDB iteration order are irrelevant. */
 export function backupToken(backup:MiseBackup):string {
-  return JSON.stringify(canonical(Object.fromEntries(backupTableNames.map(name => [name,[...backup.tables[name]].sort((a,b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)]))));
+  if(backup.schemaVersion!==BACKUP_SCHEMA_VERSION)return backupToken(parseBackup(backup));
+  // Adding an empty native table changes no logical records. Preserve existing
+  // source/review fingerprints across the schema-10 upgrade; nonempty Payments
+  // always participate and can never be silently discarded.
+  return JSON.stringify(canonical(Object.fromEntries(backupTableNames.filter(name=>name!=='payments'||backup.tables.payments.length>0).map(name => [name,[...backup.tables[name]].sort((a,b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)]))));
 }
 export function previewBackup(source:MiseBackup,current:MiseBackup):BackupPreview {
   parseBackup(source);parseBackup(current);

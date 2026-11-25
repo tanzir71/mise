@@ -2,7 +2,7 @@ import {closingPreview,type TodayContext} from '../packages/core/today';
 import {closeDayCommand,undoClosingCommand,type ClosingChange} from '../packages/core/closing';
 import {parseClosingCommand,type ClosingCommand} from '../packages/core/closing-commands';
 import {closingFingerprint} from '../packages/core/closing-replay';
-import {cloudRecordMaps,encodeCommandRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,encodeCommandRecord} from '../packages/core/cloud-records';
 import {prepareClosingReviewView,type ClosingReviewCurrent} from '../packages/core/closing-review-view';
 import {closingIntent} from '../apps/web/src/data/outbox-intents';
 import {parseClosingReviewRequest,closingReviewSourceAudits,type ClosingReviewRequest} from '../packages/core/closing-review-source';
@@ -34,7 +34,7 @@ export function fixture(mode:Mode='surplus',options:{at?:number;currency?:string
 }
 export function currentContext(f:{command:ClosingCommand;row:Pick<LocalOutboxEntry,'businessId'>;context:TodayContext;created:Pick<ClosingChange,'closing'|'sale'>},options:{context?:TodayContext;closing?:DayClosing|null;sale?:Sale|null}={}){
  const context=options.context??f.context,undo=f.command.type==='closing.undo',businessId=f.row.businessId;
- const raw=(table:BackupTable,value:unknown|null)=>value===null?null:Object.fromEntries(Object.entries(encodeCommandRecord(table,value,businessId).values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const raw=(table:BackupTable,value:unknown|null)=>value===null?null:Object.fromEntries(Object.entries(encodeCommandRecord(table,value,businessId).values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
  const tables={sales:'sales',orders:'orders',refunds:'orderRefunds',accounts:'creditAccounts',entries:'creditEntries',customers:'customers',stock:'stockItems',closings:'dayClosings'} as const;
  return JSON.stringify({business:raw('businesses',context.setup.business),outlet:raw('outlets',context.setup.outlet),actorName:context.setup.owner.name,closing:raw('dayClosings',Object.hasOwn(options,'closing')?options.closing:undo?f.created.closing:null),sale:raw('sales',Object.hasOwn(options,'sale')?options.sale:undo?f.created.sale??null:null),...Object.fromEntries(Object.entries(tables).map(([k,table])=>[k,context[k as keyof typeof tables].map(value=>raw(table,value))]))});
 }

@@ -1,5 +1,5 @@
 import {customerHostedFixture} from './customer-hosted-fixture';
-import {cloudRecordMaps,decodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,decodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {Order,OrderRefund,Customer,CreditAccount} from '../packages/core/models';
 import {newInboxId} from '../packages/core/inbox';
@@ -11,8 +11,8 @@ export async function orderHostedProofSql(){
  const baseRecords:CloudRecord[]=[...f.baseRecords,...f.records.filter(r=>['customers','credit_accounts'].includes(r.table))];
  baseRecords.push({table:'customer_outlets',values:{business_id:f.businessId,outlet_id:f.outletId,customer_id:f.records.find(r=>r.table==='customers')!.values.id}});
  const records:CloudRecord[]=[...baseRecords];
- const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
- const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMaps[table].table).map(r=>raw(table,r));
+ const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMap(table).table).map(r=>raw(table,r));
  const readOrder=()=>decodeCommandRecord('orders',rows('orders')[0]) as unknown as Order,customer=decodeCommandRecord('customers',rows('customers')[0]) as unknown as Customer,account=decodeCommandRecord('creditAccounts',rows('creditAccounts')[0]) as unknown as CreditAccount;
  const ids=():OrderFinanceIds=>({saleId:newInboxId(),saleEventId:newInboxId(),entryId:newInboxId(),creditEventId:newInboxId(),refundId:newInboxId(),refundEventId:newInboxId()}),base=()=>({id:newInboxId(),outletId:f.outletId,occurredAt:occurred});
  const steps:{id:string;type:string;ticket:string;plan:ReturnType<typeof orderWritePlan>;hash:string;clock:string;records:string}[]=[];

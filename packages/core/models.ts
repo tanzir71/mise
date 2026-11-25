@@ -1,4 +1,5 @@
 import type { BusinessType, MarketCode, MessageLanguage } from './packs';
+import type {ParsedPaymentText} from './payments';
 export interface Entity { id: string; createdAt: number; updatedAt: number }
 export interface Business extends Entity { name: string; businessType: BusinessType; marketCode: MarketCode; languages: ('en' | 'bn')[] }
 export interface Outlet extends Entity { businessId: string; name: string; address: string; timezone: string; currency: string; shopLink?: string; creditMessaging?: CreditMessaging; orderWarningMinutes?: number }
@@ -9,10 +10,19 @@ export interface Category extends Entity { outletId: string; name: string; sort:
 export interface Item extends Entity { outletId: string; name: string; nameLocal: string; categoryId: string; price: number; unit: string; available: boolean; isSample: boolean; oftenBought?: boolean }
 /** `owner` is the legacy field name for the selected operator, including a manager. */
 export interface SetupSnapshot { business: Business; outlet: Outlet; owner: Member }
-export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; stockItemId?:string; stockRevision?:number; supplierId?:string; closingId?:string; handoffId?:string; handoffRevision?:number; handoffTopic?:string; inboxId?:string; inboxRevision?:number; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
+export interface AuditEvent { id: string; outletId: string; customerId?: string; orderId?: string; orderRevision?: number; stockItemId?:string; stockRevision?:number; supplierId?:string; closingId?:string; handoffId?:string; handoffRevision?:number; handoffTopic?:string; inboxId?:string; inboxRevision?:number; paymentId?:string; paymentRevision?:number; actor: { type: 'member' | 'system' | 'agent'; id: string }; command: string; before: unknown; after: unknown; at: number; undoOf?: string }
 export interface SetupInput { businessType: BusinessType; marketCode: MarketCode; name: string; phone: string; outletName?: string; address?: string; language?: MessageLanguage; timezone?: string; currency?: string }
 export interface SetupCommand { snapshot: SetupSnapshot; items: Item[]; categories: Category[]; event: AuditEvent }
 export type PaymentMethod = 'cash' | 'wallet' | 'card';
+/** A saved observation of incoming money. Association alone never posts money. */
+export interface Payment extends Entity {
+  outletId:string;inboxId:string;revision:number;createdBy:string;eventId:string;
+  source:'manual'|'sms'|'notification';original:{title:string;text:string;url:string;createdAt:number};parsed:ParsedPaymentText;
+  amount:number;currency:string;method:PaymentMethod;methodName:string;reference:string;fromPhone?:string;receivedAt:number;
+  referenceKey?:string;matchKey?:string;
+  association?:{kind:'order'|'sale'|'credit';id:string;fingerprint:string;at:number;eventId:string};
+  voidedAt?:number;
+}
 export type SaleMethod = PaymentMethod | 'credit';
 export interface SaleLine { itemId?: string; name: string; unit: string; unitPrice: number; qty: number; lineTotal: number }
 export interface Sale extends Entity { outletId: string; orderId?:string; orderNumber?:string; closingId?:string; deliveryFee?:number; discount?:number; expression: string; amount: number; currency: string; method: SaleMethod; methodName: string; given?: number; change?: number; who: string; customerId?: string; creditAccountId?: string; items: SaleLine[]; shopName: string; shopLink?: string; timezone: string; createdBy: string; eventId: string; voidedAt?: number; voidReason?:'undo'|'order-cancel' }

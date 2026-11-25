@@ -1,7 +1,7 @@
 import type {CreditAccount,CreditEntry,Customer,Order,OrderRefund,Sale,SetupSnapshot} from './models';
 import type {ParsedPaymentText,PaymentTextChannel} from './payments';
 import {isOrderFinished} from './orders';
-import {syncDownloadToken} from './sync-download';
+import {literalToken as syncDownloadToken} from './literal-token';
 
 export interface PaymentMatchRecords {
   setup:SetupSnapshot;
@@ -86,6 +86,7 @@ export function findPaymentTextMatches(source:ParsedPaymentText,records:PaymentM
     consider({...base(order.createdAt),kind:'order',id:order.id,state:'open',label:order.number,customerName:order.customer.name,phone:order.customer.phone??null,methodName:order.payment.method==='wallet'?order.payment.wallet??null:order.payment.method==='card'?'Card':order.payment.method==='cash'?'Cash':null,orderId:order.id,snapshot:()=>({scope:{businessId,outletId},order})});
   }
   for(const sale of records.sales){
+    if(source.channel!=='unknown'&&sale.method!=='wallet')continue;
     if(sale.outletId!==outletId||sale.voidedAt!==undefined||sale.method==='credit'||refunded.has(sale.id)||sale.amount!==source.amount||sale.currency!==source.currency||!time(sale.createdAt))continue;
     const order=sale.orderId?orders.get(sale.orderId):undefined;
     if(sale.orderId&&(!order||order.payment.status!=='paid'||order.payment.saleId!==sale.id||order.payment.cancellation))continue;

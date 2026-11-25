@@ -7,7 +7,7 @@ import {CloudUploadJournal,uploadWithLocalOutbox} from '../apps/web/src/data/clo
 import {assertLocalUploadCoverage,beginLocalUpload,deliverLocalOutbox} from '../apps/web/src/data/local-outbox';
 import {backupToken} from '../packages/core/backup';
 import type {BackupTable,MiseBackup} from '../packages/core/backup-tables';
-import {cloudRecordMaps,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,cloudRecordMaps,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import {creditBalance,defaultCreditTerms} from '../packages/core/khata';
 import {closingPreview} from '../packages/core/today';
 import {newClosingId} from '../packages/core/closing';
@@ -39,7 +39,7 @@ async function queue(db:MiseDatabase){const rows=await db.outbox.orderBy('[uploa
 /** Equal admission/action clocks isolate actual wire values and IDs from canonical reconciliation. */
 async function replay(db:MiseDatabase,original:MiseBackup){
  const shadow=structuredClone(original.tables),businessId=shadow.businesses[0].id;
- const raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
+ const raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMap(table).fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
  const normalized=(rows:CloudRecord[])=>rows.toSorted((a,b)=>(a.table+':'+a.values.id).localeCompare(b.table+':'+b.values.id)).map(row=>{const fields=Object.values(cloudRecordMaps).find(map=>map.table===row.table)!.fields as Record<string,string>;return {...row,values:Object.fromEntries(Object.entries(row.values).map(([key,value])=>[key,value!==null&&/^[je]:/.test(fields[key]??'')?JSON.parse(value as string):value]))};});
  for(const row of await queue(db)){
   const c=parseShopCommand(row.commands[0]);if(!isHandoffCommand(c))throw Error('Unexpected hand-off adapter family');

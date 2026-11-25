@@ -9,7 +9,7 @@ import {syncHash} from '../packages/core/sync-read';
 import {stockNameKey} from '../packages/core/stock-quantity';
 import {adjustStockCommand,archiveStockItemCommand,saveStockItemCommand,saveStockMetadataCommand,saveSupplierCommand,stockBatchCommand,undoStockMoveCommand,type StockChange,type StockContext} from '../packages/core/stock';
 import {stockAdjustmentIntent,stockBatchIntent,stockSaveIntent} from '../apps/web/src/data/outbox-intents';
-import {cloudRecordMaps,encodeCommandRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,encodeCommandRecord} from '../packages/core/cloud-records';
 import {stockFixture,stockInput,STOCK_AT} from './stock-fixture';
 import type {PreparedStockReview} from '../packages/core/stock-review-view';
 import type {BackupTable} from '../packages/core/backup-tables';
@@ -20,7 +20,7 @@ function adjusted(){const f=stockFixture(),change=adjustStockCommand({id:f.items
 /** This fixture simulates RPCs, exercising the real HTTP handler/store and
  * pure domain replay. Native SQL authorization is verified separately. */
 async function gateway(f:StockContext,p:StockReviewRequest){
- const c=p.command,plan=stockWritePlan(c),raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,f.setup.business.id).values).map(([key,value])=>[key,value!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
+ const c=p.command,plan=stockWritePlan(c),raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,f.setup.business.id).values).map(([key,value])=>[key,value!==null&&(cloudRecordMap(table).fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
  const context=()=>({business:raw('businesses',f.setup.business),outlet:raw('outlets',f.setup.outlet),items:f.items.filter(row=>plan.rows.some(p=>p.itemId===row.id)||JSON.stringify(row.activeKey)===plan.nameKey).map(row=>raw('stockItems',row)),moves:f.moves.filter(row=>plan.rows.some(p=>p.itemId===row.stockItemId)).map(row=>raw('stockMoves',row)),suppliers:f.suppliers.filter(row=>row.id===plan.supplierId).map(row=>raw('suppliers',row))});
  const state={contextJson:JSON.stringify(context()),suppliersJson:JSON.stringify('input'in c?f.suppliers.filter(row=>row.id===c.input.supplierId||row.id===f.items.find(item=>item.id===plan.rows[0].itemId)?.supplierId).map(row=>({id:row.id,name:row.name,archived:row.archivedAt!==undefined})):[]),activeKeys:c.type==='stock.restore'?f.items.filter(row=>row.archivedAt===undefined).map(row=>({id:row.id,key:JSON.stringify(row.activeKey)})):[],selectionValid:true,reserved:false,resolutionState:plan.rows.map(row=>({itemId:row.itemId,position:null as string|null}))};
  const prepared={done:false,id:p.id,replacementId:p.replacementId,commandId:c.id,type:c.type,occurredAt:c.occurredAt,outletId:c.outletId,businessId:f.setup.business.id,actorId:f.setup.owner.id,commandHash:await stockFingerprint(c),sourceHash:p.sourceHash,sourceJsonHash:await syncHash(new TextEncoder().encode(p.sourceJson)),plan,unitFacts:stockReviewUnitFacts(p),token:'x'.repeat(43),at,expiresAt:at+120000,stateJson:JSON.stringify(state)},calls:{name:string;args:Record<string,unknown>;headers:Headers}[]=[];

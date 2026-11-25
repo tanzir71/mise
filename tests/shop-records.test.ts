@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import {afterAll,beforeAll,expect,it,vi} from 'vitest';
 import {shopDataFixture} from './shop-data-fixture';
-import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,prepareCloudMigration,readCloudMigration,type CloudMigration,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudBackupTableNames,cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,prepareCloudMigration,readCloudMigration,type CloudMigration,type CloudRecord} from '../packages/core/cloud-records';
 import {backupToken} from '../packages/core/backup';
 import {backupTableNames,type MiseBackup} from '../packages/core/backup-tables';
 import {newInboxId} from '../packages/core/inbox';
@@ -94,8 +94,9 @@ it('preserves literal source strings, including JSON escapes unsupported by Post
   const result=await db.query<{original:string}>('select $1::public.literal_text::text as original',[JSON.stringify(text)]);
   expect(JSON.parse(result.rows[0].original)).toBe(text);
 });
-it('all 21 actual local tables survive a complete SQL round trip with money, source, images and undo history intact',async()=>{
-  for(const table of backupTableNames)expect(original.tables[table].length,table).toBeGreaterThan(0);
+it('all 21 supported local tables survive a complete SQL round trip with money, source, images and undo history intact',async()=>{
+  expect(backupTableNames).toHaveLength(22);expect(original.tables.payments).toEqual([]);
+  for(const table of cloudBackupTableNames)expect(original.tables[table].length,table).toBeGreaterThan(0);
   const records:CloudRecord[]=[];
   for(const record of plan.records){
     const map=Object.values(cloudRecordMaps).find(map=>map.table===record.table);

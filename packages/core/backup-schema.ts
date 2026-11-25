@@ -4,6 +4,7 @@ import { stockAtoms } from './stock-quantity';
 import { ORDER_SOURCE_MAX_TEXT } from './order-limits';
 import type { BackupTable } from './backup-tables';
 import {memberRoles} from './models';
+import {validatePaymentRecord} from './payment-records';
 
 type Check = (value:unknown,path:string) => void;
 type Shape = Record<string,Check>;
@@ -62,14 +63,14 @@ const summary = backupObject({
   cashSales:money,cashCollections:money,cashRefunds:money,expectedCash:integer,split:array(backupObject({method:saleMethod,amount:money,count:money})),
   completedOrders:money,averageTimeMs:nullable(number),waitingOrders:money,lowStock:money,dueReminders:money,
 });
-const shapes:Record<BackupTable,Shape> = {
+const shapes:Record<Exclude<BackupTable,'payments'>,Shape> = {
   inboxItems:{...entity,outletId:nullable(id),...revision,title:text,text,url:text,kind:oneOf(inboxKinds),archived:bool,images:array(backupObject({id,name:text,type:oneOf(inboxImageTypes),size:positive,data:(v,p)=>{if(typeof v!=='string'||v.length>4*Math.ceil(5*1024*1024/3))invalid(p,'exceeds the image size limit');}}))},
   businesses:{...entity,name:text,businessType:business,marketCode:oneOf(Object.keys(marketPacks)),languages:array(oneOf(['en','bn']))},
   outlets:{...entity,businessId:id,name:text,address:text,timezone,currency,shopLink:optional(text),creditMessaging:optional(messaging),orderWarningMinutes:optional(positive)},
   members:{...entity,businessId:id,outletIds:array(id),name:text,phone:optional(phone),role:oneOf(memberRoles),active:bool},
   categories:{...owned,name:text,sort:integer},
   items:{...owned,name:text,nameLocal:text,categoryId:id,price:money,unit:text,available:bool,isSample:bool,oftenBought:optional(bool)},
-  events:{id,outletId:id,customerId:optional(id),orderId:optional(id),orderRevision:optional(positive),stockItemId:optional(id),stockRevision:optional(positive),supplierId:optional(id),closingId:optional(id),handoffId:optional(id),handoffRevision:optional(positive),handoffTopic:optional(text),inboxId:optional(id),inboxRevision:optional(positive),actor:backupObject({type:oneOf(['member','system','agent']),id:text}),command:text,before:jsonValue,after:jsonValue,at:backupTime,undoOf:optional(id)},
+  events:{id,outletId:id,customerId:optional(id),orderId:optional(id),orderRevision:optional(positive),stockItemId:optional(id),stockRevision:optional(positive),supplierId:optional(id),closingId:optional(id),handoffId:optional(id),handoffRevision:optional(positive),handoffTopic:optional(text),inboxId:optional(id),inboxRevision:optional(positive),paymentId:optional(id),paymentRevision:optional(positive),actor:backupObject({type:oneOf(['member','system','agent']),id:text}),command:text,before:jsonValue,after:jsonValue,at:backupTime,undoOf:optional(id)},
   sales:{...owned,...dated,...voided,orderId:optional(id),orderNumber:optional(text),closingId:optional(id),deliveryFee:optional(money),discount:optional(money),expression:text,amount:positive,currency,method:saleMethod,methodName:text,given:optional(money),change:optional(money),who:text,customerId:optional(id),creditAccountId:optional(id),items:array(saleLine),shopName:text,shopLink:optional(text),timezone,voidReason:optional(oneOf(['undo','order-cancel']))},
   customers:{...entity,businessId:id,name:text,nickname:text,phone:optional(phone),address:text,notes:text,tags:array(text),consent:backupObject({savedAt:backupTime,source:oneOf(['manual'])}),archivedAt:optional(backupTime)},
   creditAccounts:{...owned,customerId:id,currency,allowed:bool,limit:money,reminder:backupObject({enabled:bool,dayOfMonth:positive,tone,channel:oneOf(['whatsapp'])})},
@@ -88,6 +89,7 @@ const shapes:Record<BackupTable,Shape> = {
   purchases:{...owned,...dated,...voided,supplierId:optional(id),supplierName:text,reference:text,lines:array(backupObject({stockItemId:optional(id),name:text,unit:text,qty:number,unitPrice:money,lineTotal:money})),total:money,currency,timezone,paid:oneOf(['cash','wallet','card','due']),methodName:text,note:text,photoRef:optional(text)},
 };
 export function validateBackupRow(table:BackupTable,value:unknown,path:string) {
+  if(table==='payments'){validatePaymentRecord(value);return;}
   backupObject(shapes[table])(value,path);
   if(table==='inboxItems'){const item=value as InboxBackupItem;validateInboxItem(item);for(const image of item.images)inboxImageBytes(image);}
 }

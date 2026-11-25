@@ -3,6 +3,8 @@ import {backupTableNames,emptyBackupTables,type BackupTable,type MiseBackup} fro
 
 type FieldMap=Readonly<Record<string,string>>;
 interface TableMap {table:string;fields:FieldMap}
+export type CloudBackupTable=Exclude<BackupTable,'payments'>;
+export const cloudBackupTableNames=backupTableNames.filter((name):name is CloudBackupTable=>name!=='payments');
 // j = serialized JSON (including literal strings); e = JSON-escaped text key;
 // n = number; b = boolean. Unmarked fields are canonical strings/IDs/enums.
 const entity={id:'id',created_at:'n:createdAt',updated_at:'n:updatedAt'};
@@ -32,7 +34,10 @@ export const cloudRecordMaps={
   purchases:{table:'purchases',fields:{...owned,...dated,...voided,supplier_id:'supplierId',supplier_name:'j:supplierName',reference:'j:reference',lines:'j:lines',total:'n:total',currency:'currency',timezone:'timezone',paid:'paid',method_name:'j:methodName',note:'j:note',photo_ref:'photoRef'}},
   inboxItems:{table:'inbox_items',fields:{...owned,...revision,title:'j:title',text:'j:text',url:'j:url',kind:'kind',archived:'b:archived'}},
   events:{table:'events',fields:{id:'id',outlet_id:'outletId',actor_type:'actor.type',actor_id:'actor.id',command:'command',before_data:'j:before',after_data:'j:after',at:'n:at',undo_of:'undoOf',customer_id:'customerId',order_id:'orderId',order_revision:'n:orderRevision',stock_item_id:'stockItemId',stock_revision:'n:stockRevision',supplier_id:'supplierId',closing_id:'closingId',handoff_id:'handoffId',handoff_revision:'n:handoffRevision',handoff_topic:'handoffTopic',inbox_id:'inboxId',inbox_revision:'n:inboxRevision'}},
-} as const satisfies Record<BackupTable,TableMap>;
+} as const satisfies Record<CloudBackupTable,TableMap>;
+/** Native payment delivery is unfinished in M41. Never omit a nonempty table
+ * or manufacture a backend mapping for it. */
+export function cloudRecordMap(table:BackupTable):(typeof cloudRecordMaps)[CloudBackupTable] {if(table==='payments')throw new Error('Keep the complete local payment backup. Native payment sync is not enabled yet.');return cloudRecordMaps[table];}
 
 export type CloudValue=string|number|boolean|null;
 export interface CloudRecord {table:string;values:Record<string,CloudValue>}
@@ -77,17 +82,17 @@ function decodeFields(values:Record<string,CloudValue>,fields:FieldMap,table:Bac
 }
 /** Server command transport only: validate and authorize the mutation separately. */
 export function encodeCommandRecord(table:BackupTable,row:unknown,businessId:string):CloudRecord {
-  const map=cloudRecordMaps[table];return {table:map.table,values:{...encodeFields(row,map.fields),business_id:businessId}};
+  const map=cloudRecordMap(table);return {table:map.table,values:{...encodeFields(row,map.fields),business_id:businessId}};
 }
 /** Proposed transport values already contain serialized JSON; decode it once. */
 export function decodeProposedCommandRecord(table:BackupTable,record:CloudRecord):Record<string,unknown>{
-  const map=cloudRecordMaps[table];
+  const map=cloudRecordMap(table);
   if(record.table!==map.table)throw new Error('Keep the proposed record table.');
   return decodeFields(record.values,map.fields,table);
 }
 /** SQL row_to_json retains literal JSON; convert it through the same field map. */
 export function decodeCommandRecord(table:BackupTable,row:Record<string,unknown>):Record<string,unknown>{
-  const map=cloudRecordMaps[table],values:Record<string,CloudValue>={};
+  const map=cloudRecordMap(table),values:Record<string,CloudValue>={};
   for(const [column,spec] of Object.entries(map.fields)){
     const value=row[column],{kind}=field(spec);
     const auditNull=table==='events'&&(column==='before_data'||column==='after_data')&&value===null;
@@ -108,11 +113,13 @@ export async function prepareCloudMigration(source:MiseBackup,authUserId:string)
   // Snapshot before the first async hash so later edits cannot change a reviewed plan.
   parseBackup(source);
   const backup=parseBackup(JSON.stringify(source)),{tables}=backup;
+  if(tables.payments.length)throw new Error('Keep the complete local payment backup. Native payment sync is not enabled yet.');
   if(tables.businesses.length!==1||tables.outlets.length!==1||tables.members.length!==1||!tables.members[0].active||tables.members[0].role!=='owner')
     throw new Error('Set up one local shop and owner before turning on sync.');
   const businessId=tables.businesses[0].id,outlet=tables.outlets[0];
   const result:CloudMigration={version:1,exportedAt:backup.exportedAt,records:[],files:[]};
   for(const name of backupTableNames){
+    if(name==='payments')continue;
     const map=cloudRecordMaps[name];
     for(const row of tables[name]){
       const values=encodeFields(row,map.fields);
@@ -189,5 +196,5 @@ export async function readCloudMigration(plan:CloudMigration):Promise<MiseBackup
   const associations=extras.filter(row=>row.table==='customer_outlets');
   if(associations.length!==tables.customers.length||new Set(associations.map(row=>row.values.customer_id)).size!==tables.customers.length)throw new Error('Cloud customer assignments are incomplete.');
   if(usedFiles.size!==fileMap.size)throw new Error('Cloud files contain an unreferenced image.');
-  return parseBackup({format:'mise-backup',formatVersion:1,schemaVersion:10,exportedAt:plan.exportedAt,tables});
+  return parseBackup({format:'mise-backup',formatVersion:1,schemaVersion:11,exportedAt:plan.exportedAt,tables});
 }

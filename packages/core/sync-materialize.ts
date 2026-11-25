@@ -1,6 +1,6 @@
 import {backupToken,createBackup,parseBackup} from './backup';
 import {backupTableNames,type BackupTable,type MiseBackup} from './backup-tables';
-import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
+import {cloudRecordMaps,cloudRecordMap,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from './cloud-records';
 import {isMoneyCommand,isStockCommand,isOrderCommand,isPurchaseCommand,isCustomerCommand,parseShopCommand,type ShopCommand} from './shop-commands';
 import {proposedMoneyCurrencyMatches} from './money-currency';
 import {proposedOrderCurrencyMatches} from './order-currency';
@@ -35,13 +35,13 @@ export const materializationHash=(value:unknown)=>syncHash(new TextEncoder().enc
 export const applicationHash=(value:CanonicalApplication)=>materializationHash(value);
 /** Match row_to_json for shared mutation projections, without any ticket or authority. */
 function sqlRow(table:BackupTable,row:unknown,businessId:string):Record<string,unknown>{
- const values=encodeCommandRecord(table,row,businessId).values,fields=cloudRecordMaps[table].fields as Record<string,string>;
+ const values=encodeCommandRecord(table,row,businessId).values,fields=cloudRecordMap(table).fields as Record<string,string>;
  return Object.fromEntries(Object.entries(values).map(([key,value])=>[key,value!==null&&fields[key]?.startsWith('j:')?JSON.parse(value as string):value]));
 }
 function applyRecords(backup:MiseBackup,records:readonly CloudRecord[]):MiseBackup {
  const tables=structuredClone(backup.tables);
  for(const record of records){const table=Object.entries(cloudRecordMaps).find(([,map])=>map.table===record.table)?.[0] as BackupTable|undefined;if(!table)throw new ReconciliationError('integrity');
-  const fields=cloudRecordMaps[table].fields as Record<string,string>,raw=Object.fromEntries(Object.entries(record.values).map(([key,value])=>[key,value!==null&&fields[key]?.startsWith('j:')?JSON.parse(value as string):value])),row=decodeCommandRecord(table,raw);
+  const fields=cloudRecordMap(table).fields as Record<string,string>,raw=Object.fromEntries(Object.entries(record.values).map(([key,value])=>[key,value!==null&&fields[key]?.startsWith('j:')?JSON.parse(value as string):value])),row=decodeCommandRecord(table,raw);
   if(typeof row.id!=='string')throw new ReconciliationError('integrity');const list=tables[table] as unknown as Record<string,unknown>[],at=list.findIndex(r=>r.id===row.id);if(at>=0&&['events','creditEntries','stockMoves'].includes(table))throw new ReconciliationError('conflict');if(at<0)list.push(row);else list[at]=row;
  }
  return createBackup(tables,backup.exportedAt);

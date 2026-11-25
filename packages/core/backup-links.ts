@@ -4,6 +4,7 @@ import { stockAtoms, stockNameKey } from './stock-quantity';
 import { creditBalance, entryDelta } from './khata';
 import { orderLineTotal } from './order-lines';
 import { backupTableNames, type BackupTables, type BackupTable } from './backup-tables';
+import {validatePaymentHistory} from './payment-history';
 
 /** Check live references; historical catalogue snapshots may refer to deleted items. */
 export function validateBackupLinks(t:BackupTables):void {
@@ -16,6 +17,7 @@ export function validateBackupLinks(t:BackupTables):void {
   const pair = (...parts:unknown[]) => JSON.stringify(parts);
   const count = backupTableNames.reduce((sum,name) => sum+t[name].length,0);
   validateInboxHistory(t.inboxItems,t.events);
+  validatePaymentHistory(t.payments,t.events,t.inboxItems);
   if (!count||count===t.inboxItems.length&&t.inboxItems.every(item=>item.outletId===null)) return;
   ensure(t.businesses.length>0&&t.outlets.length>0&&t.members.length>0,'the shop identity records are incomplete');
   for(const outlet of t.outlets)link('businesses',outlet.businessId);
@@ -29,7 +31,7 @@ export function validateBackupLinks(t:BackupTables):void {
     ensure(a&&b&&a.businessId===b.businessId&&(!b.outletId||a.outletId===b.outletId),`${table} contains a foreign outlet or business reference`);
   };
   const refs:Partial<Record<BackupTable,Record<string,BackupTable>>>={
-    items:{categoryId:'categories'},events:{undoOf:'events',customerId:'customers',orderId:'orders',stockItemId:'stockItems',supplierId:'suppliers',closingId:'dayClosings',inboxId:'inboxItems'},
+    items:{categoryId:'categories'},events:{undoOf:'events',customerId:'customers',orderId:'orders',stockItemId:'stockItems',supplierId:'suppliers',closingId:'dayClosings',inboxId:'inboxItems',paymentId:'payments'},payments:{inboxId:'inboxItems'},
     creditAccounts:{customerId:'customers'},creditEntries:{accountId:'creditAccounts',customerId:'customers',saleId:'sales',orderId:'orders',refundId:'orderRefunds',returnsChargeId:'creditEntries',reversalOf:'creditEntries'},
     sales:{customerId:'customers',creditAccountId:'creditAccounts',orderId:'orders',closingId:'dayClosings'},orders:{statusEventId:'events'},orderNotes:{orderId:'orders'},orderCommunications:{orderId:'orders'},
     orderRefunds:{saleId:'sales',orderId:'orders',customerId:'customers',accountId:'creditAccounts',creditEntryId:'creditEntries'},stockItems:{supplierId:'suppliers'},stockMoves:{stockItemId:'stockItems',undoOf:'stockMoves'},
@@ -44,6 +46,7 @@ export function validateBackupLinks(t:BackupTables):void {
     if(table==='orders'){const order=entry as BackupTables['orders'][number];reference(row,'customers',order.customer.id);reference(row,'sales',order.payment.saleId);reference(row,'creditEntries',order.payment.cancellation?.creditEntryId);}
     if(table==='supplierMessages')for(const id of (entry as BackupTables['supplierMessages'][number]).stockItemIds)reference(row,'stockItems',id);
     if(table==='purchases')for(const line of (entry as BackupTables['purchases'][number]).lines)reference(row,'stockItems',line.stockItemId);
+    if(table==='payments'){const p=entry as BackupTables['payments'][number];if(p.association){reference(row,{order:'orders',sale:'sales',credit:'creditEntries'}[p.association.kind] as BackupTable,p.association.id);ensure(JSON.parse(p.association.fingerprint).scope.businessId===link('outlets',p.outletId).businessId,'a payment candidate snapshot belongs to another business');}}
   }
   unique(t.customers.map(c => c.phone && pair(c.businessId,c.phone)),'customer phones');
   unique(t.creditAccounts.map(a => pair(a.outletId,a.customerId,a.currency)),'credit accounts');

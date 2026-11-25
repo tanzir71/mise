@@ -4,7 +4,7 @@ import {parseStockReviewRevisions,parseStockResolutionReceipt,reviewedStockPropo
 import {adjustStockCommand,saveStockMetadataCommand,saveStockItemCommand} from '../packages/core/stock';
 import {stockSaveIntent} from '../apps/web/src/data/outbox-intents';
 import {replayStockRecords} from '../packages/core/stock-replay';
-import {cloudRecordMaps,encodeCommandRecord,decodeProposedCommandRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,encodeCommandRecord,decodeProposedCommandRecord} from '../packages/core/cloud-records';
 import {stockFixture,STOCK_AT} from './stock-fixture';
 import type {StockContext} from '../packages/core/stock';
 import type {BackupTable} from '../packages/core/backup-tables';
@@ -41,7 +41,7 @@ it('checked revisions cannot be missing, invented, borrowed from another item or
  for(const reserved of stockReviewReservedIds(c))expect(()=>reviewedStockProposal(c,reserved,selected(c))).toThrow();
 });
 function context(ctx:StockContext,command:StockCommand,at:number){
- const businessId=ctx.setup.business.id,raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
+ const businessId=ctx.setup.business.id,raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMap(table).fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
  return {businessId,outletId:ctx.setup.outlet.id,actorId:ctx.setup.owner.id,at,contextJson:JSON.stringify({business:raw('businesses',ctx.setup.business),outlet:raw('outlets',ctx.setup.outlet),items:ctx.items.map(x=>raw('stockItems',x)),moves:ctx.moves.filter(x=>stockWritePlan(command).rows.some(row=>row.itemId===x.stockItemId)).map(x=>raw('stockMoves',x)),suppliers:[]})};
 }
 it('a count remains strict until an explicit replacement uses its reviewed current revision, then sets the original absolute quantity',()=>{

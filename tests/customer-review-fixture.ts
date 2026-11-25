@@ -6,7 +6,7 @@ import {prepareCustomerReviewView,type CustomerReviewCurrent} from '../packages/
 import {customerReviewSourceAudits,parseCustomerReviewSource,type CustomerReviewRequest} from '../packages/core/customer-review-source';
 import {reviewedCustomerProposal} from '../packages/core/customer-review';
 import {replayCustomerRecords} from '../packages/core/customer-replay';
-import {cloudRecordMaps,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {MarketCode} from '../packages/core/packs';
 import type {AuditEvent,CreditAccount} from '../packages/core/models';
@@ -42,7 +42,7 @@ export function fixture(mode:Mode,draft=input){
  return {setup,customer,account,command,events,row,packet};
 }
 export function sqlRow(table:BackupTable,value:unknown,businessId:string){
- const fields:Readonly<Record<string,string>>=cloudRecordMaps[table].fields;
+ const fields:Readonly<Record<string,string>>=cloudRecordMap(table).fields;
  return Object.fromEntries(Object.entries(encodeCommandRecord(table,value,businessId).values).map(([key,v])=>[key,typeof v==='string'&&(fields[key]?.startsWith('j:')||fields[key]?.startsWith('e:'))?JSON.parse(v):v]));
 }
 export function replayContext(f:ReturnType<typeof fixture>,options:{accounts?:CreditAccount[];customer?:unknown;currency?:string;market?:MarketCode;actorId?:string}={}){

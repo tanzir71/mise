@@ -1,0 +1,868 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "1ddaefe0ac36bc3b19f8dbc97efe109c46227869",
+  "verifiedAt": "2026-11-25T01:54:28.184Z",
+  "scope": "M41 native saved observations, current association, original metadata receipts/undo and ordinary backup/legacy compatibility; the product review, financial posting and full backend adapter remain required in M41",
+  "sourceFingerprint": "83b374a79d3d962d446bd208e193910026d2949112ee16f28bacd70b9a4684c0",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "bbdae77524cb3fa9127250e809377e2851bf5b425e8b1ec2a7b9210e80e14ff0"
+    },
+    {
+      "path": "apps/web/src/BackupTools.tsx",
+      "sha256": "3aad941416da1ce6d0d3697f6e40f4dde9e4ab1031ef9d01a0a4cf2d09848790"
+    },
+    {
+      "path": "apps/web/src/CloudSetup.tsx",
+      "sha256": "2b2a3198b8285fc58d23dfc271f2b4fe4c9f6f3d00222ff7d4f166fd68917d50"
+    },
+    {
+      "path": "apps/web/src/data/cloud-sync-apply.ts",
+      "sha256": "4034f6f261ce69c3865b2b7b6cb0ccb8f606dfb358174143a1c15e4251ebaa8b"
+    },
+    {
+      "path": "apps/web/src/data/local-store.ts",
+      "sha256": "2b64e0095980f952a8913068ead4cd8f3f06d1574a636802a3ba5c21295c4144"
+    },
+    {
+      "path": "apps/web/src/data/payment-capture.ts",
+      "sha256": "0afe2e1ac0845941a143fd47569607d3af539b622c9df52377427c1b53deb255"
+    },
+    {
+      "path": "docs/payment-capture.md",
+      "sha256": "5a8ad50ff9f6a982904e88ca941b6faf690a45fd8eb7995e018420ecf97895df"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "d3613c440980aa3b588f89d3cc149ce521c81652ad5d19c535e688c77cac637f"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "7b3808e37c47d1546a790a934cc8117bf9d91c9cc654b8a92c07dcd1b5a29900"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "2a4a7b80d71b2e5496fcc6bf0edf1fe92756737408c4192ba5ae05b3a2241f3e"
+    },
+    {
+      "path": "package.json",
+      "sha256": "55086c9e6207275584e1a7553ef08d43919edb4d957e73adb577ebea30d9c2cf"
+    },
+    {
+      "path": "packages/core/backup-links.ts",
+      "sha256": "d5acdbe02db479d78b570e892e8b20fa18f9aebf969d263765a7aa65c7e1bdf4"
+    },
+    {
+      "path": "packages/core/backup-schema.ts",
+      "sha256": "28f1a28aa17bc1a374590e4e5ff1a25c903f9bdef5b78c301aab3ae5ee89af83"
+    },
+    {
+      "path": "packages/core/backup-tables.ts",
+      "sha256": "304410e9440b04058930f8f9fb3182e146f15e7d6a1c6c1cafed356e302cd7d6"
+    },
+    {
+      "path": "packages/core/backup.ts",
+      "sha256": "b508e2828eaffd1babeb78efc0ae2ee826e650c53d00034c12caba5e75411f2c"
+    },
+    {
+      "path": "packages/core/cloud-records.ts",
+      "sha256": "1d9fad20053467a27e92ee66b783cd1180721c5f2fe21c12f64cb3efc2de22bc"
+    },
+    {
+      "path": "packages/core/cloud-upload.ts",
+      "sha256": "f5ef7b4f1505ace965c72da839fe5243f8b457d2d178f295b5a0b39082e3b490"
+    },
+    {
+      "path": "packages/core/literal-token.ts",
+      "sha256": "45a95a9d87409a6938b98c189790f479ad0e3baeb4d28d47f74da75e23ec7e79"
+    },
+    {
+      "path": "packages/core/local-outbox.ts",
+      "sha256": "3ecced4548ef7929c482b91d46c1f070ece7526e06874b4c55ea3b7bc0d395f5"
+    },
+    {
+      "path": "packages/core/models.ts",
+      "sha256": "5d530ecdb39e809c88d027f389a823ab3cfdb0e914c77f7821865087f71ca8c0"
+    },
+    {
+      "path": "packages/core/payment-history.ts",
+      "sha256": "3e6e86482d377a33f840674872fe9b2d36f6aab487472cc5be002b41a87863b0"
+    },
+    {
+      "path": "packages/core/payment-matches.ts",
+      "sha256": "aa0b0f3d1ecea3580a6113fe520eeae15bfea95abe0f86c03e1177a8d1669094"
+    },
+    {
+      "path": "packages/core/payment-records.ts",
+      "sha256": "33d194a3e267a57502282802d503e25abef9e2e4737e8ba008736ff1ce7cb709"
+    },
+    {
+      "path": "packages/core/replay-records.ts",
+      "sha256": "0589b71e2b5aaf830e0e6947d27d10084f6472d086db9584b3cbe53e32245618"
+    },
+    {
+      "path": "packages/core/sync-download.ts",
+      "sha256": "c71c78b7b309a36a7a6bb2f4367b8b6f78c2453dbb9489b38685535fef35d1bc"
+    },
+    {
+      "path": "packages/core/sync-materialize.ts",
+      "sha256": "f862e1639cfe2125c33ee71ca252358df05c68d9262daea1b4d7b3454b803865"
+    },
+    {
+      "path": "packages/core/sync-read.ts",
+      "sha256": "32ffb6dbb4198652c7606d0d61038df33e6617a72fa37ef6bdfd593230f63ffb"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha256": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "96f0e88060c8058dfb43de109b7cc9712fb50669d8d9c2cc48a6f3ca14cde126"
+    },
+    {
+      "path": "tests/backup-db.test.ts",
+      "sha256": "355e57f195d532ccf9787e3a1804c82cbec14bbf766291e3abc47442d51eb885"
+    },
+    {
+      "path": "tests/closing-hosted-fixture.ts",
+      "sha256": "e4f36d0073bdc72588a5131617b036abc6c21b856b43f5e53747d4ba0267f136"
+    },
+    {
+      "path": "tests/closing-review-fixture.ts",
+      "sha256": "77cfc7483bce85e8fa169135d94d5cd946c277fbd39514a45c6a9f5f02e467f3"
+    },
+    {
+      "path": "tests/customer-review-db.test.ts",
+      "sha256": "b8e1836b3fabcd466beb0feacaa94443a1f2a71ec8cd3ace6e2c92ed70593bd9"
+    },
+    {
+      "path": "tests/customer-review-fixture.ts",
+      "sha256": "356628fc66b675cd8dfea2bd3e856225f2e729db1eb58227241dee9ad98f471e"
+    },
+    {
+      "path": "tests/domain-outbox-adapters.test.ts",
+      "sha256": "a5f2f92835b44b2818d81a7d65702f061955de479c63d0aa9fbfaa2ee83cc7f5"
+    },
+    {
+      "path": "tests/e2e/cloud-auth.spec.ts",
+      "sha256": "a7b35989f2765cdbc5fbbee2b65636b65855e88bdcc55e9508885a86814fc88d"
+    },
+    {
+      "path": "tests/e2e/exports.spec.ts",
+      "sha256": "a267abfda5fcf51f8c2055bbe0f654aeb72f95be4bc451c0b5f19950dafa568d"
+    },
+    {
+      "path": "tests/e2e/operators.spec.ts",
+      "sha256": "1134fcab72634112f5efad2f254158c24ff115fa320fe5d4e4efb581740bd2ff"
+    },
+    {
+      "path": "tests/e2e/outbox-boundary.spec.ts",
+      "sha256": "42b74f70f05917fa4730054675b1ce32f72efa6e721f7998b06e96495088293c"
+    },
+    {
+      "path": "tests/e2e/payment-native.spec.ts",
+      "sha256": "a120ae610bdea0b752aba1b45f3d19bbe08e232d0b85aadd127fcee4b65b3d83"
+    },
+    {
+      "path": "tests/e2e/settings-outbox.spec.ts",
+      "sha256": "5882bc82ae2a3dbc6e9d7e9cf291592567c8968e1d83fa6cbfaeb55342567464"
+    },
+    {
+      "path": "tests/e2e/sync-coverage.spec.ts",
+      "sha256": "cd72010a0c4963486ff4aaab05fbbb469c45700796efd2804905fdf7058f1bcc"
+    },
+    {
+      "path": "tests/e2e/sync-customer-currency.spec.ts",
+      "sha256": "98b110d67017180ec1517c73235ce882ae804492b9c056872d39ce9885f1906d"
+    },
+    {
+      "path": "tests/e2e/sync-download.spec.ts",
+      "sha256": "50a37026eac2ddedd3153f5fc3cf1e16ea7616950f43e8ba4972bb103c2a333c"
+    },
+    {
+      "path": "tests/e2e/sync-images.spec.ts",
+      "sha256": "bdae43f529b3cbf2f93f308a43f94dffa99e88909946d7b0511e884e4cc9cf46"
+    },
+    {
+      "path": "tests/e2e/sync-money-review-ui.spec.ts",
+      "sha256": "6a24c690d442ddd4246d64022e3379b16265f353c5f5fe82a5494549c84462bc"
+    },
+    {
+      "path": "tests/e2e/sync-purchase-currency.spec.ts",
+      "sha256": "58eda04d1a3b6865fde25b36b694878f5f7098e48f2370aabbb0d6b5d1efe5fe"
+    },
+    {
+      "path": "tests/e2e/sync-purchase-review-ui.spec.ts",
+      "sha256": "cb71bffc9bde3557653f85188f5878ceb25770bdb49d33e5d7590bbacea2c58b"
+    },
+    {
+      "path": "tests/e2e/sync-stock-review-ui.spec.ts",
+      "sha256": "0eaf48a88fa8bb30fea12333acd3e80f2a081bd233fae3341ac1cab2d9bc746a"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.mjs",
+      "sha256": "779703bfa1ffbd689597a7bbd3d3e97c925d61bf4ab5cdcca1418f46f44fb235"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "faa0260f965ef07ecefec7cd3af70981a2522d6cc6b1b0d798162d4773687c34"
+    },
+    {
+      "path": "tests/fixtures/sync-coverage-browser.ts",
+      "sha256": "11bc0b8d68699af780dad01c21fd7eef599728ae367d45e9a2038a2d12ee94f7"
+    },
+    {
+      "path": "tests/fixtures/sync-download-browser.ts",
+      "sha256": "5a7c041ad866dc416766719e802573173b19a87329cda65617c78e224a5d6c95"
+    },
+    {
+      "path": "tests/fixtures/sync-images-browser.ts",
+      "sha256": "6732215c198be0b94cf16f6056aa29a0c6808a020d369cae1ba800cad49502e9"
+    },
+    {
+      "path": "tests/handoff-db.test.ts",
+      "sha256": "fbb8deda9ff98efabccd7da8664bc68e31c685ef393b554d5d2a0b8835428ed0"
+    },
+    {
+      "path": "tests/handoff-hosted-fixture.ts",
+      "sha256": "05dc5257df3ee23060b17a0d09dd82c12c41a5b4b54eb8cbd4eadc77f9a0790e"
+    },
+    {
+      "path": "tests/handoff-outbox-adapters.test.ts",
+      "sha256": "1872f3b755d3b17bf1da0dfe1515fa9fbe776d2946598b57a16fbd72526921a1"
+    },
+    {
+      "path": "tests/inbox-db.test.ts",
+      "sha256": "ee129776181b2de1b4ef295330bc5eac161ac6b310e835569262dadd8af4c2b2"
+    },
+    {
+      "path": "tests/inbox-outbox-adapters.test.ts",
+      "sha256": "23f59d21b07b009b411e566ea85df54562326883550164c01183c20f187cef6f"
+    },
+    {
+      "path": "tests/local-outbox-db.test.ts",
+      "sha256": "4e56a762b6f717fda18edb1621d6fdccb8160fe4520b04cb1548cb07353d363c"
+    },
+    {
+      "path": "tests/money-hosted-fixture.ts",
+      "sha256": "48855a486c6fb4852510ac3830111cca4c8677ef92ea58cf903db69721a27958"
+    },
+    {
+      "path": "tests/money-review-db.test.ts",
+      "sha256": "1cc5f8ab89d0c71735dadac7305f883c81248f88825b129f7493b0015ffd13ef"
+    },
+    {
+      "path": "tests/operators-db.test.ts",
+      "sha256": "73e6260b92308bad7413541a1f7003372e8c7c544d7ab57888244e0ace0069ab"
+    },
+    {
+      "path": "tests/order-hosted-fixture.ts",
+      "sha256": "0213255f908f63320fadde6125e36a8d671c08cc18967fe1bf3a9e5d8ff8f2e1"
+    },
+    {
+      "path": "tests/order-outbox-adapters.test.ts",
+      "sha256": "c644b6f8da0e6bc4d9b65100190ad0e5bcc86263e6a4078e3545353bd7ac1122"
+    },
+    {
+      "path": "tests/payment-backup-upgrade.test.ts",
+      "sha256": "37fdf1850fa429ca73e0d91e4d7ddf7b4561b46fb583cc7b7d56b871fcff3d24"
+    },
+    {
+      "path": "tests/payment-capture.test.ts",
+      "sha256": "10015d7c39178abced4227836cb54c1bf6d251f3acd8848b992a2cd4455e1ee4"
+    },
+    {
+      "path": "tests/payment-matches.test.ts",
+      "sha256": "300cd3ea9e7621af9afba853777f08e64a968ce4d85f48e93430122f2940b78a"
+    },
+    {
+      "path": "tests/purchase-hosted-fixture.ts",
+      "sha256": "ce8ae7671dcc0d4bd55d23e4572b3d8991a788a52243294db444fcd582d8fe7d"
+    },
+    {
+      "path": "tests/purchase-review-db.test.ts",
+      "sha256": "12df69622ed65a439716c8efe0a17e80c1bf9672df4aab30f95dec262afbb558"
+    },
+    {
+      "path": "tests/scope-recovery-db.test.ts",
+      "sha256": "0e6d1c74d7223ca71b5238934024a49376c2996cfd04b97da7f438737ad2a558"
+    },
+    {
+      "path": "tests/scope-recovery-fixture.ts",
+      "sha256": "a5d95e669820b5c91adfcc6c4f3cb76a4a5c9277dee24f70c86ddd82aa676489"
+    },
+    {
+      "path": "tests/shop-records.test.ts",
+      "sha256": "8d519f887baf4e2ba39e6de70ea0e472e6ca6460b98eafacbf09ccbde9becb77"
+    },
+    {
+      "path": "tests/stock-hosted-fixture.ts",
+      "sha256": "51e9656959ed8c39fbf9cdd2008e6442370755182e55673af780c1090972a7b9"
+    },
+    {
+      "path": "tests/stock-review-db.test.ts",
+      "sha256": "d70d15b5b34d2dcb46767dc295bce171068df29cf6efc48e10b3614675e621e3"
+    },
+    {
+      "path": "tests/stock-review-fixture.ts",
+      "sha256": "c29200c7b5e12199f89e4a34925ad17ae3f0c5781ce5539cc44b799c0fb3c95e"
+    },
+    {
+      "path": "tests/stock-review-server.test.ts",
+      "sha256": "982f33adc62b16ec8ecf228927bf951bf0403f1a2f5134fbd527c7d2bd1d0b75"
+    },
+    {
+      "path": "tests/stock-review.test.ts",
+      "sha256": "89713a0d7a5efebdd149404fedad0528a8420944d94c2cf9a80104ed2a198481"
+    },
+    {
+      "path": "tests/sync-apply-fixture.ts",
+      "sha256": "13ddbf49ba8b8040589966298fb6e0be28efdd335ae86727c1ffc53260b486ce"
+    },
+    {
+      "path": "tests/sync-coverage-db.test.ts",
+      "sha256": "04977e0c87b80d76b1ab8edaf47b6cdf8b79791450c81bb346d3663a68567c4c"
+    },
+    {
+      "path": "tests/sync-download-db.test.ts",
+      "sha256": "890895337eb20de8973170bcf1fd02c4f80dcf5009c5c2d4e614070f790e1b82"
+    },
+    {
+      "path": "tests/sync-images-db.test.ts",
+      "sha256": "2aa89e40cb8c5e91606d4aa5dd5e9d573a94bc056e49ffc7bb6fdc705de08880"
+    },
+    {
+      "path": "tests/sync-session.test.ts",
+      "sha256": "9b05c0ebefaf5e93a8f8e68d0df23d79a107c5d0c626204215a9e15736d5c9bc"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "fd20a88fa9a673ff98c6386f09e4df7caed2ccc49295cc6e78d1fa9865cfe463"
+    }
+  ],
+  "storage": {
+    "nativeVersion": 29,
+    "backupVersion": 11,
+    "legacyBackupVersions": [
+      7,
+      8,
+      9,
+      10
+    ],
+    "wireManifestVersion": 1,
+    "wireBackupVersionWhenPaymentsEmpty": 10,
+    "wireTables": 21,
+    "nonemptyPaymentUpload": "rejected before chunks or SQL mapping",
+    "liveBindingPaymentWrites": "rejected until the M41 adapter is ready",
+    "canonicalApplication": "retains native Payment data"
+  },
+  "tests": {
+    "unit": {
+      "files": 283,
+      "passed": 5416,
+      "failed": 0,
+      "newNativePaymentCases": 36,
+      "newLegacyBoundaryCases": 2,
+      "focused": {
+        "files": 10,
+        "passed": 210
+      },
+      "originalKitchenHistoryRecords": 5004,
+      "workers": 2,
+      "privateWindowsProcessPriority": "AboveNormal; original test configuration, corpora and deadlines unchanged",
+      "originalCorporaAndDeadlinesUnchanged": true
+    },
+    "browser": {
+      "root": {
+        "basePath": "/",
+        "files": [
+          "cloud-auth.spec.ts",
+          "cloud-upload-review.spec.ts",
+          "cloud-upload.spec.ts",
+          "counter.spec.ts",
+          "customer-khata.spec.ts",
+          "exports.spec.ts",
+          "inbox-storage.spec.ts",
+          "khata.spec.ts",
+          "operators.spec.ts",
+          "orders.spec.ts",
+          "outbox-boundary.spec.ts",
+          "payment-native.spec.ts",
+          "payment-text.spec.ts",
+          "settings-outbox.spec.ts",
+          "sync-coverage.spec.ts",
+          "sync-customer-currency.spec.ts",
+          "sync-download.spec.ts",
+          "sync-images.spec.ts",
+          "sync-money-review-ui.spec.ts",
+          "sync-purchase-currency.spec.ts",
+          "sync-purchase-review-ui.spec.ts",
+          "sync-stock-review-ui.spec.ts"
+        ],
+        "uniqueCasesPassed": 164,
+        "unresolvedFailures": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "workers": 1,
+        "newNativeCases": 4,
+        "parserCases": 2,
+        "syntheticMessageFixtures": 30,
+        "method": "Complete initial root corpus, followed by all 18 cases in the three corrected legacy-fixture files; application source/build unchanged.",
+        "singleAttemptClean": false,
+        "initial": {
+          "passed": 163,
+          "failed": 1,
+          "skipped": 0,
+          "flaky": 0,
+          "durationMs": 868229.2829999999,
+          "report": ".private/m41-native-root-browser-initial.json"
+        },
+        "recheck": {
+          "passed": 18,
+          "failed": 0,
+          "skipped": 0,
+          "flaky": 0,
+          "durationMs": 112379.494,
+          "report": ".private/m41-native-root-browser-recheck.json",
+          "files": [
+            "sync-coverage.spec.ts",
+            "sync-download.spec.ts",
+            "sync-images.spec.ts"
+          ]
+        },
+        "correction": "Update the stale schema-28/42-store expectation to schema 29/43 stores. Exclude Payments/new indexes from genuine schema-11/13/14 inputs; assert an empty new Payment store while preserving every original source, byte/hash, queue, receipt and operator assertion."
+      },
+      "pages": {
+        "basePath": "/mise/",
+        "files": [
+          "cloud-auth.spec.ts",
+          "cloud-upload-review.spec.ts",
+          "cloud-upload.spec.ts",
+          "counter.spec.ts",
+          "customer-khata.spec.ts",
+          "exports.spec.ts",
+          "inbox-storage.spec.ts",
+          "khata.spec.ts",
+          "operators.spec.ts",
+          "orders.spec.ts",
+          "outbox-boundary.spec.ts",
+          "payment-native.spec.ts",
+          "payment-text.spec.ts",
+          "settings-outbox.spec.ts",
+          "sync-coverage.spec.ts",
+          "sync-customer-currency.spec.ts",
+          "sync-download.spec.ts",
+          "sync-images.spec.ts",
+          "sync-money-review-ui.spec.ts",
+          "sync-purchase-currency.spec.ts",
+          "sync-purchase-review-ui.spec.ts",
+          "sync-stock-review-ui.spec.ts"
+        ],
+        "uniqueCasesPassed": 164,
+        "unresolvedFailures": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "workers": 1,
+        "newNativeCases": 4,
+        "parserCases": 2,
+        "syntheticMessageFixtures": 30,
+        "method": "Complete initial Pages corpus followed by the entire unchanged operator file after one original 30-second timeout during host contention.",
+        "singleAttemptClean": false,
+        "initial": {
+          "passed": 163,
+          "failed": 1,
+          "skipped": 0,
+          "flaky": 0,
+          "durationMs": 1439944.532,
+          "report": ".private/m41-native-pages-browser-initial.json"
+        },
+        "recheck": {
+          "passed": 11,
+          "failed": 0,
+          "skipped": 0,
+          "flaky": 0,
+          "durationMs": 36283.334,
+          "report": ".private/m41-native-pages-browser-recheck.json",
+          "files": [
+            "operators.spec.ts"
+          ],
+          "originalTimeoutMs": 30000,
+          "applicationAndFixtureUnchanged": true,
+          "sourceFiles": 572,
+          "sourceFingerprint": "a264acd3192c29c141d8c2757f84a258eb758e5029da75e62212d81e89a56df3"
+        },
+        "note": "The initial timeout snapshot already showed the locked operator screen. The same complete 11-case file passed unchanged; its timed-out case completed in about three seconds. No deadline or application adjustment was made."
+      }
+    },
+    "visual": {
+      "root": {
+        "comparisons": 18,
+        "actualRestoreCaptures": [
+          {
+            "viewportWidth": 390,
+            "path": ".private/m41-native-root-qa/screens/native-payment-restore-390.png",
+            "bytes": 34245,
+            "sha256": "2e20c41d44bceb9af68695f03f33927741f24ba4c06b24b40461cca57cb8fa60",
+            "imageWidth": 390,
+            "imageHeight": 976,
+            "note": "Count panel inside the existing scrollable restore dialog; no complete M41 capture/review interface is claimed."
+          },
+          {
+            "viewportWidth": 1440,
+            "path": ".private/m41-native-root-qa/screens/native-payment-restore-1440.png",
+            "bytes": 35014,
+            "sha256": "87c078b5dd222c83832f21d76b5d23269811fb920bf1e243c277373c44386fe7",
+            "imageWidth": 440,
+            "imageHeight": 1000,
+            "note": "Count panel inside the existing scrollable restore dialog; no complete M41 capture/review interface is claimed."
+          }
+        ],
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "report": ".private/m41-native-root-qa/report.html",
+        "contexts": [
+          "M17 export controls",
+          "M30 upload-review states"
+        ],
+        "note": "Original supplied export/More/business-data frames; differences remain informational. No M41 capture/review frame or complete native interface is claimed.",
+        "screens": [
+          {
+            "page": "m17-phone-export",
+            "width": 390,
+            "screen": "screens/m17-phone-export-screen-390.png",
+            "referenceFile": "screens/mobile/M29 · Manager — Export (sheet).png",
+            "overflow": false
+          },
+          {
+            "page": "m17-exports-desktop",
+            "width": 1440,
+            "screen": "screens/m17-exports-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+            "overflow": false
+          },
+          {
+            "page": "m17-export-sheet-desktop",
+            "width": 1440,
+            "screen": "screens/m17-export-sheet-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-phone",
+            "width": 360,
+            "screen": "screens/m30-upload-review-armed-phone-screen-360.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-phone",
+            "width": 390,
+            "screen": "screens/m30-upload-review-armed-phone-screen-390.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-desktop",
+            "width": 768,
+            "screen": "screens/m30-upload-review-armed-desktop-screen-768.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-desktop",
+            "width": 1024,
+            "screen": "screens/m30-upload-review-armed-desktop-screen-1024.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-desktop",
+            "width": 1440,
+            "screen": "screens/m30-upload-review-armed-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-phone",
+            "width": 360,
+            "screen": "screens/m30-upload-review-accepted-phone-screen-360.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-phone",
+            "width": 390,
+            "screen": "screens/m30-upload-review-accepted-phone-screen-390.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-desktop",
+            "width": 768,
+            "screen": "screens/m30-upload-review-accepted-desktop-screen-768.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-desktop",
+            "width": 1024,
+            "screen": "screens/m30-upload-review-accepted-desktop-screen-1024.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-desktop",
+            "width": 1440,
+            "screen": "screens/m30-upload-review-accepted-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-phone",
+            "width": 360,
+            "screen": "screens/m30-upload-review-recovery-phone-screen-360.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-phone",
+            "width": 390,
+            "screen": "screens/m30-upload-review-recovery-phone-screen-390.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-desktop",
+            "width": 768,
+            "screen": "screens/m30-upload-review-recovery-desktop-screen-768.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-desktop",
+            "width": 1024,
+            "screen": "screens/m30-upload-review-recovery-desktop-screen-1024.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-desktop",
+            "width": 1440,
+            "screen": "screens/m30-upload-review-recovery-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          }
+        ]
+      },
+      "pages": {
+        "comparisons": 18,
+        "actualRestoreCaptures": [
+          {
+            "viewportWidth": 390,
+            "path": ".private/m41-native-pages-qa/screens/native-payment-restore-390.png",
+            "bytes": 34245,
+            "sha256": "2e20c41d44bceb9af68695f03f33927741f24ba4c06b24b40461cca57cb8fa60",
+            "imageWidth": 390,
+            "imageHeight": 976,
+            "note": "Count panel inside the existing scrollable restore dialog; no complete M41 capture/review interface is claimed."
+          },
+          {
+            "viewportWidth": 1440,
+            "path": ".private/m41-native-pages-qa/screens/native-payment-restore-1440.png",
+            "bytes": 35014,
+            "sha256": "87c078b5dd222c83832f21d76b5d23269811fb920bf1e243c277373c44386fe7",
+            "imageWidth": 440,
+            "imageHeight": 1000,
+            "note": "Count panel inside the existing scrollable restore dialog; no complete M41 capture/review interface is claimed."
+          }
+        ],
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "report": ".private/m41-native-pages-qa/report.html",
+        "contexts": [
+          "M17 export controls",
+          "M30 upload-review states"
+        ],
+        "note": "Original supplied export/More/business-data frames; differences remain informational. No M41 capture/review frame or complete native interface is claimed.",
+        "screens": [
+          {
+            "page": "m17-phone-export",
+            "width": 390,
+            "screen": "screens/m17-phone-export-screen-390.png",
+            "referenceFile": "screens/mobile/M29 · Manager — Export (sheet).png",
+            "overflow": false
+          },
+          {
+            "page": "m17-exports-desktop",
+            "width": 1440,
+            "screen": "screens/m17-exports-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+            "overflow": false
+          },
+          {
+            "page": "m17-export-sheet-desktop",
+            "width": 1440,
+            "screen": "screens/m17-export-sheet-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-phone",
+            "width": 360,
+            "screen": "screens/m30-upload-review-armed-phone-screen-360.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-phone",
+            "width": 390,
+            "screen": "screens/m30-upload-review-armed-phone-screen-390.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-desktop",
+            "width": 768,
+            "screen": "screens/m30-upload-review-armed-desktop-screen-768.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-desktop",
+            "width": 1024,
+            "screen": "screens/m30-upload-review-armed-desktop-screen-1024.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-armed-desktop",
+            "width": 1440,
+            "screen": "screens/m30-upload-review-armed-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-phone",
+            "width": 360,
+            "screen": "screens/m30-upload-review-accepted-phone-screen-360.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-phone",
+            "width": 390,
+            "screen": "screens/m30-upload-review-accepted-phone-screen-390.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-desktop",
+            "width": 768,
+            "screen": "screens/m30-upload-review-accepted-desktop-screen-768.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-desktop",
+            "width": 1024,
+            "screen": "screens/m30-upload-review-accepted-desktop-screen-1024.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-accepted-desktop",
+            "width": 1440,
+            "screen": "screens/m30-upload-review-accepted-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-phone",
+            "width": 360,
+            "screen": "screens/m30-upload-review-recovery-phone-screen-360.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-phone",
+            "width": 390,
+            "screen": "screens/m30-upload-review-recovery-phone-screen-390.png",
+            "referenceFile": "screens/mobile/M27 · Manager — More (everything else, one tap away).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-desktop",
+            "width": 768,
+            "screen": "screens/m30-upload-review-recovery-desktop-screen-768.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-desktop",
+            "width": 1024,
+            "screen": "screens/m30-upload-review-recovery-desktop-screen-1024.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          },
+          {
+            "page": "m30-upload-review-recovery-desktop",
+            "width": 1440,
+            "screen": "screens/m30-upload-review-recovery-desktop-screen-1440.png",
+            "referenceFile": "screens/desktop/Desktop 14 · Mise — Settings › Business data (menu, ingredients, suppliers, devices…).png",
+            "overflow": false
+          }
+        ]
+      }
+    }
+  },
+  "checks": {
+    "lint": true,
+    "strictTypecheck": true,
+    "astroFiles": 214,
+    "astroErrors": 0,
+    "astroWarnings": 0,
+    "astroHints": 0,
+    "rootBuild": true,
+    "pagesBuild": true,
+    "exportsPresent": 270,
+    "reactChecklist": "Both settings changes keep existing structure, controls, hooks, data boundaries and styling; backup labels are keyed exhaustively by table, and upload rows enumerate only the existing supported protocol.",
+    "secretChecks": {
+      "privateComparisons": 13,
+      "buildArtifacts": true,
+      "finalCommand": "pnpm check:secrets --history --artifacts",
+      "requiredAfterThisRecord": true,
+      "normalCommitAndPushGuardsEnabled": true
+    }
+  },
+  "invariants": [
+    "Saving or associating an observed Payment never changes a sale, order payment or debt.",
+    "The original message/parser context is retained separately from checked fields.",
+    "Serialized reviews and comparisons do not authorize a write.",
+    "Actual source/operator/revision/current target checks and unique native identities guard each writer.",
+    "Original metadata requests recover by stable identity without undoing a later decision.",
+    "A changed financial target reopens inspection without restoring money.",
+    "Ordinary backups retain source images and the full payment audit chain.",
+    "Empty-table upgrades preserve earlier logical review fingerprints and v1 wire compatibility; nonempty native observations are never omitted.",
+    "All installation/backend/source/provider accounts, credentials, numbers and hosting remain end-user configured."
+  ],
+  "limitations": [
+    "M41 product capture/manual-review interfaces, explicit guarded financial posting/allocation, full native backend command/canonical support and their recovery remain required in this same milestone.",
+    "M37 backend-only observations retain their existing recorded-receipt semantics.",
+    "The existing manual Inbox money flow remains available. Native payment writes under a live binding are intentionally held until the adapter exists.",
+    "Workflows, CI uploads, publication, service/migration deployment, provider commissioning and tags remain held."
+  ],
+  "milestoneComplete": false,
+  "localImplementationComplete": false
+}

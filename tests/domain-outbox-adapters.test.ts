@@ -7,7 +7,7 @@ import {CloudUploadJournal} from '../apps/web/src/data/cloud-upload';
 import {assertLocalUploadCoverage,beginLocalUpload} from '../apps/web/src/data/local-outbox';
 import {backupToken} from '../packages/core/backup';
 import type {BackupTable,MiseBackup} from '../packages/core/backup-tables';
-import {cloudRecordMaps,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,cloudRecordMaps,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import {saveCustomerCommand} from '../packages/core/customers';
 import {defaultCreditTerms,creditBalance} from '../packages/core/khata';
 import {newInboxId} from '../packages/core/inbox';
@@ -41,7 +41,7 @@ async function queue(db:MiseDatabase){const rows=await db.outbox.orderBy('[uploa
  * Equal clocks isolate record/companion identity and domain values from canonical-time reconciliation. */
 async function replay(db:MiseDatabase,original:MiseBackup){
  const shadow=structuredClone(original.tables),setup={business:shadow.businesses[0],outlet:shadow.outlets[0],owner:shadow.members[0]},businessId=setup.business.id;
- const raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
+ const raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMap(table).fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
  for(const entry of await queue(db)){
   const c=parseShopCommand(entry.commands[0]),event=entry.changes.find(change=>change.table==='events'&&change.key===c.id)!.after as {at:number};
   const ticketId=newInboxId(),prepared={done:false,ticketId,token:'a'.repeat(43),businessId,outletId:setup.outlet.id,actorId:setup.owner.id,at:event.at};

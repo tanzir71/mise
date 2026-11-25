@@ -11,7 +11,7 @@ import {
 } from '@mise/core/cloud-connection';
 import { newInboxId } from '@mise/core/inbox';
 import type { SetupSnapshot } from '@mise/core/models';
-import { backupTableNames } from '@mise/core/backup-tables';
+import { cloudBackupTableNames } from '@mise/core/cloud-records';
 import {
   CloudUploadJournal,
   type LocalUploadReview,
@@ -406,7 +406,7 @@ function UploadReview({ setup }: { setup: SetupSnapshot }) {
             <span>{review.manifest.images} original images</span>
           </div>
           <dl className="cloud-review-counts">
-            {backupTableNames.map((name) => (
+            {cloudBackupTableNames.map((name) => (
               <div key={name}>
                 <dt>{labels[name] ?? name}</dt>
                 <dd>{review.manifest.counts[name].toLocaleString('en')}</dd>

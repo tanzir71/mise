@@ -1,5 +1,5 @@
 import {customerHostedFixture} from './customer-hosted-fixture';
-import {cloudRecordMaps,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,decodeCommandRecord,encodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {Business,DayClosing,Outlet} from '../packages/core/models';
 import type {NamedShopSetup} from '../packages/core/shop-access';
@@ -15,8 +15,8 @@ export async function closingHostedProofSql(){
  // Production closing/undo clock rules are unchanged.
  const timezone=['Asia/Dhaka','UTC'].find(zone=>dayKey(occurred,zone)===dayKey(clockBase+10000,zone))!;
  const base=f.baseRecords.map(r=>['businesses','outlets','members'].includes(r.table)?{...r,values:{...r.values,name:JSON.stringify(literal),...(r.table==='outlets'?{timezone}:{})}}:r),records:CloudRecord[]=[...base];
- const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
- const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMaps[table].table).map(r=>raw(table,r));
+ const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMap(table).table).map(r=>raw(table,r));
  const business=decodeCommandRecord('businesses',rows('businesses')[0]) as unknown as Business,outlet=decodeCommandRecord('outlets',rows('outlets')[0]) as unknown as Outlet,setup:NamedShopSetup={business,outlet,owner:{id:f.actorId,name:literal,businessId:f.businessId,active:true,outletIds:[outlet.id]}};
  const initial=recordSaleCommand({expression:'100',method:'cash'},{setup,items:[],wallets:[]},occurred-1000);
  records.push(encodeCommandRecord('sales',initial.sale,f.businessId),encodeCommandRecord('events',initial.event,f.businessId));

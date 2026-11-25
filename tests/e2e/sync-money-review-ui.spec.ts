@@ -75,7 +75,7 @@ for(const outcome of ['replaced','withdrawn'] as const)test(`the money review in
    const downloaded=await downloading,bytes=await readFile((await downloaded.path())!,'utf8'),backup=JSON.parse(bytes);
    for(const table of backupTableNames)if(table!=='events')expect(backup.tables[table],table).toEqual(original.backup.tables[table]);
    for(const event of original.backup.tables.events)expect(backup.tables.events).toContainEqual(event);
-   expect(Object.keys(backup.tables)).toHaveLength(21);expect(bytes).not.toMatch(/apiUrl|publishableKey|access_token|refresh_token|Authorization|moneyReviews/);
+   expect(Object.keys(backup.tables)).toHaveLength(22);expect(bytes).not.toMatch(/apiUrl|publishableKey|access_token|refresh_token|Authorization|moneyReviews/);
    await manager.goto(returnUrl);await manager.getByRole('button',{name:'Review saved money action',exact:true}).click();await installSyncApplyFixture(manager);
    expectedQueue=(await manager.evaluate(()=>window.miseSyncApplyTest.inspect())).queue;expect(expectedQueue.slice(0,original.queue.length)).toEqual(original.queue);
   }

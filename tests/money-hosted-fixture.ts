@@ -1,5 +1,5 @@
 import {customerHostedFixture} from './customer-hosted-fixture';
-import {cloudRecordMaps,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import {moneyWritePlan,type MoneyCommand} from '../packages/core/money-commands';
 import {moneyFingerprint,moneyWriteFields} from '../supabase/functions/_shared/money-write';
@@ -9,8 +9,8 @@ export async function moneyHostedProofSql(){
  const f=await customerHostedFixture(),occurred=Date.now()-1000,clockBase=Date.now()+10000;
  const records=[...f.baseRecords,...f.records,{table:'customer_outlets',values:{business_id:f.businessId,outlet_id:f.outletId,customer_id:f.command.customerId}} as CloudRecord];
  const account=records.find(r=>r.table==='credit_accounts')!.values.id as string;
- const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
- const row=(table:BackupTable,id?:string)=>{const r=records.find(r=>r.table===cloudRecordMaps[table].table&&(id===undefined||r.values.id===id));return r?raw(table,r):null;};
+ const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const row=(table:BackupTable,id?:string)=>{const r=records.find(r=>r.table===cloudRecordMap(table).table&&(id===undefined||r.values.id===id));return r?raw(table,r):null;};
  const base=()=>({id:newInboxId(),occurredAt:occurred,outletId:f.outletId});
  const cash:MoneyCommand={...base(),type:'sale.record',saleId:newInboxId(),input:{expression:'100',method:'cash',given:12000,wallet:null,who:'Synthetic only',items:[]}};
  const credit:MoneyCommand={...base(),type:'sale.credit',saleId:newInboxId(),accountId:account,entryId:newInboxId(),creditEventId:newInboxId(),input:{expression:'100',items:[],confirmation:null}};

@@ -1,5 +1,5 @@
 import {customerHostedFixture} from './customer-hosted-fixture';
-import {cloudRecordMaps,decodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,decodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {StockItem} from '../packages/core/models';
 import {newInboxId} from '../packages/core/inbox';
@@ -8,8 +8,8 @@ import {stockFingerprint,stockWriteFields} from '../supabase/functions/_shared/s
 /** SQL-role proof only: one deliberate exception rolls back all synthetic writes. */
 export async function stockHostedProofSql(){
  const f=await customerHostedFixture(),occurred=Date.now()-1000,clockBase=Date.now()+100000,records:CloudRecord[]=[...f.baseRecords];
- const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
- const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMaps[table].table).map(r=>raw(table,r));
+ const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMap(table).table).map(r=>raw(table,r));
  const item=(id:string)=>decodeCommandRecord('stockItems',rows('stockItems').find(r=>r.id===id)!) as unknown as StockItem;
  const a=newInboxId(),b=newInboxId(),base=()=>({id:newInboxId(),outletId:f.outletId,occurredAt:occurred}),literal='চাল\0'+String.fromCharCode(0xd800);
  const input:StockSaveInput={name:literal,nameLocal:literal,unit:'kg',category:'Food',aliases:[literal],onHand:20.125,target:30,packSize:1,lowAt:null,supplierId:null};

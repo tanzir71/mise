@@ -1,6 +1,6 @@
 import {createBackup} from './backup';
 import type {BackupTable, MiseBackup} from './backup-tables';
-import {cloudRecordMaps, decodeCommandRecord, encodeCommandRecord, type CloudRecord} from './cloud-records';
+import {cloudRecordMaps,cloudRecordMap, decodeCommandRecord, encodeCommandRecord, type CloudRecord} from './cloud-records';
 import {inboxImageBytes, type InboxBackupImage} from './inbox';
 import {syncHash} from './sync-read';
 
@@ -12,7 +12,7 @@ const immutableTables:readonly BackupTable[]=['events','creditEntries','stockMov
 /** Domain facts only: this envelope contains no server admission or credential. */
 export function replaySqlRow(table:BackupTable,row:unknown|null,businessId:string):Record<string,unknown>|null {
   if(row===null)return null;
-  const values=encodeCommandRecord(table,row,businessId).values,fields=cloudRecordMaps[table].fields as Record<string,string>;
+  const values=encodeCommandRecord(table,row,businessId).values,fields=cloudRecordMap(table).fields as Record<string,string>;
   return Object.fromEntries(Object.entries(values).map(([key,value])=>[key,value!==null&&fields[key]?.startsWith('j:')?JSON.parse(value as string):value]));
 }
 /** Rebuild an exact tentative projection, preserving fields outside scalar SQL maps. */
@@ -28,7 +28,7 @@ export async function applyReplayProjection(backup:MiseBackup,projection:ReplayP
     if(record.table==='inbox_images')continue;
     const table=Object.entries(cloudRecordMaps).find(([,map])=>map.table===record.table)?.[0] as BackupTable|undefined;
     if(!table)throw new PendingReplayError();
-    const fields=cloudRecordMaps[table].fields as Record<string,string>,raw=Object.fromEntries(Object.entries(record.values).map(([key,value])=>[key,value!==null&&fields[key]?.startsWith('j:')?JSON.parse(value as string):value])),row=decodeCommandRecord(table,raw);
+    const fields=cloudRecordMap(table).fields as Record<string,string>,raw=Object.fromEntries(Object.entries(record.values).map(([key,value])=>[key,value!==null&&fields[key]?.startsWith('j:')?JSON.parse(value as string):value])),row=decodeCommandRecord(table,raw);
     if(typeof row.id!=='string')throw new PendingReplayError();
     const rows=tables[table] as unknown as Record<string,unknown>[],at=rows.findIndex(before=>before.id===row.id);
     if(at>=0&&immutableTables.includes(table))throw new PendingReplayError();

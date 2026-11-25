@@ -1,5 +1,5 @@
 import {customerHostedFixture} from './customer-hosted-fixture';
-import {cloudRecordMaps,decodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,decodeCommandRecord,type CloudRecord} from '../packages/core/cloud-records';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {Supplier} from '../packages/core/models';
 import {newInboxId} from '../packages/core/inbox';
@@ -8,8 +8,8 @@ import {purchaseFingerprint,purchaseWriteFields} from '../supabase/functions/_sh
 /** Synthetic SQL-role proof; every Auth/domain row rolls back in one subtransaction. */
 export async function purchaseHostedProofSql(){
  const f=await customerHostedFixture(),occurred=Date.now()-1000,clockBase=Date.now()+100000,records:CloudRecord[]=[...f.baseRecords],literal='সরবরাহ\0'+String.fromCharCode(0xd800),supplierId=newInboxId(),purchaseId=newInboxId();
- const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
- const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMaps[table].table).map(r=>raw(table,r));
+ const raw=(table:BackupTable,r:CloudRecord)=>Object.fromEntries(Object.entries(r.values).map(([k,v])=>[k,v!==null&&(cloudRecordMap(table).fields as Record<string,string>)[k]?.startsWith('j:')?JSON.parse(v as string):v]));
+ const rows=(table:BackupTable)=>records.filter(r=>r.table===cloudRecordMap(table).table).map(r=>raw(table,r));
  const supplier=()=>decodeCommandRecord('suppliers',rows('suppliers')[0]) as unknown as Supplier,base=()=>({id:newInboxId(),outletId:f.outletId,occurredAt:occurred});
  const steps:{id:string;type:string;ticket:string;plan:ReturnType<typeof purchaseWritePlan>;hash:string;clock:string;records:string}[]=[];
  async function step(c:PurchaseCommand){

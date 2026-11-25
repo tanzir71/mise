@@ -77,7 +77,7 @@ it('journals an explicit withdrawal before HTTP and acknowledges only the real r
  const result=await decideSavedMoneyReview(f.db,f.id,r.revision,withdraw,f.options);
  expect(result.record.phase).toBe('confirmed');expect(result.record.receipt).toMatchObject({type:'command.resolved',outcome:'withdrawn',replacement:null});
  expect(f.calls()).toBe(1);expect((await f.db.outbox.toArray()).map(row=>row.changes)).toEqual(f.original.map(row=>row.changes));expect(backupToken(await f.db.readBackup())).toBe(f.backup);
- expect(JSON.stringify(result.record)).not.toContain('"token"');expect(Object.keys((await f.db.readBackup()).tables)).toHaveLength(21);
+ expect(JSON.stringify(result.record)).not.toContain('"token"');expect(Object.keys((await f.db.readBackup()).tables)).toHaveLength(22);
 });
 it('accepts a distinct genuine replacement while keeping original cash and financial identities intact',async()=>{
  const f=await boot(),r=await prepareSavedMoneyReview(f.db,f.id,null,f.options),result=await decideSavedMoneyReview(f.db,f.id,r.revision,replacement,f.options);
@@ -159,12 +159,12 @@ it('rejects tokens or forged completed choices in the durable journal',async()=>
  expect(await hasSavedMoneyReview(f.db,f.original[0].uploadId)).toBe(true);
 });
 it('a real schema-23 upgrade preserves every original store and complete image while adding only an empty private review journal',async()=>{
- const f=await boot(),old=new Dexie('mise-money-review-v23-'+randomUUID()),tables=f.db.tables.filter(t=>t.name!=='moneyReviews'&&t.name!=='purchaseReviews'&&t.name!=='stockReviews'&&t.name!=='customerReviews'&&t.name!=='closingReviews'),saved=await Promise.all(tables.map(t=>t.toArray()));databases.push(old);
+ const f=await boot(),old=new Dexie('mise-money-review-v23-'+randomUUID()),tables=f.db.tables.filter(t=>t.name!=='payments'&&t.name!=='moneyReviews'&&t.name!=='purchaseReviews'&&t.name!=='stockReviews'&&t.name!=='customerReviews'&&t.name!=='closingReviews'),saved=await Promise.all(tables.map(t=>t.toArray()));databases.push(old);
  old.version(23).stores(Object.fromEntries(tables.map(t=>[t.name,[t.schema.primKey.src,...t.schema.indexes.map(i=>i.src)].join(',')])));
  for(let i=0;i<tables.length;i++)await old.table(tables[i].name).bulkPut(saved[i]);old.close();
  const upgraded=new MiseDatabase(old.name);databases.push(upgraded);await upgraded.open();
  expect(upgraded.verno).toBe(localSchemaVersion);expect(upgraded.tables).toHaveLength(localTableNames.length);expect(await upgraded.moneyReviews.count()).toBe(0);expect(await upgraded.purchaseReviews.count()).toBe(0);
- expect(await Promise.all(tables.map(t=>upgraded.table(t.name).toArray()))).toEqual(saved);expect(backupToken(await upgraded.readBackup())).toBe(f.backup);expect(Object.keys((await upgraded.readBackup()).tables)).toHaveLength(21);
+ expect(await Promise.all(tables.map(t=>upgraded.table(t.name).toArray()))).toEqual(saved);expect(backupToken(await upgraded.readBackup())).toBe(f.backup);expect(Object.keys((await upgraded.readBackup()).tables)).toHaveLength(22);
 });
 async function activateOriginalOwner(f:Awaited<ReturnType<typeof boot>>){
  const setup=(await f.db.setup())!;

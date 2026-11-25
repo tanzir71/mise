@@ -5,7 +5,7 @@ import {reviewedStockProposal} from '../packages/core/stock-review';
 import {parseStockReviewRequest,stockReviewItem,stockReviewMove,stockReviewSourceAudits,type StockReviewRequest} from '../packages/core/stock-review-source';
 import {stockReviewInput,stockReviewProjection,type PreparedStockReview} from '../packages/core/stock-review-view';
 import {replayStockRecords} from '../packages/core/stock-replay';
-import {cloudRecordMaps,decodeProposedCommandRecord,encodeCommandRecord} from '../packages/core/cloud-records';
+import {cloudRecordMap,decodeProposedCommandRecord,encodeCommandRecord} from '../packages/core/cloud-records';
 import {stockFixture,STOCK_AT} from './stock-fixture';
 import type {BackupTable} from '../packages/core/backup-tables';
 import type {StockItem} from '../packages/core/models';
@@ -15,7 +15,7 @@ export function packet(command:StockCommand,change:StockChange):StockReviewReque
 }
 export function apply(f:StockContext,change:StockChange){for(const item of change.items){const index=f.items.findIndex(x=>x.id===item.id);if(index<0)f.items.push(item);else f.items[index]=item;}f.moves.push(...change.moves);}
 export function context(f:StockContext,c:StockCommand,at:number){
- const businessId=f.setup.business.id,raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMaps[table].fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
+ const businessId=f.setup.business.id,raw=(table:BackupTable,row:unknown)=>Object.fromEntries(Object.entries(encodeCommandRecord(table,row,businessId).values).map(([key,value])=>[key,value!==null&&(cloudRecordMap(table).fields as Record<string,string>)[key]?.startsWith('j:')?JSON.parse(value as string):value]));
  return {businessId,outletId:c.outletId,actorId:f.setup.owner.id,at,contextJson:JSON.stringify({business:raw('businesses',f.setup.business),outlet:raw('outlets',f.setup.outlet),items:f.items.map(x=>raw('stockItems',x)),moves:f.moves.filter(x=>stockWritePlan(c).rows.some(row=>row.itemId===x.stockItemId)).map(x=>raw('stockMoves',x)),suppliers:f.suppliers.filter(row=>row.id===stockWritePlan(c).supplierId).map(row=>raw('suppliers',row))})};
 }
 export function view(f:StockContext,p:StockReviewRequest,at=STOCK_AT+10000,enabled=true):PreparedStockReview {
