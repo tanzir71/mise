@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 now has authenticated native payment admission, current-context execution and atomic private completion with genuine financial children and immutable retry receipts. Live role/phone/outlet checks, literal-source preservation, server-timed undo and audit-ID reservations protect the original invocation. The app outbox, archive transport and canonical/upload integration remain fenced. All installation configuration stays end-user owned; no hosted service or workflow is enabled. See [native payment backend](docs/payment-native-backend.md).
+
 - In progress: M41 native payment actions now atomically retain their exact invocation, effective matching controls, financial confirmations and original identities through one shared native executor. Ordinary restore and independent originals retain those choices; older actions receive no invented consent. The connected backend/outcome/canonical adapter remains open and the preview stays off. All configuration remains end-user owned. See [native payment commands](docs/payment-native-commands.md).
 
 - In progress: M41 can retain a complete validated original outlet/payment snapshot in shared immutable records and resolve exact original native financial actions. Radix buckets avoid repeating unchanged ledgers and imported notes across snapshots; malformed, cross-scope and self-rehashed invalid money evidence fail verification. This is groundwork for the full backend/outcome/canonical adapter, with no sync fence removed or hosted service changed. All configuration remains end-user owned. See [complete payment originals](docs/payment-original-basis.md).

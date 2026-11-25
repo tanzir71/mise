@@ -144,3 +144,6 @@ verify_jwt = false
 # server environment until that installation explicitly enables public orders.
 [functions.public]
 verify_jwt = false
+
+[functions.native-payment]
+verify_jwt = true

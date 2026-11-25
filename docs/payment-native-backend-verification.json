@@ -1,0 +1,238 @@
+{
+  "milestone": "M41",
+  "increment": "Authenticated native payment backend authority",
+  "complete": false,
+  "baseCommit": "e9d33dff7d1a54cd8c6e1f895c937e2450e35e5a",
+  "scope": {
+    "nativeAdmissionPreparationExecutionCompletion": true,
+    "actualRetainedInvocationAndResultHash": true,
+    "genuineFinancialChildrenAndAtomicOriginalReceipts": true,
+    "legacyM37ProtocolUnchanged": true,
+    "nativeSchema": 29,
+    "ordinaryBackupSchema": 13,
+    "ordinaryTables": 22,
+    "productionConnectedAppAdapterEnabled": false,
+    "liveBindingUploadCanonicalFencesRetained": true,
+    "paymentTextDefault": false,
+    "allInstallationConfigurationEndUserOwned": true,
+    "noHostedSqlServiceWorkflowOrPublicationChanges": true
+  },
+  "unit": {
+    "passed": 5539,
+    "failed": 0,
+    "skipped": 0,
+    "files": 292,
+    "singleCleanFullSuiteInvocation": true,
+    "log": ".private/m41-backend-full-unit.log",
+    "report": ".private/m41-backend-full-unit.json",
+    "startTime": 1795613092842,
+    "durationSeconds": 1343.23,
+    "newNativeBackendCases": 28,
+    "maxWorkers": 2,
+    "originalCorporaAssertionsDeadlinesUnchanged": true,
+    "completeOriginalCharges": 5000,
+    "originalNoteCodeUnits": 1000000,
+    "backendCollectionsAndUndos": 3,
+    "actualDeploymentBundleAgainstLocalPostgres": true
+  },
+  "securityCatalog": {
+    "passed": true,
+    "log": ".private/m41-backend-local-advisors.log",
+    "forcedRlsTables": 4,
+    "noDirectGrantsForAnonAuthenticatedService": true,
+    "hardenedPrivateDefiners": 4,
+    "publicDefiners": 0,
+    "authenticatedCompletionDenied": true,
+    "sharedAuditIdentityReservation": true,
+    "hostedAdvisorOrMutation": false,
+    "report": ".private/m41-backend-local-advisors.json",
+    "indexes": 14
+  },
+  "checks": {
+    "types": {
+      "passed": true,
+      "astroFiles": 223,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-backend-types.log"
+    },
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-backend-lint.log"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "log": ".private/m41-backend-root-build.log"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "log": ".private/m41-backend-pages-build.log"
+      }
+    ],
+    "productionSourcesUnchangedThroughVerification": true,
+    "newProductMarkupOrStyles": false,
+    "newVisualComparisonRun": false,
+    "priorVisualEvidence": "docs/payment-inspection-verification.json",
+    "ownPort": 4332,
+    "neverTouchPort": 4321
+  },
+  "delivery": {
+    "directMain": true,
+    "skipCi": true,
+    "workflowsHeld": true,
+    "publicationHeld": true,
+    "providerCommissioningHeld": true,
+    "migrationServiceDeploymentHeld": true,
+    "tagsHeld": true,
+    "observedBeforeCommit": {
+      "disabledWorkflows": 3,
+      "runCount": 77,
+      "latestRun": 43927944995,
+      "latestDeployment": 7832852111
+    },
+    "postPushHoldRecheck": ".private/m41-backend-delivered.json"
+  },
+  "remainingM41": [
+    "Durable independent originals and bounded lossless archive transport",
+    "Original-versus-canonical immutable financial outcomes and original undo handling",
+    "Connected native app outbox",
+    "Initial native-history registration without reposting historical money",
+    "Lossless upload, canonical and ordinary-backup integration"
+  ],
+  "browser": {
+    "root": {
+      "report": ".private/m41-backend-root-browser.json",
+      "startTime": "2026-11-25T13:50:05.300Z",
+      "duration": 199540.505,
+      "expected": 32,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "pages": {
+      "report": ".private/m41-backend-pages-browser.json",
+      "startTime": "2026-11-25T13:54:26.533Z",
+      "duration": 179920.677,
+      "expected": 32,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "distinctPerBase": 32,
+    "workers": 1,
+    "retries": 0,
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "axeAssertedImpacts": [
+      "serious",
+      "critical"
+    ],
+    "assertedAxeViolations": 0,
+    "originalsTransportIsTestOnly": true,
+    "providerAccountRequired": false
+  },
+  "secretScan": {
+    "status": "passed",
+    "command": "pnpm check:secrets --history --artifacts",
+    "observedBeforeFinalRecord": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0
+    },
+    "firstLog": ".private/m41-backend-first-secrets.log",
+    "finalSameSourceRecordRecheck": ".private/m41-backend-final-secrets.log",
+    "newExceptions": 0,
+    "legacyBaselineChanged": false,
+    "commitPushGuardsRemainEnabled": true
+  },
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "c39d8c4b58f8611a9e5ae5d333a7f3c518958ec58f39012f8c3ec4a1d654bd43"
+    },
+    {
+      "path": "apps/web/src/data/payment-capture.ts",
+      "sha256": "5d6c96c9dec4e731e71c3581e00f8ae5e675463147ef3f0517c811a8c3773526"
+    },
+    {
+      "path": "docs/payment-native-backend.md",
+      "sha256": "33c49bad013ce1343f9f73830e16bb727963b471ad4f77c1cf54d48280fb0887"
+    },
+    {
+      "path": "docs/payment-native-commands.md",
+      "sha256": "916e522825b12e4ec02465f7be80bc5ed971c638cb20e5810ad550d4f021d0c5"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "3a36561569ee5c4524c9cf2bf9bc4c9ad3c9cca4e50e2e6a1b6e921c94330a4f"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "fe2bd19608a164bbcb666d5a4f2e475492fd5d0a29e0fa0a44c00089e3d35e5c"
+    },
+    {
+      "path": "packages/core/literal-token.ts",
+      "sha256": "45a95a9d87409a6938b98c189790f479ad0e3baeb4d28d47f74da75e23ec7e79"
+    },
+    {
+      "path": "packages/core/payment-backend.ts",
+      "sha256": "0da981e65ec1d1b6d19c7f2b403ead848b58256a899b947753a6d665f9e54dc2"
+    },
+    {
+      "path": "packages/core/payment-invocations.ts",
+      "sha256": "ff01fcbb5c886a28bacb28395a7a2bbc424571dfab321fe08316ec8e40e357ff"
+    },
+    {
+      "path": "packages/core/payment-native-commands.ts",
+      "sha256": "ed493e248a963443dc5e4f81008db0a5732f80a82215d5c687fbbb37f64dbe62"
+    },
+    {
+      "path": "supabase/config.toml",
+      "sha256": "2b9509ddbe34d1f02beb1b69ea3432d0b9caa742d347a1927bef6de710eb7455"
+    },
+    {
+      "path": "supabase/functions/_shared/native-payment-handler.ts",
+      "sha256": "a80665aa6a28d9d58b91db83eef10b2cbdc7e419710bde49eb903e590dc540cb"
+    },
+    {
+      "path": "supabase/functions/native-payment/index.ts",
+      "sha256": "35ced17a044c23e135def7ad4a7ffc6077ba61bdebffe122e16c414b4eb22ad1"
+    },
+    {
+      "path": "supabase/migrations/20261118042520_inbox_commands.sql",
+      "sha256": "8ac6a3be5d43223b50fa46e96a62e4ba1811fef08a209e16e94962def2b0ff95"
+    },
+    {
+      "path": "supabase/migrations/20261125121852_native_payment_commands.sql",
+      "sha256": "5b2cc0f43b1f85f9fdc154e522e60f24a94a245aca302ea54e7e002b238b6d10"
+    },
+    {
+      "path": "tests/fixtures/payment-storage.ts",
+      "sha256": "9af16f22181f2e50e58d4fec140f3ed2325fb9280741c6b1904a69d23e5d0418"
+    },
+    {
+      "path": "tests/native-payment-backend.test.ts",
+      "sha256": "79eac529afe43a1e7ed0e4d1772182a4ce74bc40c2fd8ae4bd5d9e5f404893f4"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "e0d1063a3c493eba789b34c26b305ec242f087a29fb29c72f9bf6eb043399edf"
+    }
+  ],
+  "sourceFingerprint": "4b53db9d599410e5bb94399a40bcb1de1522ada89e640f920fe501d801947224"
+}

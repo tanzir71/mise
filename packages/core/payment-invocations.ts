@@ -467,3 +467,18 @@ export function validateNativePaymentInvocations(
     }
   }
 }
+
+/** The exact invocation retained by the actual native transaction. */
+export function parseNativePaymentInvocation(
+  value: unknown,
+): NativePaymentInvocation {
+  ensure(
+    object(value) &&
+      exact(value, 'command,paymentHash') &&
+      hash(value.paymentHash),
+  );
+  return {
+    command: parseNativePaymentCommand(value.command),
+    paymentHash: value.paymentHash,
+  };
+}
