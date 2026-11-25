@@ -97,6 +97,11 @@
       },
       {
         "type": "fill",
+        "selector": ".payment-new-money label:has-text(\"Who (optional)\") input",
+        "value": "Original counter customer"
+      },
+      {
+        "type": "fill",
         "selector": ".payment-new-money textarea",
         "value": "Checked against the original"
       },

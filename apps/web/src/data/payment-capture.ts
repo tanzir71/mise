@@ -1,4 +1,5 @@
 import {PaymentEvidenceReader} from '@mise/core/payment-evidence';
+import {inspectOriginalPaymentTargets,type OriginalPaymentInspection} from './payment-inspection';
 import type {MiseDatabase} from './db';
 import type {InboxDestination,StoredInboxItem} from './inbox';
 import {captureBindingToken} from './inbox';
@@ -15,7 +16,7 @@ import {literalToken as syncDownloadToken} from '@mise/core/literal-token';
 import {parseLocalCloudState} from '@mise/core/local-outbox';
 
 export interface SavedPaymentSource {readonly itemId:string;readonly original:Readonly<Payment['original']>;readonly parsed:Readonly<ParsedPaymentText>}
-export interface SavedPaymentReceipt {payment:Payment;original:Payment;events:AuditEvent[];associationCurrent:boolean|null}
+export interface SavedPaymentReceipt {payment:Payment;original:Payment;events:AuditEvent[];associationCurrent:boolean|null;inspection:OriginalPaymentInspection}
 export interface SavedPaymentMatches {readonly paymentId:string;readonly revision:number;readonly result:PaymentTextMatches}
 export interface SavedPaymentAction {id:string;revision:number}
 export interface SavedPaymentMoneyComparison {readonly paymentId:string;readonly revision:number;readonly preview:PaymentMoneyPreview;readonly note:string}
@@ -52,8 +53,9 @@ async function receipt(db:MiseDatabase,proof:SourceProof,item:StoredInboxItem):P
  validatePaymentHistory([payment],events,[item]);events.sort((a,b)=>a.paymentRevision!-b.paymentRevision!);
  if(events[0].id!==proof.captureId||payment.inboxId!==item.id)throw new Error('This source belongs to a different original payment.');
  const data=payment.association||payment.postings||events.some(e=>(e.after as Payment).association)?await records(db,(await db.setup())!):null;
- if(data)validatePaymentFinanceLinks(data.payments,{outlets:[data.records.setup.outlet],orders:data.records.orders.slice(),sales:data.records.sales.slice(),creditEntries:data.records.entries.slice(),creditAccounts:data.records.accounts.slice(),customers:data.records.customers.slice(),events:data.records.events.slice()});
- return {payment,original:structuredClone(events[0].after as Payment),events,associationCurrent:data?paymentAssociationIsCurrent(payment,data.records,data.payments):null};
+ const reader=data?validatePaymentFinanceLinks(data.payments,{outlets:[data.records.setup.outlet],orders:data.records.orders.slice(),sales:data.records.sales.slice(),creditEntries:data.records.entries.slice(),creditAccounts:data.records.accounts.slice(),customers:data.records.customers.slice(),events:data.records.events.slice()}):null;
+ const inspection=reader?inspectOriginalPaymentTargets(payment,events,reader):{associations:[],postings:[]};
+ return {inspection,payment,original:structuredClone(events[0].after as Payment),events,associationCurrent:data?paymentAssociationIsCurrent(payment,data.records,data.payments):null};
 }
 export async function savedPaymentReceipt(db:MiseDatabase,review:SavedPaymentSource):Promise<SavedPaymentReceipt|null>{return db.transaction('r',db.tables,async()=>{const {proof,item}=await guard(db,review);return receipt(db,proof,item);});}
 function checkedFields(p:Payment):CheckedPaymentInput{return {checked:true,...paymentCheckedFields(p)};}

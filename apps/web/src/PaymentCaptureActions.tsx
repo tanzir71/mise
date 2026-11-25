@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Link } from 'react-router-dom';
+import { PaymentOriginalTarget } from './PaymentOriginalTarget';
 import { Button } from '@mise/ui/primitives.tsx';
 import type { SetupSnapshot } from '@mise/core/models';
 import { formatMoney } from '@mise/core/money';
@@ -58,6 +58,20 @@ export function PaymentCaptureActions({
 }) {
   const p = saved.payment,
     posting = activePaymentPosting(p);
+  const postingTargets = new Map(
+    saved.inspection.postings.map((row) => [row.eventId, row.target]),
+  );
+  const associationTargets = new Map(
+    saved.inspection.associations.map((row) => [row.eventId, row.target]),
+  );
+  const currentTarget = posting
+    ? postingTargets.get(posting.eventId)
+    : p.association
+      ? associationTargets.get(p.association.eventId)
+      : undefined;
+  const metadataHistory = saved.inspection.associations.filter(
+    (row) => !postingTargets.has(row.eventId),
+  );
   const [editing, setEditing] = useState(false),
     [matches, setMatches] = useState<SavedPaymentMatches>(),
     [windowMinutes, setWindowMinutes] = useState('30'),
@@ -290,22 +304,10 @@ export function PaymentCaptureActions({
             Recorded {khataDate(posting.at, setup, true)}. Received{' '}
             {khataDate(posting.money.receivedAt, setup, true)}.
           </p>
-          <p>
-            {posting.target.kind === 'order'
-              ? 'Order'
-              : posting.target.kind === 'credit'
-                ? 'Customer account'
-                : 'Counter receipt'}{' '}
-            · {posting.target.id.slice(-8)}. Receipt ·{' '}
-            {posting.receipt.id.slice(-8)}.
-          </p>
-          {posting.target.kind === 'order' ? (
-            <Link to={'/orders/' + posting.target.id}>Open actual order</Link>
-          ) : posting.receipt.kind === 'sale' ? (
-            <Link to="/counter">Open counter receipts</Link>
-          ) : (
-            <Link to="/khata">Open customer accounts</Link>
-          )}
+          <p>Original receipt · {posting.receipt.id}.</p>
+          {currentTarget ? (
+            <PaymentOriginalTarget target={currentTarget} />
+          ) : null}
           {posting.note ? <p dir="auto">{posting.note}</p> : null}
           {saved.associationCurrent === false ? (
             <p>
@@ -350,9 +352,14 @@ export function PaymentCaptureActions({
               ? 'The linked record changed. Check it again.'
               : 'The original link is kept with this source.'}
           </p>
+          {currentTarget ? (
+            <PaymentOriginalTarget target={currentTarget} />
+          ) : null}
+          {p.association.kind !== 'order' ? (
+            <p>Original linked receipt · {p.association.id}.</p>
+          ) : null}
           {p.association.kind === 'order' ? (
             <>
-              <Link to={'/orders/' + p.association.id}>Open linked order</Link>
               <label className="inbox-field">
                 Recording note (optional)
                 <textarea
@@ -755,8 +762,8 @@ export function PaymentCaptureActions({
           <div>
             <dt>Original read</dt>
             <dd>
-              {saved.original.parsed.status} · {saved.original.parsed.channel} ·{' '}
-              {saved.original.parsed.direction}
+              {saved.original.parsed.status} · {saved.original.parsed.channel}{' '}
+              · {saved.original.parsed.direction}
             </dd>
           </div>
           <div>
@@ -833,6 +840,12 @@ export function PaymentCaptureActions({
                 Received {khataDate(post.money.receivedAt, setup, true)} ·{' '}
                 {post.target.kind} · {post.target.id.slice(-8)}.
               </p>
+              {postingTargets.has(post.eventId) ? (
+                <PaymentOriginalTarget
+                  target={postingTargets.get(post.eventId)!}
+                />
+              ) : null}
+              <p>Original receipt · {post.receipt.id}.</p>
               {post.note ? <p dir="auto">{post.note}</p> : null}
               {post.undo ? (
                 <p>
@@ -841,6 +854,22 @@ export function PaymentCaptureActions({
                     : 'Undone'}{' '}
                   {khataDate(post.undo.at, setup, true)}.
                 </p>
+              ) : null}
+            </article>
+          ))}
+        {metadataHistory
+          .slice(-historyLimit)
+          .reverse()
+          .map((row) => (
+            <article key={row.eventId}>
+              <h3>Original metadata link</h3>
+              <p>
+                Linked {khataDate(row.at, setup, true)}. This link recorded no
+                new money.
+              </p>
+              <PaymentOriginalTarget target={row.target} />
+              {row.receipt ? (
+                <p>Original linked receipt · {row.receipt.id}.</p>
               ) : null}
             </article>
           ))}
@@ -855,8 +884,11 @@ export function PaymentCaptureActions({
               </li>
             ))}
         </ol>
-        {Math.max(saved.events.length, p.postings?.length ?? 0) >
-        historyLimit ? (
+        {Math.max(
+          saved.events.length,
+          p.postings?.length ?? 0,
+          metadataHistory.length,
+        ) > historyLimit ? (
           <Button kind="ghost" onClick={() => setHistoryLimit((n) => n + 20)}>
             Show older history
           </Button>

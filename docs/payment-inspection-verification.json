@@ -1,0 +1,199 @@
+{
+  "milestone": "M41",
+  "increment": "Read-only original payment target inspection",
+  "complete": false,
+  "baseCommit": "661eb862681a5a8b71afcd6c465e147ac79705ff",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "0ced7b7b7209b0bf1e861aba32f84f0766e889a8599cfcd2ef5dcfbb3ba5f921"
+    },
+    {
+      "path": "apps/web/src/PaymentCaptureActions.tsx",
+      "sha256": "e9f87d4dd9cd7b1f5b60c93e8788e3c0302869a2878f2d6b3d6df6a13a1bbf92"
+    },
+    {
+      "path": "apps/web/src/PaymentOriginalTarget.tsx",
+      "sha256": "6af180b8326749bcde6ea15d3d1341fcccd14516d64379d2a7f98419a843a323"
+    },
+    {
+      "path": "apps/web/src/data/payment-capture.ts",
+      "sha256": "fd65ac449c46886012e5f86c10213d1af0093705b7133214a107da6445ca1a04"
+    },
+    {
+      "path": "apps/web/src/data/payment-inspection.ts",
+      "sha256": "bfeb8f7ee9452b285f5f48ddae63b0fcfb82760c3708dacd81724845644d0b9c"
+    },
+    {
+      "path": "apps/web/src/payment-capture.css",
+      "sha256": "fbcb3ce8d8388c212944b0a78aa72975cb734a416e74f93a9c0bbdcd9b36281f"
+    },
+    {
+      "path": "docs/payment-inspection.md",
+      "sha256": "0fda37c7ac91438585be35cabaf5b59c4ad3241d151522017a6c8df1827ad304"
+    },
+    {
+      "path": "docs/payment-review.md",
+      "sha256": "63eca4a917eb5714f2ac4e4fdb8691d7a30a8713f14ffc4b62515a0507ef6909"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "ce6cea00c691653fe0ed56abd162c8b17251833732877f543a5939d72f1a9e16"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "e074fc3714869474bfec4f08ee2e6500423bf355cd3fb4bf00e0816bb99080e6"
+    },
+    {
+      "path": "packages/core/payment-finance-links.ts",
+      "sha256": "d07c30e729cfa66ccfd810e1c7b4967284d99c47ff8bb3dae493c0fdca15ee53"
+    },
+    {
+      "path": "qa/configs/m41-payment-review.json",
+      "sha256": "bb2ae39b4cc226db2f765d4f1d9a427abd6fa2b39fd8d01e01049bfebd35597c"
+    },
+    {
+      "path": "tests/e2e/payment-capture-ui.spec.ts",
+      "sha256": "ab10ffa0e1dfe5f9c7a25c77a03c210d7138cb5b513d21a064318deeb56e479a"
+    },
+    {
+      "path": "tests/payment-inspection.test.ts",
+      "sha256": "93d2e94e66e9aaa0b91d1df9f97cdb8122d3737dfc9cdf32c61e4b5dd0c2d8ae"
+    }
+  ],
+  "sourceFingerprint": "8297a46d554fdc44f8a319e98c67b3bb9d16c1458b5f09a0fb4c37a4dd05e1f8",
+  "unit": {
+    "passed": 5476,
+    "files": 289,
+    "durationSeconds": 1488.63,
+    "log": ".private/m41-target-full-unit.log",
+    "originalCorporaAndDeadlines": true
+  },
+  "browser": {
+    "root": {
+      "distinctSelected": 188,
+      "files": 23,
+      "ui": {
+        "report": ".private/m41-target-root-ui-r1.json",
+        "passed": 22,
+        "durationMs": 156723.415,
+        "retries": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      "relatedInitial": {
+        "report": ".private/m41-target-root-regression.json",
+        "passed": 165,
+        "failed": 1,
+        "failure": "Browser-context teardown exceeded the unchanged 30-second timeout after all application assertions completed.",
+        "trace": ".private/m41-target-root-restore-timeout.zip"
+      },
+      "nativeWholeFileRecheck": {
+        "report": ".private/m41-target-root-native-recheck.json",
+        "passed": 6,
+        "durationMs": 49741.969,
+        "retries": 0,
+        "skipped": 0,
+        "flaky": 0
+      }
+    },
+    "pages": {
+      "report": ".private/m41-target-pages-regression.json",
+      "passed": 188,
+      "durationMs": 743126.629,
+      "retries": 0,
+      "skipped": 0,
+      "flaky": 0
+    }
+  },
+  "developmentCorrection": {
+    "initialReport": ".private/m41-target-root-ui.json",
+    "passed": 8,
+    "failed": 1,
+    "notRun": 13,
+    "fix": "Assert original paragraphs separately from adjacent link text. No application change."
+  },
+  "visual": {
+    "root": {
+      "report": ".private/m41-target-root-qa/report.html",
+      "comparisons": 21,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "references": [
+        "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+        "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png",
+        "screens/mobile/M29 · Manager — Export (sheet).png"
+      ],
+      "inspectedScreens": [
+        ".private/m41-target-root-qa/screens/m41-payment-original-phone-sheet-390.png",
+        ".private/m41-target-root-qa/screens/m41-payment-original-desktop-sheet-1440.png",
+        ".private/m41-target-root-qa/screens/m41-payment-checked-phone-sheet-390.png"
+      ]
+    },
+    "pages": {
+      "report": ".private/m41-target-pages-qa/report.html",
+      "comparisons": 21,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "references": [
+        "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+        "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png",
+        "screens/mobile/M29 · Manager — Export (sheet).png"
+      ],
+      "inspectedScreens": [
+        ".private/m41-target-pages-qa/screens/m41-payment-original-phone-sheet-390.png",
+        ".private/m41-target-pages-qa/screens/m41-payment-original-desktop-sheet-1440.png",
+        ".private/m41-target-pages-qa/screens/m41-payment-checked-phone-sheet-390.png"
+      ]
+    }
+  },
+  "checks": {
+    "lint": ".private/m41-target-final-lint.log",
+    "types": ".private/m41-target-final-types.log",
+    "builds": [
+      ".private/m41-target-root-build.log",
+      ".private/m41-target-pages-build.log"
+    ],
+    "exportsPresent": 270,
+    "privateBuildComparisons": 13,
+    "nativeSchema": 29,
+    "ordinaryBackupSchema": 13,
+    "ordinaryTables": 22,
+    "featureFlag": {
+      "name": "paymentText",
+      "default": false
+    }
+  },
+  "holds": {
+    "endUserConfiguration": true,
+    "disabledWorkflows": 3,
+    "workflowRunCountBeforeCommit": 77,
+    "latestRunBeforeCommit": 43927944995,
+    "latestDeploymentBeforeCommit": 7832852111,
+    "noPR": true,
+    "noSignoff": true,
+    "noWorkflowDispatch": true,
+    "noCIUpload": true,
+    "noPublication": true,
+    "noServiceMigrationDeployment": true,
+    "noProviderCommissioning": true,
+    "noTags": true
+  },
+  "remaining": [
+    "Complete M41 backend/source-command and original financial/allocation outcome receipts.",
+    "Complete the same-milestone upload/canonical adapter before removing native nonempty-Payment/live-binding fences.",
+    "Full milestone and remaining handover acceptance, with all installation configuration end-user owned."
+  ]
+}

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 payment receipts now show checked original order/customer/counter labels and actual detail links, retaining names after edits, link removal, undo and backup restore. Customer links select the original account currency. Complete financial/evidence checks still precede display; no money or schema changes. The full backend/canonical adapter remains open and the preview stays off. See [original target inspection](docs/payment-inspection.md).
+
 - In progress: M41 reviews payment text in the actual Inbox sheet behind a default-off paymentText flag, with end-user source clocks, editable manual hints, current receipt/order matching, explicit new-money confirmation and original financial undo/recovery. The existing manual path remains one tap away. The full backend/canonical adapter and final acceptance remain required; workflows/publication stay held. See [payment review](docs/payment-review.md).
 
 - In progress: M41 payment matches and financial history now share complete immutable snapshot evidence and retain checked ledger-prefix digests instead of copying whole ledgers and large labels into each revision. The reproduced 5,000-entry/million-character fixture now remains exportable, restorable and undoable; schema 13 imports schema-12 originals unchanged. Product review and full backend/canonical handling remain required in this same milestone. Configuration stays end-user owned and workflows/publication remain held. See [payment storage](docs/payment-storage.md).

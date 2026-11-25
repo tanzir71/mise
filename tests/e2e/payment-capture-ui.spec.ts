@@ -54,6 +54,7 @@ async function boot(
             expression: '910',
             method: 'wallet',
             wallet: 'bKash',
+            who: '<script>Original counter customer</script>',
           });
         if (scenario === 'order' || scenario === 'many')
           for (let i = 0; i < (scenario === 'many' ? 4 : 1); i++) {
@@ -72,7 +73,7 @@ async function boot(
             });
             ids.push(order.id);
           }
-        if (scenario === 'credit') {
+        if (scenario === 'credit' || scenario === 'credit-receipt') {
           const customer = await db.saveCustomer({
             name: 'Karim bhai',
             nickname: '',
@@ -97,7 +98,9 @@ async function boot(
             expression: '1000',
             items: [],
           });
-          ids.push(account.id);
+          ids.push(account.id, customer.id);
+          if (scenario === 'credit-receipt')
+            await db.recordCreditPayment(account.id, 91000, 'wallet', 'bKash');
         }
         let text =
           scenario === 'settings'
@@ -443,6 +446,11 @@ test('one existing receipt is linked automatically without recording money and m
       exact: true,
     }),
   ).toBeVisible();
+  const originalCounter = f.sheet.locator('.payment-association .payment-original-target');
+  await expect(originalCounter).toContainText('<script>Original counter customer</script>');
+  await expect(originalCounter).toContainText('Payment review shop');
+  await expect(originalCounter.locator('script')).toHaveCount(0);
+  await expect(originalCounter.getByRole('link')).toHaveAttribute('href', new URL('app/counter',baseURL!).pathname);
   let state = await native(page, f.url, f.name);
   expect(state.sales).toEqual(before.sales);
   expect(state.payments[0].association).toMatchObject({
@@ -555,6 +563,20 @@ for (const target of ['order', 'credit', 'counter'])
       await expect(
         f.sheet.getByRole('heading', { name: 'Money recorded', exact: true }),
       ).toBeVisible();
+      const originalTarget = f.sheet.locator(
+        '.payment-financial-original .payment-original-target',
+      );
+      await expect(originalTarget).toContainText(
+        target === 'order'
+          ? 'Customer 0'
+          : target === 'credit'
+            ? 'Karim bhai'
+            : 'Walk-in customer',
+      );
+      const originalLabel = await originalTarget.locator('p').allTextContents();
+      const originalHref = await originalTarget
+        .getByRole('link')
+        .getAttribute('href');
       let state = await native(page, f.url, f.name);
       expect(state.payments[0].postings).toHaveLength(1);
       if (target === 'credit')
@@ -601,6 +623,60 @@ for (const target of ['order', 'credit', 'counter'])
         );
       if (target === 'order')
         expect(state.orders[0].payment.status).toBe('pending');
+      if (target === 'credit') {
+        await page.evaluate(
+          async ({ url, name, id }) => {
+            const m = await import(url),
+              db = new m.MiseDatabase(name);
+            try {
+              await db.saveCustomer(
+                {
+                  name: 'Later customer name',
+                  nickname: '',
+                  phone: '',
+                  address: '',
+                  notes: '',
+                  tags: [],
+                },
+                { id },
+              );
+            } finally {
+              db.close();
+            }
+          },
+          { url: f.url, name: f.name, id: f.source.ids[1] },
+        );
+      }
+      await page.reload();
+      await page
+        .getByRole('button', { name: 'Review payment', exact: true })
+        .click();
+      await page
+        .getByText('Original proposal and saved history', { exact: true })
+        .click();
+      const historyTarget = page
+        .locator('.payment-history article .payment-original-target')
+        .first();
+      await expect(historyTarget.locator('p')).toHaveText(originalLabel);
+      await expect(historyTarget.getByRole('link')).toHaveAttribute(
+        'href',
+        originalHref!,
+      );
+      await historyTarget.getByRole('link').click();
+      await expect(page).toHaveURL(new URL(originalHref!, baseURL!).href);
+      if (target === 'credit')
+        await expect(
+          page.getByRole('heading', {
+            name: 'Later customer name',
+            exact: true,
+          }),
+        ).toBeVisible();
+      else if (target === 'order')
+        await expect(page.locator('.order-detail')).toBeVisible();
+      else
+        await expect(
+          page.getByRole('heading', { name: 'Counter', exact: true }),
+        ).toBeVisible();
     },
   );
 test('source clocks and numeric date order are end-user choices and a saved proposal is never reinterpreted on reopening', async ({
@@ -831,3 +907,141 @@ for (const [scenario, hour] of [
       expect(state.entries).toHaveLength(0);
     },
   );
+
+test('a linked customer receipt keeps the original name after a rename and opens the actual currency account from saved history', async ({
+  page,
+  baseURL,
+}) => {
+  const f = await boot(page, baseURL!, 'credit-receipt');
+  await checkDetails(f.sheet);
+  const target = f.sheet.locator(
+    '.payment-association .payment-original-target',
+  );
+  await expect(target).toContainText('Karim bhai');
+  const href = await target.getByRole('link').getAttribute('href');
+  expect(href).toBe(
+    new URL('app/khata/' + f.source.ids[1] + '?currency=BDT', baseURL!)
+      .pathname + '?currency=BDT',
+  );
+  await page.evaluate(
+    async ({ url, name, id }) => {
+      const m = await import(url),
+        db = new m.MiseDatabase(name);
+      try {
+        await db.saveCustomer(
+          {
+            name: 'Later customer name',
+            nickname: '',
+            phone: '',
+            address: '',
+            notes: '',
+            tags: [],
+          },
+          { id },
+        );
+      } finally {
+        db.close();
+      }
+    },
+    { url: f.url, name: f.name, id: f.source.ids[1] },
+  );
+  await page.reload();
+  await page
+    .getByRole('button', { name: 'Review payment', exact: true })
+    .click();
+  await expect(
+    f.sheet.locator('.payment-association .payment-original-target'),
+  ).toContainText('Karim bhai');
+  await f.sheet
+    .getByRole('button', { name: 'Remove link', exact: true })
+    .click();
+  await f.sheet
+    .getByText('Original proposal and saved history', { exact: true })
+    .click();
+  const original = f.sheet
+    .locator('.payment-history article')
+    .filter({
+      has: page.getByRole('heading', {
+        name: 'Original metadata link',
+        exact: true,
+      }),
+    });
+  await expect(original).toContainText('Karim bhai');
+  const state = await native(page, f.url, f.name);
+  await expect(original).toContainText(
+    state.entries.find((e: { type: string }) => e.type === 'payment').id,
+  );
+  await original.getByRole('link').click();
+  await expect(page).toHaveURL(new URL(href!, baseURL!).href);
+  await expect(
+    page.getByRole('heading', { name: 'Later customer name', exact: true }),
+  ).toBeVisible();
+});
+
+test('an edited order retains the originally linked customer and actual order route after the metadata link is removed', async ({
+  page,
+  baseURL,
+}) => {
+  const f = await boot(page, baseURL!, 'order');
+  await checkDetails(f.sheet);
+  const target = f.sheet.locator(
+    '.payment-association .payment-original-target',
+  );
+  await expect(target).toContainText('Customer 0');
+  const href = await target.getByRole('link').getAttribute('href');
+  await page.evaluate(
+    async ({ url, name, id }) => {
+      const m = await import(url),
+        db = new m.MiseDatabase(name);
+      try {
+        const order = await db.orders.get(id);
+        await db.saveOrder(
+          {
+            source: order.source,
+            sourceText: order.sourceText,
+            name: 'Later order customer',
+            phone: '',
+            type: order.type,
+            address: order.address,
+            table: order.table,
+            lines: [{ name: 'Rice', unit: 'pc', qty: 1, unitPrice: 91000 }],
+            deliveryFee: 0,
+            discount: 0,
+            payment: { method: 'cash' },
+          },
+          { id, revision: order.revision },
+        );
+      } finally {
+        db.close();
+      }
+    },
+    { url: f.url, name: f.name, id: f.source.ids[0] },
+  );
+  await page.reload();
+  await page
+    .getByRole('button', { name: 'Review payment', exact: true })
+    .click();
+  await expect(
+    f.sheet.locator('.payment-association .payment-original-target'),
+  ).toContainText('Customer 0');
+  await f.sheet
+    .getByRole('button', { name: 'Remove link', exact: true })
+    .click();
+  await f.sheet
+    .getByText('Original proposal and saved history', { exact: true })
+    .click();
+  const original = f.sheet
+    .locator('.payment-history article')
+    .filter({
+      has: page.getByRole('heading', {
+        name: 'Original metadata link',
+        exact: true,
+      }),
+    });
+  await expect(original).toContainText('Customer 0');
+  await original.getByRole('link').click();
+  await expect(page).toHaveURL(new URL(href!, baseURL!).href);
+  await expect(page.locator('.order-detail')).toContainText(
+    'Later order customer',
+  );
+});

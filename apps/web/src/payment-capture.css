@@ -146,3 +146,12 @@
 .payment-history p[dir] {
   white-space: pre-wrap;
 }
+
+.payment-original-target p {
+  white-space: pre-wrap;
+}
+.payment-original-target a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}

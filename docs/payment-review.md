@@ -38,7 +38,7 @@ The existing share-source view follows supplied M25 `104:950`. M41 specifies no 
 
 The reusable configuration is [qa/configs/m41-payment-review.json](../qa/configs/m41-payment-review.json). Run `pnpm qa:visual qa/configs/m41-payment-review.json` against a production preview to reproduce the source, checked details, consent and original receipt comparisons. Its synthetic shop and source are created through the actual forms; no private installation inputs are needed.
 
-Target inspection currently shows original identities and available history links. Checked original order/customer/counter labels and precise available detail routes remain part of M41 before the preview flag graduates. They must come from retained original evidence and actual receipts, including after later edits.
+The [original target inspection follow-up](payment-inspection.md) now resolves checked order numbers, original customer names and counter labels from validated immutable evidence. It retains those labels after later edits and opens actual order/customer routes, including the original account currency. Full backend/canonical integration remains required before the preview flag graduates.
 
 Workflows, CI uploads, publication, service/migration deployment, provider commissioning and tags remain held. The preview is default-off and M41 remains unchecked.
 

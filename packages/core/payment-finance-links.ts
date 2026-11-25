@@ -101,7 +101,7 @@ function associationRows(p: Payment, snapshot: Record<string, unknown>) {
 export function validatePaymentFinanceLinks(
   payments: readonly Payment[],
   tables: FinancialTables,
-): void {
+): PaymentEvidenceReader {
   const claimed = new Set<string>(),
     reader = new PaymentEvidenceReader(tables.events, tables.creditEntries),
     eventMap = new Map(tables.events.map((e) => [e.id, e])),
@@ -441,4 +441,6 @@ export function validatePaymentFinanceLinks(
     }
   }
   reader.assertComplete();
+  // Reuse checked originals for read-only presentation, never write authority.
+  return reader;
 }
