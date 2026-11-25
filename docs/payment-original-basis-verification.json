@@ -1,0 +1,149 @@
+{
+  "milestone": "M41",
+  "increment": "Complete independent native original bases and exact action lookup",
+  "complete": false,
+  "baseCommit": "3bf61aa945ce2907c7b6a08f681b6cbcaad5b945",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "79713c0d067932c9d516168c9006c2d1eb37b92e0e6868ccb9b6fc0aa18b0417"
+    },
+    {
+      "path": "docs/payment-original-basis.md",
+      "sha256": "048d3c47a0e5dcb4f98c2652f784f12192cd26cf1020ca26ae52f50f9de31324"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "13b93e25c32201ae2dd0c4409a5116775438a94818210d98645a1cd1151f833d"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "b2ddb8314df0925825c84c8acc8ad02edcf878b13d68efb17e9fd54fc36110a3"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "bc91ccb1d5d6409b72e699a58505187a885a62ac95564ed0f73a38d8623de2ad"
+    },
+    {
+      "path": "packages/core/payment-originals.ts",
+      "sha256": "3352bb67e3ced2cfda480bd87369f2cd9680dd53feeb532e7c4decb2bee27cc2"
+    },
+    {
+      "path": "tests/e2e/payment-originals.spec.ts",
+      "sha256": "4affc252fbe91c4e93f27ac7abfb881a7cf8b97641e87e41a427f7ad51b6de3b"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "62365aad75ee0ab96b59cfaee879e35aae1ca0bae769e46dec6977ce21663345"
+    },
+    {
+      "path": "tests/payment-originals.test.ts",
+      "sha256": "2d69b1e9ffed26521387192a49f0fa8572a1bb2700f1be614c0a75ca90ab6ac7"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "e5d9b6d2b479ed5a220b6274cb3016ef524769888ebbc6afd5ed94be307e73fb"
+    }
+  ],
+  "sourceFingerprint": "66cff9dbf2ec7df6bd4f9cb29eee13783c592a1763521b54755d066583cb78ff",
+  "unit": {
+    "passed": 5492,
+    "files": 290,
+    "durationSeconds": 1109.09,
+    "newOriginalCases": 16,
+    "log": ".private/m41-originals-full-unit-isolated.log",
+    "originalDatasetsAndDeadlines": true,
+    "initialMixedRun": {
+      "passed": 5490,
+      "failed": 2,
+      "durationSeconds": 1512.99,
+      "log": ".private/m41-originals-full-unit.log",
+      "failures": [
+        {
+          "file": "tests/payment-originals.test.ts",
+          "deadlineMs": 5000
+        },
+        {
+          "file": "tests/customer-review-completion.test.ts",
+          "deadlineMs": 30000
+        }
+      ],
+      "correction": "Run the archive corpus in its own sequential project before ordinary SQL/build fixtures; no data, assertions or deadline changes."
+    }
+  },
+  "browser": {
+    "root": {
+      "distinct": 8,
+      "newCases": {
+        "report": ".private/m41-originals-root-preflight.json",
+        "passed": 2,
+        "durationMs": 36719.532,
+        "skipped": 0,
+        "flaky": 0,
+        "retries": 0
+      },
+      "existingNativeCases": {
+        "report": ".private/m41-originals-root-native.json",
+        "passed": 6,
+        "durationMs": 45917.187999999995,
+        "skipped": 0,
+        "flaky": 0,
+        "retries": 0
+      }
+    },
+    "pages": {
+      "report": ".private/m41-originals-pages-browser.json",
+      "passed": 8,
+      "durationMs": 81331.686,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0
+    }
+  },
+  "checks": {
+    "lint": ".private/m41-originals-lint.log",
+    "types": ".private/m41-originals-types.log",
+    "astroFiles": 220,
+    "errorsWarningsHints": [
+      0,
+      0,
+      0
+    ],
+    "builds": [
+      ".private/m41-originals-root-build.log",
+      ".private/m41-originals-pages-build.log"
+    ],
+    "privateBuildComparisons": 13,
+    "nativeSchema": 29,
+    "ordinaryBackupSchema": 13,
+    "ordinaryTables": 22,
+    "originalBasisVersion": 1,
+    "originalSourceSchema": 13,
+    "productUiUnchangedFrom": "3bf61aa945ce2907c7b6a08f681b6cbcaad5b945",
+    "priorUiVerification": "docs/payment-inspection-verification.json",
+    "newVisualRun": false,
+    "newSqlOrHostedChanges": false
+  },
+  "holds": {
+    "endUserConfiguration": true,
+    "paymentTextDefault": false,
+    "disabledWorkflows": 3,
+    "workflowRunCountBeforeCommit": 77,
+    "latestDeploymentBeforeCommit": 7832852111,
+    "noPR": true,
+    "noSignoff": true,
+    "noWorkflowDispatch": true,
+    "noCIUpload": true,
+    "noPublication": true,
+    "noServiceMigrationDeployment": true,
+    "noProviderCommissioning": true,
+    "noTags": true
+  },
+  "remaining": [
+    "Full backend/source-command admission and atomic native observation/financial transactions.",
+    "Independent immutable original-vs-canonical outcome/allocation and undo receipts.",
+    "Complete lossless ordinary backup, upload and canonical adapters before removing native fences.",
+    "New connected intents must preserve actual invocation controls; legacy audits never invent matching windows or fresh consent.",
+    "Full M41 and subsequent handover milestones; all installation resources remain end-user configured."
+  ]
+}

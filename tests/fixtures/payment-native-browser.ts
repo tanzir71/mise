@@ -5,3 +5,5 @@ export * from '../../apps/web/src/data/payment-capture';
 
 export {seedPaymentStorage} from './payment-storage';
 export {creditBalance} from '../../packages/core/khata';
+
+export * from '../../packages/core/payment-originals';

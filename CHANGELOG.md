@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 can retain a complete validated original outlet/payment snapshot in shared immutable records and resolve exact original native financial actions. Radix buckets avoid repeating unchanged ledgers and imported notes across snapshots; malformed, cross-scope and self-rehashed invalid money evidence fail verification. This is groundwork for the full backend/outcome/canonical adapter, with no sync fence removed or hosted service changed. All configuration remains end-user owned. See [complete payment originals](docs/payment-original-basis.md).
+
 - In progress: M41 payment receipts now show checked original order/customer/counter labels and actual detail links, retaining names after edits, link removal, undo and backup restore. Customer links select the original account currency. Complete financial/evidence checks still precede display; no money or schema changes. The full backend/canonical adapter remains open and the preview stays off. See [original target inspection](docs/payment-inspection.md).
 
 - In progress: M41 reviews payment text in the actual Inbox sheet behind a default-off paymentText flag, with end-user source clocks, editable manual hints, current receipt/order matching, explicit new-money confirmation and original financial undo/recovery. The existing manual path remains one tap away. The full backend/canonical adapter and final acceptance remain required; workflows/publication stay held. See [payment review](docs/payment-review.md).
