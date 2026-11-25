@@ -2,7 +2,9 @@ import type { CreditEntry, Order, Payment, Sale } from './models';
 import type { BackupTables } from './backup-tables';
 import { validateBackupRow } from './backup-schema';
 import { literalToken } from './literal-token';
-import { paymentSnapshot } from './payment-posting-shape';
+import { validatePaymentPostingSnapshots } from './payment-posting-shape';
+import { PaymentEvidenceReader } from './payment-evidence';
+import { validatePaymentAssociationSnapshot } from './payment-records';
 
 type FinancialTables = Pick<
   BackupTables,
@@ -14,12 +16,84 @@ type FinancialTables = Pick<
   | 'customers'
   | 'events'
 >;
-const same = (a: unknown, b: unknown) => literalToken(a) === literalToken(b);
+const same = (a: unknown, b: unknown) =>
+  a === b || literalToken(a) === literalToken(b);
 function ensure(ok: unknown): asserts ok {
   if (!ok)
     throw Error(
       'Keep the original payment recording and its actual financial audit links.',
     );
+}
+function associationRows(p: Payment, snapshot: Record<string, unknown>) {
+  const a = p.association!,
+    s = snapshot.scope as { businessId: string; outletId: string },
+    row = snapshot[a.kind === 'credit' ? 'entry' : a.kind] as Record<
+      string,
+      unknown
+    >;
+  validateBackupRow(
+    a.kind === 'order'
+      ? 'orders'
+      : a.kind === 'sale'
+        ? 'sales'
+        : 'creditEntries',
+    row,
+    'original payment candidate',
+  );
+  if (a.kind === 'credit') {
+    validateBackupRow(
+      'creditAccounts',
+      snapshot.account,
+      'original payment candidate account',
+    );
+    validateBackupRow(
+      'customers',
+      snapshot.customer,
+      'original payment candidate customer',
+    );
+    const account = snapshot.account as {
+        id: string;
+        outletId: string;
+        currency: string;
+        customerId: string;
+      },
+      customer = snapshot.customer as { id: string; businessId: string };
+    ensure(
+      account.id === row.accountId &&
+        account.outletId === s.outletId &&
+        account.currency === row.currency &&
+        account.customerId === row.customerId &&
+        customer.id === row.customerId &&
+        customer.businessId === s.businessId,
+    );
+  } else if (a.kind === 'sale') {
+    if (snapshot.order !== null) {
+      validateBackupRow(
+        'orders',
+        snapshot.order,
+        'original payment candidate order',
+      );
+      const order = snapshot.order as Order;
+      ensure(
+        order.id === row.orderId &&
+          order.outletId === s.outletId &&
+          order.currency === row.currency &&
+          order.payment.saleId === row.id &&
+          order.payment.status === 'paid',
+      );
+    } else ensure(row.orderId === undefined);
+    if (snapshot.customer !== null) {
+      validateBackupRow(
+        'customers',
+        snapshot.customer,
+        'original payment candidate customer',
+      );
+      const customer = snapshot.customer as { id: string; businessId: string };
+      ensure(
+        customer.id === row.customerId && customer.businessId === s.businessId,
+      );
+    } else ensure(row.customerId === undefined);
+  }
 }
 /** A historical snapshot is evidence only when the original domain audit and
  * financial identities still exist. Later edits, refunds and undo may make an
@@ -28,25 +102,42 @@ export function validatePaymentFinanceLinks(
   payments: readonly Payment[],
   tables: FinancialTables,
 ): void {
-  const claimed = new Set<string>();
-  for (const payment of payments)
+  const claimed = new Set<string>(),
+    reader = new PaymentEvidenceReader(tables.events, tables.creditEntries),
+    eventMap = new Map(tables.events.map((e) => [e.id, e])),
+    entryMap = new Map(tables.creditEntries.map((e) => [e.id, e]));
+  const histories = new Map<string, Payment[]>();
+  for (const event of tables.events)
+    if (event.paymentId) {
+      const chain = histories.get(event.paymentId) ?? [];
+      chain.push(event.after as Payment);
+      histories.set(event.paymentId, chain);
+    }
+  for (const payment of payments) {
+    for (const original of histories.get(payment.id) ?? []) {
+      const a = original.association;
+      if (a) {
+        const snapshot = reader.expand(a.fingerprint, a.at);
+        validatePaymentAssociationSnapshot(original, a, snapshot);
+        associationRows(original, snapshot);
+      }
+    }
     for (const posting of payment.postings ?? []) {
       const outlet = tables.outlets.find((row) => row.id === payment.outletId);
       ensure(outlet);
-      const target = paymentSnapshot(posting.target.fingerprint),
-        receipt = paymentSnapshot(posting.receipt.fingerprint);
+      const target = reader.expand(posting.target.fingerprint, posting.at),
+        receipt = reader.expand(posting.receipt.fingerprint, posting.at);
       ensure(
         same(target.scope, {
           businessId: outlet.businessId,
           outletId: outlet.id,
         }) && same(receipt.scope, target.scope),
       );
+      validatePaymentPostingSnapshots(payment, posting, target, receipt);
       const lookup = (id: string) => {
-        const rows = tables.events.filter(
-          (e) => e.id === id && e.outletId === outlet.id,
-        );
-        ensure(rows.length === 1);
-        return rows[0];
+        const event = eventMap.get(id);
+        ensure(event && event.outletId === outlet.id);
+        return event;
       };
       const action = lookup(posting.eventId);
       ensure(
@@ -210,41 +301,48 @@ export function validatePaymentFinanceLinks(
             same(target.account, receipt.account) &&
             same(target.customer, receipt.customer),
         );
-        const original = target.entries as CreditEntry[];
-        for (const row of original) {
-          validateBackupRow('creditEntries', row, 'payment original ledger');
+        const prefix = reader.ledger(posting.target.fingerprint);
+        if (prefix)
           ensure(
-            row.outletId === outlet.id &&
-              row.accountId === entry.accountId &&
-              same(
-                tables.creditEntries.find((e) => e.id === row.id),
-                row,
-              ),
+            prefix.accountId === entry.accountId &&
+              prefix.throughSequence + 1 === entry.sequence &&
+              prefix.balance >= entry.amount &&
+              event.customerId === entry.customerId,
+          );
+        else {
+          const original = target.entries as CreditEntry[];
+          for (const row of original) {
+            validateBackupRow('creditEntries', row, 'payment original ledger');
+            ensure(
+              row.outletId === outlet.id &&
+                row.accountId === entry.accountId &&
+                same(entryMap.get(row.id), row),
+            );
+          }
+          ensure(
+            same(
+              original,
+              tables.creditEntries
+                .filter(
+                  (row) =>
+                    row.accountId === entry.accountId &&
+                    row.sequence < entry.sequence,
+                )
+                .sort(
+                  (a, b) => a.sequence - b.sequence || a.id.localeCompare(b.id),
+                ),
+            ) &&
+              entry.sequence ===
+                original.reduce((max, row) => Math.max(max, row.sequence), 0) +
+                  1 &&
+              event.customerId === entry.customerId,
           );
         }
-        ensure(
-          same(
-            original,
-            tables.creditEntries
-              .filter(
-                (row) =>
-                  row.accountId === entry.accountId &&
-                  row.sequence < entry.sequence,
-              )
-              .sort(
-                (a, b) => a.sequence - b.sequence || a.id.localeCompare(b.id),
-              ),
-          ) &&
-            entry.sequence ===
-              original.reduce((max, row) => Math.max(max, row.sequence), 0) +
-                1 &&
-            event.customerId === entry.customerId,
-        );
       }
       if (!posting.undo) continue;
       const undo = posting.undo,
         ack = lookup(undo.eventId),
-        snapshot = paymentSnapshot(undo.fingerprint),
+        snapshot = reader.expand(undo.fingerprint, undo.at),
         undoEvents = undo.eventIds.map(lookup);
       ensure(
         ack.command === 'payment.record-undo' &&
@@ -341,4 +439,6 @@ export function validatePaymentFinanceLinks(
         );
       }
     }
+  }
+  reader.assertComplete();
 }

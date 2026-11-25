@@ -1,5 +1,7 @@
 # Native payment recording
 
+The [shared original-evidence follow-up](payment-storage.md) addresses the reproduced long-ledger/large-label backup problem with schema-13 compact references. This document and its verification record describe the preceding schema-12 financial delivery.
+
 M41 now has an explicit native financial action after a saved payment observation has been checked. It records a real order settlement, khata collection or new counter receipt through the existing Core commands. Matching an already-recorded receipt remains a separate metadata action and changes no money.
 
 This increment does not complete M41. Its product capture/review interface and full backend command/canonical adapter remain required in this same milestone. The native APIs have no production review consumer yet, and they reject writes under a live cloud binding. The existing manual money interfaces remain available. Workflows, CI uploads, publication, service/migration deployment, provider commissioning and tags stay held.

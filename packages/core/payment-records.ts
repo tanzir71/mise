@@ -1,3 +1,5 @@
+import {literalToken} from './literal-token';
+import {isCompactPaymentSnapshot,validateCompactPaymentSnapshot,PaymentEvidenceReader,PaymentEvidenceWriter} from './payment-evidence';
 import type {AuditEvent,Payment,PaymentCheckedFields} from './models';
 import {activePaymentPosting,paymentCheckedFields,validatePaymentPostings} from './payment-posting-shape';
 import {currentPaymentReceipt} from './payment-receipts';
@@ -9,7 +11,7 @@ import {parsePaymentText,type ParsedPaymentText,type PaymentTextContext} from '.
 import {findPaymentTextMatches,type PaymentMatchRecords,type PaymentTextMatch,type PaymentMatchOptions} from './payment-matches';
 
 export interface CheckedPaymentInput extends PaymentCheckedFields {checked:true}
-export interface PaymentChange {payment:Payment;event:AuditEvent}
+export interface PaymentChange {payment:Payment;event:AuditEvent;evidenceEvents?:AuditEvent[]}
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;
 const exact=(v:Record<string,unknown>,required:string,optional='')=>required.split(',').every(k=>Object.hasOwn(v,k))&&Object.keys(v).every(k=>(required+','+optional).split(',').includes(k));
 const time=(v:unknown):v is number=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=0&&v<=253402300799999;
@@ -37,12 +39,12 @@ export function validatePaymentRecord(v:unknown):asserts v is Payment {
  if(v.association!==undefined){
   const a=v.association;if(!object(a)||!exact(a,'kind,id,fingerprint,at,eventId')||!['order','sale','credit'].includes(a.kind as string)||!id(a.id)||!id(a.eventId)||typeof a.fingerprint!=='string'||!time(a.at)||a.at<v.createdAt||v.voidedAt!==undefined)throw new Error('Keep the complete checked payment association.');
   let snapshot:unknown;try{snapshot=JSON.parse(a.fingerprint);}catch{throw new Error('Keep the literal original payment candidate snapshot.');}
-  const keys=a.kind==='order'?'scope,order':a.kind==='sale'?'scope,sale,order,customer':'scope,entry,account,customer';
-  if(!object(snapshot)||!exact(snapshot,keys)||!object(snapshot.scope)||!exact(snapshot.scope,'businessId,outletId')||!id(snapshot.scope.businessId)||snapshot.scope.outletId!==v.outletId)throw new Error('The payment candidate snapshot has a different scope.');
-  const target=snapshot[a.kind==='credit'?'entry':a.kind as string];
-  if(!object(target)||target.id!==a.id||target.outletId!==v.outletId||target.currency!==v.currency||(a.kind==='order'?target.total:target.amount)!==v.amount)throw new Error('The payment candidate snapshot has different money or identity.');
-  const methodMatches=typeof target.methodName==='string'&&target.methodName.trim().normalize('NFKC').toLowerCase()===(v.methodName as string).trim().normalize('NFKC').toLowerCase();
-  if(a.kind==='order'&&(!object(target.payment)||target.payment.status!=='pending')||a.kind==='sale'&&(target.voidedAt!==undefined||target.method!==v.method||!methodMatches)||a.kind==='credit'&&(target.type!=='payment'||target.reversalOf!==undefined||target.refundId!==undefined||!methodMatches))throw new Error('Keep the original eligible payment candidate.');
+  if(object(snapshot)&&isCompactPaymentSnapshot(snapshot)){
+   validateCompactPaymentSnapshot(snapshot,{stage:snapshot.stage==='match'?'match':'receipt',kind:a.kind as 'order'|'sale'|'credit',id:a.id,outletId:v.outletId as string,money:v as unknown as Payment});
+   if(snapshot.stage!=='match'&&(!Array.isArray(v.postings)||!v.postings.some(post=>object(post)&&!post.undo&&object(post.receipt)&&post.receipt.fingerprint===a.fingerprint)))throw Error('Keep the original financial posting behind this compact association.');
+  }else{
+   validatePaymentAssociationSnapshot(v as unknown as Payment,a as unknown as NonNullable<Payment['association']>,snapshot);
+  }
  }
  const p=v as unknown as Payment;validatePaymentPostings(p);if(p.referenceKey!==paymentReferenceKey(p)||p.matchKey!==matchKey(p))throw new Error('The payment reference or association key changed.');
 }
@@ -86,16 +88,18 @@ export function paymentCandidates(p:Payment,records:PaymentMatchRecords,payments
 /** A later refund, payment, edit or reversal reopens review; it never restores money. */
 export function paymentAssociationIsCurrent(p:Payment,records:PaymentMatchRecords,payments:readonly Payment[]):boolean|null {
  if(!p.association)return null;if(p.voidedAt!==undefined)return false;const a=p.association,posting=activePaymentPosting(p);
- if(posting){const actual=currentPaymentReceipt(records,posting.receipt.kind,posting.receipt.id);return !!actual&&actual.fingerprint===posting.receipt.fingerprint&&actual.amount===p.amount&&actual.currency===p.currency&&actual.method===p.method&&actual.methodName===p.methodName&&!payments.some(other=>other.id!==p.id&&other.outletId===p.outletId&&other.voidedAt===undefined&&other.association?.kind===a.kind&&other.association.id===a.id);}
+ if(posting){const actual=currentPaymentReceipt(records,posting.receipt.kind,posting.receipt.id);return !!actual&&actual.fingerprint===literalToken(new PaymentEvidenceReader(records.events??[],records.entries).expand(posting.receipt.fingerprint))&&actual.amount===p.amount&&actual.currency===p.currency&&actual.method===p.method&&actual.methodName===p.methodName&&!payments.some(other=>other.id!==p.id&&other.outletId===p.outletId&&other.voidedAt===undefined&&other.association?.kind===a.kind&&other.association.id===a.id);}
  const selected:PaymentMatchRecords={...records,orders:a.kind==='order'?records.orders.filter(o=>o.id===a.id):a.kind==='sale'?records.orders.filter(o=>records.sales.some(s=>s.id===a.id&&s.orderId===o.id)):[],sales:a.kind==='sale'?records.sales.filter(s=>s.id===a.id):[],entries:a.kind==='credit'?records.entries.filter(e=>e.id===a.id||e.reversalOf===a.id):[]};
- return paymentCandidates(p,selected,payments,{windowMs:86400000}).candidates.some(c=>c.kind===a.kind&&c.id===a.id&&c.fingerprint===a.fingerprint);
+ return paymentCandidates(p,selected,payments,{windowMs:86400000}).candidates.some(c=>c.kind===a.kind&&c.id===a.id&&c.fingerprint===literalToken(new PaymentEvidenceReader(records.events??[],records.entries).expand(a.fingerprint)));
 }
 export function associatePaymentCommand(before:Payment,revision:number,selected:Pick<PaymentTextMatch,'kind'|'id'|'fingerprint'>,setup:ShopSetup,records:PaymentMatchRecords,payments:readonly Payment[],eventId:string,at=Date.now(),options:PaymentMatchOptions={}):PaymentChange {
  assertCurrentPayment(before,revision,setup);if(before.association)throw new Error('Inspect or unmatch the existing association first.');
  if(records.setup.business.id!==setup.business.id||records.setup.outlet.id!==setup.outlet.id)throw new Error('Read candidates from the selected business and outlet.');
  const candidate=paymentCandidates(before,records,payments,options).candidates.find(c=>c.id===selected.id&&c.kind===selected.kind&&c.fingerprint===selected.fingerprint);
  if(!candidate)throw new Error('The selected payment candidate changed. Check the latest matches.');
- return writePaymentChange(before,{...before,association:{kind:candidate.kind,id:candidate.id,fingerprint:candidate.fingerprint,at,eventId}},setup,'payment.match',at,eventId);
+ if(records.setup.owner.id!==setup.owner.id)throw Error('Compare the payment under the selected operator.');
+ const writer=new PaymentEvidenceWriter(records.setup,records.events??[],at),fingerprint=writer.pack(candidate.fingerprint,'match',candidate.kind,candidate.id,before),change=writePaymentChange(before,{...before,association:{kind:candidate.kind,id:candidate.id,fingerprint,at,eventId}},setup,'payment.match',at,eventId);
+ return {...change,evidenceEvents:writer.added};
 }
 export function unmatchPaymentCommand(before:Payment,revision:number,setup:ShopSetup,eventId:string,at=Date.now()):PaymentChange {
  assertCurrentPayment(before,revision,setup);if(activePaymentPosting(before))throw new Error('Undo this source’s recorded money before unmatching it.');if(!before.association||before.voidedAt!==undefined)throw new Error('Open an active matched payment.');
@@ -104,4 +108,13 @@ export function unmatchPaymentCommand(before:Payment,revision:number,setup:ShopS
 export function setPaymentVoidedCommand(before:Payment,revision:number,voided:boolean,setup:ShopSetup,eventId:string,at=Date.now()):PaymentChange {
  assertCurrentPayment(before,revision,setup);if(activePaymentPosting(before))throw new Error('Undo this source’s recorded money before setting it aside.');if(before.association)throw new Error('Unmatch this payment before setting it aside.');if((before.voidedAt!==undefined)===voided)throw new Error('This payment already has that state.');
  const payment={...before};delete payment.voidedAt;return writePaymentChange(before,{...payment,...(voided?{voidedAt:at}:{})},setup,voided?'payment.void':'payment.reopen',at,eventId);
+}
+
+export function validatePaymentAssociationSnapshot(v:Pick<Payment,'outletId'|'currency'|'amount'|'method'|'methodName'>,a:{kind:'order'|'sale'|'credit';id:string},snapshot:unknown):void {
+  const keys=a.kind==='order'?'scope,order':a.kind==='sale'?'scope,sale,order,customer':'scope,entry,account,customer';
+  if(!object(snapshot)||!exact(snapshot,keys)||!object(snapshot.scope)||!exact(snapshot.scope,'businessId,outletId')||!id(snapshot.scope.businessId)||snapshot.scope.outletId!==v.outletId)throw new Error('The payment candidate snapshot has a different scope.');
+  const target=snapshot[a.kind==='credit'?'entry':a.kind as string];
+  if(!object(target)||target.id!==a.id||target.outletId!==v.outletId||target.currency!==v.currency||(a.kind==='order'?target.total:target.amount)!==v.amount)throw new Error('The payment candidate snapshot has different money or identity.');
+  const methodMatches=typeof target.methodName==='string'&&target.methodName.trim().normalize('NFKC').toLowerCase()===(v.methodName as string).trim().normalize('NFKC').toLowerCase();
+  if(a.kind==='order'&&(!object(target.payment)||target.payment.status!=='pending')||a.kind==='sale'&&(target.voidedAt!==undefined||target.method!==v.method||!methodMatches)||a.kind==='credit'&&(target.type!=='payment'||target.reversalOf!==undefined||target.refundId!==undefined||!methodMatches))throw new Error('Keep the original eligible payment candidate.');
 }

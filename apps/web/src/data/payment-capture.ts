@@ -1,3 +1,4 @@
+import {PaymentEvidenceReader} from '@mise/core/payment-evidence';
 import type {MiseDatabase} from './db';
 import type {InboxDestination,StoredInboxItem} from './inbox';
 import {captureBindingToken} from './inbox';
@@ -50,13 +51,13 @@ async function receipt(db:MiseDatabase,proof:SourceProof,item:StoredInboxItem):P
  if(!payment&&!events.length)return null;if(!payment)throw new Error('The original payment receipt is incomplete. Keep its source and backup.');
  validatePaymentHistory([payment],events,[item]);events.sort((a,b)=>a.paymentRevision!-b.paymentRevision!);
  if(events[0].id!==proof.captureId||payment.inboxId!==item.id)throw new Error('This source belongs to a different original payment.');
- const data=payment.association||payment.postings?await records(db,(await db.setup())!):null;
+ const data=payment.association||payment.postings||events.some(e=>(e.after as Payment).association)?await records(db,(await db.setup())!):null;
  if(data)validatePaymentFinanceLinks(data.payments,{outlets:[data.records.setup.outlet],orders:data.records.orders.slice(),sales:data.records.sales.slice(),creditEntries:data.records.entries.slice(),creditAccounts:data.records.accounts.slice(),customers:data.records.customers.slice(),events:data.records.events.slice()});
  return {payment,original:structuredClone(events[0].after as Payment),events,associationCurrent:data?paymentAssociationIsCurrent(payment,data.records,data.payments):null};
 }
 export async function savedPaymentReceipt(db:MiseDatabase,review:SavedPaymentSource):Promise<SavedPaymentReceipt|null>{return db.transaction('r',db.tables,async()=>{const {proof,item}=await guard(db,review);return receipt(db,proof,item);});}
 function checkedFields(p:Payment):CheckedPaymentInput{return {checked:true,...paymentCheckedFields(p)};}
-async function persist(db:MiseDatabase,change:PaymentChange){await db.payments.put(change.payment);await db.events.add(change.event);}
+async function persist(db:MiseDatabase,change:PaymentChange){await db.payments.put(change.payment);await db.events.add(change.event);for(const event of change.evidenceEvents??[])await db.events.add(event);}
 export async function recordSavedPayment(db:MiseDatabase,review:SavedPaymentSource,input:CheckedPaymentInput):Promise<SavedPaymentReceipt>{
  input=structuredClone(input);
  return db.transaction('rw',db.tables,async()=>{
@@ -83,7 +84,7 @@ export async function editSavedPayment(db:MiseDatabase,review:SavedPaymentSource
 export async function associateSavedPayment(db:MiseDatabase,review:SavedPaymentSource,comparison:SavedPaymentMatches,selected:Pick<PaymentTextMatch,'kind'|'id'>,actionId=newInboxId()):Promise<SavedPaymentReceipt>{
  selected=structuredClone(selected);const original=comparisons.get(comparison);if(!original||original.source!==review||token(comparison)!==original.token)throw new Error('Compare the actual saved payment again before selecting a match.');
  const candidate=comparison.result.candidates.find(c=>c.id===selected.id&&c.kind===selected.kind);if(!candidate)throw new Error('Choose one of the actual current payment candidates.');
- return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');const previous=await originalAction(db,saved,{id:actionId,revision:comparison.revision},'payment.match',setup.owner.id);if(previous){if(token((previous.after as Payment).association)!==token({kind:candidate.kind,id:candidate.id,fingerprint:candidate.fingerprint,at:previous.at,eventId:previous.id}))throw new Error('This original match selected different checked data.');return saved;}
+ return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');const previous=await originalAction(db,saved,{id:actionId,revision:comparison.revision},'payment.match',setup.owner.id);if(previous){const prior=(previous.after as Payment).association!,data=await records(db,setup);if(token({...prior,fingerprint:token(new PaymentEvidenceReader(data.records.events,data.records.entries).expand(prior.fingerprint))})!==token({kind:candidate.kind,id:candidate.id,fingerprint:candidate.fingerprint,at:previous.at,eventId:previous.id}))throw new Error('This original match selected different checked data.');return saved;}
   if(token(saved.payment)!==original.payment)throw new Error('This payment changed after comparison. Check it again.');await guard(db,review,true);const data=await records(db,setup);await persist(db,associatePaymentCommand(saved.payment,comparison.revision,candidate,setup,data.records,data.payments,actionId,Date.now(),original.options));return (await receipt(db,proof,item))!;
  });
 }
@@ -131,8 +132,8 @@ export async function recordSavedPaymentMoney(db:MiseDatabase,review:SavedPaymen
   const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw Error('Payment not found.');
   const previous=await originalAction(db,saved,{id:actionId,revision:comparison.revision},'payment.record',setup.owner.id);
   if(previous){
-   const posting=(previous.after as Payment).postings?.at(-1);
-   if(token(previous.before)!==original.payment||token(posting?.target)!==token(comparison.preview.target)||posting?.note!==comparison.note)throw Error('This original recording used different checked data.');return saved;
+   const posting=(previous.after as Payment).postings?.at(-1),data=await records(db,setup);
+   if(token(previous.before)!==original.payment||!posting||token({...posting.target,fingerprint:token(new PaymentEvidenceReader(data.records.events,data.records.entries).expand(posting.target.fingerprint))})!==token(comparison.preview.target)||posting?.note!==comparison.note)throw Error('This original recording used different checked data.');return saved;
   }
   if(token(saved.payment)!==original.payment)throw Error('This payment changed after comparison. Check it again.');
   await guard(db,review,true);if(item.archived)throw Error('Reopen the original source before recording new money.');

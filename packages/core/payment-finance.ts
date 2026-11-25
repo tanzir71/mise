@@ -1,3 +1,7 @@
+import {
+  PaymentEvidenceReader,
+  PaymentEvidenceWriter,
+} from './payment-evidence';
 import type {
   AuditEvent,
   CreditEntry,
@@ -16,7 +20,6 @@ import {
 import {
   activePaymentPosting,
   paymentCheckedFields,
-  paymentSnapshot,
 } from './payment-posting-shape';
 import { currentPaymentReceipt } from './payment-receipts';
 import { literalToken } from './literal-token';
@@ -436,16 +439,44 @@ export function recordPaymentMoneyCommand(
       actual.methodName === before.methodName,
     'Keep the actual new financial receipt.',
   );
+  const writer = new PaymentEvidenceWriter(
+      records.setup,
+      [...records.events, ...events],
+      at,
+    ),
+    targetFingerprint = writer.pack(
+      preview.target.fingerprint,
+      'target',
+      preview.target.kind,
+      preview.target.id,
+      before,
+    ),
+    receiptFingerprint = writer.pack(
+      actual.fingerprint,
+      'receipt',
+      kind,
+      receiptId,
+      before,
+    );
+  ensure(
+    !writer.added.some(
+      (e) =>
+        identities.includes(e.id) ||
+        e.id === before.id ||
+        e.id === before.inboxId,
+    ),
+    'Keep distinct shared evidence and original action identities.',
+  );
   const posting: PaymentPosting = {
     eventId,
     at,
     note,
     money: paymentCheckedFields(before),
-    target: preview.target,
+    target: { ...preview.target, fingerprint: targetFingerprint },
     receipt: {
       kind,
       id: receiptId,
-      fingerprint: actual!.fingerprint,
+      fingerprint: receiptFingerprint,
       eventIds: events.map((event) => event.id),
     },
   };
@@ -457,7 +488,7 @@ export function recordPaymentMoneyCommand(
       association: {
         kind,
         id: receiptId,
-        fingerprint: actual!.fingerprint,
+        fingerprint: receiptFingerprint,
         at,
         eventId,
       },
@@ -467,6 +498,7 @@ export function recordPaymentMoneyCommand(
     at,
     eventId,
   );
+  events.push(...writer.added);
   return { payment, orders, sales, entries, events };
 }
 
@@ -480,7 +512,10 @@ export function paymentMoneyUndoEvidence(
   records: PaymentFinanceRecords,
 ): PaymentUndoEvidence | null {
   const expected = posting.receipt.kind === 'sale' ? 'sale.undo' : 'khata.undo',
-    original = paymentSnapshot(posting.receipt.fingerprint),
+    original = new PaymentEvidenceReader(
+      records.events,
+      records.entries,
+    ).expand(posting.receipt.fingerprint),
     row = original[posting.receipt.kind === 'sale' ? 'sale' : 'entry'] as
       Sale | CreditEntry;
   const financial = records.events.filter(
@@ -637,7 +672,10 @@ export function undoPaymentMoneyCommand(
   let evidence = paymentMoneyUndoEvidence(posting, records);
   const mode = evidence ? ('already-undone' as const) : ('performed' as const);
   if (!evidence) {
-    const original = paymentSnapshot(posting.receipt.fingerprint),
+    const original = new PaymentEvidenceReader(
+        records.events,
+        records.entries,
+      ).expand(posting.receipt.fingerprint),
       recorded = original[
         posting.receipt.kind === 'sale' ? 'sale' : 'entry'
       ] as Sale | CreditEntry;
@@ -708,6 +746,18 @@ export function undoPaymentMoneyCommand(
       'Keep the actual original financial undo and its receipts.',
     );
   }
+  const writer = new PaymentEvidenceWriter(
+      records.setup,
+      [...records.events, ...events],
+      at,
+    ),
+    undoFingerprint = writer.pack(
+      evidence!.fingerprint,
+      'undo',
+      posting.receipt.kind,
+      posting.receipt.id,
+      posting.money,
+    );
   const unmatched = { ...before },
     postings = structuredClone(before.postings!);
   delete unmatched.association;
@@ -717,7 +767,7 @@ export function undoPaymentMoneyCommand(
       eventId,
       at,
       eventIds: evidence!.events.map((e) => e.id),
-      fingerprint: evidence!.fingerprint,
+      fingerprint: undoFingerprint,
       mode,
     },
   };
@@ -730,5 +780,6 @@ export function undoPaymentMoneyCommand(
     eventId,
     posting.eventId,
   );
+  events.push(...writer.added);
   return { payment, orders, sales, entries, events };
 }

@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "9c1a2381fafa0d8b75a34f37da22b8fa99048190",
+  "verifiedAt": "2026-11-25T05:30:33.702Z",
+  "scope": "M41 complete shared native original evidence and prefix retention for financial records and metadata matches; product review and complete backend/canonical adapter remain required",
+  "sourceFingerprint": "394310c7c23b4e60a699a9296afc902db736ac7b7361d5b18d0151743513800a",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "409aaf52d9e6383f4883fb7a5f4c0da3aca891de4f96f5e1aed94b57475a41f3"
+    },
+    {
+      "path": "apps/web/src/data/payment-capture.ts",
+      "sha256": "875b24b1755d60f1934109b3da12a2595eaf0b70208fc5d59f4aebdb22a4eb61"
+    },
+    {
+      "path": "docs/payment-finance.md",
+      "sha256": "33d2544679188b9ff155a854ea6e16a468d4e71e9668416e3def3a6c23910ebf"
+    },
+    {
+      "path": "docs/payment-storage.md",
+      "sha256": "86b2fd337a34f856ed06cf339c8275d90746e9de0af5056348f964573c955d90"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "13192969bcf9c87f4be7960608a68f05861d3835b78a592de30a110aa291479c"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "62577190a9d7804aeb42b11fc132790d650bcc3e5490c85416789e34fafcccd6"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "981ea2be5d4ab86d9d4334d70099fe1f53896d4287980b52f7aa4b9c65a9432b"
+    },
+    {
+      "path": "packages/core/backup-tables.ts",
+      "sha256": "caede070500fec0f790c73b84f53522e0fe8f5b61cec1f82b929109853ed4489"
+    },
+    {
+      "path": "packages/core/backup.ts",
+      "sha256": "9949642665c76c79b67dc06357b8092cfda8c276a7d02d0a1f9094a1ce57b28a"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "846b5a7db2aba9433b6318ad6cca8a3a621861b72567ca52d8954a26721906a4"
+    },
+    {
+      "path": "packages/core/payment-evidence.ts",
+      "sha256": "d02e47913dc6da6e7a6cc575e26eea1985d6e8aaf42f227636b8dda85238ad38"
+    },
+    {
+      "path": "packages/core/payment-finance-links.ts",
+      "sha256": "6c46999e496ef46cfd7aa974f9ae4a379165a9e1ad311f20434b6aa11884feab"
+    },
+    {
+      "path": "packages/core/payment-finance.ts",
+      "sha256": "f984bfc96f59d5e1159f1f2a97ee70555c0f9a87c7b40892d4d8c534cbbdc19f"
+    },
+    {
+      "path": "packages/core/payment-matches.ts",
+      "sha256": "931ca64af22f2c108fc76abdd3cd0ebedc424f3ff4b78b5b4f5158eb35bdb1d8"
+    },
+    {
+      "path": "packages/core/payment-posting-shape.ts",
+      "sha256": "a1c6ba08bb546b5398d8fa12045d3aae65683d4f20c89de08125e6c2bc76b79e"
+    },
+    {
+      "path": "packages/core/payment-records.ts",
+      "sha256": "1ffedf50b6ee22085462d9367ce38c6d96a6b7b3dd1870e4b62b584724725648"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "5542300050a6ce073dfe67f192348ae2607551954cd3e35209bb51418a8aeb87"
+    },
+    {
+      "path": "tests/backup-db.test.ts",
+      "sha256": "3b8b8723dbdb8b924457c8f351344d2e9658d9bc61d0a24c705ed9e2f892d5d4"
+    },
+    {
+      "path": "tests/e2e/exports.spec.ts",
+      "sha256": "f94b2681911da58e3e9271ef49cb91d090ade70866c42e8e7f761ddf36fcc518"
+    },
+    {
+      "path": "tests/e2e/outbox-boundary.spec.ts",
+      "sha256": "e00e4fce0788651fa686f1956133d9f53112763257e33f0bff96689f83183af5"
+    },
+    {
+      "path": "tests/e2e/payment-native.spec.ts",
+      "sha256": "45c144b8af1692d58e8822991061cda8b86a217a742d694c64b1ba3e12aac483"
+    },
+    {
+      "path": "tests/e2e/sync-download.spec.ts",
+      "sha256": "92075bf4e7f1490920451b41fa01ff395f6921d2de6badcb0345347d798a6d36"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "c63405467025bf3044edf43a215e2880d32c374d6707007bb66a476e4aa57599"
+    },
+    {
+      "path": "tests/fixtures/payment-storage.ts",
+      "sha256": "9af16f22181f2e50e58d4fec140f3ed2325fb9280741c6b1904a69d23e5d0418"
+    },
+    {
+      "path": "tests/handoff-db.test.ts",
+      "sha256": "a2c50c2d4cb61e57a41094c516bb1cf784f6b37db0b52b61dcc0a97a9e623063"
+    },
+    {
+      "path": "tests/inbox-db.test.ts",
+      "sha256": "bed813db3e8da61c6d5cdd24d14fee4ad6c0bdfaa6e348b0e8bfcbfbac70a055"
+    },
+    {
+      "path": "tests/inbox-outbox-adapters.test.ts",
+      "sha256": "c3abfce1946b02c3dde1f05b1d9c01f8089002eb8a7fbd52aa1df317c17031da"
+    },
+    {
+      "path": "tests/local-outbox-db.test.ts",
+      "sha256": "740f8f639c4e27e30f1c137fc772cca7f29eedcef28d37fe922d0d2fbb4bfe64"
+    },
+    {
+      "path": "tests/operators-db.test.ts",
+      "sha256": "5838f0e596dae966d92fe06042257720882647e29d7db56797f9da1ec12e035c"
+    },
+    {
+      "path": "tests/payment-backup-upgrade.test.ts",
+      "sha256": "588ccc77d29e1b05c163e2614d4d2b3276fa446dadea701e7fb5f2c77eaf594f"
+    },
+    {
+      "path": "tests/payment-capture.test.ts",
+      "sha256": "b5b57f88411f593862ff5f6ccfd8791c7aebde5255987e9d439ca5d9f8def4ed"
+    },
+    {
+      "path": "tests/payment-evidence.test.ts",
+      "sha256": "b2ca25da3b35882ffa3786f77811908f0e0ad17be61e0de5f93fa9022bacf761"
+    },
+    {
+      "path": "tests/payment-finance.test.ts",
+      "sha256": "baa3c6b57de4e9ffc6f44013fe1afa8cf489c296c7933eb27aa5af85332a198c"
+    },
+    {
+      "path": "tests/payment-storage.test.ts",
+      "sha256": "cd3fae89a66b15c8acb88b5b9011450fb49c8d1774d7b796b6e6d04dc59718f7"
+    },
+    {
+      "path": "tests/sync-download-db.test.ts",
+      "sha256": "96efb7f9117d4af4779fc3fe5c5327c015944bca490c8497eb322bf8832d60fc"
+    }
+  ],
+  "unit": {
+    "passed": 5449,
+    "files": 286,
+    "workers": 2,
+    "log": ".private/m41-storage-full-unit.log",
+    "financialCases": 23,
+    "evidenceCases": 7,
+    "scaleCases": 2,
+    "originalCorporaAndDeadlinesUnchanged": true,
+    "subsequentChange": "Only the deprecated SHA-256 import path changed to its identical /sha2 export after this full run.",
+    "sameImplementationProof": ".private/m41-storage-hash-alias.log",
+    "postAliasFocused": {
+      "passed": 81,
+      "files": 6,
+      "log": ".private/m41-storage-post-alias-focused.log"
+    }
+  },
+  "baseline": {
+    "paymentBytes": 46271419,
+    "paymentAuditBytes": 46279075,
+    "backupLimitBytes": 52428800,
+    "backupExportFailed": true,
+    "log": ".private/m41-storage-baseline.log"
+  },
+  "revised": {
+    "paymentBytes": 8728,
+    "paymentAuditBytes": 16384,
+    "backupBytes": 24463291,
+    "completeOriginalLedgerEntries": 5000,
+    "customerNoteCodeUnits": 1000000,
+    "nativeCollections": 3,
+    "sharedEvidenceRecords": 11,
+    "freshRestoreAndUndo": true,
+    "existingReceiptMatchesAndMetadataUndo": true
+  },
+  "browser": {
+    "root": {
+      "basePath": "/",
+      "scope": "selected affected browser regression",
+      "files": [
+        "cloud-auth.spec.ts",
+        "cloud-upload-review.spec.ts",
+        "cloud-upload.spec.ts",
+        "counter.spec.ts",
+        "customer-khata.spec.ts",
+        "exports.spec.ts",
+        "inbox-storage.spec.ts",
+        "khata.spec.ts",
+        "operators.spec.ts",
+        "orders.spec.ts",
+        "outbox-boundary.spec.ts",
+        "payment-native.spec.ts",
+        "payment-text.spec.ts",
+        "settings-outbox.spec.ts",
+        "sync-coverage.spec.ts",
+        "sync-customer-currency.spec.ts",
+        "sync-download.spec.ts",
+        "sync-images.spec.ts",
+        "sync-money-review-ui.spec.ts",
+        "sync-purchase-currency.spec.ts",
+        "sync-purchase-review-ui.spec.ts",
+        "sync-stock-review-ui.spec.ts"
+      ],
+      "passed": 166,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 1,
+      "durationMs": 790437.29,
+      "report": ".private/m41-storage-root-browser.json",
+      "nativeCases": 6,
+      "scale": {
+        "schema": 13,
+        "backupBytes": 24463795,
+        "paymentBytes": 8854,
+        "paymentAuditBytes": 16720,
+        "payments": 6,
+        "originalRows": 5000,
+        "originalDigest": "d650738ca43cd103459fde8edd58f4838b36c10b648604a2552475505bf0f397",
+        "noteLength": 1000000,
+        "noteDigest": "2d5047c3ac10e4815319b4146c308802d8355d06853c650a1d7293b5a25747b9",
+        "balance": 499500,
+        "sales": 0,
+        "current": true,
+        "matchUnchanged": true,
+        "remainingMatches": 4
+      },
+      "existingTimeoutsUnchanged": true,
+      "newScaleCaseTimeoutMs": 90000
+    },
+    "pages": {
+      "basePath": "/mise/",
+      "scope": "selected affected browser regression",
+      "files": [
+        "cloud-auth.spec.ts",
+        "cloud-upload-review.spec.ts",
+        "cloud-upload.spec.ts",
+        "counter.spec.ts",
+        "customer-khata.spec.ts",
+        "exports.spec.ts",
+        "inbox-storage.spec.ts",
+        "khata.spec.ts",
+        "operators.spec.ts",
+        "orders.spec.ts",
+        "outbox-boundary.spec.ts",
+        "payment-native.spec.ts",
+        "payment-text.spec.ts",
+        "settings-outbox.spec.ts",
+        "sync-coverage.spec.ts",
+        "sync-customer-currency.spec.ts",
+        "sync-download.spec.ts",
+        "sync-images.spec.ts",
+        "sync-money-review-ui.spec.ts",
+        "sync-purchase-currency.spec.ts",
+        "sync-purchase-review-ui.spec.ts",
+        "sync-stock-review-ui.spec.ts"
+      ],
+      "passed": 166,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 1,
+      "durationMs": 734742.608,
+      "report": ".private/m41-storage-pages-browser.json",
+      "nativeCases": 6,
+      "scale": {
+        "schema": 13,
+        "backupBytes": 24463795,
+        "paymentBytes": 8854,
+        "paymentAuditBytes": 16720,
+        "payments": 6,
+        "originalRows": 5000,
+        "originalDigest": "3d987a8cd6c16aa35fc312dfc8d8d6984e6eee61afe33bb3f2c489e3ef5ff8f5",
+        "noteLength": 1000000,
+        "noteDigest": "2d5047c3ac10e4815319b4146c308802d8355d06853c650a1d7293b5a25747b9",
+        "balance": 499500,
+        "sales": 0,
+        "current": true,
+        "matchUnchanged": true,
+        "remainingMatches": 4
+      },
+      "existingTimeoutsUnchanged": true,
+      "newScaleCaseTimeoutMs": 90000
+    }
+  },
+  "visual": {
+    "root": {
+      "comparisons": 18,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": ".private/m41-storage-root-qa/report.html",
+      "restoreCaptures": [
+        {
+          "width": 390,
+          "path": ".private/m41-storage-root-qa/screens/native-payment-restore-390.png",
+          "bytes": 34245,
+          "sha256": "2e20c41d44bceb9af68695f03f33927741f24ba4c06b24b40461cca57cb8fa60"
+        },
+        {
+          "width": 1440,
+          "path": ".private/m41-storage-root-qa/screens/native-payment-restore-1440.png",
+          "bytes": 35014,
+          "sha256": "87c078b5dd222c83832f21d76b5d23269811fb920bf1e243c277373c44386fe7"
+        }
+      ]
+    },
+    "pages": {
+      "comparisons": 18,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": ".private/m41-storage-pages-qa/report.html",
+      "restoreCaptures": [
+        {
+          "width": 390,
+          "path": ".private/m41-storage-pages-qa/screens/native-payment-restore-390.png",
+          "bytes": 34245,
+          "sha256": "2e20c41d44bceb9af68695f03f33927741f24ba4c06b24b40461cca57cb8fa60"
+        },
+        {
+          "width": 1440,
+          "path": ".private/m41-storage-pages-qa/screens/native-payment-restore-1440.png",
+          "bytes": 35014,
+          "sha256": "87c078b5dd222c83832f21d76b5d23269811fb920bf1e243c277373c44386fe7"
+        }
+      ]
+    }
+  },
+  "checks": {
+    "lint": ".private/m41-storage-lint.log",
+    "types": ".private/m41-storage-types.log",
+    "rootBuild": ".private/m41-storage-root-build.log",
+    "pagesBuild": ".private/m41-storage-pages-build.log",
+    "exports": ".private/m41-storage-exports.log",
+    "nativeSchema": 29,
+    "backupSchema": 13,
+    "ordinaryTables": 22,
+    "privateOwnNodePriority": "AboveNormal"
+  },
+  "holds": {
+    "workflowsDisabled": 3,
+    "workflowRunCount": 77,
+    "latestWorkflowRun": 43927944995,
+    "latestDeployment": 7832852111,
+    "noWorkflowDispatch": true,
+    "noCIUpload": true,
+    "noPublication": true,
+    "noServiceOrMigrationDeployment": true,
+    "noProviderCommissioning": true,
+    "noTags": true,
+    "endUserConfiguration": true
+  },
+  "remaining": [
+    "M41 actual product capture/manual-review interface and original financial recovery controls.",
+    "M41 complete backend/source-command, financial/allocation receipt, upload and canonical adapter before removing fences.",
+    "Full M41 and remaining handover acceptance, with current workflow/publication/deployment holds preserved."
+  ]
+}

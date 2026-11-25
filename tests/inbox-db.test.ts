@@ -66,7 +66,7 @@ test('the maximum 5 MB image exports and restores without a large-input validato
 
 test('JSON backup round-trips native blobs byte for byte and preserves the full manual sorting history',async()=>{
   const source=await boot();let item=await source.captureInbox({title:'Screenshot',text:'  চাল\n',files:[inboxImageFile()]});item=await source.changeInbox(item.id,1,{kind:'stock'});item=await source.changeInbox(item.id,2,{archived:true});
-  const backup=await source.readBackup(),json=JSON.stringify(backup),target=await boot(false);expect(backup.schemaVersion).toBe(12);expect(backup.tables.inboxItems[0].images[0].data).toMatch(/^iVBOR/);await target.restoreBackup(json,await target.previewRestore(json));target.close();await target.open();
+  const backup=await source.readBackup(),json=JSON.stringify(backup),target=await boot(false);expect(backup.schemaVersion).toBe(13);expect(backup.tables.inboxItems[0].images[0].data).toMatch(/^iVBOR/);await target.restoreBackup(json,await target.previewRestore(json));target.close();await target.open();
   const restored=(await target.inboxItems.get(item.id))!;expect(await bytes(restored.images[0].blob)).toEqual([...inboxPng]);expect(restored.images[0].blob.type).toBe('image/png');expect(restored.kind).toBe('stock');expect(restored.archived).toBe(true);expect((await target.readBackup()).tables.inboxItems).toEqual(backup.tables.inboxItems);
   expect(await target.events.where('inboxId').equals(item.id).toArray()).toEqual(await source.events.where('inboxId').equals(item.id).toArray());
 });

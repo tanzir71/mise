@@ -1,1 +1,1 @@
-{"name":"@mise/core","version":"0.1.0","private":true,"type":"module","exports":{"./*":"./*.ts"},"dependencies":{"libphonenumber-js":"^1.13.16","lz-string":"1.5.0","ulid":"^3.0.2"}}
+{"name":"@mise/core","version":"0.1.0","private":true,"type":"module","exports":{"./*":"./*.ts"},"dependencies":{"@noble/hashes":"1.8.0","libphonenumber-js":"^1.13.16","lz-string":"1.5.0","ulid":"^3.0.2"}}

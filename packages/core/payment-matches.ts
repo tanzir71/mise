@@ -1,9 +1,10 @@
-import type {CreditAccount,CreditEntry,Customer,Order,OrderRefund,Sale,SetupSnapshot} from './models';
+import type {AuditEvent,CreditAccount,CreditEntry,Customer,Order,OrderRefund,Sale,SetupSnapshot} from './models';
 import type {ParsedPaymentText,PaymentTextChannel} from './payments';
 import {isOrderFinished} from './orders';
 import {literalToken as syncDownloadToken} from './literal-token';
 
 export interface PaymentMatchRecords {
+  events?:readonly AuditEvent[];
   setup:SetupSnapshot;
   orders:readonly Order[];
   sales:readonly Sale[];

@@ -33,7 +33,15 @@ export function parseBackup(input:unknown):MiseBackup {
     for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)oldPayment(event.before);oldPayment(event.after);}}
     return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
   }
-  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9, 10, 11 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
+  if(backup.schemaVersion===12){
+    const legacy=backupRecord(backup.tables,'tables');
+    if(!Array.isArray(legacy.events)||!Array.isArray(legacy.payments))throw Error('Keep all legacy payment and audit records.');
+    const old=(row:unknown)=>{const p=backupRecord(row,'legacy payment');const fp=(v:unknown)=>{if(typeof v!=='string')return;let x:unknown;try{x=JSON.parse(v);}catch{return;}if(x&&typeof x==='object'&&(x as {v?:unknown}).v===2)throw Error('The schema-12 backup cannot contain compact payment evidence.');};if(p.association)fp(backupRecord(p.association,'legacy association').fingerprint);if(Array.isArray(p.postings))for(const raw of p.postings){const post=backupRecord(raw,'legacy posting');fp(backupRecord(post.target,'legacy target').fingerprint);fp(backupRecord(post.receipt,'legacy receipt').fingerprint);if(post.undo)fp(backupRecord(post.undo,'legacy undo').fingerprint);}};
+    for(const p of legacy.payments)old(p);
+    for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.command==='source.payment-evidence')throw Error('The schema-12 backup cannot contain compact payment evidence.');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)old(event.before);old(event.after);}}
+    return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
+  }
+  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9, 10, 11, 12 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
   if (Object.keys(backup).some(k => !['format','formatVersion','schemaVersion','exportedAt','tables'].includes(k))) throw new Error('The backup has unsupported metadata.');
   backupTime(backup.exportedAt,'exportedAt');
   const tables = backupRecord(backup.tables,'tables');

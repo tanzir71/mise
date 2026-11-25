@@ -19,7 +19,13 @@ import { newInboxId } from '../packages/core/inbox';
 import { backupToken, parseBackup } from '../packages/core/backup';
 import { creditBalance, defaultCreditTerms } from '../packages/core/khata';
 import type { CheckedPaymentInput } from '../packages/core/payment-records';
+import type { Payment } from '../packages/core/models';
 import { inboxImageFile, inboxPng } from './inbox-fixture';
+import {
+  PaymentEvidenceReader,
+  paymentEvidenceCommand,
+} from '../packages/core/payment-evidence';
+import { literalToken } from '../packages/core/literal-token';
 
 const at = Date.UTC(2026, 10, 25, 8, 30),
   databases: MiseDatabase[] = [];
@@ -544,7 +550,7 @@ it('backs up and restores complete money postings, originals and images, rejecti
       true,
     ),
     backup = await f.db.readBackup();
-  expect(backup.schemaVersion).toBe(12);
+  expect(backup.schemaVersion).toBe(13);
   const target = new MiseDatabase('restore-money-' + newInboxId());
   databases.push(target);
   await target.restoreBackup(
@@ -880,7 +886,7 @@ it('upgrades strict schema-11 observations without reinterpreting originals or a
     legacy = JSON.parse(JSON.stringify(current));
   legacy.schemaVersion = 11;
   const upgraded = parseBackup(legacy);
-  expect(upgraded.schemaVersion).toBe(12);
+  expect(upgraded.schemaVersion).toBe(13);
   expect(upgraded.tables).toEqual(current.tables);
   legacy.tables.events.find(
     (e: { command: string }) => e.command === 'payment.capture',
@@ -901,4 +907,117 @@ it('retains outgoing originals for manual review without converting source instr
     compareSavedPaymentMoney(f.db, s.review, { kind: 'counter', who: '' }),
   ).rejects.toThrow('outgoing money');
   expect(backupToken(await f.db.readBackup())).toBe(before);
+});
+
+it('preserves a complete legacy schema-12 financial history unchanged and rejects compact records claiming that older format', async () => {
+  const f = await fixture(),
+    account = await ledger(f);
+  await recordSavedPaymentMoney(
+    f.db,
+    f.review,
+    await compareSavedPaymentMoney(f.db, f.review, {
+      kind: 'credit',
+      id: account.id,
+    }),
+    true,
+  );
+  await undoSavedPaymentMoney(
+    f.db,
+    f.review,
+    await compareSavedPaymentMoneyUndo(f.db, f.review),
+    true,
+  );
+  const current = await f.db.readBackup(),
+    reader = new PaymentEvidenceReader(
+      current.tables.events,
+      current.tables.creditEntries,
+    ),
+    legacy = JSON.parse(JSON.stringify(current));
+  const inflate = (p: Payment) => {
+    const next = structuredClone(p);
+    if (next.association)
+      next.association.fingerprint = literalToken(
+        reader.expand(next.association.fingerprint),
+      );
+    for (const post of next.postings ?? []) {
+      post.target.fingerprint = literalToken(
+        reader.expand(post.target.fingerprint),
+      );
+      post.receipt.fingerprint = literalToken(
+        reader.expand(post.receipt.fingerprint),
+      );
+      if (post.undo)
+        post.undo.fingerprint = literalToken(
+          reader.expand(post.undo.fingerprint),
+        );
+    }
+    return next;
+  };
+  legacy.schemaVersion = 12;
+  legacy.tables.payments = current.tables.payments.map(inflate);
+  legacy.tables.events = current.tables.events
+    .filter((e) => e.command !== paymentEvidenceCommand)
+    .map((e) =>
+      e.paymentId
+        ? {
+            ...e,
+            before: e.before ? inflate(e.before as Payment) : null,
+            after: inflate(e.after as Payment),
+          }
+        : e,
+    );
+  const upgraded = parseBackup(legacy);
+  expect(upgraded.schemaVersion).toBe(13);
+  expect(upgraded.tables).toEqual(legacy.tables);
+  const target = new MiseDatabase('legacy-money-' + newInboxId());
+  databases.push(target);
+  await target.restoreBackup(
+    JSON.stringify(legacy),
+    await target.previewRestore(legacy),
+  );
+  const review = await openSavedPaymentSource(
+    target,
+    f.item.id,
+    f.destination,
+    { sender: 'bKash' },
+  );
+  expect((await savedPaymentReceipt(target, review))!.payment).toEqual(
+    legacy.tables.payments[0],
+  );
+  expect(await balance(target, account.id)).toBe(120000);
+  const wrong = JSON.parse(JSON.stringify(current));
+  wrong.schemaVersion = 12;
+  expect(() => parseBackup(wrong)).toThrow('schema-12');
+});
+
+it('rejects a missing or corrupted shared original and rolls back a failed evidence audit with all actual money', async () => {
+  const f = await fixture(),
+    c = await compareSavedPaymentMoney(f.db, f.review, {
+      kind: 'counter',
+      who: 'Apa',
+    }),
+    before = backupToken(await f.db.readBackup()),
+    fail = (_key: unknown, e: { command: string }) => {
+      if (e.command === paymentEvidenceCommand)
+        throw new DOMException('Evidence full', 'QuotaExceededError');
+    };
+  f.db.events.hook('creating', fail);
+  try {
+    await expect(
+      recordSavedPaymentMoney(f.db, f.review, c, true),
+    ).rejects.toThrow('Evidence full');
+  } finally {
+    f.db.events.hook('creating').unsubscribe(fail);
+  }
+  expect(backupToken(await f.db.readBackup())).toBe(before);
+  expect(await f.db.sales.count()).toBe(0);
+  await recordSavedPaymentMoney(f.db, f.review, c, true);
+  const backup = await f.db.readBackup(),
+    bad = structuredClone(backup),
+    node = bad.tables.events.find((e) => e.command === paymentEvidenceCommand)!;
+  (node.after as { value: unknown }).value = 'Wrong original';
+  expect(() => parseBackup(bad)).toThrow('verified links');
+  const missing = structuredClone(backup);
+  missing.tables.events = missing.tables.events.filter((e) => e.id !== node.id);
+  expect(() => parseBackup(missing)).toThrow('verified links');
 });

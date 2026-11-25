@@ -2,3 +2,6 @@
 export {MiseDatabase} from '../../apps/web/src/data/db';
 export {newInboxId} from '../../packages/core/inbox';
 export * from '../../apps/web/src/data/payment-capture';
+
+export {seedPaymentStorage} from './payment-storage';
+export {creditBalance} from '../../packages/core/khata';

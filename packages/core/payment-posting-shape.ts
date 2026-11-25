@@ -1,5 +1,9 @@
 import type { Payment, PaymentCheckedFields, PaymentPosting } from './models';
 import { literalToken } from './literal-token';
+import {
+  isCompactPaymentSnapshot,
+  validateCompactPaymentSnapshot,
+} from './payment-evidence';
 const obj = (v: unknown): v is Record<string, unknown> =>
   !!v &&
   typeof v === 'object' &&
@@ -130,80 +134,25 @@ export function validatePaymentPostings(p: Payment): void {
       receipt = paymentSnapshot(posting.receipt.fingerprint),
       receiptScope = scope(receipt, p.outletId);
     ensure(targetScope.businessId === receiptScope.businessId);
-    if (posting.target.kind === 'order')
+    if (isCompactPaymentSnapshot(target) || isCompactPaymentSnapshot(receipt)) {
       ensure(
-        keys(target, 'scope,order') &&
-          obj(target.order) &&
-          target.order.id === posting.target.id &&
-          target.order.outletId === p.outletId &&
-          target.order.total === posting.money.amount &&
-          target.order.currency === posting.money.currency &&
-          obj(target.order.payment) &&
-          target.order.payment.status === 'pending' &&
-          posting.receipt.kind === 'sale',
+        isCompactPaymentSnapshot(target) && isCompactPaymentSnapshot(receipt),
       );
-    else if (posting.target.kind === 'credit')
-      ensure(
-        keys(target, 'scope,account,customer,entries') &&
-          obj(target.account) &&
-          obj(target.customer) &&
-          Array.isArray(target.entries) &&
-          target.account.id === posting.target.id &&
-          target.account.outletId === p.outletId &&
-          target.account.currency === posting.money.currency &&
-          target.customer.id === target.account.customerId &&
-          target.customer.businessId === targetScope.businessId &&
-          posting.receipt.kind === 'credit',
-      );
-    else
-      ensure(
-        keys(target, 'scope,business,outlet,who') &&
-          obj(target.business) &&
-          obj(target.outlet) &&
-          target.business.id === targetScope.businessId &&
-          target.outlet.id === p.outletId &&
-          posting.target.id === p.outletId &&
-          text(target.who, 80) &&
-          posting.receipt.kind === 'sale',
-      );
-    const expectedKeys =
-      posting.receipt.kind === 'sale'
-        ? 'scope,sale,order,customer'
-        : 'scope,entry,account,customer';
-    ensure(keys(receipt, expectedKeys));
-    const row = receipt[posting.receipt.kind === 'sale' ? 'sale' : 'entry'];
-    ensure(
-      obj(row) &&
-        row.id === posting.receipt.id &&
-        row.outletId === p.outletId &&
-        row.amount === posting.money.amount &&
-        row.currency === posting.money.currency &&
-        row.methodName === posting.money.methodName &&
-        row.createdAt === posting.at,
-    );
-    if (posting.receipt.kind === 'sale') {
-      ensure(row.method === posting.money.method && row.voidedAt === undefined);
-      if (posting.target.kind === 'order')
-        ensure(
-          obj(receipt.order) &&
-            receipt.order.id === posting.target.id &&
-            row.orderId === posting.target.id &&
-            obj(receipt.order.payment) &&
-            receipt.order.payment.status === 'paid' &&
-            receipt.order.payment.saleId === row.id,
-        );
-      else ensure(receipt.order === null && row.orderId === undefined);
-    } else
-      ensure(
-        row.type === 'payment' &&
-          row.reversalOf === undefined &&
-          row.refundId === undefined &&
-          row.accountId === posting.target.id &&
-          obj(receipt.account) &&
-          receipt.account.id === posting.target.id &&
-          obj(receipt.customer) &&
-          row.customerId === receipt.customer.id,
-      );
+      validateCompactPaymentSnapshot(target, {
+        stage: 'target',
+        kind: posting.target.kind,
+        id: posting.target.id,
+        outletId: p.outletId,
+        money: posting.money,
+      });
+      validateCompactPaymentSnapshot(receipt, {
+        stage: 'receipt',
+        kind: posting.receipt.kind,
+        id: posting.receipt.id,
+        outletId: p.outletId,
+        money: posting.money,
+      });
+    } else validatePaymentPostingSnapshots(p, posting, target, receipt);
     ensure(
       posting.receipt.eventIds.length ===
         (posting.target.kind === 'order' ? 2 : 1) &&
@@ -227,17 +176,29 @@ export function validatePaymentPostings(p: Payment): void {
           undo.eventIds.every(id),
       );
       const snapshot = paymentSnapshot(undo.fingerprint);
-      ensure(
-        keys(snapshot, 'scope,receipt,reversal,events') &&
-          scope(snapshot, p.outletId).businessId === targetScope.businessId &&
-          obj(snapshot.receipt) &&
-          snapshot.receipt.id === posting.receipt.id &&
-          Array.isArray(snapshot.events) &&
-          snapshot.events.length === undo.eventIds.length &&
-          snapshot.events.every(
-            (event, i) => obj(event) && event.id === undo.eventIds[i],
-          ),
-      );
+      if (isCompactPaymentSnapshot(snapshot)) {
+        validateCompactPaymentSnapshot(snapshot, {
+          stage: 'undo',
+          kind: posting.receipt.kind,
+          id: posting.receipt.id,
+          outletId: p.outletId,
+          money: posting.money,
+        });
+        ensure(
+          scope(snapshot, p.outletId).businessId === targetScope.businessId,
+        );
+      } else
+        ensure(
+          keys(snapshot, 'scope,receipt,reversal,events') &&
+            scope(snapshot, p.outletId).businessId === targetScope.businessId &&
+            obj(snapshot.receipt) &&
+            snapshot.receipt.id === posting.receipt.id &&
+            Array.isArray(snapshot.events) &&
+            snapshot.events.length === undo.eventIds.length &&
+            snapshot.events.every(
+              (event, i) => obj(event) && event.id === undo.eventIds[i],
+            ),
+        );
       for (const value of [undo.eventId, ...undo.eventIds]) {
         ensure(!identities.has(value) && value !== p.id && value !== p.inboxId);
         identities.add(value);
@@ -259,4 +220,88 @@ export function validatePaymentPostings(p: Payment): void {
       );
     }
   }
+}
+
+export function validatePaymentPostingSnapshots(
+  p: Payment,
+  posting: PaymentPosting,
+  target: Record<string, unknown>,
+  receipt: Record<string, unknown>,
+): void {
+  const targetScope = scope(target, p.outletId);
+  ensure(targetScope.businessId === scope(receipt, p.outletId).businessId);
+  if (posting.target.kind === 'order')
+    ensure(
+      keys(target, 'scope,order') &&
+        obj(target.order) &&
+        target.order.id === posting.target.id &&
+        target.order.outletId === p.outletId &&
+        target.order.total === posting.money.amount &&
+        target.order.currency === posting.money.currency &&
+        obj(target.order.payment) &&
+        target.order.payment.status === 'pending' &&
+        posting.receipt.kind === 'sale',
+    );
+  else if (posting.target.kind === 'credit')
+    ensure(
+      keys(target, 'scope,account,customer,entries') &&
+        obj(target.account) &&
+        obj(target.customer) &&
+        Array.isArray(target.entries) &&
+        target.account.id === posting.target.id &&
+        target.account.outletId === p.outletId &&
+        target.account.currency === posting.money.currency &&
+        target.customer.id === target.account.customerId &&
+        target.customer.businessId === targetScope.businessId &&
+        posting.receipt.kind === 'credit',
+    );
+  else
+    ensure(
+      keys(target, 'scope,business,outlet,who') &&
+        obj(target.business) &&
+        obj(target.outlet) &&
+        target.business.id === targetScope.businessId &&
+        target.outlet.id === p.outletId &&
+        posting.target.id === p.outletId &&
+        text(target.who, 80) &&
+        posting.receipt.kind === 'sale',
+    );
+  const expectedKeys =
+    posting.receipt.kind === 'sale'
+      ? 'scope,sale,order,customer'
+      : 'scope,entry,account,customer';
+  ensure(keys(receipt, expectedKeys));
+  const row = receipt[posting.receipt.kind === 'sale' ? 'sale' : 'entry'];
+  ensure(
+    obj(row) &&
+      row.id === posting.receipt.id &&
+      row.outletId === p.outletId &&
+      row.amount === posting.money.amount &&
+      row.currency === posting.money.currency &&
+      row.methodName === posting.money.methodName &&
+      row.createdAt === posting.at,
+  );
+  if (posting.receipt.kind === 'sale') {
+    ensure(row.method === posting.money.method && row.voidedAt === undefined);
+    if (posting.target.kind === 'order')
+      ensure(
+        obj(receipt.order) &&
+          receipt.order.id === posting.target.id &&
+          row.orderId === posting.target.id &&
+          obj(receipt.order.payment) &&
+          receipt.order.payment.status === 'paid' &&
+          receipt.order.payment.saleId === row.id,
+      );
+    else ensure(receipt.order === null && row.orderId === undefined);
+  } else
+    ensure(
+      row.type === 'payment' &&
+        row.reversalOf === undefined &&
+        row.refundId === undefined &&
+        row.accountId === posting.target.id &&
+        obj(receipt.account) &&
+        receipt.account.id === posting.target.id &&
+        obj(receipt.customer) &&
+        row.customerId === receipt.customer.id,
+    );
 }
