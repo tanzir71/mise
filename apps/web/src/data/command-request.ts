@@ -19,6 +19,9 @@ export interface CommandReviewProof {
  assertCurrent:()=>void;
 }
 const reviewGuards=new WeakMap<object,CommandReviewProof>();
+const nativePaymentReviewGuards=new WeakMap<object,CommandReviewProof>();
+export function nativePaymentReviewProof(error:unknown):CommandReviewProof|null {if(!error||typeof error!=='object')return null;const proof=nativePaymentReviewGuards.get(error);if(!proof)return null;proof.assertCurrent();return {...proof};}
+
 /** Only an actual response verified against the uninterrupted original account
  * carries this proof. Serializing an error cannot manufacture one. */
 export function commandReviewProof(error:unknown):CommandReviewProof|null {
@@ -57,6 +60,10 @@ export type PaymentSourceRpc='read_payment_source'|'read_payment_match'|'read_pa
 export function createPaymentSourceRequest(config:CloudConnection,input:CommandAccount,rpc:PaymentSourceRpc,send:typeof fetch){
  if(!['read_payment_source','read_payment_match','read_payment_candidates','act_payment_source'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8*1024*1024);
+}
+/** Native outcomes use separate response/review proofs under the verified SDK account. */
+export function createNativePaymentRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+ return accountRequest(config,input,new URL('functions/v1/native-payment',config.apiUrl+'/'),'POST',send,256000,nativePaymentReviewGuards);
 }
 /** Original byte copies use the same verified SDK account/target boundary. */
 export function createOriginalCopyRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
@@ -128,7 +135,7 @@ export function createAccountImageRequest(config:CloudConnection,input:CommandAc
  const endpoint=new URL('functions/v1/inbox-image',config.apiUrl+'/');endpoint.searchParams.set('image',imageId);
  return accountRequest(config,input,endpoint,'PUT',send);
 }
-function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL,method:'POST'|'PUT',send:typeof fetch,maximumResponse=responseLimit){
+function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL,method:'POST'|'PUT',send:typeof fetch,maximumResponse=responseLimit,rejected=reviewGuards){
  if(!input||typeof input.scope!=='string'||!input.scope||input.scope.length>2048||!['accountHash','targetHash'].every(k=>typeof input[k as 'accountHash'|'targetHash']==='string'&&/^[a-f0-9]{64}$/.test(input[k as 'accountHash'|'targetHash']))||typeof input.getAuth!=='function'||typeof input.assertCurrent!=='function')throw new CommandRequestError('auth');
  const {scope,accountHash,targetHash,getAuth,assertCurrent}=input;
  const current=(value:CommandAuthorization)=>{try{const result:unknown=assertCurrent(value);if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw Error();}}catch{throw new CommandRequestError('auth');}};
@@ -159,7 +166,7 @@ function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL
     if(routeIsCommand()&&typeof body==='string'){
      const bodyHash=await abortable(syncHash(new TextEncoder().encode(body)));current(latest);
      if(lifetime.aborted)throw new CommandRequestError('retry');
-     reviewGuards.set(error,{status:response.status as CommandReviewProof['status'],targetHash,accountHash,bodyHash,assertCurrent:()=>current(latest)});
+     rejected.set(error,{status:response.status as CommandReviewProof['status'],targetHash,accountHash,bodyHash,assertCurrent:()=>current(latest)});
     }
     throw error;
    }
@@ -172,6 +179,6 @@ function accountRequest(config:CloudConnection,input:CommandAccount,endpoint:URL
   }catch(error){void response?.body?.cancel().catch(()=>{});if(error instanceof CommandRequestError)throw error;throw new CommandRequestError('retry');}
   finally{clearTimeout(timer);controller.abort();}
  };
- function routeIsCommand(){return method==='POST'&&endpoint.pathname.endsWith('/functions/v1/commands');}
+ function routeIsCommand(){return method==='POST'&&(endpoint.pathname.endsWith('/functions/v1/commands')||rejected===nativePaymentReviewGuards&&endpoint.pathname.endsWith('/functions/v1/native-payment'));}
 }
 export function createCommandRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){return createAccountJsonRequest(config,input,'commands',send);}

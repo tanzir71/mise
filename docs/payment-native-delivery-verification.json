@@ -1,0 +1,344 @@
+{
+  "milestone": "M41",
+  "increment": "Original native payment delivery and session-bound immutable outcomes",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "a75c0ed4ec5ab1c8b69cb7125987bd9aec177240",
+  "sourceFingerprint": "185b698c2c3607a134ca2b0e346ec8d545fd3efa622ef709102bd4b7c347f2b3",
+  "sourceFiles": [
+    "apps/web/src/data/command-request.ts",
+    "apps/web/src/data/local-outbox.ts",
+    "apps/web/src/data/native-payment-barriers.ts",
+    "apps/web/src/data/native-payment-outbox.ts",
+    "apps/web/src/data/native-payment-session.ts",
+    "supabase/migrations/20261125214903_native_payment_sessions.sql",
+    "tests/e2e/native-payment-delivery.spec.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/fixtures/native-payment-server.ts",
+    "tests/fixtures/original-copy-sdk.ts",
+    "tests/native-payment-backend.test.ts",
+    "tests/native-payment-delivery.test.ts",
+    "vitest.config.ts"
+  ],
+  "scope": {
+    "nativeSchema": 31,
+    "ordinarySchema": 13,
+    "originalGraphVersion": 1,
+    "copyWireVersion": 1,
+    "portableArchiveVersion": 2,
+    "nativeReceiptVersion": 1,
+    "newPrivateHostedMigrationFiles": 1,
+    "hostedMigrationsApplied": 0,
+    "newProviderAccountsOrEnvironmentVariables": 0,
+    "allConfigurationEndUserOwned": true,
+    "paymentPreviewDefaultOff": true,
+    "actualLocalFinancialHttpDeliveryImplemented": true,
+    "legacyGlobalMarkersStillRetained": true,
+    "canonicalUploadAndJoinFencesRetained": true,
+    "historicalRegistrationImplemented": false
+  },
+  "checks": {
+    "newUnitCases": 34,
+    "originalNativeFinancialRuntimeCases": 28,
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-native-delivery-lint.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 229,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-native-delivery-types.log"
+    },
+    "fullUnit": {
+      "passed": 5700,
+      "failed": 0,
+      "pending": 0,
+      "files": 297,
+      "success": true,
+      "report": ".private/m41-native-delivery-full-unit.json"
+    },
+    "focusedBrowser": {
+      "passed": 2,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 28498.347999999998,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-delivery-focused-browser.json"
+    },
+    "browser": {
+      "root": {
+        "passed": 57,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 256105.386,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-delivery-root-browser.json"
+      },
+      "pages": {
+        "passed": 57,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 266730.152,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-delivery-pages-browser.json"
+      }
+    },
+    "builds": {
+      "passed": true,
+      "bases": [
+        "/",
+        "/mise/"
+      ],
+      "logs": [
+        ".private/m41-native-delivery-root-build.log",
+        ".private/m41-native-delivery-pages-build.log"
+      ]
+    },
+    "gateRecords": [
+      {
+        "gate": "types",
+        "started": "2026-11-25T22:40:06.8828139Z",
+        "ended": "2026-11-25T22:41:03.3789016Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-delivery-types.log"
+      },
+      {
+        "gate": "full-unit",
+        "started": "2026-11-25T22:41:03.4257724Z",
+        "ended": "2026-11-25T23:23:36.2297892Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-delivery-full-unit.log"
+      },
+      {
+        "gate": "root-build",
+        "started": "2026-11-25T23:23:36.2326601Z",
+        "ended": "2026-11-25T23:24:28.3344584Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-delivery-root-build.log"
+      },
+      {
+        "gate": "root-browser",
+        "started": "2026-11-25T23:24:28.3370715Z",
+        "ended": "2026-11-25T23:28:45.6473501Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-delivery-root-browser.log"
+      },
+      {
+        "gate": "pages-build",
+        "started": "2026-11-25T23:28:45.6496682Z",
+        "ended": "2026-11-25T23:29:43.8726185Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-delivery-pages-build.log"
+      },
+      {
+        "gate": "pages-browser",
+        "started": "2026-11-25T23:29:43.8750765Z",
+        "ended": "2026-11-25T23:34:11.7165009Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-delivery-pages-browser.log"
+      }
+    ],
+    "originalFinancialTests": {
+      "file": "tests/native-payment-backend.test.ts",
+      "existingTestDeclarations": 19,
+      "currentTestDeclarations": 26,
+      "changedExistingDeclarations": [],
+      "comparison": "Complete TypeScript token sequence of each existing it-call, including source corpora/assertions/deadlines; setup fixture excluded.",
+      "checkedAt": "2026-11-25T22:38:33.724Z"
+    },
+    "originalFinancialSql": {
+      "functions": [
+        {
+          "function": "admit_native_payment_write",
+          "financialBodyIdenticalAfterRemovingOnlyEnumeratedSessionGuards": true,
+          "baselineHash": "73a05157ee7f5f248e17538734e66cd0633f7f02f92e3eea6b4a5979993ec0e8"
+        },
+        {
+          "function": "prepare_native_payment_write",
+          "financialBodyIdenticalAfterRemovingOnlyEnumeratedSessionGuards": true,
+          "baselineHash": "d9dd7b4f6d024e5bb25141a0c1765b2a0a23751bfa21d7babb5214bd38caa022"
+        },
+        {
+          "function": "finish_native_payment_write",
+          "financialBodyIdenticalAfterRemovingOnlyEnumeratedSessionGuards": true,
+          "baselineHash": "47c3a0863be6c01adbdff250b9c2dcc0bf21953eeab58d3ada9bf8a58c117fcc"
+        }
+      ],
+      "existingFinancialAlgorithmChanged": false
+    },
+    "baselineNativeBackend": {
+      "passed": 28,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-session-existing.json"
+    },
+    "guardedExistingNativeBackend": {
+      "passed": 28,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-session-guard-existing-r2.json"
+    },
+    "newSessionCases": {
+      "passed": 18,
+      "failed": 0,
+      "pending": 28,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-session-new.json"
+    },
+    "focusedNativeDelivery": {
+      "passed": 12,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-delivery-current.json"
+    },
+    "additionalMoneyKinds": {
+      "passed": 3,
+      "failed": 0,
+      "pending": 13,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-delivery-money-kinds.json"
+    },
+    "largeSource": {
+      "passed": true,
+      "charges": 5000,
+      "noteCodeUnits": 1000000,
+      "images": 1,
+      "actualCollections": 1,
+      "originalHashesUnchanged": true,
+      "storedNodeCount": 89570,
+      "storedNodeBytes": 23672531,
+      "focusedDurationMs": 243526.9995,
+      "fullRunDurationMs": 240726.30180000002,
+      "newCaseDeadlineMs": 600000,
+      "nativeHttpDeadlineMs": 20000,
+      "report": ".private/m41-native-delivery-scale-r2.json"
+    },
+    "localCli": {
+      "advisorExitCode": 1,
+      "migrationListExitCode": 1,
+      "target": "local-only",
+      "checkedAt": "2026-11-25T22:36:45.0423015Z"
+    },
+    "localCliQualification": "Both commands targeted only127.0.0.1:54322 and could not connect because no local Supabase stack is running. No remote advisor, schema or deployment call was made. Actual all-migration PGlite/restricted-role tests cover session, forced-RLS, grants and financial rollback behavior; managed database/JWT-signature acceptance is not claimed.",
+    "ui": {
+      "markupStylesOrReferenceExportsChanged": false,
+      "criticalAxeViolations": 0,
+      "newBrowserCases": 2,
+      "newBrowserWidths": [
+        390,
+        1440
+      ],
+      "allSelectedBrowserViewportWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "visualArtifactUpload": "held",
+      "scope": "Selected existing payment, original, backup, reference and copy flows plus new actual HTTP/SQL/reload delivery. No claim of full application browser coverage."
+    },
+    "secretScan": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "status": "passed",
+      "log": ".private/m41-native-delivery-secret-first.log",
+      "requiredRepeatAfterFinalDocumentation": ".private/m41-native-delivery-secrets-final-r2.log",
+      "newExceptionsAdded": false,
+      "qualification": "The 22 fixed reviewed historical findings are nonsecret. No credential, current deployment identifier or coverage gap is present. The full scan must repeat after final documentation, before the unchanged commit/push guards run."
+    },
+    "formattingOnlyDelta": {
+      "file": "supabase/migrations/20261125214903_native_payment_sessions.sql",
+      "removedBytes": 1,
+      "onlyRemovedFinalLF": true,
+      "allOtherFrozenSourceBytesUnchanged": true,
+      "sqlStatementBytesUnchanged": true,
+      "beforeHash": "bdb8094a0060b5ec78fd91c1ec753dfca0d19106101098c1d746a61045fcd68d",
+      "afterHash": "73f3289ab297d90596725445e84f4482bd2f126fb96f49aec5df0adfd8a25b05",
+      "fullRunStartedSourceFingerprint": "2ebc74d20f82ec3929ffd1e82c3557721797c8f295d6cc87da7d66ea170e092c",
+      "finalSourceFingerprint": "185b698c2c3607a134ca2b0e346ec8d545fd3efa622ef709102bd4b7c347f2b3"
+    }
+  },
+  "sourceQualification": "The only source delta after all runtime checks removes one redundant terminal newline from the new SQL migration, caught by the staging whitespace check. The complete SQL statement bytes and every other frozen source byte remain unchanged; reconstruction using the saved pre-correction migration matches the full-run source fingerprint. Existing financial test bodies, assertions, corpora and deadlines are unchanged.",
+  "initialFailuresAndCorrections": [
+    "Initial guarded backend fixture added its session reset at module initialization before SQL existed; moved it into the actual beforeEach. The original28 cases then passed with the new guards.",
+    "Initial delivery fixture seeded relational rows outside one transaction and hit a foreign key; initial seed now uses one actual transaction.",
+    "Expanded integration showed a real config-change abort reported as retry after server completion. The sender now rechecks actual SDK/native scope in its error path, reports auth and stops; the original payment remains safe for same-user recovery.",
+    "First large integration attempt rejected the valid sha256 fixture column with an alpha-only SQL identifier allowlist. The test-only allowlist now permits digits after the initial character. The complete unchanged corpus then passed.",
+    "Strict compilation found a Dexie overloaded get/hook test type ambiguity. The additive quota fixture now uses its explicit native journal entry type, an object modifications parameter and an unknown key, preserving the actual failure trigger. Final types and full tests cover the correction.",
+    "The final staging whitespace check caught one extra blank line at the new migration EOF. Exactly one terminal LF was removed after runtime verification. A saved original reconstructs the full-run fingerprint; SQL statement bytes and all other frozen source bytes are identical. Final documentation and scans record the formatting-only delta."
+  ],
+  "remainingInMilestone": [
+    "Complete canonical/native-feed projection",
+    "Initial historical registration without reposting existing money",
+    "Connected restore and original/canonical undo reconciliation",
+    "Copied-original discovery",
+    "Actual product controls and complete milestone acceptance"
+  ],
+  "holds": {
+    "workflowRuns": true,
+    "ciArtifactUploads": true,
+    "pagesPublication": true,
+    "hostedMigrationFunctionServiceDeployment": true,
+    "providerCommissioning": true,
+    "releaseTags": true,
+    "lastReadOnlyObservation": {
+      "observedAt": "2026-11-25T22:41:03.3953168Z",
+      "workflows": [
+        {
+          "id": 419007052,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419075081,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419005433,
+          "state": "disabled_manually"
+        }
+      ],
+      "runs": {
+        "active": [],
+        "count": 77,
+        "latest": {
+          "head_sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+          "id": 43927944995,
+          "status": "completed"
+        }
+      },
+      "pages": {
+        "environment": "github-pages",
+        "id": 7832852111,
+        "sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+      },
+      "method": "Read-only GitHub CLI; connector lacks workflow and Pages inventories"
+    }
+  },
+  "fullRunStartedSourceFingerprint": "2ebc74d20f82ec3929ffd1e82c3557721797c8f295d6cc87da7d66ea170e092c"
+}

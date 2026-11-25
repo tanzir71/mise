@@ -1,3 +1,4 @@
+import {nativePaymentBarrierAllows,type NativePaymentBarriers} from './native-payment-barriers';
 import Dexie from 'dexie';
 import {backupTableNames,emptyBackupTables,type BackupTable} from '@mise/core/backup-tables';
 import {backupToken,createBackup} from '@mise/core/backup';
@@ -98,7 +99,7 @@ export async function cancelLocalUpload(db:MiseDatabase,uploadId:string,targetHa
 }
 
 /** Receipts are durable per intent. Retained/unclassified work stops ordered delivery. */
-export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand,currency?:string,signal?:AbortSignal,closingParent?:string)=>Promise<ShopCommandReceipt>,throughCommandId?:string):Promise<{accepted:number;retained:number;pending:number}>{
+export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:(command:ShopCommand,currency?:string,signal?:AbortSignal,closingParent?:string)=>Promise<ShopCommandReceipt>,throughCommandId?:string,nativeBarriers?:NativePaymentBarriers):Promise<{accepted:number;retained:number;pending:number}>{
  const {initial,operator,rows}=await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{const initial=parseLocalCloudState(await db.cloudState.get('binding'));if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Finish the original upload or device join before sending local changes.');return {initial,operator:await joinedOperator(db,initial),rows:(await db.outbox.where('uploadId').equals(initial.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence)};});
  const originalOperator=deliveryToken(initial,operator);let deliveryIdentityHash:Promise<string>|null=null;
  async function currentOperator(){const state=parseLocalCloudState(await db.cloudState.get('binding'));if(deliveryToken(state,await joinedOperator(db,state))!==originalOperator)throw new Error('The original operator changed. Keep the local action and its receipt unconfirmed.');return state;}
@@ -106,7 +107,7 @@ export async function deliverLocalOutbox(db:MiseDatabase,targetHash:string,send:
  delivery: for(const row of rows){
   let saved=entry(row,initial);if(saved.status==='accepted')continue;
   if(isLocalInboxRetention(saved)){const original=await nativeRowHash(saved);await db.transaction('r',db.cloudState,db.operatorState,db.outbox,async()=>{await currentOperator();if(await Dexie.waitFor(nativeRowHash(entry((await db.outbox.get(saved.id))!,initial)))!==original)throw new Error('The original saved share changed. Keep its source.');});continue;}
-  if(saved.status==='retained')break;
+  if(saved.status==='retained'){if(nativeBarriers&&await nativePaymentBarrierAllows(db,nativeBarriers,saved,targetHash))continue;break;}
   const identityHash=await(deliveryIdentityHash??=syncHash(new TextEncoder().encode(originalOperator)));
   for(let index=saved.receipts.length;index<saved.commands.length;index++){
    if(index<saved.receipts.length)continue;
@@ -180,9 +181,10 @@ export async function readLocalActionReviews(db:MiseDatabase):Promise<{review:Sy
  });
 }
 /** Image bytes follow their accepted metadata. Retries retain every original queue record. */
-export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,put:(image:SyncImageDescriptor,blob:Blob,signal?:AbortSignal)=>Promise<InboxImageUploadReceipt>,signal?:AbortSignal):Promise<number>{
+export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,put:(image:SyncImageDescriptor,blob:Blob,signal?:AbortSignal)=>Promise<InboxImageUploadReceipt>,signal?:AbortSignal,throughSequence?:number):Promise<number>{
  const initial=parseLocalCloudState(await db.cloudState.get('binding'));
  if(initial.targetHash!==targetHash||!hasOriginalAdmission(initial))throw new Error('Use the original image connection.');
+ if(throughSequence!==undefined&&(!Number.isSafeInteger(throughSequence)||throughSequence<1||throughSequence>initial.sequence))throw new Error('Keep the original image queue position.');
  const originalScope=deliveryToken(initial,await joinedOperator(db,initial));
  const rows=await db.outbox.where('uploadId').equals(initial.uploadId).sortBy('sequence');
  if(rows.length!==initial.sequence||rows.some((row,index)=>row.sequence!==index+1))throw new Error('Keep the complete original image queue.');
@@ -191,6 +193,7 @@ export async function deliverLocalInboxImages(db:MiseDatabase,targetHash:string,
  if(!canonical&&initial.version!==1)throw new Error('Keep the original device admission.');
  let delivered=0;
  for(const raw of rows){
+  if(throughSequence!==undefined&&raw.sequence>throughSequence)break;
   const saved=entry(raw,initial);let sourceHash:string|undefined;
   for(const [index,command] of saved.commands.entries()){
    if(command.type!=='inbox.capture'||!command.input.images.length)continue;

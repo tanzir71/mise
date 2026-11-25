@@ -64,13 +64,14 @@ async function asRole<T>(
   role: 'authenticated' | 'service_role' | 'anon',
   query: string,
   args: unknown[] = [],
+  sessionClaim: unknown = n ? uid(n + 100) : null,
 ) {
   return sql.transaction(async (db) => {
     await db.exec('set local role ' + role);
     await db.query("select set_config('request.jwt.claims',$1,true)", [
       JSON.stringify({
         role,
-        ...(n ? { sub: uid(n) } : {}),
+        ...(n ? { sub: uid(n), session_id: sessionClaim } : {}),
         user_metadata: { role: 'owner' },
       }),
     ]);
@@ -333,7 +334,10 @@ async function backendPayment(id: string) {
     ? (JSON.parse(rows.rows[0].record_json) as Payment)
     : null;
 }
-async function prepare(i: NativePaymentInvocation) {
+async function prepare(
+  i: NativePaymentInvocation,
+  sessionClaim: unknown = uid(101),
+) {
   const c = i.command;
   return (
     await asRole<{ data: Record<string, unknown> }>(
@@ -349,6 +353,7 @@ async function prepare(i: NativePaymentInvocation) {
         paymentInvocationHash(i),
         c.occurredAt,
       ],
+      sessionClaim,
     )
   )[0].data;
 }
@@ -378,6 +383,9 @@ beforeAll(async () => {
     await sql.exec(
       readFileSync(new URL('./fixtures/' + f, import.meta.url), 'utf8'),
     );
+  await sql.exec(
+    'create table auth.sessions(id uuid primary key,user_id uuid not null references auth.users(id) on delete cascade,not_after timestamptz)',
+  );
   const dir = new URL('../supabase/migrations/', import.meta.url);
   for (const f of readdirSync(dir)
     .filter((f) => f.endsWith('.sql'))
@@ -391,11 +399,17 @@ beforeAll(async () => {
 }, 30000);
 beforeEach(async () => {
   lastError = '';
+  await sql.exec('truncate auth.sessions');
+  for (const n of [1, 2])
+    await sql.query('insert into auth.sessions(id,user_id) values($1,$2)', [
+      uid(n + 100),
+      uid(n),
+    ]);
   await sql.exec(
-    'truncate public.businesses cascade;truncate private.native_payment_actions,private.native_payment_events,private.native_payment_write_tickets',
+    'truncate public.businesses cascade;truncate private.native_payment_actions,private.native_payment_events,private.native_payment_write_tickets cascade',
   );
   await sql.exec(
-    "update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null",
+    "update auth.users set phone='1415555010'||right(id::text,1),phone_confirmed_at=now(),banned_until=null,deleted_at=null,is_anonymous=false",
   );
 });
 afterEach(async () => {
@@ -1105,4 +1119,340 @@ it('a recording-device clock cannot extend undo beyond the persisted real server
       )
     ).rows[0].voided_at,
   ).toBeNull();
+});
+
+// Live-session cases use actual role-restricted SQL and the existing real HTTP,
+// native capture and money APIs. The prior financial corpus stays unchanged.
+async function nativeFinancialFacts() {
+  const tables = [
+    'public.orders',
+    'public.sales',
+    'public.credit_entries',
+    'public.events',
+    'private.native_payment_observations',
+    'private.native_payment_events',
+    'private.native_payment_actions',
+  ];
+  const facts: Record<string, unknown> = {};
+  for (const table of tables)
+    facts[table] = (
+      await sql.query('select * from ' + table + ' order by id')
+    ).rows;
+  return literalToken(facts);
+}
+async function pendingCounterMoney() {
+  const f = await fixture();
+  await accepted(f.capture);
+  const saved = await recordSavedPaymentMoney(
+    f.db,
+    f.review,
+    await compareSavedPaymentMoney(f.db, f.review, {
+      kind: 'counter',
+      who: 'Session-checked customer',
+    }),
+    true,
+  );
+  return { f, invocation: await retained(f.db, saved.payment.eventId) };
+}
+it.each([
+  'missing',
+  'malformed',
+  'unknown',
+  'foreign',
+  'expired',
+  'removed',
+] as const)(
+  'denies %s Auth session at both body admission and preparation without changing native records',
+  async (kind) => {
+    const f = await fixture();
+    await sql.query(
+      "insert into auth.sessions(id,user_id,not_after) values($1,$2,clock_timestamp()-interval '1 second')",
+      [uid(103), uid(1)],
+    );
+    if (kind === 'removed')
+      await sql.query('delete from auth.sessions where id=$1', [uid(101)]);
+    const claim =
+      kind === 'missing'
+        ? null
+        : kind === 'malformed'
+          ? 'not-a-session'
+          : kind === 'unknown'
+            ? uid(999)
+            : kind === 'foreign'
+              ? uid(102)
+              : kind === 'expired'
+                ? uid(103)
+                : uid(101);
+    const before = await nativeFinancialFacts();
+    await expect(
+      asRole(
+        1,
+        'authenticated',
+        'select public.admit_native_payment_write($1)',
+        [f.capture.command.outletId],
+        claim,
+      ),
+    ).rejects.toMatchObject({ code: '42501' });
+    await expect(prepare(f.capture, claim)).rejects.toMatchObject({
+      code: '42501',
+    });
+    expect(await nativeFinancialFacts()).toBe(before);
+    expect(
+      (await sql.query('select id from private.native_payment_write_tickets'))
+        .rows,
+    ).toHaveLength(0);
+    expect(
+      (
+        await sql.query(
+          'select ticket_id from private.native_payment_ticket_sessions',
+        )
+      ).rows,
+    ).toHaveLength(0);
+  },
+);
+it.each([
+  'removed',
+  'expired',
+  'foreign',
+  'anonymous',
+  'unconfirmed',
+  'banned',
+  'deleted-user',
+] as const)(
+  'denies genuine service completion after %s session/account revocation and retains every original money fact',
+  async (kind) => {
+    const { f, invocation } = await pendingCounterMoney(),
+      before = await nativeFinancialFacts();
+    const response = await http(invocation, 1, async () => {
+      if (kind === 'removed')
+        await sql.query('delete from auth.sessions where id=$1', [uid(101)]);
+      if (kind === 'expired')
+        await sql.query(
+          "update auth.sessions set not_after=clock_timestamp()-interval '1 second' where id=$1",
+          [uid(101)],
+        );
+      if (kind === 'foreign')
+        await sql.query('update auth.sessions set user_id=$2 where id=$1', [
+          uid(101),
+          uid(2),
+        ]);
+      if (kind === 'anonymous')
+        await sql.query('update auth.users set is_anonymous=true where id=$1', [
+          uid(1),
+        ]);
+      if (kind === 'unconfirmed')
+        await sql.query(
+          'update auth.users set phone_confirmed_at=null where id=$1',
+          [uid(1)],
+        );
+      if (kind === 'banned')
+        await sql.query(
+          "update auth.users set banned_until=clock_timestamp()+interval '1 hour' where id=$1",
+          [uid(1)],
+        );
+      if (kind === 'deleted-user')
+        await sql.query(
+          'update auth.users set deleted_at=clock_timestamp() where id=$1',
+          [uid(1)],
+        );
+    });
+    expect(response.status, lastError).toBe(403);
+    expect(await nativeFinancialFacts()).toBe(before);
+    expect((await backendPayment(f.saved.payment.id))!.revision).toBe(1);
+    expect(
+      (
+        await sql.query(
+          'select ticket_id,session_id,auth_user_id from private.native_payment_ticket_sessions',
+        )
+      ).rows,
+    ).toMatchObject([{ session_id: uid(101), auth_user_id: uid(1) }]);
+    expect(await f.db.sales.count()).toBe(1); // Genuine local cash is retained.
+  },
+);
+it('keeps ticket session binding private, removes it atomically on completion, and requires a new live session even for an immutable old receipt', async () => {
+  const f = await fixture(),
+    p = await prepare(f.capture);
+  expect(
+    (
+      await sql.query(
+        'select ticket_id,auth_user_id,session_id from private.native_payment_ticket_sessions',
+      )
+    ).rows,
+  ).toEqual([
+    { ticket_id: p.ticketId, auth_user_id: uid(1), session_id: uid(101) },
+  ]);
+  const receipt = (await finish(p, f.capture))[0].data,
+    before = await nativeFinancialFacts();
+  expect(
+    (
+      await sql.query(
+        'select ticket_id from private.native_payment_ticket_sessions',
+      )
+    ).rows,
+  ).toHaveLength(0);
+  await sql.query('delete from auth.sessions where id=$1', [uid(101)]);
+  await expect(prepare(f.capture)).rejects.toMatchObject({ code: '42501' });
+  await sql.query('insert into auth.sessions(id,user_id) values($1,$2)', [
+    uid(201),
+    uid(1),
+  ]);
+  expect(await prepare(f.capture, uid(201))).toEqual({ done: true, receipt });
+  expect(await nativeFinancialFacts()).toBe(before);
+});
+it('expiry inside the actual financial insert rolls money, audit, receipt and session changes back before a deliberate original retry', async () => {
+  const { invocation } = await pendingCounterMoney(),
+    before = await nativeFinancialFacts();
+  await sql.exec(
+    `create function private.test_native_session_expiry() returns trigger language plpgsql as $$begin update auth.sessions set not_after=clock_timestamp()-interval '1 second' where id='${uid(101)}';return new;end $$;create trigger test_native_session_expiry before insert on public.sales for each row execute function private.test_native_session_expiry()`,
+  );
+  try {
+    expect((await http(invocation)).status, lastError).toBe(403);
+  } finally {
+    await sql.exec(
+      'drop trigger test_native_session_expiry on public.sales;drop function private.test_native_session_expiry()',
+    );
+  }
+  expect(await nativeFinancialFacts()).toBe(before);
+  expect(
+    (
+      await sql.query('select not_after from auth.sessions where id=$1', [
+        uid(101),
+      ])
+    ).rows,
+  ).toEqual([{ not_after: null }]);
+  const receipt = await accepted(invocation);
+  expect(receipt.financial).toMatchObject({ kind: 'record' });
+  expect((await sql.query('select id from public.sales')).rows).toHaveLength(1);
+  expect(await accepted(invocation)).toEqual(receipt);
+});
+it('expiry during actual ticket insertion rolls its private session binding back with the preparation', async () => {
+  const f = await fixture(),
+    before = await nativeFinancialFacts();
+  await sql.exec(
+    `create function private.test_native_prepare_expiry() returns trigger language plpgsql as $$begin update auth.sessions set not_after=clock_timestamp()-interval '1 second' where id='${uid(101)}';return new;end $$;create trigger test_native_prepare_expiry after insert on private.native_payment_write_tickets for each row execute function private.test_native_prepare_expiry()`,
+  );
+  try {
+    await expect(prepare(f.capture)).rejects.toMatchObject({ code: '42501' });
+  } finally {
+    await sql.exec(
+      'drop trigger test_native_prepare_expiry on private.native_payment_write_tickets;drop function private.test_native_prepare_expiry()',
+    );
+  }
+  expect(await nativeFinancialFacts()).toBe(before);
+  expect(
+    (await sql.query('select id from private.native_payment_write_tickets'))
+      .rows,
+  ).toHaveLength(0);
+  expect(
+    (
+      await sql.query(
+        'select ticket_id from private.native_payment_ticket_sessions',
+      )
+    ).rows,
+  ).toHaveLength(0);
+  expect(
+    (
+      await sql.query('select not_after from auth.sessions where id=$1', [
+        uid(101),
+      ])
+    ).rows,
+  ).toEqual([{ not_after: null }]);
+});
+it('an actual older unbound preparation cannot finish after the session upgrade and recovers only through a new bound original preparation', async () => {
+  const { invocation } = await pendingCounterMoney(),
+    before = await nativeFinancialFacts(),
+    signature =
+      'private.prepare_native_payment_write(public.ulid,public.ulid,text,public.ulid,jsonb,text,public.utc_ms)';
+  const current = (
+    await sql.query<{ body: string }>(
+      'select pg_get_functiondef($1::regprocedure) body',
+      [signature],
+    )
+  ).rows[0].body;
+  const old = readFileSync(
+    new URL(
+      '../supabase/migrations/20261125121852_native_payment_commands.sql',
+      import.meta.url,
+    ),
+    'utf8',
+  );
+  const oldPrepare = old
+    .slice(
+      old.indexOf('create function private.prepare_native_payment_write('),
+      old.indexOf('create function private.native_payment_tokens('),
+    )
+    .replace('create function', 'create or replace function');
+  let legacy: Record<string, unknown>;
+  await sql.exec(oldPrepare);
+  try {
+    legacy = await prepare(invocation);
+  } finally {
+    await sql.exec(current);
+  }
+  expect(
+    (
+      await sql.query(
+        'select ticket_id from private.native_payment_ticket_sessions',
+      )
+    ).rows,
+  ).toHaveLength(0);
+  await expect(finish(legacy!, invocation)).rejects.toMatchObject({
+    code: '42501',
+  });
+  expect(await nativeFinancialFacts()).toBe(before);
+  const fresh = await prepare(invocation);
+  expect((await finish(fresh, invocation))[0].data.financial).toMatchObject({
+    kind: 'record',
+  });
+  expect((await sql.query('select id from public.sales')).rows).toHaveLength(1);
+});
+it('the private session binding forces RLS and grants neither Auth reads nor bypass helpers to any client role', async () => {
+  const policy = (
+    await sql.query<{ relrowsecurity: boolean; relforcerowsecurity: boolean }>(
+      "select relrowsecurity,relforcerowsecurity from pg_class where oid='private.native_payment_ticket_sessions'::regclass",
+    )
+  ).rows;
+  expect(policy).toEqual([{ relrowsecurity: true, relforcerowsecurity: true }]);
+  for (const role of ['anon', 'authenticated', 'service_role'] as const) {
+    const grants = (
+      await sql.query<{ granted: boolean }>(
+        "select has_table_privilege($1,'private.native_payment_ticket_sessions','select,insert,update,delete') or has_function_privilege($1,'private.assert_native_payment_session(uuid,uuid)','execute') or has_function_privilege($1,'private.current_native_payment_session()','execute') granted",
+        [role],
+      )
+    ).rows;
+    expect(grants).toEqual([{ granted: false }]);
+  }
+  for (const role of ['anon', 'authenticated'] as const)
+    expect(
+      (
+        await sql.query<{ granted: boolean }>(
+          "select has_table_privilege($1,'auth.sessions','select') granted",
+          [role],
+        )
+      ).rows,
+    ).toEqual([{ granted: false }]);
+  const f = await fixture();
+  await expect(
+    asRole(
+      1,
+      'authenticated',
+      'select private.assert_native_payment_session($1,$2)',
+      [uid(1), uid(101)],
+    ),
+  ).rejects.toMatchObject({ code: '42501' });
+  await expect(
+    asRole(
+      1,
+      'authenticated',
+      'select * from private.native_payment_ticket_sessions',
+    ),
+  ).rejects.toMatchObject({ code: '42501' });
+  expect(
+    await asRole(
+      1,
+      'authenticated',
+      'select public.admit_native_payment_write($1) allowed',
+      [f.capture.command.outletId],
+    ),
+  ).toEqual([{ allowed: true }]);
 });

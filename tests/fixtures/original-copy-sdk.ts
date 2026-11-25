@@ -26,6 +26,7 @@ export async function createCopySdk(
   copy: typeof fetch,
   n = 1,
   storage: KeyStorage = new CopySdkStorage(),
+  sessionId = copySdkSubject(n + 100),
 ) {
   const user = {
     id: copySdkSubject(n),
@@ -47,7 +48,7 @@ export async function createCopySdk(
     encode({ alg: 'HS256', typ: 'JWT' }),
     encode({
       sub: user.id,
-      session_id: copySdkSubject(n + 100),
+      session_id: sessionId,
       role: 'authenticated',
       exp: Math.floor(Date.now() / 1000) + 3600,
       phone: user.phone,

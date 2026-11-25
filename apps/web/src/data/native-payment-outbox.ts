@@ -65,6 +65,8 @@ export async function recordNativePaymentMutation<T>(
     if (saved)
       throw Error('Recover the original native action before reusing its ID.');
     const captured = await withNativeOutboxCapture(db, c.id, write);
+    if (identity && !captured.marker)
+      throw Error('Keep the native payment in its actual connected queue.');
     let marker: NativePaymentMarker | null = null;
     if (captured.marker) {
       const { state, entry } = captured.marker;
