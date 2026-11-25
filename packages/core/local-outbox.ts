@@ -4,7 +4,7 @@ import type {CloudUploadReceipt} from './cloud-upload-runner';
 import {parseSyncScope,type SyncScope} from './sync-read';
 import {syncDownloadToken} from './sync-download';
 
-export const localSchemaVersion=30;
+export const localSchemaVersion=31;
 export const localSyncTableNames=['cloudState','outbox'] as const;
 export interface LocalCloudState {
  /** uploadId/ownerId are legacy names for the fence identity and selected actor. */

@@ -288,6 +288,7 @@ export async function createNativeOriginalCopySession(
     });
   return {
     identity: b.identity,
+    assertCurrent: check,
     prepare: (id: string) =>
       run(async () => {
         const existing = await b.journal.prepared(id, b.identity, b.current);

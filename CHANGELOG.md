@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 native payment writes now atomically retain the actual invocation and row changes, share the global connected queue order, and seal complete original source batches before future reconciliation. Quota, account and scope failures roll back the whole action; historical backup restore never manufactures outgoing payments. Native schema 31 adds one private journal store. Backend delivery/outcomes and canonical integration remain open; the preview and delivery holds stay unchanged. All installation configuration remains end-user owned. See [native payment queue](docs/payment-native-outbox.md).
+
 - In progress: M41 original-copy delivery now binds the actual phone SDK account, end-user destination and native operator, with fresh verified HTTP responses, native read locks during private commits, immutable preparation retries and separate same-account historical recovery. Complete originals and offline preparation survive interruption; no financial sync fence or delivery hold is lifted. See [SDK-bound originals](docs/payment-original-copy-binding.md).
 
 - In progress: M41 adds bounded authenticated transfer and complete readback/recovery of independent original archives, with immutable storage receipts, private native retry state and live Auth/session/role checks. Native archive writes stay atomic across bounded batches and late storage failure. Copies preserve complete text/images and grant no financial authority; native outbox and canonical integration remain fenced. Installation setup stays end-user owned, with all hosted/workflow/publication holds unchanged. See [private original copies](docs/payment-original-copies.md).

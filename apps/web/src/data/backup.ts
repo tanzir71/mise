@@ -42,6 +42,9 @@ export async function restoreDatabaseBackup(db:MiseDatabase,input:unknown,review
   await Promise.all(backupTableNames.map(name=>db.table(name).clear()));
   await Promise.all(backupTableNames.map(name=>db.table(name).bulkAdd(name==='inboxItems'?images:command.tables[name])));
   await replaceRetainedPaymentOriginals(db,source);
+  // Restore replaces only an unbound local shop. Its actual invocations remain
+  // in the complete domain backup; old delivery envelopes never become new sends.
+  await db.nativePaymentActions.clear();
   await db.events.add(command.event);await db.operatorState.clear();
   return (await readLocalWorkspace(db)).setup;
  });

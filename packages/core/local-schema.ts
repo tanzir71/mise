@@ -1,3 +1,4 @@
+import {localNativePaymentTableNames} from './native-payment-outbox';
 import {backupTableNames} from './backup-tables';
 import {localSyncTableNames} from './local-outbox';
 import {localDownloadTableNames} from './sync-download';
@@ -18,4 +19,4 @@ import {localStockReviewTableNames} from './stock-review-journal';
 import {localCustomerReviewTableNames} from './customer-review-journal';
 import {localClosingReviewTableNames} from './closing-review-journal';
 import {localPaymentArchiveTableNames} from './payment-archive';
-export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames,...localActionReviewTableNames,...localOrderReviewTableNames,...localMoneyReviewTableNames,...localPurchaseReviewTableNames,...localStockReviewTableNames,...localCustomerReviewTableNames,...localClosingReviewTableNames,...localPaymentArchiveTableNames] as const;
+export const localTableNames=[...backupTableNames,...localSyncTableNames,...localDownloadTableNames,...localOperatorTableNames,...localImageTableNames,...localCoverageTableNames,...localCanonicalTableNames,...localApplicationTableNames,...localAdmissionTableNames,...localSessionTableNames,...localJoinTableNames,...localRecoveryTableNames,...localActionReviewTableNames,...localOrderReviewTableNames,...localMoneyReviewTableNames,...localPurchaseReviewTableNames,...localStockReviewTableNames,...localCustomerReviewTableNames,...localClosingReviewTableNames,...localPaymentArchiveTableNames,...localNativePaymentTableNames] as const;

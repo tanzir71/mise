@@ -1,6 +1,10 @@
 import Dexie, { type Table } from 'dexie';
 import { parseLocalCloudState } from '@mise/core/local-outbox';
 import type { MiseDatabase } from './db';
+import {
+  assertNativePaymentScope,
+  type NativePaymentAccess,
+} from './native-payment-access';
 import { readDatabaseBackup } from './backup';
 import { backupToken, parseBackup } from '@mise/core/backup';
 import type { MiseBackup } from '@mise/core/backup-tables';
@@ -80,48 +84,72 @@ export async function readRetainedPaymentOriginals(
 export async function retainPaymentOriginal(
   db: MiseDatabase,
   source: MiseBackup,
+  access?: NativePaymentAccess,
 ): Promise<PaymentOriginalBasis> {
   source = parseBackup(JSON.stringify(source));
   return db.transaction('rw', db.tables, async () => {
-    const binding = await db.cloudState.get('binding');
-    if (binding && parseLocalCloudState(binding).phase !== 'cancelled')
-      throw Error(
-        'Native payment archive sync is not enabled yet. Keep the original source.',
-      );
-    const current = await readDatabaseBackup(db);
-    if (backupToken(current) !== backupToken(source))
-      throw Error(
-        'The original shop changed. Capture its latest complete payment records.',
-      );
-    const old = await readRetainedPaymentOriginals(db, current),
-      raw = new Map(old.nodes.map((n) => [n.digest, n.json]));
-    const plan = preparePaymentOriginalBasis(source, raw);
-    const previous = old.bases.find((b) => b.root === plan.basis.root);
-    if (previous) return previous;
-    if (
-      old.bases.length >= 512 ||
-      old.bases.reduce(
-        (n, b) => n + b.snapshotBytes,
-        plan.basis.snapshotBytes,
-      ) > paymentArchiveMaxExpandedBytes
-    )
-      throw Error(
-        'Keep the retained original archive; this complete archive exceeds the bounded backup budget.',
-      );
-    verifyPaymentOriginalDelta(plan, (key) => raw.get(key));
-    const writer = sharedJsonWriter(
-        new Map(old.values.map((n) => [n.digest, n.json])),
-      ),
-      indices: StoredPaymentOriginalNode[] = [];
-    for (const node of plan.added)
-      indices.push({ digest: node.digest, value: writer.write(node.json) });
-    await addArchiveRows(db.paymentOriginalValues, writer.added);
-    await addArchiveRows(db.paymentOriginalNodes, indices);
-    await db.paymentOriginalBases.add({
-      id: plan.basis.root,
-      basis: plan.basis,
-    });
-    return plan.basis;
+    const tx = Dexie.currentTransaction!;
+    try {
+      const binding = await db.cloudState.get('binding');
+      if (
+        binding &&
+        parseLocalCloudState(binding).phase !== 'cancelled' &&
+        !access
+      )
+        throw Error(
+          'Native payment archive sync is not enabled yet. Keep the original source.',
+        );
+      if (access) await assertNativePaymentScope(access, db);
+      const current = await readDatabaseBackup(db);
+      if (backupToken(current) !== backupToken(source))
+        throw Error(
+          'The original shop changed. Capture its latest complete payment records.',
+        );
+      const old = await readRetainedPaymentOriginals(db, current),
+        raw = new Map(old.nodes.map((n) => [n.digest, n.json]));
+      const plan = preparePaymentOriginalBasis(source, raw);
+      const previous = old.bases.find((b) => b.root === plan.basis.root);
+      if (previous) {
+        if (access) await assertNativePaymentScope(access, db);
+        return previous;
+      }
+      if (
+        old.bases.length >= 512 ||
+        old.bases.reduce(
+          (n, b) => n + b.snapshotBytes,
+          plan.basis.snapshotBytes,
+        ) > paymentArchiveMaxExpandedBytes
+      )
+        throw Error(
+          'Keep the retained original archive; this complete archive exceeds the bounded backup budget.',
+        );
+      verifyPaymentOriginalDelta(plan, (key) => raw.get(key));
+      const writer = sharedJsonWriter(
+          new Map(old.values.map((n) => [n.digest, n.json])),
+        ),
+        indices: StoredPaymentOriginalNode[] = [];
+      for (const node of plan.added)
+        indices.push({ digest: node.digest, value: writer.write(node.json) });
+      await addArchiveRows(db.paymentOriginalValues, writer.added);
+      await addArchiveRows(db.paymentOriginalNodes, indices);
+      await db.paymentOriginalBases.add({
+        id: plan.basis.root,
+        basis: plan.basis,
+      });
+      if (backupToken(await readDatabaseBackup(db)) !== backupToken(source))
+        throw Error(
+          'The original shop changed while retaining its payment source.',
+        );
+      if (access) await assertNativePaymentScope(access, db);
+      return plan.basis;
+    } catch (error) {
+      try {
+        tx.abort();
+      } catch {
+        /* Preserve the original failure. */
+      }
+      throw error;
+    }
   });
 }
 export async function readRetainedPaymentAction(

@@ -1,3 +1,6 @@
+import Dexie from 'dexie';
+import {assertNativePaymentAccess,assertNativePaymentScope,type NativePaymentAccess} from './native-payment-access';
+import {recordNativePaymentMutation} from './native-payment-outbox';
 import {PaymentEvidenceReader} from '@mise/core/payment-evidence';
 import {inspectOriginalPaymentTargets,type OriginalPaymentInspection} from './payment-inspection';
 import type {MiseDatabase} from './db';
@@ -23,7 +26,7 @@ export interface SavedPaymentMatches {readonly paymentId:string;readonly revisio
 export interface SavedPaymentAction {id:string;revision:number}
 export interface SavedPaymentMoneyComparison {readonly paymentId:string;readonly revision:number;readonly preview:PaymentMoneyPreview;readonly note:string}
 export interface SavedPaymentUndoComparison {readonly paymentId:string;readonly revision:number;readonly preview:ReturnType<typeof previewPaymentMoneyUndo>}
-type SourceProof={db:MiseDatabase;destination:InboxDestination;selection:string;binding:string;shop:string;source:string;context:PaymentTextContext;paymentId:string;captureId:string;kind:Payment['source']};
+type SourceProof={db:MiseDatabase;destination:InboxDestination;selection:string;binding:string;shop:string;source:string;context:PaymentTextContext;paymentId:string;captureId:string;kind:Payment['source'];nativeAccess?:NativePaymentAccess};
 const sources=new WeakMap<SavedPaymentSource,SourceProof>();
 const comparisons=new WeakMap<SavedPaymentMatches,{source:SavedPaymentSource;payment:string;token:string;options:PaymentMatchOptions}>();
 const moneyComparisons=new WeakMap<SavedPaymentMoneyComparison,{source:SavedPaymentSource;payment:string;token:string;target:PaymentMoneyTarget}>();
@@ -34,7 +37,8 @@ async function guard(db:MiseDatabase,review:SavedPaymentSource,write=false){
  const [setup,item,selection,binding]=await Promise.all([db.setup(),db.inboxItems.get(review.itemId),db.operatorState.get('active'),db.cloudState.get('binding')]);
  if(!setup||setup.business.id!==proof.destination.businessId||setup.outlet.id!==proof.destination.outletId||setup.owner.id!==proof.destination.actorId||token(selection??null)!==proof.selection||captureBindingToken(binding)!==proof.binding||token(setup)!==proof.shop)throw new Error('The selected outlet, member or connection changed. Open the payment source again.');
  if(!item||item.outletId!==setup.outlet.id||token(inboxSnapshot(item))!==proof.source)throw new Error('The original saved source was changed, sorted or archived. Open its current review.');
- if(write&&binding&&parseLocalCloudState(binding).phase!=='cancelled')throw new Error('Native payment sync is not enabled yet. Keep the original source and use the existing manual money flow.');
+ if(proof.nativeAccess){await assertNativePaymentScope(proof.nativeAccess,db);assertNativePaymentAccess(proof.nativeAccess,db,proof.destination);}
+ if(write&&binding&&parseLocalCloudState(binding).phase!=='cancelled'){if(!proof.nativeAccess)throw new Error('Native payment sync is not enabled yet. Keep the original source and use the existing manual money flow.');const identity=assertNativePaymentAccess(proof.nativeAccess,db,proof.destination),state=parseLocalCloudState(binding);if(state.phase!=='ready'||state.targetHash!==identity.targetHash)throw Error('Keep the original native payment account and admission.');}
  return {proof,setup,item};
 }
 export async function openSavedPaymentSource(db:MiseDatabase,itemId:string,destination:InboxDestination,options:{sender?:string;timeZone?:string;dateOrder?:'DMY'|'MDY';kind?:Payment['source']}={}):Promise<SavedPaymentSource>{
@@ -47,6 +51,11 @@ export async function openSavedPaymentSource(db:MiseDatabase,itemId:string,desti
   const review=Object.freeze({itemId,original:Object.freeze(original),parsed:Object.freeze(parsePaymentText(original.text||original.title,context))});
   sources.set(review,{db,destination,selection:token(selection??null),binding:captureBindingToken(binding),shop:token(setup),source:token(inboxSnapshot(item)),context,paymentId:ids[0],captureId:ids[1],kind:options.kind??'sms'});return review;
  });
+}
+/** Actual connected reviews require the SDK/native capability, never a boolean flag. */
+export async function openQueuedPaymentSource(db:MiseDatabase,itemId:string,access:NativePaymentAccess,options:Parameters<typeof openSavedPaymentSource>[3]={}):Promise<SavedPaymentSource>{
+ const identity=await assertNativePaymentScope(access,db),destination={businessId:identity.businessId,outletId:identity.outletId,actorId:identity.actorId},review=await openSavedPaymentSource(db,itemId,destination,options);
+ sources.get(review)!.nativeAccess=access;await assertNativePaymentScope(access,db);assertNativePaymentAccess(access,db,destination);return review;
 }
 async function receipt(db:MiseDatabase,proof:SourceProof,item:StoredInboxItem):Promise<SavedPaymentReceipt|null>{
  const payment=await db.payments.get(proof.paymentId),events=await db.events.where('paymentId').equals(proof.paymentId).toArray();
@@ -67,7 +76,7 @@ export async function recordSavedPayment(db:MiseDatabase,review:SavedPaymentSour
  return db.transaction('rw',db.tables,async()=>{
   const {proof,setup,item}=await guard(db,review),existing=await receipt(db,proof,item);
   if(existing){if(token(checkedFields(existing.original))!==token(input)||existing.original.source!==proof.kind)throw new Error('This source was already recorded with different checked details. Inspect its original receipt.');return existing;}
-  await guard(db,review,true);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,null,proof.captureId),type:'payment.capture',input,context:proof.context,kind:proof.kind});return (await receipt(db,proof,item))!;
+  await guard(db,review,true);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,null,proof.captureId),type:'payment.capture',input,context:proof.context,kind:proof.kind});return (await receipt(db,proof,item))!;
  });
 }
 async function records(db:MiseDatabase,setup:SetupSnapshot):Promise<{records:PaymentFinanceRecords;payments:Payment[]}>{
@@ -82,24 +91,24 @@ async function originalAction(db:MiseDatabase,saved:SavedPaymentReceipt,action:S
  if(event.paymentId!==saved.payment.id||event.command!==type||event.actor.id!==actorId||event.paymentRevision!==action.revision+1)throw new Error('This action identity belongs to a different original request.');return event;
 }
 export async function editSavedPayment(db:MiseDatabase,review:SavedPaymentSource,action:SavedPaymentAction,input:CheckedPaymentInput):Promise<SavedPaymentReceipt>{
- action=structuredClone(action);input=structuredClone(input);return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');const original=await originalAction(db,saved,action,'payment.edit',setup.owner.id);if(original){if(token(checkedFields(original.after as Payment))!==token(input))throw new Error('This original edit used different checked details.');return saved;}await guard(db,review,true);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,action.id),revision:action.revision,type:'payment.edit',input});return (await receipt(db,proof,item))!;});
+ action=structuredClone(action);input=structuredClone(input);return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');const original=await originalAction(db,saved,action,'payment.edit',setup.owner.id);if(original){if(token(checkedFields(original.after as Payment))!==token(input))throw new Error('This original edit used different checked details.');return saved;}await guard(db,review,true);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,action.id),revision:action.revision,type:'payment.edit',input});return (await receipt(db,proof,item))!;});
 }
 export async function associateSavedPayment(db:MiseDatabase,review:SavedPaymentSource,comparison:SavedPaymentMatches,selected:Pick<PaymentTextMatch,'kind'|'id'>,actionId=newInboxId()):Promise<SavedPaymentReceipt>{
  selected=structuredClone(selected);const original=comparisons.get(comparison);if(!original||original.source!==review||token(comparison)!==original.token)throw new Error('Compare the actual saved payment again before selecting a match.');
  const candidate=comparison.result.candidates.find(c=>c.id===selected.id&&c.kind===selected.kind);if(!candidate)throw new Error('Choose one of the actual current payment candidates.');
  return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');const previous=await originalAction(db,saved,{id:actionId,revision:comparison.revision},'payment.match',setup.owner.id);if(previous){const prior=(previous.after as Payment).association!,data=await records(db,setup),invocation=readNativePaymentInvocation(previous,data.records.events);if(invocation&&(invocation.command.type!=='payment.match'||token(invocation.command.options)!==token(nativePaymentMatchOptions(original.options))||invocation.command.mode!=='manual'))throw Error('This original match used different invocation controls.');if(token({...prior,fingerprint:token(new PaymentEvidenceReader(data.records.events,data.records.entries).expand(prior.fingerprint))})!==token({kind:candidate.kind,id:candidate.id,fingerprint:candidate.fingerprint,at:previous.at,eventId:previous.id}))throw new Error('This original match selected different checked data.');return saved;}
-  if(token(saved.payment)!==original.payment)throw new Error('This payment changed after comparison. Check it again.');await guard(db,review,true);const data=await records(db,setup);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,actionId),revision:comparison.revision,type:'payment.match',selected:{kind:candidate.kind,id:candidate.id,hash:paymentInvocationHash(JSON.parse(candidate.fingerprint))},options:nativePaymentMatchOptions(original.options),mode:'manual'},data);return (await receipt(db,proof,item))!;
+  if(token(saved.payment)!==original.payment)throw new Error('This payment changed after comparison. Check it again.');await guard(db,review,true);const data=await records(db,setup);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,actionId),revision:comparison.revision,type:'payment.match',selected:{kind:candidate.kind,id:candidate.id,hash:paymentInvocationHash(JSON.parse(candidate.fingerprint))},options:nativePaymentMatchOptions(original.options),mode:'manual'},data);return (await receipt(db,proof,item))!;
  });
 }
 /** Automatic association of one checked source; this never posts or undoes money. */
 export async function autoMatchSavedPayment(db:MiseDatabase,review:SavedPaymentSource,receivedTimeConfirmed=false):Promise<SavedPaymentReceipt>{
- return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');if(saved.payment.association)return saved;const data=await records(db,setup),options=nativePaymentMatchOptions({receivedTimeConfirmed}),matches=paymentCandidates(saved.payment,data.records,data.payments,options);if(matches.selection!=='automatic')return saved;await guard(db,review,true);const candidate=matches.candidates[0];await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,newInboxId()),type:'payment.match',selected:{kind:candidate.kind,id:candidate.id,hash:paymentInvocationHash(JSON.parse(candidate.fingerprint))},options,mode:'automatic'},data);return (await receipt(db,proof,item))!;});
+ return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');if(saved.payment.association)return saved;const data=await records(db,setup),options=nativePaymentMatchOptions({receivedTimeConfirmed}),matches=paymentCandidates(saved.payment,data.records,data.payments,options);if(matches.selection!=='automatic')return saved;await guard(db,review,true);const candidate=matches.candidates[0];await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,newInboxId()),type:'payment.match',selected:{kind:candidate.kind,id:candidate.id,hash:paymentInvocationHash(JSON.parse(candidate.fingerprint))},options,mode:'automatic'},data);return (await receipt(db,proof,item))!;});
 }
 export async function unmatchSavedPayment(db:MiseDatabase,review:SavedPaymentSource,action:SavedPaymentAction):Promise<SavedPaymentReceipt>{
- action=structuredClone(action);return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');if(await originalAction(db,saved,action,'payment.unmatch',setup.owner.id))return saved;await guard(db,review,true);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,action.id),revision:action.revision,type:'payment.unmatch'});return (await receipt(db,proof,item))!;});
+ action=structuredClone(action);return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');if(await originalAction(db,saved,action,'payment.unmatch',setup.owner.id))return saved;await guard(db,review,true);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,action.id),revision:action.revision,type:'payment.unmatch'});return (await receipt(db,proof,item))!;});
 }
 export async function setSavedPaymentVoided(db:MiseDatabase,review:SavedPaymentSource,action:SavedPaymentAction,voided:boolean):Promise<SavedPaymentReceipt>{
- action=structuredClone(action);return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');if(await originalAction(db,saved,action,voided?'payment.void':'payment.reopen',setup.owner.id))return saved;await guard(db,review,true);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,action.id),revision:action.revision,type:voided?'payment.void':'payment.reopen'});return (await receipt(db,proof,item))!;});
+ action=structuredClone(action);return db.transaction('rw',db.tables,async()=>{const {proof,setup,item}=await guard(db,review),saved=await receipt(db,proof,item);if(!saved)throw new Error('Payment not found.');if(await originalAction(db,saved,action,voided?'payment.void':'payment.reopen',setup.owner.id))return saved;await guard(db,review,true);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,action.id),revision:action.revision,type:voided?'payment.void':'payment.reopen'});return (await receipt(db,proof,item))!;});
 }
 
 /** Compare actual native money records without granting a serialized plan any
@@ -122,9 +131,13 @@ async function persistMoney(db:MiseDatabase,change:PaymentMoneyChange){
  for(const event of change.events)await db.events.add(event);
  await persist(db,change.payment);
 }
-async function commitNative(db:MiseDatabase,setup:SetupSnapshot,item:StoredInboxItem,command:NativePaymentCommand,current?:Awaited<ReturnType<typeof records>>){
+async function commitNative(db:MiseDatabase,review:SavedPaymentSource,setup:SetupSnapshot,item:StoredInboxItem,command:NativePaymentCommand,current?:Awaited<ReturnType<typeof records>>){
+ const tx=Dexie.currentTransaction;try{
  const data=current??await records(db,setup),change=executeNativePaymentCommand(command,data.records,data.payments,item);
- await persistMoney(db,change);await db.events.add(change.invocation);
+ const access=sources.get(review)?.nativeAccess,identity=access?assertNativePaymentAccess(access,db,{businessId:setup.business.id,outletId:setup.outlet.id,actorId:setup.owner.id}):null;
+ await recordNativePaymentMutation(db,change,async()=>{await persistMoney(db,change);await db.events.add(change.invocation);},identity,access?()=>{assertNativePaymentAccess(access,db);}:undefined);
+ await guard(db,review,true);
+ }catch(error){try{tx?.abort();}catch{}throw error;}
 }
 export async function recordSavedPaymentMoney(db:MiseDatabase,review:SavedPaymentSource,comparison:SavedPaymentMoneyComparison,confirmedNewMoney:boolean,actionId=newInboxId()):Promise<SavedPaymentReceipt>{
  const original=moneyComparisons.get(comparison);
@@ -140,7 +153,7 @@ export async function recordSavedPaymentMoney(db:MiseDatabase,review:SavedPaymen
   }
   if(token(saved.payment)!==original.payment)throw Error('This payment changed after comparison. Check it again.');
   await guard(db,review,true);if(item.archived)throw Error('Reopen the original source before recording new money.');
-  const data=await records(db,setup);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,actionId),revision:comparison.revision,type:'payment.record',target:original.target,targetHash:paymentInvocationHash(JSON.parse(comparison.preview.target.fingerprint)),note:comparison.note,confirmedNewMoney:true},data);
+  const data=await records(db,setup);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,actionId),revision:comparison.revision,type:'payment.record',target:original.target,targetHash:paymentInvocationHash(JSON.parse(comparison.preview.target.fingerprint)),note:comparison.note,confirmedNewMoney:true},data);
   return (await receipt(db,proof,item))!;
  });
 }
@@ -160,7 +173,7 @@ export async function undoSavedPaymentMoney(db:MiseDatabase,review:SavedPaymentS
   const previous=await originalAction(db,saved,{id:actionId,revision:comparison.revision},'payment.record-undo',setup.owner.id);
   if(previous){if(token(previous.before)!==original.payment)throw Error('This original undo used different checked data.');return saved;}
   if(token(saved.payment)!==original.payment)throw Error('This payment changed after comparison. Check it again.');
-  await guard(db,review,true);const data=await records(db,setup);await commitNative(db,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,actionId),revision:comparison.revision,type:'payment.record-undo',comparisonHash:paymentInvocationHash(JSON.parse(comparison.preview.fingerprint)),confirmedUndo:true},data);
+  await guard(db,review,true);const data=await records(db,setup);await commitNative(db,review,setup,item,{...nativePaymentCommandBase(setup,item,saved.payment,actionId),revision:comparison.revision,type:'payment.record-undo',comparisonHash:paymentInvocationHash(JSON.parse(comparison.preview.fingerprint)),confirmedUndo:true},data);
   return (await receipt(db,proof,item))!;
  });
 }

@@ -52,7 +52,7 @@ function source(db:MiseDatabase,origin:Origin,input:ApplyCanonicalInput):Promise
  return db.transaction('r',db.tables,async()=>{
   await assertOrigin(db,origin);const binding=parseLocalCloudState(await db.cloudState.get('binding')),operator=selected(await db.operatorState.get('active'),input,originScope(origin)),queue=(await db.outbox.where('uploadId').equals(binding.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
   if(queue.length!==binding.sequence||queue.some((r,i)=>r.sequence!==i+1)||await db.outbox.count()!==queue.length)throw fail('integrity');const parsed=queue.map(r=>parseLocalOutboxEntry(r,binding));
-  const portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);if(working.tables.payments.length||await db.paymentOriginalBases.count())throw fail('retained');return {binding,operator,queue,portable,working,queueToken:syncDownloadToken(portable)};
+  const portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);if(working.tables.payments.length||await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw fail('retained');return {binding,operator,queue,portable,working,queueToken:syncDownloadToken(portable)};
  });
 }
 /** Prove every local row is explained by the last materialization plus original
@@ -83,7 +83,7 @@ export async function readRecoveryWorkingSource(db:MiseDatabase,installed:Canoni
   if(operator.revision!==expectedRevision||operator.businessId!==scope.businessId||operator.outletId!==scope.outletId||operator.actorId!==scope.actorId||c?.accountHash!==scope.accountHash||c.targetHash!==binding.targetHash)throw fail();
   const queue=(await db.outbox.where('uploadId').equals(binding.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
   if(queue.length!==binding.sequence||queue.some((row,i)=>row.sequence!==i+1)||await db.outbox.count()!==queue.length)throw fail('integrity');
-  const parsed=queue.map(row=>parseLocalOutboxEntry(row,binding)),portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);if(working.tables.payments.length||await db.paymentOriginalBases.count())throw fail('retained');
+  const parsed=queue.map(row=>parseLocalOutboxEntry(row,binding)),portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);if(working.tables.payments.length||await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw fail('retained');
   return {binding,operator,queue,portable,working,queueToken:syncDownloadToken(portable)};
  });
 }
@@ -123,7 +123,7 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
  const writePlan=await prepareCanonicalWrites([...operations,...controls],s.binding);
  const pages=await db.syncPages.where('readId').equals(state.id).sortBy('index');await fresh(snapshot.scope,refresh,signal);
  return db.transaction('rw',db.tables,()=>withCanonicalWrites(db,writePlan,async()=>{
-  if(await db.paymentOriginalBases.count())throw fail('retained');
+  if(await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw fail('retained');
   active(signal,assertActive);await assertOrigin(db,origin);assertCanonicalTransaction(db,writePlan,'origin');const latest=await source(db,origin,input);assertCanonicalTransaction(db,writePlan,'source');if(syncDownloadToken(latest.binding)!==syncDownloadToken(s.binding)||latest.queueToken!==s.queueToken||backupToken(latest.working)!==backupToken(s.working))throw fail();
   if(syncDownloadToken(await Dexie.waitFor(assertSyncDownloadContext(db,verified.context)))!==syncDownloadToken(state)||syncDownloadToken(await db.syncRecords.where('readId').equals(state.id).sortBy('changeId'))!==syncDownloadToken([...verified.records].sort((a,b)=>a.changeId.localeCompare(b.changeId)))||syncDownloadToken(await db.syncPages.where('readId').equals(state.id).sortBy('index'))!==syncDownloadToken(pages))throw fail('integrity');
   assertCanonicalTransaction(db,writePlan,'download');

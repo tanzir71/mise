@@ -1,6 +1,8 @@
 import Dexie,{type Transaction} from 'dexie';
 import type {DBCore,DBCoreMutateRequest,DBCoreTable,DBCoreTransaction} from 'dexie';
 import {backupTableNames,type BackupTable} from '@mise/core/backup-tables';
+import {nativePaymentWriteTables} from '@mise/core/native-payment-outbox';
+import type {LocalRowChange} from '@mise/core/local-outbox';
 import {localSyncTableNames,parseLocalCloudState,type LocalCloudState,type LocalOutboxEntry} from '@mise/core/local-outbox';
 import {newInboxId} from '@mise/core/inbox';
 import {parseShopCommand,type ShopCommand} from '@mise/core/shop-commands';
@@ -11,6 +13,26 @@ import {ReconciliationError} from '@mise/core/sync-materialize';
 
 interface Capture {state:LocalCloudState;entry:LocalOutboxEntry;changes:Map<string,LocalOutboxEntry['changes'][number]>;persist:Promise<void>;inserted?:boolean}
 const intents=new WeakMap<Transaction,readonly ShopCommand[]>();
+interface NativeWritingCapture {
+ commandId:string; changes:Map<string,LocalRowChange>;
+ group?:{id:string;index:number}; marker?:Capture;
+}
+const nativeIntents=new WeakMap<Transaction,NativeWritingCapture>();
+function currentNativeIntent():NativeWritingCapture|undefined {for(let tx:Transaction|undefined=Dexie.currentTransaction;tx;tx=tx.parent){const value=nativeIntents.get(tx);if(value)return value;}return undefined;}
+/** Captures actual native writes in their existing transaction. The command is
+ * supplied by the checked native executor; row changes never infer an intent. */
+export async function withNativeOutboxCapture<T>(db:Dexie,commandId:string,write:()=>Promise<T>){
+ const tx=Dexie.currentTransaction;
+ if(!tx||tx.db!==db||tx.mode!=='readwrite'||hasCanonicalWrites(tx)||currentNativeIntent()||currentIntent())throw Error('Keep native payment writes in their own checked transaction.');
+ const captured:NativeWritingCapture={commandId,changes:new Map()};nativeIntents.set(tx,captured);
+ try{
+  const result=await write();
+  if(!captured.group||!captured.changes.size)throw Error('Keep every actual native payment row.');
+  return {result,group:captured.group,changes:[...captured.changes.values()],marker:captured.marker?{state:structuredClone(captured.marker.state),entry:structuredClone(captured.marker.entry)}:null};
+ }catch(error){try{tx.abort();}catch{/* A caught quota/companion failure must still roll all money back. */}throw error;}
+ finally{nativeIntents.delete(tx);}
+}
+
 /** Annotate the actual writes, never infer authority or a command from stored row changes. */
 export async function withOutboxIntent<T>(db:Dexie,input:ShopCommand,write:()=>Promise<T>):Promise<T>{
  return withOutboxIntents(db,[input],write);
@@ -18,6 +40,7 @@ export async function withOutboxIntent<T>(db:Dexie,input:ShopCommand,write:()=>P
 /** One atomic local group, with durable delivery progress for each original intent. */
 export async function withOutboxIntents<T>(db:Dexie,inputs:readonly ShopCommand[],write:()=>Promise<T>):Promise<T>{
  const tx=Dexie.currentTransaction;if(!tx||tx.db!==db||tx.mode!=='readwrite')throw new Error('Queue the command in its local write transaction.');
+ if(currentNativeIntent())throw new ReconciliationError('integrity');
  if(hasCanonicalWrites(tx))throw new ReconciliationError('integrity');
  const previous=intents.get(tx),commands=inputs.map(parseShopCommand);if(!commands.length||commands.length>1000||new Set(commands.map(command=>command.id)).size!==commands.length)throw new Error('Keep between one and 1,000 distinct original commands.');intents.set(tx,commands);
  try{return await write();}catch(error){try{tx.abort();}catch{/* A failed financial command stays atomic even if its caller catches it. */}throw error;}finally{if(previous)intents.set(tx,previous);else intents.delete(tx);}
@@ -29,7 +52,7 @@ export function installOutboxCapture(db:Dexie):void {
  db.use({stack:'dbcore',name:'mise-local-outbox',level:1,create(down:DBCore){
   const enabled=localSyncTableNames.every(name=>down.schema.tables.some(t=>t.name===name));
   if(!enabled)return down;
-  const states=down.table('cloudState'),outbox=down.table('outbox'),contexts=new WeakMap<DBCoreTransaction,Promise<Capture|null>>();
+  const states=down.table('cloudState'),outbox=down.table('outbox'),contexts=new WeakMap<DBCoreTransaction,Promise<Capture|null>>(),nativeGroups=new WeakMap<DBCoreTransaction,{id:string;next:number;bound:boolean}>();
   const keep=<T>(promise:Promise<T>)=>Dexie.Promise.resolve(promise);
   function context(trans:DBCoreTransaction):Promise<Capture|null>{
    let promise=contexts.get(trans);
@@ -52,30 +75,38 @@ export function installOutboxCapture(db:Dexie):void {
   },table(name){
    const table=down.table(name),captured=(backupTableNames as readonly string[]).includes(name);
    return {...table,mutate(request){
-    const intent=currentIntent();
+    const intent=currentIntent(),native=currentNativeIntent();
     const canonical=canonicalWritesFor(request.trans);
     if(canonical)return keep((async()=>{
-     if(intent||request.type==='deleteRange'||syncDownloadToken(await states.get({trans:request.trans,key:'binding'}))!==canonical.bindingToken)throw new ReconciliationError('integrity');
+     if(intent||native||request.type==='deleteRange'||syncDownloadToken(await states.get({trans:request.trans,key:'binding'}))!==canonical.bindingToken)throw new ReconciliationError('integrity');
      const source=await rows(table,request);if(new Set(source.keys).size!==source.keys.length)throw new ReconciliationError('integrity');
      for(let n=0;n<source.keys.length;n++){const expected=canonical.writes.get(name+'\0'+source.keys[n]),step=expected?.steps[expected.used];if(!expected||!step||await Dexie.waitFor(nativeRowHash(source.before[n]??null))!==step.before)throw new ReconciliationError('integrity');}
      const response=await table.mutate(request);if(response.numFailures)throw new ReconciliationError('integrity');const after=await table.getMany({trans:request.trans,keys:source.keys});
      for(let n=0;n<source.keys.length;n++){const expected=canonical.writes.get(name+'\0'+source.keys[n])!,step=expected.steps[expected.used];if(!step||await Dexie.waitFor(nativeRowHash(after[n]??null))!==step.after)throw new ReconciliationError('integrity');expected.used++;}
      return response;
     })()).catch(error=>{try{request.trans.abort();}catch{/* Keep every reconciliation write atomic. */}throw error;});
+    if(native&&!(nativePaymentWriteTables as readonly string[]).includes(name))return keep(Promise.reject(new Error('Keep native payment effects inside their exact domain tables.'))).catch(error=>{try{request.trans.abort();}catch{}throw error;});
     if(!captured)return table.mutate(request);
     // DBCore callbacks must retain Dexie's transaction zone across every continuation.
     return keep(context(request.trans)).then(capture=>{
-     if(!capture)return table.mutate(request);
+     if(!capture&&!native)return table.mutate(request);
+     if(native&&capture?.entry.commands.length||!native&&nativeGroups.get(request.trans)?.bound)throw Error('Do not mix native payment and legacy command intents in one transaction.');
      return keep(rows(table,request)).then(source=>keep(table.mutate(request)).then(response=>keep(table.getMany({trans:request.trans,keys:source.keys})).then(after=>{
      let changed=false;
      for(let index=0;index<source.keys.length;index++){
       if(request.type!=='deleteRange'&&response.failures[index])continue;
       const key=source.keys[index];if(source.before[index]===undefined&&after[index]===undefined)continue;
       changed=true;
-      const identity=name+'\0'+key,previous=capture.changes.get(identity);
-      capture.changes.set(identity,{table:name as BackupTable,key,before:previous?previous.before:structuredClone(source.before[index]??null),after:structuredClone(after[index]??null)});
+      const identity=name+'\0'+key;
+      if(native){
+       let group=nativeGroups.get(request.trans);if(!group){group={id:native.commandId,next:0,bound:!!capture};nativeGroups.set(request.trans,group);}
+       if(!native.group){if(group.next>=1000)throw Error('Keep a bounded native command group.');native.group={id:group.id,index:group.next++};}
+       const previous=native.changes.get(identity);native.changes.set(identity,{table:name as BackupTable,key,before:previous?previous.before:structuredClone(source.before[index]??null),after:structuredClone(after[index]??null)});
+       if(capture)native.marker=capture;
+      }
+      if(capture){const previous=capture.changes.get(identity);capture.changes.set(identity,{table:name as BackupTable,key,before:previous?previous.before:structuredClone(source.before[index]??null),after:structuredClone(after[index]??null)});}
      }
-     if(changed){
+     if(changed&&capture){
       if(!intent)capture.entry.status='retained';
       else for(const command of intent){const saved=capture.entry.commands.find(c=>c.id===command.id);if(saved&&JSON.stringify(saved)!==JSON.stringify(command))throw new Error('A queued action identity changed.');if('outletId'in command&&command.outletId!==capture.state.outletId)throw new Error('This queued action belongs to another outlet.');if(!saved)capture.entry.commands.push(command);}
       capture.entry.changes=[...capture.changes.values()];

@@ -1,0 +1,345 @@
+{
+  "milestone": "M41",
+  "increment": "Atomic native payment queue and independent batch source seals",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "296cfa5ef400b2bc0581bbb91dd6b8d4165f7820",
+  "sourceFingerprint": "ae68ad120d2b71eebf345ee4c2ba6c05df146b73c05a391f4de23a9a153a35ac",
+  "scope": {
+    "nativeSchema": 31,
+    "ordinarySchema": 13,
+    "originalGraphVersion": 1,
+    "copyWireVersion": 1,
+    "portableArchiveVersion": 2,
+    "privateNativeJournalVersion": 1,
+    "newPrivateNativeStores": 1,
+    "newHostedTablesMigrationsProvidersOrEnvironmentVariables": 0,
+    "allConfigurationEndUserOwned": true,
+    "paymentPreviewDefaultOff": true,
+    "actualFinancialHttpDeliveryImplemented": false,
+    "legacyGlobalMarkersStillRetained": true,
+    "historicalRestoreCreatesOutgoingConsent": false,
+    "canonicalAndUploadFencesRetained": true
+  },
+  "checks": {
+    "focused": {
+      "passed": 71,
+      "failed": 0,
+      "files": 3,
+      "report": ".private/m41-native-queue-focused.json"
+    },
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-native-queue-final-lint-2.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 229,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-native-queue-final-types-2.log"
+    },
+    "fullUnit": {
+      "passed": 5665,
+      "failed": 1,
+      "pending": 0,
+      "files": 296,
+      "nestedSuites": 321,
+      "durationSeconds": 2165.814,
+      "maxWorkers": 2,
+      "report": ".private/m41-native-queue-full-unit.json",
+      "log": ".private/m41-native-queue-full-unit.log"
+    },
+    "correctedWholeFileRecheck": {
+      "passed": 18,
+      "failed": 0,
+      "file": "tests/scope-recovery-db.test.ts",
+      "report": ".private/m41-native-queue-unit-recheck.json",
+      "log": ".private/m41-native-queue-unit-recheck.log"
+    },
+    "distinctCurrentUnitCasesVerified": 5666,
+    "singleFullCurrentUnitInvocationPassed": false,
+    "unitQualification": "The complete run passed every case except one schema-20 test fixture that included the newly added native store in an older database. A whole-file recheck of all18 cases after correcting only that fixture passes. Financial/data/history assertions and all existing corpora/deadlines remain intact.",
+    "newUnitCases": 28,
+    "browser": {
+      "root": {
+        "passed": 55,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 238523.76,
+        "report": ".private/m41-native-queue-root-browser.json",
+        "log": ".private/m41-native-queue-root-browser.log",
+        "workers": 1,
+        "retries": 0
+      },
+      "pages": {
+        "passed": 55,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 257310.47699999998,
+        "report": ".private/m41-native-queue-pages-browser.json",
+        "log": ".private/m41-native-queue-pages-browser.log",
+        "workers": 1,
+        "retries": 0
+      }
+    },
+    "builds": {
+      "passed": true,
+      "bases": [
+        "/",
+        "/mise/"
+      ],
+      "logs": [
+        ".private/m41-native-queue-root-build.log",
+        ".private/m41-native-queue-pages-build.log"
+      ]
+    },
+    "gateRecords": [
+      {
+        "gate": "lint",
+        "started": "2026-11-25T20:38:10.7873432Z",
+        "ended": "2026-11-25T20:39:02.7827771Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-lint.log"
+      },
+      {
+        "gate": "types",
+        "started": "2026-11-25T20:39:02.8349060Z",
+        "ended": "2026-11-25T20:39:51.6288387Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-types.log"
+      },
+      {
+        "gate": "full-unit",
+        "started": "2026-11-25T20:39:51.6316699Z",
+        "ended": "2026-11-25T21:15:58.7324663Z",
+        "exitCode": 1,
+        "log": ".private/m41-native-queue-full-unit.log"
+      },
+      {
+        "gate": "unit-recheck",
+        "started": "2026-11-25T21:16:55.1192474Z",
+        "ended": "2026-11-25T21:17:09.8570249Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-unit-recheck.log"
+      },
+      {
+        "gate": "final-lint",
+        "started": "2026-11-25T21:17:09.8915922Z",
+        "ended": "2026-11-25T21:18:04.8995759Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-final-lint.log"
+      },
+      {
+        "gate": "final-types",
+        "started": "2026-11-25T21:18:04.9041018Z",
+        "ended": "2026-11-25T21:18:59.4216202Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-final-types.log"
+      },
+      {
+        "gate": "root-build",
+        "started": "2026-11-25T21:18:59.4256353Z",
+        "ended": "2026-11-25T21:20:10.0715361Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-root-build.log"
+      },
+      {
+        "gate": "root-browser",
+        "started": "2026-11-25T21:20:10.0745680Z",
+        "ended": "2026-11-25T21:24:50.3549532Z",
+        "exitCode": 1,
+        "log": ".private/m41-native-queue-root-browser.log"
+      },
+      {
+        "gate": "final-lint-2",
+        "started": "2026-11-25T21:25:00.0640794Z",
+        "ended": "2026-11-25T21:25:50.9050234Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-final-lint-2.log"
+      },
+      {
+        "gate": "final-types-2",
+        "started": "2026-11-25T21:25:50.9397826Z",
+        "ended": "2026-11-25T21:26:44.7269627Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-final-types-2.log"
+      },
+      {
+        "gate": "root-browser",
+        "started": "2026-11-25T21:26:44.7309573Z",
+        "ended": "2026-11-25T21:30:44.2247147Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-root-browser.log"
+      },
+      {
+        "gate": "pages-build",
+        "started": "2026-11-25T21:30:44.2307079Z",
+        "ended": "2026-11-25T21:31:39.6866383Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-pages-build.log"
+      },
+      {
+        "gate": "pages-browser",
+        "started": "2026-11-25T21:31:39.6883451Z",
+        "ended": "2026-11-25T21:35:58.0986932Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-queue-pages-browser.log"
+      }
+    ],
+    "initialRootBrowser": {
+      "report": ".private/m41-native-queue-root-browser-initial.json",
+      "log": ".private/m41-native-queue-root-browser-initial.log",
+      "passed": 53,
+      "failed": 2,
+      "qualification": "Both additive browser cases stopped at an ambiguous test-only bundler import before executing. The existing53 cases pass; the complete55-case root path is then rechecked with the explicit .ts import."
+    },
+    "lateBrowserFixtureCorrection": {
+      "file": "tests/fixtures/native-payment-queue-browser.ts",
+      "change": "Explicit .ts module extension avoids the same-named Node-only .mjs helper.",
+      "productionSourceChanged": false,
+      "existingBrowserCorporaAssertionsAndDeadlinesChanged": false
+    },
+    "originalTestAudit": {
+      "rows": [
+        {
+          "file": "tests/payment-capture.test.ts",
+          "baselineCalls": 24,
+          "currentCalls": 24,
+          "removed": [],
+          "changed": [
+            "upgrades actual schema-28 IndexedDB data without inventing a Payment or dropping money and accepts a strict schema-10 backup"
+          ]
+        },
+        {
+          "file": "tests/payment-archive.test.ts",
+          "baselineCalls": 16,
+          "currentCalls": 16,
+          "removed": [],
+          "changed": [
+            "upgrades an actual schema-29 owner store without changing native financial records or operator selection"
+          ]
+        },
+        {
+          "file": "tests/scope-recovery-db.test.ts",
+          "baselineCalls": 13,
+          "currentCalls": 13,
+          "removed": [],
+          "changed": [
+            "upgrades schema 20 with all 34 original stores, complete images, queue and canonical evidence unchanged"
+          ]
+        }
+      ],
+      "qualification": "Only actual old-schema fixtures/current-version expectations change; financial corpora, deadlines and domain assertions remain intact."
+    },
+    "formattingOnlyDelta": {
+      "file": "apps/web/src/data/outbox-capture.ts",
+      "sameTypeScriptTokens": true,
+      "onlyChangedLine": 107,
+      "beforeSha256": "452c36bd6c111b0742a8d502a522eb0d5f05238e0783d6d3c2d11c865526373f",
+      "afterSha256": "b7288c8d651403445a1bf2a8b819cd44d24259ed376543158092db30d675b7cb",
+      "allOtherProductionSourceBytesUnchanged": true,
+      "reconstructedStartedSourceFingerprint": "a6d46307e9e7fd6d14fe557580fdcbca6dd5e068e1cfd81a6f47473a43b8f6f3"
+    },
+    "lateTestFixtureCorrection": {
+      "file": "tests/scope-recovery-db.test.ts",
+      "schema": 20,
+      "originalTableCountKept": 34,
+      "newStoreExcludedFromOldFixture": "nativePaymentActions",
+      "additionalEmptyNewJournalAssertion": true,
+      "financialCorporaAndDeadlinesUnchanged": true
+    },
+    "ui": {
+      "markupStylesOrReferenceExportsChanged": false,
+      "visualArtifactUpload": "held",
+      "scope": "Selected payment/copy/backup browser flows; no claim of full application browser coverage."
+    },
+    "scale": {
+      "charges": 5000,
+      "maximumImportedNoteCodeUnits": 1000000,
+      "originalImages": 1,
+      "actualCollections": 1,
+      "newNativeQueueActions": 2,
+      "independentBatchBases": 1,
+      "case": "seals and cold-opens the actual SDK-bound 5,000-charge, million-code-unit source and genuine collection without truncating or replaying money",
+      "deadlineMs": 300000,
+      "focusedDurationMs": 39458.9454
+    },
+    "secretScan": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "files": 2413,
+      "objects": 13192,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "firstEvidenceLog": ".private/m41-native-queue-secrets-first.log",
+      "finalAfterDocumentationLog": ".private/m41-native-queue-secrets-final.log",
+      "fixedHistoricalNonsecretExceptionsChanged": false,
+      "credentialsEverExempt": false
+    },
+    "testOnlyFixtureMarkerAbsentFromBuiltSite": true,
+    "ownedPreviewPortClosed": 4332
+  },
+  "holds": {
+    "workflowRuns": "held",
+    "ciArtifactUploads": "held",
+    "pagesPublication": "held",
+    "hostedMigrationsFunctionsServices": "held",
+    "providerCommissioning": "held",
+    "tags": "held",
+    "lastReadOnlyObservation": {
+      "observedAt": "2026-11-25T21:32:28.1414274Z",
+      "workflows": [
+        {
+          "id": 419007052,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419075081,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419005433,
+          "state": "disabled_manually"
+        }
+      ],
+      "runs": {
+        "count": 77,
+        "latest": {
+          "head_sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+          "id": 43927944995,
+          "status": "completed"
+        }
+      },
+      "pages": {
+        "environment": "github-pages",
+        "id": 7832852111,
+        "sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+      },
+      "method": "Read-only GitHub CLI; connector lacks workflow and Pages inventories"
+    }
+  },
+  "limitations": [
+    "No native financial HTTP sender or acknowledgement/409/global marker advancement is implemented in this increment.",
+    "Sensitive native financial delivery must first add live auth.sessions correlation at backend write boundaries.",
+    "Controlled SDK Auth/native IndexedDB verification does not claim hosted JWT-signature, managed Auth or provider acceptance.",
+    "Full M41 outcome, canonical, historical-registration and product acceptance remain open."
+  ],
+  "verifiedAt": "2026-11-25T21:39:50.751999+00:00",
+  "fullRunStartedSourceFingerprint": "a6d46307e9e7fd6d14fe557580fdcbca6dd5e068e1cfd81a6f47473a43b8f6f3",
+  "sourceQualification": "The only production delta after verification began removes trailing whitespace on outbox-capture.ts line107, with the complete TypeScript scanner token sequence identical. One already-run schema-20 test fixture then excludes the new schema-31 store while retaining the original34-table and all financial/history assertions; its whole18-case file is rechecked. The new browser-only fixture also makes its .ts module import explicit after Vite first selected a same-named Node .mjs helper. Both browser paths are rechecked with that corrected fixture. All other frozen source bytes, existing cases/corpora and deadlines are unchanged.",
+  "initialFailuresAndCorrections": [
+    "Initial regressions exposed the missing local table allowlist entry and optional-undefined native row normalization; both were corrected and original financial cases rechecked.",
+    "Old schema upgrade fixtures now exclude the new store and assert the shared current schema, preserving original domain/money/history assertions.",
+    "New test fixture errors in initial NUL expectation, credit-sale input, counter label and invocation audit name were corrected before the verified focused/full runs."
+  ]
+}

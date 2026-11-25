@@ -1,4 +1,5 @@
 import 'fake-indexeddb/auto';
+import { localSchemaVersion } from '../packages/core/local-outbox';
 import { inboxImageFile } from './inbox-fixture';
 import { prepareCloudUpload } from '../packages/core/cloud-upload';
 import { beginLocalUpload } from '../apps/web/src/data/local-outbox';
@@ -335,7 +336,11 @@ it('upgrades an actual schema-29 owner store without changing native financial r
     operator = await f.db.operatorState.toArray(),
     name = 'archive-upgrade-' + newInboxId(),
     old = new Dexie(name),
-    tables = f.db.tables.filter((t) => !t.name.startsWith('paymentOriginal'));
+    tables = f.db.tables.filter(
+      (t) =>
+        !t.name.startsWith('paymentOriginal') &&
+        t.name !== 'nativePaymentActions',
+    );
   old
     .version(29)
     .stores(
@@ -354,7 +359,8 @@ it('upgrades an actual schema-29 owner store without changing native financial r
   const next = new MiseDatabase(name);
   dbs.push(next);
   await next.open();
-  expect(next.verno).toBe(30);
+  expect(next.verno).toBe(localSchemaVersion);
+  expect(await next.nativePaymentActions.count()).toBe(0);
   expect(await counts(next)).toEqual([0, 0, 0]);
   expect(backupToken(await next.readBackup())).toBe(backupToken(source));
   expect(await next.operatorState.toArray()).toEqual(operator);
