@@ -1,9 +1,20 @@
+import 'fake-indexeddb/auto';
+import { createPhoneAuth } from '../apps/web/src/data/phone-auth';
+import {
+  createNativeOriginalCopySession,
+  createOriginalCopyOwnerSession,
+} from '../apps/web/src/data/original-copy-session';
+import { createCopySdk } from './fixtures/original-copy-sdk';
+import {
+  saveCloudConnection,
+  cloudConnectionTarget,
+} from '../packages/core/cloud-connection';
+import { operatorAccountHash } from '../packages/core/operators';
 import {
   parsePortableBackup,
   type PortableBackup,
 } from '../packages/core/payment-archive';
 import { readPaymentOriginalBasis } from '../packages/core/payment-originals';
-import 'fake-indexeddb/auto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import {
@@ -61,6 +72,8 @@ function stage(op: string) {
   if (trace) console.log(JSON.stringify({ stage: op }));
 }
 const current = () => {};
+const sdkClients: Awaited<ReturnType<typeof createCopySdk>>[] = [];
+const boundSessions: { stop(): void }[] = [];
 beforeAll(async () => {
   sql = await PGlite.create();
   for (const f of ['supabase-auth.sql', 'supabase-storage.sql'])
@@ -98,6 +111,8 @@ beforeEach(async () => {
     );
 });
 afterEach(async () => {
+  for (const session of boundSessions.splice(0)) session.stop();
+  for (const sdk of sdkClients.splice(0)) await sdk.auth.dispose();
   for (const db of locals.splice(0)) await db.delete();
 });
 afterAll(async () => {
@@ -137,8 +152,18 @@ async function rpc(
     )
   )[0].v;
 }
-function wire(n = 1, before?: (op: string) => Promise<void>) {
+function wire(
+  n = 1,
+  before?: (op: string) => Promise<void>,
+  expectedJwt?: string,
+) {
   const rpcFetch: typeof fetch = async (_url, init) => {
+    if (
+      expectedJwt &&
+      new Headers(init?.headers).get('Authorization') !==
+        'Bearer ' + expectedJwt
+    )
+      return new Response('{}', { status: 401 });
     const a = JSON.parse(init!.body as string);
     try {
       await before?.(a.p_op);
@@ -1094,3 +1119,516 @@ it('resumes a lost verification-step reply without publishing a partial archive 
     ).rows[0],
   ).toEqual({ n: f.manifest.nodeCount });
 });
+
+const boundConfig = {
+  apiUrl: 'https://edge.test',
+  publishableKey: 'sb_publishable_test',
+};
+async function boundFixture(prepare = true, note = false) {
+  const f = await fixture(false, note),
+    authScope = '/mise/app/' + f.scope.businessId;
+  let network: typeof fetch = async () => {
+    throw Error('Unconfigured fixture.');
+  };
+  const sdk = await createCopySdk(boundConfig, authScope, (url, init) =>
+    network(url, init),
+  );
+  sdkClients.push(sdk);
+  network = wire(1, undefined, sdk.access).edgeFetch;
+  const journal = new OriginalCopyJournal('bound-copies-' + newInboxId());
+  locals.push(journal);
+  const options = {
+      config: boundConfig,
+      authScope,
+      auth: sdk.auth,
+      storage: sdk.storage,
+      journal,
+      send: sdk.send,
+    },
+    session = await createNativeOriginalCopySession(f.db, options),
+    id = newInboxId();
+  boundSessions.push(session);
+  const manifest = prepare ? await session.prepare(id) : null;
+  return { ...f, sdk, journal, session, options, id, manifest };
+}
+function locked(f: Awaited<ReturnType<typeof boundFixture>>) {
+  return {
+    id: 'active' as const,
+    version: 1 as const,
+    revision: 1,
+    phase: 'locked' as const,
+    ...f.scope,
+    role: 'owner' as const,
+    connection: null,
+  };
+}
+it('the actual SDK copy controller derives its own identity and transfers, downloads and verifies strict originals without money', async () => {
+  const f = await boundFixture(),
+    before = (await sql.query('select count(*)::int n from public.events'))
+      .rows;
+  expect(f.session.identity).toEqual({
+    ...f.scope,
+    accountHash: await operatorAccountHash(user(1)),
+    targetHash: await cloudConnectionTarget(
+      boundConfig,
+      f.options.authScope,
+      user(1),
+    ),
+  });
+  expect(Object.isFrozen(f.session.identity)).toBe(true);
+  const receipt = await f.session.deliver(f.id),
+    downloaded = await f.session.readback(f.id);
+  expect(downloaded.bases[0]).toEqual(f.basis);
+  expect(downloaded.current.tables.payments).toEqual(f.source.tables.payments);
+  expect(receipt.verification).toBe('content-addressed-copy');
+  expect((await f.journal.copies.get(f.id))!.verified).toBe(true);
+  const requests = f.sdk.calls.filter((c) => c.path.includes('/functions/'));
+  expect(requests.length).toBeGreaterThan(5);
+  expect(
+    requests.every((c) => c.authorization === 'Bearer ' + f.sdk.access),
+  ).toBe(true);
+  expect(f.sdk.calls.some((c) => /otp|verify|settings/.test(c.path))).toBe(
+    false,
+  );
+  const saved = JSON.stringify([
+    await f.journal.copies.toArray(),
+    await f.journal.values.toArray(),
+  ]);
+  for (const privateValue of [
+    boundConfig.apiUrl,
+    boundConfig.publishableKey,
+    f.sdk.access,
+    f.sdk.saved.refresh_token,
+    user(1),
+  ])
+    expect(saved).not.toContain(privateValue);
+  expect(
+    (await sql.query('select count(*)::int n from public.events')).rows,
+  ).toEqual(before);
+  await assertSourceUnchanged(f);
+});
+it.each(['project', 'publishable-key', 'auth-scope'] as const)(
+  'rejects an SDK/configuration %s mismatch before private persistence or copy HTTP',
+  async (wrong) => {
+    const f = await boundFixture(false),
+      config = { ...boundConfig };
+    if (wrong === 'project') config.apiUrl = 'https://another.test';
+    if (wrong === 'publishable-key')
+      config.publishableKey = 'sb_publishable_another_test';
+    saveCloudConnection(f.sdk.storage, config);
+    await expect(
+      createNativeOriginalCopySession(f.db, {
+        ...f.options,
+        config,
+        authScope:
+          wrong === 'auth-scope'
+            ? f.options.authScope + '/another'
+            : f.options.authScope,
+      }),
+    ).rejects.toThrow();
+    expect(await f.journal.copies.count()).toBe(0);
+    expect(
+      f.sdk.calls.filter((c) => c.path.includes('/functions/')),
+    ).toHaveLength(0);
+  },
+);
+it.each(['accountHash', 'targetHash', 'authKey'] as const)(
+  'rejects a native operator whose %s belongs to a different SDK account or destination',
+  async (field) => {
+    const f = await boundFixture(false),
+      connection = {
+        authKey: f.sdk.key,
+        accountHash: f.session.identity.accountHash,
+        targetHash: f.session.identity.targetHash,
+        epoch: user(31),
+        scopeVersion: user(32),
+      };
+    connection[field] =
+      field === 'authKey'
+        ? 'mise.cloud.auth.' + 'c'.repeat(64)
+        : 'c'.repeat(64);
+    await f.db.operatorState.put({ ...locked(f), phase: 'active', connection });
+    await expect(
+      createNativeOriginalCopySession(f.db, f.options),
+    ).rejects.toThrow();
+    expect(await f.journal.copies.count()).toBe(0);
+    expect(
+      f.sdk.calls.filter((c) => c.path.includes('/functions/')),
+    ).toHaveLength(0);
+  },
+);
+it('never pairs an altered cached account label with another actual SDK JWT', async () => {
+  const f = await boundFixture(false);
+  f.sdk.storage.setItem(
+    f.sdk.key,
+    JSON.stringify({
+      ...f.sdk.saved,
+      user: { ...f.sdk.saved.user, id: user(2) },
+    }),
+  );
+  await expect(
+    createNativeOriginalCopySession(f.db, f.options),
+  ).rejects.toThrow();
+  expect(await f.journal.copies.count()).toBe(0);
+  expect(
+    f.sdk.calls.filter((c) => c.path.includes('/functions/')),
+  ).toHaveLength(0);
+});
+it('fresh SDK verification rejects an unconfirmed server phone before the first copy request and preserves the complete local plan', async () => {
+  const f = await boundFixture();
+  f.sdk.setConfirmed(false);
+  await expect(f.session.deliver(f.id)).rejects.toThrow();
+  expect(
+    f.sdk.calls.filter((c) => c.path.includes('/functions/')),
+  ).toHaveLength(0);
+  const row = await f.journal.copies.get(f.id);
+  expect(row!.receipt).toBeNull();
+  expect(row!.verified).toBe(false);
+  await assertSourceUnchanged(f);
+});
+it.each([
+  'begin',
+  'missing',
+  'put',
+  'part',
+  'seal',
+  'verify',
+  'finish',
+  'inspect',
+  'read',
+  'read-part',
+])(
+  'rechecks the actual native operator after the %s HTTP boundary before confirming private data',
+  async (op) => {
+    const f = await boundFixture(
+        true,
+        ['part', 'seal', 'read-part'].includes(op),
+      ),
+      reading = ['inspect', 'read', 'read-part'].includes(op);
+    if (reading) await f.session.deliver(f.id);
+    let changed = false;
+    f.sdk.afterCopy(async (actual) => {
+      if (actual === op && !changed) {
+        changed = true;
+        await f.db.operatorState.put(locked(f));
+      }
+    });
+    await expect(
+      reading ? f.session.readback(f.id) : f.session.deliver(f.id),
+    ).rejects.toThrow();
+    expect(changed).toBe(true);
+    const row = await f.journal.copies.get(f.id);
+    expect(row!.verified).toBe(false);
+    if (!reading) expect(row!.receipt).toBeNull();
+    expect(row!.identity).toEqual(f.session.identity);
+    expect(row!.manifest).toEqual(f.manifest);
+    await assertSourceUnchanged(f);
+  },
+);
+it('a completed remote copy survives a late account removal while its local receipt stays unconfirmed and only a new original-account session recovers it', async () => {
+  const f = await boundFixture();
+  f.sdk.afterCopy(async (op) => {
+    if (op === 'finish') f.sdk.storage.removeItem(f.sdk.key);
+  });
+  await expect(f.session.deliver(f.id)).rejects.toThrow();
+  expect((await f.journal.copies.get(f.id))!.receipt).toBeNull();
+  expect(
+    (
+      await sql.query(
+        'select receipt is not null complete from private.native_original_copies where id=$1',
+        [f.id],
+      )
+    ).rows,
+  ).toEqual([{ complete: true }]);
+  f.sdk.afterCopy();
+  f.sdk.storage.setItem(f.sdk.key, JSON.stringify(f.sdk.saved));
+  await expect(f.session.deliver(f.id)).rejects.toThrow();
+  const fresh = new OriginalCopyJournal('fresh-owned-' + newInboxId());
+  locals.push(fresh);
+  const owner = await createOriginalCopyOwnerSession(
+    { ...f.options, journal: fresh },
+    f.scope,
+  );
+  boundSessions.push(owner);
+  const recovered = await owner.recover(f.id);
+  expect(recovered.bases[0]).toEqual(f.basis);
+  expect((await fresh.copies.get(f.id))!.verified).toBe(true);
+  expect((await f.journal.copies.get(f.id))!.receipt).toBeNull();
+  await assertSourceUnchanged(f);
+});
+it('a destination changed after remote completion cannot confirm locally or revive the old controller when restored', async () => {
+  const f = await boundFixture();
+  f.sdk.afterCopy(async (op) => {
+    if (op === 'finish')
+      saveCloudConnection(f.sdk.storage, {
+        ...boundConfig,
+        apiUrl: 'https://another.test',
+      });
+  });
+  await expect(f.session.deliver(f.id)).rejects.toThrow();
+  expect((await f.journal.copies.get(f.id))!.receipt).toBeNull();
+  saveCloudConnection(f.sdk.storage, boundConfig);
+  f.sdk.afterCopy();
+  await expect(f.session.deliver(f.id)).rejects.toThrow();
+  const next = await createNativeOriginalCopySession(f.db, f.options);
+  boundSessions.push(next);
+  const receipt = await next.deliver(f.id);
+  expect(receipt.verification).toBe('content-addressed-copy');
+  expect(
+    (
+      await sql.query(
+        'select count(*)::int n from private.native_original_copies',
+      )
+    ).rows,
+  ).toEqual([{ n: 1 }]);
+  await assertSourceUnchanged(f);
+});
+it('historical owner recovery uses the same actual SDK account after both native and server membership removal without installing shop rows', async () => {
+  const f = await boundFixture();
+  await f.session.deliver(f.id);
+  await f.db.operatorState.put(locked(f));
+  await sql.query('update public.members set active=false where id=$1', [
+    f.scope.actorId,
+  ]);
+  const journal = new OriginalCopyJournal('former-member-' + newInboxId());
+  locals.push(journal);
+  const owner = await createOriginalCopyOwnerSession(
+    { ...f.options, journal },
+    f.scope,
+  );
+  boundSessions.push(owner);
+  expect('deliver' in owner).toBe(false);
+  expect('prepare' in owner).toBe(false);
+  const recovered = await owner.recover(f.id);
+  expect(recovered.current.tables.payments).toEqual(f.source.tables.payments);
+  expect((await journal.copies.get(f.id))!.verified).toBe(true);
+  await assertSourceUnchanged(f);
+});
+it('an interrupted copy controller stops an active HTTP result and leaves its native source and original manifest intact', async () => {
+  const f = await boundFixture();
+  f.sdk.afterCopy(async (op) => {
+    if (op === 'begin') f.session.stop();
+  });
+  await expect(f.session.deliver(f.id)).rejects.toThrow();
+  expect((await f.journal.copies.get(f.id))!.receipt).toBeNull();
+  await assertSourceUnchanged(f);
+});
+it('a misbound account/JWT transport is denied before it can store another user copy', async () => {
+  const f = await boundFixture(),
+    second = await createCopySdk(
+      boundConfig,
+      '/unrelated',
+      wire(2).edgeFetch,
+      2,
+    );
+  sdkClients.push(second);
+  const wrong = await createNativeOriginalCopySession(f.db, {
+    ...f.options,
+    send: wire(2, undefined, second.access).edgeFetch,
+  });
+  boundSessions.push(wrong);
+  await expect(wrong.deliver(f.id)).rejects.toThrow();
+  expect(
+    (
+      await sql.query(
+        'select count(*)::int n from private.native_original_copies',
+      )
+    ).rows,
+  ).toEqual([{ n: 0 }]);
+  expect((await f.journal.copies.get(f.id))!.receipt).toBeNull();
+  await assertSourceUnchanged(f);
+});
+it('actual private-journal quota failure rolls native-scope preparation back completely without changing shop money', async () => {
+  const f = await boundFixture(false),
+    fail = () => {
+      throw new DOMException('Full private copy journal', 'QuotaExceededError');
+    };
+  f.journal.copies.hook('creating', fail);
+  try {
+    await expect(f.session.prepare(f.id)).rejects.toThrow();
+  } finally {
+    f.journal.copies.hook('creating').unsubscribe(fail);
+  }
+  expect(await f.journal.copies.count()).toBe(0);
+  expect(await f.journal.values.count()).toBe(0);
+  await assertSourceUnchanged(f);
+  expect((await f.session.prepare(f.id)).id).toBe(f.id);
+});
+
+it('a native preparation retry reopens the exact retained original after later current shop changes', async () => {
+  const f = await boundFixture();
+  await f.db.saveCustomer({
+    name: 'Later current customer',
+    nickname: '',
+    phone: '',
+    address: '',
+    notes: 'Keep the original copy',
+    tags: [],
+  });
+  const again = await f.session.prepare(f.id);
+  expect(again).toEqual(f.manifest);
+  expect(await f.journal.copies.count()).toBe(1);
+  await f.session.deliver(f.id);
+  const original = await f.session.readback(f.id);
+  expect(original.current.tables.customers).toEqual(f.source.tables.customers);
+  expect(
+    (await f.db.customers.toArray()).some(
+      (c) => c.name === 'Later current customer',
+    ),
+  ).toBe(true);
+});
+it('actual offline SDK continuity permits private preparation and reopening but cannot authorize copy HTTP', async () => {
+  const f = await boundFixture(false);
+  f.session.stop();
+  await f.sdk.auth.dispose();
+  f.sdk.setOnline(false);
+  f.sdk.auth = await createPhoneAuth(boundConfig, f.options.authScope, {
+    storage: f.sdk.storage,
+    send: f.sdk.send,
+  });
+  await f.sdk.auth.check();
+  expect(f.sdk.auth.getSnapshot().phase).toBe('offline');
+  const session = await createNativeOriginalCopySession(f.db, {
+    ...f.options,
+    auth: f.sdk.auth,
+  });
+  boundSessions.push(session);
+  const manifest = await session.prepare(f.id);
+  expect(await session.prepare(f.id)).toEqual(manifest);
+  await expect(session.deliver(f.id)).rejects.toThrow();
+  expect(
+    f.sdk.calls.filter((c) => c.path.includes('/functions/')),
+  ).toHaveLength(0);
+  expect((await f.journal.copies.get(f.id))!.receipt).toBeNull();
+  await assertSourceUnchanged(f);
+});
+it('the native identity read lease blocks a second connection from changing operator during the actual private receipt commit', async () => {
+  const f = await boundFixture(false),
+    other = new MiseDatabase(f.db.name);
+  locals.push(other);
+  let entered!: () => void, release!: () => void;
+  const reached = new Promise<void>((resolve) => {
+      entered = resolve;
+    }),
+    gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+  f.journal.use({
+    stack: 'dbcore',
+    name: 'verify-native-receipt-lease',
+    create(down) {
+      return {
+        ...down,
+        table(name) {
+          const table = down.table(name);
+          if (name !== 'copies') return table;
+          return {
+            ...table,
+            mutate(request) {
+              if (
+                request.type === 'put' &&
+                request.values.some((v) => v.receipt)
+              ) {
+                entered();
+                return Dexie.Promise.resolve(Dexie.waitFor(gate)).then(() =>
+                  table.mutate(request),
+                );
+              }
+              return table.mutate(request);
+            },
+          };
+        },
+      };
+    },
+  });
+  await f.session.prepare(f.id);
+  const sending = f.session.deliver(f.id).then(
+    (value) => ({ value }),
+    (error) => ({ error }),
+  );
+  await reached;
+  let switched = false;
+  const changing = other.operatorState.put(locked(f)).then(() => {
+    switched = true;
+  });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  expect(switched).toBe(false);
+  release();
+  await sending;
+  await changing;
+  expect(switched).toBe(true);
+  const row = await f.journal.copies.get(f.id);
+  expect(row!.receipt!.verification).toBe('content-addressed-copy');
+  expect(row!.identity).toEqual(f.session.identity);
+  expect(row!.verified).toBe(false);
+  await assertSourceUnchanged(f);
+  other.close();
+});
+
+it('the actual SDK and native identity leases preserve the full 5,000-charge controller prepare, transfer and cold readback without truncation or financial replay', async () => {
+  const started = performance.now(),
+    f = await fixture(true),
+    authScope = '/mise/app/' + f.scope.businessId;
+  let network: typeof fetch = async () => {
+    throw Error('Unconfigured scale fixture.');
+  };
+  const sdk = await createCopySdk(boundConfig, authScope, (url, init) =>
+    network(url, init),
+  );
+  sdkClients.push(sdk);
+  network = wire(1, undefined, sdk.access).edgeFetch;
+  const journal = new OriginalCopyJournal('sdk-scale-' + newInboxId());
+  locals.push(journal);
+  const session = await createNativeOriginalCopySession(f.db, {
+    config: boundConfig,
+    authScope,
+    auth: sdk.auth,
+    storage: sdk.storage,
+    journal,
+    send: sdk.send,
+  });
+  boundSessions.push(session);
+  const id = newInboxId(),
+    manifest = await session.prepare(id);
+  expect(await session.prepare(id)).toEqual(manifest);
+  const before = (
+      await sql.query('select count(*)::int n from public.credit_entries')
+    ).rows,
+    receipt = await session.deliver(id);
+  journal.close();
+  await journal.open();
+  const recovered = await session.readback(id);
+  expect(recovered.current.tables).toEqual(f.source.tables);
+  expect(recovered.bases).toEqual([f.basis]);
+  expect((await journal.copies.get(id))!.verified).toBe(true);
+  expect(
+    (await sql.query('select count(*)::int n from public.credit_entries')).rows,
+  ).toEqual(before);
+  expect(
+    sdk.calls.filter((c) => c.path.endsWith('/user')).length,
+  ).toBeGreaterThan(
+    sdk.calls.filter((c) => c.path.includes('/functions/')).length,
+  );
+  for (const value of [
+    boundConfig.apiUrl,
+    boundConfig.publishableKey,
+    sdk.access,
+    sdk.saved.refresh_token,
+  ])
+    expect(JSON.stringify(await journal.copies.toArray())).not.toContain(value);
+  await assertSourceUnchanged(f);
+  console.log(
+    JSON.stringify({
+      stage: 'sdk-native-copy-scale',
+      charges: 5000,
+      noteCodeUnits: 1000000,
+      nodeCount: receipt.nodeCount,
+      nodeBytes: receipt.nodeBytes,
+      originalCollections: 1,
+      images: 1,
+      freshSdkChecks: sdk.calls.filter((c) => c.path.endsWith('/user')).length,
+      verified: true,
+      durationMs: performance.now() - started,
+    }),
+  );
+}, 600000);

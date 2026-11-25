@@ -58,6 +58,10 @@ export function createPaymentSourceRequest(config:CloudConnection,input:CommandA
  if(!['read_payment_source','read_payment_match','read_payment_candidates','act_payment_source'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8*1024*1024);
 }
+/** Original byte copies use the same verified SDK account/target boundary. */
+export function createOriginalCopyRequest(config:CloudConnection,input:CommandAccount,send:typeof fetch){
+ return accountRequest(config,input,new URL('functions/v1/native-original-copy',config.apiUrl+'/'),'POST',send,256000);
+}
 export function createOwnerTaskRequest(config:CloudConnection,input:CommandAccount,rpc:OwnerTaskRpc,send:typeof fetch){
  if(!['read_owner_task_page','act_owner_task'].includes(rpc))throw new CommandRequestError('review');
  return accountRequest(config,input,new URL('rest/v1/rpc/'+rpc,config.apiUrl+'/'),'POST',send,8*1024*1024);

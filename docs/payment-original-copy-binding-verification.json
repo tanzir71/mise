@@ -1,0 +1,335 @@
+{
+  "milestone": "M41",
+  "increment": "Actual SDK/native identity binding for retained original copies",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "a896a87f75a3abe302f6ba6d86bdd2d5d1c146ff",
+  "verifiedAt": "2026-11-25T19:39:38.296369+00:00",
+  "scope": {
+    "nativeSchema": 30,
+    "ordinarySchema": 13,
+    "originalGraphVersion": 1,
+    "copyWireVersion": 1,
+    "portableArchiveVersion": 2,
+    "legacyEmptyPortableVersion": 1,
+    "sdkVersion": "2.119.0",
+    "newEnvironmentVariables": 0,
+    "newTablesMigrationsOrProviders": 0,
+    "allConfigurationEndUserOwned": true,
+    "separateAccountTargetJwtOrRemoteLabelsAcceptedByController": false,
+    "defaultOffPaymentPreviewUnchanged": true,
+    "financialAuthorityFromStorageReceipt": false,
+    "nativeFinancialOutboxAndCanonicalFencesRetained": true,
+    "historicalOwnerCapabilityIncludesNewWrites": false,
+    "networkHoldsNativeReadLock": false,
+    "localPrivatePersistenceUsesNativeIdentityReadLease": true
+  },
+  "checks": {
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-copy-binding-post-scale-lint.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 228,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-copy-binding-post-scale-types.log"
+    },
+    "unit": {
+      "fullRun": {
+        "passed": 5637,
+        "failed": 0,
+        "pending": 0,
+        "files": 295,
+        "nestedSuites": 320,
+        "durationSeconds": 1867.59,
+        "report": ".private/m41-copy-binding-full-unit.json",
+        "log": ".private/m41-copy-binding-full-unit.log"
+      },
+      "fullRunCopyCases": 64,
+      "newBindingCasesInFullRun": 28,
+      "additionalActualSdkScale": {
+        "passed": 1,
+        "failed": 0,
+        "otherCasesIntentionallyFiltered": 64,
+        "declaredDeadlineMs": 600000,
+        "report": ".private/m41-copy-binding-sdk-scale.json",
+        "log": ".private/m41-copy-binding-sdk-scale.log"
+      },
+      "distinctCurrentCasesVerified": 5638,
+      "filesAcrossCoverage": 295,
+      "singleFullCurrent5638Invocation": false,
+      "coverageAccounting": "Union by source path, full test name and same-name parameterized occurrence. The full reporter has 22 additional same-name parameterized instances.",
+      "scopeQualification": "An additive full-scale controller test was appended after this file was loaded by the full run. No production or other frozen source changed. Full5637 plus that separately verified case covers5638; this is not one full5638 invocation.",
+      "originalDirectTestCallExpressionsTokenMatched": 27,
+      "originalRuntimeCasesPreserved": 36,
+      "oldCorporaAssertionsAndDeadlinesUnchanged": true,
+      "maxWorkers": 2,
+      "originalCallsAudit": ".private/m41-copy-binding-existing-tests.json"
+    },
+    "build": {
+      "passed": true,
+      "bases": ["/", "/mise/"],
+      "logs": [
+        ".private/m41-copy-binding-root-build.log",
+        ".private/m41-copy-binding-pages-build.log"
+      ]
+    },
+    "browser": {
+      "passed": true,
+      "casesAcrossBases": 106,
+      "workers": 1,
+      "retries": 0,
+      "runs": {
+        "root": {
+          "base": "/",
+          "passed": 53,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0,
+          "durationMs": 224839.527,
+          "report": ".private/m41-copy-binding-root-browser.json",
+          "log": ".private/m41-copy-binding-root-browser.log"
+        },
+        "pages": {
+          "base": "/mise/",
+          "passed": 53,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0,
+          "durationMs": 219118.18699999998,
+          "report": ".private/m41-copy-binding-pages-browser.json",
+          "log": ".private/m41-copy-binding-pages-browser.log"
+        }
+      },
+      "widthsCovered": [360, 390, 768, 1024, 1440],
+      "existingAxeSeriousAndCriticalAssertionsPassed": true,
+      "port": 4332,
+      "otherProjectPortUntouched": 4321
+    },
+    "newProductMarkupOrStyles": false,
+    "newVisualComparisonOrCiArtifact": false
+  },
+  "measuredSdkNativeScale": {
+    "stage": "sdk-native-copy-scale",
+    "charges": 5000,
+    "noteCodeUnits": 1000000,
+    "nodeCount": 89569,
+    "nodeBytes": 23672481,
+    "originalCollections": 1,
+    "images": 1,
+    "freshSdkChecks": 2595,
+    "verified": true,
+    "durationMs": 267507.8187,
+    "caseDurationMs": 267761.3748
+  },
+  "diagnostics": {
+    "initialBindingFixtureRun": {
+      "failed": 25,
+      "reason": "A new Dexie import preceded fake-indexeddb/auto; corrected test-only import order.",
+      "log": ".private/m41-copy-binding-initial-tests.log"
+    },
+    "correctedBindingRun": {
+      "passed": 25,
+      "otherCasesIntentionallyFiltered": 36,
+      "log": ".private/m41-copy-binding-tests-r2.log"
+    },
+    "initialRetryOfflineLeaseRun": {
+      "passed": 3,
+      "otherCasesIntentionallyFiltered": 61,
+      "log": ".private/m41-copy-binding-lease-tests.log"
+    },
+    "initialLint": "An unused browser parameter and underscore rename both failed the configured unused-parameter rule. Removed the unused parameter completely; final lint and types pass."
+  },
+  "security": {
+    "newAdministratorOrProviderKeyRequired": false,
+    "connectionConfigurationNotPersistedInJournal": [
+      "apiUrl",
+      "publishableKey",
+      "jwt",
+      "refreshToken",
+      "authUserId"
+    ],
+    "archivedShopSourceDataRemainsComplete": true,
+    "sameActualSdkAccountAndTargetCheckedBeforeAndAfterHttp": true,
+    "authorityFromEditableUserMetadata": false,
+    "unchangedSqlCatalogSecurityTestsPassedInFullCopySuite": true,
+    "hostedAdvisorOrMutationPerformed": false,
+    "finalSourceHistoryArtifactPrivateScanPending": false,
+    "commitAndPushHooksPath": ".githooks",
+    "reviewedHistoricalPolicyUnchanged": true,
+    "sourceHistoryArtifactPrivateScan": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "command": "pnpm check:secrets --history --artifacts",
+      "completedEvidenceLog": ".private/m41-copy-binding-secrets-first.log",
+      "requiredFinalRecordRecheckLog": ".private/m41-copy-binding-final-secrets.log",
+      "commitAndPushGuardsEnabled": true,
+      "reviewedHistoricalPolicyChanged": false
+    }
+  },
+  "publicationHold": {
+    "allHeld": true,
+    "disabledWorkflowCount": 3,
+    "runCount": 77,
+    "latestRunId": 43927944995,
+    "pagesDeploymentId": 7832852111,
+    "pagesHead": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "beforePushObservedWorkflows": [
+      {
+        "id": 419007052,
+        "state": "disabled_manually"
+      },
+      {
+        "id": 419075081,
+        "state": "disabled_manually"
+      },
+      {
+        "id": 419005433,
+        "state": "disabled_manually"
+      }
+    ],
+    "beforePushObservedRuns": {
+      "latest": {
+        "conclusion": "success",
+        "head_sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+        "id": 43927944995,
+        "status": "completed"
+      },
+      "total_count": 77
+    },
+    "beforePushObservedPages": {
+      "environment": "github-pages",
+      "id": 7832852111,
+      "sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+    }
+  },
+  "localAcceptanceBoundary": "Actual SDK calls use a controlled Auth HTTP fixture. Handler, PostgreSQL roles/SQL and native persistence run locally; real-browser offline cases also pass. Hosted JWT signatures, managed Auth, deployed networking/provider acceptance and CI/Pages publication remain untested or held.",
+  "remaining": [
+    "Actual native payment writer/outbox atomic retention and delivery",
+    "Immutable original-versus-canonical outcomes",
+    "Historical registration without replaying money or fabricating consent",
+    "Complete canonical projection/restore and independent original financial undo",
+    "Copy discovery and product retention controls",
+    "Full M41 end-to-end and hosted acceptance"
+  ],
+  "sourceFingerprintAlgorithm": "SHA-256 of concatenated sorted path + space + sha256 + LF lines, UTF-8",
+  "sources": [
+    {
+      "path": "apps/web/package.json",
+      "sha256": "6e507b2e9191e91645250d6d2f0274dafc11153183ea0c45e5fbe82657ae4ca0"
+    },
+    {
+      "path": "apps/web/src/data/command-request.ts",
+      "sha256": "1b208be7182e3549373ee24a5d8a6da20b52ff7b2bf97123091a2b4892dbe3a1"
+    },
+    {
+      "path": "apps/web/src/data/operator-auth.ts",
+      "sha256": "34d59e7799bdc11989c739d76586c3f756118db71f1de2d8c03699556ad51ced"
+    },
+    {
+      "path": "apps/web/src/data/original-copies.ts",
+      "sha256": "163d31295af78a417b63b1241a378d861afcdd5dcc20fe9487f04517b7707a10"
+    },
+    {
+      "path": "apps/web/src/data/original-copy-session.ts",
+      "sha256": "6b50e8352bb50087309390d74a43ab400ed360db8fcd3f35806355a6fc8e6db7"
+    },
+    {
+      "path": "apps/web/src/data/payment-original-retention.ts",
+      "sha256": "15123d55e6831c8d8001ca44f93e8ff43fb42ede19817bc953b8d76106c777b5"
+    },
+    {
+      "path": "apps/web/src/data/phone-auth.ts",
+      "sha256": "beafce45c3493eba49fc73714ac920ae4a0596cdfd4d41da4e83d75efe6c04b5"
+    },
+    {
+      "path": "packages/core/cloud-connection.ts",
+      "sha256": "c38757b86300173e935e5b9d98100e627f27bf850e6337beecada881bd7f31f4"
+    },
+    {
+      "path": "packages/core/operators.ts",
+      "sha256": "c389fe2198400cf0e0f4f250ee1ce26e8a5b7107310da4d349199b8152be490d"
+    },
+    {
+      "path": "packages/core/original-copy-wire.ts",
+      "sha256": "e06e3ee6f22130e0b4a1ce9be083582d785855a02bba07036a61f1f72e085ebd"
+    },
+    {
+      "path": "packages/core/original-copy.ts",
+      "sha256": "3de657aa32d2671b8b12c510ea2c179e297544ccfbbd39619c68f331cf5f5355"
+    },
+    {
+      "path": "packages/core/payment-archive.ts",
+      "sha256": "69d72f2abe2ce492ceb382b1dca39938df7ec90638b813568a5e0a0b15b7c0e6"
+    },
+    {
+      "path": "packages/core/payment-originals.ts",
+      "sha256": "971f96b45357c0c0a0e29df26eee8a0b36d4973f02a451bc0f9744bd73966fe5"
+    },
+    {
+      "path": "packages/core/shared-json.ts",
+      "sha256": "41f0848dc0b01e684d95317b18c6215f0ae5e9f6d489a87b4c3ac4a4168a801d"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha256": "c8c4d82d6aac4ce05d76a8f625d96d87c8b6d7aa949d77dc0bc5a257dec53c55"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "5542300050a6ce073dfe67f192348ae2607551954cd3e35209bb51418a8aeb87"
+    },
+    {
+      "path": "supabase/functions/_shared/original-copy-handler.ts",
+      "sha256": "4c5ac72ded9ffcf324a9831bf9102f5dd0f8148a379c5d7a690741a74457ef07"
+    },
+    {
+      "path": "supabase/functions/native-original-copy/index.ts",
+      "sha256": "fd92c5f05e914beced87ca4a875e761597c6c59dcd1b046a5e0dca24e504667f"
+    },
+    {
+      "path": "supabase/migrations/20261125152441_native_original_copies.sql",
+      "sha256": "b868082c0aea0bc77815685198e9978c4b3ed38c5bf4a8cfffe5756c5394eed8"
+    },
+    {
+      "path": "tests/e2e/payment-original-copies.spec.ts",
+      "sha256": "7489da8b5b17ea72d4194da62cff84fb6fcb831a039e16f62566930fb8b68841"
+    },
+    {
+      "path": "tests/fixtures/original-copy-sdk.ts",
+      "sha256": "0219ff587808f5e1e48fdbb5810baaa8e39f8817447ff53d3c53b78dbfb6f4f0"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.mjs",
+      "sha256": "779703bfa1ffbd689597a7bbd3d3e97c925d61bf4ab5cdcca1418f46f44fb235"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "584cf2ed40ca57aa87fec6f052e1528bbfec2006e70dd71af595d509094911da"
+    },
+    {
+      "path": "tests/native-original-copies.test.ts",
+      "sha256": "7eb46a34507e2e44497145c26e440260120ec68cac100dac4c596011f1ce6e86"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "58ac761019ebe11fde4e95c7e1320bbe6599d26eb49a3fff19dd28dc021473b1"
+    }
+  ],
+  "sourceFingerprint": "c8a830db42ef0c48e14df2b6af5b16a60d9453c9690b4eaf27b0272634ebd100",
+  "fullRunSourceFingerprint": "fa07ea9b8a189fa7e7e88a59fcad8ba47a83b848e2bc4790a66baf98a7de26c3",
+  "postCollectionSourceDelta": {
+    "path": "tests/native-original-copies.test.ts",
+    "change": "One additive actual SDK/native controller scale case; all production and other frozen source hashes match."
+  }
+}

@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 original-copy delivery now binds the actual phone SDK account, end-user destination and native operator, with fresh verified HTTP responses, native read locks during private commits, immutable preparation retries and separate same-account historical recovery. Complete originals and offline preparation survive interruption; no financial sync fence or delivery hold is lifted. See [SDK-bound originals](docs/payment-original-copy-binding.md).
+
 - In progress: M41 adds bounded authenticated transfer and complete readback/recovery of independent original archives, with immutable storage receipts, private native retry state and live Auth/session/role checks. Native archive writes stay atomic across bounded batches and late storage failure. Copies preserve complete text/images and grant no financial authority; native outbox and canonical integration remain fenced. Installation setup stays end-user owned, with all hosted/workflow/publication holds unchanged. See [private original copies](docs/payment-original-copies.md).
 
 - In progress: M41 now retains complete independent local payment originals in shared native stores, and the existing backup controls export/restore them with an explicit version-two portable file. Legacy schema-13 files stay unchanged; stale reviews, corrupt graphs and quota failures preserve every native record. Original text/images remain complete, with no archive eviction. Connected outcome/outbox/upload work remains fenced; installation configuration stays end-user owned. See [retained payment originals](docs/payment-original-archive.md).

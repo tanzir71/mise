@@ -14,3 +14,7 @@ export * from '../../apps/web/src/data/payment-original-retention';
 export * from '../../packages/core/payment-archive';
 
 export * from '../../apps/web/src/data/original-copies';
+
+export * from '../../apps/web/src/data/original-copy-session';
+export {createPhoneAuth} from '../../apps/web/src/data/phone-auth';
+export {createCopySdk} from './original-copy-sdk';

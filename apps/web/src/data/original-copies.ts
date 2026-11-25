@@ -41,6 +41,10 @@ export interface OriginalCopyRemote {
   scope: OriginalCopyScope;
   call(op: string, id: string, body: Record<string, unknown>): Promise<unknown>;
 }
+/** A caller may hold its native identity read lock while this separate private
+ * journal commits. No network operation runs inside this local mutation lease. */
+export type OriginalCopyMutation = <T>(run: () => Promise<T>) => Promise<T>;
+const directMutation: OriginalCopyMutation = (run) => run();
 const encoder = new TextEncoder(),
   hex = /^[a-f0-9]{64}$/;
 function ensure(ok: unknown): asserts ok {
@@ -86,45 +90,49 @@ export class OriginalCopyJournal extends Dexie {
     identity: OriginalCopyIdentity,
     id: string,
     current: () => void,
+    mutate: OriginalCopyMutation = directMutation,
   ) {
     current();
     identity = structuredClone(identity);
     const plan = prepareOriginalCopy(portable, identity, id),
       ownerKey = identityKey(identity);
     current();
-    return this.transaction('rw', this.tables, async () => {
-      current();
-      const old = await this.copies.get(id);
-      if (old) {
-        ensure(
-          old.ownerKey === ownerKey &&
-            originalCopyHash(old.manifest) === originalCopyHash(plan.manifest),
-        );
-        return structuredClone(old.manifest);
-      }
-      const existing = await this.values.bulkGet(
-          plan.nodes.map((n) => [ownerKey, n.digest] as [string, string]),
-        ),
-        added: CopyValue[] = [];
-      plan.nodes.forEach((n, index) => {
-        const prior = existing[index];
-        ensure(!prior || prior.json === n.json);
-        if (!prior) added.push({ ...n, ownerKey });
-      });
-      await this.values.bulkAdd(added);
-      await this.copies.add({
-        id,
-        version: 1,
-        identity,
-        ownerKey,
-        manifest: plan.manifest,
-        keys: plan.nodes.map((n) => n.digest),
-        receipt: null,
-        verified: false,
-      });
-      current();
-      return plan.manifest;
-    });
+    return mutate(() =>
+      this.transaction('rw', this.tables, async () => {
+        current();
+        const old = await this.copies.get(id);
+        if (old) {
+          ensure(
+            old.ownerKey === ownerKey &&
+              originalCopyHash(old.manifest) ===
+                originalCopyHash(plan.manifest),
+          );
+          return structuredClone(old.manifest);
+        }
+        const existing = await this.values.bulkGet(
+            plan.nodes.map((n) => [ownerKey, n.digest] as [string, string]),
+          ),
+          added: CopyValue[] = [];
+        plan.nodes.forEach((n, index) => {
+          const prior = existing[index];
+          ensure(!prior || prior.json === n.json);
+          if (!prior) added.push({ ...n, ownerKey });
+        });
+        await this.values.bulkAdd(added);
+        await this.copies.add({
+          id,
+          version: 1,
+          identity,
+          ownerKey,
+          manifest: plan.manifest,
+          keys: plan.nodes.map((n) => n.digest),
+          receipt: null,
+          verified: false,
+        });
+        current();
+        return plan.manifest;
+      }),
+    );
   }
   private async plan(
     id: string,
@@ -155,38 +163,58 @@ export class OriginalCopyJournal extends Dexie {
     readOriginalCopy(manifest, (key) => pool.get(key));
     return { row, plan: { manifest, nodes } };
   }
+  /** A retry reopens the complete original, never a fresh export timestamp or
+   * newer current shop rows under an already retained ID. */
+  async prepared(
+    id: string,
+    identity: OriginalCopyIdentity,
+    current: () => void,
+  ) {
+    current();
+    const existing = await this.copies.get(id);
+    current();
+    if (!existing) return null;
+    const { plan } = await this.plan(id, identity);
+    current();
+    return structuredClone(plan.manifest);
+  }
   private async receipt(
     row: CopyRow,
     receipt: unknown,
     verified: boolean,
     current: () => void,
+    mutate: OriginalCopyMutation = directMutation,
   ) {
     const checked = parseOriginalCopyReceipt(receipt, row.manifest);
     current();
-    return this.transaction('rw', this.copies, async () => {
-      current();
-      const saved = await this.copies.get(row.id);
-      ensure(
-        saved &&
-          saved.ownerKey === row.ownerKey &&
-          originalCopyHash(saved.manifest) === originalCopyHash(row.manifest) &&
-          (!saved.receipt ||
-            literalToken(saved.receipt) === literalToken(checked)),
-      );
-      await this.copies.put({
-        ...saved,
-        receipt: checked,
-        verified: saved.verified || verified,
-      });
-      current();
-      return checked;
-    });
+    return mutate(() =>
+      this.transaction('rw', this.copies, async () => {
+        current();
+        const saved = await this.copies.get(row.id);
+        ensure(
+          saved &&
+            saved.ownerKey === row.ownerKey &&
+            originalCopyHash(saved.manifest) ===
+              originalCopyHash(row.manifest) &&
+            (!saved.receipt ||
+              literalToken(saved.receipt) === literalToken(checked)),
+        );
+        await this.copies.put({
+          ...saved,
+          receipt: checked,
+          verified: saved.verified || verified,
+        });
+        current();
+        return checked;
+      }),
+    );
   }
   async deliver(
     id: string,
     identity: OriginalCopyIdentity,
     remote: OriginalCopyRemote,
     current: () => void,
+    mutate: OriginalCopyMutation = directMutation,
   ) {
     current();
     ensure(
@@ -214,7 +242,8 @@ export class OriginalCopyJournal extends Dexie {
       object(start) &&
         originalCopyHash(start.manifest) === originalCopyHash(plan.manifest),
     );
-    if (start.receipt) return this.receipt(row, start.receipt, false, current);
+    if (start.receipt)
+      return this.receipt(row, start.receipt, false, current, mutate);
     const needed = new Set<string>();
     for (let i = 0; i < plan.nodes.length; i += 512) {
       const keys = plan.nodes.slice(i, i + 512).map((n) => n.digest),
@@ -278,13 +307,20 @@ export class OriginalCopyJournal extends Dexie {
       ensure((progress.checked as number) > checked);
       checked = progress.checked as number;
     }
-    return this.receipt(row, await invoke('finish', {}), false, current);
+    return this.receipt(
+      row,
+      await invoke('finish', {}),
+      false,
+      current,
+      mutate,
+    );
   }
   async readback(
     id: string,
     identity: OriginalCopyIdentity,
     remote: OriginalCopyRemote,
     current: () => void,
+    mutate: OriginalCopyMutation = directMutation,
   ) {
     current();
     const { row, plan } = await this.plan(id, identity);
@@ -295,7 +331,7 @@ export class OriginalCopyJournal extends Dexie {
       current,
       plan.manifest,
     );
-    await this.receipt(row, result.receipt, true, current);
+    await this.receipt(row, result.receipt, true, current, mutate);
     return result.decoded;
   }
   /** Same authenticated account can restore a known original to an empty private
@@ -305,13 +341,14 @@ export class OriginalCopyJournal extends Dexie {
     identity: OriginalCopyIdentity,
     remote: OriginalCopyRemote,
     current: () => void,
+    mutate: OriginalCopyMutation = directMutation,
   ) {
     const result = await this.download(id, identity, remote, current);
-    await this.prepare(result.portable, identity, id, current);
+    await this.prepare(result.portable, identity, id, current, mutate);
     const row = await this.copies.get(id);
     ensure(row);
     current();
-    await this.receipt(row, result.receipt, true, current);
+    await this.receipt(row, result.receipt, true, current, mutate);
     return result.decoded;
   }
   private async download(
