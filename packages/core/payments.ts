@@ -171,3 +171,17 @@ export function parsePaymentText(raw:string,context:PaymentTextContext):ParsedPa
   if(result.status==='manual')result.warnings.push(scope.conflict?'The sender and message provider disagree. Enter the payment by hand.':outgoing||contradictory?'This may describe outgoing money. Check it before recording anything.':blocked?'This is not a supported incoming-payment message.':'This format needs manual entry. Check every field.');
   return result;
 }
+
+/** A payment form uses the installation's clock, never the browser's timezone. */
+export function paymentWallTime(at:number,timeZone:string):string {
+  if(!safeTime(at))throw new Error('Choose a valid received date and time.');
+  const w=wallAt(at,timeZone),ms=at%1000;
+  return `${String(w[0]).padStart(4,'0')}-${String(w[1]).padStart(2,'0')}-${String(w[2]).padStart(2,'0')}T${String(w[3]).padStart(2,'0')}:${String(w[4]).padStart(2,'0')}:${String(w[5]).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
+}
+export function parsePaymentWallTime(value:string,timeZone:string):number {
+  const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/.exec(value);
+  if(!m)throw new Error('Enter the received date and time.');
+  const at=localTime([+m[1],+m[2],+m[3],+m[4],+m[5],+(m[6]??0)],timeZone);
+  if(at===null)throw new Error('This time is missing or occurs twice in the selected timezone. Check the original and choose an unambiguous time.');
+  const result=at+Number((m[7]??'').padEnd(3,'0'));if(!safeTime(result))throw new Error('Choose a valid received date and time.');return result;
+}

@@ -1,0 +1,357 @@
+{
+  "title": "M41 actual local payment text review",
+  "output": "qa/m41-payment-review",
+  "actionSets": {
+    "openSource": [
+      {
+        "type": "click",
+        "selector": "input[name=\"business\"][value=\"corner_shop\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "click",
+        "selector": "input[name=\"market\"][value=\"BD\"]"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"shopName\"]",
+        "value": "Rahman Store"
+      },
+      {
+        "type": "fill",
+        "selector": "input[name=\"phone\"]",
+        "value": "01712345482"
+      },
+      {
+        "type": "click",
+        "selector": "button[type=\"submit\"]"
+      },
+      {
+        "type": "wait",
+        "selector": ".today-page[aria-busy=\"false\"]",
+        "state": "visible"
+      },
+      {
+        "type": "click",
+        "selector": ".app-sidebar a[href$=\"/more\"]:visible,.app-bottom-nav a[href$=\"/more\"]:visible"
+      },
+      {
+        "type": "click",
+        "selector": "main a[href$=\"/inbox\"]"
+      },
+      {
+        "type": "click",
+        "selector": ".inbox-list a[href$=\"/inbox/new\"]"
+      },
+      {
+        "type": "fill",
+        "selector": ".inbox-add label:has-text(\"Title (optional)\") input",
+        "value": "Original payment text"
+      },
+      {
+        "type": "fill",
+        "selector": ".inbox-add textarea",
+        "value": "Unknown transfer notice: Tk 15.25.\nমূল বার্তাটি এখানে থাকে।"
+      },
+      {
+        "type": "click",
+        "selector": ".inbox-add button[type=submit]"
+      },
+      {
+        "type": "wait",
+        "selector": ".inbox-detail"
+      },
+      {
+        "type": "click",
+        "selector": ".inbox-kinds button:text-is(\"Payment\")"
+      },
+      {
+        "type": "wait",
+        "selector": ".payment-checked"
+      }
+    ],
+    "reviewMoney": [
+      {
+        "type": "click",
+        "selector": ".payment-checked input[type=checkbox]"
+      },
+      {
+        "type": "click",
+        "selector": ".payment-checked button[type=submit]"
+      },
+      {
+        "type": "wait",
+        "selector": ".payment-saved"
+      },
+      {
+        "type": "select",
+        "selector": ".payment-new-money select",
+        "value": "counter"
+      },
+      {
+        "type": "fill",
+        "selector": ".payment-new-money textarea",
+        "value": "Checked against the original"
+      },
+      {
+        "type": "click",
+        "selector": ".payment-new-money button:text-is(\"Review new payment\")"
+      },
+      {
+        "type": "wait",
+        "selector": ".payment-confirm"
+      }
+    ],
+    "recordMoney": [
+      {
+        "type": "click",
+        "selector": ".payment-confirm input[type=checkbox]"
+      },
+      {
+        "type": "click",
+        "selector": ".payment-confirm button:text-is(\"Record received money\")"
+      },
+      {
+        "type": "wait",
+        "selector": ".payment-financial-original"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "m41-payment-checked-phone",
+      "path": "app/?flags=paymentText",
+      "widths": [360, 390],
+      "heights": {
+        "360": 900,
+        "390": 900,
+        "768": 1100,
+        "1024": 1100,
+        "1440": 1100
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [],
+      "sections": [
+        {
+          "id": "sheet",
+          "selector": ".app-dialog:has(.payment-capture)",
+          "reference": "screens/mobile/M29 · Manager — Export (sheet).png",
+          "clip": {
+            "left": 56,
+            "top": 144,
+            "width": 780,
+            "height": 1576
+          }
+        }
+      ],
+      "actionSets": ["openSource"]
+    },
+    {
+      "id": "m41-payment-checked-desktop",
+      "path": "app/?flags=paymentText",
+      "widths": [768, 1024, 1440],
+      "heights": {
+        "360": 900,
+        "390": 900,
+        "768": 1100,
+        "1024": 1100,
+        "1440": 1100
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [],
+      "sections": [
+        {
+          "id": "sheet",
+          "selector": ".app-dialog:has(.payment-capture)",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "clip": {
+            "left": 1004,
+            "top": 198,
+            "width": 440,
+            "height": 728
+          }
+        }
+      ],
+      "actionSets": ["openSource"]
+    },
+    {
+      "id": "m41-payment-confirmation-phone",
+      "path": "app/?flags=paymentText",
+      "widths": [360, 390],
+      "heights": {
+        "360": 900,
+        "390": 900,
+        "768": 1100,
+        "1024": 1100,
+        "1440": 1100
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [],
+      "sections": [
+        {
+          "id": "sheet",
+          "selector": ".app-dialog:has(.payment-capture)",
+          "reference": "screens/mobile/M29 · Manager — Export (sheet).png",
+          "clip": {
+            "left": 56,
+            "top": 144,
+            "width": 780,
+            "height": 1576
+          }
+        },
+        {
+          "id": "consent",
+          "selector": ".payment-confirm",
+          "reference": "screens/mobile/M29 · Manager — Export (sheet).png",
+          "clip": {
+            "left": 56,
+            "top": 144,
+            "width": 780,
+            "height": 1576
+          },
+          "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used. This extra capture shows the actual required received/not-already-recorded checkbox and confirmation controls."
+        }
+      ],
+      "actionSets": ["openSource", "reviewMoney"]
+    },
+    {
+      "id": "m41-payment-confirmation-desktop",
+      "path": "app/?flags=paymentText",
+      "widths": [768, 1024, 1440],
+      "heights": {
+        "360": 900,
+        "390": 900,
+        "768": 1100,
+        "1024": 1100,
+        "1440": 1100
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [],
+      "sections": [
+        {
+          "id": "sheet",
+          "selector": ".app-dialog:has(.payment-capture)",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "clip": {
+            "left": 1004,
+            "top": 198,
+            "width": 440,
+            "height": 728
+          }
+        },
+        {
+          "id": "consent",
+          "selector": ".payment-confirm",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "clip": {
+            "left": 1004,
+            "top": 198,
+            "width": 440,
+            "height": 728
+          },
+          "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used. This extra capture shows the actual required received/not-already-recorded checkbox and confirmation controls."
+        }
+      ],
+      "actionSets": ["openSource", "reviewMoney"]
+    },
+    {
+      "id": "m41-payment-original-phone",
+      "path": "app/?flags=paymentText",
+      "widths": [360, 390],
+      "heights": {
+        "360": 900,
+        "390": 900,
+        "768": 1100,
+        "1024": 1100,
+        "1440": 1100
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [],
+      "sections": [
+        {
+          "id": "sheet",
+          "selector": ".app-dialog:has(.payment-capture)",
+          "reference": "screens/mobile/M29 · Manager — Export (sheet).png",
+          "clip": {
+            "left": 56,
+            "top": 144,
+            "width": 780,
+            "height": 1576
+          }
+        }
+      ],
+      "actionSets": ["openSource", "reviewMoney", "recordMoney"]
+    },
+    {
+      "id": "m41-payment-original-desktop",
+      "path": "app/?flags=paymentText",
+      "widths": [768, 1024, 1440],
+      "heights": {
+        "360": 900,
+        "390": 900,
+        "768": 1100,
+        "1024": 1100,
+        "1440": 1100
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [],
+      "sections": [
+        {
+          "id": "sheet",
+          "selector": ".app-dialog:has(.payment-capture)",
+          "reference": "screens/desktop/Desktop 18 · Mise — Settings › Exports (every dataset, any format).png",
+          "clip": {
+            "left": 1004,
+            "top": 198,
+            "width": 440,
+            "height": 728
+          }
+        }
+      ],
+      "actionSets": ["openSource", "reviewMoney", "recordMoney"]
+    },
+    {
+      "id": "m41-shared-source-phone",
+      "path": "app/?flags=paymentText",
+      "widths": [390],
+      "heights": {
+        "390": 900
+      },
+      "captureStyle": ".app-skip{visibility:hidden}",
+      "note": "M41 names no dedicated payment-editor frame. The actual Inbox source uses supplied M25 104:950; its checked payment and financial/undo controls reuse the supplied M29 and Desktop18 utility-sheet spacing, monochrome tokens and 44px controls. This report compares those shared design contexts and leaves content/layout differences visible and informational. All data is created through actual local forms. No provider, Auth, backend, workflow or publication is used.",
+      "actions": [
+        {
+          "type": "click",
+          "selector": ".app-dialog button[aria-label=\"Close manual review\"]"
+        }
+      ],
+      "sections": [
+        {
+          "id": "screen",
+          "selector": ".inbox-detail",
+          "reference": "screens/mobile/M25 · Any phone — Share to Mise (screenshot understood).png",
+          "clip": {
+            "left": 56,
+            "top": 104,
+            "width": 780,
+            "height": 1576
+          }
+        }
+      ],
+      "actionSets": ["openSource"]
+    }
+  ]
+}

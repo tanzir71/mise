@@ -1,0 +1,310 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "530265e2d98b4dd338be3d126773b75130e957c9",
+  "verifiedAt": "2026-11-25T07:34:19.836Z",
+  "scope": "M41 actual native payment review in the existing Inbox source sheet, source-owned clocks and manual hints, current metadata matching, explicit financial confirmation, original inspection/recovery/undo. Full backend/upload/canonical adapter and milestone acceptance remain required.",
+  "sourceFingerprint": "c25008593c43192f9341a4f73eb57cff8eb009adda2295ae44d2055ea2103999",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "548301f9c21a7cb88bc6128eca6cc47f0c3590fe9ab62d8b66366ca26a68a3ba"
+    },
+    {
+      "path": "apps/web/src/Inbox.tsx",
+      "sha256": "4e3849296981d013c74c962c32145ca6a41587c470e397966eb7f63db3ca0230"
+    },
+    {
+      "path": "apps/web/src/LocalApp.tsx",
+      "sha256": "20a431454764b3085cc47286434f5ce5b0e4e932b557756d06dfeddfaa61c129"
+    },
+    {
+      "path": "apps/web/src/PaymentCaptureActions.tsx",
+      "sha256": "9066786284e91422cfb7972bda0c55924722854dfbffe77c1a69801c9698aaee"
+    },
+    {
+      "path": "apps/web/src/PaymentCaptureReview.tsx",
+      "sha256": "adb50afa2e00a4e907743b1ba66d639c2c87075e297c494eb8875ceb2abaa8cb"
+    },
+    {
+      "path": "apps/web/src/PaymentCheckedForm.tsx",
+      "sha256": "b1cd16d2aa5aa06247868b1b061a1da46bc146b205652202b3f707949066833c"
+    },
+    {
+      "path": "apps/web/src/data/payment-review.ts",
+      "sha256": "c23010971a5cff3dfb919f21d559b42be38ae74e5ca932a5b52504cc05a6c78d"
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sha256": "c7a3736957690b2cf642e90ef64b735812b2febce948ae39ce2e4d6ee5801c24"
+    },
+    {
+      "path": "apps/web/src/payment-capture.css",
+      "sha256": "dceef5ffb04a99dd92cb024bc7adb9314e473a6b635b6b6de77b10ea1efbb503"
+    },
+    {
+      "path": "apps/web/src/payment-text-context.tsx",
+      "sha256": "e755c72ce7112e92653b3cc4097019f08aad4ec7145b4bd27b8da1fdc24fc9c6"
+    },
+    {
+      "path": "docs/payment-review.md",
+      "sha256": "32f050ffaf627c61660b55ee4bc789dc6828305fa0cbc357b501b9174448ea3e"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "f2f96b63968cf4b229d451af6aee338caeffdcb1709c5c15899547c63256d0c0"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "4a206f9d7300986551e55ed6e18436b495c118956d91e310eb22df2f80ab1211"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "4c54087c22ab02f38c9b0a89fa83f15f57fe4246428b5acc08fda2a0349f6e1c"
+    },
+    {
+      "path": "packages/core/flags.ts",
+      "sha256": "05aa78f0062ce6a7f1302103404ae485d5419e1eac89f2ade71075dcae49e58a"
+    },
+    {
+      "path": "packages/core/payments.ts",
+      "sha256": "8854c1950d8dc94d0a71c098f00899bc3474f0d28a673a76b444fc8b46076735"
+    },
+    {
+      "path": "qa/configs/m41-payment-review.json",
+      "sha256": "b1e16fe10f53dacd5e8c71cdbe776c9b6433e10a15482d76e6430f105131aecb"
+    },
+    {
+      "path": "tests/e2e/payment-capture-ui.spec.ts",
+      "sha256": "cc11eb7024bb0a2b6b8d21a5ae521bf99dd46059e283874c5115f5a2ef2b5280"
+    },
+    {
+      "path": "tests/payment-review.test.ts",
+      "sha256": "b090a92b74db3a732bde5f1786012a4d2c1750a49ee51f40fe212f8495d44b46"
+    },
+    {
+      "path": "tests/payment-wall-time.test.ts",
+      "sha256": "899d799246b1d75cb651cdb684d603b9de9bae2f64bcea6811c532b4b0e6bd7b"
+    }
+  ],
+  "unit": {
+    "passed": 5466,
+    "files": 288,
+    "maxWorkers": 2,
+    "minWorkers": 1,
+    "originalCorporaAndDeadlinesUnchanged": true,
+    "log": ".private/m41-ui-full-unit.log",
+    "newClockCases": 15,
+    "newReadOnlyFrameCases": 2,
+    "qualification": "The full unit run verified the unchanged Core/domain source. A subsequent UI-only form correction preserves a known exact original timestamp when its unchanged local fields lie in a DST fold. The strict Core parser is unchanged. Both edited ambiguous-time rejection and exact first/second original instants are verified by fresh complete browser files and final strict types.",
+    "subsequentUiOnlyChanges": [
+      "apps/web/src/PaymentCheckedForm.tsx",
+      "tests/e2e/payment-capture-ui.spec.ts"
+    ],
+    "originalCodeSnapshot": ".private/m41-ui-frozen-source.json"
+  },
+  "browser": {
+    "root": {
+      "basePath": "/",
+      "passed": 186,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "workers": 1,
+      "files": [
+        "cloud-auth.spec.ts",
+        "cloud-upload-review.spec.ts",
+        "cloud-upload.spec.ts",
+        "counter.spec.ts",
+        "customer-khata.spec.ts",
+        "exports.spec.ts",
+        "inbox-storage.spec.ts",
+        "khata.spec.ts",
+        "operators.spec.ts",
+        "orders.spec.ts",
+        "outbox-boundary.spec.ts",
+        "payment-capture-ui.spec.ts",
+        "payment-native.spec.ts",
+        "payment-text.spec.ts",
+        "settings-outbox.spec.ts",
+        "sync-coverage.spec.ts",
+        "sync-customer-currency.spec.ts",
+        "sync-download.spec.ts",
+        "sync-images.spec.ts",
+        "sync-money-review-ui.spec.ts",
+        "sync-purchase-currency.spec.ts",
+        "sync-purchase-review-ui.spec.ts",
+        "sync-stock-review-ui.spec.ts"
+      ],
+      "actualPaymentUiCases": 20,
+      "existingNativePaymentCases": 6,
+      "report": ".private/m41-ui-root-regression.json",
+      "durationMs": 1359711.084,
+      "existingCorporaAndDeadlinesUnchanged": true
+    },
+    "pages": {
+      "basePath": "/mise/",
+      "passed": 186,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "retries": 0,
+      "workers": 1,
+      "files": [
+        "cloud-auth.spec.ts",
+        "cloud-upload-review.spec.ts",
+        "cloud-upload.spec.ts",
+        "counter.spec.ts",
+        "customer-khata.spec.ts",
+        "exports.spec.ts",
+        "inbox-storage.spec.ts",
+        "khata.spec.ts",
+        "operators.spec.ts",
+        "orders.spec.ts",
+        "outbox-boundary.spec.ts",
+        "payment-capture-ui.spec.ts",
+        "payment-native.spec.ts",
+        "payment-text.spec.ts",
+        "settings-outbox.spec.ts",
+        "sync-coverage.spec.ts",
+        "sync-customer-currency.spec.ts",
+        "sync-download.spec.ts",
+        "sync-images.spec.ts",
+        "sync-money-review-ui.spec.ts",
+        "sync-purchase-currency.spec.ts",
+        "sync-purchase-review-ui.spec.ts",
+        "sync-stock-review-ui.spec.ts"
+      ],
+      "actualPaymentUiCases": 20,
+      "existingNativePaymentCases": 6,
+      "report": ".private/m41-ui-pages-regression.json",
+      "durationMs": 797258.745,
+      "existingCorporaAndDeadlinesUnchanged": true
+    }
+  },
+  "visual": {
+    "root": {
+      "reusableConfiguration": "qa/configs/m41-payment-review.json",
+      "comparisons": 21,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": ".private/m41-ui-root-qa-final/report.html",
+      "contexts": "Actual shared-source view and editor/confirmation/original-financial sheet states, plus focused explicit-consent captures. Supplied M25/M29/Desktop18 utility references are context comparisons; no dedicated M41 editor export is claimed.",
+      "keyCaptures": [
+        {
+          "path": ".private/m41-ui-root-qa-final/screens/m41-payment-checked-phone-sheet-390.png",
+          "bytes": 48591,
+          "sha256": "b21ca45ca2bc53a9434d36ab9fdefd57cb335816beeaa14d61fb90302b37279c"
+        },
+        {
+          "path": ".private/m41-ui-root-qa-final/screens/m41-payment-confirmation-phone-consent-390.png",
+          "bytes": 17690,
+          "sha256": "77e2e7f59ce49ae0a7f2d3e6be884c91ced4743e278346a0a176cf2c156e5ff6"
+        },
+        {
+          "path": ".private/m41-ui-root-qa-final/screens/m41-payment-original-desktop-sheet-1440.png",
+          "bytes": 57118,
+          "sha256": "ed35bf19fdf2088992bb315f04620dfea8c6a43047086d29ae03359861f46146"
+        }
+      ]
+    },
+    "pages": {
+      "reusableConfiguration": "qa/configs/m41-payment-review.json",
+      "comparisons": 21,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": ".private/m41-ui-pages-qa-final/report.html",
+      "contexts": "Actual shared-source view and editor/confirmation/original-financial sheet states, plus focused explicit-consent captures. Supplied M25/M29/Desktop18 utility references are context comparisons; no dedicated M41 editor export is claimed.",
+      "keyCaptures": [
+        {
+          "path": ".private/m41-ui-pages-qa-final/screens/m41-payment-checked-phone-sheet-390.png",
+          "bytes": 48587,
+          "sha256": "7a20cdc02d81254564df41d7575ec6f1091b716875d714d999672e8186acec53"
+        },
+        {
+          "path": ".private/m41-ui-pages-qa-final/screens/m41-payment-confirmation-phone-consent-390.png",
+          "bytes": 17538,
+          "sha256": "cce7ce78ed13b32d9ce4a9859fa625621a76713c21b2da3b804f3042e76b11fb"
+        },
+        {
+          "path": ".private/m41-ui-pages-qa-final/screens/m41-payment-original-desktop-sheet-1440.png",
+          "bytes": 57468,
+          "sha256": "4a663809c83ed168bd8307d779d313c1102acd7b178ab014fe2e7a8c855806e9"
+        }
+      ]
+    }
+  },
+  "developmentChecks": {
+    "initial": "Stopped the first new-file run after repeated exact wrapping-label selector mismatches; logs and traces retained privately.",
+    "r1": {
+      "passed": 16,
+      "failed": 2,
+      "report": ".private/m41-ui-root-preflight-r1.json",
+      "corrections": [
+        "Use the accessible name for the readonly full-copy textarea.",
+        "Keep a disabled Save label stable instead of calling every disabled state Saving."
+      ]
+    },
+    "r2": {
+      "passed": 18,
+      "report": ".private/m41-ui-root-preflight-r2.json"
+    },
+    "r3": {
+      "passed": 18,
+      "report": ".private/m41-ui-root-preflight-r3.json",
+      "scope": "Includes supported same-linked-order financial recording plus recorded-receipt and expanded-original accessibility at all five widths."
+    },
+    "finalKnownFoldWholeFile": {
+      "passed": 20,
+      "report": ".private/m41-ui-root-preflight-fold.json"
+    }
+  },
+  "checks": {
+    "types": ".private/m41-ui-types-post-fold.log",
+    "lint": ".private/m41-ui-lint.log",
+    "rootBuild": ".private/m41-ui-root-build-post-fold.log",
+    "pagesBuild": ".private/m41-ui-pages-build.log",
+    "exportsPresent": 270,
+    "nativeSchema": 29,
+    "backupSchema": 13,
+    "ordinaryTables": 22,
+    "featureFlag": {
+      "name": "paymentText",
+      "default": false
+    },
+    "privateOwnNodePriority": "AboveNormal"
+  },
+  "holds": {
+    "endUserConfiguration": true,
+    "workflowsDisabled": 3,
+    "workflowRunCount": 77,
+    "latestWorkflowRun": 43927944995,
+    "latestDeployment": 7832852111,
+    "noPR": true,
+    "noSignoff": true,
+    "noWorkflowDispatch": true,
+    "noCIUpload": true,
+    "noPublication": true,
+    "noServiceMigrationDeployment": true,
+    "noProviderCommissioning": true,
+    "noTags": true
+  },
+  "remaining": [
+    "M41 checked human-readable original target labels and available exact detail routes, preserving names after later edits.",
+    "M41 complete backend/source-command and immutable original outcome/allocation receipts.",
+    "M41 complete upload/canonical adapter before removing the native nonempty-Payment/live-binding fences.",
+    "Full M41 and remaining handover acceptance, keeping every installation resource end-user configured and all current delivery holds."
+  ]
+}

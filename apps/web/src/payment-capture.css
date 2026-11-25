@@ -1,0 +1,148 @@
+.payment-capture {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.payment-capture h2 {
+  font: 500 20px/28px var(--font-sans);
+}
+.payment-capture h3 {
+  font: 500 16px/24px var(--font-sans);
+  margin: 0 0 8px;
+}
+.payment-capture p {
+  line-height: 1.5;
+}
+.payment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 16px 0;
+}
+.payment-capture .button {
+  min-height: 44px;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.payment-capture fieldset {
+  border: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+}
+.payment-capture legend {
+  font: 500 18px/24px var(--font-sans);
+  padding: 0;
+}
+.payment-capture small {
+  font: 400 12px/18px var(--font-sans);
+  color: var(--text-700);
+}
+.payment-capture input,
+.payment-capture select,
+.payment-capture textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+.payment-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding: 12px 0;
+  line-height: 20px;
+}
+.payment-check input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  accent-color: var(--text);
+}
+.payment-source-settings > summary,
+.payment-history > summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 0;
+  font-weight: 500;
+}
+.payment-source-settings,
+.payment-history {
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+.payment-warnings {
+  padding-left: 20px;
+  line-height: 1.5;
+}
+.payment-details {
+  margin: 16px 0;
+}
+.payment-details > div {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.payment-details dt {
+  color: var(--text-700);
+}
+.payment-details dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.payment-saved > section {
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+.payment-match-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.payment-match-list > li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+.payment-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.payment-confirm p {
+  margin: 0;
+}
+.payment-history article {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.payment-history ol {
+  padding-left: 20px;
+  line-height: 1.8;
+}
+.payment-capture .inbox-manual {
+  padding: 0;
+}
+.payment-saved header > p {
+  font-size: 20px;
+}
+.payment-capture input[type='datetime-local'] {
+  font-family: var(--font-sans);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.payment-financial-original p[dir],
+.payment-history p[dir] {
+  white-space: pre-wrap;
+}
