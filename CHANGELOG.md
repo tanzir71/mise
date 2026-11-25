@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 native payment actions now atomically retain their exact invocation, effective matching controls, financial confirmations and original identities through one shared native executor. Ordinary restore and independent originals retain those choices; older actions receive no invented consent. The connected backend/outcome/canonical adapter remains open and the preview stays off. All configuration remains end-user owned. See [native payment commands](docs/payment-native-commands.md).
+
 - In progress: M41 can retain a complete validated original outlet/payment snapshot in shared immutable records and resolve exact original native financial actions. Radix buckets avoid repeating unchanged ledgers and imported notes across snapshots; malformed, cross-scope and self-rehashed invalid money evidence fail verification. This is groundwork for the full backend/outcome/canonical adapter, with no sync fence removed or hosted service changed. All configuration remains end-user owned. See [complete payment originals](docs/payment-original-basis.md).
 
 - In progress: M41 payment receipts now show checked original order/customer/counter labels and actual detail links, retaining names after edits, link removal, undo and backup restore. Customer links select the original account currency. Complete financial/evidence checks still precede display; no money or schema changes. The full backend/canonical adapter remains open and the preview stays off. See [original target inspection](docs/payment-inspection.md).

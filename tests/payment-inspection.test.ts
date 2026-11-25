@@ -297,7 +297,7 @@ for (const legacy of [false, true])
         backup.schemaVersion = 12;
         backup.tables.payments = backup.tables.payments.map(inflate);
         backup.tables.events = backup.tables.events
-          .filter((e) => e.command !== paymentEvidenceCommand)
+          .filter((e) => e.command !== paymentEvidenceCommand && e.command !== 'source.payment-invocation')
           .map((e) =>
             e.paymentId
               ? {

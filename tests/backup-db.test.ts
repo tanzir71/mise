@@ -168,7 +168,7 @@ test('schema 7 records upgrade to the current local schema and portable schema 1
   const {db:source} = await fullFixture(),records:Record<string,unknown[]> = {},stores:Record<string,string> = {};
   for (const table of source.tables.filter(t => (backupTableNames as readonly string[]).includes(t.name)&&!['purchases','inboxItems','payments'].includes(t.name))) {
     stores[table.name] = [table.schema.primKey.src,...table.schema.indexes.filter(i => !['handoffId','handoffTopic','[handoffId+handoffRevision]','inboxId','[inboxId+inboxRevision]','paymentId','[paymentId+paymentRevision]'].includes(i.name)).map(i => i.src)].join(',');
-    records[table.name] = (await table.toArray()).filter(row => table.name !== 'events' || !row.command.startsWith('purchase.') && !row.command.startsWith('inbox.') && !row.command.startsWith('payment.'));
+    records[table.name] = (await table.toArray()).filter(row => table.name !== 'events' || !row.command.startsWith('purchase.') && !row.command.startsWith('inbox.') && !row.command.startsWith('payment.') && !row.command.startsWith('source.payment-'));
   }
   const name = `mise-purchases-v7-${randomUUID()}`,legacy = new Dexie(name);legacy.version(7).stores(stores);
   for (const table of Object.keys(stores)) await legacy.table(table).bulkPut(records[table]);legacy.close();

@@ -882,8 +882,10 @@ it('binds recording to the actual source, outlet selection and connection, and p
 
 it('upgrades strict schema-11 observations without reinterpreting originals or allowing new financial fields to masquerade as legacy data', async () => {
   const f = await fixture(),
-    current = await f.db.readBackup(),
-    legacy = JSON.parse(JSON.stringify(current));
+    current = await f.db.readBackup();
+  // Reconstruct the historical schema-11 fixture before invocation retention.
+  current.tables.events = current.tables.events.filter(e => e.command !== 'source.payment-invocation');
+  const legacy = JSON.parse(JSON.stringify(current));
   legacy.schemaVersion = 11;
   const upgraded = parseBackup(legacy);
   expect(upgraded.schemaVersion).toBe(13);
@@ -956,7 +958,8 @@ it('preserves a complete legacy schema-12 financial history unchanged and reject
   legacy.schemaVersion = 12;
   legacy.tables.payments = current.tables.payments.map(inflate);
   legacy.tables.events = current.tables.events
-    .filter((e) => e.command !== paymentEvidenceCommand)
+    // Schema 12 predates compact originals and retained native invocations.
+    .filter((e) => e.command !== paymentEvidenceCommand && e.command !== 'source.payment-invocation')
     .map((e) =>
       e.paymentId
         ? {

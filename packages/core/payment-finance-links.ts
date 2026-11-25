@@ -1,3 +1,4 @@
+import {validateNativePaymentInvocations} from './payment-invocations';
 import type { CreditEntry, Order, Payment, Sale } from './models';
 import type { BackupTables } from './backup-tables';
 import { validateBackupRow } from './backup-schema';
@@ -441,6 +442,7 @@ export function validatePaymentFinanceLinks(
     }
   }
   reader.assertComplete();
+  validateNativePaymentInvocations(tables.events,(fingerprint,at)=>reader.expand(fingerprint,at),outletId=>tables.outlets.find(o=>o.id===outletId)?.businessId);
   // Reuse checked originals for read-only presentation, never write authority.
   return reader;
 }

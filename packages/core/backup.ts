@@ -30,7 +30,7 @@ export function parseBackup(input:unknown):MiseBackup {
     const oldPayment=(row:unknown)=>{const p=backupRecord(row,'legacy payment');if(Object.hasOwn(p,'referenceScope')||Object.hasOwn(p,'postings'))throw new Error('The schema-11 backup cannot contain newer payment recording fields.');};
     if(!Array.isArray(legacy.payments)||!Array.isArray(legacy.events))throw new Error('Keep all legacy payment and audit records.');
     for(const p of legacy.payments)oldPayment(p);
-    for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)oldPayment(event.before);oldPayment(event.after);}}
+    for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.command==='source.payment-invocation')throw Error('The schema-11 backup cannot contain newer payment invocations.');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)oldPayment(event.before);oldPayment(event.after);}}
     return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
   }
   if(backup.schemaVersion===12){
@@ -38,7 +38,7 @@ export function parseBackup(input:unknown):MiseBackup {
     if(!Array.isArray(legacy.events)||!Array.isArray(legacy.payments))throw Error('Keep all legacy payment and audit records.');
     const old=(row:unknown)=>{const p=backupRecord(row,'legacy payment');const fp=(v:unknown)=>{if(typeof v!=='string')return;let x:unknown;try{x=JSON.parse(v);}catch{return;}if(x&&typeof x==='object'&&(x as {v?:unknown}).v===2)throw Error('The schema-12 backup cannot contain compact payment evidence.');};if(p.association)fp(backupRecord(p.association,'legacy association').fingerprint);if(Array.isArray(p.postings))for(const raw of p.postings){const post=backupRecord(raw,'legacy posting');fp(backupRecord(post.target,'legacy target').fingerprint);fp(backupRecord(post.receipt,'legacy receipt').fingerprint);if(post.undo)fp(backupRecord(post.undo,'legacy undo').fingerprint);}};
     for(const p of legacy.payments)old(p);
-    for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.command==='source.payment-evidence')throw Error('The schema-12 backup cannot contain compact payment evidence.');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)old(event.before);old(event.after);}}
+    for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.command==='source.payment-invocation')throw Error('The schema-12 backup cannot contain newer payment invocations.');if(event.command==='source.payment-evidence')throw Error('The schema-12 backup cannot contain compact payment evidence.');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)old(event.before);old(event.after);}}
     return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
   }
   if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9, 10, 11, 12 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);

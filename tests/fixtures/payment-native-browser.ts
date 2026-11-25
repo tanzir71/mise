@@ -7,3 +7,5 @@ export {seedPaymentStorage} from './payment-storage';
 export {creditBalance} from '../../packages/core/khata';
 
 export * from '../../packages/core/payment-originals';
+
+export * from '../../packages/core/payment-invocations';

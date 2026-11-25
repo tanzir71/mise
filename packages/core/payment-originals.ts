@@ -1,3 +1,4 @@
+import {readNativePaymentInvocation,type NativePaymentInvocation} from './payment-invocations';
 import { validatePaymentFinanceLinks } from './payment-finance-links.ts';
 import type { AuditEvent, Payment, PaymentPosting } from './models.ts';
 import { sha256 } from '@noble/hashes/sha2';
@@ -469,6 +470,7 @@ export interface PaymentOriginalAction {
   ref: PaymentOriginalActionRef;
   /** Genuine native facts. These do not assert a canonical outcome or grant a write. */
   event: AuditEvent;
+  invocation: NativePaymentInvocation | null;
   before: Payment | null;
   after: Payment;
   source: MiseBackup['tables']['inboxItems'][number];
@@ -556,6 +558,7 @@ export function readPaymentOriginalAction(
     basis,
     ref,
     event,
+    invocation: readNativePaymentInvocation(event,t.events),
     before,
     after,
     source,

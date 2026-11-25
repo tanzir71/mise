@@ -1,0 +1,220 @@
+{
+  "milestone": "M41",
+  "increment": "Atomic real native payment invocation and exact command execution",
+  "complete": false,
+  "baseCommit": "389db8f590fc68a0e175b50d0103db9bab55125f",
+  "scope": {
+    "actualNativePath": true,
+    "captureEditMatchUnmatchVoidReopenRecordAndUndo": true,
+    "immutableOriginalInvocationLookup": true,
+    "legacyInvocationIsNull": true,
+    "backendCanonicalAdapterEnabled": false,
+    "liveBindingUploadCanonicalFencesRetained": true,
+    "paymentTextDefault": false,
+    "nativeSchema": 29,
+    "ordinaryBackupSchema": 13,
+    "ordinaryTables": 22,
+    "originalBasisVersion": 1,
+    "noHostedSqlServiceWorkflowOrPublicationChanges": true,
+    "allInstallationConfigurationEndUserOwned": true
+  },
+  "unit": {
+    "uniqueCasesVerified": 5511,
+    "files": 291,
+    "newNativeCommandCases": 19,
+    "singleCleanFullSuiteInvocation": false,
+    "fullRun": {
+      "passed": 5510,
+      "failed": 1,
+      "durationSeconds": 1456.99,
+      "log": ".private/m41-invocations-full-unit.log",
+      "failure": "The schema-7 reconstruction removed newer Payment rows/actions but retained the new invocation companion."
+    },
+    "fixtureCorrection": {
+      "productionValidationChanged": false,
+      "selection": "Exclude later source.payment-* companions from the reconstructed schema-7 history, as newer Payment rows/actions are already excluded.",
+      "recheckPassed": 63,
+      "recheckFiles": [
+        "tests/backup-db.test.ts",
+        "tests/payment-native-commands.test.ts",
+        "tests/payment-finance.test.ts",
+        "tests/payment-inspection.test.ts"
+      ],
+      "durationSeconds": 8.34,
+      "log": ".private/m41-invocations-fixture-recheck.log"
+    },
+    "otherLegacyConstructions": "Historical schema-11/12 fixture construction excludes post-format invocation companions; assertions and original data sizes remain.",
+    "originalCorporaAssertionsAndDeadlines": true,
+    "unitMaxWorkers": 2,
+    "productionSourcesUnchangedBetweenFullRunAndRecheck": true
+  },
+  "browser": {
+    "root": {
+      "report": ".private/m41-invocations-root-browser.json",
+      "startTime": "2026-11-25T11:45:24.464Z",
+      "duration": 208065.247,
+      "expected": 32,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "pages": {
+      "report": ".private/m41-invocations-pages-browser.json",
+      "startTime": "2026-11-25T11:50:33.084Z",
+      "duration": 184093.44400000002,
+      "expected": 32,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "distinctPerBase": 32,
+    "newPerBase": 2,
+    "workers": 1,
+    "retries": 0,
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "axeViolations": 0,
+    "providerAccountRequired": false,
+    "originalsTransportIsTestOnly": true
+  },
+  "checks": {
+    "types": {
+      "passed": true,
+      "astroFiles": 222,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-invocations-types-verified.log"
+    },
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-invocations-lint-verified.log"
+    },
+    "builds": [
+      {
+        "base": "/",
+        "passed": true,
+        "log": ".private/m41-invocations-root-build.log"
+      },
+      {
+        "base": "/mise/",
+        "passed": true,
+        "log": ".private/m41-invocations-pages-build.log"
+      }
+    ],
+    "priorVisualEvidence": "docs/payment-inspection-verification.json",
+    "newProductMarkupOrStyles": false,
+    "newVisualComparisonRun": false,
+    "ownPort": 4332,
+    "neverTouchPort": 4321
+  },
+  "secretScan": {
+    "status": "passed",
+    "command": "pnpm check:secrets --history --artifacts",
+    "observedBeforeFinalRecord": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0
+    },
+    "finalSameSourceRecordRecheck": ".private/m41-invocations-final-secrets.log",
+    "newExceptions": 0,
+    "legacyBaselineChanged": false,
+    "commitPushGuardsRemainEnabled": true
+  },
+  "delivery": {
+    "directMain": true,
+    "skipCi": true,
+    "workflowsHeld": true,
+    "publicationHeld": true,
+    "providerCommissioningHeld": true,
+    "tagsHeld": true,
+    "prOrSignoffRequested": false
+  },
+  "remaining": [
+    "Authenticated native command admission/completion and exact original action recovery.",
+    "Durable originals/native outbox and actual canonical financial outcome/undo receipts.",
+    "Complete lossless initial upload, canonical projection and ordinary backup integration before removing existing fences."
+  ],
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "3dfd8696fdb6e8260472bc718262d1d662d458467b5dfd383af0b5373b45d3c6"
+    },
+    {
+      "path": "apps/web/src/data/payment-capture.ts",
+      "sha256": "5d6c96c9dec4e731e71c3581e00f8ae5e675463147ef3f0517c811a8c3773526"
+    },
+    {
+      "path": "docs/payment-native-commands.md",
+      "sha256": "16f4e9c6cbbf287eee673668b3b259614fd05dbefbea9a5b60f048a435473540"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "82827db40b7dfb6f6000e55f30040ab448cc50a37e4f9ea5679732f76bddcbc5"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "6025e873b865397b54c550dcff6cd35ac18eeeb5695a310181f66b2203a12f63"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "142700b196d73398d9fcc536c13f967ba439ff7cfec90aaaa2122ff151cf8156"
+    },
+    {
+      "path": "packages/core/backup.ts",
+      "sha256": "0e7463d606a3d88476bbf775e160c9fbc62f977f6c6ec86b5b7344c0204d5685"
+    },
+    {
+      "path": "packages/core/payment-finance-links.ts",
+      "sha256": "3e7d94d7506e9be2a6d1b9c085f55c4ae2a346ceb190e3b1df85e67d4fddb893"
+    },
+    {
+      "path": "packages/core/payment-invocations.ts",
+      "sha256": "178955c6fb6a7c9e5ec2465e6e6c7e0aefd66544402edcaed8fe95d533035103"
+    },
+    {
+      "path": "packages/core/payment-native-commands.ts",
+      "sha256": "ed493e248a963443dc5e4f81008db0a5732f80a82215d5c687fbbb37f64dbe62"
+    },
+    {
+      "path": "packages/core/payment-originals.ts",
+      "sha256": "971f96b45357c0c0a0e29df26eee8a0b36d4973f02a451bc0f9744bd73966fe5"
+    },
+    {
+      "path": "tests/backup-db.test.ts",
+      "sha256": "cc2d5385d6f83072d42d40e93e1664fdd862bb520351ca96ed2427901d8d335c"
+    },
+    {
+      "path": "tests/e2e/payment-invocations.spec.ts",
+      "sha256": "486c3fe15ac3046fe9c41cac2df3cad028083b54184d92b5838f079b6604634c"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "c269195e3d1396041287e559e39a88694dcf831c5f5dbeae7087ea70960ff654"
+    },
+    {
+      "path": "tests/payment-finance.test.ts",
+      "sha256": "7d20b1f97bc754f30fef260ac8afc39960f06a375c79b4ad79e005a7e2463649"
+    },
+    {
+      "path": "tests/payment-inspection.test.ts",
+      "sha256": "cd0f7ce890de72f55e86275f23b3acc7fe7d712c2963ce023aa7d9d51573c03a"
+    },
+    {
+      "path": "tests/payment-native-commands.test.ts",
+      "sha256": "2834453dbebb3e899ee647473262593c5d095a883a306ee58aac58a9b12a1c88"
+    }
+  ],
+  "sourceFingerprint": "a48dc4a7b1f9de3af1aaa46ae5099c2cda24e51b0ee95a9c05d2495aaacbbe5a"
+}
