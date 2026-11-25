@@ -12,3 +12,5 @@ export * from '../../packages/core/payment-invocations';
 
 export * from '../../apps/web/src/data/payment-original-retention';
 export * from '../../packages/core/payment-archive';
+
+export * from '../../apps/web/src/data/original-copies';

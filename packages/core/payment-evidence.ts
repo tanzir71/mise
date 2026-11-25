@@ -1,4 +1,4 @@
-import { sha256 } from '@noble/hashes/sha2';
+import { literalSha256 } from './literal-hash';
 import type {
   AuditEvent,
   CreditEntry,
@@ -57,10 +57,7 @@ function ensure(ok: unknown): asserts ok {
       'Keep the complete original payment evidence and its verified links.',
     );
 }
-export const paymentEvidenceDigest = (v: unknown) =>
-  Array.from(sha256(new TextEncoder().encode(literalToken(v))), (b) =>
-    b.toString(16).padStart(2, '0'),
-  ).join('');
+export const paymentEvidenceDigest = literalSha256;
 function digestId(digest: string) {
   let n = BigInt('0x' + digest.slice(0, 32)),
     result = '';

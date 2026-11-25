@@ -4,6 +4,7 @@ const kitchenHistory='tests/kitchen-current-tickets.test.ts';
 const paymentOriginals='tests/payment-originals.test.ts';
 const nativePaymentBackend='tests/native-payment-backend.test.ts';
 const paymentArchive='tests/payment-archive.test.ts';
+const originalCopies='tests/native-original-copies.test.ts';
 export default defineConfig({test:{maxWorkers:2,projects:[
   // Start the full original history in a fresh worker before accumulated WASM
   // allocations from the other suites. Groups run sequentially; its original
@@ -16,5 +17,6 @@ export default defineConfig({test:{maxWorkers:2,projects:[
   // ordinary SQL/build fixtures; all existing corpora and deadlines stay intact.
   {test:{name:'native-payment-backend',include:[nativePaymentBackend],sequence:{groupOrder:2}}},
   {test:{name:'payment-archive',include:[paymentArchive],sequence:{groupOrder:3}}},
-  {test:{name:'unit',include:['tests/**/*.test.ts'],exclude:[...configDefaults.exclude,kitchenHistory,paymentOriginals,nativePaymentBackend,paymentArchive],sequence:{groupOrder:4}}},
+  {test:{name:'original-copies',include:[originalCopies],sequence:{groupOrder:4}}},
+  {test:{name:'unit',include:['tests/**/*.test.ts'],exclude:[...configDefaults.exclude,kitchenHistory,paymentOriginals,nativePaymentBackend,paymentArchive,originalCopies],sequence:{groupOrder:5}}},
 ]}});

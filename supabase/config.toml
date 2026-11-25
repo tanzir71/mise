@@ -147,3 +147,6 @@ verify_jwt = false
 
 [functions.native-payment]
 verify_jwt = true
+
+[functions.native-original-copy]
+verify_jwt = true

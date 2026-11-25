@@ -1,5 +1,5 @@
+import { literalSha256 } from './literal-hash';
 import { sha256 } from '@noble/hashes/sha2';
-import { literalToken } from './literal-token';
 import { marketPacks } from './packs';
 import { inboxSnapshot, type InboxItem } from './inbox';
 import type { AuditEvent, Payment, PaymentCheckedFields } from './models';
@@ -97,10 +97,7 @@ function ensure(ok: unknown): asserts ok {
 /** Canonical literal bytes preserve NUL and lone surrogates through JSON escapes.
  * These hashes establish equality, never membership, consent or write authority. */
 export function paymentInvocationHash(value: unknown): string {
-  return Array.from(
-    sha256(new TextEncoder().encode(literalToken(value))),
-    (b) => b.toString(16).padStart(2, '0'),
-  ).join('');
+  return literalSha256(value);
 }
 /** The existing native financial identities, shared by device and server replay. */
 export function nativePaymentId(source: string, slot: string): string {
@@ -347,9 +344,10 @@ export function readNativePaymentInvocation(
   event: AuditEvent,
   events: readonly AuditEvent[],
 ): NativePaymentInvocation | null {
-  const receipt = events.find(
-    (e) => e.id === nativePaymentId(event.id, 'invocation'),
-  );
+  if (!events.length) return null;
+  // The companion identity depends on this action, not each historical row.
+  const receiptId = nativePaymentId(event.id, 'invocation');
+  const receipt = events.find((e) => e.id === receiptId);
   if (!receipt) return null;
   ensure(
     receipt.command === paymentInvocationCommand &&

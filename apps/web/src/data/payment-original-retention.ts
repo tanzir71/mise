@@ -1,3 +1,4 @@
+import Dexie, { type Table } from 'dexie';
 import { parseLocalCloudState } from '@mise/core/local-outbox';
 import type { MiseDatabase } from './db';
 import { readDatabaseBackup } from './backup';
@@ -27,6 +28,23 @@ import {
   sharedJsonHash,
   type SharedJsonNode,
 } from '@mise/core/shared-json';
+/** Bound the native request queue while retaining the caller's one transaction.
+ * A later batch failure still aborts every earlier archive write. */
+function addArchiveRows<T>(
+  table: Pick<Table<T, string>, 'bulkAdd'>,
+  rows: readonly T[],
+): PromiseLike<void> {
+  let start = 0;
+  const next = (): PromiseLike<void> => {
+    const batch = rows.slice(start, start + 512);
+    start += batch.length;
+    return table.bulkAdd(batch).then(() => {
+      if (start < rows.length) return next();
+    });
+  };
+  // Keep empty results and each following batch in Dexie's transaction zone.
+  return rows.length ? next() : Dexie.Promise.resolve();
+}
 export async function readRetainedPaymentOriginals(
   db: MiseDatabase,
   current: MiseBackup,
@@ -97,8 +115,8 @@ export async function retainPaymentOriginal(
       indices: StoredPaymentOriginalNode[] = [];
     for (const node of plan.added)
       indices.push({ digest: node.digest, value: writer.write(node.json) });
-    await db.paymentOriginalValues.bulkAdd(writer.added);
-    await db.paymentOriginalNodes.bulkAdd(indices);
+    await addArchiveRows(db.paymentOriginalValues, writer.added);
+    await addArchiveRows(db.paymentOriginalNodes, indices);
     await db.paymentOriginalBases.add({
       id: plan.basis.root,
       basis: plan.basis,
@@ -147,9 +165,12 @@ export async function replaceRetainedPaymentOriginals(
     db.paymentOriginalNodes.clear(),
     db.paymentOriginalValues.clear(),
   ]);
-  await db.paymentOriginalValues.bulkAdd(writer.added as SharedJsonNode[]);
-  await db.paymentOriginalNodes.bulkAdd(index);
-  await db.paymentOriginalBases.bulkAdd(bases);
+  await addArchiveRows(
+    db.paymentOriginalValues,
+    writer.added as SharedJsonNode[],
+  );
+  await addArchiveRows(db.paymentOriginalNodes, index);
+  await addArchiveRows(db.paymentOriginalBases, bases);
 }
 /** Materialize only this complete frozen original; it never replaces current rows. */
 export async function readRetainedPaymentSnapshot(

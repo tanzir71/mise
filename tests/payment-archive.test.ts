@@ -360,8 +360,17 @@ it('upgrades an actual schema-29 owner store without changing native financial r
   expect(await next.operatorState.toArray()).toEqual(operator);
 });
 it('retains all 5,000 charges and the complete million-code-unit note through three original collections, normalized export and cold restored original undo', async () => {
+  const started = Date.now();
+  const phase = (stage: string) =>
+    console.log(
+      JSON.stringify({
+        stage: 'archive-scale-' + stage,
+        elapsedMs: Date.now() - started,
+      }),
+    );
   const f = await fixture(true),
     bases = [];
+  phase('fixture');
   let original = f.saved;
   for (let i = 0; i < 3; i++) {
     if (i) {
@@ -377,6 +386,7 @@ it('retains all 5,000 charges and the complete million-code-unit note through th
     }
     const source = await f.db.readBackup();
     bases.push(await retainPaymentOriginal(f.db, source));
+    phase('retained-' + i);
     await undoSavedPaymentMoney(
       f.db,
       f.review,
@@ -384,9 +394,11 @@ it('retains all 5,000 charges and the complete million-code-unit note through th
       true,
     );
   }
+  phase('originals');
   const copy = await f.db.readPortableBackup(),
     file = backupFile(copy.portable),
     text = await file.text();
+  phase('exported');
   expect(file.size).toBeLessThan(MAX_BACKUP_BYTES);
   expect(copy.portable.formatVersion).toBe(2);
   const decoded = parsePortableBackup(text);
@@ -410,7 +422,10 @@ it('retains all 5,000 charges and the complete million-code-unit note through th
     new TextEncoder().encode(JSON.stringify(decoded)).length,
   ).toBeGreaterThan(MAX_BACKUP_BYTES);
   const target = fresh();
-  await target.restoreBackup(text, await target.previewRestore(text));
+  const restoreReview = await target.previewRestore(text);
+  phase('restore-previewed');
+  await target.restoreBackup(text, restoreReview);
+  phase('restored');
   target.close();
   await target.open();
   const ref = {
@@ -481,3 +496,28 @@ it('holds new retention behind the existing live binding until the full native a
   expect(await counts(f.db)).toEqual([0, 0, 0]);
   expect(backupToken(await f.db.readBackup())).toBe(backupToken(source));
 });
+
+it('rolls earlier archive batches back when native storage fails after the first 512 writes', async () => {
+  const f = await fixture();
+  for (let i = 0; i < 120; i++)
+    await f.db.saveCustomer({
+      name: 'Extra original ' + i,
+      nickname: '',
+      phone: '',
+      address: '',
+      notes: '',
+      tags: [],
+    });
+  const source = await f.db.readBackup(),
+    before = backupToken(source),
+    archive = await counts(f.db);
+  let writes = 0;
+  f.db.paymentOriginalValues.hook('creating', () => {
+    if (++writes === 513)
+      throw new DOMException('Native storage full', 'QuotaExceededError');
+  });
+  await expect(retainPaymentOriginal(f.db, source)).rejects.toThrow();
+  expect(writes).toBeGreaterThanOrEqual(513);
+  expect(await counts(f.db)).toEqual(archive);
+  expect(backupToken(await f.db.readBackup())).toBe(before);
+}, 30000);

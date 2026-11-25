@@ -1,0 +1,372 @@
+{
+  "milestone": "M41",
+  "increment": "Private authenticated connected original copies with bounded resumable verification and strict recovery",
+  "complete": false,
+  "baseCommit": "3a854e49330239559607a7d6f8e69c2568f9435e",
+  "scope": {
+    "nativeSchema": 30,
+    "ordinaryCurrentSchema": 13,
+    "originalGraphVersion": 1,
+    "portableArchiveFormatVersion": 2,
+    "legacyEmptyArchiveFormatVersion": 1,
+    "newPrivateBackendTables": 5,
+    "newPrivateIndexes": 7,
+    "newPrivateJournalTables": 2,
+    "defaultOffPaymentPreviewUnchanged": true,
+    "financialAuthorityFromStorageReceipt": false,
+    "nativeOutboxAndCanonicalAdapterEnabled": false,
+    "existingFencesRetained": true,
+    "knownCopyRecoveryIntoEmptyJournal": true,
+    "allInstallationConfigurationEndUserOwned": true,
+    "newEnvironmentVariables": 0,
+    "administratorKeyRequiredByCopyFunction": false,
+    "noHostedWorkflowPublicationCommissioningOrTagChanges": true,
+    "calculationMemo": {
+      "maxAccountedBytes": 33554432,
+      "maxRetainedEntryBytes": 131072,
+      "maxEntries": 16384,
+      "completeCanonicalInputReserializedEveryCall": true,
+      "largeInputAlwaysCompletelyHashed": true,
+      "mutableObjectKeys": false,
+      "authorityOrValidationCached": false,
+      "persistentCachedInputs": false
+    }
+  },
+  "limits": {
+    "requestAndResponseBytes": 256000,
+    "fetchAndBodyDeadlineMs": 20000,
+    "multipartBytes": 147456,
+    "maxVerifiedNodesPerStep": 512,
+    "maxCopyNodeCount": 819200,
+    "maxCopyNodeBytes": 52428800,
+    "maxAccountPendingCopies": 20,
+    "maxAccountCopies": 512,
+    "maxAccountDeclaredMemberships": 1638400,
+    "maxAccountRetainedAndReservedNodeBytes": 536870912,
+    "eviction": false
+  },
+  "checks": {
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-copies-final-lint-r3.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 228,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-copies-final-types-r3.log"
+    },
+    "unit": {
+      "uniqueCasesVerified": 5609,
+      "filesAcrossCoverage": 295,
+      "singleCleanFullSuiteInvocation": false,
+      "fullRunBeforePerformanceFixes": {
+        "passed": 5593,
+        "failed": 2,
+        "files": 294,
+        "durationSeconds": 2134.22,
+        "log": ".private/m41-copies-full-unit.log",
+        "report": ".private/m41-copies-full-unit.json",
+        "failures": "Two archive deadlines, fixed and covered by the final related run."
+      },
+      "finalRelatedRun": {
+        "passed": 363,
+        "failed": 0,
+        "files": 19,
+        "log": ".private/m41-copies-final-related-unit.log",
+        "report": ".private/m41-copies-final-related-unit.json",
+        "durationSeconds": 575.43
+      },
+      "newCopyCases": 36,
+      "newDigestCases": 13,
+      "newLateBatchRollbackCases": 1,
+      "originalCorporaDeadlinesAndAssertionsPreserved": true,
+      "oldArchiveTestInstrumentation": "Added phase timing only; same data, financial assertions and 180-second deadline.",
+      "maxWorkers": 2,
+      "productionDeltaAfterFullRun": "Bounded native archive writes, one constant companion-ID derivation and bounded exact canonical digest calculation reuse. All affected payment/original/backend/archive/hash cases are rechecked in the final 363-case run.",
+      "coverageAccounting": "Union by source path, full test name and same-name parameterized occurrence; 22 parameterized cases share names in the full-run reporter."
+    },
+    "browser": {
+      "passed": true,
+      "casesAcrossBases": 102,
+      "workers": 1,
+      "retries": 0,
+      "port": 4332,
+      "protectedOtherProjectPort": 4321,
+      "widthsCovered": [360, 390, 768, 1024, 1440],
+      "existingAxeSeriousAndCriticalAssertionsPassed": true,
+      "runs": {
+        "root": {
+          "base": "/",
+          "passed": 51,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0,
+          "durationMs": 274623.414,
+          "report": ".private/m41-copies-root-browser.json",
+          "log": ".private/m41-copies-root-browser-final.log"
+        },
+        "pages": {
+          "base": "/mise/",
+          "passed": 51,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0,
+          "durationMs": 415060.019,
+          "report": ".private/m41-copies-pages-browser.json",
+          "log": ".private/m41-copies-pages-browser-final.log"
+        }
+      }
+    },
+    "build": {
+      "passed": true,
+      "bases": ["/", "/mise/"],
+      "logs": [
+        ".private/m41-copies-root-build-final.log",
+        ".private/m41-copies-pages-build-final.log"
+      ]
+    },
+    "newProductMarkupOrStyles": false,
+    "newVisualComparisonOrHostedCiArtifact": false,
+    "edgeBundle": {
+      "passed": true,
+      "entrypoint": "supabase/functions/native-original-copy/index.ts",
+      "bytes": 6161,
+      "sha256": "9474f8a37fa6da77fa0c8726fe9803c7091b96d0613be49068e0b1e12f858f66",
+      "runtimeImports": [],
+      "sourceFiles": 4,
+      "log": ".private/m41-copies-final-bundle.log"
+    },
+    "lineEndingOnlyNormalizationAfterChecks": [
+      "tests/literal-hash.test.ts: CRLF to LF; identical source lines, corpus, assertions and deadlines."
+    ]
+  },
+  "security": {
+    "advisorsCli": {
+      "passed": false,
+      "target": "local only",
+      "reason": "No running local stack on loopback port 54322. No hosted advisor or mutation attempted.",
+      "log": ".private/m41-copies-local-advisors.log"
+    },
+    "catalogReview": {
+      "passedInTargetedSmallCases": true,
+      "forcedRlsTables": 5,
+      "privateDefiners": 1,
+      "publicDefiners": 0,
+      "forbiddenDirectTableGrants": 0,
+      "emptySearchPaths": true,
+      "newForeignKeyPrefixesIndexed": true,
+      "passedInFinal36CaseCopySuite": true
+    },
+    "finalSourceHistoryArtifactPrivateValueScanPending": false,
+    "legacyFindingBaselineChanged": false,
+    "sourceHistoryArtifactPrivateValueScan": {
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "command": "pnpm check:secrets --history --artifacts",
+      "completedEvidenceLog": ".private/m41-copies-final-secrets-first.log",
+      "requiredFinalRecordRecheckLog": ".private/m41-copies-final-secrets.log",
+      "commitAndPushGuardsEnabled": true,
+      "reviewedHistoricalPolicyChanged": false
+    }
+  },
+  "diagnostics": {
+    "stoppedObsoleteScaleRuns": [
+      ".private/m41-copies-tests-r3.log",
+      ".private/m41-copies-scale-diagnostic.log",
+      ".private/m41-copies-scale-r2.log"
+    ],
+    "cause": "Recursive closure and a generic membership update repeatedly scanned historical/frontier rows. Replaced with durable 512-node steps and exact per-digest membership updates.",
+    "queryPlanProbe": {
+      "syntheticOnlyNotFinancialAcceptance": true,
+      "nodePoolRows": 89560,
+      "correctedPointUpdateVisitedRows": 1,
+      "correctedPointUpdateMs": 0.171,
+      "log": ".private/m41-copies-query-plans-point.log"
+    },
+    "initialFixtureCorrections": [
+      "Whitelist scope fields when preparing a manifest from a wider private identity.",
+      "Allow sha256 column names in the new test SQL identifier guard.",
+      "Seed an already-existing manager assignment idempotently.",
+      "Compare unchanged source data independently of fresh export timestamps."
+    ],
+    "nativeBrowserProfile": {
+      "originalCaseDeadlineMs": 90000,
+      "originalCaseDataAndAssertionsUnchanged": true,
+      "initialRootMatrixPassed": 50,
+      "initialRootMatrixFailed": 1,
+      "coldRecheckAlsoTimedOut": true,
+      "reason": "Repeated constant companion-ID derivation and repeated hashing of identical canonical ledger input.",
+      "calculationOnlyFixConfirmedAgainstIndependentNodeCrypto": true,
+      "unchangedCaseAfterFixMs": 61448,
+      "profile": ".private/m41-native-browser.cpuprofile",
+      "log": ".private/m41-native-browser-profile.log"
+    },
+    "nativeArchiveBatching": {
+      "initialNativeAsyncHelperPrematureCommitErrors": true,
+      "correctedToDexiePromiseChain": true,
+      "lateFailureRollsEarlierBatchesBack": true,
+      "finalArchiveCasesPassed": 21,
+      "finalArchiveScaleMs": 130606.80040000001,
+      "originalDeadlineMs": 180000
+    }
+  },
+  "publicationHold": {
+    "workflowIds": [419007052, 419075081, 419005433],
+    "workflowStates": [
+      "disabled_manually",
+      "disabled_manually",
+      "disabled_manually"
+    ],
+    "runCount": 77,
+    "latestRunId": 43927944995,
+    "latestRunHead": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+    "pagesDeploymentId": 7832852111,
+    "pagesHead": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+  },
+  "remaining": [
+    "Production copy controller bound to the actual SDK account, destination and native operator across every boundary",
+    "Actual native payment writer/outbox integration",
+    "Immutable original-versus-canonical outcomes",
+    "Historical initial registration without replaying money",
+    "Complete canonical projection and original financial undo integration",
+    "Known-copy discovery and product retention controls",
+    "Full M41 end-to-end acceptance"
+  ],
+  "localTestBoundary": "Real HTTP protocol and PostgreSQL roles are exercised locally. Hosted JWT signatures, managed Auth and deployed network/provider acceptance remain untested under the delivery holds.",
+  "measuredScale": {
+    "stage": "original-copy-scale",
+    "charges": 5000,
+    "noteCodeUnits": 1000000,
+    "nodeCount": 89562,
+    "nodeBytes": 23671566,
+    "originalCollections": 1,
+    "images": 1,
+    "verified": true,
+    "durationMs": 178360.21289999998
+  },
+  "measuredArchive": {
+    "stage": "archive-wire-size",
+    "wireBytes": 28762548,
+    "expandedJsonBytes": 55767354,
+    "charges": 5000,
+    "noteCodeUnits": 1000000,
+    "bases": 3,
+    "durationMs": 130606.80040000001
+  },
+  "sourceFingerprintAlgorithm": "SHA-256 of concatenated sorted path + space + sha256 + LF lines, UTF-8",
+  "sources": [
+    {
+      "path": "apps/web/src/data/original-copies.ts",
+      "sha256": "a9cb5679a9b6305b10b9829291681f6d2a9f2e16dcdd65e73fc90a50a0301ef3"
+    },
+    {
+      "path": "apps/web/src/data/payment-original-retention.ts",
+      "sha256": "15123d55e6831c8d8001ca44f93e8ff43fb42ede19817bc953b8d76106c777b5"
+    },
+    {
+      "path": "packages/core/literal-hash.ts",
+      "sha256": "7e8c2c9e7adea28fc8a89bf705009d044fd9eb3313c61d1a947dd2ec90076d53"
+    },
+    {
+      "path": "packages/core/literal-token.ts",
+      "sha256": "45a95a9d87409a6938b98c189790f479ad0e3baeb4d28d47f74da75e23ec7e79"
+    },
+    {
+      "path": "packages/core/original-copy-wire.ts",
+      "sha256": "e06e3ee6f22130e0b4a1ce9be083582d785855a02bba07036a61f1f72e085ebd"
+    },
+    {
+      "path": "packages/core/original-copy.ts",
+      "sha256": "3de657aa32d2671b8b12c510ea2c179e297544ccfbbd39619c68f331cf5f5355"
+    },
+    {
+      "path": "packages/core/payment-archive.ts",
+      "sha256": "69d72f2abe2ce492ceb382b1dca39938df7ec90638b813568a5e0a0b15b7c0e6"
+    },
+    {
+      "path": "packages/core/payment-evidence.ts",
+      "sha256": "a38a0f877a0c0915909bd1d8706d5db81c85dcfc21cc024df34c29c6818ffe2d"
+    },
+    {
+      "path": "packages/core/payment-invocations.ts",
+      "sha256": "8039644b60368756f54f4277ebe3583098105fded8843a26c971a8bff64992c4"
+    },
+    {
+      "path": "packages/core/payment-originals.ts",
+      "sha256": "971f96b45357c0c0a0e29df26eee8a0b36d4973f02a451bc0f9744bd73966fe5"
+    },
+    {
+      "path": "packages/core/shared-json.ts",
+      "sha256": "41f0848dc0b01e684d95317b18c6215f0ae5e9f6d489a87b4c3ac4a4168a801d"
+    },
+    {
+      "path": "supabase/config.toml",
+      "sha256": "013b770b190eb72dedbde11fcb12a2f93a3e1619a959e0b2789d1c921fd3ad10"
+    },
+    {
+      "path": "supabase/functions/.env.example",
+      "sha256": "340595e4353b9345e59fb7a9bddf5e615c08cc3ffc8913252a5f8001fb47cca2"
+    },
+    {
+      "path": "supabase/functions/_shared/original-copy-handler.ts",
+      "sha256": "4c5ac72ded9ffcf324a9831bf9102f5dd0f8148a379c5d7a690741a74457ef07"
+    },
+    {
+      "path": "supabase/functions/native-original-copy/index.ts",
+      "sha256": "fd92c5f05e914beced87ca4a875e761597c6c59dcd1b046a5e0dca24e504667f"
+    },
+    {
+      "path": "supabase/migrations/20261125152441_native_original_copies.sql",
+      "sha256": "b868082c0aea0bc77815685198e9978c4b3ed38c5bf4a8cfffe5756c5394eed8"
+    },
+    {
+      "path": "tests/e2e/payment-native.spec.ts",
+      "sha256": "45c144b8af1692d58e8822991061cda8b86a217a742d694c64b1ba3e12aac483"
+    },
+    {
+      "path": "tests/e2e/payment-original-copies.spec.ts",
+      "sha256": "96e05b29cca00a21fb7f5b6225b719ca91a8095a8264bfc8d63b9626404c2301"
+    },
+    {
+      "path": "tests/e2e/payment-originals.spec.ts",
+      "sha256": "4affc252fbe91c4e93f27ac7abfb881a7cf8b97641e87e41a427f7ad51b6de3b"
+    },
+    {
+      "path": "tests/fixtures/payment-native-browser.ts",
+      "sha256": "4e12b893281f59debea4b3142430610194a1271b437662d6cff7fd70490f5477"
+    },
+    {
+      "path": "tests/fixtures/payment-storage.ts",
+      "sha256": "9af16f22181f2e50e58d4fec140f3ed2325fb9280741c6b1904a69d23e5d0418"
+    },
+    {
+      "path": "tests/literal-hash.test.ts",
+      "sha256": "ffe44f97c7ecaa66685b334ccfdded9521ffd80e32245af4e0d430f6af49bd82"
+    },
+    {
+      "path": "tests/native-original-copies.test.ts",
+      "sha256": "8cb0012729f55c65a991267bfeee8f761cf9000cbbe42a11e54ca5ea27860557"
+    },
+    {
+      "path": "tests/payment-archive.test.ts",
+      "sha256": "79c34f2e4026a8035fb80a0a96b240fd11ebc33c42aa885e0f71e7162202abbc"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "58ac761019ebe11fde4e95c7e1320bbe6599d26eb49a3fff19dd28dc021473b1"
+    }
+  ],
+  "sourceFingerprint": "fb2204e3da421ae1625688c36691013ffcb3dbe344742d26204ad25c5549928b",
+  "verifiedAt": "2026-11-25T18:21:45.252749+00:00"
+}
