@@ -24,7 +24,16 @@ export function parseBackup(input:unknown):MiseBackup {
     if(Object.keys(oldTables).length!==expected.length||Object.keys(oldTables).some(name=>!(expected as readonly string[]).includes(name)))throw new Error(`The schema-${String(version)} backup has unsupported tables.`);
     return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION,tables:{...oldTables,...(version===7?{purchases:[]}:{}),...(version!==10?{inboxItems:[]}:{}),payments:[]}});
   }
-  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9, 10 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
+  if (backup.schemaVersion === 11) {
+    const legacy=backupRecord(backup.tables,'tables');
+    if(Object.keys(legacy).length!==backupTableNames.length||Object.keys(legacy).some(name=>!(backupTableNames as readonly string[]).includes(name)))throw new Error('The schema-11 backup has unsupported tables.');
+    const oldPayment=(row:unknown)=>{const p=backupRecord(row,'legacy payment');if(Object.hasOwn(p,'referenceScope')||Object.hasOwn(p,'postings'))throw new Error('The schema-11 backup cannot contain newer payment recording fields.');};
+    if(!Array.isArray(legacy.payments)||!Array.isArray(legacy.events))throw new Error('Keep all legacy payment and audit records.');
+    for(const p of legacy.payments)oldPayment(p);
+    for(const raw of legacy.events){const event=backupRecord(raw,'legacy audit');if(event.paymentId!==undefined||typeof event.command==='string'&&event.command.startsWith('payment.')){if(event.before!==null)oldPayment(event.before);oldPayment(event.after);}}
+    return parseBackup({...backup,schemaVersion:BACKUP_SCHEMA_VERSION});
+  }
+  if (backup.schemaVersion !== BACKUP_SCHEMA_VERSION) throw new Error(`This backup uses schema ${String(backup.schemaVersion)}. This version supports schemas 7, 8, 9, 10, 11 and ${BACKUP_SCHEMA_VERSION}; open it with the matching Mise version.`);
   if (Object.keys(backup).some(k => !['format','formatVersion','schemaVersion','exportedAt','tables'].includes(k))) throw new Error('The backup has unsupported metadata.');
   backupTime(backup.exportedAt,'exportedAt');
   const tables = backupRecord(backup.tables,'tables');

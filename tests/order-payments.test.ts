@@ -42,6 +42,16 @@ test('zero-total orders settle without inventing a sale or a credit charge',()=>
   const cancelled=cancelOrderCommand(paid.order,undefined,context,2,at+2); expect(cancelled.order.payment.cancellation?.refundDue).toBe(0);
 });
 
+test('an explicitly supplied bank label can settle an order while ordinary market wallet restrictions remain intact',()=>{
+  const {context,order}=fixture(),bank={method:'wallet' as const,wallet:'Bank transfer'};
+  expect(()=>settleOrderCommand(order,bank,context,order.revision,at)).toThrow('wallet');
+  const paid=settleOrderCommand(order,bank,{...context,wallets:['Bank transfer']},order.revision,at);
+  expect(paid.sales[0]).toMatchObject({method:'wallet',methodName:'Bank transfer',amount:order.total,currency:order.currency});
+  expect(()=>settleOrderCommand(order,{method:'wallet',wallet:'bKash'},{...context,wallets:['Bank transfer']},order.revision,at)).toThrow('wallet');
+  const undone=undoOrderPaymentCommand(paid.order,paid.sales[0],context,paid.order.revision,at+1);
+  expect(undone.sales[0].voidReason).toBe('undo');expect(undone.order.payment.status).toBe('pending');
+});
+
 test('khata settlement checks current identity, allowed state, currency and exact over-limit consent',()=>{
   const {context,order}=fixture(), limited={...context,ledger:{...context.ledger,account:{...context.ledger.account,limit:1000}}};
   expect(()=>settleOrderCommand(order,{method:'credit',accountId:limited.ledger.account.id},limited,1,at)).toThrow(/limit/);

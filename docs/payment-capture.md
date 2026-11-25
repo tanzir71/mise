@@ -1,6 +1,8 @@
 # Native saved payments
 
-M41 now has a first-class local `Payment` record, a Dexie schema-29 store, schema-11 ordinary backups and native source/review operations. This is the persistence and association layer of the same M41 milestone. Its product review interface, guarded financial posting and complete backend command/canonical adapter remain required before enabling the feature. The existing Inbox manual-money flow and M37 backend observation service keep their separate contracts.
+The follow-up [native financial recording increment](payment-finance.md) adds explicit order/khata/counter recording and original financial undo, with schema-12 backups. The verification below records the earlier persistence delivery. Product review and the full backend/canonical adapter remain required in the same M41 milestone.
+
+The initial persistence increment added a first-class local `Payment` record, a Dexie schema-29 store, schema-11 ordinary backups and native source/review operations. It provided the persistence and association layer of the same M41 milestone. At that checkpoint, the product review interface, guarded financial posting and complete backend command/canonical adapter remained required before enabling the feature. The existing Inbox manual-money flow and M37 backend observation service keep their separate contracts.
 
 ## Original source and checked values
 
@@ -34,7 +36,7 @@ Unit checks exercise actual local recording, immutable originals, concurrent cap
 
 All hosting, backend/source/provider accounts, credentials, phone numbers and later device enrollment belong to each installation. Privileged provider credentials stay server-side. No maintainer account or verification number is needed for these local operations. Workflows, CI uploads, publication, service/migration deployment and tags remain held.
 
-## Verification of this increment
+## Verification of the persistence increment
 
 The complete unit run passes all **5,416 tests in 283 files**, including 36 native Payment cases and two independent legacy-upload compatibility cases. The focused native/backup set passes 210 cases. Original 5,004-record history, 1,000-line and million-character fixtures and wall-clock deadlines remain unchanged. On the busy Windows host, the final run used private process-local Node priority with the repository's two-worker limit; browser runs used one worker.
 

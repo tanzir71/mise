@@ -14,12 +14,19 @@ export interface AuditEvent { id: string; outletId: string; customerId?: string;
 export interface SetupInput { businessType: BusinessType; marketCode: MarketCode; name: string; phone: string; outletName?: string; address?: string; language?: MessageLanguage; timezone?: string; currency?: string }
 export interface SetupCommand { snapshot: SetupSnapshot; items: Item[]; categories: Category[]; event: AuditEvent }
 export type PaymentMethod = 'cash' | 'wallet' | 'card';
+export interface PaymentCheckedFields {amount:number;currency:string;method:PaymentMethod;methodName:string;reference:string;referenceScope?:string;fromPhone?:string;receivedAt:number}
+export interface PaymentPosting {
+  note:string;
+  eventId:string;at:number;money:PaymentCheckedFields;
+  target:{kind:'order'|'credit'|'counter';id:string;fingerprint:string};
+  receipt:{kind:'sale'|'credit';id:string;fingerprint:string;eventIds:string[]};
+  undo?:{eventId:string;at:number;eventIds:string[];fingerprint:string;mode:'performed'|'already-undone'};
+}
 /** A saved observation of incoming money. Association alone never posts money. */
-export interface Payment extends Entity {
+export interface Payment extends Entity, PaymentCheckedFields {
   outletId:string;inboxId:string;revision:number;createdBy:string;eventId:string;
   source:'manual'|'sms'|'notification';original:{title:string;text:string;url:string;createdAt:number};parsed:ParsedPaymentText;
-  amount:number;currency:string;method:PaymentMethod;methodName:string;reference:string;fromPhone?:string;receivedAt:number;
-  referenceKey?:string;matchKey?:string;
+  referenceKey?:string;matchKey?:string;postings?:PaymentPosting[];
   association?:{kind:'order'|'sale'|'credit';id:string;fingerprint:string;at:number;eventId:string};
   voidedAt?:number;
 }

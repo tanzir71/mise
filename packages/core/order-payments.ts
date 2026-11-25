@@ -10,7 +10,7 @@ import type { AuditEvent, CreditEntry, Order, OrderRefund, PaymentMethod, Sale }
 import type { ShopSetup } from './shop-access';
 
 export type OrderMoneyIds=(kind:'event'|'sale'|'saleEvent'|'entry'|'creditEvent'|'refund'|'refundEvent')=>string;
-export interface OrderMoneyContext { setup:ShopSetup; ledger?:CustomerLedgerContext }
+export interface OrderMoneyContext { setup:ShopSetup; ledger?:CustomerLedgerContext; wallets?:readonly string[] }
 export interface OrderSettlementInput { method:PaymentMethod|'credit'; wallet?:string; given?:number; accountId?:string; confirmation?:OverLimitConfirmation }
 export interface OrderRefundInput { amount:number; method:PaymentMethod; wallet?:string; note?:string }
 export interface OrderMoneyChange { order:Order; sales:Sale[]; entries:CreditEntry[]; refunds:OrderRefund[]; events:AuditEvent[] }
@@ -23,9 +23,9 @@ function update(before: Order, setup: ShopSetup, command: string, at: number, ne
 function saleEvent(sale: Sale, before: Sale|null, setup: ShopSetup, command: string, at: number, newId:OrderMoneyIds): AuditEvent {
   return {id:newId('saleEvent'),outletId:sale.outletId,orderId:sale.orderId,customerId:sale.customerId,actor:{type:'member',id:setup.owner.id},command,before,after:sale,at};
 }
-function paymentMethod(method: PaymentMethod, wallet: string|undefined, setup: ShopSetup, previous?:Sale, historicalWallets:string[] = []): string {
+function paymentMethod(method: PaymentMethod, wallet: string|undefined, setup: ShopSetup, previous?:Sale, historicalWallets:string[] = [],wallets:readonly string[]=marketPacks[setup.business.marketCode]['pay/wallets']): string {
   if (!['cash','wallet','card'].includes(method)) throw new Error('Choose a supported payment method.');
-  if (method === 'wallet' && (!wallet || wallet === 'Cash' || (!marketPacks[setup.business.marketCode]['pay/wallets'].includes(wallet) && !(previous?.method === 'wallet' && previous.methodName === wallet) && !historicalWallets.includes(wallet)))) throw new Error('Choose a wallet available in this market.');
+  if (method === 'wallet' && (!wallet || wallet === 'Cash' || (!wallets.includes(wallet) && !(previous?.method === 'wallet' && previous.methodName === wallet) && !historicalWallets.includes(wallet)))) throw new Error('Choose a wallet available in this market.');
   return method === 'wallet' ? wallet! : method === 'cash' ? 'Cash' : 'Card';
 }
 function ledgerFor(order: Order, context: OrderMoneyContext): CustomerLedgerContext {
@@ -45,12 +45,12 @@ export function settleOrderCommand(before: Order, input: OrderSettlementInput, c
   if (!pricing.complete || pricing.total !== before.total || pricing.subtotal !== before.subtotal || before.total === null) throw new Error('Finish pricing and confirm swaps before recording payment.');
   if (!['cash','wallet','card','credit'].includes(input.method)) throw new Error('Choose a supported payment method.');
   const historicalWallets = before.payment.method === 'wallet' && before.payment.wallet ? [before.payment.wallet] : [];
-  if (input.method !== 'credit') paymentMethod(input.method,input.wallet,setup,undefined,historicalWallets);
+  if (input.method !== 'credit') paymentMethod(input.method,input.wallet,setup,undefined,historicalWallets,context.wallets);
   if (input.given !== undefined && (input.method !== 'cash' || !Number.isSafeInteger(input.given) || input.given < before.total)) throw new Error('Given must cover the cash total.');
   const change = update(before,setup,'order.payment',at,newId);
   if (before.total === 0) { change.order.payment = {method:'cash',status:'paid',at}; return change; }
   const expression = moneyInputValue(before.total,before.currency).replace(',','.');
-  const recorded = recordSaleCommand({expression,method:input.method === 'credit' ? 'cash' : input.method,wallet:input.wallet,given:input.method === 'cash' ? input.given : undefined,who:before.customer.name},{setup:{...setup,outlet:{...setup.outlet,currency:before.currency}},items:[],wallets:[...marketPacks[setup.business.marketCode]['pay/wallets'],...historicalWallets]},at,kind=>newId(kind==='event'?'saleEvent':'sale'));
+  const recorded = recordSaleCommand({expression,method:input.method === 'credit' ? 'cash' : input.method,wallet:input.wallet,given:input.method === 'cash' ? input.given : undefined,who:before.customer.name},{setup:{...setup,outlet:{...setup.outlet,currency:before.currency}},items:[],wallets:[...(context.wallets??marketPacks[setup.business.marketCode]['pay/wallets']),...historicalWallets]},at,kind=>newId(kind==='event'?'saleEvent':'sale'));
   const sale: Sale = {...recorded.sale,orderId:before.id,orderNumber:before.number,deliveryFee:before.deliveryFee,discount:before.discount,customerId:before.customer.id,items:before.lines.filter(line => !line.unavailable).map(line => ({itemId:line.itemId,name:line.name,unit:line.unit,qty:line.qty,unitPrice:line.unitPrice!,lineTotal:orderLineTotal(line.unitPrice!,line.qty)}))};
   if (input.method === 'credit') {
     const ledger = ledgerFor(before,context);
@@ -123,7 +123,7 @@ export function refundOrderCommand(before: Order, sale: Sale, input: OrderRefund
   const {setup} = context; validateOrder(before,setup,revision); const original = linkedSale(before,sale), cancellation = before.payment.cancellation;
   if (before.status !== 'cancelled' || original.voidReason !== 'order-cancel' || original.voidedAt === undefined || !cancellation || cancellation.refundDue <= 0 || !Number.isSafeInteger(input.amount) || input.amount <= 0 || input.amount > cancellation.refundDue) throw new Error('Enter a refund up to the remaining amount owed.');
   const historicalWallets = context.ledger ? activeEntries(context.ledger.account,context.ledger.entries).filter(entry => entry.type === 'payment' && entry.methodName && !['Cash','Card'].includes(entry.methodName)).map(entry => entry.methodName!) : [];
-  const methodName = paymentMethod(input.method,input.wallet,setup,original,historicalWallets), note = input.note?.trim() || `Refund · ${before.number}`;
+  const methodName = paymentMethod(input.method,input.wallet,setup,original,historicalWallets,context.wallets), note = input.note?.trim() || `Refund · ${before.number}`;
   if (note.length > 1000) throw new Error('Keep the refund note within 1,000 characters.');
   const change = update(before,setup,'order.refund',at,newId), eventId = newId('refundEvent');
   const refund: OrderRefund = {id:newId('refund'),orderId:before.id,saleId:original.id,outletId:before.outletId,customerId:before.customer.id,accountId:original.creditAccountId,amount:input.amount,currency:before.currency,method:input.method,methodName,note,createdBy:setup.owner.id,eventId,createdAt:at,updatedAt:at};

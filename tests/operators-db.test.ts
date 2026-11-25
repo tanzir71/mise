@@ -78,7 +78,7 @@ it('round-trips multiple businesses/outlets, inactive roles and missing phone nu
  for(const table of backupTableNames)(ta[table] as unknown[]).push(...tb[table]);const source=createBackup(ta),target=new MiseDatabase('mise-operators-restore-'+randomUUID());databases.push(target);
  expect((await target.previewRestore(source)).shopName).toBe('2 shops');expect(await target.restoreBackup(source,await target.previewRestore(source))).toBeNull();expect((await readLocalWorkspace(target)).requiresSelection).toBe(true);
  await selectLocalOperator(target,{businessId:a.setup.business.id,outletId:a.setup.outlet.id,actorId:a.manager.id},null);expect((await target.recordSale({expression:'3',method:'cash'})).createdBy).toBe(a.manager.id);
- const result=await target.readBackup();expect(result.schemaVersion).toBe(11);expect(Object.keys(result.tables)).toHaveLength(22);expect(result.tables.members.find(m=>m.id===a.manager.id)).toEqual(a.manager);expect(JSON.stringify(result)).not.toContain('operatorState');
+ const result=await target.readBackup();expect(result.schemaVersion).toBe(12);expect(Object.keys(result.tables)).toHaveLength(22);expect(result.tables.members.find(m=>m.id===a.manager.id)).toEqual(a.manager);expect(JSON.stringify(result)).not.toContain('operatorState');
 });
 it('rejects foreign business actors and cross-outlet event links before replacing any data',async()=>{
  const f=await boot();await choose(f);await f.db.recordSale({expression:'5',method:'cash'});const saved=await f.db.readBackup(),before=backupToken(saved);

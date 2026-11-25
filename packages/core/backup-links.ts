@@ -5,6 +5,7 @@ import { creditBalance, entryDelta } from './khata';
 import { orderLineTotal } from './order-lines';
 import { backupTableNames, type BackupTables, type BackupTable } from './backup-tables';
 import {validatePaymentHistory} from './payment-history';
+import {validatePaymentFinanceLinks} from './payment-finance-links';
 
 /** Check live references; historical catalogue snapshots may refer to deleted items. */
 export function validateBackupLinks(t:BackupTables):void {
@@ -18,6 +19,7 @@ export function validateBackupLinks(t:BackupTables):void {
   const count = backupTableNames.reduce((sum,name) => sum+t[name].length,0);
   validateInboxHistory(t.inboxItems,t.events);
   validatePaymentHistory(t.payments,t.events,t.inboxItems);
+  validatePaymentFinanceLinks(t.payments,t);
   if (!count||count===t.inboxItems.length&&t.inboxItems.every(item=>item.outletId===null)) return;
   ensure(t.businesses.length>0&&t.outlets.length>0&&t.members.length>0,'the shop identity records are incomplete');
   for(const outlet of t.outlets)link('businesses',outlet.businessId);

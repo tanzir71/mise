@@ -1,5 +1,5 @@
 import {backupToken,parseBackup} from './backup';
-import {backupTableNames,emptyBackupTables,type BackupTable,type MiseBackup} from './backup-tables';
+import {BACKUP_SCHEMA_VERSION,backupTableNames,emptyBackupTables,type BackupTable,type MiseBackup} from './backup-tables';
 
 type FieldMap=Readonly<Record<string,string>>;
 interface TableMap {table:string;fields:FieldMap}
@@ -196,5 +196,5 @@ export async function readCloudMigration(plan:CloudMigration):Promise<MiseBackup
   const associations=extras.filter(row=>row.table==='customer_outlets');
   if(associations.length!==tables.customers.length||new Set(associations.map(row=>row.values.customer_id)).size!==tables.customers.length)throw new Error('Cloud customer assignments are incomplete.');
   if(usedFiles.size!==fileMap.size)throw new Error('Cloud files contain an unreferenced image.');
-  return parseBackup({format:'mise-backup',formatVersion:1,schemaVersion:11,exportedAt:plan.exportedAt,tables});
+  return parseBackup({format:'mise-backup',formatVersion:1,schemaVersion:BACKUP_SCHEMA_VERSION,exportedAt:plan.exportedAt,tables});
 }

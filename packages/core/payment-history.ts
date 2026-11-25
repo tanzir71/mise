@@ -1,11 +1,12 @@
 import type {AuditEvent,Payment} from './models';
 import type {InboxItem} from './inbox';
 import {paymentOriginal,validatePaymentRecord} from './payment-records';
+import {activePaymentPosting,paymentCheckedFields} from './payment-posting-shape';
 import {literalToken as syncDownloadToken} from './literal-token';
 const same=(a:unknown,b:unknown)=>syncDownloadToken(a)===syncDownloadToken(b);
 const ensure=(ok:unknown):void=>{if(!ok)throw new Error('Invalid backup: the saved payment source or audit history is incomplete or inconsistent.');};
 const fields=['id','createdAt','outletId','inboxId','createdBy','source','original','parsed'] as const;
-const mutable=['amount','currency','method','methodName','reference','fromPhone','receivedAt'] as const;
+const mutable=['amount','currency','method','methodName','reference','referenceScope','fromPhone','receivedAt'] as const;
 function unchanged(before:Payment,after:Payment,keys:readonly (keyof Payment)[]){ensure(keys.every(k=>same(before[k]??null,after[k]??null)));}
 /** Validate the whole local chain, including original capture and metadata undo.
  * A restored association is evidence to inspect, never fresh recording authority. */
@@ -20,16 +21,24 @@ export function validatePaymentHistory(payments:readonly Payment[],events:readon
   const chain=(groups.get(payment.id)??[]).sort((a,b)=>a.paymentRevision!-b.paymentRevision!);ensure(chain.length===payment.revision);let before:Payment|null=null;
   for(const [index,event]of chain.entries()){
    validatePaymentRecord(event.after);const after=event.after;ensure(event.paymentRevision===index+1&&after.revision===index+1&&after.id===payment.id&&event.outletId===after.outletId&&event.actor.type==='member'&&after.eventId===event.id&&same(event.before,before));
-   if(!before)ensure(event.command==='payment.capture'&&after.createdBy===event.actor.id&&after.createdAt===event.at&&after.updatedAt===event.at&&!after.association&&after.voidedAt===undefined&&!event.undoOf);
+   if(!before)ensure(event.command==='payment.capture'&&after.createdBy===event.actor.id&&after.createdAt===event.at&&after.updatedAt===event.at&&!after.association&&!after.postings&&after.voidedAt===undefined&&!event.undoOf);
    else{
     unchanged(before,after,fields);ensure(after.updatedAt===Math.max(before.updatedAt,event.at));
     if(event.command!=='payment.edit')unchanged(before,after,mutable);
+    if(!['payment.record','payment.record-undo'].includes(event.command))unchanged(before,after,['postings']);
     switch(event.command){
-     case 'payment.edit':ensure(!before.association&&!after.association&&before.voidedAt===undefined&&after.voidedAt===undefined&&!event.undoOf);break;
+     case 'payment.edit':ensure(!activePaymentPosting(before)&&!before.association&&!after.association&&before.voidedAt===undefined&&after.voidedAt===undefined&&!event.undoOf);break;
      case 'payment.match':ensure(!before.association&&after.association&&after.association.eventId===event.id&&after.association.at===event.at&&before.voidedAt===undefined&&after.voidedAt===undefined&&!event.undoOf);break;
-     case 'payment.unmatch':ensure(before.association&&!after.association&&event.undoOf===before.association.eventId&&before.voidedAt===undefined&&after.voidedAt===undefined);break;
-     case 'payment.void':ensure(!before.association&&!after.association&&before.voidedAt===undefined&&after.voidedAt===event.at&&!event.undoOf);break;
+     case 'payment.unmatch':ensure(!activePaymentPosting(before)&&before.association&&!after.association&&event.undoOf===before.association.eventId&&before.voidedAt===undefined&&after.voidedAt===undefined);break;
+     case 'payment.void':ensure(!activePaymentPosting(before)&&!before.association&&!after.association&&before.voidedAt===undefined&&after.voidedAt===event.at&&!event.undoOf);break;
      case 'payment.reopen':ensure(!before.association&&!after.association&&before.voidedAt!==undefined&&after.voidedAt===undefined&&!event.undoOf);break;
+     case 'payment.record':{
+      const old=before.postings??[],next=after.postings??[],posting=next.at(-1);ensure(!activePaymentPosting(before)&&before.voidedAt===undefined&&after.voidedAt===undefined&&next.length===old.length+1&&same(next.slice(0,-1),old)&&posting&&posting.eventId===event.id&&posting.at===event.at&&!posting.undo&&same(posting.money,paymentCheckedFields(before))&&!event.undoOf);
+      ensure(!before.association||posting!.target.kind==='order'&&before.association.kind==='order'&&before.association.id===posting!.target.id);break;
+     }
+     case 'payment.record-undo':{
+      const old=before.postings??[],next=after.postings??[],posting=old.at(-1),undone=next.at(-1);ensure(posting&&!posting.undo&&old.length===next.length&&same(old.slice(0,-1),next.slice(0,-1))&&undone?.undo&&same(posting,{...undone,undo:undefined})&&undone.undo.eventId===event.id&&undone.undo.at===event.at&&event.undoOf===posting.eventId&&!after.association&&before.voidedAt===undefined&&after.voidedAt===undefined);break;
+     }
      default:ensure(false);
     }
    }

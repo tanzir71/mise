@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "sourceParentCommit": "4091a00743b056cd098204dea5bffa2cedf9a468",
+  "verifiedAt": "2026-11-25T03:47:43.614Z",
+  "scope": "M41 explicit native financial recording/undo and original recovery; product review and full backend/canonical adapter remain required in M41",
+  "sourceFingerprint": "a4335459f8a82fcc95688ab5d65af7988cf9f440db90141db2fbe73a23849045",
+  "sources": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "ae2e6c3bc5a7eb8aa99cb4aa95a3b90c4e83eeb6a923dcbae58aafacba6d91c9"
+    },
+    {
+      "path": "apps/web/src/data/payment-capture.ts",
+      "sha256": "7673dcef5c8c6d28bc93f387a860ee8bc5a7a84d698c7bb58c0f31682faaa775"
+    },
+    {
+      "path": "docs/payment-capture.md",
+      "sha256": "8351fe515ae4944f896c4eb10175431bdea265585d3e3624185de6bbfe06e3c7"
+    },
+    {
+      "path": "docs/payment-finance.md",
+      "sha256": "228b7e86bf831fcf97d65313950e151c4703836cb39a7d11997772510d77e3cc"
+    },
+    {
+      "path": "handover/DECISIONS.md",
+      "sha256": "8f251ce2bdebf2a83e6b960e2054699d8cddaa35525fa7fb29380b3bb2043788"
+    },
+    {
+      "path": "handover/QUESTIONS.md",
+      "sha256": "71c656f96d5f5d701e11121e9947831ae0202c61fd3089e512efe9863e2b2d5f"
+    },
+    {
+      "path": "handover/docs/03-roadmap.md",
+      "sha256": "ef4b9c49f25ead7035421cf3333a3f8cd55fd5f8201ec3b65e0d52c8a4364560"
+    },
+    {
+      "path": "packages/core/backup-links.ts",
+      "sha256": "177847f3acb5c66eced18b0f6f7e63d1e7a68cbd5bca98fca13cf62d8f3550fe"
+    },
+    {
+      "path": "packages/core/backup-tables.ts",
+      "sha256": "4e324be624e2f3ec578dcd23cff050347ed22cade8425b8d522088ea70a40f32"
+    },
+    {
+      "path": "packages/core/backup.ts",
+      "sha256": "123a00af662b2a79c51ee361888cfe2acdb84c5ad0d9e6b76a68a14fc9d6403f"
+    },
+    {
+      "path": "packages/core/cloud-records.ts",
+      "sha256": "ea0d2c3861a27245af9fdc42882c9820c6df5dc87ae8a7f065a40c87aa9e0bd9"
+    },
+    {
+      "path": "packages/core/models.ts",
+      "sha256": "33147dbdfc4be5f7af22e5ccfe52219cfd4ba0c95f12e155d513b1d2a351239e"
+    },
+    {
+      "path": "packages/core/order-payments.ts",
+      "sha256": "a4cd62d0981f8b80dae65abdedebc15acab8c0e3bc4be40613321a95e7bb9edc"
+    },
+    {
+      "path": "packages/core/payment-finance-links.ts",
+      "sha256": "b89734a3e2287b305be69741fae4b26cb08ffc5431467f0403928ff4e0601dbc"
+    },
+    {
+      "path": "packages/core/payment-finance.ts",
+      "sha256": "299a2f48e90c00acfe91355aeb5e79c220b9443a3d26cfa4bb47595bdb589f52"
+    },
+    {
+      "path": "packages/core/payment-history.ts",
+      "sha256": "8f3aa46f597a957a4496a554b0db89b71b4f48c0ca61ed52fd8dee0ca3aba86e"
+    },
+    {
+      "path": "packages/core/payment-posting-shape.ts",
+      "sha256": "47005f14626f6548abc91d91d0592c73874aa2efa4c0bf45d4ae288a77c614aa"
+    },
+    {
+      "path": "packages/core/payment-receipts.ts",
+      "sha256": "ac4cdd7c3344840fa47fa31f2509ccb8d4b81ae55f9ae5dafd4266de3e6d6e4a"
+    },
+    {
+      "path": "packages/core/payment-records.ts",
+      "sha256": "35906a18a081ec7de6ee59fd5bc8a072c79f4e4439cedeefee73cda90eccf8ad"
+    },
+    {
+      "path": "tests/backup-db.test.ts",
+      "sha256": "a1e11fa588ddd50ea8d7a9b44442e67bc68de94eda684913908008512f809985"
+    },
+    {
+      "path": "tests/e2e/exports.spec.ts",
+      "sha256": "d56a3c582265d6bf06379e989ace4b3c59d18d0472746a3cae98d27cdbc56b5d"
+    },
+    {
+      "path": "tests/e2e/outbox-boundary.spec.ts",
+      "sha256": "3fe252054c92a7a7f79930a2d12066403229df6c1b774c6406164c64634ea890"
+    },
+    {
+      "path": "tests/e2e/payment-native.spec.ts",
+      "sha256": "16689428a40ac9847fdfda78b7741384dcd666f6bd140b64d4f741a625a9080d"
+    },
+    {
+      "path": "tests/e2e/sync-download.spec.ts",
+      "sha256": "86bc4206ec370a619d478df24d3754d6a05d1971492513173dc9d44fc168f9a8"
+    },
+    {
+      "path": "tests/handoff-db.test.ts",
+      "sha256": "f7af1bdb7408f7c0742f730a71ee00102aac7bbcd04161f16efb6d3071fc189d"
+    },
+    {
+      "path": "tests/inbox-db.test.ts",
+      "sha256": "661daf2eca23a7036a8ddf3d22dc64a56d8b2259a1304dbd3bb83e700f0c4dae"
+    },
+    {
+      "path": "tests/inbox-outbox-adapters.test.ts",
+      "sha256": "2291014a679718548a764381150490545b596864d0253bf07d69f0cf7261550c"
+    },
+    {
+      "path": "tests/local-outbox-db.test.ts",
+      "sha256": "ee0ce8ada71af435161dd4338ff5b7dd3fae265a23ad92823ec76e3467caea23"
+    },
+    {
+      "path": "tests/operators-db.test.ts",
+      "sha256": "f0735fc0bf46932f458fe4fca7ececec69a29799bf8a883bfecdb031004fdfdf"
+    },
+    {
+      "path": "tests/order-payments.test.ts",
+      "sha256": "1a44c59f957d0afde0730044dc6ec55e6c6ca8c9d685c2d75580fc368a8428eb"
+    },
+    {
+      "path": "tests/payment-backup-upgrade.test.ts",
+      "sha256": "eb441cb0ce25afcee1013387fd27a8953b4f3c46b81431c7f13aff93f5df9e36"
+    },
+    {
+      "path": "tests/payment-capture.test.ts",
+      "sha256": "d15135cc26ecea23c3d9ef08e6b4fbb699cd85bd1bde78546d851ca77cd061be"
+    },
+    {
+      "path": "tests/payment-finance.test.ts",
+      "sha256": "ddc385d1be88ac0b0da3e8fc1d8e2bd89b3baae77e85a61e561575df58c1e3c1"
+    },
+    {
+      "path": "tests/sync-download-db.test.ts",
+      "sha256": "2e1df656d22ef9ab82a4374fc495c9bd0df2e2ffe8595332fcc68425e9abcf6a"
+    }
+  ],
+  "unit": {
+    "passed": 5438,
+    "files": 284,
+    "workers": 2,
+    "log": ".private/m41-finance-full-unit.log",
+    "nativeFinancialCases": 21,
+    "orderMoneyCases": 14,
+    "originalCorporaAndDeadlinesUnchanged": true
+  },
+  "browser": {
+    "root": {
+      "basePath": "/",
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 1,
+      "durationMs": 672771.855,
+      "report": ".private/m41-finance-root-browser.json",
+      "initial": {
+        "passed": 164,
+        "failed": 1
+      },
+      "recheck": {
+        "passed": 5,
+        "failed": 0,
+        "report": ".private/m41-finance-root-browser-recheck.json",
+        "durationMs": 11747.824999999999,
+        "applicationFilesUnchanged": 701,
+        "sourceFingerprint": "618798981a4248805f61a59e0f5235f53f396a12dfc47116e44e2e1fcef1dbb4",
+        "correction": "Wait for the existing installed worker to be activated and controlling the page before disconnecting and reloading. No application change, deadline extension, skip or automatic retry."
+      }
+    },
+    "pages": {
+      "basePath": "/mise/",
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "workers": 1,
+      "durationMs": 603579.905,
+      "report": ".private/m41-finance-pages-browser.json",
+      "singleAttemptClean": true
+    }
+  },
+  "visual": {
+    "root": {
+      "comparisons": 18,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": ".private/m41-finance-root-qa/report.html",
+      "restoreCaptures": [
+        {
+          "width": 390,
+          "path": ".private/m41-finance-root-qa/screens/native-payment-restore-390.png",
+          "sha256": "2e20c41d44bceb9af68695f03f33927741f24ba4c06b24b40461cca57cb8fa60",
+          "bytes": 34245
+        },
+        {
+          "width": 1440,
+          "path": ".private/m41-finance-root-qa/screens/native-payment-restore-1440.png",
+          "sha256": "87c078b5dd222c83832f21d76b5d23269811fb920bf1e243c277373c44386fe7",
+          "bytes": 35014
+        }
+      ]
+    },
+    "pages": {
+      "comparisons": 18,
+      "overflow": 0,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "report": ".private/m41-finance-pages-qa/report.html",
+      "restoreCaptures": [
+        {
+          "width": 390,
+          "path": ".private/m41-finance-pages-qa/screens/native-payment-restore-390.png",
+          "sha256": "2e20c41d44bceb9af68695f03f33927741f24ba4c06b24b40461cca57cb8fa60",
+          "bytes": 34245
+        },
+        {
+          "width": 1440,
+          "path": ".private/m41-finance-pages-qa/screens/native-payment-restore-1440.png",
+          "sha256": "87c078b5dd222c83832f21d76b5d23269811fb920bf1e243c277373c44386fe7",
+          "bytes": 35014
+        }
+      ]
+    }
+  },
+  "checks": {
+    "lint": ".private/m41-finance-lint.log",
+    "types": ".private/m41-finance-types.log",
+    "rootBuild": ".private/m41-finance-root-build.log",
+    "pagesBuild": ".private/m41-finance-pages-build.log",
+    "exports": ".private/m41-finance-exports.log",
+    "originalTestConfiguration": true,
+    "privateOwnNodePriority": "AboveNormal",
+    "nativeSchema": 29,
+    "backupSchema": 12
+  },
+  "holds": {
+    "workflowsDisabled": 3,
+    "workflowRunCount": 77,
+    "latestWorkflowRun": 43927944995,
+    "latestDeployment": 7832852111,
+    "noWorkflowDispatch": true,
+    "noCIUpload": true,
+    "noPublication": true,
+    "noServiceOrMigrationDeployment": true,
+    "noProviderCommissioning": true,
+    "noTags": true,
+    "endUserConfiguration": true
+  },
+  "remaining": [
+    "M41 long-ledger/imported-label storage and save-performance qualification; compact repeated financial evidence without discarding originals or weakening comparison guards.",
+    "M41 production capture/manual-review interface, original financial recovery controls and complete current-candidate presentation.",
+    "M41 complete backend/source-command, financial/allocation receipt, cloud upload and canonical adapter.",
+    "Full M41 and remaining handover milestone acceptance, with current workflow/publication/deployment holds preserved."
+  ]
+}
