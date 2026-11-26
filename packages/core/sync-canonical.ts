@@ -1,3 +1,4 @@
+import {isNativeSyncTable} from './native-sync-records';
 import {createBackup,parseBackup} from './backup';
 import {emptyBackupTables,type BackupTable,type MiseBackup} from './backup-tables';
 import {cloudRecordMaps} from './cloud-records';
@@ -36,6 +37,7 @@ export async function reconstructCanonicalSnapshot(input:LocalSyncDownload,incom
  if(incoming.length!==state.records||new Set(incoming.map(r=>r.changeId)).size!==incoming.length)throw fail();
  if(previous){parseBackup(previous.backup);if(previous.targetHash!==scope.targetHash||syncDownloadToken(previous.scope)!==syncDownloadToken(parseSyncScope(state.window)))throw fail();}
  const records=await mergeCanonicalRecords(previous?.records??[],incoming,state.id),live=records.filter(r=>r.operation==='upsert'),tables=emptyBackupTables(),extras:CanonicalRecord[]=[];
+ if(records.some(r=>isNativeSyncTable(r.table)))throw Error('Keep the complete native payment download and originals. Native canonical installation is not enabled yet.');
  for(const record of live){
   const name=Object.entries(cloudRecordMaps).find(([,map])=>map.table===record.table)?.[0] as BackupTable|undefined;
   if(!name){extras.push(record);continue;}

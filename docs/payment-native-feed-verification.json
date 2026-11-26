@@ -1,0 +1,448 @@
+{
+  "milestone": "M41",
+  "increment": "Native payment history and outcomes in the shared server snapshot",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "bd01d0b38b158a6eb394c3c7e01212f8ec5c60b3",
+  "sourceFingerprint": "2e18cc5059ad5d3b3fcb929a0151f12aaaf5e3a8d0e39c4f9351543a371f0421",
+  "sourceFiles": [
+    ".gitattributes",
+    "packages/core/native-sync-records.ts",
+    "packages/core/sync-canonical.ts",
+    "packages/core/sync-download.ts",
+    "packages/core/sync-read.ts",
+    "supabase/migrations/20261125235037_native_payment_sync_capture.sql",
+    "tests/e2e/native-payment-sync.spec.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/fixtures/native-payment-server.ts",
+    "tests/fixtures/sync-read-before-native.txt",
+    "tests/native-payment-sync.test.ts",
+    "vitest.config.ts",
+    "tests/e2e/payment-capture-ui.spec.ts"
+  ],
+  "fullRunStartedSourceFingerprint": "135cd8644e3cab35cf29a015cea1971d1623dd7b1101f397bd5fc52055763653",
+  "fullRunStartedSourceFiles": [
+    ".gitattributes",
+    "packages/core/native-sync-records.ts",
+    "packages/core/sync-canonical.ts",
+    "packages/core/sync-download.ts",
+    "packages/core/sync-read.ts",
+    "supabase/migrations/20261125235037_native_payment_sync_capture.sql",
+    "tests/e2e/native-payment-sync.spec.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/fixtures/native-payment-server.ts",
+    "tests/fixtures/sync-read-before-native.txt",
+    "tests/native-payment-sync.test.ts",
+    "vitest.config.ts"
+  ],
+  "browserOnlyPostUnitDelta": {
+    "file": "tests/e2e/payment-capture-ui.spec.ts",
+    "addedAssertions": 2,
+    "purpose": "Wait for actual Link removed status before opening history after revision-key remount",
+    "existingAssertionsCorporaAndDeadlinesPreserved": true,
+    "productionUnitSourceFilesChanged": false
+  },
+  "scope": {
+    "nativeSchema": 31,
+    "ordinarySchema": 13,
+    "originalGraphVersion": 1,
+    "copyWireVersion": 1,
+    "portableArchiveVersion": 2,
+    "nativeReceiptVersion": 1,
+    "fragmentWindowCursorVersion": 1,
+    "newNativeProjectionKinds": [
+      "native_payments",
+      "native_payment_events",
+      "native_payment_actions"
+    ],
+    "newPrivateMemberCacheColumns": 2,
+    "newInvokerOnlyHelpers": 4,
+    "newTablesDefinersClientTableGrantsProviderAccountsOrEnvironmentVariables": 0,
+    "newHostedMigrationFiles": 1,
+    "hostedMigrationsApplied": 0,
+    "nativeRecordMaximumOuterBytes": {
+      "sourceOrAudit": 104861696,
+      "invocationOutcome": 520192
+    },
+    "legacyRecordMaximumBytesUnchanged": 1073741824,
+    "allConfigurationEndUserOwned": true,
+    "paymentPreviewDefaultOff": true,
+    "actualNativeDownloadAndPrivateStagingImplemented": true,
+    "nativeCanonicalInstallationImplemented": false,
+    "allCanonicalUploadJoinOriginalArchiveFencesRetained": true
+  },
+  "checks": {
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-native-feed-lint-r2.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 230,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-native-feed-types-r2.log"
+    },
+    "fullUnit": {
+      "passed": 5716,
+      "failed": 0,
+      "pending": 0,
+      "files": 298,
+      "success": true,
+      "report": ".private/m41-native-feed-full-unit.json"
+    },
+    "newUnitCases": 16,
+    "browser": {
+      "root": {
+        "passed": 59,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 303645.42,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-feed-root-browser.json"
+      },
+      "pages": {
+        "passed": 59,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 295166.381,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-feed-pages-browser.json"
+      }
+    },
+    "focusedBrowser": {
+      "passed": 2,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 20712.722,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-feed-focused-browser.json"
+    },
+    "builds": {
+      "passed": true,
+      "bases": [
+        "/",
+        "/mise/"
+      ],
+      "logs": [
+        ".private/m41-native-feed-root-build-r2.log",
+        ".private/m41-native-feed-pages-build-r2.log"
+      ]
+    },
+    "gateRecords": [
+      {
+        "gate": "types",
+        "started": "2026-11-26T00:35:55.3298701Z",
+        "ended": "2026-11-26T00:36:56.0808559Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-types.log"
+      },
+      {
+        "gate": "full-unit",
+        "started": "2026-11-26T00:36:56.1416082Z",
+        "ended": "2026-11-26T01:24:57.0202662Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-full-unit.log"
+      },
+      {
+        "gate": "root-build",
+        "started": "2026-11-26T01:24:57.0259942Z",
+        "ended": "2026-11-26T01:26:03.1190423Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-root-build.log"
+      },
+      {
+        "gate": "root-browser",
+        "started": "2026-11-26T01:26:03.1220191Z",
+        "ended": "2026-11-26T01:31:33.1493280Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-root-browser.log"
+      },
+      {
+        "gate": "pages-build",
+        "started": "2026-11-26T01:31:33.1530140Z",
+        "ended": "2026-11-26T01:32:35.5213395Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-pages-build.log"
+      },
+      {
+        "gate": "pages-browser",
+        "started": "2026-11-26T01:32:35.5241703Z",
+        "ended": "2026-11-26T01:40:34.7551928Z",
+        "exitCode": 1,
+        "log": ".private/m41-native-feed-pages-browser.log"
+      },
+      {
+        "gate": "lint-r2",
+        "started": "2026-11-26T01:42:36.6376449Z",
+        "ended": "2026-11-26T01:43:28.6058429Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-lint-r2.log"
+      },
+      {
+        "gate": "types-r2",
+        "started": "2026-11-26T01:43:28.6501949Z",
+        "ended": "2026-11-26T01:44:19.8447551Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-types-r2.log"
+      },
+      {
+        "gate": "root-build-r2",
+        "started": "2026-11-26T01:44:19.8485677Z",
+        "ended": "2026-11-26T01:45:16.3720585Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-root-build-r2.log"
+      },
+      {
+        "gate": "root-browser-r2",
+        "started": "2026-11-26T01:45:16.3753518Z",
+        "ended": "2026-11-26T01:50:21.1620592Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-root-browser-r2.log"
+      },
+      {
+        "gate": "pages-build-r2",
+        "started": "2026-11-26T01:50:21.1655532Z",
+        "ended": "2026-11-26T01:51:16.2718163Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-pages-build-r2.log"
+      },
+      {
+        "gate": "pages-browser-r2",
+        "started": "2026-11-26T01:51:16.2737880Z",
+        "ended": "2026-11-26T01:56:12.6329007Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-feed-pages-browser-r2.log"
+      }
+    ],
+    "initialBrowser": {
+      "root": {
+        "passed": 59,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 328937.184,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-feed-initial-root-browser.json"
+      },
+      "pages": {
+        "passed": 57,
+        "failed": 2,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 477365.71599999996,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-feed-initial-pages-browser.json"
+      }
+    },
+    "existingFinancialBackend": {
+      "passed": 46,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-feed-backend-regression.json"
+    },
+    "existingLegacyFeed": {
+      "passed": 32,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-feed-legacy.json"
+    },
+    "targetedStream13": {
+      "passed": 13,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-feed-thirteen-r2.json"
+    },
+    "targetedUpgrade": {
+      "passed": 1,
+      "failed": 0,
+      "pending": 13,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-feed-upgrade.json"
+    },
+    "targetedPreviousReader": {
+      "passed": 1,
+      "failed": 0,
+      "pending": 15,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-feed-old-reader.json"
+    },
+    "scale": {
+      "unchangedCorpus": true,
+      "caseDeadlineMs": 600000,
+      "nativeFinancialHttpDeadlineMsUnchanged": 20000,
+      "focused": {
+        "stage": "native-feed-scale-verified",
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "completeOriginalEventRows": 9,
+        "downloadRecords": 10037,
+        "downloadBytes": 28423869,
+        "pages": 145,
+        "durationMs": 261838.80359999998
+      },
+      "fullRun": {
+        "stage": "native-feed-scale-verified",
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "completeOriginalEventRows": 9,
+        "downloadRecords": 10037,
+        "downloadBytes": 28423869,
+        "pages": 145,
+        "durationMs": 279620.091
+      },
+      "assertions": "All5000 original charge rows compare deeply; the entire million-code-unit NUL/surrogate note compares by independent Node SHA-256 of its JSON string; complete frozen original image/receipt and every original native event JSON string are retained; server/local5001 entries prove one collection. Download stages no domain records or outgoing intents."
+    },
+    "frozenPriorReader": {
+      "sourceCommit": "bd01d0b38b158a6eb394c3c7e01212f8ec5c60b3",
+      "sourcePath": "packages/core/sync-read.ts",
+      "fixture": "tests/fixtures/sync-read-before-native.txt",
+      "sha256": "32ffb6dbb4198652c7606d0d61038df33e6617a72fa37ef6bdfd593230f63ffb",
+      "pathSpecificLfRule": true,
+      "actualProductionReaderExecutesAfterHashVerification": true,
+      "nativeFragmentsRejectedBeforeCursorAcceptance": true,
+      "ordinaryFragmentParsingRetained": true
+    },
+    "localCli": {
+      "checkedAt": "2026-11-26T00:31:24.3412628Z",
+      "target": "local-only",
+      "advisorExitCode": 1,
+      "migrationListExitCode": 1
+    },
+    "localCliQualification": "Security advisors and migration list target only127.0.0.1:54322 and cannot connect because no local Supabase stack is running. Actual all-migration PGlite catalogue/privilege/session/rollback queries provide local evidence; no hosted project/advisor/deployment call is made.",
+    "ui": {
+      "markupStylesOrReferenceExportsChanged": false,
+      "criticalAxeViolations": 0,
+      "newBrowserCases": 2,
+      "newBrowserWidths": [
+        390,
+        1440
+      ],
+      "allSelectedBrowserViewportWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "visualArtifactUpload": "held",
+      "scope": "Selected existing payment/copy/original/backup/reference flows plus actual native stream page-loss/reload recovery. No claim of full application browser coverage."
+    },
+    "secretScan": {
+      "status": "passed",
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "files": 2428,
+      "objects": 13300,
+      "archiveFiles": 0,
+      "knownValuesChecked": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "log": ".private/m41-native-feed-secrets-first.log",
+      "beforePushRepeatLog": ".private/m41-native-feed-secrets-final.log",
+      "fixedReviewedHistoricalNonsecretPolicyUnchanged": true
+    },
+    "existingLargeBrowser": {
+      "corpusAnd90000msDeadlineUnchanged": true,
+      "initialRoot": {
+        "status": "passed",
+        "durationMs": 60865
+      },
+      "initialPages": {
+        "status": "timedOut",
+        "durationMs": 90508
+      },
+      "finalRoot": {
+        "status": "passed",
+        "durationMs": 65387
+      },
+      "finalPages": {
+        "status": "passed",
+        "durationMs": 64616
+      }
+    }
+  },
+  "sourceQualification": "The original12 production/unit/runtime-fixture source bytes remain exactly as tested by all5716 units and the initial builds/browser runs. After the initial Pages run, only two actual-success-status assertions were added to the existing payment-capture browser fixture before opening history after removal. No assertion, source corpus, existing deadline or production code changed. Final lint/types, both production builds and all59 browser cases per base were then repeated with max2 unit/1 browser workers, retries0. The new full-size stream unit test owns a fresh sequential Vitest project.",
+  "initialFailuresAndCorrections": [
+    "Initial ordinary JSON actor extraction hit22P05 on unrelated source NUL/surrogate escapes. It was replaced with the existing opaque native parser, deriving only a typed public member ID once into two private indexed columns. Native financial algorithms, all literal source bytes and original validators remain unchanged.",
+    "The initial stream test expected one observation record, but the immutable stream correctly retained both capture and recording upserts. The corrected test asserts both and merges numeric ordinals to compare the actual latest row.",
+    "An additive test fixture had an escaped double quote outside its SQL string and could not collect; only that fixture syntax was corrected.",
+    "The first large test attempt imported Dexie-dependent helpers before fake IndexedDB. Moving fake-indexeddb to the first import preserved the exact corpus and its declared deadline; the rerun passes.",
+    "The browser fixture captured a mutable untyped Auth variable. Its explicit PhoneAuth cleanup type and constant actual SDK manager capture corrected strict compilation; the actual browser recovery then passed at both widths.",
+    "The initial final Pages browser run passed57 and failed2: an existing history case opened details88ms after Remove link before the revision-key remount closed them, and the unchanged5000-entry/million-code-unit native offline case reached its existing90000ms deadline after that worker restart. The actual trace and closed-details error snapshot were retained privately. Two explicit Link removed success-status waits correct the existing history fixtures without removing assertions or changing deadlines/corpora/production code. Full59-case runs on both bases are repeated; initial results remain in this record."
+  ],
+  "remainingInMilestone": [
+    "Complete native-aware canonical materialization with original financial validation kept strict",
+    "Original-versus-canonical financial outcome and undo reconciliation",
+    "Initial historical registration without cash replay",
+    "Connected backup/restore and scope recovery",
+    "Copied-original discovery/source links",
+    "Actual product controls and complete milestone acceptance"
+  ],
+  "holds": {
+    "workflowRuns": true,
+    "ciArtifactUploads": true,
+    "pagesPublication": true,
+    "hostedMigrationFunctionServiceDeployment": true,
+    "providerCommissioning": true,
+    "releaseTags": true,
+    "lastReadOnlyObservation": {
+      "observedAt": "2026-11-26T00:42:07.234696+00:00",
+      "workflows": [
+        {
+          "id": 419007052,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419075081,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419005433,
+          "state": "disabled_manually"
+        }
+      ],
+      "runs": {
+        "active": [],
+        "count": 77,
+        "latest": {
+          "head_sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+          "id": 43927944995,
+          "status": "completed"
+        }
+      },
+      "pages": {
+        "environment": "github-pages",
+        "id": 7832852111,
+        "sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+      },
+      "method": "Read-only GitHub CLI; connector lacks workflow and Pages inventories"
+    }
+  }
+}

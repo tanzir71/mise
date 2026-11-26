@@ -1,4 +1,4 @@
-import {decodeSyncBase64,parseSyncWindow,syncPartBudget,syncRecordColumns,type SyncReadPart,type SyncReadPage,type SyncReadWindow} from './sync-read';
+import {decodeSyncBase64,parseSyncWindow,syncPartBudget,syncRecordColumns,syncRecordByteLimit,type SyncReadPart,type SyncReadPage,type SyncReadWindow} from './sync-read';
 import {literalToken as syncDownloadToken} from './literal-token';
 export {literalToken as syncDownloadToken} from './literal-token';
 export const localDownloadTableNames=['syncReads','syncPages','syncRecords'] as const;
@@ -29,7 +29,7 @@ export function parseSyncDownloadSource(v:unknown):SyncDownloadSource {
 }
 export function syncRecordMeta(part:SyncReadPart):SyncRecordMeta {return {changeId:part.changeId,table:part.table,id:part.id,operation:part.operation,totalBytes:part.totalBytes,sha256:part.sha256};}
 function position(v:unknown):SyncDownloadPosition {
- if(!object(v)||!exact(v,'changeId,table,id,operation,totalBytes,sha256,received')||typeof v.changeId!=='string'||!/^[1-9][0-9]{0,18}$/.test(v.changeId)||BigInt(v.changeId)>9223372036854775807n||!id(v.id)||typeof v.table!=='string'||!Object.hasOwn(syncRecordColumns,v.table)||!['upsert','delete'].includes(v.operation as string)||!count(v.totalBytes,1073741824)||v.totalBytes<1||!hash(v.sha256)||!count(v.received,v.totalBytes)||v.received<1)throw syncDownloadError();
+ if(!object(v)||!exact(v,'changeId,table,id,operation,totalBytes,sha256,received')||typeof v.changeId!=='string'||!/^[1-9][0-9]{0,18}$/.test(v.changeId)||BigInt(v.changeId)>9223372036854775807n||!id(v.id)||typeof v.table!=='string'||!Object.hasOwn(syncRecordColumns,v.table)||!['upsert','delete'].includes(v.operation as string)||!count(v.totalBytes,syncRecordByteLimit(v.table))||v.totalBytes<1||!hash(v.sha256)||!count(v.received,v.totalBytes)||v.received<1)throw syncDownloadError();
  return {changeId:v.changeId,table:v.table as SyncReadPart['table'],id:v.id,operation:v.operation as SyncReadPart['operation'],totalBytes:v.totalBytes,sha256:v.sha256,received:v.received};
 }
 export function downloadWindow(value:unknown,source:SyncDownloadSource):SyncReadWindow {

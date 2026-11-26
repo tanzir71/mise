@@ -1,3 +1,4 @@
+import {createSyncReadHandler,createSyncReadStore} from '../../supabase/functions/_shared/sync-read-handler';
 // Controlled HTTP/Auth boundary over real PostgreSQL roles and production handlers.
 // Never imported by a browser bundle or deployed to an installation.
 import { PGlite } from '@electric-sql/pglite';
@@ -21,6 +22,7 @@ export async function nativePaymentTestServer(
   apiUrl: string,
   publishableKey: string,
   origin: string,
+  migrationCeiling?: string,
 ) {
   const sql = await PGlite.create(),
     serviceKey = 'sb_secret_test_only';
@@ -30,7 +32,7 @@ export async function nativePaymentTestServer(
     'create table auth.sessions(id uuid primary key,user_id uuid not null references auth.users(id) on delete cascade,not_after timestamptz)',
   );
   for (const file of readdirSync('supabase/migrations')
-    .filter((n) => n.endsWith('.sql'))
+    .filter((n) => n.endsWith('.sql') && (!migrationCeiling || n <= migrationCeiling))
     .sort())
     await sql.exec(readFileSync('supabase/migrations/' + file, 'utf8'));
   for (const n of [1, 2]) {
@@ -50,6 +52,7 @@ export async function nativePaymentTestServer(
       Buffer.from(jwt.split('.')[1], 'base64url').toString('utf8'),
     ) as { sub: string; session_id: string };
   }
+  let lastError='';
   const rpc: typeof fetch = async (url, init = {}) => {
     const name = new URL(String(url)).pathname.split('/').at(-1)!;
     if (!/^[a-z_][a-z_0-9]*$/.test(name)) throw Error('Unknown controlled RPC');
@@ -94,7 +97,8 @@ export async function nativePaymentTestServer(
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
-      const e = error as { code: string; message: string };
+      const e = error as { code: string; message: string; where?: string };
+      lastError=e.code+' '+e.message+' '+(e.where??'').slice(0,1200);
       return new Response(
         JSON.stringify({ code: e.code, message: e.message }),
         {
@@ -110,6 +114,7 @@ export async function nativePaymentTestServer(
       );
     }
   };
+  const syncRead = createSyncReadHandler({origins:new Set([origin]),cursorKey:'c'.repeat(64),store:createSyncReadStore(apiUrl,publishableKey,rpc)});
   const originals = originalCopyHandler(
       new Set([origin]),
       originalCopyStore(apiUrl, publishableKey, rpc),
@@ -124,8 +129,9 @@ export async function nativePaymentTestServer(
     });
   return {
     sql,
-    async seed(source: MiseBackup) {
-      const plan = await prepareCloudMigration(source, copySdkSubject(1));
+    lastError:()=>lastError,
+    async seed(source: MiseBackup, authUser=copySdkSubject(1)) {
+      const plan = await prepareCloudMigration(source, authUser);
       await sql.transaction(async (tx) => {
         for (const row of plan.records) {
           const keys = Object.keys(row.values);
@@ -175,6 +181,7 @@ export async function nativePaymentTestServer(
           return new Response('{}', { status: 401 });
         }
       }
+      if (path === '/functions/v1/sync-read') return syncRead(request);
       if (path === '/functions/v1/native-original-copy')
         return originals(request);
       if (path === '/functions/v1/native-payment') return native(request);

@@ -1,1 +1,2 @@
 .githooks/* text eol=lf
+tests/fixtures/sync-read-before-native.txt text eol=lf

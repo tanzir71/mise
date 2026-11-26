@@ -955,6 +955,9 @@ test('a linked customer receipt keeps the original name after a rename and opens
   await f.sheet
     .getByRole('button', { name: 'Remove link', exact: true })
     .click();
+  await expect(f.sheet.getByRole('status')).toHaveText(
+    'Link removed. Recorded money is unchanged.',
+  );
   await f.sheet
     .getByText('Original proposal and saved history', { exact: true })
     .click();
@@ -1027,6 +1030,9 @@ test('an edited order retains the originally linked customer and actual order ro
   await f.sheet
     .getByRole('button', { name: 'Remove link', exact: true })
     .click();
+  await expect(f.sheet.getByRole('status')).toHaveText(
+    'Link removed. Recorded money is unchanged.',
+  );
   await f.sheet
     .getByText('Original proposal and saved history', { exact: true })
     .click();
