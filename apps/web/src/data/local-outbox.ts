@@ -51,6 +51,7 @@ export async function beginLocalUpload(db:MiseDatabase,plan:CloudUploadPlan,targ
  if(!/^[a-f0-9]{64}$/.test(targetHash))throw new Error('Use a private connection fingerprint.');
  const manifest=plan.manifest,manifestHash=await cloudUploadManifestHash(manifest);
  return db.transaction('rw',db.tables,async()=>{
+  if(await db.nativePaymentState.count()||await db.nativePaymentValues.count())throw Error('Keep a complete JSON backup. Native payment history needs reviewed registration before a new upload.');
   if(await db.nativePaymentActions.count())throw Error('Native payment delivery is not enabled yet. Keep the original journal.');
   const saved=await db.cloudState.get('binding');if(saved){const state=parseLocalCloudState(saved);if(state.version!==1)throw new Error('This device joined an existing outlet. Keep its original sync admission.');if(state.phase!=='cancelled'){bound(state,manifest.id,targetHash,manifestHash,manifest);return state;}if(state.uploadId===manifest.id)throw new Error('Prepare a fresh review after cancelling this upload.');}
   if(await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw Error('Native payment archive sync is not enabled yet. Keep a complete JSON backup.');

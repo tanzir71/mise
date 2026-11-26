@@ -1,10 +1,14 @@
+import type {NativePaymentBackup} from '@mise/core/native-payment-backup';
+import {isNativeSyncTable} from '@mise/core/native-sync-records';
+import {projectNativePaymentCanonical,type NativePaymentOriginalLoader} from '@mise/core/native-payment-canonical';
+import {readNativePaymentState,nativePaymentStateChanges} from './native-payment-state';
 import Dexie from 'dexie';
 import {backupToken,createBackup} from '@mise/core/backup';
 import type {MiseBackup} from '@mise/core/backup-tables';
 import {parseLocalCloudState,type LocalCloudState,type LocalOutboxEntry,type LocalRowChange} from '@mise/core/local-outbox';
 import {cloudUploadManifestHash,readCloudUpload,type CloudUploadPlan} from '@mise/core/cloud-upload';
 import {parseLocalOperatorState,parseOperatorContext,type LocalOperatorState,type OperatorContext} from '@mise/core/operators';
-import {canonicalSnapshotHash,reconstructCanonicalSnapshot,type LocalCanonicalSnapshot} from '@mise/core/sync-canonical';
+import {canonicalSnapshotHash,reconstructCanonicalSnapshot,reconstructNativeCanonicalArchive,type NativeCanonicalRead,type CanonicalSnapshot,type LocalCanonicalSnapshot} from '@mise/core/sync-canonical';
 import {syncDownloadToken,type SyncDownloadTarget} from '@mise/core/sync-download';
 import {parseSyncScope,type SyncScope} from '@mise/core/sync-read';
 import {parseSyncUploadCoverageSource,assertVisibleUploadCoverage,ownerUploadAdmissionHash,type SyncUploadCoverageSource,type SyncUploadCoveragePage,type LocalOwnerUploadAdmission} from '@mise/core/sync-upload-admission';
@@ -46,7 +50,7 @@ function selected(raw:unknown,input:ApplyCanonicalInput,scope:SyncScope):LocalOp
  const state=parseLocalOperatorState(raw),c=state.connection;
  if(state.phase!=='active'||state.revision!==input.expectedOperatorRevision||state.businessId!==input.target.businessId||state.outletId!==input.target.outletId||state.actorId!==input.target.actorId||state.role!==input.target.role||!c||c.authKey!==input.authKey||c.targetHash!==input.target.targetHash||c.accountHash!==input.target.accountHash||c.epoch!==scope.epoch||c.scopeVersion!==scope.scopeVersion)throw fail();return state;
 }
-function assertUnadoptedOwner(db:MiseDatabase,binding:LocalCloudState){return db.cloudState.get('binding').then(raw=>{const current=parseLocalCloudState(raw);if(current.version!==1||current.phase!=='ready'||syncDownloadToken({...current,sequence:0})!==syncDownloadToken({...binding,sequence:0}))throw fail('integrity');return Dexie.Promise.all([db.syncCanonical.count(),db.syncApplications.count(),db.syncAdmissions.count()]);}).then(counts=>{if(counts.some(Boolean))throw fail('integrity');});}
+function assertUnadoptedOwner(db:MiseDatabase,binding:LocalCloudState){return db.cloudState.get('binding').then(raw=>{const current=parseLocalCloudState(raw);if(current.version!==1||current.phase!=='ready'||syncDownloadToken({...current,sequence:0})!==syncDownloadToken({...binding,sequence:0}))throw fail('integrity');return Dexie.Promise.all([db.syncCanonical.count(),db.syncApplications.count(),db.syncAdmissions.count(),db.nativePaymentState.count(),db.nativePaymentValues.count()]);}).then(counts=>{if(counts.some(Boolean))throw fail('integrity');});}
 function assertOrigin(db:MiseDatabase,origin:Origin){return origin.installed?assertCanonicalState(db,origin.installed):assertUnadoptedOwner(db,origin.owner.binding);}
 function source(db:MiseDatabase,origin:Origin,input:ApplyCanonicalInput):Promise<Source>{
  return db.transaction('r',db.tables,async()=>{
@@ -83,7 +87,7 @@ export async function readRecoveryWorkingSource(db:MiseDatabase,installed:Canoni
   if(operator.revision!==expectedRevision||operator.businessId!==scope.businessId||operator.outletId!==scope.outletId||operator.actorId!==scope.actorId||c?.accountHash!==scope.accountHash||c.targetHash!==binding.targetHash)throw fail();
   const queue=(await db.outbox.where('uploadId').equals(binding.uploadId).toArray()).sort((a,b)=>a.sequence-b.sequence);
   if(queue.length!==binding.sequence||queue.some((row,i)=>row.sequence!==i+1)||await db.outbox.count()!==queue.length)throw fail('integrity');
-  const parsed=queue.map(row=>parseLocalOutboxEntry(row,binding)),portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);if(working.tables.payments.length||await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw fail('retained');
+  const parsed=queue.map(row=>parseLocalOutboxEntry(row,binding)),portable=await Dexie.waitFor(portableQueue(parsed)),working=await readDatabaseBackup(db);if(working.tables.payments.length||await db.paymentOriginalBases.count()||await db.nativePaymentActions.count()||await db.nativePaymentState.count()||await db.nativePaymentValues.count())throw fail('retained');
   return {binding,operator,queue,portable,working,queueToken:syncDownloadToken(portable)};
  });
 }
@@ -94,10 +98,10 @@ async function fresh(scope:SyncScope,refresh:(context:OperatorContext)=>Promise<
 /** Canonical install, pending intent projection and accepted cursor are one exact
  * native transaction. Unsupported/unknown work stays retained rather than lost.
  */
-export async function applyCanonicalDownload(db:MiseDatabase,input:ApplyCanonicalInput,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void):Promise<AppliedCanonical>{
- return applyCanonicalFrom(db,structuredClone(input),{installed:await readCanonicalState(db)},remote,refresh,signal,assertActive);
+export async function applyCanonicalDownload(db:MiseDatabase,input:ApplyCanonicalInput,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void,nativeOriginals?:NativePaymentOriginalLoader):Promise<AppliedCanonical>{
+ return applyCanonicalFrom(db,structuredClone(input),{installed:await readCanonicalState(db)},remote,refresh,signal,assertActive,nativeOriginals);
 }
-async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,origin:Origin,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void):Promise<AppliedCanonical>{
+async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,origin:Origin,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void,nativeOriginals?:NativePaymentOriginalLoader):Promise<AppliedCanonical>{
  input=structuredClone(input);const installed=origin.installed,previousBase=installed?.base??null,previous=installed?.application??null,s=await source(db,origin,input);await assertWorkingCoverage(origin,s);
  if(previousBase?.snapshot.readId===input.readId&&previous){assertCanonicalResolutions(s.portable,previousBase.snapshot.backup.tables.events,new Set(previous.covered.map(c=>c.id)));await fresh(originScope(origin),refresh,signal);return db.transaction('r',db.tables,async()=>{await assertOrigin(db,origin);const latest=await source(db,origin,input);if(latest.queueToken!==s.queueToken||backupToken(latest.working)!==backupToken(s.working))throw fail();active(signal,assertActive);return response(previousBase,previous);});}
  const verified=await readVerifiedSyncRecords(db,input.readId,input.target,signal),state=verified.context.state;if(state.source.previousCursor!==(previousBase?.snapshot.cursor??null)||!state.window||syncDownloadToken(parseSyncScope(state.window))!==syncDownloadToken(originScope(origin)))throw fail();
@@ -107,7 +111,22 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
  const covered=new Map<string,SyncCoverageIntent>();for(const c of previous?.covered??[]){if(syncDownloadToken(identities.get(c.id))!==syncDownloadToken(c))throw fail('integrity');covered.set(c.id,c);}
  const needed=commands.filter(c=>!covered.has(c.id)),proofs:LocalSyncCoverage[]=[],unknown=new Set<string>(),conflicts=new Set<string>();
  for(let at=0;at<needed.length;at+=syncCoverageLimit){const batch=needed.slice(at,at+syncCoverageLimit),result=await downloadSyncCoverage(db,state.id,input.target,batch,remote,signal);for(const id of result.visible)covered.set(id,identities.get(id)!);result.unknown.forEach(id=>unknown.add(id));result.conflicts.forEach(id=>conflicts.add(id));const ids=new Set(batch.map(c=>c.id));const saved=(await db.syncCoverage.where('readId').equals(state.id).toArray()).find(p=>p.source.intents.length===ids.size&&p.source.intents.every(c=>ids.has(c.id)));if(!saved?.resultHash)throw fail('integrity');proofs.push(saved);}
- if(unknown.size||conflicts.size)throw fail('retained');const images=await readVerifiedSyncImages(db,state.id,input.target,signal),snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,previousBase?.snapshot??null);assertCanonicalResolutions(s.portable,snapshot.backup.tables.events,new Set(covered.keys()));let working=structuredClone(snapshot.backup);const pending:ShopCommand[]=[];
+ if(unknown.size||conflicts.size)throw fail('retained');const images=await readVerifiedSyncImages(db,state.id,input.target,signal);
+ let snapshot:CanonicalSnapshot,nativeBackup:NativePaymentBackup|null=null;
+ if(verified.records.some(r=>isNativeSyncTable(r.meta.table))||previousBase?.snapshot.records.some(r=>isNativeSyncTable(r.table))){
+  if(!nativeOriginals)throw fail('retained');
+  const savedNative=await readNativePaymentState(db);
+  let prior:NativeCanonicalRead|null=null;
+  if(previousBase){
+   if(installed?.native?.token!==savedNative?.token)throw fail('integrity');
+   const p=previousBase.snapshot,native=savedNative?.projection??await projectNativePaymentCanonical(p.records,p.backup,p.scope,nativeOriginals);
+   prior={format:'mise-native-canonical-read',version:1,current:p.backup,records:p.records,cursor:p.cursor,readId:p.readId,seal:p.seal,scope:p.scope,targetHash:p.targetHash,native};
+  }
+  const archive=await reconstructNativeCanonicalArchive(state,verified.records,images.images,nativeOriginals,prior,{bases:savedNative?.bases??[],nodes:savedNative?.nodes??[]});
+  nativeBackup=archive.backup;
+  snapshot=archive.snapshot;
+ }else snapshot=await reconstructCanonicalSnapshot(state,verified.records,images.images,previousBase?.snapshot??null);
+ assertCanonicalResolutions(s.portable,snapshot.backup.tables.events,new Set(covered.keys()));let working=structuredClone(snapshot.backup);const pending:ShopCommand[]=[];
  const originalTimes=new Map(s.portable.flatMap(row=>row.commands.map(command=>[command.id,row.at] as const)));
  const currencyFor=originalCurrencyReader(s.portable),parentFor=originalClosingParentReader(s.portable),stockBoundary=await stockReviewBoundary(snapshot.backup.tables.events,input.target.outletId),customerBoundary=await customerReviewBoundary(snapshot.backup.tables.events,input.target.outletId),closingBoundary=await closingReviewBoundary(snapshot.backup.tables.events,input.target.outletId);
  for(const c of commands)if(!covered.has(c.id)){pending.push(c);let currency:string|undefined,parent:string|null;try{currency=currencyFor(c);parent=parentFor(c);}catch{throw new ReconciliationError('integrity',c.id);}working=await replayPendingIntent(working,c,s.operator.actorId,state.window.createdAt,s.working,originalTimes.get(c.id),currency,stockBoundary,customerBoundary,parent,closingBoundary);}
@@ -120,7 +139,8 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
  const operations:LocalRowChange[]=[...changes.filter(c=>c.before!==null).map(c=>({...c,after:null})),...changes.filter(c=>c.after!==null).map(c=>({...c,before:null}))];
  const admissionCopy:LocalCanonicalSnapshot|null=uploadAdmission?{id:`upload:${s.binding.uploadId}`,version:1,snapshot,hash:baseHash}:installed?.admission.id==='active'?{...installed.admission,id:`join:${installed.admission.snapshot.readId}`,version:1}:null;
  const controls:CanonicalRowChange[]=[{table:'syncCanonical',key:'active',before:previousBase,after:base},{table:'syncApplications',key:state.id,before:null,after:application},{table:'operatorState',key:'active',before:s.operator,after:s.operator},{table:'cloudState',key:'binding',before:s.binding,after:s.binding}];if(admissionCopy)controls.push({table:'syncCanonical',key:admissionCopy.id,before:null,after:admissionCopy});if(uploadAdmission)controls.push({table:'syncAdmissions',key:'owner-upload',before:null,after:uploadAdmission});
- const writePlan=await prepareCanonicalWrites([...operations,...controls],s.binding);
+ const nativePlan=await nativePaymentStateChanges(db,nativeBackup,baseHash);
+ const writePlan=await prepareCanonicalWrites([...operations,...nativePlan.changes,...controls],s.binding);
  const pages=await db.syncPages.where('readId').equals(state.id).sortBy('index');await fresh(snapshot.scope,refresh,signal);
  return db.transaction('rw',db.tables,()=>withCanonicalWrites(db,writePlan,async()=>{
   if(await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw fail('retained');
@@ -130,9 +150,12 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
   for(const proof of proofs)if(syncDownloadToken(await db.syncCoverage.get([state.id,proof.batchHash]))!==syncDownloadToken(proof))throw fail('integrity');
   for(const change of operations){active(signal,assertActive);assertCanonicalTransaction(db,writePlan);if(change.after===null)await db.table(change.table).delete(change.key);else await db.table(change.table).put(change.after);}
   assertCanonicalTransaction(db,writePlan);
+  for(const change of nativePlan.changes){active(signal,assertActive);assertCanonicalTransaction(db,writePlan,'native-originals');if(change.after===null)await db.table(change.table).delete(change.key);else await db.table(change.table).put(change.after);}
   if(admissionCopy)await db.syncCanonical.add(admissionCopy);
   if(uploadAdmission)await db.syncAdmissions.add(uploadAdmission);
   await db.syncApplications.add(application);await db.syncCanonical.put(base);await db.operatorState.put(s.operator);await db.cloudState.put(s.binding);
+  const savedNative=await readNativePaymentState(db);
+  if(nativePlan.state?(!savedNative||syncDownloadToken(savedNative.state)!==syncDownloadToken(nativePlan.state)):!!savedNative)throw fail('integrity');
   const checks={working:backupToken(await readDatabaseBackup(db))===backupToken(working),queueCount:await db.outbox.count()===s.queue.length,queue:syncDownloadToken(await db.outbox.where('uploadId').equals(s.binding.uploadId).sortBy('sequence'))===syncDownloadToken(s.queue),binding:syncDownloadToken(await db.cloudState.get('binding'))===syncDownloadToken(s.binding),operator:syncDownloadToken(await db.operatorState.get('active'))===syncDownloadToken(s.operator),base:syncDownloadToken(await db.syncCanonical.get('active'))===syncDownloadToken(base),application:syncDownloadToken(await db.syncApplications.get(state.id))===syncDownloadToken(application)};
   if(Object.values(checks).some(ok=>!ok))throw Object.assign(fail('integrity'),{cause:Object.keys(checks).filter(key=>!checks[key as keyof typeof checks])});
   active(signal,assertActive);return response(base,application);
@@ -141,7 +164,7 @@ async function applyCanonicalFrom(db:MiseDatabase,input:ApplyCanonicalInput,orig
 /** The original owner upload is adopted only after its real promotion is visible
  * in this complete bootstrap. Neither its fence nor accepted receipt is replaced.
  */
-export async function adoptOwnerUpload(db:MiseDatabase,input:ApplyCanonicalInput,plan:CloudUploadPlan,uploadRemote:OwnerUploadCoverageRemote,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void):Promise<AppliedCanonical>{
+export async function adoptOwnerUpload(db:MiseDatabase,input:ApplyCanonicalInput,plan:CloudUploadPlan,uploadRemote:OwnerUploadCoverageRemote,remote:SyncCoverageRemote,refresh:(context:OperatorContext)=>Promise<OperatorContext>,signal?:AbortSignal,assertActive?:()=>void,nativeOriginals?:NativePaymentOriginalLoader):Promise<AppliedCanonical>{
  input=structuredClone(input);plan=structuredClone(plan);signal?.throwIfAborted();const original=await readCloudUpload(plan),manifestHash=await cloudUploadManifestHash(plan.manifest),binding=parseLocalCloudState(await db.cloudState.get('binding'));
  if(binding.version!==1||binding.phase!=='ready'||!binding.receipt||binding.uploadId!==plan.manifest.id||binding.manifestHash!==manifestHash||binding.targetHash!==input.target.targetHash||binding.businessId!==input.target.businessId||binding.outletId!==input.target.outletId||binding.ownerId!==input.target.actorId||input.target.role!=='owner')throw fail();
  if(await db.syncCanonical.get('active')){
@@ -152,5 +175,5 @@ export async function adoptOwnerUpload(db:MiseDatabase,input:ApplyCanonicalInput
  await db.transaction('r',db.tables,async()=>assertUnadoptedOwner(db,binding));await assertLocalUploadCoverage(db,plan,input.target.targetHash);
  const {context}=await readVerifiedSyncRecords(db,input.readId,input.target,signal),state=context.state;if(state.source.previousCursor!==null||!state.window||!state.seal||!state.receivedCursor)throw fail();selected(await db.operatorState.get('active'),input,parseSyncScope(state.window));
  const uploadSource=await parseSyncUploadCoverageSource({version:1,readId:state.id,readSourceHash:state.sourceHash,readSeal:state.seal,target:input.target,window:state.window,cursor:state.receivedCursor,manifest:plan.manifest,manifestHash,receipt:binding.receipt}),proof=assertVisibleUploadCoverage(uploadSource,await uploadRemote.get(structuredClone(uploadSource),signal));signal?.throwIfAborted();
- return applyCanonicalFrom(db,input,{installed:null,owner:{binding,original,plan,source:uploadSource,proof}},remote,refresh,signal,assertActive);
+ return applyCanonicalFrom(db,input,{installed:null,owner:{binding,original,plan,source:uploadSource,proof}},remote,refresh,signal,assertActive,nativeOriginals);
 }

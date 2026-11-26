@@ -40,7 +40,7 @@ export async function readPaymentReviewFrame(
       bindingToken: captureBindingToken(binding),
     };
     const blocked =
-      !!binding && parseLocalCloudState(binding).phase !== 'cancelled';
+      (!!binding && parseLocalCloudState(binding).phase !== 'cancelled') || (await db.nativePaymentState.count()) > 0;
     return {
       setup,
       item,

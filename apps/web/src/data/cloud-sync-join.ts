@@ -1,3 +1,10 @@
+import { type NativePaymentBackup } from '@mise/core/native-payment-backup';
+import { isNativeSyncTable } from '@mise/core/native-sync-records';
+import type { NativePaymentOriginalLoader } from '@mise/core/native-payment-canonical';
+import {
+  readNativePaymentState,
+  replaceNativePaymentState,
+} from './native-payment-state';
 import Dexie, { type Transaction } from 'dexie';
 import { backupTableNames } from '@mise/core/backup-tables';
 import { backupToken, createBackup } from '@mise/core/backup';
@@ -15,6 +22,8 @@ import {
 import {
   canonicalSnapshotHash,
   reconstructCanonicalSnapshot,
+  reconstructNativeCanonicalArchive,
+  type CanonicalSnapshot,
   type LocalCanonicalSnapshot,
 } from '@mise/core/sync-canonical';
 import {
@@ -239,6 +248,7 @@ export async function joinCanonicalDevice(
   refresh: (context: OperatorContext) => Promise<OperatorContext>,
   signal?: AbortSignal,
   assertActive?: () => void,
+  nativeOriginals?: NativePaymentOriginalLoader,
 ): Promise<JoinedDevice> {
   input = structuredClone(input);
   input.target = parseSyncDownloadTarget(input.target);
@@ -279,17 +289,31 @@ export async function joinCanonicalDevice(
   )
     throw fail();
   const images = await readVerifiedSyncImages(
-      db,
-      input.readId,
-      input.target,
-      signal,
-    ),
+    db,
+    input.readId,
+    input.target,
+    signal,
+  );
+  let nativeBackup: NativePaymentBackup | null = null,
+    snapshot: CanonicalSnapshot;
+  if (verified.records.some((r) => isNativeSyncTable(r.meta.table))) {
+    if (!nativeOriginals) throw fail();
+    const archive = await reconstructNativeCanonicalArchive(
+      state,
+      verified.records,
+      images.images,
+      nativeOriginals,
+    );
+    nativeBackup = archive.backup;
+    // Both complete views enter the same ordinary/canonical writer.
+    snapshot = archive.snapshot;
+  } else
     snapshot = await reconstructCanonicalSnapshot(
       state,
       verified.records,
       images.images,
-    ),
-    base: LocalCanonicalSnapshot = {
+    );
+  const base: LocalCanonicalSnapshot = {
       id: 'active',
       version: 1,
       snapshot,
@@ -323,7 +347,9 @@ export async function joinCanonicalDevice(
       (await db.syncAdmissions.count()) ||
       (await db.outbox.count()) ||
       (await db.paymentOriginalBases.count()) ||
-      (await db.nativePaymentActions.count())
+      (await db.nativePaymentActions.count()) ||
+      (await db.nativePaymentState.count()) ||
+      (await db.nativePaymentValues.count())
     )
       throw fail();
     const current = await Dexie.waitFor(
@@ -405,6 +431,12 @@ export async function joinCanonicalDevice(
         .bulkAdd(name === 'inboxItems' ? stored : snapshot.backup.tables[name]);
     }
     check();
+    if (nativeBackup)
+      await replaceNativePaymentState(db, nativeBackup, {
+        mode: 'canonical',
+        baseHash: base.hash,
+      });
+    check();
     await db.syncCanonical.add(base);
     check();
     await db.operatorState.put(active);
@@ -413,6 +445,16 @@ export async function joinCanonicalDevice(
     // Validate the exact postcondition after every write/hook, while the native
     // writer still excludes other tabs. Unexpected local work aborts the join;
     // an absent pre-join fence is never a generic capture bypass.
+    const installedNative = await readNativePaymentState(db);
+    if (
+      nativeBackup
+        ? !installedNative ||
+          installedNative.state.mode !== 'canonical' ||
+          installedNative.state.baseHash !== base.hash ||
+          installedNative.wire.root !== nativeBackup.root
+        : !!installedNative
+    )
+      throw fail();
     const expected = structuredClone(snapshot.backup.tables);
     expected.inboxItems.push(
       ...(await Dexie.waitFor(portableInboxItems(unassigned))),

@@ -11,3 +11,14 @@ export {reconstructCanonicalSnapshot,reconstructNativeCanonicalRead,mergeCanonic
 export {isNativeSyncTable} from '../../packages/core/native-sync-records';
 export {createLinkedPaymentOriginalSession} from '../../apps/web/src/data/original-copy-session';
 export {readLinkedPaymentOriginal} from '../../packages/core/native-payment-originals';
+
+export {prepareCloudJoin,resumeCloudJoin} from '../../apps/web/src/data/cloud-join';
+export {discoveryAuthScope} from '../../apps/web/src/data/cloud-auth-scope';
+export {runSyncCycle} from '../../apps/web/src/data/sync-cycle';
+export {CloudUploadJournal} from '../../apps/web/src/data/cloud-upload';
+export {readNativePaymentState} from '../../apps/web/src/data/native-payment-state';
+export {readCanonicalState} from '../../apps/web/src/data/cloud-canonical-state';
+
+export {createShopCommandRemote} from '../../apps/web/src/data/shop-command-remote';
+export {operatorAccountHash} from '../../packages/core/operators';
+export {createOperatorRemote} from '../../apps/web/src/data/operator-remote';

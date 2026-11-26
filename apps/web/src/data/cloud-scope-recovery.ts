@@ -42,7 +42,9 @@ export async function scopeRecoveryAuthScope(db:MiseDatabase,config:CloudConnect
  return originalCloudAdmission(canonical.binding).version===2?discoveryAuthScope(base):base+business;
 }
 async function access(db:MiseDatabase,options:ScopeRecoveryOptions,signal?:AbortSignal){
- const config=parseCloudConnection(options.config),canonical=await readCanonicalState(db),scope=canonical.base.snapshot.scope,target:SyncDownloadTarget={targetHash:canonical.binding.targetHash,businessId:scope.businessId,outletId:scope.outletId,actorId:scope.actorId,accountHash:scope.accountHash,role:scope.role};
+ const config=parseCloudConnection(options.config),canonical=await readCanonicalState(db);
+ if(canonical.native)throw new ScopeRecoveryError('review');
+ const scope=canonical.base.snapshot.scope,target:SyncDownloadTarget={targetHash:canonical.binding.targetHash,businessId:scope.businessId,outletId:scope.outletId,actorId:scope.actorId,accountHash:scope.accountHash,role:scope.role};
  await resolveCloudAuthScope(config,options.base,scope.businessId,options.auth.key);
  const account=cycleAccount({...options,config,scope:options.base+scope.businessId},{target,authKey:options.auth.key});
  let latest:CommandAuthorization=await account.getAuth();

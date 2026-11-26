@@ -1,3 +1,5 @@
+import { createNativeCanonicalOriginals } from './native-canonical-originals';
+import { readNativePaymentState } from './native-payment-state';
 import {
   parseCloudConnection,
   cloudConnectionTarget,
@@ -25,7 +27,7 @@ import { SyncImageError } from '@mise/core/sync-images';
 import { SyncCoverageError } from '@mise/core/sync-coverage';
 import { UploadAdmissionError } from '@mise/core/sync-upload-admission';
 import { ScopeRecoveryError } from '@mise/core/scope-recovery';
-import {isLocalInboxRetention} from '@mise/core/local-inbox';
+import { isLocalInboxRetention } from '@mise/core/local-inbox';
 import type { MiseDatabase } from './db';
 import type { PhoneAuth } from './phone-auth';
 import type { CommandAccount, CommandAuthorization } from './command-request';
@@ -39,8 +41,8 @@ import { createCloudUploadCoverageRemote } from './cloud-upload-coverage-remote'
 import { prepareSyncDownload, runSyncDownload } from './cloud-sync-journal';
 import { downloadSyncImages } from './cloud-sync-images';
 import { applyCanonicalDownload, adoptOwnerUpload } from './cloud-sync-apply';
-import { deliverLocalOutbox,deliverLocalInboxImages } from './local-outbox';
-import {createCloudInboxImageUploader} from './cloud-inbox-upload';
+import { deliverLocalOutbox, deliverLocalInboxImages } from './local-outbox';
+import { createCloudInboxImageUploader } from './cloud-inbox-upload';
 import { CloudUploadJournal } from './cloud-upload';
 import {
   claimSyncSession,
@@ -210,10 +212,16 @@ export async function runSyncCycle(
       delivery = await deliverLocalOutbox(
         db,
         claimed.target.targetHash,
-        (command,currency,_signal,parent) => commands(command,currency,lifetime,parent),
+        (command, currency, _signal, parent) =>
+          commands(command, currency, lifetime, parent),
       );
     if (delivery.retained) throw new SyncSessionError('review');
-    await deliverLocalInboxImages(db,claimed.target.targetHash,createCloudInboxImageUploader(options.config,account,send),lifetime);
+    await deliverLocalInboxImages(
+      db,
+      claimed.target.targetHash,
+      createCloudInboxImageUploader(options.config, account, send),
+      lifetime,
+    );
     lifetime.throwIfAborted();
     const queue = await db.outbox.orderBy('[uploadId+sequence]').toArray(),
       queueHash = await materializationHash(
@@ -263,29 +271,57 @@ export async function runSyncCycle(
       authKey: state.authKey,
       expectedOperatorRevision: state.operatorRevision,
     };
-    if (base)
-      await applyCanonicalDownload(
-        db,
-        input,
-        coverage,
-        refresh,
+    const savedNative = await readNativePaymentState(db),
+      knownCopies = new Set(
+        savedNative?.projection.actions.map(
+          (a) => a.source.retention.copy.id,
+        ) ?? [],
+      ),
+      nativeSources = createNativeCanonicalOriginals(
+        options.config,
+        account,
+        {
+          businessId: state.target.businessId,
+          outletId: state.target.outletId,
+          actorId: state.target.actorId,
+        },
+        send,
         lifetime,
         assertActive,
+        async (link) =>
+          savedNative && knownCopies.has(link.retention.copy.id)
+            ? savedNative.loadOriginal(link)
+            : null,
       );
-    else {
-      const binding = await db.cloudState.get('binding');
-      if (binding?.version !== 1) throw new SyncSessionError('review');
-      const original = await options.journal.readSnapshot(binding.uploadId);
-      await adoptOwnerUpload(
-        db,
-        input,
-        { manifest: original.manifest, chunks: original.chunks },
-        uploadCoverage,
-        coverage,
-        refresh,
-        lifetime,
-        assertActive,
-      );
+    try {
+      if (base)
+        await applyCanonicalDownload(
+          db,
+          input,
+          coverage,
+          refresh,
+          lifetime,
+          assertActive,
+          nativeSources.load,
+        );
+      else {
+        const binding = await db.cloudState.get('binding');
+        if (binding?.version !== 1) throw new SyncSessionError('review');
+        const original = await options.journal.readSnapshot(binding.uploadId);
+        await adoptOwnerUpload(
+          db,
+          input,
+          { manifest: original.manifest, chunks: original.chunks },
+          uploadCoverage,
+          coverage,
+          refresh,
+          lifetime,
+          assertActive,
+          nativeSources.load,
+        );
+      }
+    } finally {
+      nativeSources.stop();
     }
     const confirmed = await auth();
     account.assertCurrent(confirmed);
@@ -307,7 +343,11 @@ export async function runSyncCycle(
     if (
       error instanceof ReconciliationError &&
       error.kind === 'retained' &&
-      !(await db.outbox.where('status').equals('retained').filter(row=>!isLocalInboxRetention(row)).count()) &&
+      !(await db.outbox
+        .where('status')
+        .equals('retained')
+        .filter((row) => !isLocalInboxRetention(row))
+        .count()) &&
       (await db.outbox.where('status').equals('pending').count())
     )
       kind = 'retry';

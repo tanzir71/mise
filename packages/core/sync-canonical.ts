@@ -1,4 +1,8 @@
 import {projectNativePaymentCanonical,type NativePaymentOriginalLoader,type NativePaymentCanonicalProjection} from './native-payment-canonical';
+import {createNativePaymentBackup,type NativePaymentLegacyArchive} from './native-payment-backup';
+import {prepareNativeCanonicalCopy} from './native-canonical-copy';
+import {parseOriginalCopyReceipt} from './original-copy';
+import {literalToken} from './literal-token';
 import {isNativeSyncTable} from './native-sync-records';
 import {createBackup,parseBackup} from './backup';
 import {emptyBackupTables,type BackupTable,type MiseBackup} from './backup-tables';
@@ -102,4 +106,32 @@ export async function reconstructNativeCanonicalRead(input:LocalSyncDownload,inc
  const prior:CanonicalSnapshot|null=previous?{backup:previous.current,records:previous.records,cursor:previous.cursor,readId:previous.readId,seal:previous.seal,scope:previous.scope,targetHash:previous.targetHash}:null;
  const snapshot=await reconstructSnapshot(input,incoming,images,prior,true),native=await projectNativePaymentCanonical(snapshot.records,snapshot.backup,snapshot.scope,loadOriginal);
  return {format:'mise-native-canonical-read',version:1,current:snapshot.backup,records:snapshot.records,cursor:snapshot.cursor,readId:snapshot.readId,seal:snapshot.seal,scope:snapshot.scope,targetHash:snapshot.targetHash,native};
+}
+
+/** Prepare the complete archive and ordinary snapshot in one strict projection.
+ * Recheck each source after preparation, retaining both live reader inspections
+ * without expanding and validating the identical financial history twice. */
+export async function reconstructNativeCanonicalArchive(
+ input:LocalSyncDownload,
+ incoming:readonly LocalSyncRecord[],
+ images:readonly LocalSyncImage[],
+ loadOriginal:NativePaymentOriginalLoader,
+ previous:NativeCanonicalRead|null=null,
+ legacy:NativePaymentLegacyArchive={bases:[],nodes:[]},
+) {
+ if(previous&&(previous.format!=='mise-native-canonical-read'||previous.version!==1))throw fail();
+ const prior:CanonicalSnapshot|null=previous?{backup:previous.current,records:previous.records,cursor:previous.cursor,readId:previous.readId,seal:previous.seal,scope:previous.scope,targetHash:previous.targetHash}:null;
+ const snapshot=await reconstructSnapshot(input,incoming,images,prior,true);
+ const sources=new Map<string,Parameters<NativePaymentOriginalLoader>[0]>();
+ const backup=await createNativePaymentBackup(snapshot.backup,snapshot.records,async(link)=>{
+  if(!sources.has(link.retention.copy.id))sources.set(link.retention.copy.id,structuredClone(link));
+  return loadOriginal(link);
+ },legacy);
+ for(const link of sources.values()) {
+  const loaded=await loadOriginal(structuredClone(link));
+  if(literalToken(loaded.link)!==literalToken(link))throw fail();
+  const checked=prepareNativeCanonicalCopy(loaded.portable,{businessId:link.businessId,outletId:link.outletId,actorId:link.actorId},link.retention.copy.id);
+  parseOriginalCopyReceipt(link.retention.copy,checked.plan.manifest);
+ }
+ return {snapshot,backup};
 }

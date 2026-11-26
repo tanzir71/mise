@@ -1,3 +1,4 @@
+import {savedNativePaymentReceipt} from './native-payment-receipt';
 import Dexie from 'dexie';
 import {assertNativePaymentAccess,assertNativePaymentScope,type NativePaymentAccess} from './native-payment-access';
 import {recordNativePaymentMutation} from './native-payment-outbox';
@@ -34,6 +35,7 @@ const undoComparisons=new WeakMap<SavedPaymentUndoComparison,{source:SavedPaymen
 const token=syncDownloadToken;
 async function guard(db:MiseDatabase,review:SavedPaymentSource,write=false){
  const proof=sources.get(review);if(!proof||proof.db!==db)throw new Error('Open the saved payment source again.');
+ if(write&&await db.nativePaymentState.count())throw Error('Keep this accepted source for inspection. Use the existing manual money flow while connected payment changes are unfinished.');
  const [setup,item,selection,binding]=await Promise.all([db.setup(),db.inboxItems.get(review.itemId),db.operatorState.get('active'),db.cloudState.get('binding')]);
  if(!setup||setup.business.id!==proof.destination.businessId||setup.outlet.id!==proof.destination.outletId||setup.owner.id!==proof.destination.actorId||token(selection??null)!==proof.selection||captureBindingToken(binding)!==proof.binding||token(setup)!==proof.shop)throw new Error('The selected outlet, member or connection changed. Open the payment source again.');
  if(!item||item.outletId!==setup.outlet.id||token(inboxSnapshot(item))!==proof.source)throw new Error('The original saved source was changed, sorted or archived. Open its current review.');
@@ -58,6 +60,7 @@ export async function openQueuedPaymentSource(db:MiseDatabase,itemId:string,acce
  sources.get(review)!.nativeAccess=access;await assertNativePaymentScope(access,db);assertNativePaymentAccess(access,db,destination);return review;
 }
 async function receipt(db:MiseDatabase,proof:SourceProof,item:StoredInboxItem):Promise<SavedPaymentReceipt|null>{
+ const native=await savedNativePaymentReceipt(db,item,proof.paymentId);if(native!==undefined)return native;
  const payment=await db.payments.get(proof.paymentId),events=await db.events.where('paymentId').equals(proof.paymentId).toArray();
  if(!payment&&!events.length)return null;if(!payment)throw new Error('The original payment receipt is incomplete. Keep its source and backup.');
  validatePaymentHistory([payment],events,[item]);events.sort((a,b)=>a.paymentRevision!-b.paymentRevision!);

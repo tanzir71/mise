@@ -181,6 +181,7 @@ export async function nativePaymentTestServer(
           return new Response('{}', { status: 401 });
         }
       }
+      if(['/rest/v1/rpc/operator_context','/rest/v1/rpc/operator_contexts'].includes(path))return rpc(request.url,{method:request.method,headers:request.headers,body:await request.text()});
       if (path === '/functions/v1/sync-read') return syncRead(request);
       if (path === '/functions/v1/native-original-copy')
         return originals(request);

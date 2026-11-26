@@ -1,3 +1,4 @@
+import { createNativeCanonicalOriginals } from './native-canonical-originals';
 import Dexie, { type Transaction } from 'dexie';
 import { backupTableNames } from '@mise/core/backup-tables';
 import {
@@ -494,24 +495,42 @@ export async function resumeCloudJoin(
       );
     }
     check();
-    const joined = await joinCanonicalDevice(
-      db,
+    const sourceReader = createNativeCanonicalOriginals(
+      access.config,
+      account,
       {
-        readId: session.readId,
-        target: session.target,
-        authKey: session.authKey,
-        expectedOperatorRevision: session.operatorRevision,
-        session,
+        businessId: session.target.businessId,
+        outletId: session.target.outletId,
+        actorId: session.target.actorId,
       },
-      async (value) => {
-        const next = await access.metadata.select(value, signal);
-        sameScope(fresh, next);
-        check();
-        return next;
-      },
+      options.send ?? fetch,
       signal,
       check,
     );
+    let joined: Awaited<ReturnType<typeof joinCanonicalDevice>>;
+    try {
+      joined = await joinCanonicalDevice(
+        db,
+        {
+          readId: session.readId,
+          target: session.target,
+          authKey: session.authKey,
+          expectedOperatorRevision: session.operatorRevision,
+          session,
+        },
+        async (value) => {
+          const next = await access.metadata.select(value, signal);
+          sameScope(fresh, next);
+          check();
+          return next;
+        },
+        signal,
+        check,
+        sourceReader.load,
+      );
+    } finally {
+      sourceReader.stop();
+    }
     return await db.transaction('rw', db.tables, async () => {
       const tx = Dexie.currentTransaction;
       native(db, tx, check);

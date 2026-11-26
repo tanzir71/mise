@@ -1,4 +1,5 @@
-import { prepareOriginalCopy, parseOriginalCopyReceipt } from './original-copy';
+import { parseOriginalCopyReceipt } from './original-copy';
+import { prepareNativeCanonicalCopy } from './native-canonical-copy';
 import { currentPaymentReceipt } from './payment-receipts';
 import type { AuditEvent, Payment } from './models';
 import type { MiseBackup } from './backup-tables';
@@ -25,7 +26,6 @@ import {
   type NativePaymentOriginalLink,
 } from './native-payment-originals';
 import {
-  parsePortableBackup,
   verifyPaymentArchive,
   paymentArchiveMaxExpandedBytes,
   type PortableBackup,
@@ -112,6 +112,7 @@ export async function projectNativePaymentCanonical(
   currentInput: MiseBackup,
   scope: { businessId: string; outletId: string },
   load: NativePaymentOriginalLoader,
+  { freshOriginals = false }: { freshOriginals?: boolean } = {},
 ): Promise<NativePaymentCanonicalProjection> {
   const current = parseBackup(currentInput),
     t = current.tables;
@@ -227,7 +228,7 @@ export async function projectNativePaymentCanonical(
     if (!copy) {
       const loaded = await load(structuredClone(link));
       ensure(same(loaded.link, link));
-      const plan = prepareOriginalCopy(
+      const checked = prepareNativeCanonicalCopy(
         loaded.portable,
         {
           businessId: link.businessId,
@@ -235,10 +236,10 @@ export async function projectNativePaymentCanonical(
           actorId: link.actorId,
         },
         link.retention.copy.id,
+        { fresh: freshOriginals },
       );
-      parseOriginalCopyReceipt(link.retention.copy, plan.manifest);
-      const decoded = parsePortableBackup(loaded.portable);
-      for (const n of decoded.nodes) {
+      parseOriginalCopyReceipt(link.retention.copy, checked.plan.manifest);
+      for (const n of checked.nodes) {
         const old = availableNodes.get(n.digest);
         ensure(old === undefined || old === n.json);
         if (old === undefined) {
@@ -247,7 +248,7 @@ export async function projectNativePaymentCanonical(
           availableNodes.set(n.digest, n.json);
         }
       }
-      copy = { bases: decoded.bases, retention: link.retention };
+      copy = { bases: checked.bases, retention: link.retention };
       copies.set(link.retention.copy.id, copy);
     } else ensure(same(copy.retention, link.retention));
     // Check this exact copy even when another copy supplied the same root.

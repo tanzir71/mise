@@ -1,41 +1,52 @@
+import 'fake-indexeddb/auto';
+import {
+  prepareCloudJoin,
+  resumeCloudJoin,
+} from '../apps/web/src/data/cloud-join';
+import { runSyncCycle } from '../apps/web/src/data/sync-cycle';
+import { reviewScopeRecovery } from '../apps/web/src/data/cloud-scope-recovery';
+import { CloudUploadJournal } from '../apps/web/src/data/cloud-upload';
+import { discoveryAuthScope } from '../apps/web/src/data/cloud-auth-scope';
+import {
+  applyCanonicalDownload,
+  readRecoveryWorkingSource,
+} from '../apps/web/src/data/cloud-sync-apply';
+import { createCloudCoverageRemote } from '../apps/web/src/data/cloud-coverage-remote';
+import { joinCanonicalDevice } from '../apps/web/src/data/cloud-sync-join';
+import { createNativeCanonicalOriginals } from '../apps/web/src/data/native-canonical-originals';
+import { createOperatorRemote } from '../apps/web/src/data/operator-remote';
+import { selectCloudOperator } from '../apps/web/src/data/operator-state';
+import { readCanonicalState } from '../apps/web/src/data/cloud-canonical-state';
+import { parseSyncScope } from '../packages/core/sync-read';
+import { paymentCheckedFields } from '../packages/core/payment-posting-shape';
+import { readNativePaymentState } from '../apps/web/src/data/native-payment-state';
+import { backupToken } from '../packages/core/backup';
+import {
+  createNativePaymentBackup,
+  parseNativePaymentBackup,
+} from '../packages/core/native-payment-backup';
+import { sharedJsonHash } from '../packages/core/shared-json';
 import {
   parsePortableBackup,
   createPortableBackup,
 } from '../packages/core/payment-archive';
 import { createHash } from 'node:crypto';
-import { seedPaymentStorage } from './fixtures/payment-storage';
-import { inboxImageFile } from './inbox-fixture';
 import { inboxImageBytes } from '../packages/core/inbox';
 import {
   syncImageSource,
   syncImageSourceHash,
 } from '../packages/core/sync-images';
-
-import { defaultCreditTerms, creditBalance } from '../packages/core/khata';
-import 'fake-indexeddb/auto';
-import Dexie from 'dexie';
+import { creditBalance } from '../packages/core/khata';
 import { beforeAll, afterAll, afterEach, it, expect } from 'vitest';
-import { nativePaymentTestServer } from './fixtures/native-payment-server';
 import { createCopySdk, copySdkSubject } from './fixtures/original-copy-sdk';
 import { MiseDatabase } from '../apps/web/src/data/db';
-import { OriginalCopyJournal } from '../apps/web/src/data/original-copies';
-import { createNativePaymentOutboxSession } from '../apps/web/src/data/native-payment-session';
-import { createLinkedPaymentOriginalSession } from '../apps/web/src/data/original-copy-session';
-import { createCloudSyncRemote } from '../apps/web/src/data/cloud-sync-remote';
 import {
-  prepareSyncDownload,
-  runSyncDownload,
-} from '../apps/web/src/data/cloud-sync-journal';
-import { createShopCommandRemote } from '../apps/web/src/data/shop-command-remote';
-import {
-  recordSavedPayment,
-  compareSavedPaymentMoney,
-  recordSavedPaymentMoney,
+  openSavedPaymentSource,
+  savedPaymentReceipt,
+  editSavedPayment,
   compareSavedPaymentMoneyUndo,
   undoSavedPaymentMoney,
 } from '../apps/web/src/data/payment-capture';
-import { cloudConnectionTarget } from '../packages/core/cloud-connection';
-import { operatorAccountHash } from '../packages/core/operators';
 import { newInboxId } from '../packages/core/inbox';
 import { literalToken } from '../packages/core/literal-token';
 import { paymentInvocationHash } from '../packages/core/payment-invocations';
@@ -52,258 +63,22 @@ import {
   readPaymentOriginalBasis,
   readPaymentOriginalAction,
 } from '../packages/core/payment-originals';
+import { nativeCanonicalHarness } from './fixtures/native-canonical-harness';
+import { prepareNativeCanonicalCopy } from '../packages/core/native-canonical-copy';
 
 const config = {
     apiUrl: 'https://native-canonical.test',
     publishableKey: 'sb_publishable_canonical_test',
   },
   origin = 'https://shop.test';
-let server: Awaited<ReturnType<typeof nativePaymentTestServer>>;
-const stores: Dexie[] = [],
-  sdks: Awaited<ReturnType<typeof createCopySdk>>[] = [],
-  sessions: { stop(): void }[] = [];
+const harness = nativeCanonicalHarness(config, origin);
+const { fixture, download, manager, stores, sdks, sessions } = harness;
+let server: Awaited<ReturnType<typeof harness.start>>;
 beforeAll(async () => {
-  server = await nativePaymentTestServer(
-    config.apiUrl,
-    config.publishableKey,
-    origin,
-  );
+  server = await harness.start();
 }, 30000);
-afterEach(async () => {
-  for (const s of sessions.splice(0)) s.stop();
-  for (const s of sdks.splice(0)) await s.auth.dispose();
-  for (const s of stores.splice(0)) await s.delete();
-});
-afterAll(async () => {
-  await server.close();
-});
-async function fixture(
-  kind: 'counter' | 'credit' | 'order' = 'counter',
-  scale = false,
-) {
-  const db = new MiseDatabase('native-canonical-source-' + newInboxId());
-  stores.push(db);
-  const large = scale ? await seedPaymentStorage(db) : null;
-  const setup =
-    large?.setup ??
-    (await db.saveSetup({
-      businessType: 'corner_shop',
-      marketCode: 'BD',
-      name: 'Canonical originals',
-      phone: '01712345482',
-    }));
-  let accountId: string | undefined = large?.account.id;
-  if (kind === 'credit' && !large) {
-    const customer = await db.saveCustomer(
-      {
-        name: 'Original customer',
-        nickname: 'Apa',
-        phone: '01712345482',
-        address: '',
-        notes: '',
-        tags: [],
-      },
-      {
-        credit: { ...defaultCreditTerms, allowed: true, limit: 200000 },
-        opening: { amount: 100000, occurredAt: Date.now() },
-      },
-    );
-    accountId = (await db.creditAccounts
-      .where('customerId')
-      .equals(customer.id)
-      .first())!.id;
-  }
-  const order =
-    kind === 'order'
-      ? await db.saveOrder({
-          source: 'phone',
-          sourceText: 'Original unpaid order',
-          name: 'Customer',
-          phone: '01712345482',
-          type: 'pickup',
-          address: '',
-          table: '',
-          lines: [{ name: 'Rice', unit: 'pc', qty: 1, unitPrice: 1525 }],
-          deliveryFee: 0,
-          discount: 0,
-          payment: { method: 'cash' },
-        })
-      : null;
-  const item = await db.captureInbox({
-    text: 'DBBL received Tk 15.25\0\ud800 \u09ac\u09be\u0982\u09b2\u09be',
-    ...(large ? { files: [inboxImageFile()] } : {}),
-  });
-  await server.seed(await db.readBackup());
-  const bridge: typeof fetch = async (url, init = {}) => {
-    const headers = new Headers(init.headers);
-    headers.set('Origin', origin);
-    return server.handle(new Request(url, { ...init, headers }));
-  };
-  const authScope = 'canonical/' + db.name,
-    sdk = await createCopySdk(config, authScope, bridge);
-  sdks.push(sdk);
-  const targetHash = await cloudConnectionTarget(
-      config,
-      authScope,
-      sdk.saved.user.id,
-    ),
-    uploadId = newInboxId();
-  await db.cloudState.put({
-    id: 'binding',
-    version: 1,
-    uploadId,
-    businessId: setup.business.id,
-    outletId: setup.outlet.id,
-    ownerId: setup.owner.id,
-    targetHash,
-    manifestHash: 'b'.repeat(64),
-    phase: 'ready',
-    sequence: 0,
-    receipt: {
-      id: uploadId,
-      businessId: setup.business.id,
-      outletId: setup.outlet.id,
-      snapshotHash: 'c'.repeat(64),
-      at: Date.now(),
-      records: 3,
-      images: 0,
-    },
-  });
-  const journal = new OriginalCopyJournal(
-    'native-canonical-copies-' + newInboxId(),
-  );
-  stores.push(journal);
-  const send: typeof fetch = (url, init) =>
-    new URL(String(url)).pathname.startsWith('/functions/')
-      ? bridge(url, init)
-      : sdk.send(url, init);
-  const options = {
-      config,
-      authScope,
-      auth: sdk.auth,
-      storage: sdk.storage,
-      journal,
-      send,
-    },
-    session = await createNativePaymentOutboxSession(db, options);
-  sessions.push(session);
-  const remote = createCloudSyncRemote(
-    config,
-    async () => (await sdk.auth.commandAuthorization()).jwt,
-    send,
-  );
-  const sources = await createLinkedPaymentOriginalSession(options, {
-    businessId: setup.business.id,
-    outletId: setup.outlet.id,
-    actorId: setup.owner.id,
-  });
-  sessions.push(sources);
-  const commands = createShopCommandRemote(
-    config.apiUrl,
-    config.publishableKey,
-    {
-      scope: authScope,
-      accountHash: await operatorAccountHash(sdk.saved.user.id),
-      targetHash,
-      getAuth: () => sdk.auth.commandAuthorization(),
-      assertCurrent: (v) => sdk.auth.assertCommandAuthorization(v),
-    },
-    send,
-  );
-  const review = await session.review(item.id, { sender: 'DBBL' });
-  await recordSavedPayment(db, review, {
-    checked: true,
-    amount: 1525,
-    currency: 'BDT',
-    method: 'cash',
-    methodName: 'Cash',
-    reference: 'TESTCANONICAL' + item.id,
-    receivedAt: item.createdAt,
-  });
-  const recorded = await recordSavedPaymentMoney(
-    db,
-    review,
-    await compareSavedPaymentMoney(
-      db,
-      review,
-      order
-        ? { kind: 'order', id: order.id }
-        : accountId
-          ? { kind: 'credit', id: accountId }
-          : { kind: 'counter', who: 'Exact original' },
-    ),
-    true,
-  );
-  await session.deliver();
-  return {
-    db,
-    setup,
-    item,
-    sdk,
-    session,
-    remote,
-    sources,
-    commands: {
-      async apply(...args: Parameters<typeof commands.apply>) {
-        try {
-          return await commands.apply(
-            args[0],
-            args[1] ?? setup.outlet.currency,
-            args[2],
-            args[3],
-          );
-        } catch (error) {
-          throw Error(String(error) + ' ' + server.lastError());
-        }
-      },
-    },
-    recorded,
-    review,
-    targetHash,
-    options,
-    large,
-    bridge,
-    accountId,
-    order,
-  };
-}
-async function download(
-  f: Awaited<ReturnType<typeof fixture>>,
-  previous: NativeCanonicalRead | null = null,
-) {
-  const window = await f.remote.begin({
-    type: 'begin',
-    id: newInboxId(),
-    outletId: f.setup.outlet.id,
-    cursor: previous?.cursor ?? null,
-  });
-  const db = new MiseDatabase('native-canonical-target-' + newInboxId());
-  stores.push(db);
-  const target = {
-    targetHash: f.targetHash,
-    businessId: window.businessId,
-    outletId: window.outletId,
-    actorId: window.actorId,
-    accountHash: window.accountHash,
-    role: window.role,
-  };
-  await prepareSyncDownload(db, {
-    id: window.id,
-    target,
-    previousCursor: previous?.cursor ?? null,
-  });
-  const state = await runSyncDownload(db, window.id, target, f.remote),
-    records = await db.syncRecords.toArray();
-  const read = () =>
-    reconstructNativeCanonicalRead(
-      state,
-      records,
-      [],
-      (link) => f.sources.read(link.id),
-      previous,
-    );
-  return { db, state, records, read };
-}
+afterEach(async () => harness.cleanup());
+afterAll(async () => harness.close());
 const copyRows = (rows: CanonicalRecord[]) => structuredClone(rows);
 function rehash(row: CanonicalRecord) {
   row.rowHash = paymentInvocationHash(row.row);
@@ -640,62 +415,6 @@ it('a root cached from another accepted action must still belong to the exact cl
   ).rejects.toThrow();
 }, 30000);
 
-async function manager(f: Awaited<ReturnType<typeof fixture>>) {
-  const managerId = newInboxId();
-  await server.sql.query(
-    "insert into public.members(id,business_id,auth_user_id,name,role,created_at,updated_at) values($1,$2,$3,$4,'manager',$5,$5)",
-    [
-      managerId,
-      f.setup.business.id,
-      copySdkSubject(2),
-      JSON.stringify('Current manager'),
-      Date.now(),
-    ],
-  );
-  await server.sql.query('insert into public.member_outlets values($1,$2,$3)', [
-    f.setup.business.id,
-    managerId,
-    f.setup.outlet.id,
-  ]);
-  const authScope = 'canonical-manager/' + newInboxId(),
-    sdk = await createCopySdk(config, authScope, f.bridge, 2);
-  sdks.push(sdk);
-  const targetHash = await cloudConnectionTarget(
-      config,
-      authScope,
-      sdk.saved.user.id,
-    ),
-    journal = new OriginalCopyJournal(
-      'canonical-manager-journal-' + newInboxId(),
-    );
-  stores.push(journal);
-  const send: typeof fetch = (url, init) =>
-    new URL(String(url)).pathname.startsWith('/functions/')
-      ? f.bridge(url, init)
-      : sdk.send(url, init);
-  const sources = await createLinkedPaymentOriginalSession(
-    {
-      ...f.options,
-      authScope,
-      auth: sdk.auth,
-      storage: sdk.storage,
-      journal,
-      send,
-    },
-    {
-      businessId: f.setup.business.id,
-      outletId: f.setup.outlet.id,
-      actorId: managerId,
-    },
-  );
-  sessions.push(sources);
-  const remote = createCloudSyncRemote(
-    config,
-    async () => (await sdk.auth.commandAuthorization()).jwt,
-    send,
-  );
-  return { ...f, sdk, remote, sources, targetHash, managerId };
-}
 it.each(['credit', 'order'] as const)(
   'actual %s canonical money can be independently undone while accepted original history remains exact',
   async (kind) => {
@@ -954,3 +673,905 @@ it('a valid original basis cannot excuse a different portable body under the cla
     ),
   ).rejects.toThrow();
 }, 30000);
+
+it('a complete v3 payment backup retains genuine original evidence independently of actual current financial undo without any SDK, cursor or outgoing action on cold read', async () => {
+  const f = await fixture(),
+    sale = f.recorded.payment.postings![0].receipt.id;
+  await f.commands.apply({
+    id: newInboxId(),
+    type: 'sale.undo',
+    outletId: f.setup.outlet.id,
+    saleId: sale,
+    occurredAt: Date.now(),
+    entryId: null,
+    creditEventId: null,
+  });
+  const v = await (await download(f)).read(),
+    file = await createNativePaymentBackup(v.current, v.records, (link) =>
+      f.sources.read(link.id),
+    );
+  expect(file.formatVersion).toBe(3);
+  const cold = await parseNativePaymentBackup(JSON.stringify(file), {
+    fresh: true,
+  });
+  expect(cold.current).toEqual(v.current);
+  expect(cold.records).toEqual(
+    v.records.filter((r) => r.table.startsWith('native_')),
+  );
+  expect(cold.projection).toEqual(v.native);
+  expect(cold.projection.payments[0].original.text).toBe(
+    'DBBL received Tk 15.25\0\ud800 \u09ac\u09be\u0982\u09b2\u09be',
+  );
+  expect(cold.projection.current[0].postings[0]).toMatchObject({
+    currentReceipt: { eligible: false },
+    nativeUndo: null,
+    receipt: { state: 'changed' },
+  });
+  expect(Object.keys(file).sort()).toEqual([
+    'encoding',
+    'exportedAt',
+    'format',
+    'formatVersion',
+    'root',
+    'schemaVersion',
+    'values',
+  ]);
+  expect(() => parsePortableBackup(file)).toThrow();
+  expect(
+    (
+      await server.sql.query(
+        'select id from public.sales where business_id=$1 and outlet_id=$2',
+        [f.setup.business.id, f.setup.outlet.id],
+      )
+    ).rows,
+  ).toHaveLength(1);
+  expect(await f.db.nativePaymentActions.count()).toBe(2);
+}, 30000);
+
+it('the v3 file rejects missing, changed, duplicate and unrelated shared source nodes before restore', async () => {
+  const f = await fixture(),
+    v = await (await download(f)).read(),
+    file = await createNativePaymentBackup(v.current, v.records, (link) =>
+      f.sources.read(link.id),
+    );
+  const bad = structuredClone(file);
+  bad.values[0].json += ' ';
+  await expect(parseNativePaymentBackup(bad)).rejects.toThrow();
+  const missing = structuredClone(file);
+  missing.values = missing.values.filter((n) => n.digest !== file.root);
+  await expect(parseNativePaymentBackup(missing)).rejects.toThrow();
+  const duplicate = structuredClone(file);
+  duplicate.values.push(duplicate.values[0]);
+  await expect(parseNativePaymentBackup(duplicate)).rejects.toThrow();
+  const unrelated = structuredClone(file),
+    json = '["s","Unrelated exact node"]';
+  unrelated.values.push({ digest: sharedJsonHash(json), json });
+  await expect(parseNativePaymentBackup(unrelated)).rejects.toThrow();
+  expect(
+    (
+      await server.sql.query(
+        'select id from public.sales where business_id=$1 and outlet_id=$2',
+        [f.setup.business.id, f.setup.outlet.id],
+      )
+    ).rows,
+  ).toHaveLength(1);
+}, 30000);
+
+it('the existing restore/export controls retain both original native evidence and independently corrected current money with no restored sends', async () => {
+  const f = await fixture(),
+    sale = f.recorded.payment.postings![0].receipt.id;
+  await f.commands.apply({
+    id: newInboxId(),
+    type: 'sale.undo',
+    outletId: f.setup.outlet.id,
+    saleId: sale,
+    occurredAt: Date.now(),
+    entryId: null,
+    creditEventId: null,
+  });
+  const v = await (await download(f)).read(),
+    file = await createNativePaymentBackup(v.current, v.records, (link) =>
+      f.sources.read(link.id),
+    );
+  const target = new MiseDatabase('native-v3-cold-restore-' + newInboxId());
+  stores.push(target);
+  const preview = await target.previewRestore(JSON.stringify(file));
+  expect(preview.counts.payments).toBe(1);
+  await target.restoreBackup(JSON.stringify(file), preview);
+  const saved = await readNativePaymentState(target);
+  expect(saved?.state.mode).toBe('restored');
+  expect(saved?.projection.payments).toEqual(v.native.payments);
+  expect(saved?.projection.current[0].postings[0]).toMatchObject({
+    currentReceipt: { eligible: false },
+    nativeUndo: null,
+  });
+  expect(await target.sales.count()).toBe(1);
+  expect((await target.sales.get(sale))?.voidedAt).toBeDefined();
+  expect(await target.nativePaymentActions.count()).toBe(0);
+  expect(await target.outbox.count()).toBe(0);
+  expect(await target.cloudState.count()).toBe(0);
+  expect(await target.syncCanonical.count()).toBe(0);
+  await expect(target.readPortableBackup()).rejects.toThrow('complete backup');
+  const migration = new CloudUploadJournal(
+    'native-v3-migration-fence-' + newInboxId(),
+  );
+  stores.push(migration);
+  await expect(migration.prepare(target, newInboxId())).rejects.toThrow(
+    'complete JSON backup',
+  );
+  expect(await migration.uploads.count()).toBe(0);
+  const setup = (await target.setup())!,
+    review = await openSavedPaymentSource(target, f.item.id, {
+      businessId: setup.business.id,
+      outletId: setup.outlet.id,
+      actorId: setup.owner.id,
+    }),
+    restored = await savedPaymentReceipt(target, review);
+  expect(restored?.payment).toEqual(v.native.payments[0]);
+  expect(restored?.associationCurrent).toBe(false);
+  expect(restored?.inspection.postings[0].target).toMatchObject({
+    kind: 'counter',
+    who: 'Exact original',
+  });
+  await expect(
+    editSavedPayment(
+      target,
+      review,
+      { id: newInboxId(), revision: restored!.payment.revision },
+      { checked: true, ...paymentCheckedFields(restored!.payment) },
+    ),
+  ).rejects.toThrow('manual money flow');
+  expect(await target.sales.count()).toBe(1);
+
+  await target.recordSale({ expression: '10', method: 'cash' });
+  const exported = (await target.readCompleteBackup()).portable;
+  expect(exported.formatVersion).toBe(3);
+  const checked = await parseNativePaymentBackup(JSON.stringify(exported));
+  expect(checked.current.tables.sales).toHaveLength(2);
+  expect(checked.projection.payments).toEqual(v.native.payments);
+  expect(
+    checked.projection.current[0].postings[0].currentReceipt.eligible,
+  ).toBe(false);
+  expect(
+    (
+      await server.sql.query(
+        'select id from public.sales where business_id=$1',
+        [f.setup.business.id],
+      )
+    ).rows,
+  ).toHaveLength(1);
+}, 30000);
+
+it('a native graph quota failure during the actual restore rolls every ordinary record, selection and source write back', async () => {
+  const f = await fixture(),
+    v = await (await download(f)).read(),
+    file = await createNativePaymentBackup(v.current, v.records, (link) =>
+      f.sources.read(link.id),
+    );
+  const target = new MiseDatabase('native-v3-quota-restore-' + newInboxId());
+  stores.push(target);
+  await target.saveSetup({
+    businessType: 'corner_shop',
+    marketCode: 'BD',
+    name: 'Keep existing shop',
+    phone: '01712345482',
+  });
+  await target.recordSale({ expression: '42', method: 'cash' });
+  const before = await target.readBackup(),
+    selection = await target.operatorState.toArray(),
+    preview = await target.previewRestore(file);
+  const quota = () => {
+    throw new Error('fictional native evidence quota failure');
+  };
+  target.nativePaymentValues.hook('creating', quota);
+  await expect(target.restoreBackup(file, preview)).rejects.toThrow('quota');
+  target.nativePaymentValues.hook('creating').unsubscribe(quota);
+  expect(backupToken(await target.readBackup())).toBe(backupToken(before));
+  expect(await target.operatorState.toArray()).toEqual(selection);
+  expect(await target.nativePaymentState.count()).toBe(0);
+  expect(await target.nativePaymentValues.count()).toBe(0);
+  expect(await target.nativePaymentActions.count()).toBe(0);
+  expect(await target.outbox.count()).toBe(0);
+}, 30000);
+
+it('a fresh actual SDK device installs current money and complete native originals with one accepted cursor and no outgoing money', async () => {
+  const f = await fixture(),
+    d = await download(f),
+    target = d.state.source.target,
+    context = {
+      version: 1 as const,
+      ...parseSyncScope(d.state.window!),
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    },
+    metadata = createOperatorRemote(
+      config,
+      () => f.sdk.auth.commandAuthorization(),
+      f.options.send,
+    ),
+    refresh: Parameters<typeof selectCloudOperator>[4] = (c) =>
+      metadata.select(c),
+    selected = await selectCloudOperator(
+      d.db,
+      context,
+      { authKey: f.sdk.auth.key, targetHash: target.targetHash },
+      null,
+      refresh,
+    ),
+    sources = createNativeCanonicalOriginals(
+      config,
+      {
+        scope: f.options.authScope,
+        targetHash: target.targetHash,
+        accountHash: target.accountHash,
+        getAuth: () => f.sdk.auth.commandAuthorization(),
+        assertCurrent: (value) => f.sdk.auth.assertCommandAuthorization(value),
+      },
+      {
+        businessId: target.businessId,
+        outletId: target.outletId,
+        actorId: target.actorId,
+      },
+      f.options.send,
+    );
+  sessions.push(sources);
+  const input = {
+      readId: d.state.id,
+      target,
+      authKey: f.sdk.auth.key,
+      expectedOperatorRevision: selected.revision,
+    },
+    joined = await joinCanonicalDevice(
+      d.db,
+      input,
+      refresh,
+      undefined,
+      undefined,
+      sources.load,
+    ),
+    state = await readCanonicalState(d.db),
+    native = await readNativePaymentState(d.db);
+  expect(state.base.snapshot.readId).toBe(joined.readId);
+  expect(native?.state).toMatchObject({
+    mode: 'canonical',
+    baseHash: state.base.hash,
+  });
+  expect(native?.projection.payments[0].original.text).toBe(
+    'DBBL received Tk 15.25\0\ud800 \u09ac\u09be\u0982\u09b2\u09be',
+  );
+  expect(await d.db.sales.count()).toBe(1);
+  expect(await d.db.payments.count()).toBe(0);
+  expect(await d.db.nativePaymentActions.count()).toBe(0);
+  expect(await d.db.outbox.count()).toBe(0);
+  expect((await d.db.cloudState.get('binding'))?.join?.cursor).toBe(
+    d.state.receivedCursor,
+  );
+  expect(
+    await joinCanonicalDevice(
+      d.db,
+      input,
+      refresh,
+      undefined,
+      undefined,
+      sources.load,
+    ),
+  ).toEqual(joined);
+  expect((await d.db.readCompleteBackup()).portable.formatVersion).toBe(3);
+  expect(
+    (
+      await server.sql.query(
+        'select id from public.sales where business_id=$1',
+        [f.setup.business.id],
+      )
+    ).rows,
+  ).toHaveLength(1);
+}, 30000);
+
+it('real native canonical pulls preserve an absent cash intent, then use actual receipt coverage without repeating money or rewriting originals', async () => {
+  const f = await fixture(),
+    d = await download(f),
+    target = d.state.source.target,
+    context = {
+      version: 1 as const,
+      ...parseSyncScope(d.state.window!),
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    },
+    metadata = createOperatorRemote(
+      config,
+      () => f.sdk.auth.commandAuthorization(),
+      f.options.send,
+    ),
+    refresh: Parameters<typeof selectCloudOperator>[4] = (c) =>
+      metadata.select(c),
+    selected = await selectCloudOperator(
+      d.db,
+      context,
+      { authKey: f.sdk.auth.key, targetHash: target.targetHash },
+      null,
+      refresh,
+    ),
+    account = {
+      scope: f.options.authScope,
+      targetHash: target.targetHash,
+      accountHash: target.accountHash,
+      getAuth: () => f.sdk.auth.commandAuthorization(),
+      assertCurrent: (
+        value: Awaited<ReturnType<typeof f.sdk.auth.commandAuthorization>>,
+      ) => f.sdk.auth.assertCommandAuthorization(value),
+    },
+    sourceScope = {
+      businessId: target.businessId,
+      outletId: target.outletId,
+      actorId: target.actorId,
+    },
+    firstSources = createNativeCanonicalOriginals(
+      config,
+      account,
+      sourceScope,
+      f.options.send,
+    );
+  sessions.push(firstSources);
+  await joinCanonicalDevice(
+    d.db,
+    {
+      readId: d.state.id,
+      target,
+      authKey: f.sdk.auth.key,
+      expectedOperatorRevision: selected.revision,
+    },
+    refresh,
+    undefined,
+    undefined,
+    firstSources.load,
+  );
+  const original = await readNativePaymentState(d.db);
+  expect(original).not.toBeNull();
+  firstSources.stop();
+  const copyOps: string[] = [],
+    send: typeof fetch = (url, init) => {
+      const op = new Headers(init?.headers).get('X-Mise-Original-Action');
+      if (op) copyOps.push(op);
+      return f.options.send(url, init);
+    },
+    sources = createNativeCanonicalOriginals(
+      config,
+      account,
+      sourceScope,
+      send,
+      undefined,
+      () => {},
+      async (link) => original!.loadOriginal(link),
+    );
+  sessions.push(sources);
+  const sale = f.recorded.payment.postings![0].receipt.id;
+  await f.commands.apply({
+    id: newInboxId(),
+    type: 'sale.undo',
+    outletId: f.setup.outlet.id,
+    saleId: sale,
+    occurredAt: Date.now(),
+    entryId: null,
+    creditEventId: null,
+  });
+  const pendingSale = await d.db.recordSale({
+      expression: '19',
+      method: 'cash',
+    }),
+    queued = await d.db.outbox.toArray(),
+    command = queued[0].commands[0];
+  const coverage = createCloudCoverageRemote(
+    config,
+    f.options.authScope,
+    () => f.sdk.auth.commandAuthorization(),
+    f.options.send,
+  );
+  const pull = async () => {
+    const base = (await readCanonicalState(d.db)).base.snapshot,
+      native = await readNativePaymentState(d.db),
+      prior: NativeCanonicalRead = {
+        format: 'mise-native-canonical-read',
+        version: 1,
+        current: base.backup,
+        records: base.records,
+        cursor: base.cursor,
+        readId: base.readId,
+        seal: base.seal,
+        scope: base.scope,
+        targetHash: base.targetHash,
+        native: native!.projection,
+      },
+      next = await download(f, prior, d.db),
+      operator = (await d.db.operatorState.get('active'))!;
+    const applied = await applyCanonicalDownload(
+      d.db,
+      {
+        readId: next.state.id,
+        target,
+        authKey: f.sdk.auth.key,
+        expectedOperatorRevision: operator.revision,
+      },
+      coverage,
+      refresh,
+      undefined,
+      undefined,
+      sources.load,
+    );
+    return {
+      applied,
+      native: await readNativePaymentState(d.db),
+      state: await readCanonicalState(d.db),
+    };
+  };
+  const first = await pull();
+  expect(first.applied.pending).toBe(1);
+  expect(first.applied.covered).toBe(0);
+  expect((await d.db.sales.get(sale))?.voidedAt).toBeDefined();
+  expect((await d.db.sales.get(pendingSale.id))?.amount).toBe(1900);
+  expect(await d.db.outbox.toArray()).toEqual(queued);
+  expect(first.native?.projection.payments).toEqual(
+    original!.projection.payments,
+  );
+  expect(first.native?.projection.current[0].postings[0]).toMatchObject({
+    currentReceipt: { eligible: false },
+    nativeUndo: null,
+  });
+  await f.commands.apply(command);
+  const second = await pull();
+  expect(second.applied.pending).toBe(0);
+  expect(second.applied.covered).toBe(1);
+  expect(await d.db.sales.count()).toBe(2);
+  expect(
+    (await d.db.sales.toArray())
+      .filter((s) => s.voidedAt === undefined)
+      .map((s) => s.amount),
+  ).toEqual([1900]);
+  expect(second.native?.projection.payments).toEqual(
+    original!.projection.payments,
+  );
+  expect(
+    copyOps.filter((op) => op === 'payment-inspect').length,
+  ).toBeGreaterThanOrEqual(4);
+  expect(
+    copyOps.filter((op) => op === 'payment-read' || op === 'payment-read-part'),
+  ).toEqual([]);
+  expect(
+    (
+      await server.sql.query(
+        'select amount from public.sales where business_id=$1 and voided_at is null',
+        [f.setup.business.id],
+      )
+    ).rows,
+  ).toEqual([{ amount: 1900 }]);
+  expect(await d.db.nativePaymentActions.count()).toBe(0);
+  expect((await d.db.readCompleteBackup()).portable.formatVersion).toBe(3);
+}, 60000);
+
+it('the actual product join and sync controllers use a fresh SDK session to install native history and deliver one manual cash entry', async () => {
+  const f = await fixture(),
+    window = await f.remote.begin({
+      type: 'begin',
+      id: newInboxId(),
+      outletId: f.setup.outlet.id,
+      cursor: null,
+    }),
+    base = '/native-product-' + newInboxId() + '/',
+    sessionId = copySdkSubject(301);
+  await server.sql.query(
+    'insert into auth.sessions(id,user_id) values($1,$2)',
+    [sessionId, copySdkSubject(1)],
+  );
+  const sdk = await createCopySdk(
+    config,
+    discoveryAuthScope(base),
+    f.bridge,
+    1,
+    undefined,
+    sessionId,
+  );
+  sdks.push(sdk);
+  const target = new MiseDatabase('native-product-device-' + newInboxId()),
+    journal = new CloudUploadJournal('native-product-uploads-' + newInboxId());
+  stores.push(target, journal);
+  const options = { config, base, auth: sdk.auth, send: f.bridge },
+    context = {
+      version: 1 as const,
+      ...parseSyncScope(window),
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    };
+  await prepareCloudJoin(target, options, context);
+  const joined = await resumeCloudJoin(target, options);
+  expect(joined.phase).toBe('ready');
+  expect(
+    (await readNativePaymentState(target))?.projection.payments[0].original
+      .text,
+  ).toBe('DBBL received Tk 15.25\0\ud800 \u09ac\u09be\u0982\u09b2\u09be');
+  expect(await target.nativePaymentActions.count()).toBe(0);
+  expect(await target.outbox.count()).toBe(0);
+  const cash = await target.recordSale({ expression: '21', method: 'cash' });
+  expect(
+    await runSyncCycle(target, {
+      config,
+      scope: base + f.setup.business.id,
+      auth: sdk.auth,
+      journal,
+      send: f.bridge,
+    }),
+  ).toBe(true);
+  expect((await target.outbox.toArray()).map((r) => r.status)).toEqual([
+    'accepted',
+  ]);
+  expect((await target.sales.get(cash.id))?.amount).toBe(2100);
+  expect(await target.sales.count()).toBe(2);
+  expect(await target.nativePaymentActions.count()).toBe(0);
+  const canonical = await readCanonicalState(target),
+    native = await readNativePaymentState(target);
+  expect(native?.state.baseHash).toBe(canonical.base.hash);
+  expect(canonical.application?.pending).toEqual([]);
+  expect(native?.projection.payments[0].postings?.[0].receipt.id).toBe(
+    f.recorded.payment.postings![0].receipt.id,
+  );
+  expect(
+    (
+      await server.sql.query(
+        'select amount from public.sales where business_id=$1 order by amount',
+        [f.setup.business.id],
+      )
+    ).rows,
+  ).toEqual([{ amount: 1525 }, { amount: 2100 }]);
+  expect((await target.readCompleteBackup()).portable.formatVersion).toBe(3);
+}, 60000);
+
+async function nativeInstallFixture(f: Awaited<ReturnType<typeof fixture>>) {
+  const d = await download(f),
+    target = d.state.source.target,
+    context = {
+      version: 1 as const,
+      ...parseSyncScope(d.state.window!),
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    },
+    metadata = createOperatorRemote(
+      config,
+      () => f.sdk.auth.commandAuthorization(),
+      f.bridge,
+    ),
+    refresh: Parameters<typeof selectCloudOperator>[4] = (c) =>
+      metadata.select(c),
+    selected = await selectCloudOperator(
+      d.db,
+      context,
+      { authKey: f.sdk.auth.key, targetHash: target.targetHash },
+      null,
+      refresh,
+    ),
+    input = {
+      readId: d.state.id,
+      target,
+      authKey: f.sdk.auth.key,
+      expectedOperatorRevision: selected.revision,
+    },
+    load: Parameters<typeof joinCanonicalDevice>[5] = (link) =>
+      f.sources.read(link.id);
+  return { d, target, selected, input, refresh, load };
+}
+async function nativeInstallPrior(
+  db: MiseDatabase,
+): Promise<NativeCanonicalRead> {
+  const base = (await readCanonicalState(db)).base.snapshot,
+    native = await readNativePaymentState(db);
+  return {
+    format: 'mise-native-canonical-read',
+    version: 1,
+    current: base.backup,
+    records: base.records,
+    cursor: base.cursor,
+    readId: base.readId,
+    seal: base.seal,
+    scope: base.scope,
+    targetHash: base.targetHash,
+    native: native!.projection,
+  };
+}
+it('native installation quota failure preserves the empty device and every staged source without accepting a cursor', async () => {
+  const f = await fixture(),
+    x = await nativeInstallFixture(f),
+    before = await x.d.db.operatorState.get('active'),
+    quota = () => {
+      throw Error('fictional native installation quota');
+    };
+  x.d.db.nativePaymentValues.hook('creating', quota);
+  await expect(
+    joinCanonicalDevice(
+      x.d.db,
+      x.input,
+      x.refresh,
+      undefined,
+      undefined,
+      x.load,
+    ),
+  ).rejects.toThrow('quota');
+  x.d.db.nativePaymentValues.hook('creating').unsubscribe(quota);
+  expect(await x.d.db.sales.count()).toBe(0);
+  expect(await x.d.db.nativePaymentValues.count()).toBe(0);
+  expect(await x.d.db.nativePaymentState.count()).toBe(0);
+  expect(await x.d.db.syncCanonical.count()).toBe(0);
+  expect(await x.d.db.cloudState.count()).toBe(0);
+  expect(await x.d.db.operatorState.get('active')).toEqual(before);
+  expect(await x.d.db.syncRecords.toArray()).toEqual(x.d.records);
+}, 30000);
+it('a finite native canonical quota failure preserves the old current money, source graph, cursor and queue together', async () => {
+  const f = await fixture(),
+    x = await nativeInstallFixture(f);
+  await joinCanonicalDevice(
+    x.d.db,
+    x.input,
+    x.refresh,
+    undefined,
+    undefined,
+    x.load,
+  );
+  const before = await readCanonicalState(x.d.db),
+    native = await readNativePaymentState(x.d.db),
+    ordinary = await x.d.db.readBackup(),
+    queue = await x.d.db.outbox.toArray(),
+    prior = await nativeInstallPrior(x.d.db);
+  await f.commands.apply({
+    id: newInboxId(),
+    type: 'sale.undo',
+    outletId: f.setup.outlet.id,
+    saleId: f.recorded.payment.postings![0].receipt.id,
+    occurredAt: Date.now(),
+    entryId: null,
+    creditEventId: null,
+  });
+  const next = await download(f, prior, x.d.db),
+    operator = (await x.d.db.operatorState.get('active'))!,
+    quota = () => {
+      throw Error('fictional finite native delta quota');
+    };
+  x.d.db.nativePaymentValues.hook('creating', quota);
+  await expect(
+    applyCanonicalDownload(
+      x.d.db,
+      {
+        ...x.input,
+        readId: next.state.id,
+        expectedOperatorRevision: operator.revision,
+      },
+      createCloudCoverageRemote(
+        config,
+        f.options.authScope,
+        () => f.sdk.auth.commandAuthorization(),
+        f.options.send,
+      ),
+      x.refresh,
+      undefined,
+      undefined,
+      x.load,
+    ),
+  ).rejects.toThrow('quota');
+  x.d.db.nativePaymentValues.hook('creating').unsubscribe(quota);
+  expect(backupToken(await x.d.db.readBackup())).toBe(backupToken(ordinary));
+  expect((await readNativePaymentState(x.d.db))!.token).toBe(native!.token);
+  expect((await readCanonicalState(x.d.db)).token).toBe(before.token);
+  expect(await x.d.db.outbox.toArray()).toEqual(queue);
+  expect(
+    (await x.d.db.syncRecords.where('readId').equals(next.state.id).toArray())
+      .length,
+  ).toBe(next.records.length);
+}, 30000);
+it('warm native validation caches keep caller copies private and reject changed actual stored bytes before export or canonical use', async () => {
+  const f = await fixture(),
+    x = await nativeInstallFixture(f);
+  await joinCanonicalDevice(
+    x.d.db,
+    x.input,
+    x.refresh,
+    undefined,
+    undefined,
+    x.load,
+  );
+  const original = await readNativePaymentState(x.d.db),
+    before = await readCanonicalState(x.d.db),
+    expected = structuredClone(original!.projection.payments);
+  original!.projection.payments[0].amount = 1;
+  original!.wire.values[0].json += ' ';
+  const link = original!.projection.actions[0].source,
+    source = await f.sources.read(link.id),
+    scope = {
+      businessId: link.businessId,
+      outletId: link.outletId,
+      actorId: link.actorId,
+    },
+    first = prepareNativeCanonicalCopy(
+      source.portable,
+      scope,
+      link.retention.copy.id,
+    ),
+    expectedCopy = {
+      manifest: structuredClone(first.plan.manifest),
+      values: structuredClone(first.plan.nodes),
+      bases: structuredClone(first.bases),
+      nodes: structuredClone(first.nodes),
+    };
+  first.plan.manifest.root = '0'.repeat(64);
+  first.plan.nodes[0].json += ' ';
+  first.bases[0] = {
+    ...first.bases[0],
+    scope: { ...first.bases[0].scope, outletId: newInboxId() },
+  };
+  first.nodes[0] = { ...first.nodes[0], json: first.nodes[0].json + ' ' };
+  first.portable.exportedAt = 0;
+  const nextCopy = prepareNativeCanonicalCopy(
+    source.portable,
+    scope,
+    link.retention.copy.id,
+  );
+  expect(nextCopy.plan.manifest).toEqual(expectedCopy.manifest);
+  expect(nextCopy.plan.nodes).toEqual(expectedCopy.values);
+  expect(nextCopy.bases).toEqual(expectedCopy.bases);
+  expect(nextCopy.nodes).toEqual(expectedCopy.nodes);
+  expect(nextCopy.portable.exportedAt).toBe(source.portable.exportedAt);
+  const edited = structuredClone(source.portable);
+  if (edited.formatVersion !== 2)
+    throw Error('Keep the complete shared original.');
+  edited.values[0].json += ' ';
+  expect(() =>
+    prepareNativeCanonicalCopy(edited, scope, link.retention.copy.id),
+  ).toThrow();
+  expect(() =>
+    prepareNativeCanonicalCopy(
+      source.portable,
+      { ...scope, businessId: newInboxId() },
+      link.retention.copy.id,
+    ),
+  ).toThrow();
+  const otherId = newInboxId(),
+    otherCopy = prepareNativeCanonicalCopy(source.portable, scope, otherId);
+  expect(otherCopy.plan.manifest.id).toBe(otherId);
+  expect(otherCopy.plan.manifest.root).toBe(expectedCopy.manifest.root);
+  const freshCopy = prepareNativeCanonicalCopy(
+    source.portable,
+    scope,
+    link.retention.copy.id,
+    { fresh: true },
+  );
+  expect(freshCopy.plan.manifest).toEqual(expectedCopy.manifest);
+  expect(freshCopy.nodes).toEqual(expectedCopy.nodes);
+  const fresh = await readNativePaymentState(x.d.db);
+  expect(fresh!.projection.payments).toEqual(expected);
+  const wire = (await x.d.db.readCompleteBackup()).portable,
+    decoded = await parseNativePaymentBackup(wire);
+  expect(wire).toEqual(fresh!.wire);
+  expect(wire.exportedAt).toBe(fresh!.wire.exportedAt);
+  decoded.projection.payments[0].amount = 2;
+  decoded.wire.values[0].json += ' ';
+  expect((await parseNativePaymentBackup(wire)).projection.payments).toEqual(
+    expected,
+  );
+  const node = (await x.d.db.nativePaymentValues.toArray())[0];
+  await x.d.db.nativePaymentValues.put({ ...node, json: node.json + ' ' });
+  await expect(readCanonicalState(x.d.db)).rejects.toThrow();
+  await expect(x.d.db.readCompleteBackup()).rejects.toThrow();
+  await x.d.db.nativePaymentValues.put(node);
+  await expect(
+    reviewScopeRecovery(x.d.db, {
+      config,
+      base: '/native-scope-install/',
+      auth: f.sdk.auth,
+      send: f.bridge,
+    }),
+  ).rejects.toMatchObject({ kind: 'review' });
+  expect(await x.d.db.scopeRecoveries.count()).toBe(0);
+  await expect(
+    readRecoveryWorkingSource(
+      x.d.db,
+      before,
+      (await x.d.db.operatorState.get('active'))!.revision,
+    ),
+  ).rejects.toThrow();
+  expect((await readCanonicalState(x.d.db)).token).toBe(before.token);
+  expect((await readNativePaymentState(x.d.db))!.projection.payments).toEqual(
+    expected,
+  );
+}, 30000);
+it('actual manager revocation after all original reads prevents installation and retains every downloaded source', async () => {
+  const f = await fixture(),
+    m = await manager(f),
+    x = await nativeInstallFixture(m);
+  let reads = 0,
+    revoked = false;
+  const load: typeof x.load = async (link) => {
+      const value = await x.load!(link);
+      reads++;
+      return value;
+    },
+    refresh: typeof x.refresh = async (context) => {
+      if (reads && !revoked) {
+        await server.sql.query(
+          'delete from public.member_outlets where member_id=$1',
+          [m.managerId],
+        );
+        revoked = true;
+      }
+      return x.refresh(context);
+    };
+  await expect(
+    joinCanonicalDevice(x.d.db, x.input, refresh, undefined, undefined, load),
+  ).rejects.toThrow();
+  expect(reads).toBeGreaterThan(0);
+  expect(revoked).toBe(true);
+  expect(await x.d.db.sales.count()).toBe(0);
+  expect(await x.d.db.nativePaymentValues.count()).toBe(0);
+  expect(await x.d.db.syncCanonical.count()).toBe(0);
+  expect(await x.d.db.cloudState.count()).toBe(0);
+  expect(await x.d.db.syncRecords.toArray()).toEqual(x.d.records);
+}, 30000);
+it('a fresh actual manager product controller installs after uploader Auth deletion and cold restore keeps the original owner identity', async () => {
+  const f = await fixture(),
+    m = await manager(f),
+    window = await m.remote.begin({
+      type: 'begin',
+      id: newInboxId(),
+      outletId: f.setup.outlet.id,
+      cursor: null,
+    }),
+    base = '/native-manager-install-' + newInboxId() + '/',
+    sessionId = copySdkSubject(302);
+  await server.sql.query(
+    'insert into auth.sessions(id,user_id) values($1,$2)',
+    [sessionId, copySdkSubject(2)],
+  );
+  await server.sql.query('delete from auth.users where id=$1', [
+    copySdkSubject(1),
+  ]);
+  const sdk = await createCopySdk(
+    config,
+    discoveryAuthScope(base),
+    f.bridge,
+    2,
+    undefined,
+    sessionId,
+  );
+  sdks.push(sdk);
+  const target = new MiseDatabase('native-manager-installer-' + newInboxId()),
+    cold = new MiseDatabase('native-manager-cold-' + newInboxId());
+  stores.push(target, cold);
+  const options = { config, base, auth: sdk.auth, send: f.bridge },
+    context = {
+      version: 1 as const,
+      ...parseSyncScope(window),
+      businessName: null,
+      outletName: null,
+      actorName: null,
+    };
+  await prepareCloudJoin(target, options, context);
+  expect((await resumeCloudJoin(target, options)).phase).toBe('ready');
+  const native = await readNativePaymentState(target);
+  expect(
+    native!.projection.actions.every(
+      (a) =>
+        a.source.actorId === f.setup.owner.id &&
+        a.invocation.command.actorId === f.setup.owner.id,
+    ),
+  ).toBe(true);
+  expect((await target.setup())!.owner.id).toBe(m.managerId);
+  expect(native!.projection.payments[0].createdBy).toBe(f.setup.owner.id);
+  expect(await target.sales.count()).toBe(1);
+  const complete = (await target.readCompleteBackup()).portable,
+    preview = await cold.previewRestore(complete);
+  await cold.restoreBackup(complete, preview);
+  expect((await readNativePaymentState(cold))!.projection.payments).toEqual(
+    native!.projection.payments,
+  );
+  expect(await cold.sales.count()).toBe(1);
+  expect(await cold.outbox.count()).toBe(0);
+  expect(await cold.nativePaymentActions.count()).toBe(0);
+  expect(await cold.cloudState.count()).toBe(0);
+}, 60000);

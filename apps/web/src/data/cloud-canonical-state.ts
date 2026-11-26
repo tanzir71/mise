@@ -1,5 +1,8 @@
+import {readNativePaymentState} from './native-payment-state';
+import {isNativeSyncTable} from '@mise/core/native-sync-records';
+import type {StoredNativePaymentState} from '@mise/core/native-payment-backup';
 import Dexie from 'dexie';
-import {parseBackup} from '@mise/core/backup';
+import {parseBackup,backupToken} from '@mise/core/backup';
 import {parseLocalCloudState,originalCloudAdmission,type LocalCloudState} from '@mise/core/local-outbox';
 import {canonicalSnapshotHash,type LocalCanonicalSnapshot} from '@mise/core/sync-canonical';
 import {applicationHash,ReconciliationError,restoreMaterialization,workingSnapshotHash,type LocalCanonicalApplication} from '@mise/core/sync-materialize';
@@ -11,7 +14,7 @@ import type {LocalStore} from './local-store';
 import {nativeRowHash} from './canonical-writes';
 
 export interface RecoveryEvidence {admission:ScopeRecoveryAdmission;snapshot:LocalCanonicalSnapshot;application:LocalCanonicalApplication}
-export interface CanonicalState {binding:LocalCloudState;base:LocalCanonicalSnapshot;admission:LocalCanonicalSnapshot;application:LocalCanonicalApplication|null;upload:LocalOwnerUploadAdmission|null;recoveries:RecoveryEvidence[];token:string}
+export interface CanonicalState {binding:LocalCloudState;base:LocalCanonicalSnapshot;admission:LocalCanonicalSnapshot;application:LocalCanonicalApplication|null;upload:LocalOwnerUploadAdmission|null;recoveries:RecoveryEvidence[];native?:{state:StoredNativePaymentState;token:string};token:string}
 export type JoinedCanonicalState=CanonicalState;
 const stable=(binding:LocalCloudState)=>({...binding,sequence:0});
 const identity=(state:Omit<CanonicalState,'token'>)=>nativeRowHash({...state,binding:stable(state.binding)});
@@ -24,7 +27,7 @@ async function verifyApplication(app:LocalCanonicalApplication,snapshot:LocalCan
 /** Original admission and each later scope bridge remain distinct, retained evidence.
  * None of these local hashes can establish fresh server authorization. */
 export async function readCanonicalState(db:LocalStore):Promise<CanonicalState>{
- const saved=await db.transaction('r',db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.scopeRecoveries,async()=>{
+ const saved=await db.transaction('r',[db.cloudState,db.syncCanonical,db.syncApplications,db.syncAdmissions,db.scopeRecoveries,db.nativePaymentState,db.nativePaymentValues],async()=>{
   const binding=parseLocalCloudState(await db.cloudState.get('binding')),original=originalCloudAdmission(binding);
   if(binding.phase!=='ready'||original.version===2&&!original.join)throw new ReconciliationError('review');
   const base=await db.syncCanonical.get('active');if(!base)throw fail();
@@ -44,6 +47,8 @@ export async function readCanonicalState(db:LocalStore):Promise<CanonicalState>{
   return {binding,base,admission,application,upload,recoveries};
  });
  const {binding,base,admission,application,upload,recoveries}=saved,original=originalCloudAdmission(binding);
+ const native=await readNativePaymentState(db),nativeRecords=base.snapshot.records.filter(r=>isNativeSyncTable(r.table));
+ if(nativeRecords.length){if(!native||native.state.mode!=='canonical'||native.state.baseHash!==base.hash||!equal(native.records,nativeRecords)||backupToken(native.current)!==backupToken(base.snapshot.backup))throw fail();}else if(native)throw fail();
  for(const row of [base,admission]){if(await canonicalSnapshotHash(row.snapshot)!==row.hash)throw fail();parseBackup(row.snapshot.backup);}
  let initial:SyncScope;
  if(original.version===2){
@@ -70,7 +75,8 @@ export async function readCanonicalState(db:LocalStore):Promise<CanonicalState>{
   if(!application||application.hash!==base.applicationHash||!Number.isSafeInteger(application.throughSequence)||application.throughSequence<0||application.throughSequence>binding.sequence)throw fail();
   await verifyApplication(application,base);
  }
- return {...saved,token:await identity(saved)};
+ const complete={...saved,...(native?{native:{state:native.state,token:native.token}}:{})};
+ return {...complete,token:await identity(complete)};
 }
 export async function readJoinedCanonicalState(db:LocalStore):Promise<JoinedCanonicalState>{const state=await readCanonicalState(db);if(state.binding.version!==2)throw new ReconciliationError('review');return state;}
 /** Recheck exact original evidence inside the same native transaction. */
@@ -80,6 +86,7 @@ export async function assertCanonicalState(db:LocalStore,state:CanonicalState):P
   const record=await db.scopeRecoveries.get(evidence.admission.id),snapshot=await db.syncCanonical.get(evidence.snapshot.id),app=await db.syncApplications.get(evidence.application.id);
   if(!record||record.kind!=='admission'||!snapshot||!app)throw fail();recoveries.push({admission:record,snapshot,application:app});
  }
- if(!base||!admission||application===undefined||await Dexie.waitFor(identity({binding,base,admission,application,upload,recoveries}))!==state.token)throw new ReconciliationError('review');
+ const native=await readNativePaymentState(db);
+ if(!base||!admission||application===undefined||await Dexie.waitFor(identity({binding,base,admission,application,upload,recoveries,...(native?{native:{state:native.state,token:native.token}}:{})}))!==state.token)throw new ReconciliationError('review');
 }
 export const assertJoinedCanonicalState=assertCanonicalState;

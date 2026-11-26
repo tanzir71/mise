@@ -276,7 +276,7 @@ export function CloudJoin({
     });
   const backup = () =>
     run('backup', async () => {
-      downloadFile(backupFile((await db.readPortableBackup()).portable));
+      downloadFile(backupFile((await db.readCompleteBackup()).portable));
       setNotice('Backup downloaded. Keep it somewhere safe.');
     });
   const selectedChoice = choices.find(

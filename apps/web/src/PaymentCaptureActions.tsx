@@ -282,9 +282,8 @@ export function PaymentCaptureActions({
       </dl>
       {blocked ? (
         <p role="status">
-          This review is currently available for local shops. Keep this source
-          and its history here; use the manual payment form for this connected
-          shop.
+          Keep this source and its recorded history. Use the manual payment
+          form for any new payment.
         </p>
       ) : null}
       {archived ? (

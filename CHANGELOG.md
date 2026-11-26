@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: fresh connected devices retain accepted native payment originals alongside independently current money, continue ordinary cash sync and export both views in a complete JSON backup. Cold restore preserves source and financial history without restoring sends or account authority. Native writes, historical registration and full M41 acceptance remain open; previews and all delivery holds remain in place. Every installation owns its configuration. See [native payment installation](docs/payment-native-installation.md).
+
 - In progress: M41 reconstructs native payment history from the actual shared snapshot and exact outlet-owned originals while keeping current money independent. Genuine receipt and undo identities, whole history, copy membership and current manager access are verified; reconstruction creates no financial or outgoing work. Local qualification passes; durable installation, historical registration and connected restore remain open. Installation configuration stays end-user owned and all delivery holds remain. See [native payment reads](docs/payment-native-canonical.md).
 
 - In progress: M41 retains complete payment originals under the outlet before money and commits accepted source locators atomically with actual native outcomes. Current readers keep their own SDK identity while recovering an earlier actor’s exact evidence, including after uploader deletion. Local qualification passes; native canonical integration remains open, configuration stays end-user owned and all delivery holds remain. See [original payment links](docs/payment-original-links.md).

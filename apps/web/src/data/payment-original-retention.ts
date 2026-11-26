@@ -1,3 +1,4 @@
+import { currentNativePaymentBackup } from './native-payment-state';
 import Dexie, { type Table } from 'dexie';
 import { parseLocalCloudState } from '@mise/core/local-outbox';
 import type { MiseDatabase } from './db';
@@ -165,13 +166,34 @@ export async function readRetainedPaymentAction(
     return readPaymentOriginalAction(basis, (key) => nodes.get(key), ref);
   });
 }
+/** Legacy original-copy protocol remains exact and cannot discard a native plane. */
 export async function readDatabasePortableBackup(db: MiseDatabase) {
   return db.transaction('r', db.tables, async () => {
+    if (
+      (await db.nativePaymentState.count()) ||
+      (await db.nativePaymentValues.count())
+    )
+      throw Error(
+        'Use the complete backup for this shop’s retained native payment history.',
+      );
     const current = await readDatabaseBackup(db),
       archive = await readRetainedPaymentOriginals(db, current);
     return {
       current,
       portable: createPortableBackup(current, archive.bases, archive.nodes),
+    };
+  });
+}
+/** Product export includes both current ordinary money and every native source. */
+export async function readDatabaseCompleteBackup(db: MiseDatabase) {
+  return db.transaction('r', db.tables, async () => {
+    const current = await readDatabaseBackup(db),
+      archive = await readRetainedPaymentOriginals(db, current);
+    return {
+      current,
+      portable:
+        (await currentNativePaymentBackup(db, current, archive)) ??
+        createPortableBackup(current, archive.bases, archive.nodes),
     };
   });
 }

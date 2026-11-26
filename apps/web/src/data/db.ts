@@ -410,6 +410,7 @@ export class MiseDatabase extends LocalStore {
     });
   }
   async readPortableBackup() {return (await import('./payment-original-retention')).readDatabasePortableBackup(this);}
+  async readCompleteBackup() {return (await import('./payment-original-retention')).readDatabaseCompleteBackup(this);}
   async readBackup():Promise<MiseBackup> {
     return (await import('./backup')).readDatabaseBackup(this);
   }

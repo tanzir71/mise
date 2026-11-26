@@ -29,6 +29,7 @@ export class CloudUploadJournal extends Dexie {
   reviews!:EntityTable<SelectedReview,'id'>;
   constructor(name='mise-cloud-uploads'){super(name);this.version(1).stores({uploads:'id,businessId'});this.version(2).stores({reviews:'id'});}
   async prepare(db:MiseDatabase,id:string):Promise<StoredCloudUpload>{
+    if(await db.nativePaymentState.count()||await db.nativePaymentValues.count())throw Error('Keep a complete JSON backup. Native payment history needs reviewed registration before a new upload.');
     if(await db.nativePaymentActions.count())throw Error('Native payment delivery is not enabled yet. Keep the original journal.');
     const current=await this.review(db);if(current.phase!=='review')return current.snapshot!;
     if(await db.paymentOriginalBases.count()||await db.nativePaymentActions.count())throw Error('Native payment archive sync is not enabled yet. Keep a complete JSON backup.');

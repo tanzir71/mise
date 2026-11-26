@@ -1,3 +1,4 @@
+import type {NativePaymentBackup} from '@mise/core/native-payment-backup';
 import {MAX_BACKUP_BYTES} from '@mise/core/backup-tables';
 import { zipSync,strToU8 } from 'fflate';
 import { exportCsv,type ExportReport } from '@mise/core/exports';
@@ -16,7 +17,7 @@ export async function reportFile(report:ExportReport,format:DownloadFormat):Prom
   const bytes = zipSync(entries,{level:1});
   return new File([bytes],exportFilename('export',report.createdAt,'zip'),{type:'application/zip'});
 }
-export function backupFile(backup:PortableBackup):File {let text=JSON.stringify(backup,null,backup.formatVersion===2?undefined:2);if(new TextEncoder().encode(text).length>MAX_BACKUP_BYTES)text=JSON.stringify(backup);if(new TextEncoder().encode(text).length>MAX_BACKUP_BYTES)throw Error('Keep a complete backup within the 50 MB limit.');return new File([text],exportFilename('backup',backup.exportedAt,'json'),{type:'application/json'});}
+export function backupFile(backup:PortableBackup|NativePaymentBackup):File {let text=JSON.stringify(backup,null,backup.formatVersion>=2?undefined:2);if(new TextEncoder().encode(text).length>MAX_BACKUP_BYTES)text=JSON.stringify(backup);if(new TextEncoder().encode(text).length>MAX_BACKUP_BYTES)throw Error('Keep a complete backup within the 50 MB limit.');return new File([text],exportFilename('backup',backup.exportedAt,'json'),{type:'application/json'});}
 export function downloadFile(file:File):void {
   const url = URL.createObjectURL(file),link = document.createElement('a');link.href = url;link.download = file.name;link.click();setTimeout(() => URL.revokeObjectURL(url),60000);
 }

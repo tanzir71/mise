@@ -1,0 +1,43 @@
+# Native installation keeps original payments and current money together
+
+A fresh authorized device can install the current shop and its complete accepted native payment originals from one verified snapshot. One IndexedDB transaction saves both views, the operator, canonical base and accepted cursor. Existing ordinary cash commands continue through pending and receipt coverage. Accepted native history remains separate from current money.
+
+The original observation, literal source, checked labels, invocation, receipt and every original financial child stay independently validated. Later ordinary corrections change current eligibility without rewriting original postings or inventing a native undo. Saved-source review presents original evidence alongside current ordinary records. New native writes remain fenced, with the existing manual payment path available.
+
+## Complete backup and cold restore
+
+The existing backup controls select an explicit format-3 shared graph when accepted native evidence exists. It retains independently valid ordinary schema-13 data, exact native canonical records, genuine original-copy manifests and complete shared source nodes. Full text, imported NUL and surrogate values, original ledgers and image bytes survive export and restore. Formats 1/2 and their validators remain unchanged; the encoded 50 MiB and expanded 200 MiB limits remain enforced.
+
+Restore binds the reviewed source graph and current shop, then commits both atomically onto an unbound device. A file restores no account session, binding, accepted cursor, outgoing command or send authority. A multi-member file requires the existing explicit local member choice. Legacy ordinary-only backup/upload APIs refuse native evidence until genuine historical registration exists; complete backups remain usable offline.
+
+## Current authorization and atomic failure
+
+Join and sync inspect originals through the actual SDK-backed account as the current reader, separately from the origin actor. The original owner identity survives uploader Auth deletion and later admission by another authorized manager. Archive preparation performs one complete strict projection, retains both current original-loader and exact receipt checks, and keeps the final operator check before installation.
+
+The two schema-32 stores participate in canonical identity reads and transaction leases. Read caching hashes all actual stored state and node bytes. The complete-wire and original-copy boundaries each retain one bounded private checked result and return independent lazy copies. Copy preparation also binds exact origin scope and copy ID; complete file decoding forces the original validators afresh. Cached data grants no live authority.
+
+An independently parsed shop with exactly the same logical records and complete legacy sources can reuse its validated saved snapshot, preserving its actual capture time. This uses the existing order-independent backup comparison and all original basis/node values; storage bookkeeping is already independently validated. Any data change uses the complete constructor. Canonical updates prepare finite per-key writes. Quota, hook, stale-review and access failures preserve previous money, originals, cursor and queue.
+
+## Verification
+
+Full-run coverage plus corrected-scope rechecks covers all **5,761 distinct unit cases across 301 files**. This is explicitly a combined qualification, not a single all-green full-suite invocation. The ordered baseline passed 5,759 cases; complete affected-file and targeted corrections replace the two failed results. The original nineteen canonical cases, parameter corpus, assertions and deadlines remain AST-identical. All 99 ordinary compatibility cases and the final twelve new integration cases pass. The credential-guard regression file passes all 38 cases. Strict TypeScript and all 234 Astro files pass with no diagnostics. See the [verification record](payment-native-installation-verification.json).
+
+The complete large installer passes in 589,704 ms under the unchanged 600,000 ms case limit, with cleanup also passing its unchanged 10,000 ms limit. It retains all 5,000 charges, the million-code-unit source and original image through actual native acceptance, an independent genuine financial reversal, ordinary cash coverage, forced-fresh file validation and cold restore. The complete file is 33,573,432 bytes; all 10,041 snapshot records and both native actions are retained. Original image bytes are checked against the actual snapshot source, MIME type, length and SHA-256 using the authenticated original copy; a separate image-object HTTP transfer is not claimed.
+
+Both production builds and **111 browser cases per hosting path** pass at `/` and `/mise/`, with one worker and no retries. The new flow covers 360, 390, 768, 1024 and 1440 px: actual browser capture/delivery, genuine correction, uploader deletion, fresh manager admission, one manual cash receipt, complete file download and a fresh offline browser restore. Its axe and overflow assertions pass at every width. The existing export and setup Figma contexts produce 18 reference comparisons per path, with no horizontal overflow. Pixel differences remain informational and retain the original supplied reference clips.
+
+Three actual synthetic-data captures show the existing controls: [360 px connected history](screenshots/m41-native-install-360.png), [768 px connected history](screenshots/m41-native-install-768.png) and [1440 px offline restored history](screenshots/m41-native-cold-1440.png). The shared-item wrapper retains the existing M25 reference; these captures introduce no new reference design.
+
+## Corrections retained in the verification record
+
+Initial full-size attempts exceeded the original limit. One later attempt reached cold restore within the limit, then failed a new assertion that confused the inspection API's customer ID with its credit-account ID; the corrected assertion verifies the exact customer target and its account link. Stage timings then identified repeated preparation work. Complete-byte copy reuse, a single strict archive projection and exact saved-snapshot reuse remove that work while preserving validation, the original corpus and both deadlines. The new reuse assertion initially caught comparison against storage bookkeeping and iteration order; its assertion remains intact after using the existing logical record comparison.
+
+The initial new browser fixture assumptions were corrected to use actual browser capture, the existing opened payment sheet and explicit restored-member selection. An early unit run was stopped after the installed runner sorted ordinary group 10 before native group 2; changing only that new group to 99 preserves the original native-first order and worker limits. All final browser runs pass without retries.
+
+The first final root build compiled its bundles but failed closed when a required private audit reference disappeared from Temp. Actual current publishable metadata and the unchanged private server environment now live in ignored durable files selected only through clone-local Git configuration. Both private identifiers remain compared. The current audit makes eleven exact private-value comparisons; all generic credential/deployment rules and the fixed historical policy remain unchanged. Full-history, source and generated-artifact privacy audits pass with no credentials, current deployment identifiers or coverage gaps. The 22 reviewed older nonsecret findings remain fixed, and automatic commit/push guards stay enabled.
+
+## Remaining M41 work and delivery holds
+
+M41 stays unchecked and payment/cloud previews remain off. Owner-native pending, unknown and review outcomes; subsequent native writes with independent original/current context; genuine historical registration; native metadata-removal recovery; connected scope recovery; and full product acceptance remain required. The whole handover goal remains active.
+
+Each installation configures its own hosting, backend, accounts, providers, credentials, phone numbers, labels and source clocks. Privileged values remain server-side or in ignored private settings. This increment creates no provider account, dependency, application environment variable, hosted migration or function deployment. Controlled SDK/HTTP/SQL fixtures exercise production handlers and restricted local database roles; managed phone-provider commissioning is not claimed. Workflows, CI uploads, Pages publication, hosted commissioning and release tags remain held. Delivery uses guarded direct-main commits with skip-ci messages.

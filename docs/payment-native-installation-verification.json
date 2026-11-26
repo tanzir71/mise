@@ -1,0 +1,494 @@
+{
+  "milestone": "M41",
+  "increment": "Atomic native installation, continued ordinary cash sync and complete offline cold restore",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "qualificationStatus": "verified-local-increment",
+  "baseCommit": "e3c2e7fe7b90747f85b3cc4b6f19ef70fe6ca667",
+  "sourceFingerprint": "53a7a88fe369666d01645d2628309f18afe5109a5d2e209f8ffc3c1ce06f755c",
+  "sourceFiles": [
+    "apps/web/src/BackupTools.tsx",
+    "apps/web/src/CloudJoin.tsx",
+    "apps/web/src/CloudRecovery.tsx",
+    "apps/web/src/OwnerResume.tsx",
+    "apps/web/src/PaymentCaptureActions.tsx",
+    "apps/web/src/PaymentCaptureReview.tsx",
+    "apps/web/src/data/backup.ts",
+    "apps/web/src/data/cloud-canonical-state.ts",
+    "apps/web/src/data/cloud-join.ts",
+    "apps/web/src/data/cloud-scope-recovery.ts",
+    "apps/web/src/data/cloud-sync-apply.ts",
+    "apps/web/src/data/cloud-sync-join.ts",
+    "apps/web/src/data/cloud-upload.ts",
+    "apps/web/src/data/db.ts",
+    "apps/web/src/data/export-files.ts",
+    "apps/web/src/data/local-outbox.ts",
+    "apps/web/src/data/local-store.ts",
+    "apps/web/src/data/native-canonical-originals.ts",
+    "apps/web/src/data/native-payment-receipt.ts",
+    "apps/web/src/data/native-payment-state.ts",
+    "apps/web/src/data/payment-capture.ts",
+    "apps/web/src/data/payment-original-retention.ts",
+    "apps/web/src/data/payment-review.ts",
+    "apps/web/src/data/sync-cycle.ts",
+    "packages/core/local-outbox.ts",
+    "packages/core/local-schema.ts",
+    "packages/core/native-canonical-copy.ts",
+    "packages/core/native-payment-backup.ts",
+    "packages/core/native-payment-canonical.ts",
+    "packages/core/sync-canonical.ts",
+    "tests/e2e/native-payment-install.spec.ts",
+    "tests/fixtures/native-canonical-harness.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/fixtures/native-payment-server.ts",
+    "tests/native-payment-canonical.test.ts",
+    "tests/native-payment-install.test.ts",
+    "tests/scope-recovery-db.test.ts",
+    "vitest.config.ts"
+  ],
+  "scope": {
+    "ordinaryBackupSchema": 13,
+    "localDatabaseSchema": 32,
+    "newLocalStores": ["nativePaymentState", "nativePaymentValues"],
+    "completeBackupFormat": 3,
+    "encoding": "mise-native-shared-json-v1",
+    "legacyBackupFormatsUnchanged": [1, 2],
+    "encodedLimitBytes": 52428800,
+    "expandedLimitBytes": 209715200,
+    "cache": "One private bounded checked value per complete-wire and original-copy data boundary, keyed by every serialized byte; the copy key also binds exact origin scope and copy ID. Returned data is independently copied. Current SDK inspection and final scope checks remain; complete file decoding forces original validators afresh.",
+    "allConfigurationEndUserOwned": true,
+    "newBackendMigrationsServicesEnvironmentVariablesDependenciesProviderAccountsOrHostedDeployments": 0,
+    "paymentPreviewDefaultOff": true,
+    "legacyUploadWithNativeEvidence": "retained error until genuine historical registration",
+    "nativeMetadataDeletion": "retained error; no empty installation",
+    "connectedScopeRecoveryWithNativeEvidence": "explicit retained review before creating recovery state",
+    "restore": "unbound current data and complete sources; no sign-in, binding, cursor, outgoing command or send authority",
+    "preparation": "One full strict native projection per joined/applied archive; both live original-loader and exact receipt checks retained, plus existing final role checks. Identical parsed current tables and legacy sources reuse the complete saved snapshot and its actual capture time; changed data uses the full constructor."
+  },
+  "verification": {
+    "lint": "passed",
+    "strictTypes": "passed",
+    "astro": {
+      "files": 234,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "firstRootBuild": "passed",
+    "fullUnit": {
+      "method": "Complete ordered baseline, seven-file recheck, corrected twelve-case recheck and complete installer recheck, preserving exact case identities; not a single all-green full-suite run.",
+      "baseline": {
+        "cases": 5761,
+        "passed": 5759,
+        "failed": 2,
+        "files": 301
+      },
+      "currentAffectedRechecks": [
+        {
+          "file": "native-payment-canonical.test.ts",
+          "passed": 30,
+          "failedAtThisStage": 1,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 476453.74951171875
+        },
+        {
+          "file": "cloud-join.test.ts",
+          "passed": 18,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 6067.34228515625
+        },
+        {
+          "file": "owner-apply-db.test.ts",
+          "passed": 10,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 48404.41796875
+        },
+        {
+          "file": "scope-recovery-db.test.ts",
+          "passed": 18,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 15988.255126953125
+        },
+        {
+          "file": "sync-apply-db.test.ts",
+          "passed": 28,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 15918.56201171875
+        },
+        {
+          "file": "sync-canonical.test.ts",
+          "passed": 8,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 2316.215087890625
+        },
+        {
+          "file": "sync-join-db.test.ts",
+          "passed": 17,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-single-projection-seven.json",
+          "reportSha256": "ac64ec5975b14d750df26adcab4fcf050b2246d914e01cc42d3eeb8e2cd01ac1",
+          "durationMs": 7150.68994140625
+        },
+        {
+          "file": "native-payment-canonical.test.ts",
+          "passed": 12,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 19,
+          "report": ".private/m41-native-install-reuse-identity-twelve.json",
+          "reportSha256": "c9bde3924c5e55f9e84e1e961f3e77d15212368f5f9bbf549687f568eb01fdfe",
+          "durationMs": 47387.68701171875
+        },
+        {
+          "file": "native-payment-install.test.ts",
+          "passed": 1,
+          "failedAtThisStage": 0,
+          "unselectedAtThisStage": 0,
+          "report": ".private/m41-native-install-scale-reuse-identity.json",
+          "reportSha256": "c57d49ca453b157d439cb7c65146d0d753050b1ea7e48c9262f8583b204f8061",
+          "durationMs": 589704.2250976562
+        }
+      ],
+      "distinctCasesCovered": 5761,
+      "distinctFilesCovered": 301,
+      "passed": 5761,
+      "failed": 0,
+      "skipped": 0,
+      "currentSourceFingerprint": "53a7a88fe369666d01645d2628309f18afe5109a5d2e209f8ffc3c1ce06f755c",
+      "original19CanonicalCasesCorporaAssertionsAndDeadlinesASTIdentical": true,
+      "baselineDurationMs": 4145330,
+      "workers": 2,
+      "oldCorporaAssertionsAndDeadlinesUnchanged": true,
+      "groups": "old0-8, complete installer9, ordinary99"
+    },
+    "focusedNativeCases": {
+      "passed": 12,
+      "failed": 0,
+      "unselectedOriginalCases": 19,
+      "originalCasesPreviouslyPassed": 19,
+      "ordinaryCompatibilityPassed": 99,
+      "scopeRecoveryCasesIncluded": 18
+    },
+    "newBrowserRoot": {
+      "passed": 111,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 990393.953,
+      "workers": 1,
+      "retries": 0,
+      "reportSha256": "980cec8d4625560fb9f3a63539a5fbe1536ccc163f1f6ce4261e2cc29e1da03d",
+      "newNativeFlowCases": 5,
+      "otherRegressionCases": 106,
+      "widths": [360, 390, 768, 1024, 1440],
+      "axeViolationsInChangedFlow": 0,
+      "overflowFailuresInChangedFlow": 0
+    },
+    "newBrowserPages": {
+      "passed": 111,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 832869.021,
+      "workers": 1,
+      "retries": 0,
+      "reportSha256": "4830064d7320b3ef78b51465a8b30caadafd068d8f05b26ad2cf6935a3b55f33",
+      "newNativeFlowCases": 5,
+      "otherRegressionCases": 106,
+      "widths": [360, 390, 768, 1024, 1440],
+      "axeViolationsInChangedFlow": 0,
+      "overflowFailuresInChangedFlow": 0
+    },
+    "otherBrowserRegressions": {
+      "perBase": 106,
+      "bases": 2,
+      "passedExecutions": 212,
+      "newFlowExecutions": 10,
+      "totalPassedExecutions": 222
+    },
+    "bothFinalBuilds": {
+      "root": {
+        "basePath": "/",
+        "passed": true
+      },
+      "pages": {
+        "basePath": "/mise/",
+        "passed": true
+      },
+      "generatedArtifactCredentialAndCurrentIdentifierFindings": 0
+    },
+    "referenceVisualComparisons": {
+      "root": {
+        "comparisons": 18,
+        "horizontalOverflow": 0,
+        "reportSha256": "f125a6bbe43aeba30fec1c2b6a53bd6eac69121c4a633765eaa740918baa8fcf",
+        "pixelDifferences": "informational; existing supplied Figma references and clips retained"
+      },
+      "pages": {
+        "comparisons": 18,
+        "horizontalOverflow": 0,
+        "reportSha256": "de6f2a2beb0b24dac3e7f246322dd76886b5b47aebc6aaf450123f35382cd997",
+        "pixelDifferences": "informational; existing supplied Figma references and clips retained"
+      }
+    },
+    "privacyHistoryAndArtifacts": {
+      "ok": true,
+      "files": 2453,
+      "objects": 13433,
+      "archiveFiles": 0,
+      "history": true,
+      "artifacts": true,
+      "knownValuesChecked": 11,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "completeCheckout": true,
+      "hooks": ".githooks",
+      "reviewedLegacyPolicySha256": "0a5acbd09fb3b2c5ad3838d7c92bc66a9726bed9e5499b5616c18eedac26d4bb",
+      "policyUnchanged": true
+    },
+    "currentSourceQualification": {
+      "status": "verified; complete runtime/configuration/test source fingerprint retained",
+      "sourceFingerprint": "53a7a88fe369666d01645d2628309f18afe5109a5d2e209f8ffc3c1ce06f755c",
+      "sourceFiles": 38,
+      "fullInstallerPassed": true,
+      "fullInstallerDurationMs": 589704,
+      "original19CanonicalASTUnchanged": true
+    },
+    "unitCoverage": {
+      "method": "complete full baseline, seven-file recheck, corrected twelve-case recheck and complete installer recheck; not a single all-green full-suite run",
+      "distinctCasesCovered": 5761,
+      "filesCovered": 301,
+      "passed": 5761,
+      "failed": 0,
+      "skipped": 0,
+      "sourceFingerprint": "53a7a88fe369666d01645d2628309f18afe5109a5d2e209f8ffc3c1ce06f755c",
+      "original19CanonicalCasesCorporaAssertionsAndDeadlinesASTIdentical": true
+    },
+    "securityGuardRegressions": {
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0
+    },
+    "rootBuild": {
+      "passed": true,
+      "artifactAudit": {
+        "knownPrivateComparisons": 11,
+        "credentialFindings": 0,
+        "currentDeploymentFindings": 0,
+        "coverageFindings": 0
+      }
+    },
+    "manualVisualReview": {
+      "reviewed": "phone connected view, tablet connected view and desktop cold restore",
+      "layoutAndWrapping": "passed",
+      "referenceDesign": "existing M25 wrapper; existing export/setup Figma clips",
+      "ciArtifactUpload": "held by owner"
+    }
+  },
+  "fullOriginalCorpus": {
+    "charges": 5000,
+    "noteCodeUnits": 1000000,
+    "originalImages": 1,
+    "actualCollections": 1,
+    "actualIndependentReversals": 1,
+    "explicitCounterSales": 1,
+    "caseDeadlineMs": 600000,
+    "forcedFreshFileDecode": true,
+    "correctedCaseQualified": true,
+    "attempts": [
+      {
+        "result": "deadline failure before later sync/export/restore",
+        "nativeAcceptedMs": 333083.8603,
+        "completeOriginalReadMs": 395835.2153,
+        "installedMs": 573011.7672
+      },
+      {
+        "result": "deadline failure after sync and complete file validation, before cold restore",
+        "nativeAcceptedMs": 255915.8357,
+        "completeOriginalReadMs": 319240.5586,
+        "installedMs": 438161.7865,
+        "canonicalCoveredMs": 537765.9251,
+        "fileVerifiedMs": 599553.8577,
+        "fileBytes": 33569889
+      },
+      {
+        "result": "new fixture assertion used account ID where original inspection returns customer ID; corrected to exact five-field customer target and explicit account/customer link",
+        "nativeAcceptedMs": 302454.26,
+        "completeOriginalReadMs": 352297.9917,
+        "installedMs": 436821.9192,
+        "canonicalCoveredMs": 518150.3898,
+        "freshFileVerifiedMs": 565990.1327,
+        "caseReachedColdRestoreAndInspectionMs": 581387,
+        "readRecords": 10041,
+        "nativeValues": 89690,
+        "fileBytes": 33571645,
+        "deadlineExceeded": false
+      },
+      {
+        "result": "ordered full-run deadline and cleanup-hook failure; full run terminal with5759passed and two failures",
+        "nativeAcceptedMs": 303191.4728,
+        "completeOriginalReadMs": 381374.0908,
+        "installedMs": 506024.7377,
+        "canonicalCoveredMs": 596095.9304,
+        "freshFileVerifiedAfterDeadlineMs": 657998.123,
+        "fileBytes": 33571759,
+        "caseDurationMs": 659108,
+        "deadlineMs": 600000,
+        "cleanupHookLimitMs": 10000
+      },
+      {
+        "result": "original-copy preparation reuse alone was insufficient; unchanged case and cleanup deadlines exceeded; all31canonical and18scope cases pass",
+        "caseDurationMs": 656018.339,
+        "deadlineMs": 600000,
+        "cleanupHookLimitMs": 10000
+      },
+      {
+        "result": "diagnostic stage profile still exceeded unchanged deadline; supervisor CPU profile has no worker function attribution",
+        "nativeAcceptedMs": 308855.9554,
+        "completeOriginalReadMs": 386972.8611,
+        "installedMs": 489349.109,
+        "canonicalCoveredMs": 557526.1272,
+        "freshFileVerifiedAfterDeadlineMs": 614762.2194,
+        "fileBytes": 33571562,
+        "deadlineMs": 600000
+      },
+      {
+        "result": "passed complete original case and cleanup under unchanged deadlines",
+        "caseDurationMs": 589704,
+        "nativeAcceptedMs": 324978.5916,
+        "completeOriginalReadMs": 393616.5204,
+        "installedMs": 491437.0289,
+        "canonicalCoveredMs": 541538.9462,
+        "freshFileVerifiedMs": 576443.5599,
+        "completeColdRestoreVerifiedMs": 589698.5366,
+        "readRecords": 10041,
+        "nativeValues": 89698,
+        "nativeActions": 2,
+        "fileBytes": 33573432,
+        "deadlineMs": 600000,
+        "cleanupHookLimitMs": 10000
+      }
+    ],
+    "imageQualification": "Actual authorized original-copy bytes are reused as cached image data and checked against the actual snapshot source, MIME type, length and SHA-256. No separate image-object HTTP transfer is claimed."
+  },
+  "initialBrowserCorrections": [
+    {
+      "result": "collection failed before tests",
+      "cause": "Node runner imported app import.meta through the unit fixture",
+      "fix": "actual source capture/delivery now runs in the browser; Node retains only production handlers and restricted SQL fixture"
+    },
+    {
+      "result": "two failed new UI tests, interrupted remaining runner after observed failure",
+      "cause": "Payment classification already opened the sheet; redundant click targeted its backdrop",
+      "fix": "follow the actual existing sheet transition"
+    },
+    {
+      "result": "one failed new UI test; four unrun after diagnostic stop",
+      "cause": "restored two-member backup correctly requires explicit local member choice",
+      "fix": "select the current manager through the existing offline UI; preserve original actor assertions"
+    },
+    {
+      "result": "five passed",
+      "cause": null,
+      "fix": "no production behavior changed for these fixture corrections"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "docs/screenshots/m41-native-install-360.png",
+      "sha256": "b00d31de4a1c407a3dfeb077a38fc77e40f93011899c7f18104db0c6a77dd2c5",
+      "source": "actual passing Pages browser flow using synthetic data"
+    },
+    {
+      "path": "docs/screenshots/m41-native-install-768.png",
+      "sha256": "1b8f54af65ad252887f0a18d791c4b5b8d1462352c376e2783cdebed339179c2",
+      "source": "actual passing Pages browser flow using synthetic data"
+    },
+    {
+      "path": "docs/screenshots/m41-native-cold-1440.png",
+      "sha256": "b59b1f1efb9e763d208f45b5b0d355ddd35367629329785e01a11ef3a5adb9be",
+      "source": "actual passing Pages browser flow using synthetic data"
+    }
+  ],
+  "remaining": [
+    "owner-native pending/unknown/review outcomes",
+    "subsequent native writes with separate original and current context",
+    "genuine historical registration",
+    "native metadata-removal recovery",
+    "connected scope recovery",
+    "full M41 acceptance"
+  ],
+  "holds": {
+    "workflows": true,
+    "ciArtifactUploads": true,
+    "pagesPublication": true,
+    "hostedMigrationsAndFunctions": true,
+    "providerCommissioning": true,
+    "releaseTags": true,
+    "delivery": "guarded direct main commit with skip-ci; no PR or sign-off"
+  },
+  "wholeHandoverGoal": "active",
+  "testRunnerCorrection": {
+    "initialRun": "stopped after observing ordinary group10 before native group2; not a completed qualification",
+    "cause": "Installed Vitest3 implements Array.from(groups).sort(), sorting10 before2",
+    "change": "only new ordinary group10 to99; all old0-8 and new installer9 unchanged",
+    "casesCorporaWorkersAndDeadlinesUnchanged": true,
+    "onlyFrozenFileChanged": "vitest.config.ts",
+    "earlierSourceFingerprint": "17226b1edafe38c6da76e0523be1b080c5cee0ec06943b526101135956d44882"
+  },
+  "reuseIdentityCorrection": {
+    "initialCompleteSevenFileRun": {
+      "passed": 129,
+      "failed": 1,
+      "files": 7,
+      "soleFailure": "New exact saved-snapshot reuse assertion"
+    },
+    "cause": "The comparison included validated archive storage index/value bookkeeping and depended on IndexedDB row order.",
+    "change": "Use the existing exact record-order-independent backupToken plus every complete legacy basis and original-node value sorted by identity; storage encoding is already independently validated.",
+    "assertionRetained": true,
+    "correctedFocusedRecheck": {
+      "passed": 12,
+      "failed": 0,
+      "unselectedOldCases": 19
+    }
+  },
+  "privateAuditInputRecovery": {
+    "initialBuild": "compiled production bundles, then failed closed because a required private reference file was missing from Temp",
+    "durableInputs": "ignored workspace files, selected only in clone-local Git configuration",
+    "currentPublishableMetadataReadOnly": true,
+    "existingServerEnvironmentPreserved": true,
+    "privateReferencesRetained": 2,
+    "previousExactPrivateComparisons": 13,
+    "currentExactPrivateComparisons": 11,
+    "allGenericCredentialAndDeploymentPatternsUnchanged": true,
+    "reviewedLegacyExceptionPolicyUnchanged": true,
+    "actualSourceAndArtifactAudit": {
+      "passed": true,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "coverageFindings": 0
+    },
+    "hostedChanges": 0
+  }
+}
