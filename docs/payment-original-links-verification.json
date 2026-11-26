@@ -1,0 +1,399 @@
+{
+  "milestone": "M41",
+  "increment": "Outlet-owned original payment retention and accepted source locators",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "de217f92c59a333b9379a7a771147b9f953bcc6f",
+  "sourceFingerprint": "d51fcbd384bc38b6b2266c4000539e2c5ef3da2782d79cf6fd801f63146dffc0",
+  "sourceFiles": [
+    "apps/web/src/data/linked-payment-original.ts",
+    "apps/web/src/data/native-payment-barriers.ts",
+    "apps/web/src/data/native-payment-session.ts",
+    "apps/web/src/data/original-copy-session.ts",
+    "packages/core/native-payment-originals.ts",
+    "packages/core/native-sync-records.ts",
+    "supabase/functions/_shared/original-copy-handler.ts",
+    "supabase/migrations/20261126020929_native_payment_original_links.sql",
+    "tests/e2e/native-payment-original-links.spec.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/native-payment-original-links.test.ts",
+    "tests/native-payment-sync.test.ts",
+    "vitest.config.ts"
+  ],
+  "scope": {
+    "ordinarySchema": 13,
+    "nativeSchema": 31,
+    "originalGraphVersion": 1,
+    "copyWireVersion": 1,
+    "portableArchiveVersion": 2,
+    "nativeReceiptVersion": 1,
+    "newRetentionAndSourceLinkVersion": 1,
+    "newNativeProjectionKind": "native_payment_originals",
+    "newPrivateForcedRlsTables": 5,
+    "newPrivateDefinerRpcBoundaries": 1,
+    "publicRpcWrapperSecurityInvoker": true,
+    "clientAndServiceTableGrants": 0,
+    "newHostedMigrationFiles": 1,
+    "hostedMigrationsApplied": 0,
+    "newProviderAccountsOrEnvironmentVariables": 0,
+    "sharedOutletCopyQuota": 512,
+    "sharedOutletNodeBytesQuota": 536870912,
+    "pendingActorAccountOutletComparisonsQuota": 1024,
+    "linkMaximumBytes": 8192,
+    "sourceReadDigestBatch": 128,
+    "sourceReadJsonBudgetBytes": 196608,
+    "sourceReadPartBytes": 147456,
+    "nativeFinancialAlgorithmsChanged": false,
+    "sameActualFinancialTransactionCreatesSourceLocator": true,
+    "durableOriginalAuthAccountOrSessionParent": false,
+    "actualCurrentReaderDistinctFromOriginalActor": true,
+    "allConfigurationEndUserOwned": true,
+    "paymentPreviewDefaultOff": true,
+    "nativeCanonicalInstallationImplemented": false,
+    "allCanonicalUploadJoinOriginalArchiveFencesRetained": true
+  },
+  "checks": {
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-native-original-links-lint-r3.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 231,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-native-original-links-final-types.log"
+    },
+    "fullUnit": {
+      "passed": 5729,
+      "failed": 0,
+      "pending": 0,
+      "files": 299,
+      "success": true,
+      "report": ".private/m41-native-original-links-final-unit.json"
+    },
+    "newUnitCases": 13,
+    "targetedActualSdkHttpSql": {
+      "passed": 13,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-original-links-thirteen.json"
+    },
+    "existingFeedRequalification": {
+      "passed": 16,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-original-links-feed-r2.json"
+    },
+    "historicalV1Upgrade": {
+      "passed": 1,
+      "failed": 0,
+      "pending": 15,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-original-links-upgrade-r3.json"
+    },
+    "browser": {
+      "root": {
+        "passed": 61,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 394880.66199999995,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-original-links-root-browser.json"
+      },
+      "pages": {
+        "passed": 61,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 303582.30799999996,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-original-links-pages-browser.json"
+      }
+    },
+    "focusedBrowserBeforeFinalStaticBuilds": {
+      "passed": 2,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 34918.103,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-original-links-focused-browser.json"
+    },
+    "initialRootBrowser": {
+      "passed": 60,
+      "failed": 1,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 508432.49299999996,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-original-links-initial-root-browser.json"
+    },
+    "initialIsolatedUnchangedLedgerCase": {
+      "passed": 0,
+      "failed": 1,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 105584.273,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-original-links-root-scale-diagnostic.json"
+    },
+    "uninstrumentedUnchangedLedgerRecheck": {
+      "passed": 1,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 72103.283,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-original-links-root-scale-r2.json"
+    },
+    "privateDiagnosticProfile": {
+      "result": {
+        "passed": 1,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 73768.693,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-original-links-scale-profile.json"
+      },
+      "qualification": "Private copy adds stage timings and CDP sampling only; same complete corpus/assertions/90000ms deadline. It is diagnostic evidence, not the final unchanged production test qualification."
+    },
+    "builds": {
+      "passed": true,
+      "bases": [
+        "/",
+        "/mise/"
+      ],
+      "logs": [
+        ".private/m41-native-original-links-final-root-build.log",
+        ".private/m41-native-original-links-final-pages-build.log"
+      ]
+    },
+    "gateRecords": [
+      {
+        "gate": "types",
+        "started": "2026-11-26T03:29:24.7506732Z",
+        "ended": "2026-11-26T03:30:33.9764253Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-original-links-final-types.log"
+      },
+      {
+        "gate": "unit",
+        "started": "2026-11-26T03:30:34.0350116Z",
+        "ended": "2026-11-26T04:27:48.0439781Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-original-links-final-unit.log"
+      },
+      {
+        "gate": "root-build",
+        "started": "2026-11-26T04:27:48.0553367Z",
+        "ended": "2026-11-26T04:29:17.5089015Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-original-links-final-root-build.log"
+      },
+      {
+        "gate": "root-browser",
+        "started": "2026-11-26T04:29:17.5143089Z",
+        "ended": "2026-11-26T04:37:47.6909232Z",
+        "exitCode": 1,
+        "log": ".private/m41-native-original-links-final-root-browser.log"
+      },
+      {
+        "gate": "root-browser-r2",
+        "started": "2026-11-26T04:44:59.1551581Z",
+        "ended": "2026-11-26T04:51:35.5552576Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-original-links-final-root-browser-r2.log"
+      },
+      {
+        "gate": "pages-build",
+        "started": "2026-11-26T04:51:35.6025893Z",
+        "ended": "2026-11-26T04:52:43.8446492Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-original-links-final-pages-build.log"
+      },
+      {
+        "gate": "pages-browser",
+        "started": "2026-11-26T04:52:43.8485335Z",
+        "ended": "2026-11-26T04:57:48.6773937Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-original-links-final-pages-browser.log"
+      }
+    ],
+    "fullOriginalCorpus": {
+      "unchangedExistingCorpusesAssertionsAndDeadlines": true,
+      "charges": 5000,
+      "noteCodeUnits": 1000000,
+      "actualOriginalImages": 1,
+      "actualCashCollections": 1,
+      "existingCaseDeadlineMs": 600000,
+      "nativeFinancialHttpDeadlineMsUnchanged": 20000,
+      "focused": {
+        "stage": "native-feed-scale-verified",
+        "completeOriginalRecoveredByCurrentManagerAfterPersonalPoolDeletion": true,
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "completeOriginalEventRows": 9,
+        "downloadRecords": 10039,
+        "downloadBytes": 28426811,
+        "pages": 145,
+        "durationMs": 373908.1455
+      },
+      "fullRun": {
+        "stage": "native-feed-scale-verified",
+        "completeOriginalRecoveredByCurrentManagerAfterPersonalPoolDeletion": true,
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "completeOriginalEventRows": 9,
+        "downloadRecords": 10039,
+        "downloadBytes": 28426811,
+        "pages": 145,
+        "durationMs": 319117.51170000003
+      },
+      "assertions": "Every5000 original charge row compares deeply; all million note code units including NUL/surrogates compare by independent Node SHA-256 of the JSON string; complete original PNG, original receipt and every original event JSON remain exact. Fresh actual SDK manager recovers the complete original after personal copy/node pool deletion. Separate cases actually delete auth.users and recover the outlet source after personal cascades."
+    },
+    "actualIntegrationAssertions": [
+      "Link, native action, native event and sale share the actual same transaction ID; pending comparisons close",
+      "Deleting uploader after actual financial SQL completion but before reply cannot orphan source; current SDK manager recovers exact original",
+      "Source locator insertion failure rolls native money/outcome/feed back; original retained comparison retries once",
+      "Shared bytes have no Auth-account/session parent; actual uploader delete cascades personal pools but preserves outlet archive",
+      "Lost actual locator HTTP response retries unchanged hashes, money, graph and acceptance",
+      "Expiry during retention persistence rolls the entire graph/feed operation back before native money",
+      "Outlet revocation between real multipart parts denies the next part without erasing original/money",
+      "Current reader response identity verified on every operation; falsely labelled original actor rejected",
+      "Changed root cannot masquerade as the original accepted invocation",
+      "Shared current-role revocation remains separate from unchanged historical personal-owner capability",
+      "All five private tables force RLS and deny direct client/service table privileges; guarded private definer/public invoker wrapper; anonymous and service RPC execution denied",
+      "Foreign outlet denied before hostile body getter consumption"
+    ],
+    "localCli": {
+      "cliVersion": "3.2.0",
+      "helpChecked": true,
+      "remoteFlagsUsed": false,
+      "results": [
+        {
+          "command": "advisors",
+          "exitCode": 1,
+          "target": "127.0.0.1:54322",
+          "connected": false,
+          "log": ".private/m41-native-original-links-advisors.log"
+        },
+        {
+          "command": "migration-list",
+          "exitCode": 1,
+          "target": "127.0.0.1:54322",
+          "connected": false,
+          "log": ".private/m41-native-original-links-migration-list.log"
+        }
+      ],
+      "qualification": "No local Supabase stack is running; actual all-migration PGlite/session/privilege/rollback queries supply local evidence. No hosted project contacted."
+    },
+    "localCliQualification": "Security advisors and migration list target only127.0.0.1:54322 and cannot connect because no local Supabase stack is running. Actual all-migration PGlite catalogue/privilege/session/rollback queries supply local evidence. No managed project, production Auth-signature/provider or physical acceptance is claimed.",
+    "ui": {
+      "markupStylesOrReferenceExportsChanged": false,
+      "newBrowserCases": 2,
+      "newBrowserWidths": [
+        390,
+        1440
+      ],
+      "allSelectedBrowserViewportWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "criticalAxeViolations": 0,
+      "visualArtifactUpload": "held",
+      "scope": "Selected existing payment, copy, original, backup and reference flows plus actual source retention/account-deletion/lost-reply/reload/current-manager recovery. No claim of full application browser coverage."
+    },
+    "secretScan": {
+      "status": "passed",
+      "history": true,
+      "artifacts": true,
+      "completeCheckout": true,
+      "knownPrivateValueComparisons": 13,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "reviewedFixedHistoricalNonsecretFindings": 22,
+      "legacyFindingExceptionsChanged": false,
+      "summaryWrittenBeforeRequiredFinalMetadataRecheck": true,
+      "log": ".private/m41-native-original-links-final-audit.log",
+      "finalMetadataRecheckLog": ".private/m41-native-original-links-final-audit-r2.log"
+    }
+  },
+  "sourceQualification": "All13 changed production/config/test/runtime-fixture files were frozen before the complete unit run, both final production builds and61-case browser runs per hosting path. No old corpus, assertion or deadline was removed or raised. Unit workers remain2; heavy suites own sequential groups. Browsers own4332, workers1, retries0. Only a new reader manifest extraction was clarified for lint before final freeze; the actual strict nine-field manifest is unchanged. Final runtime tests qualify the shortened synthetic browser client key; no credential rule/exception changed. The initial full root browser run passed60 and exceeded the unchanged90000ms deadline in one existing full-ledger offline case. Its unchanged isolated check also timed out. A private same-deadline timing/CPU diagnostic completed the whole case; the original uninstrumented case then passed unchanged in a fresh process. All61 root cases and61 Pages cases are requalified afterward with no source, corpus, assertion, deadline, worker or retry change. Initial failures remain explicit; no code defect or environmental root cause is asserted.",
+  "initialFailuresAndCorrections": [
+    "Initial new fixture exceeded the12,000-character Inbox source limit and passed a receipt to the strict manifest decoder. Replaced only the invalid new fixture with legal literal source and a real247,121-byte reference PNG to force multipart; explicitly stripped receipt-only fields. Existing5000-charge/million-note/image corpus remained unchanged.",
+    "Fresh database setup initially consumed the new small cases5-second deadline. Moved setup to a separate30-second beforeEach hook; all case deadlines preserved.",
+    "Current-manager test name column contains encoded JSON; corrected fixture serialization after actual22P02 diagnostic. No backend privilege relaxation.",
+    "Review found a post-payment source-link loss gap. Before qualification, replaced that intermediate approach with pre-money comparison staging and accepted-action trigger inside the actual financial transaction. The intermediate approach was never delivered.",
+    "First existing feed run passed15 and failed only its genuine historical upgrade fixture: the new controller required an RPC not present in the old schema. The fixture now exercises actual old v1 SDK/native HTTP with full unchanged original-copy protocol, strict real receipt parsing and genuine undo. No production fallback, private financial SQL or fabricated receipt. The corrected full16-case regression passes.",
+    "Initial source guard correctly rejected a long synthetic browser publishable-key payload. Shortened only the fake fixture literal. No real credential, rule change or allowlist addition. Final lint then found three unused destructured receipt fields; explicit strict manifest construction fixes those fields.",
+    "Two adaptive edit assertions stopped before writes because their guessed target text did not match. Subsequent stale-source failures were retained as nonqualifying observations; only runs after confirmed successful edits are counted.",
+    "The initial full root browser run passed60 and timed out in the existing5000-ledger offline case at90000ms; the exact isolated case also timed out. Initial trace records22518ms for seeding and an interrupted64206ms second evaluate. A private timing/CPU diagnostic with the same full data/assertions/deadline passed; the unchanged original then passed in a fresh process. Both complete61-case browser runs are repeated after those observations without production/test changes, relaxed deadlines or automatic retries. No proven root cause is claimed."
+  ],
+  "remainingInMilestone": [
+    "Complete native-aware canonical materialization while preserving strict original financial validation",
+    "Original-versus-current financial outcomes and original undo reconciliation",
+    "Initial genuine historical registration without cash replay or fabricated source links",
+    "Connected backup/restore, durable native installation and scope recovery",
+    "Actual product controls and complete milestone acceptance"
+  ],
+  "holds": {
+    "workflowRuns": true,
+    "ciArtifactUploads": true,
+    "pagesPublication": true,
+    "hostedMigrationFunctionServiceDeployment": true,
+    "providerCommissioning": true,
+    "releaseTags": true,
+    "lastReadOnlyObservation": {
+      "observedAt": "2026-11-26T03:30:37.952195+00:00",
+      "workflows": [
+        {
+          "id": 419007052,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419075081,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419005433,
+          "state": "disabled_manually"
+        }
+      ],
+      "runCount": 77,
+      "activeRuns": 0,
+      "lastRun": {
+        "id": 43927944995,
+        "head": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+      },
+      "pages": {
+        "id": 7832852111,
+        "sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+        "environment": "github-pages"
+      }
+    }
+  }
+}

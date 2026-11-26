@@ -1,3 +1,5 @@
+import {downloadLinkedPaymentOriginal} from './linked-payment-original';
+import {parsePaymentOriginalRetention,parseNativePaymentOriginalLink,paymentOriginalResponse} from '@mise/core/native-payment-originals';
 import Dexie from 'dexie';
 import {
   cloudAuthStorageKey,
@@ -308,9 +310,27 @@ export async function createNativeOriginalCopySession(
       run(() => b.journal.deliver(id, b.identity, remote, b.current, mutate)),
     readback: (id: string) =>
       run(() => b.journal.readback(id, b.identity, remote, b.current, mutate)),
+    retainPaymentCopy: (id:string)=>run(async()=>parsePaymentOriginalRetention(paymentOriginalResponse(await remote.call('payment-promote',id,{}),b.identity))),
+    stagePaymentOriginal: (id:string,body:Record<string,unknown>)=>run(async()=>{if(paymentOriginalResponse(await remote.call('payment-stage',id,body),b.identity)!==true)throw bad();}),
+    linkPaymentOriginal: (id:string,body:Record<string,unknown>)=>run(async()=>parseNativePaymentOriginalLink(paymentOriginalResponse(await remote.call('payment-link',id,body),b.identity))),
     stop: b.stop,
   };
 }
 export type NativeOriginalCopySession = Awaited<
   ReturnType<typeof createNativeOriginalCopySession>
 >;
+
+/** Current scoped readers use their own actual SDK identity. The copy's origin
+ * actor stays in the link/manifest; it is never relabelled as the reader. No
+ * native tables, outgoing actions or historical-owner journal are written. */
+export async function createLinkedPaymentOriginalSession(options:Options,scope:OriginalCopyScope) {
+ const b=await binding(options,scope);
+ const inspect=async(id:string)=>{
+  const link=parseNativePaymentOriginalLink(paymentOriginalResponse(await b.remote.call('payment-inspect',id,{}),b.identity));
+  if(link.id!==id||link.businessId!==b.identity.businessId||link.outletId!==b.identity.outletId)throw bad();
+  b.current();return link;
+ };
+ return {identity:b.identity,inspect:(id:string)=>b.exclusive(()=>inspect(id)),read:(id:string)=>b.exclusive(async()=>{
+  const link=await inspect(id);return downloadLinkedPaymentOriginal(link,async(op,body)=>paymentOriginalResponse(await b.remote.call(op,id,body),b.identity),b.current);
+ }),stop:b.stop};
+}

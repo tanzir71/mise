@@ -9,3 +9,5 @@ export {createCloudSyncRemote} from '../../apps/web/src/data/cloud-sync-remote';
 export {prepareSyncDownload,runSyncDownload,readVerifiedSyncRecords} from '../../apps/web/src/data/cloud-sync-journal';
 export {reconstructCanonicalSnapshot,mergeCanonicalRecords} from '../../packages/core/sync-canonical';
 export {isNativeSyncTable} from '../../packages/core/native-sync-records';
+export {createLinkedPaymentOriginalSession} from '../../apps/web/src/data/original-copy-session';
+export {readLinkedPaymentOriginal} from '../../packages/core/native-payment-originals';

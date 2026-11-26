@@ -1,4 +1,10 @@
 import 'fake-indexeddb/auto';
+import {createNativePaymentAccess} from '../apps/web/src/data/native-payment-access';
+import {sealNativePaymentBatch} from '../apps/web/src/data/native-payment-seal';
+import {parseNativePaymentOutbox} from '../packages/core/native-payment-outbox';
+import {parseNativePaymentBackendReceipt,nativePaymentHeader} from '../packages/core/payment-backend';
+import {createLinkedPaymentOriginalSession} from '../apps/web/src/data/original-copy-session';
+import {readLinkedPaymentOriginal} from '../packages/core/native-payment-originals';
 import { seedPaymentStorage } from './fixtures/payment-storage';
 import { inboxImageFile } from './inbox-fixture';
 import { readSealedNativePaymentAction } from '../apps/web/src/data/native-payment-seal';
@@ -173,6 +179,7 @@ async function fixture(n = 1, backend = server, scale = false) {
     targetHash,
     send,
     backend,
+    copyOptions:{config,authScope,auth:sdk.auth,storage:sdk.storage,journal,send},
     large,
     afterResponse: (fn: typeof afterResponse) => {
       afterResponse = fn;
@@ -210,6 +217,22 @@ async function money(f: Awaited<ReturnType<typeof fixture>>, deliver = true) {
       throw Error(String(error) + ' ' + f.backend.lastError());
     }
   return posted;
+}
+/** Historical fixture: actual SDK, complete retained personal originals and
+ * the unchanged v1 HTTP writer on its real older schema. No new-source RPC,
+ * synthetic receipt, direct financial SQL or production downgrade is used. */
+async function deliverPriorNativeProtocol(f:Awaited<ReturnType<typeof fixture>>) {
+ const access=await createNativePaymentAccess(f.db,f.copyOptions);
+ try{
+  await sealNativePaymentBatch(f.db,access);
+  const rows=(await f.db.nativePaymentActions.toArray()).map(parseNativePaymentOutbox).sort((a,b)=>(a.original.marker?.sequence??0)-(b.original.marker?.sequence??0)||a.original.group.index-b.original.group.index),copies=new Set<string>();
+  for(const row of rows){
+   expect(row.seal).not.toBeNull();const copyId=row.seal!.copyId;
+   if(!copies.has(copyId)){await access.copies.prepare(copyId);await access.copies.deliver(copyId);const decoded=await access.copies.readback(copyId);expect(decoded.bases.some(b=>b.root===row.seal!.ref.root)).toBe(true);copies.add(copyId);}
+   const auth=await f.sdk.auth.commandAuthorization(),response=await f.send(config.apiUrl+'/functions/v1/native-payment',{method:'POST',headers:{Authorization:'Bearer '+auth.jwt,'Content-Type':'application/json',[nativePaymentHeader]:f.setup.outlet.id},body:JSON.stringify(row.original.invocation)});
+   expect(response.status).toBe(200);const receipt=parseNativePaymentBackendReceipt(await response.json(),row.original.invocation.command);expect(receipt.paymentHash).toBe(row.original.invocation.paymentHash);f.sdk.auth.assertCommandAuthorization(auth);
+  }
+ }finally{access.stop();}
 }
 async function stage(
   f: Awaited<ReturnType<typeof fixture>>,
@@ -817,7 +840,8 @@ it('an actual prior-schema native shop upgrades by backfilling complete original
   );
   try {
     const f = await fixture(1, prior);
-    await money(f);
+    await money(f,false);
+    await deliverPriorNativeProtocol(f);
     const oldWindow = await f.remote.begin({
       type: 'begin',
       id: newInboxId(),
@@ -898,7 +922,7 @@ it('an actual prior-schema native shop upgrades by backfilling complete original
       await compareSavedPaymentMoneyUndo(f.db, review),
       true,
     );
-    await f.session.deliver();
+    await deliverPriorNativeProtocol(f);
     expect(
       (await prior.sql.query('select id from public.sales')).rows,
     ).toHaveLength(1);
@@ -975,9 +999,27 @@ it('the complete 5,000-charge million-code-unit image source crosses actual nati
   expect(await d.db.creditEntries.count()).toBe(0);
   expect(await d.db.outbox.count()).toBe(0);
   expect(d.state.seal).toBeTruthy();
+  // Recover the entire unchanged large original from outlet retention after its
+  // uploader's personal graph is removed. No current row substitutes evidence.
+  const managerId=newInboxId();
+  await server.sql.query("insert into public.members(id,business_id,auth_user_id,name,role,created_at,updated_at) values($1,$2,$3,$4,'manager',$5,$5)",[managerId,f.setup.business.id,copySdkSubject(2),JSON.stringify('Original archive manager'),Date.now()]);
+  await server.sql.query('insert into public.member_outlets values($1,$2,$3)',[f.setup.business.id,managerId,f.setup.outlet.id]);
+  await server.sql.query('delete from private.native_original_copies where owner_uid=$1',[copySdkSubject(1)]);
+  await server.sql.query('delete from private.native_original_nodes where owner_uid=$1',[copySdkSubject(1)]);
+  const managerScope='native-manager-original/'+newInboxId(),managerSdk=await createCopySdk(config,managerScope,f.send,2),managerJournal=new OriginalCopyJournal('manager-original-'+newInboxId());clients.push(managerSdk);stores.push(managerJournal);
+  const managerSession=await createLinkedPaymentOriginalSession({config,authScope:managerScope,auth:managerSdk.auth,storage:managerSdk.storage,journal:managerJournal,send:f.send},{businessId:f.setup.business.id,outletId:f.setup.outlet.id,actorId:managerId});
+  try{
+   const queued=(await f.db.nativePaymentActions.toArray()).map(parseNativePaymentOutbox).find(r=>r.id===posted.payment.eventId)!;
+   const recovered=await managerSession.read(queued.id),proof=readLinkedPaymentOriginal(recovered.link,queued.original.invocation,queued.nativeReceipt!,recovered.portable),restored=new Map(proof.decoded.current.tables.creditEntries.map(r=>[r.id,r]));
+   for(const entry of seeded.entries)expect(restored.get(entry.id)).toEqual(entry);
+   expect(hash(proof.decoded.current.tables.customers.find(c=>c.id===seeded.customer.id)!.notes)).toBe(hash(seeded.largeNote));
+   expect(proof.action.source.images).toEqual(original.original.source.images);expect(recovered.link.actorId).toBe(f.setup.owner.id);expect(managerSession.identity.actorId).toBe(managerId);
+   expect((await server.sql.query('select id from private.native_original_copies')).rows).toHaveLength(0);expect((await server.sql.query('select id from public.credit_entries')).rows).toHaveLength(5001);expect(await d.db.creditEntries.count()).toBe(0);
+  }finally{managerSession.stop();}
   console.log(
     JSON.stringify({
       stage: 'native-feed-scale-verified',
+      completeOriginalRecoveredByCurrentManagerAfterPersonalPoolDeletion:true,
       charges: 5000,
       noteCodeUnits: 1000000,
       images: 1,
@@ -1041,6 +1083,7 @@ it('the exact previous production reader rejects all native fragments before acc
     'native_payments',
     'native_payment_events',
     'native_payment_actions',
+    'native_payment_originals',
   ] as const) {
     const row = d.records.find((r) => r.meta.table === table)!,
       part = { ...row.meta, offset: 0, data: 'e30=' };

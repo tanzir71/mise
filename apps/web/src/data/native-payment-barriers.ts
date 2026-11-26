@@ -1,3 +1,4 @@
+import {assertNativePaymentOriginalLink,type NativePaymentOriginalLink,type PaymentOriginalRetention} from '@mise/core/native-payment-originals';
 import type { MiseDatabase } from './db';
 import type { LocalOutboxEntry } from '@mise/core/local-outbox';
 import {
@@ -30,6 +31,8 @@ export interface VerifiedNativePaymentGroup {
   rows: NativePaymentOutboxEntry[];
   receipts: NativePaymentBackendReceipt[];
   copies: OriginalCopyReceipt[];
+  retained: PaymentOriginalRetention[];
+  sources: NativePaymentOriginalLink[];
 }
 const issued = new WeakMap<
   NativePaymentBarriers,
@@ -63,6 +66,8 @@ export function createNativePaymentBarriers(
       checked.has(marker.id) ||
       rows.length !== group.receipts.length ||
       rows.length !== group.copies.length ||
+      rows.length !== group.retained.length ||
+      rows.length !== group.sources.length ||
       !nativePaymentChangesEqual(
         composeNativePaymentChanges(rows),
         marker.changes,
@@ -74,9 +79,13 @@ export function createNativePaymentBarriers(
         m = row.original.marker,
         c = row.original.invocation.command,
         receipt = group.receipts[i],
-        copy = group.copies[i];
+        copy = group.copies[i],retention=group.retained[i],source=group.sources[i];
       assertLiveCommandReceipt(receipt);
       assertLiveCommandReceipt(copy);
+      assertLiveCommandReceipt(retention);
+      assertLiveCommandReceipt(source);
+      if(!row.seal||literalToken(retention.copy)!==literalToken(copy)||literalToken(source.retention)!==literalToken(retention))throw fail();
+      assertNativePaymentOriginalLink(source,row.original.invocation,receipt,copy,row.seal.ref);
       if (
         row.state !== 'applied' ||
         !m ||
@@ -99,7 +108,7 @@ export function createNativePaymentBarriers(
     checked.set(marker.id, {
       marker: literalToken(marker),
       rows: literalToken(rows),
-      receipts: [...group.receipts, ...group.copies],
+      receipts: [...group.receipts, ...group.copies, ...group.retained, ...group.sources],
     });
   }
   const permit: NativePaymentBarriers = Object.freeze({

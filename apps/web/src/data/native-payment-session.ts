@@ -1,3 +1,4 @@
+import {assertNativePaymentOriginalLink,nativePaymentOriginalRequest,nativePaymentOriginalStageRequest,type PaymentOriginalRetention,type NativePaymentOriginalLink} from '@mise/core/native-payment-originals';
 import Dexie from 'dexie';
 import type { MiseDatabase } from './db';
 import {
@@ -280,6 +281,7 @@ export async function createNativePaymentOutboxSession(
   }
   type Copied = {
     receipt: OriginalCopyReceipt;
+    retention: PaymentOriginalRetention;
     decoded: DecodedPortableBackup;
     snapshots: Map<string, ReturnType<typeof readPaymentOriginalBasis>>;
   };
@@ -302,7 +304,12 @@ export async function createNativePaymentOutboxSession(
         current();
         if (literalToken(receipt) !== token) throw fail();
       });
-      copied = { receipt, decoded, snapshots: new Map() };
+      const retention=await access.copies.retainPaymentCopy(row.seal.copyId);
+      await scope();
+      if(literalToken(retention.copy)!==literalToken(receipt))throw fail();
+      const retentionToken=literalToken(retention);
+      bindCommandReceipt(retention,()=>{current();if(literalToken(retention)!==retentionToken)throw fail();});
+      copied = { receipt, retention, decoded, snapshots: new Map() };
       cache.set(row.seal.copyId, copied);
     }
     const basis = copied.decoded.bases.find(
@@ -336,7 +343,8 @@ export async function createNativePaymentOutboxSession(
     )
       throw fail();
     assertLiveCommandReceipt(copied.receipt);
-    return copied.receipt;
+    assertLiveCommandReceipt(copied.retention);
+    return copied;
   }
   const session = {
     identity,
@@ -414,9 +422,11 @@ export async function createNativePaymentOutboxSession(
             front.sequence,
           );
           const receipts: NativePaymentBackendReceipt[] = [],
-            storage: OriginalCopyReceipt[] = [];
+            storage: OriginalCopyReceipt[] = [],
+            retained: PaymentOriginalRetention[] = [],
+            sources: NativePaymentOriginalLink[] = [];
           for (const row of entries) {
-            const copied = await copy(row, copies);
+            const original = await copy(row, copies),copied=original.receipt;
             const ready = await retain(
               row,
               (actual) => {
@@ -429,6 +439,8 @@ export async function createNativePaymentOutboxSession(
               },
               () => assertLiveCommandReceipt(copied),
             );
+            await access.copies.stagePaymentOriginal(row.id,nativePaymentOriginalStageRequest(row.original.invocation,copied,row.seal!.ref));
+            await scope();
             const receipt = await sendNative(ready);
             await retain(
               ready,
@@ -453,14 +465,23 @@ export async function createNativePaymentOutboxSession(
                 assertLiveCommandReceipt(receipt);
               },
             );
+            const link=await access.copies.linkPaymentOriginal(row.id,nativePaymentOriginalRequest(row.original.invocation,receipt,copied,row.seal!.ref));
+            await scope();
+            assertNativePaymentOriginalLink(link,row.original.invocation,receipt,copied,row.seal!.ref);
+            const linkToken=literalToken(link);
+            bindCommandReceipt(link,()=>{current();if(literalToken(link)!==linkToken)throw fail();});
             receipts.push(receipt);
             storage.push(copied);
+            retained.push(original.retention);
+            sources.push(link);
           }
           verified.push({
             marker: front,
             rows: await group(front),
             receipts,
             copies: storage,
+            retained,
+            sources,
           });
           barriers = createNativePaymentBarriers(db, access, verified);
         }

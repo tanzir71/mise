@@ -1,3 +1,4 @@
+import {parseNativePaymentOriginalLink,paymentOriginalLinkMaxBytes} from './native-payment-originals';
 import { validateBackupRow } from './backup-schema';
 import { MAX_BACKUP_BYTES } from './backup-tables';
 import {
@@ -14,6 +15,7 @@ import type { AuditEvent, Payment } from './models';
 
 /** Explicit feed projections, never private table grants or write permissions. */
 export const nativeSyncRecordColumns = Object.freeze({
+  native_payment_originals: Object.freeze(['id','business_id','outlet_id','record_json']),
   native_payments: Object.freeze([
     'id',
     'business_id',
@@ -42,6 +44,7 @@ export const isNativeSyncTable = (value: string): value is NativeSyncTable =>
 /** Bound the outer JSON string before allocating a complete incoming record.
  * JSON escaping can double the original literal bytes. Legacy limits stay intact. */
 export function nativeSyncRecordByteLimit(table: NativeSyncTable): number {
+  if(table==='native_payment_originals')return 2*paymentOriginalLinkMaxBytes+4096;
   return table === 'native_payment_actions'
     ? 2 * nativePaymentBodyLimit + 8192
     : 2 * MAX_BACKUP_BYTES + 4096;
@@ -93,7 +96,10 @@ export function decodeNativeSyncRecord(
       id(scope.businessId) &&
       id(scope.outletId),
   );
-  if (table === 'native_payment_actions') {
+  if(table==='native_payment_originals'){
+    const link=parseNativePaymentOriginalLink(json(value.record_json,paymentOriginalLinkMaxBytes));
+    ensure(link.id===value.id&&link.businessId===scope.businessId&&link.outletId===scope.outletId);
+  } else if (table === 'native_payment_actions') {
     const invocation = parseNativePaymentInvocation(
         json(value.intent_json, nativePaymentBodyLimit),
       ),

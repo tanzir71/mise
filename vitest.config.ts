@@ -7,6 +7,7 @@ const paymentArchive='tests/payment-archive.test.ts';
 const originalCopies='tests/native-original-copies.test.ts';
 const nativePaymentDelivery='tests/native-payment-delivery.test.ts';
 const nativePaymentSync='tests/native-payment-sync.test.ts';
+const nativePaymentOriginalLinks='tests/native-payment-original-links.test.ts';
 export default defineConfig({test:{maxWorkers:2,projects:[
   // Start the full original history in a fresh worker before accumulated WASM
   // allocations from the other suites. Groups run sequentially; its original
@@ -22,5 +23,6 @@ export default defineConfig({test:{maxWorkers:2,projects:[
   {test:{name:'original-copies',include:[originalCopies],sequence:{groupOrder:4}}},
   {test:{name:'native-payment-delivery',include:[nativePaymentDelivery],sequence:{groupOrder:5}}},
   {test:{name:'native-payment-sync',include:[nativePaymentSync],sequence:{groupOrder:6}}},
-  {test:{name:'unit',include:['tests/**/*.test.ts'],exclude:[...configDefaults.exclude,kitchenHistory,paymentOriginals,nativePaymentBackend,paymentArchive,originalCopies,nativePaymentDelivery,nativePaymentSync],sequence:{groupOrder:7}}},
+  {test:{name:'native-payment-original-links',include:[nativePaymentOriginalLinks],sequence:{groupOrder:7}}},
+  {test:{name:'unit',include:['tests/**/*.test.ts'],exclude:[...configDefaults.exclude,kitchenHistory,paymentOriginals,nativePaymentBackend,paymentArchive,originalCopies,nativePaymentDelivery,nativePaymentSync,nativePaymentOriginalLinks],sequence:{groupOrder:8}}},
 ]}});

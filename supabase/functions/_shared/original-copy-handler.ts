@@ -19,6 +19,12 @@ const operations = [
   'inspect',
   'read',
   'read-part',
+  'payment-promote',
+  'payment-stage',
+  'payment-link',
+  'payment-inspect',
+  'payment-read',
+  'payment-read-part',
 ];
 export class OriginalCopyHttpError extends Error {
   constructor(readonly status: number) {
@@ -113,7 +119,7 @@ export function originalCopyStore(
     async rpc(jwt, op, outlet, id, body) {
       return originalCopyFetchJson(
         send,
-        new URL('rest/v1/rpc/native_original_copy', root),
+        new URL('rest/v1/rpc/' + (op.startsWith('payment-') || op === 'admit' && !!body && typeof body === 'object' && String((body as {operation?:unknown}).operation).startsWith('payment-') ? 'payment_original' : 'native_original_copy'), root),
         {
           method: 'POST',
           redirect: 'error',
