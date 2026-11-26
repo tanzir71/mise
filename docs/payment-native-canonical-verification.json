@@ -1,0 +1,424 @@
+{
+  "milestone": "M41",
+  "increment": "Verified native payment reads with independently current money and complete exact originals",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "0b6aeee5760258957f9d822e84bf6390bd8c3e40",
+  "sourceFingerprint": "762aec25aa1bd3c33950b04c78b82a24de64e50610d4284782ea7f4f56086b9a",
+  "sourceFiles": [
+    "packages/core/native-payment-canonical.ts",
+    "packages/core/payment-evidence.ts",
+    "packages/core/payment-originals.ts",
+    "packages/core/sync-canonical.ts",
+    "tests/e2e/native-payment-canonical.spec.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/native-payment-canonical.test.ts",
+    "vitest.config.ts"
+  ],
+  "scope": {
+    "newReadFormat": "mise-native-canonical-read",
+    "newReadVersion": 1,
+    "nativeProjectionFormat": "mise-native-payment-canonical-read",
+    "nativeProjectionVersion": 1,
+    "ordinarySchema": 13,
+    "nativeDatabaseSchema": 31,
+    "originalBasisVersion": 1,
+    "portableBackupFormatVersionsUnchanged": [
+      1,
+      2
+    ],
+    "copyWireVersion": 1,
+    "nativeReceiptVersion": 1,
+    "newMigrationsTablesDefinersClientGrantsEnvironmentVariablesDependenciesProviderAccountsOrHostedDeployments": 0,
+    "newUserInterfaceMarkupStylesOrReferenceExports": 0,
+    "allConfigurationEndUserOwned": true,
+    "paymentPreviewDefaultOff": true,
+    "nativeInstallationEnabled": false,
+    "nativePortableBackupRestoreEnabled": false,
+    "legacyInstallerNativeAndTombstoneFenceRetained": true,
+    "missingOriginalHistory": "retained reconstruction error; no invented link or consent",
+    "nativeMetadataDeletion": "retained reconstruction error; no empty installation",
+    "ordinaryFinancialWithdrawal": "same original accepted history; actual current row missing/changed and receipt ineligible; no synthetic native undo or cash replay",
+    "readClosureKeepsValidatedSnapshotPrivate": true,
+    "existingFrozenOriginalIdentityDescriptorsPreserved": true,
+    "invalidOriginalRootRejectedBeforeNodeReads": true,
+    "exactCopyBodyReproducesManifestUnderOriginalActor": true,
+    "exactCopyMembershipCheckedEvenForCachedRoots": true,
+    "originalsUseExistingArchiveExpansionBound": true
+  },
+  "checks": {
+    "lint": {
+      "passed": true,
+      "log": ".private/m41-native-canonical-final-lint-r2.log",
+      "initialFailureLog": ".private/m41-native-canonical-final-lint.log"
+    },
+    "types": {
+      "passed": true,
+      "astroFiles": 232,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0,
+      "log": ".private/m41-native-canonical-final-types.log"
+    },
+    "fullUnit": {
+      "passed": 5748,
+      "failed": 0,
+      "pending": 0,
+      "files": 300,
+      "success": true,
+      "report": ".private/m41-native-canonical-final-unit.json"
+    },
+    "newUnitCases": 19,
+    "browser": {
+      "root": {
+        "passed": 63,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 357202.91599999997,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-canonical-root-browser.json"
+      },
+      "pages": {
+        "passed": 63,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 342921.413,
+        "workers": 1,
+        "retries": 0,
+        "report": ".private/m41-native-canonical-pages-browser.json"
+      }
+    },
+    "builds": {
+      "passed": true,
+      "bases": [
+        "/",
+        "/mise/"
+      ],
+      "logs": [
+        ".private/m41-native-canonical-final-root-build.log",
+        ".private/m41-native-canonical-final-pages-build.log"
+      ]
+    },
+    "gateRecords": [
+      {
+        "gate": "lint",
+        "started": "2026-11-26T06:17:03.7154648Z",
+        "ended": "2026-11-26T06:17:58.8526756Z",
+        "exitCode": 1,
+        "log": ".private/m41-native-canonical-final-lint.log"
+      },
+      {
+        "gate": "lint-r2",
+        "started": "2026-11-26T06:19:24.2057793Z",
+        "ended": "2026-11-26T06:20:21.0784957Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-lint-r2.log"
+      },
+      {
+        "gate": "types",
+        "started": "2026-11-26T06:20:21.1282827Z",
+        "ended": "2026-11-26T06:21:20.8014229Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-types.log"
+      },
+      {
+        "gate": "unit",
+        "started": "2026-11-26T06:21:20.8064753Z",
+        "ended": "2026-11-26T07:27:46.8441904Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-unit.log"
+      },
+      {
+        "gate": "root-build",
+        "started": "2026-11-26T07:27:46.8534614Z",
+        "ended": "2026-11-26T07:29:08.9036742Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-root-build.log"
+      },
+      {
+        "gate": "root-browser",
+        "started": "2026-11-26T07:29:08.9109583Z",
+        "ended": "2026-11-26T07:35:07.5784934Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-root-browser.log"
+      },
+      {
+        "gate": "pages-build",
+        "started": "2026-11-26T07:35:07.5813211Z",
+        "ended": "2026-11-26T07:36:00.2253092Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-pages-build.log"
+      },
+      {
+        "gate": "pages-browser",
+        "started": "2026-11-26T07:36:00.2270435Z",
+        "ended": "2026-11-26T07:41:44.1840279Z",
+        "exitCode": 0,
+        "log": ".private/m41-native-canonical-final-pages-browser.log"
+      }
+    ],
+    "targetedNineteenBeforeFrozenMetadataCompatibilityRestoration": {
+      "passed": 19,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-canonical-nineteen.json"
+    },
+    "frozenReaderCompatibility": {
+      "passed": 1,
+      "failed": 0,
+      "pending": 18,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-canonical-frozen-reader.json"
+    },
+    "earlierSeventeen": {
+      "passed": 17,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "success": true,
+      "report": ".private/m41-native-canonical-seventeen.json"
+    },
+    "existingOriginalAndLegacyCanonicalRegression": {
+      "passed": 24,
+      "failed": 0,
+      "pending": 0,
+      "files": 2,
+      "success": true,
+      "report": ".private/m41-native-canonical-old-regression.json"
+    },
+    "focusedBrowser": {
+      "passed": 2,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "durationMs": 22553.005,
+      "workers": 1,
+      "retries": 0,
+      "report": ".private/m41-native-canonical-focused-browser-r2.json"
+    },
+    "copyBodyBoundary": {
+      "expectedFailureBeforeFix": {
+        "passed": 0,
+        "failed": 1,
+        "pending": 18,
+        "files": 1,
+        "success": false,
+        "report": ".private/m41-native-canonical-copy-body-red-r2.json"
+      },
+      "focusedGreenAfterFix": {
+        "passed": 4,
+        "failed": 0,
+        "pending": 15,
+        "files": 1,
+        "success": true,
+        "report": ".private/m41-native-canonical-copy-body-green.json"
+      },
+      "scope": "The altered portable file is independently valid before the tested call. Its original bases remain exact but export time differs. The pre-fix boundary resolved it; complete original-actor manifest/receipt comparison now rejects it. The first weaker draft that caught a fixture error is not qualification."
+    },
+    "completeOriginalCorpus": {
+      "charges": 5000,
+      "noteCodeUnits": 1000000,
+      "originalImageCount": 1,
+      "actualCashCollections": 1,
+      "caseDeadlineMs": 600000,
+      "allOldCorporaAssertionsAndDeadlinesUnchanged": true,
+      "earlierSeventeen": {
+        "stage": "native-canonical-scale-verified",
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "nativeActions": 2,
+        "readRecords": 10039,
+        "originalBases": 1,
+        "originalNodes": 10594,
+        "elapsedMs": 390758.6948
+      },
+      "targetedNineteen": {
+        "stage": "native-canonical-scale-verified",
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "nativeActions": 2,
+        "readRecords": 10039,
+        "originalBases": 1,
+        "originalNodes": 10594,
+        "elapsedMs": 365095.9027
+      },
+      "fullRun": {
+        "stage": "native-canonical-scale-verified",
+        "charges": 5000,
+        "noteCodeUnits": 1000000,
+        "images": 1,
+        "actualCollections": 1,
+        "nativeActions": 2,
+        "readRecords": 10039,
+        "originalBases": 1,
+        "originalNodes": 10594,
+        "elapsedMs": 415359.2932
+      },
+      "assertions": "Every5000 original charge row compares deeply; the complete million-code-unit NUL/surrogate note compares by independent Node SHA-256 of the JSON string; exact original image bytes and descriptor match both strict original and actual current snapshot. Current5001 ledger rows prove exactly one collection. The target has no domain payments/ledger/outgoing work. All10039 current snapshot records are retained.",
+      "currentImageQualification": "Image bytes come from an actual authorized original-copy read, reused as cached data. Unchanged canonical image validation binds actual snapshot source/hash/type/length/bytes. No separate image-object HTTP transfer is claimed."
+    },
+    "actualSdkHttpSqlAssertions": [
+      "Complete current snapshot and exact original command/history are reconstructed from one real authenticated window with no domain installation",
+      "Real M37 independent counter/order/khata undo and replacement change current money without rewriting native acceptance or manufacturing native undo",
+      "Khata reversal makes the receipt ineligible even when its original entry row remains unchanged",
+      "Actual backend maintenance deletes current counter receipt/audit; reconstruction retains exact native acceptance and complete original source and never recreates money",
+      "Genuine native undo preserves actual accepted performed mode and exact original financial child events",
+      "A current manager keeps their own SDK/window identity while original actor remains unchanged, including actual uploader Auth deletion before a lost financial reply in real browser cases",
+      "Revocation after snapshot staging denies source reconstruction and retains all staged records",
+      "Rehashed actor/receipt/locator/history/evidence tampering cannot replace strict original actions, source membership or financial children",
+      "A cached root must belong to the exact claimed immutable copy; a valid inner original cannot excuse a different sealed portable body",
+      "A reused original reader preserves private validated values, frozen identity descriptors and early malformed-reference denial"
+    ],
+    "qualification": "Production handlers and actual restricted SQL roles execute every migration under PGlite; the Auth signature and HTTP routing boundary is controlled. No managed Auth/provider, real SMS/OTP or physical commissioning acceptance is claimed. This increment changes no backend schema, grant, service or hosted installation.",
+    "ui": {
+      "newBrowserWidths": [
+        390,
+        1440
+      ],
+      "existingSelectedResponsiveWidths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "criticalAxeViolations": 0,
+      "markupStylesOrExportsChanged": false,
+      "visualArtifactUpload": "held",
+      "browserScope": "Selected existing payment/copy/original/archive/export flows and new actual manager native snapshot reconstruction; no claim of full application browser coverage."
+    },
+    "secretScan": {
+      "passed": true,
+      "sourceHistoryAndArtifacts": {
+        "ok": true,
+        "history": true,
+        "artifacts": true,
+        "files": 2440,
+        "objects": 13393,
+        "archiveFiles": 0,
+        "knownValuesChecked": 13,
+        "credentialFindings": 0,
+        "currentDeploymentFindings": 0,
+        "historicalDeploymentFindings": 22,
+        "legacyDeploymentFindings": 22,
+        "blockedHistoricalDeploymentFindings": 0,
+        "coverageFindings": 0
+      },
+      "log": ".private/m41-native-canonical-final-secrets.log",
+      "repeatAfterThisMetadataRequiredBeforeCommit": true,
+      "repeatLog": ".private/m41-native-canonical-final-secrets-after-metadata.log",
+      "preCommitAndPrePushGuardsEnabled": true,
+      "completeHistory": true,
+      "reviewedHistoricalNonsecretExceptionsUnchanged": true,
+      "actualPrivateValuesRemainOutsideTrackedFiles": true
+    },
+    "finalDocumentationBuilds": {
+      "passed": true,
+      "gateRecords": [
+        {
+          "gate": "root-notes-build",
+          "started": "2026-11-26T07:43:45.9541579Z",
+          "ended": "2026-11-26T07:44:45.1275242Z",
+          "exitCode": 0,
+          "log": ".private/m41-native-canonical-final-root-notes-build.log"
+        },
+        {
+          "gate": "pages-notes-build",
+          "started": "2026-11-26T07:44:45.2909395Z",
+          "ended": "2026-11-26T07:45:55.0730622Z",
+          "exitCode": 0,
+          "log": ".private/m41-native-canonical-final-pages-notes-build.log"
+        }
+      ],
+      "artifactChecks": [
+        {
+          "base": "/",
+          "changelogSha256": "cae966f0f02e1872407ad7e345b561c54a314ab411781b3359a309bc019816c3",
+          "matchingAssets": [
+            {
+              "path": "site/app/assets/app-CGm6EIIH.js",
+              "sha256": "adcd23553616d3755fcb2ee563981ba3b265c4244b2b62fccc2bf38fdc948b1e"
+            }
+          ],
+          "runtimeSourceFingerprint": "762aec25aa1bd3c33950b04c78b82a24de64e50610d4284782ea7f4f56086b9a"
+        },
+        {
+          "base": "/mise/",
+          "changelogSha256": "cae966f0f02e1872407ad7e345b561c54a314ab411781b3359a309bc019816c3",
+          "matchingAssets": [
+            {
+              "path": "site/app/assets/app-BNcaUD3l.js",
+              "sha256": "140fd909dec86c01405bd72412d942a33a4a79bcfc284fbac8daa3a926f71002"
+            }
+          ],
+          "runtimeSourceFingerprint": "762aec25aa1bd3c33950b04c78b82a24de64e50610d4284782ea7f4f56086b9a"
+        }
+      ],
+      "reason": "The app imports CHANGELOG.md as raw product content. After all primary checks passed, final notes changed only the qualification sentence. Both builds were repeated and their app assets contain that final sentence. All8 frozen runtime/config/test/fixture files remain byte-identical to the full unit and63-per-base browser qualification. No extra tests were added for this documentation-only edit."
+    }
+  },
+  "sourceQualification": "All8 runtime/config/test/fixture files were frozen before final lint/types, all5748 units, both production builds and63 selected browser cases per base. The targeted19 case run included the full original corpus and final manifest/body binding. Before final freeze, the original reader identity metadata was restored to the existing frozen descriptor behavior without changing values (targeted one-case compatibility pass), and only an unused argument was removed from the new browser callback after initial lint. Complete final runtime checks qualify all current bytes. No old assertion, corpus, wall-clock deadline or automatic retry policy changed. Heavy suites remain sequential; unit workers2, browser workers1, retries0, owned preview4332.",
+  "initialFailuresAndCorrections": [
+    "The first new11-case run passed8 and failed3. One fixture assumed two bases, but its actual physical batch correctly shares one complete basis. The other two actual M37 calls omitted the required saved-currency header; using the fixture shop currency fixes them without changing production admission.",
+    "Review identified cached-root membership that could borrow another copy. The new regression actually resolved an invalid claim before correction; every exact-copy membership and retention descriptor is now checked even for a cached root.",
+    "One adaptive edit assertion stopped before writes; a subsequent stale-source run was not qualification. After reading actual formatted targets, edits were confirmed successful before subsequent runs.",
+    "Windows locale-default reading corrupted only the NEW Bangla fixture during editing. Explicit UTF-8 I/O and exact Unicode escapes plus an independent expected Bangla/NUL/surrogate vector correct it. Existing old corpora are untouched; current full tests qualify the corrected literal.",
+    "New TypeScript checks found an implicitly captured reader and a possible SharedArrayBuffer in a new image fixture. The actual current reader is captured explicitly and image bytes use an owned ArrayBuffer; no casts or byte assertions were relaxed.",
+    "The first copy-body draft could reject fixture preparation rather than the tested boundary. The corrected test constructs and validates a different export-time portable body outside the rejection assertion. It actually resolved before the full manifest binding fix and rejects after it.",
+    "The cached original-reader refactor copied mutable values but initially also unfroze identity metadata. The existing frozen basis/scope/count/ref behavior was restored and directly checked, together with isolation from caller mutation and zero node reads for a wrong root.",
+    "Initial final lint passed source privacy checks and rejected only one unused pending argument in the new browser callback. Removing that unused callback/pass-through argument changed no implementation, assertions, corpus or deadlines. The initial failed lint and superseded freeze remain recorded privately; current frozen bytes passed all final gates."
+  ],
+  "remainingInMilestone": [
+    "Durable native canonical installation/materialization with both original and current views",
+    "Accepted, pending, unknown and review outcome integration without replay or fabricated consent",
+    "Genuine historical registration and native metadata removal recovery",
+    "Versioned connected backup/restore and scope recovery",
+    "Complete product controls and milestone acceptance"
+  ],
+  "holds": {
+    "workflowRuns": true,
+    "ciArtifactUploads": true,
+    "pagesPublication": true,
+    "hostedMigrationFunctionServiceDeployment": true,
+    "providerCommissioning": true,
+    "releaseTags": true,
+    "lastReadOnlyObservation": {
+      "observedAt": "2026-11-26T07:43:35.140614+00:00",
+      "workflows": [
+        {
+          "id": 419007052,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419075081,
+          "state": "disabled_manually"
+        },
+        {
+          "id": 419005433,
+          "state": "disabled_manually"
+        }
+      ],
+      "runCount": 77,
+      "activeRuns": 0,
+      "lastRun": {
+        "id": 43927944995,
+        "head": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc"
+      },
+      "pages": {
+        "id": 7832852111,
+        "sha": "9ea1991f370fcdc0bb6bf6e2468baa9163d7b0bc",
+        "environment": "github-pages"
+      }
+    }
+  }
+}

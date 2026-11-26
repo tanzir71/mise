@@ -347,6 +347,9 @@ export class PaymentEvidenceReader {
       return root.parts.entries;
     }
   }
+  usedEventIds(): readonly string[] {
+    return [...this.used];
+  }
   assertComplete() {
     for (const event of this.events.values())
       if (event.command === paymentEvidenceCommand)

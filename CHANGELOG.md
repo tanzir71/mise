@@ -6,6 +6,8 @@ All notable changes are documented here. Milestone completion is recorded after 
 
 ### Added
 
+- In progress: M41 reconstructs native payment history from the actual shared snapshot and exact outlet-owned originals while keeping current money independent. Genuine receipt and undo identities, whole history, copy membership and current manager access are verified; reconstruction creates no financial or outgoing work. Local qualification passes; durable installation, historical registration and connected restore remain open. Installation configuration stays end-user owned and all delivery holds remain. See [native payment reads](docs/payment-native-canonical.md).
+
 - In progress: M41 retains complete payment originals under the outlet before money and commits accepted source locators atomically with actual native outcomes. Current readers keep their own SDK identity while recovering an earlier actor’s exact evidence, including after uploader deletion. Local qualification passes; native canonical integration remains open, configuration stays end-user owned and all delivery holds remain. See [original payment links](docs/payment-original-links.md).
 
 - In progress: M41 native payment observations, audit history and outcomes now download in the same committed snapshot as their financial rows, with strict scoped decoding, live-session checks, atomic capture and original retry recovery. Backfill preserves existing money, and old readers reject unfamiliar records. Complete canonical installation remains fenced; the preview and delivery holds stay unchanged and all configuration remains end-user owned. See [native payment feed](docs/payment-native-feed.md).

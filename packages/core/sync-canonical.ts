@@ -1,3 +1,4 @@
+import {projectNativePaymentCanonical,type NativePaymentOriginalLoader,type NativePaymentCanonicalProjection} from './native-payment-canonical';
 import {isNativeSyncTable} from './native-sync-records';
 import {createBackup,parseBackup} from './backup';
 import {emptyBackupTables,type BackupTable,type MiseBackup} from './backup-tables';
@@ -32,13 +33,14 @@ export async function mergeCanonicalRecords(previous:readonly CanonicalRecord[],
 }
 
 /** Build a complete scoped model before any IndexedDB domain write or cursor acceptance. */
-export async function reconstructCanonicalSnapshot(input:LocalSyncDownload,incoming:readonly LocalSyncRecord[],images:readonly LocalSyncImage[],previous:CanonicalSnapshot|null=null):Promise<CanonicalSnapshot> {
+async function reconstructSnapshot(input:LocalSyncDownload,incoming:readonly LocalSyncRecord[],images:readonly LocalSyncImage[],previous:CanonicalSnapshot|null,allowNative:boolean):Promise<CanonicalSnapshot> {
  const state=parseLocalSyncDownload(input),scope=state.source.target;if(!state.seal||!state.receivedCursor||!state.window||state.source.previousCursor!==(previous?.cursor??null))throw fail();
  if(incoming.length!==state.records||new Set(incoming.map(r=>r.changeId)).size!==incoming.length)throw fail();
  if(previous){parseBackup(previous.backup);if(previous.targetHash!==scope.targetHash||syncDownloadToken(previous.scope)!==syncDownloadToken(parseSyncScope(state.window)))throw fail();}
  const records=await mergeCanonicalRecords(previous?.records??[],incoming,state.id),live=records.filter(r=>r.operation==='upsert'),tables=emptyBackupTables(),extras:CanonicalRecord[]=[];
- if(records.some(r=>isNativeSyncTable(r.table)))throw Error('Keep the complete native payment download and originals. Native canonical installation is not enabled yet.');
+ if(!allowNative&&records.some(r=>isNativeSyncTable(r.table)))throw Error('Keep the complete native payment download and originals. Native canonical installation is not enabled yet.');
  for(const record of live){
+  if(isNativeSyncTable(record.table))continue;
   const name=Object.entries(cloudRecordMaps).find(([,map])=>map.table===record.table)?.[0] as BackupTable|undefined;
   if(!name){extras.push(record);continue;}
   const row=structuredClone(record.row!);if(row.id!==record.id)throw fail();
@@ -83,3 +85,21 @@ export async function reconstructCanonicalSnapshot(input:LocalSyncDownload,incom
  return {backup:createBackup(tables,state.window.createdAt),records,cursor:state.receivedCursor,readId:state.id,seal:state.seal,scope:parseSyncScope(state.window),targetHash:scope.targetHash};
 }
 export const canonicalSnapshotHash=(snapshot:CanonicalSnapshot):Promise<string>=>digest(snapshot);
+
+/** Existing installers keep their native-record fence, including tombstones. */
+export function reconstructCanonicalSnapshot(input:LocalSyncDownload,incoming:readonly LocalSyncRecord[],images:readonly LocalSyncImage[],previous:CanonicalSnapshot|null=null):Promise<CanonicalSnapshot> {
+ return reconstructSnapshot(input,incoming,images,previous,false);
+}
+export interface NativeCanonicalRead {
+ format:'mise-native-canonical-read';version:1;
+ current:MiseBackup;records:CanonicalRecord[];cursor:string;readId:string;seal:string;scope:SyncScope;targetHash:string;
+ native:NativePaymentCanonicalProjection;
+}
+/** A complete scoped read proof, deliberately distinct from CanonicalSnapshot.
+ * It cannot be fed implicitly to the legacy installer or offered as a backup. */
+export async function reconstructNativeCanonicalRead(input:LocalSyncDownload,incoming:readonly LocalSyncRecord[],images:readonly LocalSyncImage[],loadOriginal:NativePaymentOriginalLoader,previous:NativeCanonicalRead|null=null):Promise<NativeCanonicalRead> {
+ if(previous&&(previous.format!=='mise-native-canonical-read'||previous.version!==1))throw fail();
+ const prior:CanonicalSnapshot|null=previous?{backup:previous.current,records:previous.records,cursor:previous.cursor,readId:previous.readId,seal:previous.seal,scope:previous.scope,targetHash:previous.targetHash}:null;
+ const snapshot=await reconstructSnapshot(input,incoming,images,prior,true),native=await projectNativePaymentCanonical(snapshot.records,snapshot.backup,snapshot.scope,loadOriginal);
+ return {format:'mise-native-canonical-read',version:1,current:snapshot.backup,records:snapshot.records,cursor:snapshot.cursor,readId:snapshot.readId,seal:snapshot.seal,scope:snapshot.scope,targetHash:snapshot.targetHash,native};
+}

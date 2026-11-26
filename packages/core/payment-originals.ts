@@ -1,4 +1,7 @@
-import {readNativePaymentInvocation,type NativePaymentInvocation} from './payment-invocations';
+import {
+  readNativePaymentInvocation,
+  type NativePaymentInvocation,
+} from './payment-invocations';
 import { validatePaymentFinanceLinks } from './payment-finance-links.ts';
 import type { AuditEvent, Payment, PaymentPosting } from './models.ts';
 import { sha256 } from '@noble/hashes/sha2';
@@ -506,6 +509,94 @@ export function parsePaymentOriginalActionRef(
  * In particular, a financial undo retains the original financial recording and
  * its own genuine domain reversal. No user choice absent from the original
  * audit (for example a matching-window preference) is invented here. */
+export function paymentOriginalActionReader(
+  input: unknown,
+  readNode: (digest: string) => string | undefined,
+): (requested: unknown) => PaymentOriginalAction {
+  const basis = parsePaymentOriginalBasis(input),
+    backup = readPaymentOriginalBasis(basis, readNode),
+    t = backup.tables,
+    reader = validatePaymentFinanceLinks(t.payments, t),
+    events = new Map(t.events.map((e) => [e.id, e]));
+  // Only this closure holds the strictly validated snapshot. Returned objects
+  // are copied so a caller cannot change a later original action lookup.
+  return (requested: unknown) => {
+    const ref = parsePaymentOriginalActionRef(requested);
+    ensure(ref.root === basis.root);
+    const payment = t.payments.find((p) => p.id === ref.paymentId),
+      event = t.events.find((e) => e.id === ref.eventId);
+    ensure(
+      payment &&
+        event &&
+        event.paymentId === payment.id &&
+        event.paymentRevision === ref.revision &&
+        ref.revision <= payment.revision &&
+        event.outletId === basis.scope.outletId,
+    );
+    const after = event.after as Payment,
+      before = event.before as Payment | null;
+    ensure(
+      after.id === payment.id &&
+        after.revision === ref.revision &&
+        after.eventId === event.id,
+    );
+    const source = t.inboxItems.find((i) => i.id === after.inboxId);
+    ensure(source);
+    const posting =
+      event.command === 'payment.record'
+        ? after.postings?.find((p) => p.eventId === event.id)
+        : event.command === 'payment.record-undo'
+          ? after.postings?.find((p) => p.undo?.eventId === event.id)
+          : undefined;
+    if (
+      event.command === 'payment.record' ||
+      event.command === 'payment.record-undo'
+    )
+      ensure(posting);
+    const actual = (ids: string[]) =>
+      ids.map((id) => {
+        const value = events.get(id);
+        ensure(value);
+        return value;
+      });
+    const result = structuredClone({
+      basis,
+      ref,
+      event,
+      invocation: readNativePaymentInvocation(event, t.events),
+      before,
+      after,
+      source,
+      association: after.association
+        ? reader.expand(after.association.fingerprint, after.association.at)
+        : null,
+      financial: posting
+        ? {
+            posting,
+            target: reader.expand(posting.target.fingerprint, posting.at),
+            receipt: reader.expand(posting.receipt.fingerprint, posting.at),
+            events: actual(posting.receipt.eventIds),
+            undo:
+              event.command === 'payment.record-undo' && posting.undo
+                ? {
+                    snapshot: reader.expand(
+                      posting.undo.fingerprint,
+                      posting.undo.at,
+                    ),
+                    events: actual(posting.undo.eventIds),
+                  }
+                : null,
+          }
+        : null,
+    });
+    // Preserve the existing frozen identity descriptors while copying all
+    // mutable action/source values out of the private checked snapshot.
+    result.basis = basis;
+    result.ref = ref;
+    return result;
+  };
+}
+
 export function readPaymentOriginalAction(
   input: unknown,
   readNode: (digest: string) => string | undefined,
@@ -514,76 +605,7 @@ export function readPaymentOriginalAction(
   const basis = parsePaymentOriginalBasis(input),
     ref = parsePaymentOriginalActionRef(requested);
   ensure(ref.root === basis.root);
-  const backup = readPaymentOriginalBasis(basis, readNode),
-    t = backup.tables;
-  const payment = t.payments.find((p) => p.id === ref.paymentId),
-    event = t.events.find((e) => e.id === ref.eventId);
-  ensure(
-    payment &&
-      event &&
-      event.paymentId === payment.id &&
-      event.paymentRevision === ref.revision &&
-      ref.revision <= payment.revision &&
-      event.outletId === basis.scope.outletId,
-  );
-  const after = event.after as Payment,
-    before = event.before as Payment | null;
-  ensure(
-    after.id === payment.id &&
-      after.revision === ref.revision &&
-      after.eventId === event.id,
-  );
-  const source = t.inboxItems.find((i) => i.id === after.inboxId);
-  ensure(source);
-  const reader = validatePaymentFinanceLinks(t.payments, t);
-  const posting =
-    event.command === 'payment.record'
-      ? after.postings?.find((p) => p.eventId === event.id)
-      : event.command === 'payment.record-undo'
-        ? after.postings?.find((p) => p.undo?.eventId === event.id)
-        : undefined;
-  if (
-    event.command === 'payment.record' ||
-    event.command === 'payment.record-undo'
-  )
-    ensure(posting);
-  const events = new Map(t.events.map((e) => [e.id, e]));
-  const actual = (ids: string[]) =>
-    ids.map((id) => {
-      const value = events.get(id);
-      ensure(value);
-      return value;
-    });
-  return {
-    basis,
-    ref,
-    event,
-    invocation: readNativePaymentInvocation(event,t.events),
-    before,
-    after,
-    source,
-    association: after.association
-      ? reader.expand(after.association.fingerprint, after.association.at)
-      : null,
-    financial: posting
-      ? {
-          posting,
-          target: reader.expand(posting.target.fingerprint, posting.at),
-          receipt: reader.expand(posting.receipt.fingerprint, posting.at),
-          events: actual(posting.receipt.eventIds),
-          undo:
-            event.command === 'payment.record-undo' && posting.undo
-              ? {
-                  snapshot: reader.expand(
-                    posting.undo.fingerprint,
-                    posting.undo.at,
-                  ),
-                  events: actual(posting.undo.eventIds),
-                }
-              : null,
-        }
-      : null,
-  };
+  return paymentOriginalActionReader(basis, readNode)(ref);
 }
 
 export interface VerifiedPaymentOriginalDelta {
