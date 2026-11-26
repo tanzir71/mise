@@ -1,0 +1,199 @@
+{
+  "milestone": "M41",
+  "increment": "Original payment queue controls and paused foreground retry",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "baseCommit": "b964bf42b61e9e9a02aeac6b87dfca8df4c19c23",
+  "sourceFingerprint": "2ed9f019df887d0b70049f0cbee7373e39b6ca6134abedd2401f6fce753517df",
+  "fingerprintAlgorithm": "SHA-256 over sorted UTF-8 relative path, NUL, raw file bytes, NUL for each source file",
+  "sourceFiles": [
+    "apps/web/src/CloudSync.tsx",
+    "apps/web/src/NativePaymentQueueReview.tsx",
+    "apps/web/src/cloud-sync.css",
+    "apps/web/src/data/native-payment-review-session.ts",
+    "apps/web/src/data/native-payment-review.ts",
+    "apps/web/src/data/native-payment-session.ts",
+    "apps/web/src/data/sync-session.ts",
+    "tests/e2e/native-payment-owner.spec.ts",
+    "tests/fixtures/native-payment-owner.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/native-payment-owner.test.ts"
+  ],
+  "units": {
+    "distinctPassed": 105,
+    "method": "Complete four-file affected regression plus corrected 12-case owner recheck and 38 secret-guard cases. Not a full-repository unit-suite run.",
+    "initialRegression": {
+      "total": 67,
+      "passed": 66,
+      "failed": 1,
+      "failure": "New cold-restore test used a controller envelope instead of the real exported wire; corrected to the actual complete backupFile text."
+    },
+    "finalRecheck": {
+      "total": 50,
+      "passed": 50,
+      "failed": 0
+    },
+    "files": [
+      "tests/native-payment-delivery.test.ts",
+      "tests/native-payment-outbox.test.ts",
+      "tests/native-payment-owner.test.ts",
+      "tests/secret-guard.test.ts",
+      "tests/sync-session.test.ts"
+    ],
+    "originalLargeNativeDelivery": {
+      "passed": true,
+      "durationMs": 321533.2719,
+      "deadlineMs": 600000,
+      "corpus": "Complete existing 5,000-charge, million-code-unit and image original; no truncation or money replay"
+    },
+    "originalOutboxLargeCase": {
+      "passed": true,
+      "durationMs": 40523.0596
+    },
+    "existingTestCorporaAssertionsAndDeadlinesUnchanged": true,
+    "earlierNewFixtureCorrections": [
+      "Route real metadata and financial requests to the actual production handlers, keeping SDK Auth controlled.",
+      "Clone a request before its production handler consumes the body when observing lost replies.",
+      "An unconfirmed SDK may seal local originals, but cannot send or create outcomes; assert immutable intent and absent connected receipts."
+    ]
+  },
+  "checks": {
+    "lint": "passed",
+    "typecheck": "passed: strict TypeScript, 234 Astro files, zero errors/warnings/hints; strict TypeScript repeated after final test changes",
+    "buildRoot": "passed",
+    "buildPages": "passed",
+    "browserRoot": "passed: 16 distinct cases via complete baseline and corrected five-case recheck",
+    "browserPages": "passed: complete 16-case invocation",
+    "visual": "passed: 31 comparisons per base, zero overflow; five-width queue axe assertions zero violations",
+    "fullHistoryAndArtifactsPrivacy": "passed: zero credentials/current private identifiers/coverage gaps; fixed 22 reviewed older nonsecret findings"
+  },
+  "configuration": "Every installation supplies its own backend, accounts, providers, credentials and phone numbers. Privileged credentials stay server-side.",
+  "holds": {
+    "workflows": true,
+    "pagesPublication": true,
+    "hostedMigrationsAndFunctions": true,
+    "providerCommissioning": true,
+    "tagsAndCIArtifactUploads": true,
+    "defaultPaymentPreviewOff": true,
+    "defaultSyncPreviewOff": true
+  },
+  "remaining": [
+    "Current-context connected payment writes",
+    "Explicit original-conflict resolution",
+    "Historical original registration",
+    "Metadata-removal and connected-scope recovery",
+    "Full foreground-scale and product acceptance"
+  ],
+  "productionSourceFingerprint": "d614e9cc7d44d93fa30ea9a9e6c4b5cb6d14a6982bc6cba8f90c955c38952373",
+  "browserRoot": {
+    "distinctPassed": 16,
+    "workers": 1,
+    "retries": 0,
+    "method": "Complete 16-case baseline (12 passed, four new cases reached a premature five-second assertion) plus complete corrected five-case owner recheck (all passed). Not one all-green 16-case invocation.",
+    "finalRecheck": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "durationMs": 114357.761
+    },
+    "initialNewTestCorrections": [
+      "An earlier run was cancelled after the new exact-customer test used unsupported literal_text equality; corrected to the genuine customer ID. The retained log also contains trace-stream/zip teardown failures.",
+      "Wait for the genuinely aborted accepted-money request and later accepted customer request before checking UI outcomes. The existing 90-second case deadline and all older test deadlines/assertions remain unchanged."
+    ],
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "axeViolations": 0,
+    "overflow": 0,
+    "offlineReload": true,
+    "previewDefaultsOff": true,
+    "normalSyncConfirmedCursorUnchanged": true,
+    "canonicalAndRetainedMarkerFencesPreserved": true
+  },
+  "visualRoot": {
+    "comparisons": 31,
+    "sharedSettingsAndPaymentContexts": 26,
+    "actualOwnerQueueContexts": 5,
+    "overflow": 0,
+    "pixelDifferences": "informational",
+    "reports": [
+      ".private/m41-native-owner-root-common-qa/report.html",
+      ".private/m41-native-owner-root-qa/report.html"
+    ],
+    "captureStyle": "Existing full-page settings style places fixed navigation within the capture; clear accessibility-test focus before capture. Actual content and upload-recovery warning remain visible."
+  },
+  "browserPages": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "workers": 1,
+    "retries": 0,
+    "durationMs": 237616.169,
+    "allCasesMatchRootScope": true,
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "axeViolations": 0,
+    "overflow": 0,
+    "offlineReload": true
+  },
+  "visualPages": {
+    "comparisons": 31,
+    "sharedSettingsAndPaymentContexts": 26,
+    "actualOwnerQueueContexts": 5,
+    "overflow": 0,
+    "pixelDifferences": "informational",
+    "reports": [
+      ".private/m41-native-owner-pages-common-qa/report.html",
+      ".private/m41-native-owner-pages-qa/report.html"
+    ],
+    "captureStyle": "Existing full-page settings style places fixed navigation within the capture; clear accessibility-test focus before capture. Actual content and upload-recovery warning remain visible."
+  },
+  "screenshots": [
+    {
+      "path": "docs/screenshots/m41-native-owner-360.png",
+      "sha256": "540744af3f337ca5e7b28c577f8b6cf13811ce4c4cd7d1a0991ce26ca61fba5b",
+      "fixture": "controlled synthetic Auth and HTTP with actual SDK, production handlers and PostgreSQL"
+    },
+    {
+      "path": "docs/screenshots/m41-native-owner-768.png",
+      "sha256": "af8d7396d13dd346fffc612c0f69ecf8c06cd22283998a4cb48c82a920e4d562",
+      "fixture": "controlled synthetic Auth and HTTP with actual SDK, production handlers and PostgreSQL"
+    },
+    {
+      "path": "docs/screenshots/m41-native-owner-1440.png",
+      "sha256": "14b4fc8dc0c6a651ee146ceea51505821b8549ed81af9f49277914ce36742229",
+      "fixture": "controlled synthetic Auth and HTTP with actual SDK, production handlers and PostgreSQL"
+    }
+  ],
+  "previewPort": 4332,
+  "hostedChanges": 0,
+  "qualificationStatus": "verified local increment; full M41 remains open",
+  "privacy": {
+    "ok": true,
+    "files": 2464,
+    "objects": 13521,
+    "history": true,
+    "artifacts": true,
+    "knownValuesChecked": 11,
+    "credentialFindings": 0,
+    "currentDeploymentFindings": 0,
+    "legacyDeploymentFindings": 22,
+    "blockedHistoricalDeploymentFindings": 0,
+    "coverageFindings": 0,
+    "reviewedLegacyPolicyUnchanged": true,
+    "hooksEnabled": true,
+    "completeCheckout": true,
+    "privateInputsIgnored": true
+  }
+}

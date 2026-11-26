@@ -35,6 +35,8 @@ import {hasSavedStockReview} from './data/stock-review-session';
 import {CustomerActionReview} from './CustomerActionReview';
 import {hasSavedCustomerReview} from './data/customer-review-session';
 import {ClosingActionReview} from './ClosingActionReview';
+import {NativePaymentQueueReview} from './NativePaymentQueueReview';
+import {usePaymentTextEnabled} from './payment-text-context';
 import {hasSavedClosingReview} from './data/closing-review-session';
 
 function useSyncView() {
@@ -186,7 +188,7 @@ export function CloudSyncControls({
   auth: PhoneAuth | null;
   online: boolean;
 }) {
-  const navigate=useNavigate();
+  const navigate=useNavigate(),paymentTextEnabled=usePaymentTextEnabled();
   const view = useSyncView(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -287,6 +289,7 @@ export function CloudSyncControls({
         </p>
       ) : null}
       <footer>
+        {state&&paymentTextEnabled?<NativePaymentQueueReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {state&&view?.hasOrderReview?<OrderActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {state&&view?.hasMoneyReview?<MoneyActionReview setup={setup} config={config} auth={auth} online={online}/>:null}
         {state&&view?.hasPurchaseReview?<PurchaseActionReview setup={setup} config={config} auth={auth} online={online}/>:null}

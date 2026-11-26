@@ -170,3 +170,10 @@
     display: none;
   }
 }
+
+.native-payment-queue { flex-basis: 100%; min-width: 0; display: grid; gap: 16px; border-top: 1px solid var(--border); padding-top: 24px; }
+.native-payment-queue h3, .native-payment-queue p { margin: 0; }
+.native-payment-queue h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
+.native-payment-queue ol { display: grid; gap: 16px; padding-left: 24px; margin: 0; }
+.native-payment-queue li > * { display: block; overflow-wrap: anywhere; }
+.native-payment-queue strong { font-weight: 500; }

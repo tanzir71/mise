@@ -1,4 +1,10 @@
-import {assertNativePaymentOriginalLink,nativePaymentOriginalRequest,nativePaymentOriginalStageRequest,type PaymentOriginalRetention,type NativePaymentOriginalLink} from '@mise/core/native-payment-originals';
+import {
+  assertNativePaymentOriginalLink,
+  nativePaymentOriginalRequest,
+  nativePaymentOriginalStageRequest,
+  type PaymentOriginalRetention,
+  type NativePaymentOriginalLink,
+} from '@mise/core/native-payment-originals';
 import Dexie from 'dexie';
 import type { MiseDatabase } from './db';
 import {
@@ -50,6 +56,7 @@ import {
 } from './local-outbox';
 import { createCloudCommandRemote } from './cloud-command-remote';
 import { createCloudInboxImageUploader } from './cloud-inbox-upload';
+import { assertPausedSyncSession, type SessionLease } from './sync-session';
 import {
   createNativePaymentRequest,
   nativePaymentReviewProof,
@@ -58,7 +65,10 @@ import {
   CommandRequestError,
   type CommandAccount,
 } from './command-request';
-type Options = Parameters<typeof createNativePaymentAccess>[1];
+type Options = Parameters<typeof createNativePaymentAccess>[1] & {
+  signal?: AbortSignal;
+  deliveryLease?: SessionLease;
+};
 const fail = () => new CommandRequestError('review');
 const sourceToken = (row: NativePaymentOutboxEntry) =>
   literalToken([row.original, row.originalHash, row.seal]);
@@ -68,9 +78,30 @@ export async function createNativePaymentOutboxSession(
   db: MiseDatabase,
   input: Options,
 ) {
-  const options = { ...input, config: parseCloudConnection(input.config) },
-    { auth, storage, authScope } = options,
-    access = await createNativePaymentAccess(db, options),
+  const options = {
+    ...input,
+    config: parseCloudConnection(input.config),
+    deliveryLease: input.deliveryLease ? { ...input.deliveryLease } : undefined,
+  };
+  const guardDelivery = async () => {
+    options.signal?.throwIfAborted();
+    if (options.deliveryLease)
+      await assertPausedSyncSession(db, options.deliveryLease);
+    options.signal?.throwIfAborted();
+  };
+  const send: typeof fetch = async (input, init) => {
+    await guardDelivery();
+    const signal = options.signal
+      ? init?.signal
+        ? AbortSignal.any([options.signal, init.signal])
+        : options.signal
+      : init?.signal;
+    const response = await (options.send ?? fetch)(input, { ...init, signal });
+    await guardDelivery();
+    return response;
+  };
+  const { auth, storage, authScope } = options,
+    access = await createNativePaymentAccess(db, { ...options, send }),
     identity = access.identity,
     accountIdentity = auth.journalIdentity(),
     controller = new AbortController();
@@ -79,6 +110,7 @@ export async function createNativePaymentOutboxSession(
   const current = () => {
     try {
       if (
+        options.signal?.aborted ||
         !active ||
         literalToken(readCloudConnection(storage)) !==
           literalToken(options.config)
@@ -95,7 +127,9 @@ export async function createNativePaymentOutboxSession(
     active = false;
     controller.abort();
     access.stop();
+    options.signal?.removeEventListener('abort', stop);
   }
+  options.signal?.addEventListener('abort', stop, { once: true });
   const account: CommandAccount = {
     scope: authScope,
     accountHash: identity.accountHash,
@@ -115,24 +149,13 @@ export async function createNativePaymentOutboxSession(
       auth.assertCommandAuthorization(value);
     },
   };
-  const request = createNativePaymentRequest(
-      options.config,
-      account,
-      options.send ?? fetch,
-    ),
-    legacy = createCloudCommandRemote(
-      options.config,
-      account,
-      options.send ?? fetch,
-    ),
-    images = createCloudInboxImageUploader(
-      options.config,
-      account,
-      options.send ?? fetch,
-    );
+  const request = createNativePaymentRequest(options.config, account, send),
+    legacy = createCloudCommandRemote(options.config, account, send),
+    images = createCloudInboxImageUploader(options.config, account, send);
   const scope = async () => {
     current();
     await assertNativePaymentScope(access, db);
+    await guardDelivery();
     current();
   };
   async function group(marker: LocalOutboxEntry) {
@@ -304,11 +327,14 @@ export async function createNativePaymentOutboxSession(
         current();
         if (literalToken(receipt) !== token) throw fail();
       });
-      const retention=await access.copies.retainPaymentCopy(row.seal.copyId);
+      const retention = await access.copies.retainPaymentCopy(row.seal.copyId);
       await scope();
-      if(literalToken(retention.copy)!==literalToken(receipt))throw fail();
-      const retentionToken=literalToken(retention);
-      bindCommandReceipt(retention,()=>{current();if(literalToken(retention)!==retentionToken)throw fail();});
+      if (literalToken(retention.copy) !== literalToken(receipt)) throw fail();
+      const retentionToken = literalToken(retention);
+      bindCommandReceipt(retention, () => {
+        current();
+        if (literalToken(retention) !== retentionToken) throw fail();
+      });
       copied = { receipt, retention, decoded, snapshots: new Map() };
       cache.set(row.seal.copyId, copied);
     }
@@ -426,7 +452,8 @@ export async function createNativePaymentOutboxSession(
             retained: PaymentOriginalRetention[] = [],
             sources: NativePaymentOriginalLink[] = [];
           for (const row of entries) {
-            const original = await copy(row, copies),copied=original.receipt;
+            const original = await copy(row, copies),
+              copied = original.receipt;
             const ready = await retain(
               row,
               (actual) => {
@@ -439,7 +466,14 @@ export async function createNativePaymentOutboxSession(
               },
               () => assertLiveCommandReceipt(copied),
             );
-            await access.copies.stagePaymentOriginal(row.id,nativePaymentOriginalStageRequest(row.original.invocation,copied,row.seal!.ref));
+            await access.copies.stagePaymentOriginal(
+              row.id,
+              nativePaymentOriginalStageRequest(
+                row.original.invocation,
+                copied,
+                row.seal!.ref,
+              ),
+            );
             await scope();
             const receipt = await sendNative(ready);
             await retain(
@@ -465,11 +499,28 @@ export async function createNativePaymentOutboxSession(
                 assertLiveCommandReceipt(receipt);
               },
             );
-            const link=await access.copies.linkPaymentOriginal(row.id,nativePaymentOriginalRequest(row.original.invocation,receipt,copied,row.seal!.ref));
+            const link = await access.copies.linkPaymentOriginal(
+              row.id,
+              nativePaymentOriginalRequest(
+                row.original.invocation,
+                receipt,
+                copied,
+                row.seal!.ref,
+              ),
+            );
             await scope();
-            assertNativePaymentOriginalLink(link,row.original.invocation,receipt,copied,row.seal!.ref);
-            const linkToken=literalToken(link);
-            bindCommandReceipt(link,()=>{current();if(literalToken(link)!==linkToken)throw fail();});
+            assertNativePaymentOriginalLink(
+              link,
+              row.original.invocation,
+              receipt,
+              copied,
+              row.seal!.ref,
+            );
+            const linkToken = literalToken(link);
+            bindCommandReceipt(link, () => {
+              current();
+              if (literalToken(link) !== linkToken) throw fail();
+            });
             receipts.push(receipt);
             storage.push(copied);
             retained.push(original.retention);

@@ -1,5 +1,5 @@
 import Dexie, { type Transaction } from 'dexie';
-import {isLocalInboxRetention} from '@mise/core/local-inbox';
+import { isLocalInboxRetention } from '@mise/core/local-inbox';
 import {
   parseLocalCloudState,
   type LocalCloudState,
@@ -67,8 +67,10 @@ async function identity(db: LocalStore, expected: SessionSelection) {
         binding.join.epoch !== expected.epoch ||
         binding.join.scopeVersion !== expected.scopeVersion)) ||
     (binding.version === 3 &&
-      (!binding.recovery || binding.recovery.scope.accountHash !== t.accountHash ||
-        binding.recovery.scope.role !== t.role || binding.recovery.scope.epoch !== expected.epoch ||
+      (!binding.recovery ||
+        binding.recovery.scope.accountHash !== t.accountHash ||
+        binding.recovery.scope.role !== t.role ||
+        binding.recovery.scope.epoch !== expected.epoch ||
         binding.recovery.scope.scopeVersion !== expected.scopeVersion)) ||
     operator.phase !== 'active' ||
     operator.revision !== expected.operatorRevision ||
@@ -123,7 +125,14 @@ export async function ensureSyncSession(
         old.epoch === input.epoch &&
         old.scopeVersion === input.scopeVersion &&
         old.bindingHash === bindingHash;
-      const guard=()=>{native(db,tx);const result:unknown=assertActive?.();if(result!==undefined){void Promise.resolve(result).catch(()=>{});throw new SyncSessionError('auth');}};
+      const guard = () => {
+        native(db, tx);
+        const result: unknown = assertActive?.();
+        if (result !== undefined) {
+          void Promise.resolve(result).catch(() => {});
+          throw new SyncSessionError('auth');
+        }
+      };
       guard();
       if (same && old.operatorRevision === input.operatorRevision) return old;
       if (old?.generation === Number.MAX_SAFE_INTEGER)
@@ -217,6 +226,54 @@ export async function claimSyncSession(
   );
 }
 export const sessionLease = leaseToken;
+/** Explicit foreground recovery owns the same lease while normal sync is
+ * paused. This records no cursor, receipt or new financial approval. */
+export async function claimPausedSyncSession(
+  db: LocalStore,
+  id: string,
+  now: number,
+): Promise<SyncSession | null> {
+  return db.transaction(
+    'rw',
+    db.syncSessions,
+    db.cloudState,
+    db.operatorState,
+    async () => {
+      const tx = Dexie.currentTransaction,
+        raw = await db.syncSessions.get('active');
+      if (!raw) return null;
+      const state = parseSyncSession(raw);
+      if (!state.paused || (state.lease && state.lease.until > now))
+        return null;
+      if ((await Dexie.waitFor(identity(db, state))) !== state.bindingHash)
+        throw new SyncSessionError();
+      const next = parseSyncSession({
+        ...state,
+        lease: { id, until: now + leaseMs },
+      });
+      native(db, tx);
+      await db.syncSessions.put(next);
+      return next;
+    },
+  );
+}
+export async function assertPausedSyncSession(
+  db: LocalStore,
+  lease: SessionLease,
+) {
+  return db.transaction(
+    'r',
+    db.syncSessions,
+    db.cloudState,
+    db.operatorState,
+    async () => {
+      const state = await current(db, lease);
+      if (!state.paused || !state.lease || state.lease.until <= Date.now())
+        throw new SyncSessionError();
+      return state;
+    },
+  );
+}
 export async function renewSyncSession(
   db: LocalStore,
   lease: SessionLease,
@@ -349,7 +406,7 @@ export async function finishSyncSession(
       )
         throw new SyncSessionError();
       const unsent = await db.outbox
-          .filter((r) => r.status !== 'accepted'&&!isLocalInboxRetention(r))
+          .filter((r) => r.status !== 'accepted' && !isLocalInboxRetention(r))
           .count(),
         next = parseSyncSession({
           ...state,
