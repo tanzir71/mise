@@ -35,7 +35,7 @@ const undoComparisons=new WeakMap<SavedPaymentUndoComparison,{source:SavedPaymen
 const token=syncDownloadToken;
 async function guard(db:MiseDatabase,review:SavedPaymentSource,write=false){
  const proof=sources.get(review);if(!proof||proof.db!==db)throw new Error('Open the saved payment source again.');
- if(write&&await db.nativePaymentState.count())throw Error('Keep this accepted source for inspection. Use the existing manual money flow while connected payment changes are unfinished.');
+ if(write&&(await db.nativePaymentState.count()||await db.nativePaymentValues.count()))throw Error('Keep this accepted source for inspection. Use the existing manual money flow while connected payment changes are unfinished.');
  const [setup,item,selection,binding]=await Promise.all([db.setup(),db.inboxItems.get(review.itemId),db.operatorState.get('active'),db.cloudState.get('binding')]);
  if(!setup||setup.business.id!==proof.destination.businessId||setup.outlet.id!==proof.destination.outletId||setup.owner.id!==proof.destination.actorId||token(selection??null)!==proof.selection||captureBindingToken(binding)!==proof.binding||token(setup)!==proof.shop)throw new Error('The selected outlet, member or connection changed. Open the payment source again.');
  if(!item||item.outletId!==setup.outlet.id||token(inboxSnapshot(item))!==proof.source)throw new Error('The original saved source was changed, sorted or archived. Open its current review.');

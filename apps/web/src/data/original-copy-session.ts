@@ -295,21 +295,24 @@ export async function createNativeOriginalCopySession(
       run(async () => {
         const existing = await b.journal.prepared(id, b.identity, b.current);
         if (existing) return existing;
-        return db.transaction('r', db.tables, async () => {
+        const { portable } = await db.transaction('r', db.tables, async () => {
           await checkNative();
-          const { portable } = await readDatabasePortableBackup(db);
+          const source = await readDatabasePortableBackup(db);
           await checkNative();
-          return Dexie.waitFor(
-            Dexie.ignoreTransaction(() =>
-              b.journal.prepare(portable, b.identity, id, b.current, mutate),
-            ),
-          );
+          return source;
         });
+        // The complete source is an immutable point-in-time snapshot. Release
+        // its shop read lock before the private journal acquires its own native
+        // identity lock; a queued shop writer must not sit between those locks.
+        // `mutate` still rechecks and locks the original selection at commit.
+        return b.journal.prepare(portable, b.identity, id, b.current, mutate);
       }),
     deliver: (id: string) =>
       run(() => b.journal.deliver(id, b.identity, remote, b.current, mutate)),
     readback: (id: string) =>
       run(() => b.journal.readback(id, b.identity, remote, b.current, mutate)),
+    readbackSource: (id:string) =>
+      run(()=>b.journal.readbackSource(id,b.identity,remote,b.current,mutate)),
     retainPaymentCopy: (id:string)=>run(async()=>parsePaymentOriginalRetention(paymentOriginalResponse(await remote.call('payment-promote',id,{}),b.identity))),
     stagePaymentOriginal: (id:string,body:Record<string,unknown>)=>run(async()=>{if(paymentOriginalResponse(await remote.call('payment-stage',id,body),b.identity)!==true)throw bad();}),
     linkPaymentOriginal: (id:string,body:Record<string,unknown>)=>run(async()=>parseNativePaymentOriginalLink(paymentOriginalResponse(await remote.call('payment-link',id,body),b.identity))),

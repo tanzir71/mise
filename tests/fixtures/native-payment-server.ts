@@ -1,4 +1,8 @@
 import {createSyncReadHandler,createSyncReadStore} from '../../supabase/functions/_shared/sync-read-handler';
+import {createInitialUploadHandler} from '../../supabase/functions/_shared/upload-handler';
+import {createInitialUploadStore} from '../../supabase/functions/_shared/upload-store';
+import {createInboxImageHandler} from '../../supabase/functions/_shared/inbox-image-handler';
+import {createInboxImageStore} from '../../supabase/functions/_shared/inbox-image-store';
 // Controlled HTTP/Auth boundary over real PostgreSQL roles and production handlers.
 // Never imported by a browser bundle or deployed to an installation.
 import { PGlite } from '@electric-sql/pglite';
@@ -35,6 +39,9 @@ export async function nativePaymentTestServer(
     .filter((n) => n.endsWith('.sql') && (!migrationCeiling || n <= migrationCeiling))
     .sort())
     await sql.exec(readFileSync('supabase/migrations/' + file, 'utf8'));
+  // The installation provisions its own private bucket. Mirror that configured
+  // Storage boundary here; migrations deliberately do not create service-owned buckets.
+  await sql.query("insert into storage.buckets(id,name,public) values('mise-inbox','mise-inbox',false)");
   for (const n of [1, 2]) {
     await sql.query(
       'insert into auth.users(id,phone,phone_confirmed_at) values($1,$2,now())',
@@ -114,14 +121,39 @@ export async function nativePaymentTestServer(
       );
     }
   };
+  // Synthetic Storage HTTP boundary; image bytes and SQL metadata are retained
+  // exactly. Upload, image admission, scoped reads and financial handlers below
+  // are the production implementations with their actual PostgreSQL roles.
+  const objects = new Map<string,Uint8Array>();
+  const backend:typeof fetch = async(url,init={}) => {
+    const path=new URL(String(url)).pathname;
+    if(path.startsWith('/rest/v1/rpc/'))return rpc(url,init);
+    const match=path.match(/^\/storage\/v1\/object\/(?:authenticated\/)?mise-inbox\/(.+)$/),headers=new Headers(init.headers);
+    if(!match||headers.get('apikey')!==serviceKey)return new Response('{}',{status:403});
+    const name=match[1];
+    if(init.method==='POST'){
+      if(objects.has(name))return new Response('{}',{status:409});
+      const bytes=new Uint8Array(await new Response(init.body).arrayBuffer()),metadata=JSON.parse(atob(headers.get('x-metadata')!));
+      await sql.query("insert into storage.objects(bucket_id,name,metadata,user_metadata) values('mise-inbox',$1,$2,$3)",[name,JSON.stringify({size:bytes.length,mimetype:headers.get('Content-Type')}),JSON.stringify(metadata)]);
+      objects.set(name,bytes);return new Response('{}');
+    }
+    const bytes=objects.get(name);return bytes?new Response(new Uint8Array(bytes),{headers:{'Content-Length':String(bytes.length)}}):new Response('{}',{status:404});
+  };
+  const uploadStore=createInitialUploadStore(apiUrl,publishableKey,serviceKey,backend);
+  const upload=createInitialUploadHandler({origins:new Set([origin]),store:{...uploadStore,
+    putImage:async(...args)=>{try{return await uploadStore.putImage(...args);}catch(error){lastError='putImage '+String(error);throw error;}},
+    getImage:async(...args)=>{try{return await uploadStore.getImage(...args);}catch(error){lastError+='; getImage '+String(error);throw error;}},
+  }}),
+    image=createInboxImageHandler({origins:new Set([origin]),store:createInboxImageStore(apiUrl,publishableKey,serviceKey,backend)});
   const syncRead = createSyncReadHandler({origins:new Set([origin]),cursorKey:'c'.repeat(64),store:createSyncReadStore(apiUrl,publishableKey,rpc)});
   const originals = originalCopyHandler(
       new Set([origin]),
       originalCopyStore(apiUrl, publishableKey, rpc),
     ),
+    nativeStore = createNativePaymentStore(apiUrl, publishableKey, serviceKey, rpc),
     native = createNativePaymentHandler({
       origins: new Set([origin]),
-      store: createNativePaymentStore(apiUrl, publishableKey, serviceKey, rpc),
+      store: {admit:(...args)=>nativeStore.admit(...args),apply:async(...args)=>{lastError='';try{return await nativeStore.apply(...args);}catch(error){lastError+=' '+String(error);throw error;}}},
     }),
     legacy = createCommandsHandler({
       origins: new Set([origin]),
@@ -183,6 +215,8 @@ export async function nativePaymentTestServer(
       }
       if(['/rest/v1/rpc/operator_context','/rest/v1/rpc/operator_contexts'].includes(path))return rpc(request.url,{method:request.method,headers:request.headers,body:await request.text()});
       if (path === '/functions/v1/sync-read') return syncRead(request);
+      if (path === '/functions/v1/migration-upload') return upload(request);
+      if (path === '/functions/v1/inbox-image') return image(request);
       if (path === '/functions/v1/native-original-copy')
         return originals(request);
       if (path === '/functions/v1/native-payment') return native(request);

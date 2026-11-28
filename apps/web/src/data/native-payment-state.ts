@@ -183,7 +183,7 @@ export async function nativePaymentStateChanges(
   const before = await readNativePaymentState(db);
   if (!input) {
     if (before) throw fail();
-    return { changes: [] as CanonicalRowChange[], state: null };
+    return { changes: [] as CanonicalRowChange[], state: null, projection: null };
   }
   const decoded = await parseNativePaymentBackup(input),
     value = {
@@ -210,5 +210,5 @@ export async function nativePaymentStateChanges(
     before: before?.state ?? null,
     after: state,
   });
-  return { changes, state };
+  return { changes, state, projection: decoded.projection };
 }

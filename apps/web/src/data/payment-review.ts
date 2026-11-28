@@ -39,14 +39,17 @@ export async function readPaymentReviewFrame(
       selectionToken: literalToken(selection ?? null),
       bindingToken: captureBindingToken(binding),
     };
-    const blocked =
-      (!!binding && parseLocalCloudState(binding).phase !== 'cancelled') || (await db.nativePaymentState.count()) > 0;
+    const connected = binding ? parseLocalCloudState(binding) : null,
+      installed = (await db.nativePaymentState.count()) > 0 || (await db.nativePaymentValues.count()) > 0,
+      blocked = (!!connected && connected.phase !== 'cancelled') || installed,
+      nativeEligible = connected?.phase === 'ready' && !installed;
     return {
       setup,
       item,
       destination,
       blocked,
-      key: literalToken({ setup, destination, source: inboxSnapshot(item) }),
+      nativeEligible,
+      key: literalToken({ setup, destination, source: inboxSnapshot(item), nativeEligible, installed }),
     };
   });
 }

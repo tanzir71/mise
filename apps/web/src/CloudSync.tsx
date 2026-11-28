@@ -22,7 +22,7 @@ import {
   freshSyncDownload,
 } from './data/sync-session';
 import { newInboxId } from '@mise/core/inbox';
-import {isLocalInboxRetention} from '@mise/core/local-inbox';
+import {syncWaitingCount} from './data/native-payment-sync-source';
 import './cloud-sync.css';
 import {OrderActionReview} from './OrderActionReview';
 import {hasSavedOrderReview} from './data/order-review-session';
@@ -43,11 +43,7 @@ function useSyncView() {
   return useLiveQuery(async () => {
     const raw = await db.syncSessions.get('active'),
       state = raw ? parseSyncSession(raw) : null,
-      unsent = await db.outbox
-        .where('status')
-        .anyOf('pending', 'retained')
-        .filter(row=>!isLocalInboxRetention(row))
-        .count(),
+      unsent = await syncWaitingCount(db),
       binding = await db.cloudState.get('binding'),
       operator = await db.operatorState.get('active'),
       hasOrderReview = binding ? await hasSavedOrderReview(db,binding.uploadId) : false,
@@ -115,6 +111,8 @@ export function CloudSyncStatus({
           config,
           scope,
           auth,
+          storage:localStorage,
+          nativeAuthScope:authScope,
           journal,
           realtime: (wake, disconnected, signal) =>
             watchSyncRealtime(

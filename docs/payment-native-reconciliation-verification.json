@@ -1,0 +1,206 @@
+{
+  "milestone": "M41",
+  "increment": "Installation-configured native approvals and original canonical reconciliation",
+  "milestoneComplete": false,
+  "incrementVerified": true,
+  "verifiedDate": "2026-11-28",
+  "baseCommit": "c8b0f37a4adee9bb72bc8172a34356f32e5a9cae",
+  "sourceFingerprint": "5fc898f094e887af4607a97a2496e5b07e976785c39a2439dff1a9a2c1d093f1",
+  "productionFingerprint": "b657572ec3dd77c155f6236288f6d5bebe3cbc511b61fb6828195a21e1037ba4",
+  "fingerprintAlgorithm": "SHA-256 over sorted UTF-8 relative path, NUL, raw file bytes, NUL for each source file",
+  "sourceFiles": [
+    "apps/web/src/CloudSync.tsx",
+    "apps/web/src/LocalApp.tsx",
+    "apps/web/src/PaymentCaptureReview.tsx",
+    "apps/web/src/data/backup.ts",
+    "apps/web/src/data/cloud-sync-apply.ts",
+    "apps/web/src/data/native-payment-session.ts",
+    "apps/web/src/data/native-payment-state.ts",
+    "apps/web/src/data/native-payment-sync-source.ts",
+    "apps/web/src/data/original-copies.ts",
+    "apps/web/src/data/original-copy-session.ts",
+    "apps/web/src/data/payment-capture.ts",
+    "apps/web/src/data/payment-original-retention.ts",
+    "apps/web/src/data/payment-review-session.ts",
+    "apps/web/src/data/payment-review.ts",
+    "apps/web/src/data/sync-cycle.ts",
+    "apps/web/src/data/sync-runtime.ts",
+    "apps/web/src/data/sync-session.ts",
+    "packages/core/native-payment-canonical.ts",
+    "packages/core/native-payment-coverage.ts",
+    "packages/core/payment-originals.ts",
+    "tests/e2e/native-payment-reconciliation.spec.ts",
+    "tests/fixtures/native-payment-queue-browser.ts",
+    "tests/fixtures/native-payment-server.ts",
+    "tests/fixtures/native-payment-upload.ts",
+    "tests/native-payment-coverage.test.ts",
+    "tests/native-payment-reconciliation-scale.test.ts",
+    "tests/native-payment-reconciliation.test.ts",
+    "tests/payment-restore-cache.test.ts",
+    "vitest.config.ts"
+  ],
+  "configuration": "Each installation supplies hosting, backend, accounts, providers, credentials, phone numbers, clocks and labels. Privileged credentials remain server-side; no maintainer account or verification number is required.",
+  "holds": {
+    "workflows": true,
+    "pagesPublication": true,
+    "hostedMigrationsAndFunctions": true,
+    "providerCommissioning": true,
+    "tagsAndCIArtifactUploads": true,
+    "defaultPaymentPreviewOff": true,
+    "defaultSyncPreviewOff": true
+  },
+  "checks": {
+    "lint": "passed",
+    "typecheck": "passed; strict TypeScript and 235 Astro files, zero diagnostics",
+    "exports": "all 270 present",
+    "unitQualification": {
+      "method": "Prior complete baseline plus final affected-source rechecks; this is not a single all-green full-suite invocation.",
+      "priorFullBaseline": {
+        "total": 5790,
+        "passed": 5787,
+        "failed": 3,
+        "sourceFingerprint": "e496dcdb140472ad4e917e456e5bf97f25d8863ab62561d54b0f4b0ab1832b8d"
+      },
+      "finalAffected": {
+        "files": 18,
+        "total": 294,
+        "passed": 294,
+        "failed": 0,
+        "sourceFingerprint": "5318c2f417850c1cff39c6c2b1b3e75d77424ce8ed76599a01d1956dfbca6d5d",
+        "previouslyQualifiedModulesUnchanged": true,
+        "laterChanges": "Browser selector and semantic app-header markup only; qualified by app-shell, smoke and full browser checks."
+      },
+      "correctedBaselineFailures": [
+        {
+          "file": "tests/payment-archive.test.ts",
+          "case": "retains all 5,000 charges and the complete million-code-unit note through three original collections, normalized export and cold restored original undo",
+          "finalResult": "passed"
+        },
+        {
+          "file": "tests/native-payment-sync.test.ts",
+          "case": "a native capture failure after the actual money insert rolls the money, outcome and every projected byte back together",
+          "finalResult": "passed"
+        },
+        {
+          "file": "tests/native-payment-reconciliation-scale.test.ts",
+          "case": "all 5000 charges, million-code-unit note and original image survive actual upload, configured approval, canonical sync and complete cold restore",
+          "finalResult": "passed"
+        }
+      ],
+      "originalTestAssertionsCorporaAndDeadlinesUnchanged": true
+    },
+    "fullOriginalOwnerPath": {
+      "passed": true,
+      "durationMs": 495918.09510000004,
+      "deadlineMs": 600000,
+      "cleanupDeadlineMs": 10000,
+      "charges": 5000,
+      "noteCodeUnits": 1000000,
+      "originalImages": 1,
+      "firstCycleConfirmed": 3,
+      "requested": 3,
+      "syncedAtMs": 436345,
+      "exportedAtMs": 481259,
+      "coldRestoreVerifiedAtMs": 495914,
+      "coldCreditBalanceMinor": 498475,
+      "backendCreditRows": 5001,
+      "restoredOutgoingOrAccountAuthority": false,
+      "duplicateMoney": false
+    },
+    "builds": {
+      "root": "passed with production guards",
+      "pages": "passed with production guards"
+    },
+    "browser": {
+      "root": {
+        "passed": 54,
+        "workers": 1,
+        "retries": 0,
+        "newApprovalWidths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "newApprovalAxeViolations": 0,
+        "newApprovalOverflow": false,
+        "offlineReload": "passed"
+      },
+      "pages": {
+        "passed": 54,
+        "workers": 1,
+        "retries": 0,
+        "newApprovalWidths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "newApprovalAxeViolations": 0,
+        "newApprovalOverflow": false,
+        "offlineReload": "passed"
+      }
+    },
+    "visual": {
+      "root": {
+        "referenceComparisons": 31,
+        "overflows": 0,
+        "actualApprovalCaptures": 5,
+        "manuallyInspectedWidths": [
+          360,
+          1440
+        ],
+        "referenceContext": "Existing M31 sync and M41 payment-review exports; no dedicated M41 queue export. Shared-context differences are informational."
+      },
+      "pages": {
+        "referenceComparisons": 31,
+        "overflows": 0,
+        "actualApprovalCaptures": 5,
+        "manuallyInspectedWidths": [
+          768
+        ],
+        "referenceContext": "Existing M31 sync and M41 payment-review exports; no dedicated M41 queue export. Shared-context differences are informational."
+      }
+    },
+    "privacy": {
+      "exitCode": 0,
+      "ok": true,
+      "history": true,
+      "artifacts": true,
+      "privateComparisonValues": 11,
+      "credentialFindings": 0,
+      "currentDeploymentFindings": 0,
+      "historicalDeploymentFindings": 22,
+      "legacyDeploymentFindings": 22,
+      "blockedHistoricalDeploymentFindings": 0,
+      "coverageFindings": 0,
+      "reviewedLegacyExceptionsUnchanged": true
+    }
+  },
+  "correctionsAndLimits": [
+    "The original complete baseline exposed archive timing, an overwritten synthetic SQL diagnostic and incomplete large owner reconciliation. Each exact failing case now passes; no original corpus, assertion or deadline was changed.",
+    "A queued-writer deadlock was reproduced with the old nested snapshot/private-journal lock order. Capture the immutable snapshot first, then acquire the original native identity commit lock; changed selection still fails.",
+    "A diagnostic large run confirmed sync but timed out during combined export/restore. Reuse only exact checked private graph data, share one strict original decode and privately clone exact reviewed files; the unchanged complete case now passes.",
+    "All temporary production and request diagnostics were removed before final qualification.",
+    "The first root browser attempt found an exact-label selector that did not locate the existing Record against combobox. Use its accessible role/name, as the existing UI suite does; no production code, assertion or timeout changed. Complete browser suites were rerun.",
+    "Full-page Axe then found existing phone-header links and the desktop sync chip outside landmarks after successful synchronization at all five widths. Change the shared header wrapper to a semantic header, preserve styling and keep the full accessibility assertion. Add existing app-shell and smoke cases to both final browser runs.",
+    "An independent ordinary reversal changes genuine backend audit time. A stale native acknowledgement remains unconfirmed for explicit current-context review.",
+    "CI artifact upload, Pages publication, hosted deployments, provider commissioning and release tags are held by owner instruction."
+  ],
+  "screenshots": [
+    "docs/screenshots/m41-native-reconcile-360.png",
+    "docs/screenshots/m41-native-reconcile-768.png",
+    "docs/screenshots/m41-native-reconcile-1440.png"
+  ],
+  "previewPort": 4332,
+  "hostedChanges": 0,
+  "remaining": [
+    "Accepted-history working overlay and current-context connected changes",
+    "Explicit original-conflict resolution",
+    "Historical original registration",
+    "Metadata-removal and connected-scope recovery",
+    "Complete M41 product acceptance and later roadmap milestones"
+  ]
+}

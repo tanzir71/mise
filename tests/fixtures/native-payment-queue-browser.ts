@@ -27,3 +27,5 @@ export {readNativePaymentQueue} from '../../apps/web/src/data/native-payment-rev
 export {continueNativePaymentQueue,nativePaymentCopyJournalName} from '../../apps/web/src/data/native-payment-review-session';
 export {selectCloudOperator} from '../../apps/web/src/data/operator-state';
 export {ensureSyncSession,pauseSyncSession} from '../../apps/web/src/data/sync-session';
+export {uploadNativePaymentFixture} from './native-payment-upload';
+export {syncWaitingCount} from '../../apps/web/src/data/native-payment-sync-source';

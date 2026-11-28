@@ -8,6 +8,7 @@ import {
 } from './native-payment-access';
 import { readDatabaseBackup } from './backup';
 import { backupToken, parseBackup } from '@mise/core/backup';
+import { literalToken } from '@mise/core/literal-token';
 import type { MiseBackup } from '@mise/core/backup-tables';
 import { MAX_BACKUP_BYTES } from '@mise/core/backup-tables';
 import {
@@ -50,6 +51,10 @@ function addArchiveRows<T>(
   // Keep empty results and each following batch in Dexie's transaction zone.
   return rows.length ? next() : Dexie.Promise.resolve();
 }
+const checkedArchives = new WeakMap<
+  MiseDatabase,
+  { token: string; nodes: PaymentOriginalNode[] }
+>();
 export async function readRetainedPaymentOriginals(
   db: MiseDatabase,
   current: MiseBackup,
@@ -59,6 +64,17 @@ export async function readRetainedPaymentOriginals(
     db.paymentOriginalNodes.toArray(),
     db.paymentOriginalValues.toArray(),
   ]);
+  const token = sharedJsonHash(
+      literalToken([backupToken(current), stored, index, values]),
+    ),
+    known = checkedArchives.get(db);
+  if (known?.token === token)
+    return {
+      bases: stored.map((r) => r.basis),
+      nodes: structuredClone(known.nodes),
+      index,
+      values,
+    };
   const pool = new Map(values.map((n) => [n.digest, n.json])),
     reader = sharedJsonReader(pool),
     nodes: PaymentOriginalNode[] = [];
@@ -78,6 +94,7 @@ export async function readRetainedPaymentOriginals(
     bases,
     new Map(nodes.map((n) => [n.digest, n.json])),
   );
+  checkedArchives.set(db, { token, nodes: structuredClone(nodes) });
   return { bases, nodes, index, values };
 }
 /** Capture a reviewed complete native source before any future canonical write.

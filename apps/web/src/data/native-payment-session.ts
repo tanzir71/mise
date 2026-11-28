@@ -1,5 +1,6 @@
 import {
   assertNativePaymentOriginalLink,
+  parseNativePaymentOriginalLink,
   nativePaymentOriginalRequest,
   nativePaymentOriginalStageRequest,
   type PaymentOriginalRetention,
@@ -32,7 +33,10 @@ import {
 import { readNativePaymentInvocation } from '@mise/core/payment-invocations';
 import { readPaymentOriginalBasis } from '@mise/core/payment-originals';
 import type { OriginalCopyReceipt } from '@mise/core/original-copy';
-import type { DecodedPortableBackup } from '@mise/core/payment-archive';
+import type {
+  DecodedPortableBackup,
+  PortableBackup,
+} from '@mise/core/payment-archive';
 import {
   createNativePaymentAccess,
   assertNativePaymentAccess,
@@ -56,7 +60,7 @@ import {
 } from './local-outbox';
 import { createCloudCommandRemote } from './cloud-command-remote';
 import { createCloudInboxImageUploader } from './cloud-inbox-upload';
-import { assertPausedSyncSession, type SessionLease } from './sync-session';
+import { assertDeliverySyncSession, type SessionLease } from './sync-session';
 import {
   createNativePaymentRequest,
   nativePaymentReviewProof,
@@ -68,6 +72,7 @@ import {
 type Options = Parameters<typeof createNativePaymentAccess>[1] & {
   signal?: AbortSignal;
   deliveryLease?: SessionLease;
+  deliveryPaused?: boolean;
 };
 const fail = () => new CommandRequestError('review');
 const sourceToken = (row: NativePaymentOutboxEntry) =>
@@ -86,7 +91,11 @@ export async function createNativePaymentOutboxSession(
   const guardDelivery = async () => {
     options.signal?.throwIfAborted();
     if (options.deliveryLease)
-      await assertPausedSyncSession(db, options.deliveryLease);
+      await assertDeliverySyncSession(
+        db,
+        options.deliveryLease,
+        options.deliveryPaused ?? true,
+      );
     options.signal?.throwIfAborted();
   };
   const send: typeof fetch = async (input, init) => {
@@ -107,6 +116,10 @@ export async function createNativePaymentOutboxSession(
     controller = new AbortController();
   let active = true,
     busy = false;
+  const deliveredOriginals = new Map<
+    string,
+    { token: string; link: NativePaymentOriginalLink; portable: PortableBackup }
+  >();
   const current = () => {
     try {
       if (
@@ -125,6 +138,7 @@ export async function createNativePaymentOutboxSession(
   };
   function stop() {
     active = false;
+    deliveredOriginals.clear();
     controller.abort();
     access.stop();
     options.signal?.removeEventListener('abort', stop);
@@ -306,6 +320,7 @@ export async function createNativePaymentOutboxSession(
     receipt: OriginalCopyReceipt;
     retention: PaymentOriginalRetention;
     decoded: DecodedPortableBackup;
+    portable: PortableBackup;
     snapshots: Map<string, ReturnType<typeof readPaymentOriginalBasis>>;
   };
   async function copy(
@@ -318,7 +333,7 @@ export async function createNativePaymentOutboxSession(
       await scope();
       const manifest = await access.copies.prepare(row.seal.copyId),
         receipt = await access.copies.deliver(row.seal.copyId),
-        decoded = await access.copies.readback(row.seal.copyId);
+        source = await access.copies.readbackSource(row.seal.copyId);
       await scope();
       if (receipt.id !== manifest.id || receipt.root !== manifest.root)
         throw fail();
@@ -335,7 +350,13 @@ export async function createNativePaymentOutboxSession(
         current();
         if (literalToken(retention) !== retentionToken) throw fail();
       });
-      copied = { receipt, retention, decoded, snapshots: new Map() };
+      copied = {
+        receipt,
+        retention,
+        decoded: source.decoded,
+        portable: source.portable,
+        snapshots: new Map(),
+      };
       cache.set(row.seal.copyId, copied);
     }
     const basis = copied.decoded.bases.find(
@@ -374,6 +395,42 @@ export async function createNativePaymentOutboxSession(
   }
   const session = {
     identity,
+    /** Local preparation grants no network or financial authority. Large source
+     * normalization may finish before a short delivery lease is claimed. */
+    async prepare() {
+      if (busy) throw new CommandRequestError('retry');
+      busy = true;
+      try {
+        await scope();
+        await sealNativePaymentBatch(db, access);
+        const rows = (await db.nativePaymentActions.toArray()).map(
+            parseNativePaymentOutbox,
+          ),
+          copies = new Set(
+            rows
+              .filter((r) => r.original.marker && !r.nativeReceipt && r.seal)
+              .map((r) => r.seal!.copyId),
+          );
+        for (const id of copies) {
+          await scope();
+          await access.copies.prepare(id);
+          await scope();
+        }
+      } finally {
+        busy = false;
+      }
+    },
+    /** Read-only bytes from this drain's real verified copy. This is neither a
+     * financial receipt nor authority to install or approve another action. */
+    async readDeliveredOriginal(input: NativePaymentOriginalLink) {
+      current();
+      await assertNativePaymentScope(access, db);
+      const link = parseNativePaymentOriginalLink(input),
+        known = deliveredOriginals.get(link.id);
+      current();
+      if (!known || literalToken(link) !== known.token) return null;
+      return structuredClone({ link: known.link, portable: known.portable });
+    },
     review: (
       itemId: string,
       options?: Parameters<typeof openQueuedPaymentSource>[3],
@@ -382,6 +439,7 @@ export async function createNativePaymentOutboxSession(
       current();
       if (busy) throw new CommandRequestError('retry');
       busy = true;
+      deliveredOriginals.clear();
       // Fresh HTTP evidence is required on each drain, including saved outcomes.
       const verified: VerifiedNativePaymentGroup[] = [],
         copies = new Map<string, Copied>();
@@ -525,6 +583,11 @@ export async function createNativePaymentOutboxSession(
             storage.push(copied);
             retained.push(original.retention);
             sources.push(link);
+            deliveredOriginals.set(link.id, {
+              token: linkToken,
+              link: structuredClone(link),
+              portable: original.portable,
+            });
           }
           verified.push({
             marker: front,

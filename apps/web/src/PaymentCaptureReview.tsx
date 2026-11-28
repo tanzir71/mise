@@ -58,6 +58,8 @@ export function PaymentCaptureReview({
       itemId={itemId}
       destination={f.destination}
       blocked={f.blocked}
+      nativeEligible={f.nativeEligible}
+      frameKey={f.key}
       archived={f.item.archived}
       onDone={onDone}
     />
@@ -73,7 +75,9 @@ function OpenedPayment({
   setup,
   itemId,
   destination,
-  blocked,
+  blocked: frameBlocked,
+  nativeEligible,
+  frameKey,
   archived,
   onDone,
 }: {
@@ -81,6 +85,8 @@ function OpenedPayment({
   itemId: string;
   destination: InboxDestination;
   blocked: boolean;
+  nativeEligible: boolean;
+  frameKey: string;
   archived: boolean;
   onDone: () => void;
 }) {
@@ -97,9 +103,13 @@ function OpenedPayment({
     [error, setError] = useState(''),
     [message, setMessage] = useState(''),
     [copyFallback, setCopyFallback] = useState(false);
+  const [nativeReady, setNativeReady] = useState(false);
+  const blocked = frameBlocked && !(nativeEligible && nativeReady);
   const alive = useRef(true),
     running = useRef(false),
-    generation = useRef(0);
+    generation = useRef(0),
+    sourceHandle = useRef<{ stop(): void }>(),
+    opening = useRef<AbortController>();
   const live = useLiveQuery(async () => {
     if (!review) return undefined;
     try {
@@ -118,26 +128,64 @@ function OpenedPayment({
     running.current = true;
     setBusy(true);
     setError('');
+    setNativeReady(false);
+    sourceHandle.current?.stop();
+    sourceHandle.current = undefined;
+    opening.current?.abort();
+    const controller = new AbortController();
+    opening.current = controller;
     const attempt = ++generation.current;
     try {
-      const value = await openSavedPaymentSource(
-        db,
-        itemId,
-        openedDestination,
-        options,
-      );
+      let value: SavedPaymentSource;
+      let handle:
+        { review: SavedPaymentSource; native: true; stop(): void } | undefined;
+      let connectionProblem = '';
+      if (nativeEligible) {
+        try {
+          const { openConfiguredPaymentSource } =
+            await import('./data/payment-review-session');
+          handle = await openConfiguredPaymentSource(
+            db,
+            setup,
+            itemId,
+            frameKey,
+            options,
+            {
+              storage: localStorage,
+              base: import.meta.env.BASE_URL,
+            },
+            controller.signal,
+          );
+        } catch (problem) {
+          controller.signal.throwIfAborted();
+          connectionProblem = errorText(problem);
+        }
+      }
+      if (handle) value = handle.review;
+      else
+        value = await openSavedPaymentSource(
+          db,
+          itemId,
+          openedDestination,
+          options,
+        );
       if (alive.current && attempt === generation.current) {
+        sourceHandle.current = handle;
+        setNativeReady(!!handle);
+        setError(connectionProblem);
         setReview(value);
         setAppliedKind(options.kind ?? 'sms');
         setOptimistic(null);
         setMessage('');
-      }
+      } else handle?.stop();
     } catch (problem) {
       if (alive.current && attempt === generation.current)
         setError(errorText(problem));
     } finally {
-      running.current = false;
-      if (alive.current && attempt === generation.current) setBusy(false);
+      if (attempt === generation.current) {
+        running.current = false;
+        if (alive.current) setBusy(false);
+      }
     }
   }
   useEffect(() => {
@@ -147,8 +195,10 @@ function OpenedPayment({
       alive.current = false;
       generation.current++;
       running.current = false;
+      opening.current?.abort();
+      sourceHandle.current?.stop();
     };
-  }, [itemId, openedDestination]);
+  }, [itemId, openedDestination, frameKey, nativeEligible]);
   function receive(value: SavedPaymentReceipt, text?: string) {
     if (!alive.current) return;
     setOptimistic(value);
@@ -377,7 +427,8 @@ function OpenedPayment({
           {blocked ? (
             <p role="status">
               Keep this source and its recorded history. Use the manual payment
-              form for any new payment.
+              form for any new payment.{' '}
+              <Link to="/settings/sync">Review this device’s connection</Link>
             </p>
           ) : archived ? (
             <p role="status">

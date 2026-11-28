@@ -76,6 +76,7 @@ const object = (v: unknown): v is Record<string, unknown> =>
 /** Private transfer state, outside ordinary shop/backup tables. Never stores JWTs,
  * keys, connection URLs or new financial permissions. */
 export class OriginalCopyJournal extends Dexie {
+  private checkedPlanToken: string | undefined;
   copies!: EntityTable<CopyRow, 'id'>;
   values!: Table<CopyValue, [string, string]>;
   constructor(name = 'mise-original-copies') {
@@ -159,8 +160,15 @@ export class OriginalCopyJournal extends Dexie {
     );
     ensure(data.every(Boolean));
     const nodes = data.map((n) => ({ digest: n!.digest, json: n!.json }));
-    const pool = new Map(nodes.map((n) => [n.digest, n.json]));
-    readOriginalCopy(manifest, (key) => pool.get(key));
+    // Re-read and hash every stored byte on each operation. An exact private
+    // graph already decoded by this journal need not decode its full history
+    // again; changed data always takes the complete original validator.
+    const token = originalCopyHash([manifest, nodes]);
+    if (this.checkedPlanToken !== token) {
+      const pool = new Map(nodes.map((n) => [n.digest, n.json]));
+      readOriginalCopy(manifest, (key) => pool.get(key));
+      this.checkedPlanToken = token;
+    }
     return { row, plan: { manifest, nodes } };
   }
   /** A retry reopens the complete original, never a fresh export timestamp or
@@ -322,6 +330,18 @@ export class OriginalCopyJournal extends Dexie {
     current: () => void,
     mutate: OriginalCopyMutation = directMutation,
   ) {
+    return (await this.readbackSource(id, identity, remote, current, mutate))
+      .decoded;
+  }
+  /** Preserve the exact bytes already checked through complete remote readback.
+   * Consumers still inspect their current backend locator before reusing them. */
+  async readbackSource(
+    id: string,
+    identity: OriginalCopyIdentity,
+    remote: OriginalCopyRemote,
+    current: () => void,
+    mutate: OriginalCopyMutation = directMutation,
+  ) {
     current();
     const { row, plan } = await this.plan(id, identity);
     const result = await this.download(
@@ -332,7 +352,7 @@ export class OriginalCopyJournal extends Dexie {
       plan.manifest,
     );
     await this.receipt(row, result.receipt, true, current, mutate);
-    return result.decoded;
+    return { decoded: result.decoded, portable: result.portable };
   }
   /** Same authenticated account can restore a known original to an empty private
    * journal. The decoded copy is not installed into current shop/financial rows. */

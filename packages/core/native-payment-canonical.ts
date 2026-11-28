@@ -31,8 +31,7 @@ import {
   type PortableBackup,
 } from './payment-archive';
 import {
-  paymentOriginalActionReader,
-  readPaymentOriginalBasis,
+  paymentOriginalReader,
   type PaymentOriginalAction,
   type PaymentOriginalBasis,
   type PaymentOriginalNode,
@@ -197,7 +196,7 @@ export async function projectNativePaymentCanonical(
       {
         basis: PaymentOriginalBasis;
         snapshot: MiseBackup;
-        read: ReturnType<typeof paymentOriginalActionReader>;
+        read: ReturnType<typeof paymentOriginalReader>['read'];
       }
     >(),
     pool = new Map<string, string>(),
@@ -260,10 +259,11 @@ export async function projectNativePaymentCanonical(
       snapshotBytes += basis.snapshotBytes;
       ensure(snapshotBytes <= paymentArchiveMaxExpandedBytes);
       const used = new Set<string>(),
-        snapshot = readPaymentOriginalBasis(basis, (key) => {
+        originalReader = paymentOriginalReader(basis, (key) => {
           used.add(key);
           return availableNodes.get(key);
-        });
+        }),
+        snapshot = originalReader.snapshot;
       for (const key of used) {
         const json = availableNodes.get(key);
         ensure(json !== undefined);
@@ -272,9 +272,7 @@ export async function projectNativePaymentCanonical(
       root = {
         basis,
         snapshot,
-        read: paymentOriginalActionReader(basis, (key) =>
-          availableNodes.get(key),
-        ),
+        read: originalReader.read,
       };
       roots.set(basis.root, root);
     }

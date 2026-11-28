@@ -1,5 +1,8 @@
 import Dexie, { type Transaction } from 'dexie';
-import { isLocalInboxRetention } from '@mise/core/local-inbox';
+import {
+  prepareSyncWaitingProof,
+  assertSyncWaitingProof,
+} from './native-payment-sync-source';
 import {
   parseLocalCloudState,
   type LocalCloudState,
@@ -261,6 +264,14 @@ export async function assertPausedSyncSession(
   db: LocalStore,
   lease: SessionLease,
 ) {
+  return assertDeliverySyncSession(db, lease, true);
+}
+/** Both background and explicit paused delivery own the established lease. */
+export async function assertDeliverySyncSession(
+  db: LocalStore,
+  lease: SessionLease,
+  paused: boolean,
+) {
   return db.transaction(
     'r',
     db.syncSessions,
@@ -268,7 +279,11 @@ export async function assertPausedSyncSession(
     db.operatorState,
     async () => {
       const state = await current(db, lease);
-      if (!state.paused || !state.lease || state.lease.until <= Date.now())
+      if (
+        state.paused !== paused ||
+        !state.lease ||
+        state.lease.until <= Date.now()
+      )
         throw new SyncSessionError();
       return state;
     },
@@ -388,46 +403,37 @@ export async function finishSyncSession(
   now: number,
   assertActive?: () => void,
 ): Promise<void> {
-  await db.transaction(
-    'rw',
-    db.syncSessions,
-    db.cloudState,
-    db.operatorState,
-    db.syncCanonical,
-    db.outbox,
-    async () => {
-      const tx = Dexie.currentTransaction,
-        state = await current(db, lease),
-        base = await db.syncCanonical.get('active');
-      if (
-        state.readId !== readId ||
-        base?.snapshot.readId !== readId ||
-        requested > state.requested
-      )
-        throw new SyncSessionError();
-      const unsent = await db.outbox
-          .filter((r) => r.status !== 'accepted' && !isLocalInboxRetention(r))
-          .count(),
-        next = parseSyncSession({
-          ...state,
-          lease: null,
-          readId: null,
-          readQueueHash: null,
-          problem: null,
-          failures: 0,
-          retryAt: 0,
-          lastConfirmedAt: now,
-          confirmed: requested,
-          requested: unsent
-            ? Math.max(state.requested, requested + 1)
-            : state.requested,
-        });
-      native(db, tx);
-      assertActive?.();
-      await db.syncSessions.put(next);
-      assertActive?.();
-    },
-  );
+  const waiting = await prepareSyncWaitingProof(db);
+  await db.transaction('rw', db.tables, async () => {
+    const tx = Dexie.currentTransaction,
+      state = await current(db, lease),
+      base = await db.syncCanonical.get('active');
+    if (
+      state.readId !== readId ||
+      base?.snapshot.readId !== readId ||
+      requested > state.requested
+    )
+      throw new SyncSessionError();
+    const unsent = await assertSyncWaitingProof(db, waiting),
+      next = parseSyncSession({
+        ...state,
+        lease: null,
+        readId: null,
+        readQueueHash: null,
+        problem: null,
+        failures: 0,
+        retryAt: 0,
+        lastConfirmedAt: now,
+        confirmed: requested,
+        requested: unsent
+          ? Math.max(state.requested, requested + 1)
+          : state.requested,
+      });
+    native(db, tx);
+    assertActive?.();
+    await db.syncSessions.put(next);
+    assertActive?.();
+  });
 }
 /** Explicit recovery retains all prior session/download/image/source records. */
 export async function freshSyncDownload(

@@ -509,10 +509,10 @@ export function parsePaymentOriginalActionRef(
  * In particular, a financial undo retains the original financial recording and
  * its own genuine domain reversal. No user choice absent from the original
  * audit (for example a matching-window preference) is invented here. */
-export function paymentOriginalActionReader(
+export function paymentOriginalReader(
   input: unknown,
   readNode: (digest: string) => string | undefined,
-): (requested: unknown) => PaymentOriginalAction {
+) {
   const basis = parsePaymentOriginalBasis(input),
     backup = readPaymentOriginalBasis(basis, readNode),
     t = backup.tables,
@@ -520,7 +520,7 @@ export function paymentOriginalActionReader(
     events = new Map(t.events.map((e) => [e.id, e]));
   // Only this closure holds the strictly validated snapshot. Returned objects
   // are copied so a caller cannot change a later original action lookup.
-  return (requested: unknown) => {
+  const read = (requested: unknown): PaymentOriginalAction => {
     const ref = parsePaymentOriginalActionRef(requested);
     ensure(ref.root === basis.root);
     const payment = t.payments.find((p) => p.id === ref.paymentId),
@@ -595,6 +595,21 @@ export function paymentOriginalActionReader(
     result.ref = ref;
     return result;
   };
+  let snapshot: MiseBackup | undefined;
+  return {
+    get snapshot() {
+      return (snapshot ??= structuredClone(backup));
+    },
+    read,
+  };
+}
+/** Keep the checked original private while sharing its one strict decode with
+ * callers that also need an independent snapshot for canonical comparison. */
+export function paymentOriginalActionReader(
+  input: unknown,
+  readNode: (digest: string) => string | undefined,
+): (requested: unknown) => PaymentOriginalAction {
+  return paymentOriginalReader(input, readNode).read;
 }
 
 export function readPaymentOriginalAction(

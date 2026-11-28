@@ -100,10 +100,29 @@ async function completeBackup(input: unknown) {
     value.formatVersion === 3
   ) {
     const native = await parseNativePaymentBackup(value);
-    return { ...native, native: native.wire };
+    return {
+      current: native.current,
+      bases: native.bases,
+      nodes: native.nodes,
+      native: native.wire,
+      nativePaymentCount: native.records.filter(
+        (r) => r.table === 'native_payments',
+      ).length,
+    };
   }
-  return { ...parsePortableBackup(value), native: null };
+  return { ...parsePortableBackup(value), native: null, nativePaymentCount: 0 };
 }
+// A preview owns its checked complete decode privately. Only the exact immutable
+// input string may reuse it; mutable inputs and reconstructed reviews reparse.
+// Live destination, archive, selection and transaction checks still run below.
+const reviewedFiles = new WeakMap<
+  RestoreReview,
+  {
+    db: MiseDatabase;
+    input: string;
+    source: Awaited<ReturnType<typeof completeBackup>>;
+  }
+>();
 function bindNativePreview(
   preview: BackupPreview,
   source: string | null,
@@ -131,7 +150,7 @@ export async function previewDatabaseRestore(
   input: unknown,
 ): Promise<BackupPreview> {
   const source = await completeBackup(input);
-  return db.transaction('r', db.tables, async () => {
+  const preview = await db.transaction('r', db.tables, async () => {
     const current = await snapshot(db),
       archive = await readRetainedPaymentOriginals(db, current);
     const native = await readNativePaymentState(db);
@@ -143,16 +162,30 @@ export async function previewDatabaseRestore(
       ),
       source.native?.root ?? null,
       native?.token ?? null,
-      'projection' in source ? source.projection.payments.length : 0,
+      source.nativePaymentCount,
     );
   });
+  if (
+    typeof input === 'string' &&
+    (source.native !== null || source.bases.length)
+  )
+    reviewedFiles.set(preview, {
+      db,
+      input,
+      source,
+    });
+  return preview;
 }
 export async function restoreDatabaseBackup(
   db: MiseDatabase,
   input: unknown,
   review: RestoreReview,
 ): Promise<SetupSnapshot | null> {
-  const source = await completeBackup(input),
+  const checked = reviewedFiles.get(review),
+    source =
+      checked?.db === db && checked.input === input
+        ? structuredClone(checked.source)
+        : await completeBackup(input),
     images = storedInboxItems(source.current.tables.inboxItems);
   return db.transaction('rw', db.tables, async () => {
     const binding = await db.cloudState.get('binding');
@@ -169,7 +202,7 @@ export async function restoreDatabaseBackup(
         bindArchivePreview(plain, source.bases, archive.bases),
         source.native?.root ?? null,
         native?.token ?? null,
-        'projection' in source ? source.projection.payments.length : 0,
+        source.nativePaymentCount,
       );
     if (review.sourceToken !== latest.sourceToken)
       throw Error('The selected backup changed. Preview it again.');

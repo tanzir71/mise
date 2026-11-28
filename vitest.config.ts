@@ -10,6 +10,7 @@ const nativePaymentSync='tests/native-payment-sync.test.ts';
 const nativePaymentOriginalLinks='tests/native-payment-original-links.test.ts';
 const nativePaymentCanonical='tests/native-payment-canonical.test.ts';
 const nativePaymentInstall='tests/native-payment-install.test.ts';
+const nativePaymentReconciliationScale='tests/native-payment-reconciliation-scale.test.ts';
 export default defineConfig({test:{maxWorkers:2,projects:[
   // Start the full original history in a fresh worker before accumulated WASM
   // allocations from the other suites. Groups run sequentially; its original
@@ -29,6 +30,9 @@ export default defineConfig({test:{maxWorkers:2,projects:[
   {test:{name:'native-payment-canonical',include:[nativePaymentCanonical],sequence:{groupOrder:8}}},
   // The complete installer owns its full original corpus in a separate worker group.
   {test:{name:'native-payment-install',include:[nativePaymentInstall],sequence:{groupOrder:9}}},
+  // Actual owner upload/reconciliation retains the same complete large corpus.
+  // Its worker is isolated; existing groups, cases and deadlines are unchanged.
+  {test:{name:'native-payment-reconciliation-scale',include:[nativePaymentReconciliationScale],sequence:{groupOrder:98}}},
   // Installed Vitest 3 sorts group IDs as strings: 99 keeps ordinary suites last.
-  {test:{name:'unit',include:['tests/**/*.test.ts'],exclude:[...configDefaults.exclude,kitchenHistory,paymentOriginals,nativePaymentBackend,paymentArchive,originalCopies,nativePaymentDelivery,nativePaymentSync,nativePaymentOriginalLinks,nativePaymentCanonical,nativePaymentInstall],sequence:{groupOrder:99}}},
+  {test:{name:'unit',include:['tests/**/*.test.ts'],exclude:[...configDefaults.exclude,kitchenHistory,paymentOriginals,nativePaymentBackend,paymentArchive,originalCopies,nativePaymentDelivery,nativePaymentSync,nativePaymentOriginalLinks,nativePaymentCanonical,nativePaymentInstall,nativePaymentReconciliationScale],sequence:{groupOrder:99}}},
 ]}});

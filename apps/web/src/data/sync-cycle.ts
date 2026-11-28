@@ -1,9 +1,15 @@
 import { createNativeCanonicalOriginals } from './native-canonical-originals';
+import { createNativePaymentOutboxSession } from './native-payment-session';
+import { OriginalCopyJournal } from './original-copies';
+import { nativePaymentCopyJournalName } from './native-payment-review-session';
+import { nativePaymentQueueToken } from './native-payment-sync-source';
+import { parseNativePaymentOutbox } from '@mise/core/native-payment-outbox';
 import { readNativePaymentState } from './native-payment-state';
 import {
   parseCloudConnection,
   cloudConnectionTarget,
   type CloudConnection,
+  type KeyStorage,
 } from '@mise/core/cloud-connection';
 import {
   operatorAccountHash,
@@ -59,6 +65,8 @@ export interface SyncCycleOptions {
   scope: string;
   auth: PhoneAuth;
   journal: CloudUploadJournal;
+  storage?: KeyStorage;
+  nativeAuthScope?: string;
   send?: typeof fetch;
   now?: () => number;
   random?: () => number;
@@ -157,8 +165,55 @@ export async function runSyncCycle(
   takeOver = false,
 ): Promise<boolean> {
   signal?.throwIfAborted();
-  const now = options.now ?? Date.now,
-    claimed = await claimSyncSession(db, newInboxId(), now(), takeOver);
+  const now = options.now ?? Date.now;
+  let preparationProblem: unknown;
+  // Complete local originals before claiming a short network-delivery lease.
+  // No HTTP or financial action runs here. The subsequent claim still checks
+  // current selection, pause/retry state, ownership and competing leases.
+  if (await db.nativePaymentActions.count()) {
+    const ready = await activeSyncSession(db);
+    if (
+      !ready ||
+      ready.paused ||
+      ready.problem === 'auth' ||
+      ready.problem === 'review' ||
+      ready.retryAt > now() ||
+      (ready.lease && ready.lease.until > now() && !takeOver)
+    )
+      return false;
+    const pending = (await db.nativePaymentActions.toArray())
+      .map(parseNativePaymentOutbox)
+      .some((r) => r.original.marker && !r.nativeReceipt);
+    if (pending) {
+      const storage =
+          options.storage ??
+          (typeof window !== 'undefined' ? window.localStorage : undefined),
+        journal = new OriginalCopyJournal(nativePaymentCopyJournalName(db));
+      let preparation:
+        | Awaited<ReturnType<typeof createNativePaymentOutboxSession>>
+        | undefined;
+      try {
+        if (!storage) throw new SyncSessionError('auth');
+        preparation = await createNativePaymentOutboxSession(db, {
+          config: options.config,
+          auth: options.auth,
+          authScope: options.nativeAuthScope ?? options.scope,
+          storage,
+          journal,
+          send: options.send,
+          signal,
+        });
+        await preparation.prepare();
+      } catch (error) {
+        preparationProblem = error ?? new SyncSessionError();
+      } finally {
+        preparation?.stop();
+        journal.close();
+      }
+    }
+  }
+  if (signal?.aborted) return false;
+  const claimed = await claimSyncSession(db, newInboxId(), now(), takeOver);
   if (!claimed) return false;
   const lease = sessionLease(claimed),
     controller = new AbortController(),
@@ -166,6 +221,9 @@ export async function runSyncCycle(
       ? AbortSignal.any([signal, controller.signal])
       : controller.signal;
   let heartbeatProblem: SyncProblem | null = null;
+  let nativeJournal: OriginalCopyJournal | undefined,
+    nativeDelivery:
+      Awaited<ReturnType<typeof createNativePaymentOutboxSession>> | undefined;
   const heartbeat = setInterval(() => {
     void renewSyncSession(db, lease, now()).catch((error) => {
       heartbeatProblem = problem(error);
@@ -173,6 +231,7 @@ export async function runSyncCycle(
     });
   }, 10000);
   try {
+    if (preparationProblem !== undefined) throw preparationProblem;
     const account = cycleAccount(options, claimed),
       send = options.send ?? fetch;
     let latestAuthorization: CommandAuthorization | undefined;
@@ -208,14 +267,35 @@ export async function runSyncCycle(
       return fresh;
     };
     await refresh(context);
-    const commands = createCloudCommandRemote(options.config, account, send),
-      delivery = await deliverLocalOutbox(
-        db,
-        claimed.target.targetHash,
-        (command, currency, _signal, parent) =>
-          commands(command, currency, lifetime, parent),
-      );
-    if (delivery.retained) throw new SyncSessionError('review');
+    if (await db.nativePaymentActions.count()) {
+      const storage =
+        options.storage ??
+        (typeof window !== 'undefined' ? window.localStorage : undefined);
+      if (!storage) throw new SyncSessionError('auth');
+      nativeJournal = new OriginalCopyJournal(nativePaymentCopyJournalName(db));
+      nativeDelivery = await createNativePaymentOutboxSession(db, {
+        config: options.config,
+        auth: options.auth,
+        authScope: options.nativeAuthScope ?? options.scope,
+        storage,
+        journal: nativeJournal,
+        send,
+        signal: lifetime,
+        deliveryLease: lease,
+        deliveryPaused: false,
+      });
+      const delivered = await nativeDelivery.deliver();
+      if (delivered.blockedEntryId) throw new SyncSessionError('review');
+    } else {
+      const commands = createCloudCommandRemote(options.config, account, send),
+        delivery = await deliverLocalOutbox(
+          db,
+          claimed.target.targetHash,
+          (command, currency, _signal, parent) =>
+            commands(command, currency, lifetime, parent),
+        );
+      if (delivery.retained) throw new SyncSessionError('review');
+    }
     await deliverLocalInboxImages(
       db,
       claimed.target.targetHash,
@@ -224,8 +304,17 @@ export async function runSyncCycle(
     );
     lifetime.throwIfAborted();
     const queue = await db.outbox.orderBy('[uploadId+sequence]').toArray(),
+      nativeProgress = (await db.nativePaymentActions.toArray()).map(
+        parseNativePaymentOutbox,
+      ),
+      legacyProgress = queue.map((row) => ({
+        id: row.id,
+        receipts: row.receipts,
+      })),
       queueHash = await materializationHash(
-        queue.map((row) => ({ id: row.id, receipts: row.receipts })),
+        nativeProgress.length
+          ? [legacyProgress, nativePaymentQueueToken(nativeProgress)]
+          : legacyProgress,
       ),
       state = await syncSessionRead(db, lease, queueHash, newInboxId()),
       readId = state.readId!,
@@ -288,10 +377,11 @@ export async function runSyncCycle(
         send,
         lifetime,
         assertActive,
-        async (link) =>
-          savedNative && knownCopies.has(link.retention.copy.id)
-            ? savedNative.loadOriginal(link)
-            : null,
+        async (link) => {
+          if (savedNative && knownCopies.has(link.retention.copy.id))
+            return savedNative.loadOriginal(link);
+          return (await nativeDelivery?.readDeliveredOriginal(link)) ?? null;
+        },
       );
     try {
       if (base)
@@ -362,6 +452,8 @@ export async function runSyncCycle(
   } finally {
     clearInterval(heartbeat);
     controller.abort();
+    nativeDelivery?.stop();
+    nativeJournal?.close();
   }
 }
 export async function activeSyncSession(
